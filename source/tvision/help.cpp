@@ -31,11 +31,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __HELP_H )
-#include "tvision\help.h"
+#include "tvision/help.h"
 #endif  // __HELP_H
 
 #if !defined( __UTIL_H )
-#include "tvision\util.h"
+#include "tvision/util.h"
 #endif  // __UTIL_H
 
 #if !defined( __STRING_H )

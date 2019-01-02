@@ -606,89 +606,89 @@
 #define __INC_TKEYS_H
 #endif
 
-#include <tvision\config.h>
-#include <tvision\ttypes.h>
+#include <tvision/config.h>
+#include <tvision/ttypes.h>
 
 #if defined( __INC_HARDWARE_H )
-#include <tvision\hardware.h>
+#include <tvision/hardware.h>
 #endif
 
 #if defined( __INC_TKEYS_H )
-#include <tvision\tkeys.h>
+#include <tvision/tkeys.h>
 #endif
 
-#include <tvision\util.h>
+#include <tvision/util.h>
 
 #if defined( __INC_TVOBJS_H )
-#include <tvision\tvobjs.h>
+#include <tvision/tvobjs.h>
 #endif
 
 #if defined( __INC_TOBJSTRM_H )
-#include <tvision\tobjstrm.h>
+#include <tvision/tobjstrm.h>
 #endif
 
 #if defined( __INC_DRAWBUF_H )
-#include <tvision\drawbuf.h>
+#include <tvision/drawbuf.h>
 #endif
 
 #if defined( __INC_OBJECTS_H )
-#include <tvision\objects.h>
+#include <tvision/objects.h>
 #endif
 
 #if defined( __INC_SYSTEM_H )
-#include <tvision\system.h>
+#include <tvision/system.h>
 #endif
 
 #if defined( __INC_MSGBOX_H )
-#include <tvision\msgbox.h>
+#include <tvision/msgbox.h>
 #endif
 
 #if defined( __INC_RESOURCE_H )
-#include <tvision\resource.h>
+#include <tvision/resource.h>
 #endif
 
 #if defined( __INC_VIEWS_H )
-#include <tvision\views.h>
+#include <tvision/views.h>
 #endif
 
 #if defined( __INC_BUFFERS_H )
-#include <tvision\buffers.h>
+#include <tvision/buffers.h>
 #endif
 
 #if defined( __INC_DIALOGS_H )
-#include <tvision\dialogs.h>
+#include <tvision/dialogs.h>
 #endif
 
 #if defined( __INC_VALIDATOR_H )
-#include <tvision\validate.h>
+#include <tvision/validate.h>
 #endif
 
 #if defined( __INC_STDDLG_H )
-#include <tvision\stddlg.h>
+#include <tvision/stddlg.h>
 #endif
 
 #if defined( __INC_COLORSEL_H )
-#include <tvision\colorsel.h>
+#include <tvision/colorsel.h>
 #endif
 
 #if defined( __INC_MENUS_H )
-#include <tvision\menus.h>
+#include <tvision/menus.h>
 #endif
 
 #if defined( __INC_TEXTVIEW_H )
-#include <tvision\textview.h>
+#include <tvision/textview.h>
 #endif
 
 #if defined( __INC_EDITORS_H )
-#include <tvision\editors.h>
+#include <tvision/editors.h>
 #endif
 
 #if defined( __INC_OUTLINE_H )
-#include <tvision\outline.h>
+#include <tvision/outline.h>
 #endif
 
 #if defined( __INC_APP_H )
-#include <tvision\app.h>
+#include <tvision/app.h>
 #endif
 
 #pragma option -Vo.

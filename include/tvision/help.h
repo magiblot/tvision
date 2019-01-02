@@ -29,7 +29,7 @@
 #define Uses_TWindow
 #include <tvision/tv.h>
 
-#include <tvision\helpbase.h>
+#include <tvision/helpbase.h>
 
 // THelpViewer
 
