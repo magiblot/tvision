@@ -12,6 +12,6 @@
  */
 
 #define Uses_TStringCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TStringCollection::name = "TStringCollection";

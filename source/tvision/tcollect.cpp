@@ -16,7 +16,7 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STDLIB_H )
 #include <StdLib.h>

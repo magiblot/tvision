@@ -27,7 +27,7 @@
 #define Uses_TChDirDialog
 #define Uses_opstream
 #define Uses_ipstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __CTYPE_H )
 #include <Ctype.h>

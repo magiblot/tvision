@@ -13,7 +13,7 @@
  */
 
 #define Uses_TCommandSet
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 int _NEAR TCommandSet::masks[8] =
 {

@@ -39,7 +39,7 @@
 #define Uses_ifpstream
 #define Uses_ofpstream
 #define Uses_fpstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __LIMITS_H )
 #include <Limits.h>

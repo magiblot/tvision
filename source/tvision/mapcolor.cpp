@@ -15,7 +15,7 @@
 
 #define Uses_TView
 #define Uses_TGroup
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 uchar TView::mapColor( uchar color )
 {

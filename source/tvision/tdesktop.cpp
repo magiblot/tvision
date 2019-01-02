@@ -19,7 +19,7 @@
 #define Uses_TBackground
 #define Uses_opstream
 #define Uses_ipstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #ifndef __MATH_H
 #include <math.h>

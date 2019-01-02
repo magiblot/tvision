@@ -14,7 +14,7 @@
 
 #define Uses_THistoryWindow
 #define Uses_THistoryViewer
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 THistInit::THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) :
     createListViewer( cListViewer )

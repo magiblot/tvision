@@ -20,7 +20,7 @@
 #define Uses_TEvent
 #define Uses_TGroup
 #define Uses_TKeys
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DIR_H )
 #include <Dir.h>

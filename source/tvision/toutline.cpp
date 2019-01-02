@@ -18,7 +18,7 @@
 #define Uses_TEvent
 #define Uses_TDrawBuffer
 #define Uses_TKeys
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 #include <string.h>
 
 TOutlineViewer::TOutlineViewer(TRect& bounds, TScrollBar* aHScrollBar,

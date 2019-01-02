@@ -12,6 +12,6 @@
  */
 
 #define Uses_TResourceCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TResourceCollection::name = "TResourceCollection";

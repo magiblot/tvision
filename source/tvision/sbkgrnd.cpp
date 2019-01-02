@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_TStreamableClass
 #define Uses_TBackground
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RView )
 
 TStreamableClass RBackground( TBackground::name,

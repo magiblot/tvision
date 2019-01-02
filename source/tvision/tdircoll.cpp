@@ -16,7 +16,7 @@
 #define Uses_TDirEntry
 #define Uses_opstream
 #define Uses_ipstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DIR_H )
 #include <Dir.h>

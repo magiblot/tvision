@@ -13,7 +13,7 @@
 
 #if !defined(NO_STREAMABLE)
 #define Uses_TDirListBox
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TDirListBox::name = "TDirListBox";
 #endif

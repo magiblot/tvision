@@ -27,7 +27,7 @@
 #define Uses_TScroller
 #define Uses_TScrollBar
 #define Uses_TWindow
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include <tvision\helpbase.h>
 

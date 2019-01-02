@@ -13,7 +13,7 @@
  */
 
 #define Uses_TObject
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TObject::~TObject()
 {

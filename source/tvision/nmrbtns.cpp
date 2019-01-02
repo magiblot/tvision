@@ -13,7 +13,7 @@
 
 #if !defined(NO_STREAMABLE)
 #define Uses_TRadioButtons
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TRadioButtons::name = "TRadioButtons";
 #endif

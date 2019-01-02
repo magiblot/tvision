@@ -21,7 +21,7 @@
 #define Uses_TGroup
 #define Uses_opstream
 #define Uses_ipstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __MEM_H )
 #include <Mem.h>

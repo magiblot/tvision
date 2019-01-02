@@ -18,7 +18,7 @@
 #define Uses_TCollection
 #define Uses_TStringCollection
 #define Uses_TResourceCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __IO_H )
 #include <io.h>

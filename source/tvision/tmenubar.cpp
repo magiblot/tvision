@@ -18,7 +18,7 @@
 #define Uses_TMenuItem
 #define Uses_TRect
 #define Uses_TSubMenu
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>

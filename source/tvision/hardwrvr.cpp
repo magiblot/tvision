@@ -18,7 +18,7 @@
 #define Uses_TScreen
 #define Uses_THardwareInfo
 #define Uses_TSystemError
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if defined( __FLAT__ )
 

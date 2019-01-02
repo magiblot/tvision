@@ -19,7 +19,7 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TVMemMgr
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TView *TheTopView = 0;
 TGroup* ownerGroup = 0;

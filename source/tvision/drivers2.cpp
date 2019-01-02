@@ -16,7 +16,7 @@
  */
 
 #define Uses_TKeys
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */

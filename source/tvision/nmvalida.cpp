@@ -18,7 +18,7 @@
 #define Uses_TFilterValidator
 #define Uses_TLookupValidator
 #define Uses_TStringLookupValidator
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TValidator::name = "TValidator";
 const char * const _NEAR TPXPictureValidator::name = "TPXPictureValidator";

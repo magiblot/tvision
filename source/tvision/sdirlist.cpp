@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_TDirListBox
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RListBox )
 
 TStreamableClass RDirListBox( TDirListBox::name,

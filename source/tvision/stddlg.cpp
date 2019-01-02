@@ -26,7 +26,7 @@
 #define Uses_TDrawBuffer
 #define Uses_TFileDialog
 #define Uses_TSortedCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DOS_H )
 #include <dos.h>

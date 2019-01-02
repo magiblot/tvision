@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_TFileList
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RSortedListBox )            // In case the object below is moved
                                     //   to another file.
 

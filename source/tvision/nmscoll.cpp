@@ -12,6 +12,6 @@
  */
 
 #define Uses_TSortedCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TSortedCollection::name = "TSortedCollection";

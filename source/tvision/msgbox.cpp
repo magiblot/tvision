@@ -23,7 +23,7 @@
 #define Uses_TInputLine
 #define Uses_TDeskTop
 #define Uses_TLabel
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STDARG_H )
 #include <stdarg.h>

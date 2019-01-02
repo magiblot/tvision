@@ -13,7 +13,7 @@
 
 #define Uses_TStringList
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TStreamableClass RStringList( TStringList::name,
                               TStringList::build,

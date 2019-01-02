@@ -14,7 +14,7 @@
 
 #define Uses_TResourceCollection
 #define Uses_TResourceItem
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TResourceCollection::TResourceCollection( short aLimit, short aDelta) :
     TStringCollection( aLimit, aDelta)

@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_THistory
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RView )
 __link( RInputLine )
 

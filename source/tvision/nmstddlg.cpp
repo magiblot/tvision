@@ -16,7 +16,7 @@
 #define Uses_TFileInputLine
 #define Uses_TSortedListBox
 #define Uses_TFileInfoPane
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TFileInputLine::name = "TFileInputLine";
 const char * const _NEAR TSortedListBox::name = "TSortedListBox";

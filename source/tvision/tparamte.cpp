@@ -13,7 +13,7 @@
  */
 
 #define Uses_TParamText
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STDIO_H )
 #include <Stdio.h>

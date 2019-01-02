@@ -16,7 +16,7 @@
 #define Uses_TEvent
 #define Uses_TObject
 #define Uses_TVMemMgr
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr)
 {

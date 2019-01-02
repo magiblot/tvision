@@ -20,7 +20,7 @@
 #define Uses_TStringLookupValidator
 #define Uses_TStreamableClass
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TStreamableClass RValidator( TValidator::name,
                          TValidator::build,

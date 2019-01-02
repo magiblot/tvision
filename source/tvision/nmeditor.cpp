@@ -18,7 +18,7 @@
 #define Uses_TMemo
 #define Uses_TFileEditor
 #define Uses_TEditWindow
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TIndicator::name = "TIndicator";
 const char * const _NEAR TEditor::name = "TEditor";

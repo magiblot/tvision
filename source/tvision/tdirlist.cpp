@@ -18,7 +18,7 @@
 #define Uses_TChDirDialog
 #define Uses_TDirEntry
 #define Uses_TButton
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>

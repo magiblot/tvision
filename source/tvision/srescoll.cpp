@@ -13,7 +13,7 @@
 
 #define Uses_TResourceCollection
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TStreamableClass RResourceCollection( TResourceCollection::name,
                                       TResourceCollection::build,

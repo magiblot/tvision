@@ -25,7 +25,7 @@
 #define Uses_TColorItemList
 #define Uses_TColorDialog
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RCluster )
 __link( RView )
 __link( RLabel )

@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_TStreamableClass
 #define Uses_TCluster
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RView )
 __link( RStringCollection )
 

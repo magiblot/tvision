@@ -12,6 +12,6 @@
  */
 
 #define Uses_TDirCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TDirCollection::name = "TDirCollection";

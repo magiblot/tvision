@@ -13,7 +13,7 @@
  */
 
 #define Uses_TGroup
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TView *TGroup::at( short index )
 {

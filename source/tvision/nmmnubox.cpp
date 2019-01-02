@@ -13,7 +13,7 @@
 
 #if !defined(NO_STREAMABLE)
 #define Uses_TMenuBox
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TMenuBox::name = "TMenuBox";
 #endif

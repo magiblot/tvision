@@ -21,7 +21,7 @@
 #define Uses_TReplaceDialogRec
 #define Uses_opstream
 #define Uses_ipstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STRING_H )
 #include <string.h>

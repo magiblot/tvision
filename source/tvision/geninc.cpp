@@ -25,7 +25,7 @@
 #define Uses_TDrawBuffer
 #define Uses_TEditor
 #define Uses_TTerminal
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __IOSTREAM_H )
 #include <iostream.h>

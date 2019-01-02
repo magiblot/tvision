@@ -16,7 +16,7 @@
 #define Uses_THistoryViewer
 #define Uses_TScrollBar
 #define Uses_TEvent
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>

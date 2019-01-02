@@ -12,6 +12,6 @@
  */
 
 #define Uses_pstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TStreamableTypes * _NEAR pstream::types;

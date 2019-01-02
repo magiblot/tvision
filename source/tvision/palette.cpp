@@ -13,7 +13,7 @@
  */
 
 #define Uses_TPalette
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __MEM_H )
 #include <Mem.h>

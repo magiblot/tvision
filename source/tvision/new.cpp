@@ -26,7 +26,7 @@
 #endif  // __STDLIB_H
 
 #define Uses_TVMemMgr
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TBufListEntry * _NEAR TBufListEntry::bufList = 0;
 

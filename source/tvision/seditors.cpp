@@ -24,7 +24,7 @@
 #define Uses_TFileEditor
 #define Uses_TEditWindow
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RView )
 __link( RWindow )
 __link( RScrollBar )

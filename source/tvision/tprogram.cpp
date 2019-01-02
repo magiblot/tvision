@@ -25,7 +25,7 @@
 #define Uses_TStatusDef
 #define Uses_TStatusItem
 #define Uses_TDialog
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 // Public variables
 

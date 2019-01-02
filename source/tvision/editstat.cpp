@@ -13,7 +13,7 @@
 
 #define Uses_TEditor
 #define Uses_TEditorDialog
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 ushort defEditorDialog( int, ... )
 {

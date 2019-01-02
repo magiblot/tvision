@@ -28,7 +28,7 @@
 #define Uses_TWindow
 #define Uses_TKeys
 #define Uses_TPalette
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __HELP_H )
 #include "tvision\help.h"

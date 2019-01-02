@@ -15,7 +15,7 @@
 #define Uses_TEvent
 #define Uses_TEventQueue
 #define Uses_THardwareInfo
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __FLAT__ )
 #if !defined( __DOS_H )

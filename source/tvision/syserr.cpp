@@ -17,7 +17,7 @@
 #define Uses_TEvent
 #define Uses_TScreen
 #define Uses_THardwareInfo
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DOS_H )
 #include <Dos.h>

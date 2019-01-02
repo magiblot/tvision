@@ -24,7 +24,7 @@
 #define Uses_TRangeValidator
 #define Uses_TStringLookupValidator
 #define Uses_TListViewer
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 #include <tvision\help.h>
 
 #if !defined( __CTYPE_H )

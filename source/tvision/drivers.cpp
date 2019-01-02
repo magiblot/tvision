@@ -16,7 +16,7 @@
  */
 
 #define Uses_TDrawBuffer
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DOS_H )
 #include <Dos.h>

@@ -19,7 +19,7 @@
 #define Uses_TObject
 #define Uses_TMouse
 #define Uses_TApplication
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 static THardwareInfo hwInfoManager;
 TMouse _NEAR TEventQueue::mouse;

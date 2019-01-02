@@ -14,7 +14,7 @@
 #if !defined(NO_STREAMABLE)
 #define Uses_TMenuBox
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 TStreamableClass RMenuBox( TMenuBox::name,
                            TMenuBox::build,

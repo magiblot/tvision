@@ -17,7 +17,7 @@
 #define Uses_opstream
 #define Uses_ipstream
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #define cpBackground "\x01"      // background palette
 

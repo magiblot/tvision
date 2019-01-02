@@ -18,7 +18,7 @@
 #define Uses_TRect
 #define Uses_TPoint
 #define Uses_TEvent
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>

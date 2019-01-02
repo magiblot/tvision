@@ -20,7 +20,7 @@
 #define Uses_TColorGroupList
 #define Uses_TColorItemList
 #define Uses_TColorDialog
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const char * const _NEAR TColorSelector::name = "TColorSelector";
 const char * const _NEAR TMonoSelector::name = "TMonoSelector";
