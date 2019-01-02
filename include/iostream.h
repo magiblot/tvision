@@ -7,4 +7,9 @@
 #include <ostream>
 #include <cstdio>
 
+using std::ios;
+using std::streambuf;
+using std::streamoff;
+using std::streampos;
+
 #endif
