@@ -125,10 +125,10 @@ void TVMemMgr::freeDiscardable( void *block )
 
 
 #if !defined( NDEBUG )
-const BLK_SIZE = 16;
-const BLK_DATA = 0xA6;
+const int BLK_SIZE = 16;
+const int BLK_DATA = 0xA6;
 #else
-const BLK_SIZE = 0;
+const int BLK_SIZE = 0;
 #endif
 
 static void * allocBlock( size_t sz )

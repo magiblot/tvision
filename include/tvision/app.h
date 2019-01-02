@@ -239,7 +239,7 @@ protected:
 /*      32-63 = TDialog                                                   */
 /* ---------------------------------------------------------------------- */
 
-const
+const int
 
 //  TApplication palette entries
 

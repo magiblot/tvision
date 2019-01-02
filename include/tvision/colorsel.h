@@ -21,7 +21,7 @@
 #if !defined( __COLOR_COMMAND_CODES )
 #define __COLOR_COMMAND_CODES
 
-const
+const int
   cmColorForegroundChanged = 71,
   cmColorBackgroundChanged = 72,
   cmColorSet               = 73,

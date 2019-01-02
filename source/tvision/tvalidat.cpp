@@ -16,7 +16,7 @@
  *
  */
 
-#define Uses_MsgBox;
+#define Uses_MsgBox
 #define Uses_TStreamable
 #define Uses_TValidator
 #define Uses_TPXPictureValidator

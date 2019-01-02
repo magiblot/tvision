@@ -66,7 +66,8 @@ ushort getAltCode(char c)
     if( (unsigned char) c == '\xF0' )
         return 0x200;       // special case to handle alt-Space
 
-    for( int i = 0; i < sizeof( altCodes1 ); i++)
+    int i;
+    for( i = 0; i < sizeof( altCodes1 ); i++)
        if( altCodes1[i] == c )
         return (i+0x10) << 8;
 

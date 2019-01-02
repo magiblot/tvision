@@ -25,7 +25,7 @@
 #if !defined( __FILE_CMDS )
 #define __FILE_CMDS
 
-const
+const int
 
 //  Commands
 
@@ -374,7 +374,7 @@ inline opstream& operator << ( opstream& os, TFileInfoPane* cl )
 #if defined( Uses_TFileDialog ) && !defined( __TFileDialog )
 #define __TFileDialog
 
-const
+const int
     fdOKButton      = 0x0001,      // Put an OK button in the dialog
     fdOpenButton    = 0x0002,      // Put an Open button in the dialog
     fdReplaceButton = 0x0004,      // Put a Replace button in the dialog
@@ -648,7 +648,7 @@ inline TDirCollection *TDirListBox::list()
 #if defined( Uses_TChDirDialog ) && !defined( __TChDirDialog )
 #define __TChDirDialog
 
-const
+const int
     cdNormal     = 0x0000, // Option to use dialog immediately
     cdNoLoadDir  = 0x0001, // Option to init the dialog to store on a stream
     cdHelpButton = 0x0002; // Put a help button in the dialog

@@ -34,24 +34,24 @@
 #if !defined( __EDIT_COMMAND_CODES )
 #define __EDIT_COMMAND_CODES
 
-const
+const int
   ufUpdate = 0x01,
   ufLine   = 0x02,
   ufView   = 0x04;
 
-const
+const int
   smExtend = 0x01,
   smDouble = 0x02;
 
 const unsigned
   sfSearchFailed = 0xFFFF;
 
-const
+const int
   cmFind        = 82,
   cmReplace     = 83,
   cmSearchAgain = 84;
 
-const
+const int
   cmCharLeft    = 500,
   cmCharRight   = 501,
   cmWordLeft    = 502,
@@ -77,7 +77,7 @@ const
   cmIndentMode  = 522,
   cmUpdateTitle = 523;
 
-const
+const int
   edOutOfMemory   = 0,
   edReadError     = 1,
   edWriteError    = 2,
@@ -90,7 +90,7 @@ const
   edReplace       = 9,
   edReplacePrompt = 10;
 
-const
+const int
   efCaseSensitive   = 0x0001,
   efWholeWordsOnly  = 0x0002,
   efPromptOnReplace = 0x0004,
@@ -98,7 +98,7 @@ const
   efDoReplace       = 0x0010,
   efBackupFiles     = 0x0100;
 
-const
+const int
   maxLineLength = 256;
 
 #endif  // __EDIT_COMMAND_CODES

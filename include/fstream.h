@@ -4,4 +4,6 @@
 #include <iostream.h>
 #include <fstream>
 
+using std::filebuf;
+
 #endif

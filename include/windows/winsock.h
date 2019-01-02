@@ -66,10 +66,11 @@ typedef u_int           SOCKET;
 #define FD_SETSIZE      64
 #endif /* FD_SETSIZE */
 
-typedef struct fd_set {
-        u_int   fd_count;               /* how many are SET? */
-        SOCKET  fd_array[FD_SETSIZE];   /* an array of SOCKETs */
-} fd_set;
+#include <sys/select.h>
+// typedef struct fd_set {
+//         u_int   fd_count;               /* how many are SET? */
+//         SOCKET  fd_array[FD_SETSIZE];   /* an array of SOCKETs */
+// } fd_set;
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,7 +82,7 @@ extern int PASCAL FAR __WSAFDIsSet(SOCKET, fd_set FAR *);
 }
 #endif
 
-
+#ifndef FD_CLR
 #define FD_CLR(fd, set) do { \
     u_int __i; \
     for (__i = 0; __i < ((fd_set FAR *)(set))->fd_count ; __i++) { \
@@ -96,15 +97,22 @@ extern int PASCAL FAR __WSAFDIsSet(SOCKET, fd_set FAR *);
         } \
     } \
 } while(0)
+#endif
 
+#ifndef FD_SET
 #define FD_SET(fd, set) do { \
     if (((fd_set FAR *)(set))->fd_count < FD_SETSIZE) \
         ((fd_set FAR *)(set))->fd_array[((fd_set FAR *)(set))->fd_count++]=fd;\
 } while(0)
+#endif
 
+#ifndef FD_ZERO
 #define FD_ZERO(set) (((fd_set FAR *)(set))->fd_count=0)
+#endif
 
+#ifndef FD_ISSET
 #define FD_ISSET(fd, set) __WSAFDIsSet((SOCKET)fd, (fd_set FAR *)set)
+#endif
 
 /*
  * Structure used in select() call, taken from the BSD file sys/time.h.
@@ -716,8 +724,8 @@ int PASCAL FAR recv (SOCKET s, char FAR * buf, int len, int flags);
 int PASCAL FAR recvfrom (SOCKET s, char FAR * buf, int len, int flags,
                          struct sockaddr FAR *from, int FAR * fromlen);
 
-int PASCAL FAR select (int nfds, fd_set FAR *readfds, fd_set FAR *writefds,
-                       fd_set FAR *exceptfds, const struct timeval FAR *timeout);
+// int PASCAL FAR select (int nfds, fd_set FAR *readfds, fd_set FAR *writefds,
+//                        fd_set FAR *exceptfds, const struct timeval FAR *timeout);
 
 int PASCAL FAR send (SOCKET s, const char FAR * buf, int len, int flags);
 
@@ -820,9 +828,9 @@ typedef struct in_addr IN_ADDR;
 typedef struct in_addr *PIN_ADDR;
 typedef struct in_addr FAR *LPIN_ADDR;
 
-typedef struct fd_set FD_SET;
-typedef struct fd_set *PFD_SET;
-typedef struct fd_set FAR *LPFD_SET;
+typedef fd_set FD_SET;
+typedef fd_set *PFD_SET;
+typedef fd_set FAR *LPFD_SET;
 
 typedef struct hostent HOSTENT;
 typedef struct hostent *PHOSTENT;

@@ -255,7 +255,7 @@ TStreamable *TWindow::build()
 
 TWindow::TWindow( StreamableInit ) :
     TGroup( streamableInit ),
-    TWindowInit( streamableInit )
+    TWindowInit( (TFrame* (*)(TRect)) streamableInit )
 {
 }
 

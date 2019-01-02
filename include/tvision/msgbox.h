@@ -39,7 +39,7 @@ ushort inputBox( const char *Title, const char *aLabel, char *s, uchar limit );
 ushort inputBoxRect( const TRect &bounds, const char *title,
                      const char *aLabel, char *s, uchar limit );
 
-const
+const int
 
 //  Message box classes
 

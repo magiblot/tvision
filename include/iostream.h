@@ -7,6 +7,10 @@
 #include <ostream>
 #include <cstdio>
 
+using std::cerr;
+using std::cin;
+using std::cout;
+using std::endl;
 using std::ios;
 using std::streambuf;
 using std::streamoff;

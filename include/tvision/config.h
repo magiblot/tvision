@@ -21,12 +21,12 @@
 #include <limits.h>
 #endif  // __LIMITS_H
 
-const eventQSize = 16;
-const maxCollectionSize = (int)(( (long) UINT_MAX - 16)/sizeof( void * ));
+const int eventQSize = 16;
+const int maxCollectionSize = (int)(( (long) UINT_MAX - 16)/sizeof( void * ));
 
-const maxViewWidth = 132;
+const int maxViewWidth = 132;
 
-const maxFindStrLen    = 80;
-const maxReplaceStrLen = 80;
+const int maxFindStrLen    = 80;
+const int maxReplaceStrLen = 80;
 
 #endif  // __CONFIG_H

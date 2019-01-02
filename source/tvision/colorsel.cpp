@@ -153,7 +153,7 @@ void TColorSelector::colorChanged()
 
 void TColorSelector::handleEvent( TEvent& event )
 {
-    const width = 4;
+    const int width = 4;
 
     TView::handleEvent( event );
 
@@ -856,7 +856,7 @@ TStreamable *TColorDialog::build()
 
 TColorDialog::TColorDialog( StreamableInit ) :
     TDialog( streamableInit ),
-    TWindowInit( streamableInit )
+    TWindowInit( (TFrame* (*)(TRect)) streamableInit )
 {
 }
 

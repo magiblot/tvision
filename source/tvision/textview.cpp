@@ -151,7 +151,8 @@ ushort TTerminal::nextLine( ushort pos )
 int TTerminal::do_sputn( const char *s, int count )
 {
     ushort screenLines = limit.y;
-    for( ushort i = 0; i < count; i++ )
+    ushort i;
+    for( i = 0; i < count; i++ )
         if( s[i] == '\n' )
             screenLines++;
 

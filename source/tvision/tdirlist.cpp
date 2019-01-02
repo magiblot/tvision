@@ -120,7 +120,7 @@ void TDirListBox::showDrives( TDirCollection *dirs )
 
 void TDirListBox::showDirs( TDirCollection *dirs )
 {
-    const indentSize = 2;
+    const int indentSize = 2;
     int indent = indentSize;
 
     char buf[MAXPATH+MAXFILE+MAXEXT];

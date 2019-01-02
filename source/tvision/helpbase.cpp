@@ -41,7 +41,7 @@
 #endif  // __LIMITS_H
 
 #if !defined( __STAT_H )
-#include <sys\stat.h>
+#include <sys/stat.h>
 #endif  // __STAT_H
 
 #if !defined( __CTYPE_H )

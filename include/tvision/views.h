@@ -215,7 +215,7 @@ public:
     void operator += ( const TCommandSet& );
     void operator -= ( const TCommandSet& );
 
-    Boolean TCommandSet::isEmpty();
+    Boolean isEmpty();
 
     TCommandSet& operator &= ( const TCommandSet& );
     TCommandSet& operator |= ( const TCommandSet& );

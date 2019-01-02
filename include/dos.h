@@ -349,7 +349,7 @@ void        _RTLENTRY getfat( unsigned char __drive,
                           struct fatinfo _FAR *__dtable );
 void        _RTLENTRY getfatd( struct fatinfo _FAR *__dtable );
 unsigned    _RTLENTRY getpsp( void );
-void        _RTLENTRYF gettime( struct time _FAR *__timep );
+// void        _RTLENTRYF gettime( struct time _FAR *__timep );
 int         _RTLENTRY getverify( void );
 
 #if !defined( _Windows )
@@ -701,7 +701,7 @@ unsigned    _RTLENTRY _EXPFUNC _dos_write( int __fd, void * __buf, unsigned __le
 #pragma obsolete _dos_settime
 #pragma obsolete _dos_write
 
-void        _RTLENTRYF _EXPFUNC getdate( struct date *__datep );
+// void        _RTLENTRYF _EXPFUNC getdate( struct date *__datep );
 void        _RTLENTRY _EXPFUNC getdfree( unsigned char __drive,
                  struct dfree*__dtable );
 int         _RTLENTRY _EXPFUNC _getdrive( void );

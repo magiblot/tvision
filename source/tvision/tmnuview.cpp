@@ -552,7 +552,7 @@ TMenu *TMenuView::readMenu( ipstream& is )
     while( tok != 0 )
         {
         assert( tok == 0xFF );
-        item = new TMenuItem( 0, 0, (void *)0 );
+        item = new TMenuItem( 0, 0, (TMenu *)0 );
         *last = item;
         last = &(item->next);
         item->name = is.readString();

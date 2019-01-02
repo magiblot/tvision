@@ -33,7 +33,7 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-const
+const int
 
     cmGrabDefault    = 61,
     cmReleaseDefault = 62;

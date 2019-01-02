@@ -44,7 +44,7 @@ typedef int ccIndex;
 typedef Boolean (*ccTestFunc)( void *, void * );
 typedef void (*ccAppFunc)( void *, void * );
 
-const ccNotFound = -1;
+const int ccNotFound = -1;
 
 extern const uchar specialChars[];
 

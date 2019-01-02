@@ -23,7 +23,7 @@
 #if !defined( __BUTTON_TYPE )
 #define __BUTTON_TYPE
 
-const
+const int
     bfNormal    = 0x00,
     bfDefault   = 0x01,
     bfLeftJust  = 0x02,
@@ -89,7 +89,8 @@ const
 
 #define cpDialog cpGrayDialog
 
-const dpBlueDialog = 0,
+const int
+      dpBlueDialog = 0,
       dpCyanDialog = 1,
       dpGrayDialog = 2;
 

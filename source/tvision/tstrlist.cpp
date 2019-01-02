@@ -27,7 +27,7 @@
 #include <mem.h>
 #endif  // __MEM_H
 
-const MAXKEYS = 16;
+const int MAXKEYS = 16;
 
 TStrIndexRec::TStrIndexRec() :
     count(0)
