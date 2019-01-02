@@ -21,15 +21,15 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) :

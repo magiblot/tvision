@@ -48,7 +48,7 @@ const
 #define __TSearchRec
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 struct TSearchRec
@@ -387,7 +387,7 @@ const
                                    // the dialog on a stream.
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 class _FAR TEvent;
@@ -574,7 +574,7 @@ inline TDirEntry *TDirCollection::lastThat( ccTestFunc func, void *arg )
 #define __TDirListBox
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 class _FAR TRect;

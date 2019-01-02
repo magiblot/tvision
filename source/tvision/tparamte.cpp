@@ -16,15 +16,15 @@
 #include <tvision/tv.h>
 
 #if !defined( __STDIO_H )
-#include <Stdio.h>
+#include <stdio.h>
 #endif  // __STDIO_H
 
 #if !defined( __STDARG_H )
-#include <Stdarg.h>
+#include <stdarg.h>
 #endif  // __STDARG_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 TParamText::TParamText( const TRect& bounds ) :

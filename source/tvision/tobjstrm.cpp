@@ -42,11 +42,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __LIMITS_H )
-#include <Limits.h>
+#include <limits.h>
 #endif  // __LIMITS_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __FSTREAM_H )
@@ -70,7 +70,7 @@
 #endif  // __STDLIB_H
 
 #if !defined( __ASSERT_H )
-#include <Assert.h>
+#include <assert.h>
 #endif  // __ASSERT_H
 
 #ifdef __FLAT__

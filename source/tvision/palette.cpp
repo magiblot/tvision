@@ -16,7 +16,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __MEM_H )
-#include <Mem.h>
+#include <mem.h>
 #endif  // __MEM_H
 
 

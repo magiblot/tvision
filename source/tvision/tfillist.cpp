@@ -23,19 +23,19 @@
 #include <tvision/tv.h>
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 #if !defined( __ERRNO_H )
-#include <Errno.h>
+#include <errno.h>
 #endif  // __ERRNO_H
 
 #if !defined( __IO_H )
-#include <IO.h>
+#include <io.h>
 #endif  // __IO_H
 
 #if !defined( __STDIO_H )
-#include <Stdio.h>
+#include <stdio.h>
 #endif  // __STDIO_H
 
 #if !defined( __CTYPE_H )
@@ -43,15 +43,15 @@
 #endif  // __CTYPE_H
 
 #if !defined( __ASSERT_H )
-#include <Assert.h>
+#include <assert.h>
 #endif  // __ASSERT_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 void fexpand( char * );

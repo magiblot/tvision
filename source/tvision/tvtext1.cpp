@@ -26,7 +26,7 @@
 #define Uses_TButton
 #define Uses_TDirListBox
 #define Uses_TFileEditor
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include <dos.h>
 

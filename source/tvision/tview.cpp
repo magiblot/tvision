@@ -24,11 +24,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #if !defined( __LIMITS_H )
-#include <Limits.h>
+#include <limits.h>
 #endif  // __LIMITS_H
 
 TPoint shadowSize = {2,1};

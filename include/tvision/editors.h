@@ -361,7 +361,7 @@ inline opstream& operator << ( opstream& os, TMemo* cl )
 #define __TFileEditor
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 class _FAR TRect;
@@ -482,7 +482,7 @@ inline opstream& operator << ( opstream& os, TEditWindow* cl )
 #define __TFindDialogRec
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 struct TFindDialogRec
@@ -502,7 +502,7 @@ struct TFindDialogRec
 #define __TReplaceDialogRec
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 struct TReplaceDialogRec

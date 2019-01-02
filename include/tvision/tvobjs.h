@@ -27,7 +27,7 @@
 #define __TObject
 
 #if !defined( __STDDEF_H )
-#include <StdDef.h>
+#include <stddef.h>
 #endif  // __STDDEF_H
 
 class TObject

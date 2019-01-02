@@ -22,7 +22,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __LIMITS_H )
-#include <Limits.h>
+#include <limits.h>
 #endif  // __LIMITS_H
 
 #if !defined( __STRING_H )

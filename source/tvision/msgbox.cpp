@@ -34,7 +34,7 @@
 #endif  // __STDIO_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 static const char *buttonName[] =

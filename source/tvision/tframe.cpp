@@ -21,7 +21,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #define cpFrame "\x01\x01\x02\x02\x03"

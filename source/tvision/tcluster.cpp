@@ -29,11 +29,11 @@
 #endif  // __CTYPE_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #define cpCluster "\x10\x11\x12\x12\1f"

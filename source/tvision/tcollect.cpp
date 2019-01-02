@@ -19,11 +19,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __STDLIB_H )
-#include <StdLib.h>
+#include <stdlib.h>
 #endif  // __STDLIB_H
 
 #if !defined( __MEM_H )
-#include <Mem.h>
+#include <mem.h>
 #endif  // __MEM_H
 
 

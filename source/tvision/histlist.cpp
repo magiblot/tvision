@@ -21,19 +21,19 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __MEM_H )
-#include <Mem.h>
+#include <mem.h>
 #endif  // __MEM_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #if !defined( __STDLIB_H )
-#include <StdLib.h>
+#include <stdlib.h>
 #endif  // __STDLIB_H
 
 class HistRec

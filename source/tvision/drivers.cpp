@@ -19,7 +19,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #pragma warn -asc

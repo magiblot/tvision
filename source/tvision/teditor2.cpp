@@ -32,7 +32,7 @@
 #endif  // __CTYPE_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 extern "C" {

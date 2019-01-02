@@ -20,7 +20,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 

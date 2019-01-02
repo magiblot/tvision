@@ -42,7 +42,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <STring.h>
+#include <string.h>
 #endif  // __STRING_H
 
 static TColorIndex* colorIndexes = 0;

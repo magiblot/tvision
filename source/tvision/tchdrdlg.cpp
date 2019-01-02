@@ -30,11 +30,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __CTYPE_H )
-#include <Ctype.h>
+#include <ctype.h>
 #endif	// __CTYPE_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 TChDirDialog::TChDirDialog( ushort opts, ushort histId ) :

@@ -22,7 +22,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #define cpStatusLine "\x02\x03\x04\x05\x06\x07"

@@ -20,11 +20,11 @@
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __MEM_H )
-#include <Mem.h>
+#include <mem.h>
 #endif  // __MEM_H
 
 const MAXKEYS = 16;

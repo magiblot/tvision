@@ -23,11 +23,11 @@
 #endif  // __CTYPE_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #define cpHistoryViewer "\x06\x06\x07\x06\x06"

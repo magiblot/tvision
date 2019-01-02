@@ -20,7 +20,7 @@
 #include <tvision/tv.h>
 
 #if !defined( __DOS_H )
-#include <Dos.h>
+#include <dos.h>
 #endif  // __DOS_H
 
 #if !defined( __CONIO_H )
@@ -32,11 +32,11 @@
 #endif  // __STDIO_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __MATH_H )
-#include <Math.h>
+#include <math.h>
 #endif  // __MATH_H
 
 Boolean _NEAR TSystemError::ctrlBreakHit = False;

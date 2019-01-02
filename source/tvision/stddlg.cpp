@@ -33,11 +33,11 @@
 #endif  // __DOS_H
 
 #if !defined( __DIR_H )
-#include <Dir.h>
+#include <dir.h>
 #endif  // __DIR_H
 
 #if !defined( __ERRNO_H )
-#include <Errno.h>
+#include <errno.h>
 #endif  // __ERRNO_H
 
 #if !defined( __IO_H )
@@ -45,7 +45,7 @@
 #endif  // __IO_H
 
 #if !defined( __STDIO_H )
-#include <Stdio.h>
+#include <stdio.h>
 #endif  // __STDIO_H
 
 #if !defined( __CTYPE_H )
@@ -53,15 +53,15 @@
 #endif  // __CTYPE_H
 
 #if !defined( __STRING_H )
-#include <String.h>
+#include <string.h>
 #endif  // __STRING_H
 
 #if !defined( __STDLIB_H )
-#include <StdLib.h>
+#include <stdlib.h>
 #endif  // __STDLIB_H
 
 #if !defined( __LIMITS_H )
-#include <Limits.h>
+#include <limits.h>
 #endif  // __LIMITS_H
 
 #if __STDC__
