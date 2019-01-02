@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TMenuView member functions                */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TMenuItem
 #define Uses_TMenu
@@ -25,7 +22,7 @@
 #define Uses_TMenuBox
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __ASSERT_H )
 #include <Assert.h>
@@ -96,14 +93,17 @@ TMenu::~TMenu()
         }
 }
 
-void TMenuView::trackMouse( TEvent& e )
+void TMenuView::trackMouse( TEvent& e, Boolean& mouseActive )
 {
     TPoint mouse = makeLocal( e.mouse.where );
     for( current = menu->items; current != 0; current = current->next )
         {
         TRect r = getItemRect( current );
         if( r.contains(mouse) )
+        {
+        mouseActive = True;
             return;
+        }
         }
 }
 
@@ -180,8 +180,10 @@ ushort TMenuView::execute()
     TMenuView *target;
     TRect  r;
     TEvent e;
+    Boolean mouseActive;
 
     current = menu->deflt;
+    mouseActive = False;
     do  {
         action = doNothing;
         getEvent(e);
@@ -190,7 +192,7 @@ ushort TMenuView::execute()
             case  evMouseDown:
                 if( mouseInView(e.mouse.where) || mouseInOwner(e) )
                     {
-                    trackMouse(e);
+                    trackMouse(e, mouseActive);
                     if( size.y == 1 )
                         autoSelect = True;
                     }
@@ -198,18 +200,25 @@ ushort TMenuView::execute()
                     action =  doReturn;
                 break;
             case  evMouseUp:
-                trackMouse(e);
+                trackMouse(e, mouseActive);
                 if( mouseInOwner(e) )
                     current = menu->deflt;
                 else if( current != 0 && current->name != 0 )
                     action = doSelect;
-                else
+                else if (mouseActive)
                     action = doReturn;
+        else
+            {
+            current = menu->deflt;
+            if (current == 0)
+                current = menu->items;
+            action = doNothing;
+            }
                 break;
             case  evMouseMove:
                 if( e.mouse.buttons != 0 )
                     {
-                    trackMouse(e);
+                    trackMouse(e, mouseActive);
                     if( !(mouseInView(e.mouse.where) || mouseInOwner(e)) &&
                         mouseInMenus(e) )
                         action = doReturn;
@@ -323,6 +332,8 @@ ushort TMenuView::execute()
             action =  doReturn;
             clearEvent(e);
             }
+        else
+            result = 0;
         } while( action != doReturn );
 
     if( e.what != evNothing &&
@@ -345,7 +356,7 @@ TMenuItem *TMenuView::findItem( char ch )
         {
         if( p->name != 0 && !p->disabled )
             {
-            char *loc = strchr( p->name, '~' );
+            char *loc = strchr( (char *) p->name, '~' );
             if( loc != 0 && (uchar)ch == toupper( loc[1] ) )
                 return p;
             }
@@ -364,7 +375,7 @@ ushort TMenuView::getHelpCtx()
     TMenuView *c = this;
 
     while( c != 0 &&
-                (c->current == 0 || 
+                (c->current == 0 ||
                  c->current->helpCtx == hcNoContext ||
                  c->current->name == 0 )
          )
@@ -385,23 +396,26 @@ TPalette& TMenuView::getPalette() const
 Boolean TMenuView::updateMenu( TMenu *menu )
 {
     Boolean res = False;
-    for( TMenuItem *p = menu->items; p != 0; p = p->next )
+    if( menu != 0 )
         {
-        if( p->name != 0 )
-            if( p->command == 0 )
-                {
-                if (updateMenu(p->subMenu) == True)
-                    res = True;
-                }
-            else
-                {
-                Boolean commandState = commandEnabled(p->command);
-                if( p->disabled == commandState )
+        for( TMenuItem *p = menu->items; p != 0; p = p->next )
+            {
+            if( p->name != 0 )
+                if( p->command == 0 )
                     {
-                    p->disabled = Boolean(!commandState);
-                    res = True;
+                    if( p->subMenu && updateMenu(p->subMenu) == True )
+                        res = True;
                     }
-                }
+                else
+                    {
+                    Boolean commandState = commandEnabled(p->command);
+                    if( p->disabled == commandState )
+                        {
+                        p->disabled = Boolean(!commandState);
+                        res = True;
+                        }
+                    }
+            }
         }
     return res;
 }
@@ -493,9 +507,14 @@ TMenuView *TMenuView::newSubView( const TRect& bounds,
     return new TMenuBox( bounds, aMenu, aParentMenu );
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TMenuView::writeMenu( opstream& os, TMenu *menu )
 {
     uchar tok = 0xFF;
+
+    assert( menu != 0 );
+
     for( TMenuItem *item = menu->items; item != 0; item = item->next )
         {
         os << tok;
@@ -510,6 +529,7 @@ void TMenuView::writeMenu( opstream& os, TMenu *menu )
                 os.writeString( item->param );
             }
         }
+
     tok = 0;
     os << tok;
 }
@@ -525,8 +545,10 @@ TMenu *TMenuView::readMenu( ipstream& is )
     TMenu *menu = new TMenu;
     TMenuItem **last = &(menu->items);
     TMenuItem *item = 0;
+
     uchar tok;
     is >> tok;
+
     while( tok != 0 )
         {
         assert( tok == 0xFF );
@@ -571,3 +593,4 @@ TMenuView::TMenuView( StreamableInit ) : TView( streamableInit )
 }
 
 
+#endif

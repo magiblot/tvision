@@ -4,21 +4,18 @@
 /* function(s)                                                */
 /*                  TFileCollection member functions          */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 
 #define Uses_TFileCollection
 #define Uses_TSearchRec
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -56,6 +53,7 @@ int TFileCollection::compare(void *key1, void *key2)
     return strcmp( getName( key1 ), getName( key2 ) );
 }
 
+
 TStreamable *TFileCollection::build()
 {
     return new TFileCollection( streamableInit );
@@ -75,5 +73,4 @@ void *TFileCollection::readItem( ipstream& is )
     is.readString( item->name, sizeof(item->name) );
     return item;
 }
-
 

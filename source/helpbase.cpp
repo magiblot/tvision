@@ -7,16 +7,13 @@
 /*                      THelpIndex                            */
 /*                      THelpFile                             */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStreamableClass
 #define Uses_TPoint
@@ -25,14 +22,14 @@
 #define Uses_opstream
 #define Uses_fpstream
 #define Uses_TRect
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __HELP_H )
-#include "HelpBase.h"
+#include "tvision\helpbase.h"
 #endif  // __HELP_H
 
 #if !defined( __UTIL_H )
-#include "Util.h"
+#include "tvision\util.h"
 #endif  // __UTIL_H
 
 #if !defined( __STRING_H )
@@ -60,13 +57,14 @@
 TCrossRefHandler crossRefHandler = notAssigned;
 
 // THelpTopic
-const char * const near THelpTopic::name = "THelpTopic";
+
+const char * const _NEAR THelpTopic::name = "THelpTopic";
 
 void THelpTopic::write( opstream& os )
 {
     writeParagraphs( os );
     writeCrossRefs( os );
-    
+
 }
 
 void *THelpTopic::read( ipstream& is )
@@ -74,7 +72,7 @@ void *THelpTopic::read( ipstream& is )
     readParagraphs( is );
     readCrossRefs( is );
     width = 0;
-    lastLine = INT_MAX; 
+    lastLine = INT_MAX;
     return this;
 }
 
@@ -102,7 +100,8 @@ THelpTopic::THelpTopic() : TObject()
 
 void THelpTopic::readParagraphs( ipstream& s )
 {
-    int  i, size;
+    int  i;
+    ushort size;
     TParagraph **pp;
     int temp;
 
@@ -146,7 +145,7 @@ void THelpTopic::disposeParagraphs()
         {
         t = p;
         p = p->next;
-        delete t->text; 
+        delete t->text;
         delete t;
         }
 }
@@ -220,8 +219,10 @@ void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
     p = paragraphs;
     while (paraOffset + curOffset < offset)
         {
+        char lbuf[256];
+
         oldOffset = paraOffset + curOffset;
-        wrapText(p->text, p->size, curOffset, p->wrap);
+        wrapText(p->text, p->size, curOffset, p->wrap, lbuf, sizeof(lbuf));
         ++line;
         if (curOffset >= p->size)
             {
@@ -236,11 +237,10 @@ void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
     ref = crossRefPtr->ref;
 }
 
-char *THelpTopic::getLine( int line )
+char *THelpTopic::getLine( int line, char *buffer, int buflen )
 {
     int offset, i;
     TParagraph *p;
-    char buffer[256];
 
     if (lastLine < line)
         {
@@ -261,8 +261,10 @@ char *THelpTopic::getLine( int line )
     {
         while (offset < p->size)
         {
+            char lbuf[256];
+
             --line;
-            strcpy(buffer, wrapText(p->text, p->size, offset, p->wrap));
+            strncpy(buffer, wrapText(p->text, p->size, offset, p->wrap, lbuf, sizeof(lbuf)), buflen);
             if (line == 0)
                 {
                 lastOffset = offset;
@@ -292,11 +294,12 @@ int THelpTopic::numLines()
     p = paragraphs;
     while (p != 0)
         {
-        offset = 0; 
+        offset = 0;
         while (offset < p->size)
             {
+            char lbuf[256];
             ++lines;
-            wrapText(p->text, p->size, offset, p->wrap);
+            wrapText(p->text, p->size, offset, p->wrap, lbuf, sizeof(lbuf));
             }
         p = p->next;
         }
@@ -312,7 +315,7 @@ void THelpTopic::setCrossRef( int i, TCrossRef& ref )
         crossRefPtr = crossRefs + i;
         *crossRefPtr = ref;
         }
-}       
+}
 
 
 void THelpTopic::setNumCrossRefs( int i )
@@ -330,7 +333,7 @@ void THelpTopic::setNumCrossRefs( int i )
         else
             memmove(p, crossRefPtr, i * sizeof(TCrossRef));
 
-        delete [numRefs] crossRefPtr; 
+        delete [numRefs] crossRefPtr;
         }
     crossRefs = p;
     numRefs = i;
@@ -380,14 +383,14 @@ void THelpTopic::writeCrossRefs( opstream& s )
         for (i = 0; i < numRefs; ++i)
             {
             crossRefPtr = crossRefs + i;
-            crossRefHandler(s, crossRefPtr->ref);
+            (*crossRefHandler)(s, crossRefPtr->ref);
             s << crossRefPtr->offset << crossRefPtr->length;
             }
 }
 
 Boolean isBlank( char ch )
 {
-    if (isspace(ch))
+    if (isspace((uchar)ch))
         return True;
     else
         return False;
@@ -396,7 +399,7 @@ Boolean isBlank( char ch )
 int scan( char *p, int offset, char c)
 {
     char *temp1, *temp2;
-    
+
     temp1 = p + offset;
     temp2 = strchr(temp1, c);
     if (temp2 == 0)
@@ -416,10 +419,9 @@ void textToLine( void *text, int offset, int length, char *line )
     line[length] = 0;
 }
 
-char *THelpTopic::wrapText( char *text, int size,
-          int& offset, Boolean wrap )
+char *THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap,
+                            char *lineBuf, int lineBufLen )
 {
-    char line[256];
     int i;
 
     i = scan(text, offset, '\n');
@@ -434,25 +436,37 @@ char *THelpTopic::wrapText( char *text, int size,
             {
             while((i > offset) && !(isBlank(text[i])))
                 --i;
+/*
             if (i == offset)
                 i = offset + width;
             else
                 ++i;
+*/
+            if( i == offset )
+                {
+                i = offset + width;
+                while( (i < size) && !isBlank(text[i]) )
+                    ++i;
+                if( i < size )
+                    ++i;
+                }
+            else
+                ++i;
             }
         if (i == offset)
-        i = offset + width;
+            i = offset + width;
         i -= offset;
         }
-    textToLine(text, offset, i, line);
-    if (line[strlen(line) - 1] == '\n')
-        line[strlen(line) - 1] = 0;
-    offset += i;
-    return line;
+    textToLine(text, offset, min(i,lineBufLen), lineBuf);
+    if (lineBuf[min(strlen(lineBuf) - 1, lineBufLen)] == '\n')
+        lineBuf[min(strlen(lineBuf) - 1, lineBufLen)] = 0;
+    offset += min(i,lineBufLen);
+    return lineBuf;
 }
 
-// THelpIndex 
+// THelpIndex
 
-const char * const near THelpIndex::name = "THelpIndex";
+const char * const _NEAR THelpIndex::name = "THelpIndex";
 
 void THelpIndex::write( opstream& os )
 {
@@ -461,7 +475,7 @@ void THelpIndex::write( opstream& os )
     os << size;
     for (int i = 0; i < size; ++i)
         {
-        indexArrayPtr = index + i; 
+        indexArrayPtr = index + i;
         os << *indexArrayPtr;
         }
 }
@@ -559,6 +573,7 @@ THelpFile::THelpFile( fpstream&  s )
     s.seekg(0);
     handle = s.rdbuf()->fd();
     size = filelength(handle);
+    s.seekg(0);
     if (size > sizeof(magic))
         s >> magic;
     if (magic != magicHeader)
@@ -573,7 +588,7 @@ THelpFile::THelpFile( fpstream&  s )
         s.seekg(8);
         s >> indexPos;
         s.seekg(indexPos);
-        s >> index; 
+        s >> index;
         modified = False;
         }
     stream = &s;
@@ -591,7 +606,14 @@ THelpFile::~THelpFile(void)
         stream->seekp(0);
         magic = magicHeader;
         handle = stream->rdbuf()->fd();
+//
+// note: at this time, a bug in filelength leaves the seek pointer at
+//       the end of file, so we must save and restore the seek pointer
+//       around the call; this can be removed when filelength is fixed.
+//
+  streampos sp=stream->tellp();
         size = filelength(handle) - 8;
+  stream->seekp(sp);
         *stream << magic;
         *stream << size;
         *stream << indexPos;
@@ -603,7 +625,7 @@ THelpFile::~THelpFile(void)
 THelpTopic *THelpFile::getTopic( int i )
 {
     long pos;
-    THelpTopic *topic;
+    THelpTopic *topic = 0;
 
     pos = index->position(i);
     if (pos > 0 )
@@ -619,12 +641,11 @@ THelpTopic *THelpFile::invalidTopic()
 {
     THelpTopic *topic;
     TParagraph *para;
-    char invalidText[] = "\n No help available in this context.";
 
     topic =  new THelpTopic;
     para =  new TParagraph;
-    para->text = newStr(invalidText);
-    para->size = strlen(invalidText);
+    para->text = newStr(invalidContext);
+    para->size = strlen(invalidContext);
     para->wrap = False;
     para->next = 0;
     topic->addParagraph(para);

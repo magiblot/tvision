@@ -2,15 +2,19 @@
 /*                                                                         */
 /*   COLORSEL.H                                                            */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the class TColorDialog, used to set application palettes      */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -22,12 +26,13 @@ const
   cmColorBackgroundChanged = 72,
   cmColorSet               = 73,
   cmNewColorItem           = 74,
-  cmNewColorIndex          = 75;
+  cmNewColorIndex          = 75,
+  cmSaveColorIndex         = 76;
 
-#endif  // __COLOR_COMMAND_CODES 
+#endif  // __COLOR_COMMAND_CODES
 
-class far TColorItem;
-class far TColorGroup;
+class _FAR TColorItem;
+class _FAR TColorGroup;
 
 TColorItem& operator + ( TColorItem& i1, TColorItem& i2 );
 TColorGroup& operator + ( TColorGroup& g, TColorItem& i );
@@ -36,7 +41,7 @@ TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 );
 #if defined( Uses_TColorItem ) && !defined( __TColorItem )
 #define __TColorItem
 
-class far TColorGroup;
+class _FAR TColorGroup;
 
 class TColorItem
 {
@@ -58,7 +63,7 @@ public:
 #if defined( Uses_TColorGroup ) && !defined( __TColorGroup )
 #define __TColorGroup
 
-class far TColorItem;
+class _FAR TColorItem;
 
 class TColorGroup
 {
@@ -68,21 +73,31 @@ public:
     TColorGroup( const char *nm, TColorItem *itm = 0, TColorGroup *nxt = 0 );
     virtual ~TColorGroup();
     const char *name;
+    uchar index;
     TColorItem *items;
     TColorGroup *next;
     friend TColorGroup& operator + ( TColorGroup&, TColorItem& );
     friend TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 );
-    
+
 
 };
+
+class TColorIndex
+{
+public:
+    uchar groupIndex;
+    uchar colorSize;
+    uchar colorIndex[256];
+};
+
 
 #endif  // Uses_TColorGroup
 
 #if defined( Uses_TColorSelector ) && !defined( __TColorSelector )
 #define __TColorSelector
 
-class far TRect;
-class far TEvent;
+class _FAR TRect;
+class _FAR TEvent;
 
 class TColorSelector : public TView
 {
@@ -104,7 +119,7 @@ private:
 
     void colorChanged();
 
-    static const char near icon;
+    static const char _NEAR icon;
 
     virtual const char *streamableName() const
         { return name; }
@@ -117,7 +132,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -138,8 +153,8 @@ inline opstream& operator << ( opstream& os, TColorSelector* cl )
 #if defined( Uses_TMonoSelector ) && !defined( __TMonoSelector )
 #define __TMonoSelector
 
-class far TRect;
-class far TEvent;
+class _FAR TRect;
+class _FAR TEvent;
 
 class TMonoSelector : public TCluster
 {
@@ -156,11 +171,11 @@ public:
 
 private:
 
-    static const char * near button;
-    static const char * near normal;
-    static const char * near highlight;
-    static const char * near underline;
-    static const char * near inverse;
+    static const char * _NEAR button;
+    static const char * _NEAR normal;
+    static const char * _NEAR highlight;
+    static const char * _NEAR underline;
+    static const char * _NEAR inverse;
 
     virtual const char *streamableName() const
         { return name; }
@@ -171,7 +186,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -191,8 +206,8 @@ inline opstream& operator << ( opstream& os, TMonoSelector* cl )
 #if defined( Uses_TColorDisplay ) && !defined( __TColorDisplay )
 #define __TColorDisplay
 
-class far TRect;
-class far TEvent;
+class _FAR TRect;
+class _FAR TEvent;
 
 class TColorDisplay : public TView
 {
@@ -223,7 +238,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -244,10 +259,10 @@ inline opstream& operator << ( opstream& os, TColorDisplay* cl )
 #if defined( Uses_TColorGroupList ) && !defined( __TColorGroupList )
 #define __TColorGroupList
 
-class far TRect;
-class far TScrollBar;
-class far TColorGroup;
-class far TColorItem;
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TColorGroup;
+class _FAR TColorItem;
 
 class TColorGroupList : public TListViewer
 {
@@ -261,6 +276,9 @@ public:
     virtual ~TColorGroupList();
     virtual void focusItem( short item );
     virtual void getText( char *dest, short item, short maxLen );
+
+    virtual void handleEvent(TEvent&);
+
 
 protected:
 
@@ -283,7 +301,11 @@ protected:
 
 public:
 
-    static const char * const near name;
+    void setGroupIndex(uchar groupNum, uchar itemNum);
+    TColorGroup* getGroup(uchar groupNum);
+    uchar getGroupIndex(uchar groupNum);
+    uchar getNumGroups();
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -304,10 +326,10 @@ inline opstream& operator << ( opstream& os, TColorGroupList* cl )
 #if defined( Uses_TColorItemList ) && !defined( __TColorItemList )
 #define __TColorItemList
 
-class far TRect;
-class far TScrollBar;
-class far TColorItem;
-class far TEvent;
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TColorItem;
+class _FAR TEvent;
 
 class TColorItemList : public TListViewer
 {
@@ -337,7 +359,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -358,14 +380,14 @@ inline opstream& operator << ( opstream& os, TColorItemList* cl )
 #if defined( Uses_TColorDialog ) && !defined( __TColorDialog )
 #define __TColorDialog
 
-class far TColorGroup;
-class far TEvent;
-class far TColorDisplay;
-class far TColorGroupList;
-class far TLabel;
-class far TColorSelector;
-class far TMonoSelector;
-class far TPalette;
+class _FAR TColorGroup;
+class _FAR TEvent;
+class _FAR TColorDisplay;
+class _FAR TColorGroupList;
+class _FAR TLabel;
+class _FAR TColorSelector;
+class _FAR TMonoSelector;
+class _FAR TPalette;
 
 class TColorDialog : public TDialog
 {
@@ -391,19 +413,20 @@ protected:
     TColorSelector *bakSel;
     TLabel *monoLabel;
     TMonoSelector *monoSel;
+    uchar groupIndex;
 
 private:
 
-    static const char * near colors;
-    static const char * near groupText;
-    static const char * near itemText;
-    static const char * near forText;
-    static const char * near bakText;
-    static const char * near textText;
-    static const char * near colorText;
-    static const char * near okText;
-    static const char * near cancelText;
-    
+    static const char * _NEAR colors;
+    static const char * _NEAR groupText;
+    static const char * _NEAR itemText;
+    static const char * _NEAR forText;
+    static const char * _NEAR bakText;
+    static const char * _NEAR textText;
+    static const char * _NEAR colorText;
+    static const char * _NEAR okText;
+    static const char * _NEAR cancelText;
+
     virtual const char *streamableName() const
         { return name; }
 
@@ -415,7 +438,9 @@ protected:
 
 public:
 
-    static const char * const near name;
+    void getIndexes(TColorIndex*&);
+    void setIndexes(TColorIndex*&);
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -433,7 +458,7 @@ inline opstream& operator << ( opstream& os, TColorDialog* cl )
 #endif  // TColorDialog
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

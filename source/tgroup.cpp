@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TGroup member functions                   */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TGroup
 #define Uses_TView
@@ -22,9 +19,10 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TVMemMgr
-#include <tv.h>
+#include <tvision\tv.h>
 
 TView *TheTopView = 0;
+TGroup* ownerGroup = 0;
 
 TGroup::TGroup( const TRect& bounds ) :
     TView(bounds), last( 0 ), phase( phFocused ), current( 0 ), buffer( 0 ),
@@ -43,11 +41,18 @@ void TGroup::shutDown()
 {
     TView* p = last;
     if( p != 0 )
+    {
+        do {
+        p->hide();
+        p = p->prev();
+    } while (p != last);
+
         do  {
             TView* T = p->prev();
             destroy( p );
             p = T;
         } while( last != 0 );
+    }
     freeBuffer();
     current = 0;
     TView::shutDown();
@@ -58,6 +63,17 @@ void doCalcChange( TView *p, void *d )
     TRect  r;
     ((TGroup *)p)->calcBounds(r, *(TPoint*)d);
     ((TGroup *)p)->changeBounds(r);
+}
+
+#pragma warn -par
+static void doAwaken (TView* v, void* p)
+{
+    v->awaken();
+}
+
+void TGroup::awaken()
+{
+    forEach(doAwaken, 0);
 }
 
 void TGroup::changeBounds( const TRect& bounds )
@@ -97,15 +113,19 @@ ushort TGroup::dataSize()
 
 void TGroup::remove(TView* p)
 {
-    ushort saveState;
-    saveState = p->state;
-    p->hide();
-    removeView(p);
-    p->owner = 0;
-    p->next= 0;
-    if( (saveState & sfVisible) != 0 )
-        p->show();
+    if( p )
+        {
+        ushort saveState;
+        saveState = p->state;
+        p->hide();
+        removeView(p);
+        p->owner = 0;
+        p->next= 0;
+        if( (saveState & sfVisible) != 0 )
+            p->show();
+        }
 }
+
 
 void TGroup::draw()
 {
@@ -203,6 +223,40 @@ TView *TGroup::first()
         return last->next;
 }
 
+TView* TGroup::findNext(Boolean forwards)
+{
+  TView* p, *result;
+
+  result = 0;
+  if (current)
+  {
+    p = current;
+    do {
+      if (forwards)
+          p = p->next;
+      else
+        p = p->prev();
+
+    } while (! (( ((p->state & (sfVisible | sfDisabled)) == sfVisible) &&
+      (p->options & ofSelectable)) || (p == current)));
+
+    if (p != current)
+       result = p;
+  }
+  return result;
+}
+
+Boolean TGroup::focusNext(Boolean forwards)
+{
+  TView* p;
+
+  p = findNext(forwards);
+  if (p)
+      return p->focus();
+  else
+      return True;
+}
+
 TView *TGroup::firstMatch( ushort aState, ushort aOptions )
 {
     if( last == 0 )
@@ -211,7 +265,7 @@ TView *TGroup::firstMatch( ushort aState, ushort aOptions )
     TView* temp = last;
     while(1)
         {
-        if( ((temp->state & aState) == aState) && 
+        if( ((temp->state & aState) == aState) &&
             ((temp->options & aOptions) ==  aOptions))
             return temp;
 
@@ -294,7 +348,7 @@ void TGroup::handleEvent( TEvent& event )
     TView::handleEvent( event );
 
     handleStruct hs( event, *this );
-    
+
     if( (event.what & focusedEvents) != 0 )
         {
         phase = phPreProcess;
@@ -336,6 +390,8 @@ void TGroup::insertBefore( TView *p, TView *Target )
         insertView( p, Target );
         if( (saveState & sfVisible) != 0 )
             p->show();
+        if( (saveState & sfActive) != 0 )
+        p->setState(sfActive, True);
         }
 }
 
@@ -386,19 +442,10 @@ void TGroup::resetCursor()
 void TGroup::selectNext( Boolean forwards )
 {
     if( current != 0 )
-        {
-        TView* p = current;
-        do  {
-            if (forwards)
-                p = p->next;
-            else
-                p = p->prev();
-            } while ( !(
-              (((p->state & (sfVisible + sfDisabled)) == sfVisible) &&
-              (p->options & ofSelectable)) || (p == current)
-              ) );
-        p->select();
-        }
+    {
+        TView* p = findNext(forwards);
+    if (p) p->select();
+    }
 }
 
 void TGroup::selectView( TView* p, Boolean enable )
@@ -474,7 +521,7 @@ void TGroup::setState( ushort aState, Boolean enable )
     TView::setState( aState, enable );
 
     if( (aState & (sfActive | sfDragging)) != 0 )
-        { 
+        {
         lock();
         forEach( doSetState, &sb );
         unlock();
@@ -500,17 +547,22 @@ void TGroup::unlock()
         drawView();
 }
 
-static ushort cmd;
-
-Boolean isInvalid( TView *p, void * )
+Boolean isInvalid( TView *p, void *command )
 {
-    return Boolean( !p->valid( cmd ) );
+    return Boolean( !p->valid( *(ushort *) command ) );
 }
 
 Boolean TGroup::valid( ushort command )
 {
-    cmd = command;
-    return Boolean( firstThat( isInvalid, 0 ) == 0 );
+    if (command == cmReleasedFocus)
+    {
+        if (current && (current->options & ofValidate))
+            return current->valid(command);
+        else
+            return True;
+    }
+
+    return Boolean( firstThat( isInvalid, &command ) == 0 );
 }
 
 ushort TGroup::getHelpCtx()
@@ -522,6 +574,8 @@ ushort TGroup::getHelpCtx()
         h = TView::getHelpCtx();
     return h;
 }
+
+#if !defined(NO_STREAMABLE)
 
 static void doPut( TView *p, void *osp )
 {
@@ -551,7 +605,7 @@ void *TGroup::read( ipstream& is )
     ushort index;
 
     TView::read( is );
-    clip = getExtent(); 
+    clip = getExtent();
     TGroup *ownerSave = owner;
     owner = this;
     last = 0;
@@ -574,6 +628,8 @@ void *TGroup::read( ipstream& is )
     is >> index;
     current = at(index);
     setCurrent( current, TView::normalSelect );
+    if (ownerGroup == NULL)
+        awaken();
     return this;
 }
 
@@ -586,4 +642,4 @@ TGroup::TGroup( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

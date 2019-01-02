@@ -4,23 +4,20 @@
 /* function(s)                                                */
 /*                  TRadioButton member functions             */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TRadioButtons
-#include <tv.h>
+#include <tvision\tv.h>
 
 void TRadioButtons::draw()
 {
-    drawBox( button, 7 );
+    drawMultiBox( button, " \x7" );
 }
 
 Boolean TRadioButtons::mark( int item )
@@ -41,8 +38,10 @@ void TRadioButtons::movedTo( int item )
 void TRadioButtons::setData( void * rec )
 {
     TCluster::setData(rec);
-    sel = value;
+    sel = (int)value;
 }
+
+#if !defined(NO_STREAMABLE)
 
 TStreamable *TRadioButtons::build()
 {
@@ -52,3 +51,6 @@ TStreamable *TRadioButtons::build()
 TRadioButtons::TRadioButtons( StreamableInit ) : TCluster( streamableInit )
 {
 }
+
+
+#endif

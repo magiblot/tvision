@@ -2,27 +2,28 @@
 /*                                                                         */
 /*   HELPBASE.H                                                            */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TParagraph, TCrossRef, THelpTopic, THelpIndex,    */
 /*      THelpFile                                                          */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 const long magicHeader = 0x46484246L; //"FBHF"
 
-#define cHelpColor      "\x37\x3F\x3A\x13\x13\x30\x3E\x1E"
-#define cHelpBlackWhite "\x07\x0F\x07\x70\x70\x07\x0F\x70" 
-#define cHelpMonochrome "\x07\x0F\x07\x70\x70\x07\x0F\x70"
-#define cHelpViewer     "\x06\x07\x08"
-#define cHelpWindow     "\x40\x41\x42\x43\x44\x45\x46\x47"
+#define cHelpViewer "\x06\x07\x08"
+#define cHelpWindow "\x80\x81\x82\x83\x84\x85\x86\x87"
 
 // TParagraph
 
 class TParagraph
 {
-  
+
 public:
 
     TParagraph() {}
@@ -62,7 +63,7 @@ public:
     void addCrossRef( TCrossRef ref );
     void addParagraph( TParagraph *p );
     void getCrossRef( int i, TPoint& loc, uchar& length, int& ref );
-    char *getLine( int line );
+    char *getLine( int line, char *buffer, int buflen );
     int getNumCrossRefs();
     int numLines();
     void setCrossRef( int i, TCrossRef& ref );
@@ -76,7 +77,7 @@ public:
 
 private:
 
-    char *wrapText( char *text, int size, int& offset, Boolean wrap );
+    char *wrapText( char *text, int size, int& offset, Boolean wrap, char *lineBuf, int lineBufLen );
     void readParagraphs( ipstream& s );
     void readCrossRefs( ipstream& s );
     void writeParagraphs( opstream& s );
@@ -96,9 +97,9 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
- 
+
 };
 
 inline ipstream& operator >> ( ipstream& is, THelpTopic& cl )
@@ -112,7 +113,7 @@ inline opstream& operator << ( opstream& os, THelpTopic* cl )
     { return os << (TStreamable *)cl; }
 
 
-// THelpIndex 
+// THelpIndex
 
 class THelpIndex : public TObject, public TStreamable
 {
@@ -141,9 +142,9 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
- 
+
 };
 
 inline ipstream& operator >> ( ipstream& is, THelpIndex& cl )
@@ -161,6 +162,8 @@ inline opstream& operator << ( opstream& os, THelpIndex* cl )
 
 class THelpFile : public TObject
 {
+
+    static const char * _NEAR invalidContext;
 
 public:
 

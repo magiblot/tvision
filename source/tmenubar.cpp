@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TMenuBar member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TMenuBar
 #define Uses_TDrawBuffer
@@ -21,7 +18,7 @@
 #define Uses_TMenuItem
 #define Uses_TRect
 #define Uses_TSubMenu
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -109,6 +106,8 @@ TRect TMenuBar::getItemRect( TMenuItem *item )
         }
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TMenuBar::build()
 {
     return new TMenuBar( streamableInit );
@@ -118,4 +117,4 @@ TMenuBar::TMenuBar( StreamableInit ) : TMenuView( streamableInit )
 {
 }
 
-
+#endif

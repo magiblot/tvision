@@ -2,18 +2,15 @@
 /* filename - tmemo.cpp                                       */
 /*                                                            */
 /* function(s)                                                */
-/*            TMemo member functions                          
+/*            TMemo member functions
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TEditor
@@ -21,7 +18,7 @@
 #define Uses_TEvent
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #define cpMemo      "\x1A\x1B"
 
@@ -56,7 +53,7 @@ void TMemo::setData( void *rec )
     memcpy(&buffer[bufSize - data->length], data->buffer, data->length);
     setBufLen(data->length);
 }
- 
+
 TPalette& TMemo::getPalette() const
 {
     static TPalette palette( cpMemo, sizeof( cpMemo )-1 );
@@ -68,6 +65,8 @@ void TMemo::handleEvent( TEvent& event )
     if( event.what != evKeyDown || event.keyDown.keyCode != kbTab )
         TEditor::handleEvent(event);
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TMemo::write( opstream& os )
 {
@@ -101,3 +100,4 @@ TMemo::TMemo( StreamableInit ) : TEditor( streamableInit )
 {
 }
 
+#endif

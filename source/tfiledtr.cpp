@@ -4,24 +4,22 @@
 /* function(s)                                                */
 /*            TFileEditor member functions                    */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#define Uses_TProgram
 #define Uses_TGroup
 #define Uses_TEditor
 #define Uses_TFileEditor
 #define Uses_TEvent
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __LIMITS_H )
 #include <Limits.h>
@@ -42,6 +40,10 @@
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H
+
+#if !defined( __STDLIB_H )
+#include <alloc.h>
+#endif
 
 inline ushort min( ushort u1, ushort u2 )
 {
@@ -219,14 +221,18 @@ Boolean TFileEditor::saveFile()
 
 Boolean TFileEditor::setBufSize( ushort newSize )
 {
-    if( newSize > 0xF000 )
+    if( newSize == 0)
+    	newSize = 0x1000;
+    else if( newSize > 0xF000 )
         newSize = 0xFFE0;
     else
         newSize = (newSize + 0x0FFF) & 0xF000;
     if( newSize != bufSize )
         {
         char *temp = buffer;
-        if( (buffer = new char[newSize]) == 0 )
+        /* Bypass safety pool to allocate buffer, but check for possible
+           NULL return value. */
+        if( (buffer = (char *) malloc( newSize )) == 0 )
             {
             delete temp;
             return False;
@@ -284,6 +290,8 @@ Boolean TFileEditor::valid( ushort command )
     return True;
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TFileEditor::write( opstream& os )
 {
     TEditor::write( os );
@@ -294,6 +302,7 @@ void TFileEditor::write( opstream& os )
 void *TFileEditor::read( ipstream& is )
 {
     TEditor::read( is );
+    bufSize = 0;
     is.readString( fileName, sizeof( fileName ) );
     if( isValid )
         {
@@ -318,3 +327,4 @@ TFileEditor::TFileEditor( StreamableInit ) : TEditor( streamableInit )
 {
 }
 
+#endif

@@ -4,20 +4,17 @@
 /* function(s)                                                  */
 /*                      TResourceCollection member functions    */
 /*--------------------------------------------------------------*/
-
-/*--------------------------------------------------------------*/
-/*                                                              */
-/*     Turbo Vision -  Version 1.0                              */
-/*                                                              */
-/*                                                              */
-/*     Copyright (c) 1991 by Borland International              */
-/*     All Rights Reserved.                                     */
-/*                                                              */
-/*--------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TResourceCollection
 #define Uses_TResourceItem
-#include <tv.h>
+#include <tvision\tv.h>
 
 TResourceCollection::TResourceCollection( short aLimit, short aDelta) :
     TStringCollection( aLimit, aDelta)
@@ -26,15 +23,17 @@ TResourceCollection::TResourceCollection( short aLimit, short aDelta) :
 
 void TResourceCollection::freeItem( void* item )
 {
-    delete ((TResourceItem*)item)->key; 
+    delete ((TResourceItem*)item)->key;
     delete (TResourceItem*)item;
 }
 
-void* TResourceCollection::keyOf( void* item ) 
+void* TResourceCollection::keyOf( void* item )
 {
     return ((TResourceItem *)item)->key;
-} 
-        
+}
+
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TResourceCollection::build()
 {
     return new TResourceCollection( streamableInit );
@@ -42,7 +41,7 @@ TStreamable *TResourceCollection::build()
 
 void TResourceCollection::writeItem( void *obj, opstream& os )
 {
-   
+
    os << ((TResourceItem *)obj)->pos;
    os << ((TResourceItem *)obj)->size;
    os.writeString(((TResourceItem *)obj)->key);
@@ -60,5 +59,5 @@ void *TResourceCollection::readItem( ipstream& is )
     return (void *)obj;
 }
 
-      
+#endif
 

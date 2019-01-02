@@ -4,23 +4,20 @@
 /* function(s)                                                */
 /*          TBackground member functions                      */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TBackground
 #define Uses_TDrawBuffer
 #define Uses_opstream
 #define Uses_ipstream
 
-#include <tv.h>
+#include <tvision\tv.h>
 
 #define cpBackground "\x01"      // background palette
 
@@ -29,10 +26,6 @@ TBackground::TBackground( const TRect& bounds, char aPattern ) :
     pattern( aPattern )
 {
     growMode = gfGrowHiX | gfGrowHiY;
-}
-
-TBackground::TBackground( StreamableInit ) : TView( streamableInit )
-{
 }
 
 void TBackground::draw()
@@ -49,6 +42,11 @@ TPalette& TBackground::getPalette() const
     return palette;
 }
 
+#if !defined(NO_STREAMABLE)
+
+TBackground::TBackground( StreamableInit ) : TView( streamableInit )
+{
+}
 
 void TBackground::write( opstream& os )
 {
@@ -68,4 +66,4 @@ TStreamable *TBackground::build()
     return new TBackground( streamableInit );
 }
 
-
+#endif

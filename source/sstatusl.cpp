@@ -3,24 +3,23 @@
 /*                                                            */
 /* Registeration object for the class TStatusLine             */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TStatusLine
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RView )
 
 TStreamableClass RStatusLine( TStatusLine::name,
                               TStatusLine::build,
-                              __DELTA(TStatusLine) 
+                              __DELTA(TStatusLine)
                             );
 
+#endif

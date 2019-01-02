@@ -2,13 +2,17 @@
 /*                                                                         */
 /*   TOBJSTRM.H                                                            */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TStreamable, TStreamableClass, pstream,           */
 /*   ipstream, opstream, iopstream, ifpstream, ofpstream, and fpstream.    */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 typedef unsigned P_id_type;
 
@@ -25,13 +29,13 @@ typedef unsigned P_id_type;
 #pragma warn -nst
 
 #ifdef __DLL__
-#define _FAR far
+#define _FAR   far
 #else
 #define _FAR
 #endif
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -39,15 +43,15 @@ typedef unsigned P_id_type;
 #define __fLink_def
 struct fLink
 {
-    fLink near *f;
-    class TStreamableClass near *t;
+    fLink _NEAR *f;
+    class TStreamableClass _NEAR *t;
 };
 #endif
 
 #define __link( s )             \
   extern TStreamableClass s;    \
   static fLink force ## s =     \
-    { (fLink near *)&force ## s, (TStreamableClass near *)&s };
+    { (fLink _NEAR *)&force ## s, (TStreamableClass _NEAR *)&s };
 
 #if defined( Uses_TStreamable ) && !defined( __TStreamable )
 #define __TStreamable
@@ -88,7 +92,12 @@ protected:
 const P_id_type P_id_notFound = UINT_MAX;
 
 typedef TStreamable *(*BUILDER)();
+
+#ifndef __FLAT__
 #define __DELTA( d ) (FP_OFF((TStreamable *)(d *)1)-1)
+#else
+#define __DELTA( d ) ((int)(TStreamable*)(d*)1-1 )
+#endif
 
 class TStreamableClass
 {
@@ -169,7 +178,7 @@ class TPWrittenObjects : public TNSSortedCollection
 
 public:
 
-    void removeAll() { curId = 0; TNSSortedCollection::removeAll(); }
+    void removeAll() { curId = 0; TNSSortedCollection::freeAll(); }
 
 private:
 
@@ -264,11 +273,11 @@ private:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-class far TStreamableTypes;
+class _FAR TStreamableTypes;
 
 class pstream
 {
@@ -310,7 +319,7 @@ protected:
     void _Cdecl init( streambuf _FAR * );
     void _Cdecl setstate( int );
 
-    static TStreamableTypes * near types;
+    static TStreamableTypes * _NEAR types;
 
 };
 
@@ -332,11 +341,11 @@ protected:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-class far TStreamableClass;
+class _FAR TStreamableClass;
 
 class ipstream : virtual public pstream
 {
@@ -356,6 +365,7 @@ public:
     char _FAR * _Cdecl readString();
     char _FAR * _Cdecl readString( char _FAR *, unsigned );
 
+    friend ipstream& _Cdecl operator >> ( ipstream&, char& );
     friend ipstream& _Cdecl operator >> ( ipstream&, signed char& );
     friend ipstream& _Cdecl operator >> ( ipstream&, unsigned char& );
     friend ipstream& _Cdecl operator >> ( ipstream&, signed short& );
@@ -407,12 +417,12 @@ private:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
 
-class far TStreamableClass;
+class _FAR TStreamableClass;
 
 class opstream : virtual public pstream
 {
@@ -432,6 +442,7 @@ public:
     void _Cdecl writeWord( ushort );
     void _Cdecl writeString( const char _FAR * );
 
+    friend opstream& _Cdecl operator << ( opstream&, char );
     friend opstream& _Cdecl operator << ( opstream&, signed char );
     friend opstream& _Cdecl operator << ( opstream&, unsigned char );
     friend opstream& _Cdecl operator << ( opstream&, signed short );
@@ -482,7 +493,7 @@ private:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -518,7 +529,7 @@ protected:
 #endif  // __FSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -563,7 +574,7 @@ private:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -607,7 +618,7 @@ public:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -653,7 +664,7 @@ public:
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -677,6 +688,6 @@ public:
 #endif  // Uses_fpstream
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif

@@ -9,16 +9,13 @@
 /*  file needed by the assembler files                                    */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------*/
-/*                                                                        */
-/*    Turbo Vision -  Version 1.0                                         */
-/*                                                                        */
-/*                                                                        */
-/*    Copyright (c) 1991 by Borland International                         */
-/*    All Rights Reserved.                                                */
-/*                                                                        */
-/*------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TPoint
 #define Uses_TView
@@ -28,15 +25,15 @@
 #define Uses_TDrawBuffer
 #define Uses_TEditor
 #define Uses_TTerminal
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __IOSTREAM_H )
 #include <iostream.h>
-#endif	// __IOSTREAM_H
+#endif  // __IOSTREAM_H
 
 #if !defined( __IOMANIP_H )
 #include <iomanip.h>
-#endif	// __IOMANIP_H
+#endif  // __IOMANIP_H
 
 #if !defined( __STDDEF_H )
 #include <stddef.h>
@@ -48,8 +45,8 @@
 
 void generate( const char *name, size_t offset )
 {
-    cout << setw( 19 ) << setiosflags( ios::left )
-         << name << " equ " << offset << endl;
+  cout << setw( 19 ) << setiosflags( ios::left )
+       << name << " equ " << offset << endl;
 }
 
 void genRefs()

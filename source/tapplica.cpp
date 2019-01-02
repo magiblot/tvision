@@ -4,26 +4,25 @@
 /* function(s)                                                       */
 /*          TApplication member functions (constructor & destructor) */
 /*-------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------*/
-/*                                                                   */
-/*    Turbo Vision -  Version 1.0                                    */
-/*                                                                   */
-/*                                                                   */
-/*    Copyright (c) 1987,1988,1990 by Borland International          */
-/*    All Rights Reserved.                                           */
-/*                                                                   */
-/*-------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TSystemError
 #define Uses_TEventQueue
+#define Uses_THardwareInfo
 #define Uses_TScreen
 #define Uses_TObject
 #define Uses_TMouse
 #define Uses_TApplication
-#include <tv.h>
+#include <tvision\tv.h>
 
-TMouse near TEventQueue::mouse;
+static THardwareInfo hwInfoManager;
+TMouse _NEAR TEventQueue::mouse;
 static TScreen tsc;
 static TEventQueue teq;
 static TSystemError sysErr;

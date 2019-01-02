@@ -2,15 +2,19 @@
 /*                                                                         */
 /*   TEXTVIEW.H                                                            */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TTextDevice and TTerminal                         */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -19,12 +23,12 @@
 
 #include <iostream.h>
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-class far TRect;
-class far TScrollBar;
+class _FAR TRect;
+class _FAR TScrollBar;
 
 class TTextDevice : public TScroller, public streambuf
 {
@@ -46,8 +50,8 @@ public:
 #if defined( Uses_TTerminal ) && !defined( __TTerminal )
 #define __TTerminal
 
-class far TRect;
-class far TScrollBar;
+class _FAR TRect;
+class _FAR TScrollBar;
 
 class TTerminal: public TTextDevice
 {
@@ -88,7 +92,7 @@ protected:
 
 #include <iostream.h>
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -106,6 +110,6 @@ public:
 #endif
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif

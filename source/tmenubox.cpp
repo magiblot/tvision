@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  TMenuBox member functions                 */
 /*------------------------------------------------------------*/
-                                                                
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TRect
 #define Uses_TMenu
 #define Uses_TMenuItem
 #define Uses_TMenuBox
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -138,6 +135,8 @@ TRect TMenuBox::getItemRect( TMenuItem *item )
     return TRect( 2, y, size.x-2, y+1 );
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TMenuBox::build()
 {
     return new TMenuBox( streamableInit );
@@ -147,4 +146,4 @@ TMenuBox::TMenuBox( StreamableInit ) : TMenuView( streamableInit )
 {
 }
 
-
+#endif

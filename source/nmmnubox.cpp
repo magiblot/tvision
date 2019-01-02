@@ -3,19 +3,17 @@
 /*                                                            */
 /* defines the streamable name for class TMenuBox             */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TMenuBox
-#include <tv.h>
+#include <tvision\tv.h>
 
-const char * const near TMenuBox::name = "TMenuBox";
-
+const char * const _NEAR TMenuBox::name = "TMenuBox";
+#endif

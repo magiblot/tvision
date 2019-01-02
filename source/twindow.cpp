@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TWindow member functions                  */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TWindow
@@ -24,7 +21,7 @@
 #define Uses_TScrollBar
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -36,10 +33,6 @@ TWindowInit::TWindowInit( TFrame *(*cFrame)( TRect ) ) :
     createFrame( cFrame )
 {
 }
-
-#define cpBlueWindow "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
-#define cpCyanWindow "\x10\x11\x12\x13\x14\x15\x16\x17"
-#define cpGrayWindow "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
 
 TWindow::TWindow( const TRect& bounds,
                   const char *aTitle,
@@ -70,9 +63,11 @@ TWindow::~TWindow()
 
 void TWindow::close()
 {
-    frame = 0;  // so we don't try to use the frame after it's been deleted
     if( valid( cmClose ) )
+    {
+        frame = 0;  // so we don't try to use the frame after it's been deleted
         destroy( this );
+    }
 }
 
 void TWindow::shutDown()
@@ -124,6 +119,7 @@ void TWindow::handleEvent( TEvent& event )
                     ( event.message.infoPtr == 0 || event.message.infoPtr == this )
                   )
                     {
+		    clearEvent(event);
                     if( (state & sfModal) == 0 )
                         close();
                     else
@@ -131,8 +127,8 @@ void TWindow::handleEvent( TEvent& event )
                         event.what = evCommand;
                         event.message.command = cmCancel;
                         putEvent( event );
+                        clearEvent( event );
                         }
-                    clearEvent( event );
                     }
                 break;
             case  cmZoom:
@@ -149,17 +145,17 @@ void TWindow::handleEvent( TEvent& event )
             switch (event.keyDown.keyCode)
                 {
                 case  kbTab:
-                    selectNext(False);
+                    focusNext(False);
                     clearEvent(event);
                     break;
                 case  kbShiftTab:
-                    selectNext(True);
+                    focusNext(True);
                     clearEvent(event);
                     break;
                 }
-    else if( event.what == evBroadcast && 
+    else if( event.what == evBroadcast &&
              event.message.command == cmSelectWindowNum &&
-             event.message.infoInt == number && 
+             event.message.infoInt == number &&
              (options & ofSelectable) != 0
            )
             {
@@ -232,6 +228,9 @@ void TWindow::zoom()
     else
         locate( zoomRect );
 }
+
+#if !defined(NO_STREAMABLE)
+
 void TWindow::write( opstream& os )
 {
     TGroup::write( os );
@@ -260,4 +259,4 @@ TWindow::TWindow( StreamableInit ) :
 {
 }
 
-
+#endif

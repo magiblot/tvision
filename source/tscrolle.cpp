@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TScroller member functions                */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TScroller
 #define Uses_TScrollBar
@@ -21,7 +18,7 @@
 #define Uses_TRect
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -120,7 +117,7 @@ void TScroller::scrollDraw()
         }
 }
 
-void TScroller::scrollTo( short x, short y )
+void TScroller::scrollTo( int x, int y )
 {
     drawLock++;
     if( hScrollBar != 0 )
@@ -131,7 +128,7 @@ void TScroller::scrollTo( short x, short y )
     checkDraw();
 }
 
-void TScroller::setLimit( short x, short y )
+void TScroller::setLimit( int x, int y )
 {
     limit.x = x;
     limit.y = y;
@@ -141,14 +138,14 @@ void TScroller::setLimit( short x, short y )
                                0,
                                x - size.x,
                                size.x-1,
-                               1
+                               hScrollBar->arStep
                              );
     if( vScrollBar != 0 )
         vScrollBar->setParams( vScrollBar->value,
                                0,
                                y - size.y,
                                size.y-1,
-                               1
+                               vScrollBar->arStep
                              );
     drawLock--;
     checkDraw();
@@ -172,6 +169,8 @@ void TScroller::setState( ushort aState, Boolean enable )
         showSBar(vScrollBar);
         }
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TScroller::write( opstream& os )
 {
@@ -198,3 +197,4 @@ TScroller::TScroller( StreamableInit ) : TView( streamableInit )
 }
 
 
+#endif

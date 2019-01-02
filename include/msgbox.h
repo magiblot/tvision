@@ -2,14 +2,17 @@
 /*                                                                         */
 /*   MSGBOX.H                                                              */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the functions messageBox(), messageBoxRect(),                 */
 /*   inputBox(), and inputBoxRect()                                        */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
-
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #if defined( Uses_MsgBox ) && !defined( __MsgBox )
 #define __MsgBox
@@ -19,14 +22,14 @@
 #endif  // __STDARG_H
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-class far TRect;
+class _FAR TRect;
 
 ushort messageBox( const char *msg, ushort aOptions );
-ushort messageBox( ushort aOptions, const char *msg, ... );
+ushort messageBox( unsigned aOptions, const char *msg, ... );
 
 ushort messageBoxRect( const TRect &r, const char *msg, ushort aOptions );
 ushort messageBoxRect( const TRect &r, ushort aOptions, const char *msg, ... );
@@ -62,18 +65,18 @@ class MsgBoxText
 
 public:
 
-    static const char * near yesText;
-    static const char * near noText;
-    static const char * near okText;
-    static const char * near cancelText;
-    static const char * near warningText;
-    static const char * near errorText;
-    static const char * near informationText;
-    static const char * near confirmText;
+    static const char * _NEAR yesText;
+    static const char * _NEAR noText;
+    static const char * _NEAR okText;
+    static const char * _NEAR cancelText;
+    static const char * _NEAR warningText;
+    static const char * _NEAR errorText;
+    static const char * _NEAR informationText;
+    static const char * _NEAR confirmText;
 };
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

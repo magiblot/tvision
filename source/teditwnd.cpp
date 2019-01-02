@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*            TEditWindow member functions                    */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TFrame
 #define Uses_TWindow
@@ -27,7 +24,7 @@
 #define Uses_TScrollBar
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 const TPoint minEditWinSize = {24, 6};
 
@@ -97,6 +94,8 @@ void TEditWindow::sizeLimits( TPoint& min, TPoint& max )
     min = minEditWinSize;
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TEditWindow::write( opstream& os )
 {
     TWindow::write( os );
@@ -121,4 +120,4 @@ TEditWindow::TEditWindow( StreamableInit ) :
 {
 }
 
-
+#endif

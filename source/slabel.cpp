@@ -3,24 +3,23 @@
 /*                                                            */
 /* Registeration object for the class TLabel                  */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TLabel
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RStaticText )
 
 TStreamableClass RLabel( TLabel::name,
                          TLabel::build,
                          __DELTA(TLabel)
                        );
+#endif
 

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TDeskTop member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TDeskTop
 #define Uses_TRect
@@ -22,7 +19,7 @@
 #define Uses_TBackground
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #ifndef __MATH_H
 #include <math.h>
@@ -38,9 +35,9 @@ TDeskTop::TDeskTop( const TRect& bounds ) :
     TDeskInit( &TDeskTop::initBackground )
 {
     growMode = gfGrowHiX | gfGrowHiY;
+    tileColumnsFirst = False;
 
-    if( createBackground != 0 &&
-        (background = createBackground( getExtent() )) != 0 )
+    if( createBackground != 0 && (background = createBackground( getExtent() )) != 0 )
         insert( background );
 }
 
@@ -57,7 +54,7 @@ inline Boolean Tileable( TView *p )
 
 static short cascadeNum;
 static TView *lastView;
-             
+
 void doCount( TView* p, void * )
 {
     if( Tileable( p ) )
@@ -87,7 +84,7 @@ void TDeskTop::cascade( const TRect &r )
     if( cascadeNum > 0 )
         {
         lastView->sizeLimits( min, max );
-        if( (min.x > r.b.x - r.a.x - cascadeNum) || 
+        if( (min.x > r.b.x - r.a.x - cascadeNum) ||
             (min.y > r.b.y - r.a.y - cascadeNum) )
             tileError();
         else
@@ -129,7 +126,7 @@ short iSqr( short i )
 {
     short res1 = 2;
     short res2 = i/res1;
-    while( abs( res1 - res2 ) > 1 )
+    while( abs( (int)(res1 - res2) ) > 1 )
         {
         res1 = (res1 + res2)/2;
         res2 = i/res1;
@@ -137,7 +134,7 @@ short iSqr( short i )
     return res1 < res2 ? res1 : res2;
 }
 
-void mostEqualDivisors(short n, short& x, short& y)
+void mostEqualDivisors(short n, short& x, short& y, Boolean favorY)
 {
     short  i;
 
@@ -148,8 +145,16 @@ void mostEqualDivisors(short n, short& x, short& y)
     if( i < (n/i) )
         i = n/i;
 
-    x = n/i;
-    y = i;
+    if (favorY)
+        {
+        x = n/i;
+        y = i;
+        }
+    else
+        {
+        y = n/i;
+        x = i;
+        }
 }
 
 static short numCols, numRows, numTileable, leftOver, tileNum;
@@ -212,8 +217,8 @@ void TDeskTop::tile( const TRect& r )
     forEach( doCountTileable, 0 );
     if( numTileable > 0 )
         {
-        mostEqualDivisors( numTileable, numCols, numRows );
-        if( ( (r.b.x - r.a.x)/numCols ==  0 ) || 
+        mostEqualDivisors( numTileable, numCols, numRows, Boolean( !tileColumnsFirst ));
+        if( ( (r.b.x - r.a.x)/numCols ==  0 ) ||
             ( (r.b.y - r.a.y)/numRows ==  0) )
             tileError();
         else
@@ -231,6 +236,8 @@ void  TDeskTop::tileError()
 {
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TDeskTop::build()
 {
     return new TDeskTop( streamableInit );
@@ -240,6 +247,7 @@ TDeskTop::TDeskTop( StreamableInit ) :
     TGroup( streamableInit ),
     TDeskInit( streamableInit )
 {
+    tileColumnsFirst = False;
 }
 
-
+#endif

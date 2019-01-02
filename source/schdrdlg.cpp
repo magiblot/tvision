@@ -3,26 +3,28 @@
 /*                                                            */
 /* Registeration object for the class TChDirDialog            */
 /*------------------------------------------------------------*/
-                                                              
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
+#if !defined(NO_STREAMABLE)
 #define Uses_TChDirDialog
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RDialog )
 __link( RButton )
 __link( RDirListBox )
+__link( RInputLine )
+__link( RHistory )
+__link( RLabel )
+__link( RScrollBar )
 
 TStreamableClass RChDirDialog( TChDirDialog::name,
                                TChDirDialog::build,
-                               __DELTA(TChDirDialog) 
+                               __DELTA(TChDirDialog)
                              );
-
+#endif

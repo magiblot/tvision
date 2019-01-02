@@ -3,29 +3,26 @@
 /*                                                            */
 /* defines the static members of class TEditor                */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TEditor
 #define Uses_TEditorDialog
-#include <tv.h>
+#include <tvision\tv.h>
 
 ushort defEditorDialog( int, ... )
 {
     return cmCancel;
 }
 
-TEditorDialog near TEditor::editorDialog = defEditorDialog;
-ushort near TEditor::editorFlags = efBackupFiles | efPromptOnReplace;
-char near TEditor::findStr[maxFindStrLen] = "";
-char near TEditor::replaceStr[maxReplaceStrLen] = "";
-TEditor * near TEditor::clipboard = 0;
+TEditorDialog _NEAR TEditor::editorDialog = defEditorDialog;
+ushort _NEAR TEditor::editorFlags = efBackupFiles | efPromptOnReplace;
+char _NEAR TEditor::findStr[maxFindStrLen] = "";
+char _NEAR TEditor::replaceStr[maxReplaceStrLen] = "";
+TEditor * _NEAR TEditor::clipboard = 0;
 

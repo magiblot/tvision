@@ -6,16 +6,13 @@
 /*                      THelpViewer                           */
 /*                      THelpWindow                           */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStreamableClass
 #define Uses_TPoint
@@ -31,14 +28,14 @@
 #define Uses_TWindow
 #define Uses_TKeys
 #define Uses_TPalette
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __HELP_H )
-#include "Help.h"
+#include "tvision\help.h"
 #endif  // __HELP_H
 
 #if !defined( __UTIL_H )
-#include "Util.h"
+#include "tvision\util.h"
 #endif  // __UTIL_H
 
 #if !defined( __STRING_H )
@@ -84,7 +81,7 @@ THelpViewer::~THelpViewer()
     delete topic;
 }
 
-void THelpViewer::changeBounds( TRect& bounds )
+void THelpViewer::changeBounds( const TRect& bounds )
 {
     TScroller::changeBounds(bounds);
     topic->setWidth(size.x);
@@ -115,17 +112,18 @@ void THelpViewer::draw()
         {
         do
             {
+            topic->getCrossRef(keyCount, keyPoint, keyLength, keyRef);
             ++keyCount;
-            topic->getCrossRef(keyCount-1, keyPoint, keyLength, keyRef);
-            } while ( (keyCount <= topic->getNumCrossRefs()) && (keyPoint.y < delta.y));
+            } while ( (keyCount < topic->getNumCrossRefs()) &&
+                      (keyPoint.y <= delta.y));
         }
     for (i = 1; i <= size.y; ++i)
         {
         b.moveChar(0, ' ', normal, size.x);
-        strcpy(line, topic->getLine(i + delta.y));
+        strcpy(line, topic->getLine(i + delta.y, buffer, sizeof( buffer )));
         if (strlen(line) > delta.x)
             {
-            bufPtr = line + delta.x; 
+            bufPtr = line + delta.x;
             strncpy(buffer, bufPtr, size.x);
             buffer[size.x] = 0;
             b.moveStr(0, buffer, normal);
@@ -146,9 +144,11 @@ void THelpViewer::draw()
                 c = keyword;
             for(j = 0; j < l; ++j)
                 b.putAttribute((keyPoint.x - delta.x + j),c);
-            ++keyCount;
-            if (keyCount <= topic->getNumCrossRefs())
-                topic->getCrossRef(keyCount-1, keyPoint, keyLength, keyRef);
+            if (keyCount < topic->getNumCrossRefs())
+                {
+                topic->getCrossRef(keyCount, keyPoint, keyLength, keyRef);
+                keyCount++;
+                }
             else
                 keyPoint.y = 0;
             }
@@ -158,7 +158,7 @@ void THelpViewer::draw()
 
 TPalette& THelpViewer::getPalette() const
 {
-    static TPalette palette(cHelpViewer, sizeof( cHelpViewer)-1);
+    static TPalette palette( cHelpViewer, sizeof( cHelpViewer)-1 );
     return palette;
 }
 
@@ -173,8 +173,8 @@ void THelpViewer::makeSelectVisible( int selected, TPoint& keyPoint,
         d.x = keyPoint.x;
     if (keyPoint.x > d.x + size.x)
         d.x = keyPoint.x - size.x;
-    if (keyPoint.y < d.y)
-        d.y = keyPoint.y;
+    if (keyPoint.y <= d.y)
+        d.y = keyPoint.y-1;
     if (keyPoint.y > d.y + size.y)
         d.y = keyPoint.y - size.y;
     if ((d.x != delta.x) || (d.y != delta.y))
@@ -258,13 +258,13 @@ void THelpViewer::handleEvent( TEvent& event )
                   (mouse.x < keyPoint.x + keyLength)));
             selected = keyCount;
             drawView();
-            if (event.mouse.doubleClick)
+            if (event.mouse.eventFlags & meDoubleClick)
                 switchToTopic(keyRef);
             clearEvent(event);
             break;
 
         case evCommand:
-            if ((event.message.command == cmClose) && (owner->state && sfModal != 0))
+            if ((event.message.command == cmClose) && ((owner->state & sfModal) != 0))
                 {
                 endModal(cmClose);
                 clearEvent(event);
@@ -273,10 +273,10 @@ void THelpViewer::handleEvent( TEvent& event )
         }
 }
 
-// THelpWindow 
+// THelpWindow
 
 THelpWindow::THelpWindow( THelpFile *hFile, ushort context ):
-       TWindow( TRect(0,0,50,18), "Help", wnNoNumber ),
+       TWindow( TRect(0,0,50,18), helpWinTitle, wnNoNumber ),
        TWindowInit( &THelpWindow::initFrame)
 {
     TRect r(0, 0, 50, 18);
@@ -289,7 +289,7 @@ THelpWindow::THelpWindow( THelpFile *hFile, ushort context ):
 
 TPalette& THelpWindow::getPalette() const
 {
-    static TPalette palette(cHelpWindow, sizeof( cHelpWindow)-1);
+    static TPalette palette( cHelpWindow, sizeof(cHelpWindow)-1 );
     return palette;
 }
 

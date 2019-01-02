@@ -4,21 +4,18 @@
 /* function(s)                                                */
 /*                  TCommandSet member functions              */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TCommandSet
-#include <tv.h>
+#include <tvision\tv.h>
 
-int near TCommandSet::masks[8] =
+int _NEAR TCommandSet::masks[8] =
 {
     0x0001,
     0x0002,

@@ -4,29 +4,26 @@
 /* function(s)                                                */
 /*                  TSubMenu member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TSubMenu
 #define Uses_TStatusDef
 #define Uses_TStatusItem
 #define Uses_TMenu
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
 #endif  // __STRING_H
 
-TSubMenu::TSubMenu( const char *nm, ushort key, ushort helpCtx ) : 
+TSubMenu::TSubMenu( const char *nm, ushort key, ushort helpCtx ) :
     TMenuItem( nm, 0, key, helpCtx )
 {
 }

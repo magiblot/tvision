@@ -2,16 +2,20 @@
 /*                                                                         */
 /*   RESOURCE.H                                                            */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TStringCollection, TResourceCollection,           */
 /*   TResourceFile, TStrListMaker, and TStringList                         */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -41,7 +45,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -63,7 +67,7 @@ inline opstream& operator << ( opstream& os, TStringCollection* cl )
 
 struct TResourceItem
 {
-    
+
     long pos;
     long size;
     char *key;
@@ -95,7 +99,7 @@ private:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -115,8 +119,8 @@ inline opstream& operator << ( opstream& os, TResourceCollection* cl )
 #if defined( Uses_TResourceFile ) && !defined( __TResourceFile )
 #define __TResourceFile
 
-class far TResourceCollection;
-class far fpstream;
+class _FAR TResourceCollection;
+class _FAR fpstream;
 
 class TResourceFile: public TObject
 {
@@ -165,7 +169,7 @@ public:
 #if defined( Uses_TStringList ) && !defined( __TStringList )
 #define __TStringList
 
-class far TStrIndexRec;
+class _FAR TStrIndexRec;
 
 class TStringList : public TObject, public TStreamable
 {
@@ -194,7 +198,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -249,7 +253,7 @@ public:
 
     static TStreamable *build();
 
-};                    
+};
 
 inline ipstream& operator >> ( ipstream& is, TStrListMaker& cl )
     { return is >> (TStreamable&)cl; }
@@ -265,6 +269,6 @@ inline opstream& operator << ( opstream& os, TStrListMaker* cl )
 #endif  // Uses_TStrListMaker
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TDirListBox member functions              */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TDirListBox
 #define Uses_TEvent
@@ -21,7 +18,7 @@
 #define Uses_TChDirDialog
 #define Uses_TDirEntry
 #define Uses_TButton
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -43,20 +40,26 @@ TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) :
 }
 
 TDirListBox::~TDirListBox()
-{ 
+{
    if ( list() )
       destroy( list() );
 }
 
 void TDirListBox::getText( char *text, short item, short maxChars )
 {
-	strncpy( text, list()->at(item)->text(), maxChars );
-	text[maxChars] = '\0';
+    strncpy( text, list()->at(item)->text(), maxChars );
+    text[maxChars] = '\0';
 }
 
+void TDirListBox::selectItem( short item )
+{
+    message( owner, evCommand, cmChangeDir, list()->at(item) );
+}
+
+/*
 void TDirListBox::handleEvent( TEvent& event )
 {
-    if( event.what == evMouseDown && event.mouse.doubleClick )
+    if( event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick) )
         {
         event.what = evCommand;
         event.message.command = cmChangeDir;
@@ -64,8 +67,9 @@ void TDirListBox::handleEvent( TEvent& event )
         clearEvent( event );
         }
     else
-        TListBox::handleEvent( event );
+       TListBox::handleEvent( event );
 }
+*/
 
 Boolean TDirListBox::isSelected( short item )
 {
@@ -119,7 +123,7 @@ void TDirListBox::showDirs( TDirCollection *dirs )
     const indentSize = 2;
     int indent = indentSize;
 
-    char buf[MAXPATH+16];
+    char buf[MAXPATH+MAXFILE+MAXEXT];
     memset( buf, ' ', sizeof( buf ) );
     char *name = buf + sizeof(buf) - (MAXFILE+MAXEXT);
 
@@ -210,9 +214,11 @@ void TDirListBox::setState( ushort nState, Boolean enable )
         ((TChDirDialog *)owner)->chDirButton->makeDefault( enable );
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TDirListBox::build()
 {
     return new TDirListBox( streamableInit );
 }
 
-
+#endif

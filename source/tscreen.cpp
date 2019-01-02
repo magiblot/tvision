@@ -4,146 +4,146 @@
 /* function(s)                                                */
 /*                  TScreen member functions                  */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
-#define Uses_TScreen
 #define Uses_TEvent
-#include <tv.h>
+#define Uses_TScreen
+#define Uses_THardwareInfo
+#include <tvision\tv.h>
 
-#if !defined( __DOS_H )
+#if !defined( __FLAT__ ) && !defined( __DOS_H )
 #include <dos.h>
 #endif  // __DOS_H
 
-#ifdef PROTECT
-ushort far * near TDisplay::equipment = (ushort far *)MK_FP( biosSeg, 0x10 );
-uchar far * near TDisplay::crtInfo = (uchar far *)MK_FP( biosSeg, 0x87 );
-uchar far * near TDisplay::crtRows = (uchar far *)MK_FP( biosSeg, 0x84 );
-#else
-ushort far * near TDisplay::equipment = (ushort far *)MK_FP( 0x40, 0x10 );
-uchar far * near TDisplay::crtInfo = (uchar far *)MK_FP( 0x40, 0x87 );
-uchar far * near TDisplay::crtRows = (uchar far *)MK_FP( 0x40, 0x84 );
-#endif
-
-ushort near TScreen::startupMode = 0xFFFF;
-ushort near TScreen::startupCursor = 0;
-ushort near TScreen::screenMode = 0;
-uchar near TScreen::screenWidth = 0;
-uchar near TScreen::screenHeight = 0;
-Boolean near TScreen::hiResScreen = False;
-Boolean near TScreen::checkSnow = True;
-uchar far * near TScreen::screenBuffer = 0;
-ushort near TScreen::cursorLines = 0;
-
-#ifdef PROTECT
-
-extern "C"
-    extern char _protected;
-
-#pragma warn -asc
-
-static ushort protGetRows(void)
-{
-    _AX = 0x1130;
-    _BH = 0;
-    _DL = 0;
-
-    if (_protected)
-    {
-    asm {
-        PUSH ES
-        PUSH DS
-        PUSH DI
-        PUSH SI
-        PUSHF
-        PUSH DX
-        PUSH CX
-        PUSH BX
-        PUSH AX
-
-        MOV  DX,SP
-        PUSH SS
-        POP  DS     /* DS:DX points to the MSB */
-        MOV  BX, 8      /* only AX - DX can be changed */
-        MOV  AX, 0E310h /* call int 10H in real mode */
-        INT  21h
-
-        POP  AX
-        POP  BX
-        POP  CX
-        POP  CX
-        POPF        /* flags and below were not modified by E3 */
-        POP  SI
-        POP  DI
-        POP  DS
-        POP  ES
-    }
-    }
-    else
-    {
-    asm INT 10h
-    }
-    if (_DL == 0)
-        _DL = 24;
-    return _DL + 1;
-}
-
-#pragma warn .asc
-
-#endif
+ushort _NEAR TScreen::startupMode = 0xFFFF;
+ushort _NEAR TScreen::startupCursor = 0;
+ushort _NEAR TScreen::screenMode = 0;
+uchar _NEAR TScreen::screenWidth = 0;
+uchar _NEAR TScreen::screenHeight = 0;
+Boolean _NEAR TScreen::hiResScreen = False;
+Boolean _NEAR TScreen::checkSnow = True;
+ushort * _NEAR TScreen::screenBuffer;
+ushort _NEAR TScreen::cursorLines = 0;
+Boolean _NEAR TScreen::clearOnSuspend = True;
 
 ushort TDisplay::getCursorType()
 {
+#if defined( __FLAT__ )
+    return THardwareInfo::getCaretSize();
+#else
+    uchar start, end, base = 8;
+    ushort result;
+
     _AH = 3;
     _BH = 0;
     videoInt();
-    return _CX;
+
+    start = _CH;
+    end = _CL;
+
+    if( _CX == 0x2000 )
+        return 0;
+
+    if( isEGAorVGA() )
+    {
+        _AX = 0x1130;
+        _BL = 0;
+        videoInt();
+        base = _CL;
+    }
+
+    start = (ushort) start * 100 / base;
+    end = (ushort) end * 100 / base;
+
+    result = (start << 8) + end;
+    return result;
+#endif
 }
+
+#if !defined( __FLAT__ )
+int TDisplay::isEGAorVGA(void)
+{
+    _BL=0x10;
+    _AH=0x12;
+    videoInt();
+    return _BL != 0x10;
+}
+#endif
 
 void TDisplay::setCursorType( ushort ct )
 {
+#if defined( __FLAT__ )
+    THardwareInfo::setCaretSize( ct & 0xFF );
+#else
+    uchar start, end, base = 8;
+
+    if( ct == 0 )
+        _CX = 0x2000;
+    else
+        {
+        start = ct & 0xFF;
+        end = ct >> 8;
+
+        if( isEGAorVGA() )
+            {
+            _AX = 0x1130;
+            _BL = 0;
+            videoInt();
+            base = _CL;
+            }
+
+        start = ((ushort) start * base + 50) / 100;
+        end = ((ushort) end * base + 50) / 100;
+
+        _CH = start;
+        _CL = end;
+        }
     _AH = 1;
-    _CX = ct;
     videoInt();
+#endif
 }
 
 void TDisplay::clearScreen( uchar w, uchar h )
 {
+#if defined( __FLAT__ )
+    THardwareInfo::clearScreen( w, h );
+#else
     _BH = 0x07;
     _CX = 0;
     _DL = w;
     _DH = h - 1;
     _AX = 0x0600;
     videoInt();
+#endif
 }
 
 #pragma warn -asc
 
+#if !defined( __FLAT__ )
 void TDisplay::videoInt()
 {
-    asm {
-        PUSH    BP
-        PUSH    ES
-        INT     10h
-        POP     ES
-        POP     BP
-    }
+
+I   PUSH    BP
+I   PUSH    ES
+I   INT     10h
+I   POP     ES
+I   POP     BP
+
 }
+#endif
 
 #pragma warn .asc
 
 ushort TDisplay::getRows()
 {
-#ifdef PROTECT
-    return protGetRows();
+#if defined( __FLAT__ )
+    return THardwareInfo::getScreenRows();
 #else
     _AX = 0x1130;
     _BH = 0;
@@ -157,32 +157,43 @@ ushort TDisplay::getRows()
 
 ushort TDisplay::getCols()
 {
+#if defined( __FLAT__ )
+    return THardwareInfo::getScreenCols();
+#else
     _AH = 0x0F;
     videoInt();
     return _AH;
+#endif
 }
 
 ushort TDisplay::getCrtMode()
 {
+#if defined( __FLAT__ )
+    return THardwareInfo::getScreenMode();
+#else
     _AH = 0x0F;
     videoInt();
     ushort mode = _AL;
     if( getRows() > 25 )
         mode |= smFont8x8;
     return mode;
+#endif
 }
 
+#pragma argsused
 void TDisplay::setCrtMode( ushort mode )
 {
-    *equipment &= 0xFFCF;
-    *equipment |= (mode == smMono) ? 0x30 : 0x20;
-    *crtInfo &= 0x00FE;
+#if defined( __FLAT__ )
+    THardwareInfo::setScreenMode( mode );
+#else
+    ushort eflag = THardwareInfo::getBiosEquipmentFlag() & 0xFFCF;
+    eflag |= (mode == smMono) ? 0x30 : 0x20;
+    THardwareInfo::setBiosEquipmentFlag( eflag );
+    THardwareInfo::setBiosVideoInfo( THardwareInfo::getBiosVideoInfo() & 0x00FE );
 
-   
     _AH = 0;
     _AL = mode;
     videoInt();
-
 
     if( (mode & smFont8x8) != 0 )
         {
@@ -192,7 +203,7 @@ void TDisplay::setCrtMode( ushort mode )
 
         if( getRows() > 25 )
             {
-            *crtInfo |= 1;
+            THardwareInfo::setBiosVideoInfo( THardwareInfo::getBiosVideoInfo() | 1 );
 
             _AH = 1;
             _CX = 0x0607;
@@ -203,12 +214,18 @@ void TDisplay::setCrtMode( ushort mode )
             videoInt();
             }
         }
+#endif
 }
 
 TScreen::TScreen()
 {
     startupMode = getCrtMode();
     startupCursor = getCursorType();
+
+#if defined(__FLAT__)
+    screenBuffer = THardwareInfo::allocateScreenBuffer();
+#endif
+
     setCrtData();
 }
 
@@ -217,27 +234,42 @@ void TScreen::resume()
     startupMode = getCrtMode();
     startupCursor = getCursorType();
     if (screenMode != startupMode)
-       setCrtMode( screenMode );
+        setCrtMode( screenMode );
     setCrtData();
 }
 
 TScreen::~TScreen()
 {
     suspend();
+#if defined( __FLAT__ )
+    THardwareInfo::freeScreenBuffer( screenBuffer );
+#endif
 }
 
 void TScreen::suspend()
 {
     if( startupMode != screenMode )
         setCrtMode( startupMode );
-    clearScreen();
+    if (clearOnSuspend)
+      clearScreen();
     setCursorType( startupCursor );
 }
 
+#pragma argsused
 ushort TScreen::fixCrtMode( ushort mode )
 {
+#if defined( __FLAT__ )
+    if( THardwareInfo::getPlatform() != THardwareInfo::plDPMI32 )
+        {
+        mode = (mode & smFont8x8) ? smCO80 | smFont8x8 : smCO80;
+        return mode;
+        }
+#endif
+    if( (mode & 0xFF) == smMono )       // Strip smFont8x8 if necessary.
+        return smMono;
+
     _AX = mode;
-    if( _AL != smMono && _AL != smCO80 && _AL != smBW80 )
+    if( _AL != smCO80 && _AL != smBW80 )
         _AL = smCO80;
     return _AX;
 }
@@ -249,29 +281,22 @@ void TScreen::setCrtData()
     screenHeight = getRows();
     hiResScreen = Boolean(screenHeight > 25);
 
+#if !defined(__FLAT__)
     if( screenMode == smMono )
         {
-#ifdef PROTECT
-    screenBuffer = (uchar far *)MK_FP( monoSeg, 0 );
-#else
-    screenBuffer = (uchar far *)MK_FP( 0xB000, 0 );
-#endif
+        screenBuffer = THardwareInfo::getMonoAddr();
         checkSnow = False;
         }
     else
         {
-#ifdef PROTECT
-    screenBuffer = (uchar far *)MK_FP( colrSeg, 0 );
-#else
-    screenBuffer = (uchar far *)MK_FP( 0xB800, 0 );
-#endif
-        if( hiResScreen )
+        screenBuffer = THardwareInfo::getColorAddr();
+        if( isEGAorVGA() )
             checkSnow = False;
         }
+#endif
 
     cursorLines = getCursorType();
-    setCursorType( 0x2000 );
-
+    setCursorType( 0 );
 }
 
 void TScreen::clearScreen()
@@ -283,4 +308,7 @@ void TScreen::setVideoMode( ushort mode )
 {
     setCrtMode( fixCrtMode( mode ) );
     setCrtData();
+
+    if (TMouse::present())
+        TMouse::setRange( getCols()-1, getRows()-1 );
 }

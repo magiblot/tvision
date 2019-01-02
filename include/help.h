@@ -2,12 +2,16 @@
 /*                                                                         */
 /*   HELP.H                                                                */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes THelpViewer and THelpWindow                       */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #if !defined( __HELP_H )
 #define __HELP_H
@@ -15,6 +19,7 @@
 #define Uses_TStreamable
 #define Uses_ipstream
 #define Uses_opstream
+#define Uses_fpstream
 #define Uses_TObject
 #define Uses_TPoint
 #define Uses_TRect
@@ -22,9 +27,9 @@
 #define Uses_TScroller
 #define Uses_TScrollBar
 #define Uses_TWindow
-#include <tv.h>
+#include <tvision\tv.h>
 
-#include <helpbase.h>
+#include <tvision\helpbase.h>
 
 // THelpViewer
 
@@ -35,7 +40,7 @@ public:
     THelpViewer( const TRect&, TScrollBar*, TScrollBar*, THelpFile*, ushort );
     ~THelpViewer();
 
-    virtual void changeBounds( TRect& );
+    virtual void changeBounds( const TRect& );
     virtual void draw();
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& );
@@ -51,6 +56,9 @@ public:
 
 class THelpWindow : public TWindow
 {
+
+    static const char * _NEAR helpWinTitle;
+
 public:
 
     THelpWindow( THelpFile*, ushort );

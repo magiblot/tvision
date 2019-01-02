@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  messageBox related functions              */
 /*------------------------------------------------------------*/
-                                                              
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 
 #define Uses_MsgBox
@@ -26,7 +23,7 @@
 #define Uses_TInputLine
 #define Uses_TDeskTop
 #define Uses_TLabel
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STDARG_H )
 #include <stdarg.h>
@@ -69,7 +66,7 @@ ushort messageBoxRect( const TRect &r, const char *msg, ushort aOptions )
     TDialog *dialog;
     short i, x, buttonCount;
     TView* buttonList[5];
-    ushort ccode; 
+    ushort ccode;
 
     dialog = new TDialog( r, Titles[aOptions & 0x3] );
 
@@ -98,10 +95,10 @@ ushort messageBoxRect( const TRect &r, const char *msg, ushort aOptions )
 
     dialog->selectNext(False);
 
-    ccode = TProgram::deskTop->execView(dialog);
+    ccode = TProgram::application->execView(dialog);
 
     TObject::destroy( dialog );
-    
+
     return ccode;
 }
 
@@ -111,10 +108,12 @@ ushort messageBoxRect( const TRect &r,
                        ... )
 {
     va_list argptr;
-    va_start( argptr, aOptions );
+    va_start( argptr, fmt );
 
     char msg[256];
     vsprintf( msg, fmt, argptr );
+
+    va_end( argptr );
 
     return messageBoxRect( r, msg, aOptions );
 }
@@ -132,13 +131,15 @@ ushort messageBox( const char *msg, ushort aOptions )
     return messageBoxRect( makeRect(), msg, aOptions );
 }
 
-ushort messageBox( ushort aOptions, const char *fmt, ... )
+ushort messageBox( unsigned aOptions, const char *fmt, ... )
 {
     va_list argptr;
-    va_start( argptr, aOptions );
+    va_start( argptr, fmt );
 
     char msg[256];
     vsprintf( msg, fmt, argptr );
+
+    va_end( argptr );
 
     return messageBoxRect( makeRect(), msg, aOptions );
 }
@@ -183,7 +184,7 @@ ushort inputBoxRect( const TRect &bounds,
     r.b.x += 12;
     dialog->selectNext(False);
     dialog->setData(s);
-    c = TProgram::deskTop->execView(dialog);
+    c = TProgram::application->execView(dialog);
     if( c != cmCancel )
         dialog->getData(s);
     TObject::destroy( dialog );

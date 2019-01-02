@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*            TEditor member functions                        */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TEditor
@@ -24,7 +21,7 @@
 #define Uses_TReplaceDialogRec
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <string.h>
@@ -38,6 +35,12 @@
 #include <Dos.h>
 #endif  // __DOS_H
 
+extern "C" {
+int countLines( void *buf, uint count );
+ushort scan( const void *block, ushort size, const char *str );
+ushort iScan( const void *block, ushort size, const char *str );
+};
+
 inline int isWordChar( int ch )
 {
     return isalnum(ch) || ch == '_';
@@ -45,193 +48,6 @@ inline int isWordChar( int ch )
 
 #pragma warn -asc
 
-int countLines( void *buf, ushort count )
-{
-asm {
-    LES DI,buf
-    MOV CX,count
-    XOR DX,DX
-    MOV AL,0Dh
-    CLD
-    }
-__1:
-asm {
-    JCXZ __2
-    REPNE SCASB
-    JNE __2
-    INC DX
-    JMP __1
-    }
-__2:
-    return _DX;
-}
-
-ushort scan( const void *block, ushort size, const char *str )
-{
-    ushort len = strlen( str );
-asm {
-    PUSH DS
-    LES DI,block
-    LDS SI,str
-    MOV CX,size
-    JCXZ __3
-    CLD
-    MOV AX,len
-    CMP AX,1
-    JB __5
-    JA __1
-    LODSB           // searching for a single character
-    REPNE SCASB
-    JNE __3
-    JMP __5
-    }
-__1:
-asm {
-    MOV BX,AX
-    DEC BX
-    MOV DX,CX
-    SUB DX,AX
-    JB  __3
-    LODSB
-    INC DX
-    INC DX
-    }
-__2:
-asm {
-    DEC DX
-    MOV CX,DX
-    REPNE SCASB
-    JNE __3
-    MOV DX,CX
-    MOV CX,BX
-    REP CMPSB
-    JE  __4
-    SUB CX,BX
-    ADD SI,CX
-    ADD DI,CX
-    INC DI
-    OR  DX,DX
-    JNE __2
-    }
-__3:
-asm {
-    XOR AX,AX
-    JMP __6
-    }
-__4:
-asm SUB DI,BX
-__5:
-asm {
-    MOV AX,DI
-    SUB AX,WORD PTR block
-    }
-__6:
-asm {
-    DEC AX
-    POP DS
-    }
-    return _AX;
-}
-
-ushort iScan( const void *block, ushort size, const char *str )
-{
-    char s[256];
-    ushort len = strlen( str );
-asm {
-    PUSH DS
-    MOV AX,SS
-    MOV ES,AX
-    LEA DI,s
-    LDS SI,str
-    MOV AX,len;
-    MOV CX,AX
-    MOV BX,AX
-    JCXZ __9
-    }
-__1:
-asm {
-    LODSB
-    CMP AL,'a'
-    JB  __2
-    CMP AL,'z'
-    JA  __2
-    SUB AL,20h
-    }
-__2:
-asm {
-    STOSB
-    LOOP __1
-    SUB DI,BX
-    LDS SI,block
-    MOV CX,size
-    JCXZ __8
-    CLD
-    SUB CX,BX
-    JB  __8
-    INC CX
-    }
-__4:
-asm {
-    MOV AH,ES:[DI]
-    AND AH,0xDF
-    }
-__5:
-asm {
-    LODSB
-    AND AL,0xDF
-    CMP AL,AH
-    LOOPNE  __5
-    JNE __8
-    DEC SI
-    MOV DX,CX
-    MOV CX,BX
-    }
-__6:
-asm {
-    REPE CMPSB
-    JE  __10
-    MOV AL,DS:[SI-1]
-    CMP AL,'a'
-    JB  __7
-    CMP AL,'z'
-    JA  __7
-    SUB AL,20h
-    }
-__7:
-asm {
-    CMP AL,ES:[DI-1]
-    JE  __6
-    SUB CX,BX
-    ADD SI,CX
-    ADD DI,CX
-    INC SI
-    MOV CX,DX
-    JNE __4
-    }
-__8:
-asm {
-    XOR AX,AX
-    JMP __11
-    }
-__9:
-asm {
-    MOV AX, 1
-    JMP __11
-    }
-__10:
-asm {
-    SUB SI,BX
-    MOV AX,SI
-    SUB AX,wORD PTR block
-    INC AX
-    }
-__11:
-asm {
-    DEC AX
-    POP DS
-    }
-    return _AX;
-}
 
 #pragma warn .asc
 
@@ -277,6 +93,7 @@ Boolean TEditor::insertBuffer( char *p,
         if( newSize > 0xFFE0l || setBufSize(ushort(newSize)) == False )
             {
             editorDialog( edOutOfMemory );
+	    selEnd = selStart;
             return False;
             }
 
@@ -286,7 +103,7 @@ Boolean TEditor::insertBuffer( char *p,
         if( allowUndo == True )
             {
             if( delLen > 0 )
-                memmove( 
+                memmove(
                          &buffer[curPtr + gapLen - delCount - delLen],
                          &buffer[selStart],
                          delLen
@@ -688,6 +505,8 @@ Boolean TEditor::valid( ushort )
   return isValid;
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TEditor::write( opstream& os )
 {
     TView::write( os );
@@ -704,7 +523,7 @@ void *TEditor::read( ipstream& is )
     canUndo = Boolean(temp);
     selecting = False;
     overwrite = False;
-    autoIndent = False; 
+    autoIndent = False;
     lockCount = 0;
     keyState = 0;
     initBuffer();
@@ -715,7 +534,7 @@ void *TEditor::read( ipstream& is )
         TEditor::editorDialog( edOutOfMemory, 0 );
         bufSize = 0;
         }
-    lockCount = 0; 
+    lockCount = 0;
     lock();
     setBufLen( 0 );
     return this;
@@ -730,4 +549,4 @@ TEditor::TEditor( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

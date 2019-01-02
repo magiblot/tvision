@@ -2,16 +2,20 @@
 /*                                                                         */
 /*   SYSTEM.H                                                              */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes THWMouse, TMouse, TEventQueue, TDisplay,          */
 /*   TScreen, and TSystemError                                             */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -40,6 +44,19 @@ const evMessage   = 0xFF00;
 const mbLeftButton  = 0x01;
 const mbRightButton = 0x02;
 
+/* Mouse event flags */
+
+#if !defined( __FLAT__ )
+const meMouseMoved = 0x01;
+const meDoubleClick = 0x02;
+#else
+#if !defined( __WINDOWS_H )
+#include <windows.h>
+#endif
+const meMouseMoved = MOUSE_MOVED;       // NT values from WINDOWS.H
+const meDoubleClick = DOUBLE_CLICK;
+#endif
+
 #endif  // __EVENT_CODES
 
 
@@ -48,9 +65,10 @@ const mbRightButton = 0x02;
 
 struct MouseEventType
 {
-    uchar buttons;
-    Boolean doubleClick;
     TPoint where;
+    ulong eventFlags;           // Replacement for doubleClick.
+    ulong controlKeyState;
+    uchar buttons;
 };
 
 class THWMouse
@@ -67,8 +85,11 @@ protected:
 
     static void setRange( ushort, ushort );
     static void getEvent( MouseEventType& );
-    static void registerHandler( unsigned, void (far *)() );
     static Boolean present();
+
+#if !defined( __FLAT__ )
+    static void registerHandler( unsigned, void (_FAR *)() );
+#endif
 
     static void suspend();
     static void resume();
@@ -76,12 +97,12 @@ protected:
 
 protected:
 
-    static uchar near buttonCount;
+    static uchar _NEAR buttonCount;
 
 private:
 
-    static Boolean near handlerInstalled;
-    static Boolean near noMouse;
+    static Boolean _NEAR handlerInstalled;
+    static Boolean _NEAR noMouse;
 
 };
 
@@ -107,13 +128,15 @@ public:
     static void hide();
 
     static void setRange( ushort, ushort );
-
     static void getEvent( MouseEventType& );
-    static void registerHandler( unsigned, void (far *)() );
     static Boolean present();
 
+#if !defined( __FLAT__ )
+    static void registerHandler( unsigned, void (_FAR *)() );
+#endif
+
     static void suspend() { THWMouse::suspend(); }
-    static void resume() { THWMouse::resume(); show(); }
+    static void resume() { THWMouse::resume(); }
 
 };
 
@@ -137,15 +160,17 @@ inline void TMouse::getEvent( MouseEventType& me )
     THWMouse::getEvent( me );
 }
 
-inline void TMouse::registerHandler( unsigned mask, void (far *func)() )
-{
-    THWMouse::registerHandler( mask, func );
-}
-
 inline Boolean TMouse::present()
 {
     return THWMouse::present();
 }
+
+#if !defined( __FLAT__ )
+inline void TMouse::registerHandler( unsigned mask, void (_FAR *func)() )
+{
+    THWMouse::registerHandler( mask, func );
+}
+#endif
 
 struct CharScanType
 {
@@ -160,6 +185,7 @@ struct KeyDownEvent
         ushort keyCode;
         CharScanType charScan;
         };
+    ulong controlKeyState;
 };
 
 struct MessageEvent
@@ -178,6 +204,7 @@ struct MessageEvent
 
 struct TEvent
 {
+
     ushort what;
     union
     {
@@ -187,6 +214,7 @@ struct TEvent
     };
     void getMouseEvent();
     void getKeyEvent();
+
 };
 
 #endif  // Uses_TEvent
@@ -205,37 +233,47 @@ public:
     static void resume();
 
     friend class TView;
-    friend void genRefs();
     friend class TProgram;
-    static ushort near doubleDelay;
-    static Boolean near mouseReverse;
+    friend void genRefs();
+
+    static ushort _NEAR doubleDelay;
+    static Boolean _NEAR mouseReverse;
 
 private:
 
-    static TMouse near mouse;
-    static void getMouseState( TEvent& );
-    static void huge mouseInt();
+    static TMouse _NEAR mouse;
+    static Boolean getMouseState( TEvent& );
+
+#if !defined( __FLAT__ )
+#if !defined( __DPMI16__ )
+#define __MOUSEHUGE huge
+#else
+#define __MOUSEHUGE
+#endif
+    static void __MOUSEHUGE mouseInt();
+#endif
 
     static void setLast( TEvent& );
 
-    static MouseEventType near lastMouse;
-    static MouseEventType near curMouse;
+    static MouseEventType _NEAR lastMouse;
+    static MouseEventType _NEAR curMouse;
 
-    static MouseEventType near downMouse;
-    static ushort near downTicks;
+    static MouseEventType _NEAR downMouse;
+    static ushort _NEAR downTicks;
 
-    static ushort far * near Ticks;
-    static TEvent near eventQueue[ eventQSize ];
-    static TEvent * near eventQHead;
-    static TEvent * near eventQTail;
-    static Boolean near mouseIntFlag;
-    static ushort near eventCount;
+#if !defined( __FLAT__ )
+    static TEvent _NEAR eventQueue[ eventQSize ];
+    static TEvent * _NEAR eventQHead;
+    static TEvent * _NEAR eventQTail;
+    static Boolean _NEAR mouseIntFlag;
+    static ushort _NEAR eventCount;
+#endif
 
-    static Boolean near mouseEvents;
+    static Boolean _NEAR mouseEvents;
 
-    static ushort near repeatDelay;
-    static ushort near autoTicks;
-    static ushort near autoDelay;
+    static ushort _NEAR repeatDelay;
+    static ushort _NEAR autoTicks;
+    static ushort _NEAR autoDelay;
 
 };
 
@@ -249,13 +287,6 @@ inline void TEvent::getMouseEvent()
 #if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen
 
-#ifdef PROTECT
-
-extern ushort monoSeg;
-extern ushort colrSeg;
-extern ushort biosSeg;
-
-#endif
 
 class TDisplay
 {
@@ -283,6 +314,10 @@ public:
     static void setCrtMode( ushort );
     static ushort getCrtMode();
 
+#if !defined( __FLAT__ )
+    static int isEGAorVGA();
+#endif
+
 protected:
 
     TDisplay() { updateIntlChars(); };
@@ -291,12 +326,11 @@ protected:
 
 private:
 
+#if !defined( __FLAT__ )
     static void videoInt();
-    static void updateIntlChars();
+#endif
 
-    static ushort far * near equipment;
-    static uchar far * near crtInfo;
-    static uchar far * near crtRows;
+    static void updateIntlChars();
 
 };
 
@@ -311,15 +345,16 @@ public:
     static void setVideoMode( ushort mode );
     static void clearScreen();
 
-    static ushort near startupMode;
-    static ushort near startupCursor;
-    static ushort near screenMode;
-    static uchar near screenWidth;
-    static uchar near screenHeight;
-    static Boolean near hiResScreen;
-    static Boolean near checkSnow;
-    static uchar far * near screenBuffer;
-    static ushort near cursorLines;
+    static ushort _NEAR startupMode;
+    static ushort _NEAR startupCursor;
+    static ushort _NEAR screenMode;
+    static uchar _NEAR screenWidth;
+    static uchar _NEAR screenHeight;
+    static Boolean _NEAR hiResScreen;
+    static Boolean _NEAR checkSnow;
+    static ushort * _NEAR screenBuffer;
+    static ushort _NEAR cursorLines;
+    static Boolean _NEAR clearOnSuspend;
 
     static void setCrtData();
     static ushort fixCrtMode( ushort );
@@ -334,7 +369,13 @@ public:
 #if defined( Uses_TSystemError ) && !defined( __TSystemError )
 #define __TSystemError
 
-class far TDrawBuffer;
+class _FAR TDrawBuffer;
+
+struct TPMRegs
+{
+    unsigned long di, si, bp, dummy, bx, dx, cx, ax;
+    unsigned flags, es, ds, fs, gs, ip, cs, sp, ss;
+};
 
 class TSystemError
 {
@@ -344,32 +385,48 @@ public:
     TSystemError();
     ~TSystemError();
 
-    static Boolean near ctrlBreakHit;
+    static Boolean _NEAR ctrlBreakHit;
 
     static void suspend();
     static void resume();
-    static short ( far *sysErrorFunc )( short, uchar );
+
+#if !defined( __FLAT__ )
+    static short ( _FAR *sysErrorFunc )( short, uchar );
+#endif
 
 private:
 
-    static ushort near sysColorAttr;
-    static ushort near sysMonoAttr;
-    static Boolean near saveCtrlBreak;
-    static Boolean near sysErrActive;
+    static Boolean _NEAR saveCtrlBreak;
 
-    static void swapStatusLine( TDrawBuffer far & );
+#if !defined( __FLAT__ )
+    static ushort _NEAR sysColorAttr;
+    static ushort _NEAR sysMonoAttr;
+    static Boolean _NEAR sysErrActive;
+
+    static void swapStatusLine( TDrawBuffer _FAR & );
     static ushort selectKey();
     static short sysErr( short, uchar );
 
-    static Boolean near inIDE;
+    static const char * const _NEAR errorString[16];
+    static const char * _NEAR sRetryOrCancel;
 
-    static const char *const near errorString[14];
-    static const char * near sRetryOrCancel;
+    static Boolean _NEAR inIDE;
+
+    static void interrupt Int24PMThunk();
+    static void setupDPMI();
+    static void shutdownDPMI();
+
+    static TPMRegs Int24Regs;
+    static void (interrupt far *Int24RMThunk)();
+    static void (interrupt far *Int24RMCallback)();
+    static unsigned Int24RMThunkSel;
 
     friend class Int11trap;
+#endif
 
 };
 
+#if !defined( __FLAT__ )
 class Int11trap
 {
 
@@ -381,14 +438,16 @@ public:
 private:
 
     static void interrupt handler(...);
-    static void interrupt (far * near oldHandler)(...);
+    static void interrupt (_FAR * _NEAR oldHandler)(...);
 
 };
-
+#endif
 
 #endif  // Uses_TSystemError
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
+
+

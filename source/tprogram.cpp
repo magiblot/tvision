@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TProgram member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TProgram
@@ -27,16 +24,17 @@
 #define Uses_TMenuBar
 #define Uses_TStatusDef
 #define Uses_TStatusItem
-#include <tv.h>
+#define Uses_TDialog
+#include <tvision\tv.h>
 
 // Public variables
 
-TStatusLine * near TProgram::statusLine = 0;
-TMenuBar * near TProgram::menuBar = 0;
-TDeskTop * near TProgram::deskTop = 0;
-TProgram * near TProgram::application = 0;
-int near TProgram::appPalette = apColor;
-TEvent near TProgram::pending;
+TStatusLine * _NEAR TProgram::statusLine = 0;
+TMenuBar * _NEAR TProgram::menuBar = 0;
+TDeskTop * _NEAR TProgram::deskTop = 0;
+TProgram * _NEAR TProgram::application = 0;
+int _NEAR TProgram::appPalette = apColor;
+TEvent _NEAR TProgram::pending;
 
 extern TPoint shadowSize;
 
@@ -62,7 +60,7 @@ TProgram::TProgram() :
     initScreen();
     state = sfVisible | sfSelected | sfFocused | sfModal | sfExposed;
     options = 0;
-    buffer = (ushort far *)TScreen::screenBuffer;
+    buffer = TScreen::screenBuffer;
 
     if( createDeskTop != 0 &&
         (deskTop = createDeskTop( getExtent() )) != 0
@@ -92,6 +90,28 @@ void TProgram::shutDown()
     menuBar = 0;
     deskTop = 0;
     TGroup::shutDown();
+}
+
+Boolean TProgram::canMoveFocus()
+{
+    return deskTop->valid(cmReleasedFocus);
+}
+
+ushort TProgram::executeDialog( TDialog* pD, void* data )
+{
+    ushort c=cmCancel;
+
+    if (validView(pD))
+        {
+        if (data)
+        pD->setData(data);
+        c = deskTop->execView(pD);
+        if ((c != cmCancel) && (data))
+            pD->getData(data);
+        destroy(pD);
+        }
+
+    return c;
 }
 
 inline Boolean hasMouse( TView *p, void *s )
@@ -131,9 +151,9 @@ void TProgram::getEvent(TEvent& event)
 
 TPalette& TProgram::getPalette() const
 {
-    static TPalette color ( cpColor, sizeof( cpColor )-1 );
-    static TPalette blackwhite( cpBlackWhite, sizeof( cpBlackWhite )-1 );
-    static TPalette monochrome( cpMonochrome, sizeof( cpMonochrome )-1 );
+    static TPalette color ( cpAppColor, sizeof( cpAppColor )-1 );
+    static TPalette blackwhite(cpAppBlackWhite, sizeof( cpAppBlackWhite )-1 );
+    static TPalette monochrome(cpAppMonochrome, sizeof( cpAppMonochrome )-1 );
     static TPalette *palettes[] =
         {
         &color,
@@ -230,6 +250,21 @@ TStatusLine *TProgram::initStatusLine( TRect r )
             );
 }
 
+TWindow* TProgram::insertWindow(TWindow* pWin)
+{
+    if (validView(pWin))
+        if (canMoveFocus())
+            {
+            deskTop->insert(pWin);
+            return pWin;
+            }
+        else
+            destroy(pWin);
+
+   return NULL;
+}
+
+
 void TProgram::outOfMemory()
 {
 }
@@ -251,12 +286,12 @@ void TProgram::setScreenMode( ushort mode )
     TEventQueue::mouse.hide(); //HideMouse();
     TScreen::setVideoMode( mode );
     initScreen();
-    buffer = (ushort far *)TScreen::screenBuffer;
+    buffer = TScreen::screenBuffer;
     r = TRect( 0, 0, TScreen::screenWidth, TScreen::screenHeight );
     changeBounds( r );
     setState(sfExposed, False);
-    redraw();
     setState(sfExposed, True);
+    redraw();
     TEventQueue::mouse.show(); //ShowMouse();
 }
 

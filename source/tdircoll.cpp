@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  TDirCollection member functions           */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TDirCollection
 #define Uses_TDirEntry
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __DIR_H )
 #include <Dir.h>
@@ -37,17 +34,31 @@
 
 Boolean driveValid( char drive )
 {
-    asm {
-        MOV DL, drive
-        MOV AH, 36h
-        SUB DL, 'A'-1
-        INT 21h
-        INC AX
-        JE  __1
-        MOV AL, 1
-        }
+#if !defined( __FLAT__ )
+I       MOV     AH, 19H     // Save the current drive in BL
+I       INT     21H
+I       MOV     BL, AL
+I       MOV     DL, drive   // Select the given drive
+I       SUB     DL, 'A'
+I       MOV     AH, 0EH
+I       INT     21H
+I       MOV     AH, 19H     // Retrieve what DOS thinks is current
+I       INT     21H
+I       MOV     CX, 0       // Assume false
+I       CMP     AL, DL      // Is the current drive the given drive?
+I       JNE   __1
+I       MOV     CX, 1       // It is, so the drive is valid
+I       MOV     DL, BL      // Restore the old drive
+I       MOV     AH, 0EH
+I       INT     21H
 __1:
-    return Boolean(_AX); 
+I       XCHG    AX, CX      // Put the return value into AX
+    return Boolean(_AX);
+#else
+    drive = (char) toupper( drive );
+    DWORD mask = 0x01 << (drive - 'A');
+    return (Boolean) (GetLogicalDrives() & mask);
+#endif
 }
 
 #pragma warn .asc
@@ -97,9 +108,10 @@ Boolean validFileName( const char *fileName )
 
 void getCurDir( char *dir )
 {
-    dir[0] = getdisk() + 'A';
+    dir[0] = (char) (getdisk() + 'A');
     dir[1] = ':';
     dir[2] = '\\';
+    dir[3] = '\0';
     getcurdir( 0, dir+3 );
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
@@ -109,6 +121,7 @@ Boolean isWild( const char *f )
 {
     return Boolean( strpbrk( f, "?*" ) != 0 );
 }
+
 
 TStreamable *TDirCollection::build()
 {
@@ -124,7 +137,11 @@ void TDirCollection::writeItem( void *obj, opstream& os )
 
 void *TDirCollection::readItem( ipstream& is )
 {
-    const char *txt = is.readString();
-    const char *dir = is.readString();
-    return new TDirEntry( txt, dir );
+    char *txt = is.readString();
+    char *dir = is.readString();
+    TDirEntry *entry = new TDirEntry( txt, dir );
+    delete txt;
+    delete dir;
+    return entry;
 }
+

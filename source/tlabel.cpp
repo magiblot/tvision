@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                      TLabel member functions               */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TLabel
 #define Uses_TEvent
@@ -22,7 +19,7 @@
 #define Uses_TView
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -76,15 +73,19 @@ TPalette& TLabel::getPalette() const
     return palette;
 }
 
+void TLabel::focusLink(TEvent& event)
+{
+	if (link && (link->options & ofSelectable))
+		link->focus();
+	clearEvent(event);
+}
+
 void TLabel::handleEvent( TEvent& event )
 {
     TStaticText::handleEvent(event);
     if( event.what == evMouseDown )
-        {
-        if( link != 0 )
-            link->select();
-        clearEvent( event );
-        }
+    	focusLink(event);
+
     else if( event.what == evKeyDown )
         {
         char c = hotKey( text );
@@ -92,13 +93,9 @@ void TLabel::handleEvent( TEvent& event )
                 ( c != 0 && owner->phase == TGroup::phPostProcess &&
                 toupper(event.keyDown.charScan.charCode) ==  c )
           )
-            {
-            if (link != 0 )
-                link->select();
-            clearEvent( event );
-            }
+	    focusLink(event);
         }
-    else if( event.what == evBroadcast &&
+    else if( event.what == evBroadcast && link &&
             ( event.message.command == cmReceivedFocus ||
               event.message.command == cmReleasedFocus )
            )
@@ -107,6 +104,8 @@ void TLabel::handleEvent( TEvent& event )
             drawView();
             }
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TLabel::write( opstream& os )
 {
@@ -132,3 +131,4 @@ TLabel::TLabel( StreamableInit ) : TStaticText( streamableInit )
 }
 
 
+#endif

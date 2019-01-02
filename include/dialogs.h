@@ -2,17 +2,21 @@
 /*                                                                         */
 /*   DIALOGS.H                                                             */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TDialog, TInputLine, TButton, TCluster,           */
-/*   TRadioButtons, TCheckBoxes, TStaticText, TParamText, TLabel,          */
-/*   THistoryViewer, and THistoryWindow.                                   */
+/*   TRadioButtons, TCheckBoxes, TMultiCheckBoxes, TStaticText,            */
+/*   TParamText, TLabel, THistoryViewer, and THistoryWindow.               */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -24,6 +28,7 @@ const
     bfDefault   = 0x01,
     bfLeftJust  = 0x02,
     bfBroadcast = 0x04,
+    bfGrabFocus = 0x08,
 
     cmRecordHistory = 60;
 
@@ -63,15 +68,34 @@ const
 /*       28 = ListViewer selected                                         */
 /*       29 = ListViewer divider                                          */
 /*       30 = InfoPane                                                    */
-/*       31 = Reserved                                                    */
+/*       31 = Cluster Disabled                                            */
 /*       32 = Reserved                                                    */
 /* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TDialog ) && !defined( __TDialog )
 #define __TDialog
 
-class far TRect;
-class far TEvent;
+#define  cpGrayDialog \
+    "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2D\x2E\x2F"\
+    "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3A\x3B\x3C\x3D\x3E\x3F"
+
+#define  cpBlueDialog \
+    "\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f"\
+    "\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
+
+#define  cpCyanDialog \
+    "\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f"\
+    "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
+
+#define cpDialog cpGrayDialog
+
+const dpBlueDialog = 0,
+      dpCyanDialog = 1,
+      dpGrayDialog = 2;
+
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TValidator;
 
 class TDialog : public TWindow
 {
@@ -95,7 +119,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -125,15 +149,16 @@ inline opstream& operator << ( opstream& os, TDialog* cl )
 #if defined( Uses_TInputLine ) && !defined( __TInputLine )
 #define __TInputLine
 
-class far TRect;
-class far TEvent;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TValidator;
 
 class TInputLine : public TView
 {
 
 public:
 
-    TInputLine( const TRect& bounds, int aMaxLen );
+    TInputLine( const TRect& bounds, int aMaxLen, TValidator *aValid = 0 );
     ~TInputLine();
 
     virtual ushort dataSize();
@@ -144,6 +169,8 @@ public:
     void selectAll( Boolean enable );
     virtual void setData( void *rec );
     virtual void setState( ushort aState, Boolean enable );
+    virtual Boolean valid( ushort cmd );
+    void setValidator( TValidator* aValid );
 
     char* data;
     int maxLen;
@@ -158,12 +185,25 @@ private:
     int mouseDelta( TEvent& event );
     int mousePos( TEvent& event );
     void deleteSelect();
+    void adjustSelectBlock();
+    void saveState();
+    void restoreState();
+    Boolean checkValid(Boolean);
 
-    static const char near rightArrow;
-    static const char near leftArrow;
-    
+    static const char _NEAR rightArrow;
+    static const char _NEAR leftArrow;
+
     virtual const char *streamableName() const
         { return name; }
+
+    TValidator* validator;
+
+    int anchor;
+    char* oldData;
+    int oldCurPos;
+    int oldFirstPos;
+    int oldSelStart;
+    int oldSelEnd;
 
 protected:
 
@@ -172,8 +212,7 @@ protected:
     virtual void *read( ipstream& );
 
 public:
-
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -208,9 +247,9 @@ inline opstream& operator << ( opstream& os, TInputLine* cl )
 #if defined( Uses_TButton ) && !defined( __TButton )
 #define __TButton
 
-class far TRect;
-class far TEvent;
-class far TDrawBuffer;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TDrawBuffer;
 
 class TButton : public TView
 {
@@ -246,9 +285,9 @@ private:
     void pressButton( TEvent& );
     TRect getActiveRect();
 
-    static const char * near shadows;
-    static const char * near markers;
-    
+    static const char * _NEAR shadows;
+    static const char * _NEAR markers;
+
     virtual const char *streamableName() const
         { return name; }
 
@@ -260,7 +299,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -304,16 +343,17 @@ public:
 /*        2 = Selected text                                               */
 /*        3 = Normal shortcut                                             */
 /*        4 = Selected shortcut                                           */
+/*        5 = Disabled text                                               */
 /* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TCluster ) && !defined( __TCluster )
 #define __TCluster
 
-class far TRect;
-class far TSItem;
-class far TEvent;
-class far TPoint;
-class far TStringCollection;
+class _FAR TRect;
+class _FAR TSItem;
+class _FAR TEvent;
+class _FAR TPoint;
+class _FAR TStringCollection;
 
 class TCluster : public TView
 {
@@ -325,19 +365,24 @@ public:
 
     virtual ushort dataSize();
     void drawBox( const char *icon, char marker );
+    void drawMultiBox(const char *icon, const char* marker);
     virtual void getData( void *rec );
     ushort getHelpCtx();
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
     virtual Boolean mark( int item );
+    virtual uchar multiMark( int item );
+
     virtual void press( int item );
     virtual void movedTo( int item );
     virtual void setData( void *rec );
     virtual void setState( ushort aState, Boolean enable );
+    virtual void setButtonState(unsigned long aMask, Boolean enable);
 
 protected:
 
-    ushort value;
+    unsigned long value;
+    unsigned long enableMask;
     int sel;
     TStringCollection *strings;
 
@@ -346,6 +391,7 @@ private:
     int column( int item );
     int findSel( TPoint p );
     int row( int item );
+    void moveSel(int, int);
 
     virtual const char *streamableName() const
         { return name; }
@@ -357,8 +403,9 @@ protected:
     virtual void *read( ipstream& );
 
 public:
+    Boolean buttonState(int );
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -390,8 +437,8 @@ inline opstream& operator << ( opstream& os, TCluster* cl )
 #if defined( Uses_TRadioButtons ) && !defined( __TRadioButtons )
 #define __TRadioButtons
 
-class far TRect;
-class far TSItem;
+class _FAR TRect;
+class _FAR TSItem;
 
 class TRadioButtons : public TCluster
 {
@@ -408,7 +455,7 @@ public:
 
 private:
 
-    static const char * near button;
+    static const char * _NEAR button;
     virtual const char *streamableName() const
         { return name; }
 
@@ -418,7 +465,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -454,8 +501,8 @@ inline TRadioButtons::TRadioButtons( const TRect& bounds, TSItem *aStrings ) :
 #if defined( Uses_TCheckBoxes ) && !defined( __TCheckBoxes )
 #define __TCheckBoxes
 
-class far TRect;
-class far TSItem;
+class _FAR TRect;
+class _FAR TSItem;
 
 class TCheckBoxes : public TCluster
 {
@@ -465,13 +512,13 @@ public:
     TCheckBoxes( const TRect& bounds, TSItem *aStrings);
 
     virtual void draw();
-    
+
     virtual Boolean mark( int item );
     virtual void press( int item );
 
 private:
 
-    static const char * near button;
+    static const char * _NEAR button;
 
     virtual const char *streamableName() const
         { return name; }
@@ -482,7 +529,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -505,12 +552,81 @@ inline TCheckBoxes::TCheckBoxes( const TRect& bounds, TSItem *aStrings) :
 #endif  // Uses_TCheckBoxes
 
 
+#if defined( Uses_TMultiCheckBoxes ) && !defined( __TMultiCheckBoxes )
+#define __TMultiCheckBoxes
+
+const unsigned short cfOneBit       = 0x0101,
+                     cfTwoBits      = 0x0203,
+                     cfFourBits     = 0x040F,
+                     cfEightBits    = 0x08FF;
+
+/* ---------------------------------------------------------------------- */
+/*      TMultiCheckBoxes                                                  */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Normal text                                                 */
+/*        2 = Selected text                                               */
+/*        3 = Normal shortcut                                             */
+/*        4 = Selected shortcut                                           */
+/* ---------------------------------------------------------------------- */
+
+class _FAR TRect;
+class _FAR TSItem;
+
+class TMultiCheckBoxes : public TCluster
+{
+public:
+    TMultiCheckBoxes(TRect&, TSItem*, uchar, ushort, const char*);
+    ~TMultiCheckBoxes();
+    virtual ushort dataSize();
+    virtual void draw();
+    virtual void getData(void *);
+    virtual uchar multiMark(int item);
+    virtual void press( int item );
+    virtual void setData(void*);
+
+private:
+    uchar selRange;
+    ushort flags;
+    char* states;
+
+protected:
+
+    TMultiCheckBoxes( StreamableInit );
+    virtual void write( opstream& );
+    virtual void *read( ipstream& );
+
+public:
+    static const char * const _NEAR name;
+    static TStreamable *build();
+
+};
+
+inline ipstream& operator >> ( ipstream& is, TMultiCheckBoxes& cl )
+    { return is >> (TStreamable&)cl; }
+inline ipstream& operator >> ( ipstream& is, TMultiCheckBoxes*& cl )
+    { return is >> (void *&)cl; }
+
+inline opstream& operator << ( opstream& os, TMultiCheckBoxes& cl )
+    { return os << (TStreamable&)cl; }
+inline opstream& operator << ( opstream& os, TMultiCheckBoxes* cl )
+    { return os << (TStreamable *)cl; }
+
+#endif
+
+
 #if defined( Uses_TListBox ) && !defined( __TListBox )
 #define __TListBox
 
-class far TRect;
-class far TScrollBar;
-class far TCollection;
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TCollection;
+
+struct TListBoxRec
+{
+    TCollection *items;
+    ushort selection;
+};
 
 class TListBox : public TListViewer
 {
@@ -530,12 +646,12 @@ public:
 
 private:
 
-    TCollection *items;
-    
     virtual const char *streamableName() const
         { return name; }
 
 protected:
+
+    TCollection *items;
 
     TListBox( StreamableInit );
     virtual void write( opstream& );
@@ -543,7 +659,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -576,7 +692,7 @@ inline TCollection *TListBox::list()
 #if defined( Uses_TStaticText ) && !defined( __TStaticText )
 #define __TStaticText
 
-class far TRect;
+class _FAR TRect;
 
 class TStaticText : public TView
 {
@@ -607,7 +723,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -635,22 +751,22 @@ inline opstream& operator << ( opstream& os, TStaticText* cl )
 #if defined( Uses_TParamText ) && !defined( __TParamText )
 #define __TParamText
 
-class far TRect;
+class _FAR TRect;
 
 class TParamText : public TStaticText
 {
 
 public:
-    TParamText( const TRect& bounds, const char *aText, int aParamCount );
+    TParamText( const TRect& bounds );
+    ~TParamText();
 
-    virtual ushort dataSize();
-    virtual void getText( char * );
-    virtual void setData( void *rec );
+    virtual void getText( char *str );
+    virtual void setText( char *fmt, ... );
+    virtual int getTextLen();
 
 protected:
 
-    short paramCount;
-    void *paramList;
+    char *str;
 
 private:
 
@@ -660,12 +776,10 @@ private:
 protected:
 
     TParamText( StreamableInit );
-    virtual void write( opstream& );
-    virtual void *read( ipstream& );
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -696,9 +810,9 @@ inline opstream& operator << ( opstream& os, TParamText* cl )
 #if defined( Uses_TLabel ) && !defined( __TLabel )
 #define __TLabel
 
-class far TRect;
-class far TEvent;
-class far TView;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TView;
 
 class TLabel : public TStaticText
 {
@@ -721,6 +835,7 @@ private:
 
     virtual const char *streamableName() const
         { return name; }
+    void focusLink(TEvent&);
 
 protected:
 
@@ -730,7 +845,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -762,8 +877,8 @@ inline opstream& operator << ( opstream& os, TLabel* cl )
 #if defined( Uses_THistoryViewer ) && !defined( __THistoryViewer )
 #define __THistoryViewer
 
-class far TRect;
-class far TScrollBar;
+class _FAR TRect;
+class _FAR TScrollBar;
 
 class THistoryViewer : public TListViewer
 {
@@ -792,10 +907,10 @@ protected:
 #if defined( Uses_THistoryWindow ) && !defined( __THistoryWindow )
 #define __THistoryWindow
 
-class far TListViewer;
-class far TRect;
-class far TWindow;
-class far TInputLine;
+class _FAR TListViewer;
+class _FAR TRect;
+class _FAR TWindow;
+class _FAR TInputLine;
 
 class THistInit
 {
@@ -844,10 +959,10 @@ protected:
 #if defined( Uses_THistory ) && !defined( __THistory )
 #define __THistory
 
-class far TRect;
-class far TInputLine;
-class far TEvent;
-class far THistoryWindow;
+class _FAR TRect;
+class _FAR TInputLine;
+class _FAR TEvent;
+class _FAR THistoryWindow;
 
 class THistory : public TView
 {
@@ -860,7 +975,9 @@ public:
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
     virtual THistoryWindow *initHistoryWindow( const TRect& bounds );
+    virtual void recordHistory(const char *s);
     virtual void shutDown();
+
 protected:
 
     TInputLine *link;
@@ -868,7 +985,7 @@ protected:
 
 private:
 
-    static const char * near icon;
+    static const char * _NEAR icon;
 
     virtual const char *streamableName() const
         { return name; }
@@ -881,7 +998,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -899,7 +1016,7 @@ inline opstream& operator << ( opstream& os, THistory* cl )
 #endif  // Uses_THistory
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

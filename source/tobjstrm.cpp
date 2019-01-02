@@ -18,16 +18,13 @@
 /*                     ofpstream                              */
 /*                     fpstream                               */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStreamable
 #define Uses_TStreamableClass
@@ -42,7 +39,7 @@
 #define Uses_ifpstream
 #define Uses_ofpstream
 #define Uses_fpstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __LIMITS_H )
 #include <Limits.h>
@@ -75,6 +72,12 @@
 #if !defined( __ASSERT_H )
 #include <Assert.h>
 #endif  // __ASSERT_H
+
+#ifdef __FLAT__
+#define _HUGE
+#else
+#define _HUGE huge
+#endif
 
 const uchar nullStringLen = UCHAR_MAX;
 
@@ -156,7 +159,7 @@ int TPWrittenObjects::compare( void *o1, void *o2 )
 {
     if( o1 == o2 )
         return 0;
-    else if( ((char huge *)o1)+1 < ((char huge *)o2)+1 ) // force normalization
+    else if( ((char _HUGE *)o1)+1 < ((char _HUGE *)o2)+1 ) // force normalization
         return -1;
     else
         return 1;
@@ -237,8 +240,8 @@ void pstream::clear( int i )
 }
 
 void pstream::registerType( TStreamableClass *ts )
-{ 
-    types->registerType( ts ); 
+{
+    types->registerType( ts );
 }
 
 pstream::operator void _FAR *() const
@@ -353,6 +356,12 @@ char *ipstream::readString( char *buf, unsigned maxLen )
     return buf;
 }
 
+ipstream& operator >> ( ipstream& ps, char &ch )
+{
+    ch = ps.readByte();
+    return ps;
+}
+
 ipstream& operator >> ( ipstream& ps, signed char &ch )
 {
     ch = ps.readByte();
@@ -379,13 +388,13 @@ ipstream& operator >> ( ipstream& ps, unsigned short &sh )
 
 ipstream& operator >> ( ipstream& ps, signed int &i )
 {
-    i = ps.readWord();
+    ps.readBytes( &i, sizeof(int) );
     return ps;
 }
 
 ipstream& operator >> ( ipstream& ps, unsigned int &i )
 {
-    i = ps.readWord();
+    ps.readBytes( &i, sizeof(int) );
     return ps;
 }
 
@@ -410,6 +419,12 @@ ipstream& operator >> ( ipstream& ps, float &f )
 ipstream& operator >> ( ipstream& ps, double &d )
 {
     ps.readBytes( &d, sizeof(d) );
+    return ps;
+}
+
+ipstream& operator >> ( ipstream& ps, long double &ld )
+{
+    ps.readBytes( &ld, sizeof(ld) );
     return ps;
 }
 
@@ -573,6 +588,12 @@ void opstream::writeString( const char *str )
     writeBytes( str, len );
 }
 
+opstream& operator << ( opstream& ps, char ch )
+{
+    ps.writeByte( ch );
+    return ps;
+}
+
 opstream& operator << ( opstream& ps, signed char ch )
 {
     ps.writeByte( ch );
@@ -599,13 +620,13 @@ opstream& operator << ( opstream& ps, unsigned short sh )
 
 opstream& operator << ( opstream& ps, signed int i )
 {
-    ps.writeWord( i );
+    ps.writeBytes( &i, sizeof(int) );
     return ps;
 }
 
 opstream& operator << ( opstream& ps, unsigned int i )
 {
-    ps.writeWord( i );
+    ps.writeBytes( &i, sizeof(int) );
     return ps;
 }
 opstream& operator << ( opstream& ps, signed long l )
@@ -629,6 +650,12 @@ opstream& operator << ( opstream& ps, float f )
 opstream& operator << ( opstream& ps, double d )
 {
     ps.writeBytes( &d, sizeof(d) );
+    return ps;
+}
+
+opstream& operator << ( opstream& ps, long double ld )
+{
+    ps.writeBytes( &ld, sizeof(ld) );
     return ps;
 }
 

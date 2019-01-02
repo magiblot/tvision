@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  TNSCollection member functions            */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TNSCollection
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TCollection
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STDLIB_H )
 #include <StdLib.h>
@@ -47,7 +44,6 @@ TNSCollection::TNSCollection() :
     delta( 0 ),
     shouldDelete( True )
 {
-    items = 0;
 }
 
 TNSCollection::~TNSCollection()
@@ -59,6 +55,8 @@ void TNSCollection::shutDown()
 {
     if( shouldDelete )
         freeAll();
+    else
+        removeAll();
     setLimit(0);
     TObject::shutDown();
 }
@@ -211,14 +209,15 @@ void TNSCollection::setLimit(ccIndex aLimit)
         else
             {
             aItems = new void *[aLimit];
-            if( count !=  0 )
+            if( count != 0 && aItems != 0 && items != 0 )
                 memcpy( aItems, items, count*sizeof(void *) );
             }
         delete items;
-        items =  aItems;
-        limit =  aLimit;
+        items = aItems;
+        limit = aLimit;
         }
 }
+
 
 void TCollection::write( opstream& os )
 {
@@ -229,10 +228,9 @@ void TCollection::write( opstream& os )
 
 void *TCollection::read( ipstream& is )
 {
-    int limit;
-    is >> count >> limit >> delta;
-    limit = 0;
-    setLimit(limit);
+    int savedLimit;
+    is >> count >> savedLimit >> delta;
+    setLimit(savedLimit);
     for( ccIndex idx = 0; idx < count; idx++ )
         items[idx] = readItem( is );
     return this;
@@ -242,3 +240,4 @@ void *TCollection::read( ipstream& is )
 TCollection::TCollection( StreamableInit )
 {
 }
+

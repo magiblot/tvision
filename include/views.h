@@ -2,16 +2,20 @@
 /*                                                                         */
 /*   VIEWS.H                                                               */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TView, TFrame, TScrollBar, TScroller,             */
 /*   TListViewer, TGroup, and TWindow                                      */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -41,7 +45,18 @@ const ushort
     cmNo            = 13,
     cmDefault       = 14,
 
-//  TView State masks 
+// Standard application commands
+
+    cmNew           = 30,
+    cmOpen          = 31,
+    cmSave          = 32,
+    cmSaveAs        = 33,
+    cmSaveAll       = 34,
+    cmChDir         = 35,
+    cmDosShell      = 36,
+    cmCloseAll      = 37,
+
+//  TView State masks
 
     sfVisible       = 0x001,
     sfCursorVis     = 0x002,
@@ -56,7 +71,7 @@ const ushort
     sfDefault       = 0x400,
     sfExposed       = 0x800,
 
-// TView Option masks 
+// TView Option masks
 
     ofSelectable    = 0x001,
     ofTopSelect     = 0x002,
@@ -69,8 +84,9 @@ const ushort
     ofCenterX       = 0x100,
     ofCenterY       = 0x200,
     ofCentered      = 0x300,
+    ofValidate      = 0x400,
 
-// TView GrowMode masks 
+// TView GrowMode masks
 
     gfGrowLoX       = 0x01,
     gfGrowLoY       = 0x02,
@@ -78,8 +94,9 @@ const ushort
     gfGrowHiY       = 0x08,
     gfGrowAll       = 0x0f,
     gfGrowRel       = 0x10,
+    gfFixed         = 0x20,
 
-// TView DragMode masks 
+// TView DragMode masks
 
     dmDragMove      = 0x01,
     dmDragGrow      = 0x02,
@@ -94,7 +111,7 @@ const ushort
     hcNoContext     = 0,
     hcDragging      = 1,
 
-// TScrollBar part codes 
+// TScrollBar part codes
 
     sbLeftArrow     = 0,
     sbRightArrow    = 1,
@@ -106,7 +123,7 @@ const ushort
     sbPageDown      = 7,
     sbIndicator     = 8,
 
-// TScrollBar options for TWindow.StandardScrollBar 
+// TScrollBar options for TWindow.StandardScrollBar
 
     sbHorizontal    = 0x000,
     sbVertical      = 0x001,
@@ -133,7 +150,7 @@ const ushort
 
     wnNoNumber      = 0,
 
-// TWindow palette entries 
+// TWindow palette entries
 
     wpBlueWindow    = 0,
     wpCyanWindow    = 1,
@@ -149,18 +166,18 @@ const ushort
     cmTile          = 25,
     cmCascade       = 26,
 
-// Standard messages 
+// Standard messages
 
     cmReceivedFocus     = 50,
     cmReleasedFocus     = 51,
     cmCommandSetChanged = 52,
 
-// TScrollBar messages 
+// TScrollBar messages
 
     cmScrollBarChanged  = 53,
     cmScrollBarClicked  = 54,
 
-// TWindow select messages 
+// TWindow select messages
 
     cmSelectWindowNum   = 55,
 
@@ -214,7 +231,7 @@ private:
     int loc( int );
     int mask( int );
 
-    static int near masks[8];
+    static int _NEAR masks[8];
 
     uchar cmds[32];
 
@@ -271,9 +288,9 @@ public:
 
     TPalette& operator = ( const TPalette& );
 
-    char& operator[]( int ) const;
+    uchar& operator[]( int ) const;
 
-    char *data;
+    uchar *data;
 
 };
 
@@ -284,15 +301,15 @@ public:
 
 struct write_args
 {
-    void far *self;
-    void far *target;
-    void far *buf;
+    void _FAR *self;
+    void _FAR *target;
+    void _FAR *buf;
     ushort offset;
 };
 
-class far TRect;
-class far TEvent;
-class far TGroup;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TGroup;
 
 class TView : public TObject, public TStreamable
 {
@@ -332,6 +349,7 @@ public:
     virtual void draw();
     void drawView();
     Boolean exposed();
+    Boolean focus();
     void hideCursor();
     void drawHide( TView *lastView );
     void drawShow( TView *lastView );
@@ -342,10 +360,11 @@ public:
     virtual void getData( void *rec );
     virtual void setData( void *rec );
 
+    virtual void awaken();
     void blockCursor();
     void normalCursor();
     virtual void resetCursor();
-    void setCursor( short x, short y );
+    void setCursor( int x, int y );
     void showCursor();
     void drawCursor();
 
@@ -362,6 +381,7 @@ public:
     static void enableCommand( ushort command );
     static void getCommands( TCommandSet& commands );
     static void setCommands( TCommandSet& commands );
+    static void setCmdState( TCommandSet& commands, Boolean enable);
 
     virtual void endModal( ushort command );
     virtual ushort execute();
@@ -390,11 +410,11 @@ public:
     void putInFrontOf( TView *Target );
     TView *TopView();
 
-    void writeBuf(  short x, short y, short w, short h, const void far *b );
+    void writeBuf(  short x, short y, short w, short h, const void _FAR* b );
     void writeBuf(  short x, short y, short w, short h, const TDrawBuffer& b );
     void writeChar( short x, short y, char c, uchar color, short count );
     void writeLine( short x, short y, short w, short h, const TDrawBuffer& b );
-    void writeLine( short x, short y, short w, short h, const void far *b );
+    void writeLine( short x, short y, short w, short h, const void _FAR *b );
     void writeStr( short x, short y, const char *str, uchar color );
 
     TPoint size;
@@ -406,12 +426,14 @@ public:
     uchar growMode;
     uchar dragMode;
     ushort helpCtx;
-    static Boolean near commandSetChanged;
-    static TCommandSet near curCommandSet;
+    static Boolean _NEAR commandSetChanged;
+#ifndef GENINC
+    static TCommandSet _NEAR curCommandSet;
+#endif
     TGroup *owner;
 
-    static Boolean near showMarkers;
-    static uchar near errorAttr;
+    static Boolean _NEAR showMarkers;
+    static uchar _NEAR errorAttr;
 
     virtual void shutDown();
 
@@ -424,7 +446,7 @@ private:
                    TPoint maxSize,
                    uchar mode
                  );
-    void change( uchar, TPoint delta, TPoint& p, TPoint& s );
+    void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState );
     static void writeView( write_args );
 
     virtual const char *streamableName() const
@@ -436,7 +458,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 protected:
@@ -484,9 +506,9 @@ inline void TView::writeLine( short x, short y, short w, short h,
 #if defined( Uses_TFrame ) && !defined( __TFrame )
 #define __TFrame
 
-class far TRect;
-class far TEvent;
-class far TDrawBuffer;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TDrawBuffer;
 
 class TFrame : public TView
 {
@@ -506,12 +528,12 @@ private:
     void dragWindow( TEvent& event, uchar dragMode );
 
     friend class TDisplay;
-    static const char near initFrame[19];
-    static char near frameChars[33];
-    static const char * near closeIcon;
-    static const char * near zoomIcon;
-    static const char * near unZoomIcon;
-    static const char * near dragIcon;
+    static const char _NEAR initFrame[19];
+    static char _NEAR frameChars[33];
+    static const char * _NEAR closeIcon;
+    static const char * _NEAR zoomIcon;
+    static const char * _NEAR unZoomIcon;
+    static const char * _NEAR dragIcon;
 
     virtual const char *streamableName() const
         { return name; }
@@ -522,7 +544,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -551,8 +573,8 @@ inline opstream& operator << ( opstream& os, TFrame* cl )
 #if defined( Uses_TScrollBar ) && !defined( __TScrollBar )
 #define __TScrollBar
 
-class far TRect;
-class far TEvent;
+class _FAR TRect;
+class _FAR TEvent;
 
 typedef char TScrollChars[5];
 
@@ -567,31 +589,31 @@ public:
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
     virtual void scrollDraw();
-    virtual short scrollStep( short part );
-    void setParams( short aValue, short aMin, short aMax, 
-                    short aPgStep, short aArStep );
-    void setRange( short aMin, short aMax );
-    void setStep( short aPgStep, short aArStep );
-    void setValue( short aValue );
+    virtual int scrollStep( int part );
+    void setParams( int aValue, int aMin, int aMax,
+                    int aPgStep, int aArStep );
+    void setRange( int aMin, int aMax );
+    void setStep( int aPgStep, int aArStep );
+    void setValue( int aValue );
 
-    void drawPos( short pos );
-    short getPos();
-    short getSize();
+    void drawPos( int pos );
+    int getPos();
+    int getSize();
 
-    short value;
+    int value;
 
     TScrollChars chars;
-    short minVal;
-    short maxVal;
-    short pgStep;
-    short arStep;
+    int minVal;
+    int maxVal;
+    int pgStep;
+    int arStep;
 
 private:
 
-    short getPartCode(void);
+    int getPartCode(void);
 
-    static TScrollChars near vChars;
-    static TScrollChars near hChars;
+    static TScrollChars _NEAR vChars;
+    static TScrollChars _NEAR hChars;
 
     virtual const char *streamableName() const
         { return name; }
@@ -604,7 +626,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -632,9 +654,9 @@ inline opstream& operator << ( opstream& os, TScrollBar* cl )
 #if defined( Uses_TScroller ) && !defined( __TScroller )
 #define __TScroller
 
-class far TRect;
-class far TScrollBar;
-class far TEvent;
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TEvent;
 
 class TScroller : public TView
 {
@@ -650,11 +672,12 @@ public:
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
     virtual void scrollDraw();
-    void scrollTo( short x, short y );
-    void setLimit( short x, short y );
+    void scrollTo( int x, int y );
+    void setLimit( int x, int y );
     virtual void setState( ushort aState, Boolean enable );
     void checkDraw();
     virtual void shutDown();
+    TPoint delta;
 
 protected:
 
@@ -662,7 +685,6 @@ protected:
     Boolean drawFlag;
     TScrollBar *hScrollBar;
     TScrollBar *vScrollBar;
-    TPoint delta;
     TPoint limit;
 
 private:
@@ -680,7 +702,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -700,12 +722,14 @@ inline opstream& operator << ( opstream& os, TScroller* cl )
 #if defined( Uses_TListViewer ) && !defined( __TListViewer )
 #define __TListViewer
 
-class far TRect;
-class far TScrollBar;
-class far TEvent;
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TEvent;
 
 class TListViewer : public TView
 {
+
+    static const char * _NEAR emptyText;
 
 public:
 
@@ -749,7 +773,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -769,7 +793,7 @@ inline opstream& operator << ( opstream& os, TListViewer* cl )
 #if defined( Uses_TGroup ) && !defined( __TGroup )
 #define __TGroup
 
-class far TView;
+class _FAR TView;
 
 class TGroup : public TView
 {
@@ -785,6 +809,7 @@ public:
 
     ushort execView( TView *p );
     virtual ushort execute();
+    virtual void awaken();
 
     void insertView( TView *p, TView *Target );
     void remove( TView *p );
@@ -793,6 +818,7 @@ public:
     void setCurrent( TView *p, selectMode mode );
     void selectNext( Boolean forwards );
     TView *firstThat( Boolean (*func)( TView *, void * ), void *args );
+    Boolean focusNext(Boolean forwards);
     void forEach( void (*func)( TView *, void * ), void *args );
     void insert( TView *p );
     void insertBefore( TView *p, TView *Target );
@@ -837,7 +863,7 @@ public:
     TRect clip;
     phaseType phase;
 
-    ushort far *buffer;
+    ushort *buffer;
     uchar lockFlag;
     ushort endState;
 
@@ -846,6 +872,7 @@ private:
     Boolean invalid( TView *p, ushort command );
     void focusView( TView *p, Boolean enable );
     void selectView( TView *p, Boolean enable );
+    TView* findNext(Boolean forwards);
 
     virtual const char *streamableName() const
         { return name; }
@@ -858,7 +885,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -878,12 +905,16 @@ inline opstream& operator << ( opstream& os, TGroup* cl )
 #if defined( Uses_TWindow ) && !defined( __TWindow )
 #define __TWindow
 
-class far TFrame;
-class far TRect;
-class far TPoint;
-class far TEvent;
-class far TFrame;
-class far TScrollBar;
+#define cpBlueWindow "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+#define cpCyanWindow "\x10\x11\x12\x13\x14\x15\x16\x17"
+#define cpGrayWindow "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
+
+class _FAR TFrame;
+class _FAR TRect;
+class _FAR TPoint;
+class _FAR TEvent;
+class _FAR TFrame;
+class _FAR TScrollBar;
 
 class TWindowInit
 {
@@ -944,7 +975,7 @@ public:
 private:
 
     virtual const char *streamableName() const
-        { return name; }            
+        { return name; }
 
 protected:
 
@@ -954,7 +985,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -972,7 +1003,7 @@ inline opstream& operator << ( opstream& os, TWindow* cl )
 #endif  // Uses_TWindow
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

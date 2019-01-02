@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TFrame member functions                   */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TFrame
 #define Uses_TDrawBuffer
@@ -21,7 +18,7 @@
 #define Uses_TRect
 #define Uses_TPoint
 #define Uses_TEvent
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -32,7 +29,7 @@
 TFrame::TFrame( const TRect& bounds ) : TView( bounds )
 {
     growMode = gfGrowHiX + gfGrowHiY;
-    eventMask |= evBroadcast;
+    eventMask |= evBroadcast | evMouseUp;
 }
 
 void TFrame::draw()
@@ -41,25 +38,24 @@ void TFrame::draw()
     short  f, i, l, width;
     TDrawBuffer b;
 
-    if( (state & sfActive) == 0 )
+    if( (state & sfDragging) != 0 )
+        {
+        cFrame = 0x0505;
+        cTitle = 0x0005;
+        f = 0;
+        }
+    else if( (state & sfActive) == 0 )
         {
         cFrame = 0x0101;
         cTitle = 0x0002;
         f = 0;
         }
     else
-        if( (state & sfDragging) != 0 )
-            {
-            cFrame = 0x0505;
-            cTitle = 0x0005;
-            f = 0;
-            }
-        else
-            {
-            cFrame = 0x0503;
-            cTitle = 0x0004;
-            f = 9;
-            }
+        {
+        cFrame = 0x0503;
+        cTitle = 0x0004;
+        f = 9;
+        }
 
     cFrame = getColor(cFrame);
     cTitle = getColor(cTitle);
@@ -144,29 +140,38 @@ void TFrame::dragWindow( TEvent& event, uchar mode )
 void TFrame::handleEvent( TEvent& event )
 {
     TView::handleEvent(event);
-    if( event.what== evMouseDown && (state & sfActive) != 0 )
+    if( event.what == evMouseDown  )
         {
         TPoint mouse = makeLocal( event.mouse.where );
         if( mouse.y == 0 )
             {
-            if( ( ((TWindow *)owner)->flags & wfClose ) != 0 &&
-                    mouse.x >= 2 &&
-                    mouse.x <= 4 )
+            if( (((TWindow *)owner)->flags & wfClose ) != 0 &&
+                (state & sfActive) &&
+                 mouse.x >= 2 &&
+                 mouse.x <= 4
+              )
                 {
-                event.what= evCommand;
-                event.message.command = cmClose;
-                event.message.infoPtr = owner;
-                putEvent( event );
-                clearEvent( event );
+                while(mouseEvent( event, evMouse ))
+                    ;
+                mouse = makeLocal( event.mouse.where );
+                if( mouse.y == 0 && mouse.x >= 2 && mouse.x <= 4 )
+                    {
+                    event.what = evCommand;
+                    event.message.command = cmClose;
+                    event.message.infoPtr = owner;
+                    putEvent( event );
+                    clearEvent( event );
+                    }
                 }
             else
-                if( (((TWindow *)owner)->flags & wfZoom) != 0 && 
-                    ( (mouse.x >= size.x - 5 && mouse.x <= size.x - 3) ||
-                       event.mouse.doubleClick
+                if( (((TWindow *)owner)->flags & wfZoom) != 0 &&
+                    (state & sfActive) &&
+                    ((mouse.x >= size.x - 5 && mouse.x <= size.x - 3) ||
+                     (event.mouse.eventFlags & meDoubleClick)
                     )
                   )
                     {
-                    event.what= evCommand;
+                    event.what = evCommand;
                     event.message.command = cmZoom;
                     event.message.infoPtr = owner;
                     putEvent( event );
@@ -177,7 +182,8 @@ void TFrame::handleEvent( TEvent& event )
                         dragWindow( event, dmDragMove );
             }
         else
-            if( mouse.x >= size.x - 2 && mouse.y >= size.y - 1 )
+            if( (mouse.x >= size.x - 2 && mouse.y >= size.y - 1 ) &&
+            (state & sfActive))
                 if( ( ((TWindow *)owner)->flags & wfGrow ) != 0 )
                     dragWindow( event, dmDragGrow );
         }
@@ -190,6 +196,8 @@ void TFrame::setState( ushort aState, Boolean enable )
         drawView();
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TFrame::build()
 {
     return new TFrame( streamableInit );
@@ -199,4 +207,4 @@ TFrame::TFrame( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

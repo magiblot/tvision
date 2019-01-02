@@ -2,23 +2,27 @@
 /*                                                                         */
 /*   MENUS.H                                                               */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TMenuItem, TMenu, TMenuView, TSubMenu,            */
 /*   TMenuBar, TMenuBox, TStatusItem, TStatusDef, and TStatusLine          */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-class far TSubMenu;
-class far TMenuItem;
-class far TStatusDef;
-class far TStatusItem;
+class _FAR TSubMenu;
+class _FAR TMenuItem;
+class _FAR TStatusDef;
+class _FAR TStatusItem;
 
 TSubMenu& operator + ( TSubMenu& s, TMenuItem& i );
 TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 );
@@ -28,7 +32,7 @@ TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 );
 #if defined( Uses_TMenuItem ) && !defined( __TMenuItem )
 #define __TMenuItem
 
-class far TMenu;
+class _FAR TMenu;
 
 class TMenuItem
 {
@@ -129,16 +133,16 @@ public:
 #if defined( Uses_TMenuView ) && !defined( __TMenuView )
 #define __TMenuView
 
-class far TRect;
-class far TMenu;
-class far TEvent;
+class _FAR TRect;
+class _FAR TMenu;
+class _FAR TEvent;
 
 class TMenuView : public TView
 {
 
 public:
 
-    TMenuView( const TRect& bounds, TMenu *aMenu, TMenuView *aParent );
+    TMenuView( const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0 );
     TMenuView( const TRect& bounds );
 
     void setBounds( const TRect& bounds );
@@ -167,7 +171,7 @@ private:
     void trackKey( Boolean findNext );
     Boolean mouseInOwner( TEvent& e );
     Boolean mouseInMenus( TEvent& e );
-    void trackMouse( TEvent& e );
+    void trackMouse( TEvent& e , Boolean& mouseActive);
     TMenuView *topMenu();
     Boolean updateMenu( TMenu *menu );
     void do_a_select( TEvent& );
@@ -188,7 +192,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -235,8 +239,8 @@ inline TMenuView::TMenuView( const TRect& bounds ) :
 #if defined( Uses_TMenuBar ) && !defined( __TMenuBar )
 #define __TMenuBar
 
-class far TRect;
-class far TMenu;
+class _FAR TRect;
+class _FAR TMenu;
 
 class TMenuBar : public TMenuView
 {
@@ -261,7 +265,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -293,10 +297,10 @@ inline opstream& operator << ( opstream& os, TMenuBar* cl )
 #if defined( Uses_TMenuBox ) && !defined( __TMenuBox )
 #define __TMenuBox
 
-class far TRect;
-class far TMenu;
-class far TMenuView;
-class far TDrawBuffer;
+class _FAR TRect;
+class _FAR TMenu;
+class _FAR TMenuView;
+class _FAR TDrawBuffer;
 
 class TMenuBox : public TMenuView
 {
@@ -313,7 +317,7 @@ private:
     void frameLine( TDrawBuffer&, short n );
     void drawLine( TDrawBuffer& );
 
-    static const char * near frameChars;
+    static const char * _NEAR frameChars;
     virtual const char *streamableName() const
         { return name; }
 
@@ -323,10 +327,11 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
+
 
 inline ipstream& operator >> ( ipstream& is, TMenuBox& cl )
     { return is >> (TStreamable&)cl; }
@@ -339,6 +344,33 @@ inline opstream& operator << ( opstream& os, TMenuBox* cl )
     { return os << (TStreamable *)cl; }
 
 #endif  // Uses_TMenuBox
+
+
+#if defined( Uses_TMenuPopup ) && !defined( __TMenuPopup )
+#define __TMenuPopup
+
+/* ---------------------------------------------------------------------- */
+/*      class TMenuPopup                                                  */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Normal text                                                 */
+/*        2 = Disabled text                                               */
+/*        3 = Shortcut text                                               */
+/*        4 = Normal selection                                            */
+/*        5 = Disabled selection                                          */
+/*        6 = Shortcut selection                                          */
+/* ---------------------------------------------------------------------- */
+
+class TMenuPopup : TMenuBox
+{
+    TMenuPopup(TRect&, TMenu*);
+    virtual void handleEvent(TEvent&);
+};
+
+
+#endif  // Uses_TMenuPopup
+
+
 
 
 #if defined( Uses_TStatusItem ) && !defined( __TStatusItem )
@@ -354,9 +386,10 @@ public:
                  ushort cmd,
                  TStatusItem *aNext = 0
                 );
+    ~TStatusItem();
 
     TStatusItem *next;
-    const char *text;
+    char *text;
     ushort keyCode;
     ushort command;
 
@@ -367,8 +400,13 @@ inline TStatusItem::TStatusItem( const char *aText,
                                  ushort cmd,
                                  TStatusItem *aNext
                                 ) :
-    text( aText ), keyCode( key ), command( cmd ), next( aNext )
+    text( newStr(aText) ), keyCode( key ), command( cmd ), next( aNext )
 {
+}
+
+inline TStatusItem::~TStatusItem()
+{
+    delete text;
 }
 
 #endif  // Uses_TStatusItem
@@ -419,9 +457,9 @@ inline TStatusDef::TStatusDef( ushort aMin,
 #if defined( Uses_TStatusLine ) && !defined( __TStatusLine )
 #define __TStatusLine
 
-class far TRect;
-class far TEvent;
-class far TPoint;
+class _FAR TRect;
+class _FAR TEvent;
+class _FAR TPoint;
 
 class TStatusLine : public TView
 {
@@ -449,8 +487,8 @@ private:
     TStatusItem *itemMouseIsIn( TPoint );
     void disposeItems( TStatusItem *item );
 
-    static const char * near hintSeparator;
-    
+    static const char * _NEAR hintSeparator;
+
     virtual const char *streamableName() const
         { return name; }
 
@@ -465,10 +503,10 @@ protected:
     TStatusLine( StreamableInit );
     virtual void write( opstream& );
     virtual void *read( ipstream& );
- 
+
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -486,7 +524,7 @@ inline opstream& operator << ( opstream& os, TStatusLine* cl )
 #endif  // Uses_TStatusLine
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

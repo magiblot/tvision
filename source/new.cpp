@@ -1,17 +1,15 @@
 /*------------------------------------------------------------*/
 /* filename -       new.cpp                                   */
-/*------------------------------------------------------------*/ 
-                                                              
 /*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
+#define NDEBUG
 #include <assert.h>
 
 #if !defined( __MEM_H )
@@ -19,6 +17,7 @@
 #endif  // __MEM_H
 
 #if !defined( __ALLOC_H )
+
 #include <Alloc.h>
 #endif  // __ALLOC_H
 
@@ -27,9 +26,9 @@
 #endif  // __STDLIB_H
 
 #define Uses_TVMemMgr
-#include <tv.h>
+#include <tvision\tv.h>
 
-TBufListEntry * near TBufListEntry::bufList = 0;
+TBufListEntry * _NEAR TBufListEntry::bufList = 0;
 
 TBufListEntry::TBufListEntry( void*& o ) : owner( o )
 {
@@ -77,9 +76,9 @@ Boolean TBufListEntry::freeHead()
         }
 }
 
-void * near TVMemMgr::safetyPool = 0;
-size_t near TVMemMgr::safetyPoolSize = 0;
-int near TVMemMgr::inited = 0;
+void * _NEAR TVMemMgr::safetyPool = 0;
+size_t _NEAR TVMemMgr::safetyPoolSize = 0;
+int _NEAR TVMemMgr::inited = 0;
 
 TVMemMgr memMgr;
 
@@ -125,7 +124,6 @@ void TVMemMgr::freeDiscardable( void *block )
 }
 
 
-
 #if !defined( NDEBUG )
 const BLK_SIZE = 16;
 const BLK_DATA = 0xA6;
@@ -133,7 +131,7 @@ const BLK_DATA = 0xA6;
 const BLK_SIZE = 0;
 #endif
 
-void *operator new( size_t sz )
+static void * allocBlock( size_t sz )
 {
     assert( heapcheck() >= 0 );
 
@@ -160,6 +158,16 @@ void *operator new( size_t sz )
     return (char *)temp + BLK_SIZE;
 }
 
+void * operator new[] ( size_t sz )
+{
+   return allocBlock(sz);
+}
+
+void * operator new ( size_t sz )
+{
+   return allocBlock(sz);
+}
+
 #if !defined( NDEBUG )
 static void check( void *blk )
 {
@@ -168,7 +176,7 @@ static void check( void *blk )
 }
 #endif
 
-void operator delete( void *blk )
+static void deleteBlock( void *blk )
 {
     assert( heapcheck() >= 0 );
     if( blk == 0 )
@@ -182,3 +190,12 @@ void operator delete( void *blk )
         TVMemMgr::resizeSafetyPool();
 }
 
+void operator delete ( void *blk )
+{
+   deleteBlock(blk);
+}
+
+void operator delete[] ( void *blk )
+{
+   deleteBlock(blk);
+}

@@ -4,21 +4,18 @@
 /* function(s)                                                 */
 /*                  TTerminal and TTextDevice member functions */
 /*-------------------------------------------------------------*/
-
-/*-------------------------------------------------------------*/
-/*                                                             */
-/*    Turbo Vision -  Version 1.0                              */
-/*                                                             */
-/*                                                             */
-/*    Copyright (c) 1991 by Borland International              */
-/*    All Rights Reserved.                                     */
-/*                                                             */
-/*-------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TTextDevice
 #define Uses_TTerminal
 #define Uses_otstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>

@@ -4,23 +4,20 @@
 /* function(s)                                                */
 /*                  TStrListMaker member functions            */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStringList
 #define Uses_TStrIndexRec
 #define Uses_TStrListMaker
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -77,10 +74,12 @@ void TStrListMaker::put( ushort key, char *str )
         }
     int len = strlen( str );
     strings[strPos] = len;
-    movmem( str, strings+strPos+1, len );
+    memcpy( strings+strPos+1, str, len);
     strPos += len+1;
     cur.count++;
 }
+
+#if !defined(NO_STREAMABLE)
 
 TStringList::TStringList( StreamableInit ) :
     indexSize(0),
@@ -88,6 +87,7 @@ TStringList::TStringList( StreamableInit ) :
     basePos(0)
 {
 }
+#endif
 
 #pragma warn -dsz
 
@@ -107,9 +107,9 @@ void TStringList::get( char *dest, ushort key )
         }
 
     TStrIndexRec *cur = index;
-    while( cur->key + MAXKEYS < key && cur - index < indexSize )
+    while( cur->key + cur->count -1 < key && cur - index < indexSize )
         cur++;
-    if( cur->key + MAXKEYS < key )
+    if( cur->key + cur->count - 1 < key )
         {
         *dest = EOS;
         return;
@@ -122,6 +122,8 @@ void TStringList::get( char *dest, ushort key )
         dest[sz] = EOS;
         } while( count-- > 0 );
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TStrListMaker::write( opstream& os )
 {
@@ -152,4 +154,4 @@ TStreamable *TStringList::build()
     return new TStringList( streamableInit );
 }
 
-
+#endif

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*            TEditor member functions                        */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TEditor
@@ -24,7 +21,7 @@
 #define Uses_TReplaceDialogRec
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <string.h>
@@ -112,8 +109,9 @@ ushort defEditorDialog( int, ... );
 
 #pragma warn -asc
 
-ushort scanKeyMap( const void *keyMap, int keyCode )
+ushort scanKeyMap( const void *keyMap, ushort keyCode )
 {
+#if !defined(__FLAT__)
 asm {
     PUSH DS
     LDS SI,keyMap
@@ -142,6 +140,25 @@ asm {
 __4:
 asm POP DS
     return _AX;
+#else
+    register ushort *kM = (ushort *)keyMap;
+    uchar codeLow = keyCode & 0xff;
+    uchar codeHi  = keyCode >> 8;
+
+    int n;
+
+    for (n = *kM++; n--; kM++)
+    {
+        uchar  mapLow  = *kM & 0xff;
+        uchar  mapHi   = *kM >> 8;
+        kM++;
+        ushort command = *kM;
+
+        if ((mapLow == codeLow) && ((mapHi == 0) || (mapHi == codeHi)))
+            return command;
+    };
+    return 0;
+#endif
 }
 
 #pragma warn .asc
@@ -255,8 +272,7 @@ void TEditor::convertEvent( TEvent& event )
 {
     if( event.what == evKeyDown )
         {
-        const uchar far *const shiftState = (uchar far *)MK_FP( 0x40, 0x17 );
-        if( (*shiftState & 0x03) != 0 &&
+        if( (event.keyDown.controlKeyState & kbShift) != 0 &&
             event.keyDown.charScan.scanCode >= 0x47 &&
             event.keyDown.charScan.scanCode <= 0x51
           )
@@ -434,19 +450,23 @@ void TEditor::checkScrollBar( const TEvent& event,
 void TEditor::handleEvent( TEvent& event )
 {
     TView::handleEvent( event );
-    convertEvent( event );
+
     Boolean centerCursor = Boolean(!cursorVisible());
     uchar selectMode = 0;
-    uchar far *shiftState = (uchar far *)MK_FP( 0x40, 0x17 );
 
-    if( selecting == True || (*shiftState & 0x03) != 0 )
+    if( selecting == True ||
+        (event.what & evMouse && (event.mouse.controlKeyState & kbShift) != 0) ||
+        (event.what & evKeyboard && (event.keyDown.controlKeyState & kbShift ) != 0)
+      )
         selectMode = smExtend;
+
+    convertEvent( event );
 
     switch( event.what )
         {
 
         case evMouseDown:
-            if( event.mouse.doubleClick == True )
+            if( event.mouse.eventFlags & meDoubleClick )
                 selectMode |= smDouble;
 
             do  {
@@ -600,8 +620,14 @@ void TEditor::handleEvent( TEvent& event )
             switch( event.message.command )
                 {
                 case cmScrollBarChanged:
-                    checkScrollBar( event, hScrollBar, delta.x );
-                    checkScrollBar( event, vScrollBar, delta.y );
+            if ((event.message.infoPtr == hScrollBar) ||
+                (event.message.infoPtr == vScrollBar))
+            {
+                        checkScrollBar( event, hScrollBar, delta.x );
+                        checkScrollBar( event, vScrollBar, delta.y );
+            }
+            else
+                return;
                     break;
                 default:
                     return;

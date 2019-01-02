@@ -4,37 +4,49 @@
 /* function(s)                                                */
 /*                  TDialog member functions                  */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TDialog
 #define Uses_TEvent
-#include <tv.h>
+#include <tvision\tv.h>
 
-#define cpDialog "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2D\x2E\x2F"\
-                 "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3A\x3B\x3C\x3D\x3E\x3F"
+// TMultiCheckboxes flags
+//   hibyte = number of bits
+//   lobyte = bit mask
+
 
 TDialog::TDialog( const TRect& bounds, const char *aTitle ) :
     TWindow( bounds, aTitle, wnNoNumber ),
     TWindowInit( &TDialog::initFrame )
 {
-     growMode = 0;
-     flags = wfMove | wfClose;
+   growMode = 0;
+   flags = wfMove | wfClose;
+   palette = dpGrayDialog;
 }
 
 TPalette& TDialog::getPalette() const
 {
-    static TPalette palette( cpDialog, sizeof( cpDialog )-1 );
-    return palette;
+    static TPalette paletteGray( cpGrayDialog, sizeof( cpGrayDialog )-1 );
+    static TPalette paletteBlue( cpBlueDialog, sizeof( cpBlueDialog )-1 );
+    static TPalette paletteCyan( cpCyanDialog, sizeof( cpCyanDialog )-1 );
+
+    switch (palette)
+    {
+       case dpGrayDialog:
+          return paletteGray;
+       case dpBlueDialog:
+          return paletteBlue;
+       case dpCyanDialog:
+          return paletteCyan;
+    }
+    return paletteGray;
 }
 
 void TDialog::handleEvent(TEvent& event)
@@ -88,6 +100,8 @@ Boolean TDialog::valid( ushort command )
         return TGroup::valid( command );
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TDialog::build()
 {
     return new TDialog( streamableInit );
@@ -98,3 +112,5 @@ TDialog::TDialog( StreamableInit ) :
     TWindowInit( 0 )
 {
 }
+
+#endif

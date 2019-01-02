@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  THistoryViewer member functions           */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_THistoryViewer
 #define Uses_TScrollBar
 #define Uses_TEvent
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -68,7 +65,7 @@ void THistoryViewer::getText( char *dest, short item, short maxChars )
 
 void THistoryViewer::handleEvent( TEvent& event )
 {
-    if( (event.what == evMouseDown && event.mouse.doubleClick) ||
+    if( (event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick) ) ||
         (event.what == evKeyDown && event.keyDown.keyCode == kbEnter)
       )
         {

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TScrollBar member functions               */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TScrollBar
@@ -23,7 +20,7 @@
 #define Uses_TGroup
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -64,11 +61,11 @@ void TScrollBar::draw()
     drawPos(getPos());
 }
 
-void TScrollBar::drawPos( short pos )
+void TScrollBar::drawPos( int pos )
 {
     TDrawBuffer b;
 
-    short s = getSize() - 1;
+    int s = getSize() - 1;
     b.moveChar( 0, chars[0], getColor(2), 1 );
     if( maxVal == minVal )
         b.moveChar( 1, chars[4], getColor(1), s-1 );
@@ -88,18 +85,18 @@ TPalette& TScrollBar::getPalette() const
     return palette;
 }
 
-short TScrollBar::getPos()
+int TScrollBar::getPos()
 {
-    short r = maxVal - minVal;
+    int r = maxVal - minVal;
     if( r == 0 )
         return 1;
     else
-        return  short(( ((long(value - minVal) * (getSize() - 3)) + (r >> 1)) / r) + 1);
+        return  int(( ((long(value - minVal) * (getSize() - 3)) + (r >> 1)) / r) + 1);
 }
 
-short TScrollBar::getSize()
+int TScrollBar::getSize()
 {
-    short s;
+    int s;
 
     if( size.x == 1 )
         s = size.y;
@@ -110,15 +107,15 @@ short TScrollBar::getSize()
 }
 
 static TPoint mouse;
-static short p, s;
+static int p, s;
 static TRect extent;
 
-short TScrollBar::getPartCode()
+int TScrollBar::getPartCode()
 {
-    short part= - 1;
+    int part= - 1;
     if( extent.contains(mouse) )
         {
-        short mark = (size.x == 1) ? mouse.y : mouse.x;
+        int mark = (size.x == 1) ? mouse.y : mouse.x;
 
         if (mark == p)
             part= sbIndicator;
@@ -143,7 +140,7 @@ short TScrollBar::getPartCode()
 void TScrollBar::handleEvent( TEvent& event )
 {
     Boolean Tracking;
-    short i, clickPart;
+    int i, clickPart;
 
     TView::handleEvent(event);
     switch( event.what )
@@ -189,7 +186,7 @@ void TScrollBar::handleEvent( TEvent& event )
                 if( Tracking && s > 2 )
                     {
                     s -= 2;
-                    setValue( short(((long(p - 1) * (maxVal - minVal) + (s >> 1)) / s) + minVal));
+                    setValue( int(((long(p - 1) * (maxVal - minVal) + (s >> 1)) / s) + minVal));
                     }
                 }
             clearEvent(event);
@@ -260,9 +257,9 @@ void TScrollBar::scrollDraw()
     message(owner, evBroadcast, cmScrollBarChanged,this);
 }
 
-short TScrollBar::scrollStep( short part )
+int TScrollBar::scrollStep( int part )
 {
-    short  step;
+    int  step;
 
     if( !(part & 2) )
         step = arStep;
@@ -274,14 +271,14 @@ short TScrollBar::scrollStep( short part )
         return step;
 }
 
-void TScrollBar::setParams( short aValue,
-                            short aMin,
-                            short aMax,
-                            short aPgStep,
-                            short aArStep
+void TScrollBar::setParams( int aValue,
+                            int aMin,
+                            int aMax,
+                            int aPgStep,
+                            int aArStep
                           )
 {
- short  sValue;
+ int  sValue;
 
     aMax = max( aMax, aMin );
     aValue = max( aMin, aValue );
@@ -300,20 +297,22 @@ void TScrollBar::setParams( short aValue,
     arStep = aArStep;
 }
 
-void TScrollBar::setRange( short aMin, short aMax )
+void TScrollBar::setRange( int aMin, int aMax )
 {
     setParams( value, aMin, aMax, pgStep, arStep );
 }
 
-void TScrollBar::setStep( short aPgStep, short aArStep )
+void TScrollBar::setStep( int aPgStep, int aArStep )
 {
     setParams( value, minVal, maxVal, aPgStep, aArStep );
 }
 
-void TScrollBar::setValue( short aValue )
+void TScrollBar::setValue( int aValue )
 {
     setParams( aValue, minVal, maxVal, pgStep, arStep );
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TScrollBar::write( opstream& os )
 {
@@ -339,4 +338,4 @@ TScrollBar::TScrollBar( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

@@ -9,31 +9,29 @@
 /*                      TFileEditor                           */
 /*                      TEditWindow                           */
 /*------------------------------------------------------------*/
-                                                              
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
+#if !defined(NO_STREAMABLE)
 #define Uses_TIndicator
 #define Uses_TEditor
 #define Uses_TMemo
 #define Uses_TFileEditor
 #define Uses_TEditWindow
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RView )
 __link( RWindow )
-__link( RScrollBar ) 
+__link( RScrollBar )
 
 TStreamableClass RIndicator( TIndicator::name,
                              TIndicator::build,
-                             __DELTA(TIndicator)    
+                             __DELTA(TIndicator)
                            );
 
 TStreamableClass REditor( TEditor::name,
@@ -55,4 +53,5 @@ TStreamableClass REditWindow( TEditWindow::name,
                               TEditWindow::build,
                               __DELTA(TEditWindow)
                             );
+#endif
 

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*          TChDirDialog member functions                     */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_MsgBox
 #define Uses_TChDirDialog
@@ -30,7 +27,7 @@
 #define Uses_TChDirDialog
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <Ctype.h>
@@ -77,7 +74,7 @@ ushort TChDirDialog::dataSize()
 void TChDirDialog::shutDown()
 {
     dirList = 0;
-    dirList = 0;
+    dirInput = 0;
     okButton = 0;
     chDirButton = 0;
     TDialog::shutDown();
@@ -182,6 +179,8 @@ Boolean TChDirDialog::valid( ushort command )
     return True;
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TChDirDialog::write( opstream& os )
 {
     TDialog::write( os );
@@ -200,3 +199,5 @@ TStreamable *TChDirDialog::build()
 {
     return new TChDirDialog( streamableInit );
 }
+
+#endif

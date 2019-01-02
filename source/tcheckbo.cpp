@@ -4,23 +4,20 @@
 /* function(s)                                                */
 /*          TCheckBox member functions                        */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TCheckBoxes
-#include <tv.h>
+#include <tvision\tv.h>
 
 void TCheckBoxes::draw()
 {
-    drawBox( button, 'X' );
+    drawMultiBox( button, " X" );
 }
 
 Boolean TCheckBoxes::mark(int item)
@@ -33,6 +30,8 @@ void TCheckBoxes::press(int item)
     value = value^(1 << item);
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TCheckBoxes::build()
 {
     return new TCheckBoxes( streamableInit );
@@ -41,3 +40,6 @@ TStreamable *TCheckBoxes::build()
 TCheckBoxes::TCheckBoxes( StreamableInit ) : TCluster( streamableInit )
 {
 }
+
+
+#endif

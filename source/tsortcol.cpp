@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  TNSSortedCollection member functions      */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TNSSortedCollection
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TSortedCollection
-#include <tv.h>
+#include <tvision\tv.h>
 
 
 ccIndex TNSSortedCollection::indexOf(void *item)
@@ -83,6 +80,7 @@ Boolean TNSSortedCollection::search( void *key, ccIndex& index )
     return res;
 }
 
+
 void TSortedCollection::write( opstream& os )
 {
     TCollection::write( os );
@@ -103,3 +101,4 @@ TSortedCollection::TSortedCollection( StreamableInit ) :
     TCollection( streamableInit )
 {
 }
+

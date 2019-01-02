@@ -2,21 +2,41 @@
 /*                                                                         */
 /*   TV.H                                                                  */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
+/*   includes other header files based on which Uses_XXXX symbols are      */
+/*   defined.                                                              */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
+
+#if defined( __FLAT__ )
+#define _NEAR
+#define _FAR
+#else
+#define _NEAR near
+#endif
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
-#ifndef __LARGE__
+#if !defined( __FLAT__ )
+#if !defined ( __LARGE__ )
 #error TV needs the large memory model
 #endif
+#endif
 
-#define _TV_VERSION 0x0103
+#if defined( _RTLDLL )
+#error TV must use the RTL in static form only
+#endif
+
+#define _TV_VERSION 0x0200
 
 #define Uses_EventCodes
 #define Uses_ViewCommands
@@ -85,6 +105,16 @@
 #define __INC_TEXTVIEW_H
 #endif
 
+#if defined( Uses_TOutline )
+#define Uses_TOutlineViewer
+#endif
+
+#if defined( Uses_TOutlineViewer )
+#define Uses_TScroller
+#define Uses_TScrollBar
+#define __INC_OUTLINE_H
+#endif
+
 #if defined( Uses_TTextDevice )
 #define Uses_TScroller
 #define __INC_TEXTVIEW_H
@@ -100,6 +130,11 @@
 #endif
 
 #if defined( Uses_TStatusItem )
+#define __INC_MENUS_H
+#endif
+
+#if defined( Uses_TMenuPopup )
+#define Uses_TMenuBox
 #define __INC_MENUS_H
 #endif
 
@@ -132,6 +167,7 @@
 #endif
 
 #if defined( Uses_TColorDialog )
+#define Uses_TColorGroup
 #define Uses_TDialog
 #define __INC_COLORSEL_H
 #endif
@@ -187,6 +223,33 @@
 #define Uses_TCollection
 #define Uses_TDirEntry
 #define __INC_STDDLG_H
+#endif
+
+#if defined ( Uses_TRangeValidator )
+#define Uses_TFilterValidator
+#endif
+
+#if defined ( Uses_TFilterValidator )
+#define Uses_TValidator
+#endif
+
+#if defined ( Uses_TStringLookupValidator )
+#define Uses_TLookupValidator
+#define Uses_TStringCollection
+#endif
+
+#if defined ( Uses_TLookupValidator )
+#define Uses_TValidator
+#endif
+
+#if defined ( Uses_TPXPictureValidator )
+#define Uses_TValidator
+#endif
+
+#if defined ( Uses_TValidator )
+#define Uses_TObject
+#define Uses_TStreamable
+#define __INC_VALIDATOR_H
 #endif
 
 #if defined( Uses_TDirEntry )
@@ -271,6 +334,11 @@
 #define __INC_DIALOGS_H
 #endif
 
+#if defined( Uses_TMultiCheckBoxes )
+#define Uses_TCluster
+#define __INC_DIALOGS_H
+#endif
+
 #if defined( Uses_TRadioButtons )
 #define Uses_TCluster
 #define __INC_DIALOGS_H
@@ -292,6 +360,7 @@
 
 #if defined( Uses_TInputLine )
 #define Uses_TView
+#define Uses_TValidator
 #define __INC_DIALOGS_H
 #endif
 
@@ -416,6 +485,10 @@
 #define __INC_SYSTEM_H
 #endif
 
+#if defined( Uses_THardwareInfo )
+#define __INC_HARDWARE_H
+#endif
+
 #if defined( Uses_EventCodes )
 #define __INC_SYSTEM_H
 #endif
@@ -533,81 +606,93 @@
 #define __INC_TKEYS_H
 #endif
 
-#include <Config.h>
-#include <TTypes.h>
+#include <tvision\config.h>
+#include <tvision\ttypes.h>
 
-#if defined( __INC_TKEYS_H )
-#include <TKeys.h>
+#if defined( __INC_HARDWARE_H )
+#include <tvision\hardware.h>
 #endif
 
-#include <Util.h>
+#if defined( __INC_TKEYS_H )
+#include <tvision\tkeys.h>
+#endif
+
+#include <tvision\util.h>
 
 #if defined( __INC_TVOBJS_H )
-#include <TVObjs.h>
+#include <tvision\tvobjs.h>
 #endif
 
 #if defined( __INC_TOBJSTRM_H )
-#include <TObjStrm.h>
+#include <tvision\tobjstrm.h>
 #endif
 
 #if defined( __INC_DRAWBUF_H )
-#include <DrawBuf.h>
+#include <tvision\drawbuf.h>
 #endif
 
 #if defined( __INC_OBJECTS_H )
-#include <Objects.h>
+#include <tvision\objects.h>
 #endif
 
 #if defined( __INC_SYSTEM_H )
-#include <System.h>
+#include <tvision\system.h>
 #endif
 
 #if defined( __INC_MSGBOX_H )
-#include <MsgBox.h>
+#include <tvision\msgbox.h>
 #endif
 
 #if defined( __INC_RESOURCE_H )
-#include <Resource.h>
+#include <tvision\resource.h>
 #endif
 
 #if defined( __INC_VIEWS_H )
-#include <Views.h>
+#include <tvision\views.h>
 #endif
 
 #if defined( __INC_BUFFERS_H )
-#include <Buffers.h>
+#include <tvision\buffers.h>
 #endif
 
 #if defined( __INC_DIALOGS_H )
-#include <Dialogs.h>
+#include <tvision\dialogs.h>
+#endif
+
+#if defined( __INC_VALIDATOR_H )
+#include <tvision\validate.h>
 #endif
 
 #if defined( __INC_STDDLG_H )
-#include <Stddlg.h>
+#include <tvision\stddlg.h>
 #endif
 
 #if defined( __INC_COLORSEL_H )
-#include <Colorsel.h>
+#include <tvision\colorsel.h>
 #endif
 
 #if defined( __INC_MENUS_H )
-#include <Menus.h>
+#include <tvision\menus.h>
 #endif
 
 #if defined( __INC_TEXTVIEW_H )
-#include <TextView.h>
+#include <tvision\textview.h>
 #endif
 
 #if defined( __INC_EDITORS_H )
-#include <Editors.h>
+#include <tvision\editors.h>
+#endif
+
+#if defined( __INC_OUTLINE_H )
+#include <tvision\outline.h>
 #endif
 
 #if defined( __INC_APP_H )
-#include <App.h>
+#include <tvision\app.h>
 #endif
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

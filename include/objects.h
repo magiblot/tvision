@@ -2,15 +2,19 @@
 /*                                                                         */
 /*   OBJECTS.H                                                             */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TPoint, TRect, TCollection, and TSortedCollection */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -196,7 +200,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
 
 };
 
@@ -240,7 +244,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
 
 };
 
@@ -257,7 +261,7 @@ inline opstream& operator << ( opstream& os, TSortedCollection* cl )
 #endif  // Uses_TSortedCollection
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

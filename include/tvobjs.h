@@ -2,9 +2,6 @@
 /*                                                                         */
 /*   TVOBJS.H                                                              */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TObject, TNSCollection, and TNSSortedCollection.  */
 /*                                                                         */
 /*   The NS variants of collections are Not Streamable.  These are         */
@@ -13,9 +10,16 @@
 /*   rest of the library.                                                  */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -139,7 +143,7 @@ private:
 #endif  // Uses_TNSSortedCollection
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

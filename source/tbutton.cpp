@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*          TButton member functions                          */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TButton
 #define Uses_TDrawBuffer
@@ -22,7 +19,7 @@
 #define Uses_TGroup
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -185,31 +182,35 @@ void TButton::handleEvent( TEvent& event )
         if( !clickRect.contains(mouse) )
             clearEvent( event );
         }
-    TView::handleEvent(event);
+    if (flags & bfGrabFocus)
+        TView::handleEvent(event);
 
+    char c = hotKey( title );
     switch( event.what )
         {
         case evMouseDown:
-            clickRect.b.x++;
-            Boolean down = False;
-            do  {
-                mouse = makeLocal( event.mouse.where );
-                if( down != clickRect.contains( mouse ) )
-                    {
-                    down = Boolean( !down );
-                    drawState( down );
-                    }
-                } while( mouseEvent( event, evMouseMove ) );
-            if( down )
+            if ((state &  sfDisabled) == 0)
                 {
-                press();
-                drawState( False );
+                clickRect.b.x++;
+                Boolean down = False;
+                do  {
+                    mouse = makeLocal( event.mouse.where );
+                    if( down != clickRect.contains( mouse ) )
+                        {
+                        down = Boolean( !down );
+                        drawState( down );
+                        }
+                    } while( mouseEvent( event, evMouseMove ) );
+                if( down )
+                    {
+                    press();
+                    drawState( False );
+                    }
                 }
             clearEvent( event );
             break;
 
         case evKeyDown:
-            char c = hotKey( title );
             if( event.keyDown.keyCode == getAltCode(c) ||
                 ( owner->phase == phPostProcess &&
                   c != 0 &&
@@ -229,7 +230,7 @@ void TButton::handleEvent( TEvent& event )
             switch( event.message.command )
                 {
                 case cmDefault:
-                    if( amDefault )
+                    if( amDefault && !(state & sfDisabled) )
                         {
                         press();
                         clearEvent(event);
@@ -292,6 +293,8 @@ void TButton::press()
         }
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TButton::write( opstream& os )
 {
     TView::write( os );
@@ -317,3 +320,5 @@ TStreamable *TButton::build()
 {
     return new TButton( streamableInit );
 }
+
+#endif

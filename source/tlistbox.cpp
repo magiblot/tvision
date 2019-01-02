@@ -4,33 +4,25 @@
 /* function(s)                                                */
 /*                  TListBox member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TListBox
 #define Uses_TEvent
 #define Uses_TCollection
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
 #endif  // __STRING_H
 
-struct TListBoxRec 
-{
-    TCollection *items;
-    ushort selection;
-};
 
 TListBox::TListBox( const TRect& bounds,
                     ushort aNumCols,
@@ -89,6 +81,8 @@ void TListBox::setData( void *rec )
     drawView();
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TListBox::write( opstream& os )
 {
     TListViewer::write( os );
@@ -111,4 +105,4 @@ TListBox::TListBox( StreamableInit ) : TListViewer( streamableInit )
 {
 }
 
-
+#endif

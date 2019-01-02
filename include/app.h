@@ -2,22 +2,26 @@
 /*                                                                         */
 /*   APP.H                                                                 */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the classes TBackground, TDeskTop, TProgram, and TApplication */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
 #if defined( Uses_TBackground ) && !defined( __TBackground )
 #define __TBackground
-    
-class far TRect;
+
+class _FAR TRect;
 
 class TBackground : public TView
 {
@@ -45,7 +49,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -66,9 +70,9 @@ inline opstream& operator << ( opstream& os, TBackground* cl )
 #if defined( Uses_TDeskTop )  && !defined( __TDeskTop )
 #define __TDeskTop
 
-class far TBackground;
-class far TRect;
-class far TEvent;
+class _FAR TBackground;
+class _FAR TRect;
+class _FAR TEvent;
 
 class TDeskInit
 {
@@ -100,11 +104,12 @@ public:
 protected:
 
     TBackground *background;
+    Boolean tileColumnsFirst;
 
 private:
 
-    static const char near defaultBkgrnd;
-    
+    static const char _NEAR defaultBkgrnd;
+
     virtual const char *streamableName() const
         { return name; }
 
@@ -114,7 +119,7 @@ protected:
 
 public:
 
-    static const char * const near name;
+    static const char * const _NEAR name;
     static TStreamable *build();
 
 };
@@ -131,34 +136,78 @@ inline opstream& operator << ( opstream& os, TDeskTop* cl )
 
 #endif
 
+// Turbo Vision 2.0 Color Palettes
+
+#define cpAppColor \
+       "\x71\x70\x78\x74\x20\x28\x24\x17\x1F\x1A\x31\x31\x1E\x71\x1F" \
+    "\x37\x3F\x3A\x13\x13\x3E\x21\x3F\x70\x7F\x7A\x13\x13\x70\x7F\x7E" \
+    "\x70\x7F\x7A\x13\x13\x70\x70\x7F\x7E\x20\x2B\x2F\x78\x2E\x70\x30" \
+    "\x3F\x3E\x1F\x2F\x1A\x20\x72\x31\x31\x30\x2F\x3E\x31\x13\x38\x00" \
+    "\x17\x1F\x1A\x71\x71\x1E\x17\x1F\x1E\x20\x2B\x2F\x78\x2E\x10\x30" \
+    "\x3F\x3E\x70\x2F\x7A\x20\x12\x31\x31\x30\x2F\x3E\x31\x13\x38\x00" \
+    "\x37\x3F\x3A\x13\x13\x3E\x30\x3F\x3E\x20\x2B\x2F\x78\x2E\x30\x70" \
+    "\x7F\x7E\x1F\x2F\x1A\x20\x32\x31\x71\x70\x2F\x7E\x71\x13\x38\x00" \
+    "\x37\x3F\x3A\x13\x13\x30\x3E\x1E"    // help colors
+
+#define cpAppBlackWhite \
+       "\x70\x70\x78\x7F\x07\x07\x0F\x07\x0F\x07\x70\x70\x07\x70\x0F" \
+    "\x07\x0F\x07\x70\x70\x07\x70\x0F\x70\x7F\x7F\x70\x07\x70\x07\x0F" \
+    "\x70\x7F\x7F\x70\x07\x70\x70\x7F\x7F\x07\x0F\x0F\x78\x0F\x78\x07" \
+    "\x0F\x0F\x0F\x70\x0F\x07\x70\x70\x70\x07\x70\x0F\x07\x07\x78\x00" \
+    "\x07\x0F\x0F\x07\x70\x07\x07\x0F\x0F\x70\x78\x7F\x08\x7F\x08\x70" \
+    "\x7F\x7F\x7F\x0F\x70\x70\x07\x70\x70\x70\x07\x7F\x70\x07\x78\x00" \
+    "\x70\x7F\x7F\x70\x07\x70\x70\x7F\x7F\x07\x0F\x0F\x78\x0F\x78\x07" \
+    "\x0F\x0F\x0F\x70\x0F\x07\x70\x70\x70\x07\x70\x0F\x07\x07\x78\x00" \
+    "\x07\x0F\x07\x70\x70\x07\x0F\x70"    // help colors
+
+#define cpAppMonochrome \
+       "\x70\x07\x07\x0F\x70\x70\x70\x07\x0F\x07\x70\x70\x07\x70\x00" \
+    "\x07\x0F\x07\x70\x70\x07\x70\x00\x70\x70\x70\x07\x07\x70\x07\x00" \
+    "\x70\x70\x70\x07\x07\x70\x70\x70\x0F\x07\x07\x0F\x70\x0F\x70\x07" \
+    "\x0F\x0F\x07\x70\x07\x07\x70\x07\x07\x07\x70\x0F\x07\x07\x70\x00" \
+    "\x70\x70\x70\x07\x07\x70\x70\x70\x0F\x07\x07\x0F\x70\x0F\x70\x07" \
+    "\x0F\x0F\x07\x70\x07\x07\x70\x07\x07\x07\x70\x0F\x07\x07\x70\x00" \
+    "\x70\x70\x70\x07\x07\x70\x70\x70\x0F\x07\x07\x0F\x70\x0F\x70\x07" \
+    "\x0F\x0F\x07\x70\x07\x07\x70\x07\x07\x07\x70\x0F\x07\x07\x70\x00" \
+    "\x07\x0F\x07\x70\x70\x07\x0F\x70"    // help colors
 
 #if defined( Uses_TProgram ) && !defined( __TProgram )
 #define __TProgram
 
-#define cpColor \
-    "\x71\x70\x78\x74\x20\x28\x24\x17\x1F\x1A\x31\x31\x1E\x71\x00" \
-    "\x37\x3F\x3A\x13\x13\x3E\x21\x00\x70\x7F\x7A\x13\x13\x70\x7F\x00" \
-    "\x70\x7F\x7A\x13\x13\x70\x70\x7F\x7E\x20\x2B\x2F\x78\x2E\x70\x30" \
-    "\x3F\x3E\x1F\x2F\x1A\x20\x72\x31\x31\x30\x2F\x3E\x31\x13\x00\x00"
+// Standard application help contexts
 
-#define cpBlackWhite \
-    "\x70\x70\x78\x7F\x07\x07\x0F\x07\x0F\x07\x70\x70\x07\x70\x00" \
-    "\x07\x0F\x07\x70\x70\x07\x70\x00\x70\x7F\x7F\x70\x07\x70\x07\x00" \
-    "\x70\x7F\x7F\x70\x07\x70\x70\x7F\x7F\x07\x0F\x0F\x78\x0F\x78\x07" \
-    "\x0F\x0F\x0F\x70\x0F\x07\x70\x70\x70\x07\x70\x0F\x07\x07\x00\x00"
+// Note: range $FF00 - $FFFF of help contexts are reserved by Borland
 
-#define cpMonochrome \
-    "\x70\x07\x07\x0F\x70\x70\x70\x07\x0F\x07\x70\x70\x07\x70\x00" \
-    "\x07\x0F\x07\x70\x70\x07\x70\x00\x70\x70\x70\x07\x07\x70\x07\x00" \
-    "\x70\x70\x70\x07\x07\x70\x70\x70\x0F\x07\x07\x0F\x70\x0F\x70\x07" \
-    "\x0F\x0F\x07\x70\x07\x07\x70\x07\x07\x07\x70\x0F\x07\x07\x00\x00"
+const unsigned short hcNew          = 0xFF01;
+const unsigned short hcOpen         = 0xFF02;
+const unsigned short hcSave         = 0xFF03;
+const unsigned short hcSaveAs       = 0xFF04;
+const unsigned short hcSaveAll      = 0xFF05;
+const unsigned short hcChangeDir    = 0xFF06;
+const unsigned short hcDosShell     = 0xFF07;
+const unsigned short hcExit         = 0xFF08;
+
+const unsigned short hcUndo         = 0xFF10;
+const unsigned short hcCut          = 0xFF11;
+const unsigned short hcCopy         = 0xFF12;
+const unsigned short hcPaste        = 0xFF13;
+const unsigned short hcClear        = 0xFF14;
+
+const unsigned short hcTile         = 0xFF20;
+const unsigned short hcCascade      = 0xFF21;
+const unsigned short hcCloseAll     = 0xFF22;
+const unsigned short hcResize       = 0xFF23;
+const unsigned short hcZoom         = 0xFF24;
+const unsigned short hcNext         = 0xFF25;
+const unsigned short hcPrev         = 0xFF26;
+const unsigned short hcClose        = 0xFF27;
 
 
-class far TStatusLine;
-class far TMenuBar;
-class far TDeskTop;
-class far TEvent;
-class far TView;
+class _FAR TStatusLine;
+class _FAR TMenuBar;
+class _FAR TDeskTop;
+class _FAR TEvent;
+class _FAR TView;
 
 class TProgInit
 {
@@ -198,6 +247,9 @@ const
     apBlackWhite = 1,
     apMonochrome = 2;
 
+class _FAR TDialog;
+class _FAR TWindow;
+
 class TProgram : public TGroup, public virtual TProgInit
 {
 
@@ -206,6 +258,8 @@ public:
     TProgram();
     virtual ~TProgram();
 
+    virtual Boolean canMoveFocus();
+    virtual ushort executeDialog(TDialog*, void*data = 0);
     virtual void getEvent(TEvent& event);
     virtual TPalette& getPalette() const;
     virtual void handleEvent(TEvent& event);
@@ -214,6 +268,7 @@ public:
     virtual void outOfMemory();
     virtual void putEvent( TEvent& event );
     virtual void run();
+    virtual TWindow* insertWindow(TWindow*);
     void setScreenMode( ushort mode );
     TView *validView( TView *p );
     virtual void shutDown();
@@ -225,19 +280,19 @@ public:
     static TMenuBar *initMenuBar( TRect );
     static TDeskTop *initDeskTop( TRect );
 
-    static TProgram * near application;
-    static TStatusLine * near statusLine;
-    static TMenuBar * near menuBar;
-    static TDeskTop * near deskTop;
-    static int near appPalette;
+    static TProgram * _NEAR application;
+    static TStatusLine * _NEAR statusLine;
+    static TMenuBar * _NEAR menuBar;
+    static TDeskTop * _NEAR deskTop;
+    static int _NEAR appPalette;
 
 protected:
 
-    static TEvent near pending;
+    static TEvent _NEAR pending;
 
 private:
 
-    static const char * near exitText;
+    static const char * _NEAR exitText;
 
 };
 
@@ -254,6 +309,7 @@ protected:
     TApplication();
     virtual ~TApplication();
 
+public:
     virtual void suspend();
     virtual void resume();
 
@@ -262,7 +318,7 @@ protected:
 #endif
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

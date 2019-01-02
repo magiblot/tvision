@@ -2,13 +2,23 @@
 /*                                                                         */
 /*   TKEYS.H                                                               */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
+/*   defines constants for all control key combinations                    */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #if !defined( __TKEYS_H )
 #define __TKEYS_H
+
+#if defined( __FLAT__ ) && !defined( __WINDOWS_H )
+#include <windows.h>
+#endif
 
 const ushort
 
@@ -28,7 +38,7 @@ const ushort
     kbCtrlV     = 0x0016,   kbCtrlW     = 0x0017,   kbCtrlX     = 0x0018,
     kbCtrlY     = 0x0019,   kbCtrlZ     = 0x001a,
 
-// Extended key codes 
+// Extended key codes
 
     kbEsc       = 0x011b,   kbAltSpace  = 0x0200,   kbCtrlIns   = 0x0400,
     kbShiftIns  = 0x0500,   kbCtrlDel   = 0x0600,   kbShiftDel  = 0x0700,
@@ -66,18 +76,56 @@ const ushort
     kbAlt4      = 0x7b00,   kbAlt5      = 0x7c00,   kbAlt6      = 0x7d00,
     kbAlt7      = 0x7e00,   kbAlt8      = 0x7f00,   kbAlt9      = 0x8000,
     kbAlt0      = 0x8100,   kbAltMinus  = 0x8200,   kbAltEqual  = 0x8300,
-    kbCtrlPgUp  = 0x8400,   kbNoKey     = 0x0000,
+    kbCtrlPgUp  = 0x8400,   kbAltBack   = 0x0800,   kbNoKey     = 0x0000,
+
+#if defined( __FLAT__ )
+    kbF11       = 0x5700,   kbF12       = 0x5800,   kbShiftF11  = 0x8700,
+    kbShiftF12  = 0x8800,   kbCtrlF11   = 0x8900,   kbCtrlF12   = 0x8A00,
+    kbAltF11    = 0x8B00,   kbAltF12    = 0x8C00,
+#endif
 
 //  Keyboard state and shift masks
 
-    kbRightShift  = 0x0001,
-    kbLeftShift   = 0x0002,
-    kbCtrlShift   = 0x0004,
-    kbAltShift    = 0x0008,
+// Changes for this version:
+//   In 32-bit mode, distinguishing between the right and left shift
+//   keys is not supported, and there is an additional new flag,
+//   kbEnhanced, which is set if the key pressed was an enhanced key
+//   (e.g. <insert> or <home>)
+//
+//   In 16-bit mode, there are additional flags for the right and left
+//   Control and Alt keys, but this is not supported.  The flags are
+//   there for source compatibility with the 32-bit version which does
+//   support this.
+
+#if !defined( __FLAT__ )
+    kbLeftShift   = 0x0001,
+    kbRightShift  = 0x0002,
+    kbShift       = kbLeftShift | kbRightShift,
+    kbLeftCtrl    = 0x0004,
+    kbRightCtrl   = 0x0004,
+    kbCtrlShift   = kbLeftCtrl | kbRightCtrl,
+    kbLeftAlt     = 0x0008,
+    kbRightAlt    = 0x0008,
+    kbAltShift    = kbLeftAlt | kbRightAlt,
     kbScrollState = 0x0010,
     kbNumState    = 0x0020,
     kbCapsState   = 0x0040,
     kbInsState    = 0x0080;
+#else
+    kbLeftShift   = SHIFT_PRESSED,
+    kbRightShift  = SHIFT_PRESSED,
+    kbShift       = kbLeftShift | kbRightShift,
+    kbLeftCtrl    = LEFT_CTRL_PRESSED,
+    kbRightCtrl   = RIGHT_CTRL_PRESSED,
+    kbCtrlShift   = kbLeftCtrl | kbRightCtrl,
+    kbLeftAlt     = LEFT_ALT_PRESSED,
+    kbRightAlt    = RIGHT_ALT_PRESSED,
+    kbAltShift    = kbLeftAlt | kbRightAlt,
+    kbScrollState = SCROLLLOCK_ON,
+    kbNumState    = NUMLOCK_ON,
+    kbCapsState   = CAPSLOCK_ON,
+    kbEnhanced    = ENHANCED_KEY,
+    kbInsState    = 0x200;  // Ensure this doesn't overlap above values
+#endif
 
-
-#endif	// __TKEYS_H
+#endif  // __TKEYS_H

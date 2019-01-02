@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TView member functions                    */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TKeys
 #define Uses_TView
@@ -24,7 +21,7 @@
 #define Uses_TEvent
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __DOS_H )
 #include <Dos.h>
@@ -36,9 +33,9 @@
 
 TPoint shadowSize = {2,1};
 uchar shadowAttr = 0x08;
-Boolean near TView::showMarkers = False;
-uchar near TView::errorAttr = 0xCF;
-Boolean near TView::commandSetChanged = False;
+Boolean _NEAR TView::showMarkers = False;
+uchar _NEAR TView::errorAttr = 0xCF;
+Boolean _NEAR TView::commandSetChanged = False;
 
 extern TView *TheTopView;
 
@@ -55,7 +52,7 @@ static TCommandSet initCommands()
     return temp;
 }
 
-TCommandSet near TView::curCommandSet = initCommands();
+TCommandSet _NEAR TView::curCommandSet = initCommands();
 
 TView::TView( const TRect& bounds) :
     owner( 0 ), next( 0 ), options( 0 ), state( sfVisible ),
@@ -67,6 +64,10 @@ TView::TView( const TRect& bounds) :
 }
 
 TView::~TView()
+{
+}
+
+void TView::awaken()
 {
 }
 
@@ -87,7 +88,7 @@ inline int range( int val, int min, int max )
     else
         return val;
 }
-                
+
 void TView::calcBounds( TRect& bounds, TPoint delta )
 {
     bounds = getBounds();
@@ -178,17 +179,11 @@ void TView::moveGrow( TPoint p,
     locate(r);
 }
 
-void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s )
+void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState )
 {
-# ifdef PROTECT
-    unsigned char *shiftState = (unsigned char *) MK_FP(biosSeg,0x17);
-# else
-    unsigned char *shiftState = (unsigned char *) MK_FP(0x40,0x17);
-# endif
-
-    if( (mode & dmDragMove) != 0 && (*shiftState & 3) == 0 )
+    if( (mode & dmDragMove) != 0 && (ctrlState & kbShift) == 0 )
         p += delta;
-    else if( (mode & dmDragGrow) != 0 && (*shiftState & 3) != 0 )
+    else if( (mode & dmDragGrow) != 0 && (ctrlState & kbShift) != 0 )
         s += delta;
 }
 
@@ -237,14 +232,14 @@ void TView::dragView( TEvent& event,
         }
     else
         {
-        static TPoint 
-            goLeft      =   {-1, 0}, 
-            goRight     =   { 1, 0}, 
-            goUp        =   { 0,-1}, 
-            goDown      =   { 0, 1}, 
-            goCtrlLeft  =   {-8, 0}, 
+        static TPoint
+            goLeft      =   {-1, 0},
+            goRight     =   { 1, 0},
+            goUp        =   { 0,-1},
+            goDown      =   { 0, 1},
+            goCtrlLeft  =   {-8, 0},
             goCtrlRight =   { 8, 0};
-            
+
         saveBounds = getBounds();
         do  {
             p = origin;
@@ -253,22 +248,22 @@ void TView::dragView( TEvent& event,
             switch (event.keyDown.keyCode & 0xFF00)
                 {
                 case kbLeft:
-                    change(mode,goLeft,p,s);
+                    change(mode,goLeft,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbRight:
-                    change(mode,goRight,p,s);
+                    change(mode,goRight,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbUp:
-                    change(mode,goUp,p,s);
+                    change(mode,goUp,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbDown:
-                    change(mode,goDown,p,s);
+                    change(mode,goDown,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbCtrlLeft:
-                    change(mode,goCtrlLeft,p,s);
+                    change(mode,goCtrlLeft,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbCtrlRight:
-                    change(mode,goCtrlRight,p,s);
+                    change(mode,goCtrlRight,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbHome:
                     p.x = limits.a.x;
@@ -383,6 +378,27 @@ ushort  TView::execute()
     return cmCancel;
 }
 
+Boolean TView::focus()
+{
+    Boolean result = True;
+
+    if ((state & (sfSelected | sfModal)) == 0)
+        {
+        if (owner)
+            {
+            result = owner->focus();
+            if (result)
+                if ((owner->current->valid(cmReleasedFocus)) &&
+                    ((owner->current == 0) ||
+                     ((owner->current->options & ofValidate) == 0)))
+                    select();
+                else
+                    return False;
+            }
+        }
+    return result;
+}
+
 TRect TView::getClipRect()
 {
     TRect clip = getBounds();
@@ -454,11 +470,8 @@ void TView::handleEvent(TEvent& event)
     if( event.what == evMouseDown )
         {
         if(!(state & (sfSelected | sfDisabled)) && (options & ofSelectable) )
-            {
-            select();
-            if( !(options & ofFirstClick) )
+            if( !focus() || !(options & ofFirstClick) )
                 clearEvent(event);
-            }
         }
 }
 
@@ -477,7 +490,7 @@ void TView::keyEvent( TEvent& event )
 {
     do {
        getEvent(event);
-        } while( event.what != evKeyDown );
+       } while( event.what != evKeyDown );
 }
 
 #define range(Val, Min, Max)    (((Val < Min) ? Min : ((Val > Max) ? Max : Val)))
@@ -625,6 +638,8 @@ void TView::putInFrontOf( TView *Target )
 
 void TView::select()
 {
+    if( ! (options & ofSelectable))
+	return;
     if( (options & ofTopSelect) != 0 )
         makeFirst();
     else if( owner != 0 )
@@ -632,9 +647,17 @@ void TView::select()
 }
 
 void TView::setBounds( const TRect& bounds )
-{            
+{
     origin = bounds.a;
     size = bounds.b - bounds.a;
+}
+
+void TView::setCmdState(TCommandSet& commands, Boolean enable)
+{
+	if (enable)
+		enableCommands(commands);
+	else
+		disableCommands(commands);
 }
 
 void TView::setCommands( TCommandSet& commands )
@@ -644,7 +667,7 @@ void TView::setCommands( TCommandSet& commands )
     curCommandSet = commands;
 }
 
-void TView::setCursor( short x, short y )
+void TView::setCursor( int x, int y )
 {
     cursor.x = x;
     cursor.y = y;
@@ -709,7 +732,7 @@ void TView::showCursor()
 void TView::sizeLimits( TPoint& min, TPoint& max )
 {
     min.x = min.y = 0;
-    if( owner != 0 )
+    if( !(growMode & gfFixed) && owner != 0 )
         max = owner->size;
     else
         max.x = max.y = INT_MAX;
@@ -748,6 +771,9 @@ void TView::shutDown()
     TObject::shutDown();
 }
 
+
+#if !defined(NO_STREAMABLE)
+
 void TView::write( opstream& os )
 {
     ushort saveState =
@@ -776,3 +802,6 @@ TStreamable *TView::build()
 TView::TView( StreamableInit )
 {
 }
+
+
+#endif

@@ -4,64 +4,66 @@
 /* function(s)                                                */
 /*                  TParamText member functions               */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TParamText
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STDIO_H )
 #include <Stdio.h>
 #endif  // __STDIO_H
 
-TParamText::TParamText( const TRect& bounds,
-                        const char *aText,
-                        int aParamCount ) :
-    TStaticText(bounds, aText),
-    paramList( 0 ),
-    paramCount( aParamCount )
+#if !defined( __STDARG_H )
+#include <Stdarg.h>
+#endif  // __STDARG_H
+
+#if !defined( __STRING_H )
+#include <String.h>
+#endif  // __STRING_H
+
+TParamText::TParamText( const TRect& bounds ) :
+    TStaticText(bounds, 0 ),
+    str( new char [256] )
 {
+    str[0] = EOS;
 }
 
-ushort TParamText::dataSize()
+TParamText::~TParamText()
 {
-    return paramCount * sizeof(long);
+    delete str;
 }
 
 void TParamText::getText( char *s )
 {
-    if( text == 0 )
-        *s = EOS;
+    if( str != 0 )
+        strcpy( s, str );
     else
-        vsprintf( s, text, paramList );
+        *s = EOS;
 }
 
-void TParamText::setData( void *rec )
+int TParamText::getTextLen()
 {
-    paramList = &rec;
+    return (str != 0) ? strlen( str ) : 0;
 }
 
-void TParamText::write( opstream& os )
+void TParamText::setText( char *fmt, ... )
 {
-    TStaticText::write( os );
-    os << paramCount;
+    va_list ap;
+
+    va_start( ap, fmt );
+    vsprintf( str, fmt, ap );
+    va_end( ap );
+
+    drawView();
 }
 
-void *TParamText::read( ipstream& is )
-{
-    TStaticText::read( is );
-    is >> paramCount;
-    paramList = 0;
-    return this;
-}
+#if !defined(NO_STREAMABLE)
 
 TStreamable *TParamText::build()
 {
@@ -72,4 +74,4 @@ TParamText::TParamText( StreamableInit ) : TStaticText( streamableInit )
 {
 }
 
-
+#endif

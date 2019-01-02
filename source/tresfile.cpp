@@ -4,16 +4,13 @@
 /* function(s)                                                  */
 /*                  TResourceFile member functions              */
 /*--------------------------------------------------------------*/
-
-/*--------------------------------------------------------------*/
-/*                                                              */
-/*     Turbo Vision -  Version 1.0                              */
-/*                                                              */
-/*                                                              */
-/*     Copyright (c) 1991 by Borland International              */
-/*     All Rights Reserved.                                     */
-/*                                                              */
-/*--------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TResourceFile
 #define Uses_TResourceItem
@@ -21,7 +18,7 @@
 #define Uses_TCollection
 #define Uses_TStringCollection
 #define Uses_TResourceCollection
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __IO_H )
 #include <io.h>
@@ -84,13 +81,15 @@ TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
                    found = 1;
                else
                    {
-                   basePos += 
+                   basePos +=
                       header->info.infoSize + 16 - (header->info.infoSize)%16;
                    repeat = 1;
                    }
                }
            }
         } while (repeat);
+
+    delete header;
 
     if (found)
     {
@@ -135,10 +134,10 @@ void TResourceFile::flush()
 
     if (modified == True)
     {
-        stream->seekg(basePos + indexPos, ios::beg);
+        stream->seekp(basePos + indexPos, ios::beg);
         *stream << index;
         lenRez =  stream->tellp() - basePos -  sizeof(long) * 2;
-        stream->seekg(basePos, ios::beg);
+        stream->seekp(basePos, ios::beg);
         *stream << rStreamMagic;
         *stream << lenRez;
         *stream << indexPos;
@@ -182,6 +181,77 @@ void TResourceFile::put(TStreamable *item, const char *key)
     *stream << item;
     indexPos = stream->tellp() - basePos;
     p->size  = indexPos - p->pos;
+
     modified = True;
+}
+
+void copyStream( fpstream* dest, fpstream* src, long n)
+{
+	const xferSize=256;
+
+	char *xferBuf = new char[xferSize];
+	size_t thisMove;
+
+	while (n > 0)
+	{
+		if (n > xferSize)
+			thisMove = xferSize;
+		else
+			thisMove = (int)n;
+
+		src->readBytes(xferBuf, thisMove);
+		dest->writeBytes(xferBuf, thisMove);
+		n -= thisMove;
+	}
+
+	delete xferBuf;
+}
+
+struct SwitchInfo
+{
+	fpstream* sourceStream;
+	fpstream* destStream;
+	long oldBasePos;
+	long newBasePos;
+};
+
+void doCopyResource(void* item, void* arg)
+{
+  SwitchInfo* si = (SwitchInfo*)arg;
+
+  si->sourceStream->seekg(si->oldBasePos + ((TResourceItem*)item)->pos);
+  ((TResourceItem*)item)->pos = si->destStream->tellp() - si->newBasePos;
+
+  copyStream( si->destStream, si->sourceStream, ((TResourceItem*)item)->size);
+}
+
+fpstream* TResourceFile::switchTo( fpstream *aStream, Boolean pack )
+{
+  SwitchInfo args;
+
+  args.newBasePos = aStream->tellp();
+  args.oldBasePos = basePos;
+
+  if (pack)
+  {
+  	 args.sourceStream = stream;
+	 args.destStream = aStream;
+    aStream->seekp( args.newBasePos + sizeof(long)*3);
+    index->forEach(doCopyResource, &args);
+    indexPos = aStream->tellp() - args.newBasePos;
+  }
+  else
+  {
+    stream->seekg(basePos);
+	 copyStream(aStream, stream, indexPos);
+  }
+
+  modified = True;
+  basePos = args.newBasePos;
+
+  fpstream* oldStream = stream;
+  stream = aStream;
+
+  return oldStream;
 }
 

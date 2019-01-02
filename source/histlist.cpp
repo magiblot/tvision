@@ -10,18 +10,15 @@
 /*          initHistory                                       */
 /*          doneHistory                                       */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -41,7 +38,7 @@
 
 class HistRec
 {
-    
+
 public:
 
     HistRec( uchar nId, const char *nStr );
@@ -112,8 +109,12 @@ void advanceStringPointer()
 
 void deleteString()
 {
-    size_t len = curRec->len;
-    movmem( next( curRec ), curRec, size_t( (char *)lastRec - (char *)curRec ) );
+	size_t len = curRec->len;
+#if !defined(__FLAT__)
+	movmem( next( curRec ), curRec, size_t( (char *)lastRec - (char *)curRec ) );
+#else
+	memcpy(curRec, next(curRec),    size_t( (char *)lastRec - (char *)curRec ) );
+#endif
     lastRec = backup( lastRec, len );
 }
 
@@ -125,7 +126,11 @@ void insertString( uchar id, const char *str )
         ushort firstLen = historyBlock->len;
         HistRec *dst = historyBlock;
         HistRec *src = next( historyBlock );
-        movmem( src, dst,  size_t( (char *)lastRec - (char *)src ) );
+#if !defined(__FLAT__)
+		movmem( src, dst,  size_t( (char *)lastRec - (char *)src ) );
+#else
+		memcpy( dst, src,  size_t( (char *)lastRec - (char *)src ) );
+#endif
         lastRec = backup( lastRec, firstLen );
         }
     new( lastRec ) HistRec( id, str );

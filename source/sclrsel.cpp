@@ -9,17 +9,15 @@
 /*                      TColorItemList                        */
 /*                      TColorDialog                          */
 /*------------------------------------------------------------*/
-                                                              
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
+#if !defined(NO_STREAMABLE)
 #define Uses_TColorSelector
 #define Uses_TMonoSelector
 #define Uses_TColorDisplay
@@ -27,7 +25,7 @@
 #define Uses_TColorItemList
 #define Uses_TColorDialog
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RCluster )
 __link( RView )
 __link( RLabel )
@@ -37,7 +35,7 @@ __link( RDialog )
 
 TStreamableClass RColorSelector( TColorSelector::name,
                                  TColorSelector::build,
-                                 __DELTA(TColorSelector)      
+                                 __DELTA(TColorSelector)
                                );
 
 TStreamableClass RMonoSelector( TMonoSelector::name,
@@ -52,7 +50,7 @@ TStreamableClass RColorDisplay( TColorDisplay::name,
 
 TStreamableClass RColorGroupList( TColorGroupList::name,
                                   TColorGroupList::build,
-                                  __DELTA(TColorGroupList)                          
+                                  __DELTA(TColorGroupList)
                                 );
 
 
@@ -66,3 +64,4 @@ TStreamableClass RColorDialog( TColorDialog::name,
                                __DELTA(TColorDialog)
                              );
 
+#endif

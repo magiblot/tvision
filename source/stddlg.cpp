@@ -8,17 +8,13 @@
 /*                      TSearchRec                            */
 /*                      TFileInfoPane                         */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_MsgBox
 #define Uses_TKeys
@@ -30,7 +26,7 @@
 #define Uses_TDrawBuffer
 #define Uses_TFileDialog
 #define Uses_TSortedCollection
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __DOS_H )
 #include <dos.h>
@@ -68,7 +64,15 @@
 #include <Limits.h>
 #endif  // __LIMITS_H
 
-char &shiftKeys = *(char far *)MK_FP( 0x40, 0x17 );
+#if __STDC__
+extern "C"
+{
+char _FAR * _CType _FARFUNC ltoa(long __value, char _FAR *__string, int );
+char _FAR *_CType _FARFUNC itoa(int __value, char _FAR *__string, int );
+int  _CType _FARFUNC strnicmp(const char _FAR *__s1, const char _FAR *__s2,
+                size_t __maxlen);
+};
+#endif
 
 void fexpand( char * );
 
@@ -77,7 +81,7 @@ void fexpand( char * );
 TFileInputLine::TFileInputLine( const TRect& bounds, short aMaxLen ) :
     TInputLine( bounds, aMaxLen )
 {
-    eventMask = eventMask | evBroadcast;
+    eventMask |= evBroadcast;
 }
 
 void TFileInputLine::handleEvent( TEvent& event )
@@ -118,60 +122,64 @@ static Boolean equal( const char *s1, const char *s2, ushort count)
 
 void TSortedListBox::handleEvent(TEvent& event)
 {
-char curString[256], newString[256];
-void* k;
-int value, oldPos, oldValue;
+    char curString[256], newString[256];
+    void* k;
+    int value;
+    short oldPos, oldValue;
 
     oldValue = focused;
     TListBox::handleEvent( event );
-    if( oldValue != focused )
-        searchPos = USHRT_MAX;
+    if( oldValue != focused ||
+        ( event.what == evBroadcast &&
+          event.message.command == cmReleasedFocus )
+      )
+        searchPos = -1;
     if( event.what == evKeyDown )
         {
         if( event.keyDown.charScan.charCode != 0 )
             {
             value = focused;
             if( value < range )
-                getText( curString, value, 255 );
+                getText( curString, (short) value, 255 );
             else
                 *curString = EOS;
             oldPos = searchPos;
             if( event.keyDown.keyCode == kbBack )
                 {
-                if( searchPos == USHRT_MAX )
+                if( searchPos == -1 )
                     return;
                 searchPos--;
-                if( searchPos == USHRT_MAX )
-                    shiftState = shiftKeys;
-                curString[searchPos] = EOS;
+                if( searchPos == -1 )
+                    shiftState = (ushort) event.keyDown.controlKeyState;
+                curString[searchPos+1] = EOS;
                 }
             else if( (event.keyDown.charScan.charCode == '.') )
                 {
                 char *loc = strchr( curString, '.' );
                 if( loc == 0 )
-                    searchPos = USHRT_MAX;
+                    searchPos = -1;
                 else
-                    searchPos = ushort(loc - curString);
+                    searchPos = short(loc - curString);
                 }
             else
                 {
                 searchPos++;
                 if( searchPos == 0 )
-                    shiftState = shiftKeys;
+                    shiftState = (ushort) event.keyDown.controlKeyState;
                 curString[searchPos] = event.keyDown.charScan.charCode;
                 curString[searchPos+1] = EOS;
                 }
             k = getKey(curString);
-            list()->search( k, value );
+            list()->search( k, (ccIndex) value );
             if( value < range )
                 {
-                getText( newString, value, 255 );
-                if( equal( curString, newString, searchPos+1 ) )
+                getText( newString, (short) value, 255 );
+                if( equal( curString, newString, (ushort) (searchPos+1) ) )
                     {
                     if( value != oldValue )
                         {
-                        focusItem(value);
-                        setCursor( cursor.x+searchPos, cursor.y );
+                        focusItem( (short) value );
+                        setCursor( cursor.x+searchPos+1, cursor.y );
                         }
                     else
                         setCursor(cursor.x+(searchPos-oldPos), cursor.y );
@@ -219,11 +227,11 @@ void TFileInfoPane::draw()
     fexpand( path );
 
     color = getColor(0x01);
-    b.moveChar( 0, ' ', color, size.x );
+    b.moveChar( 0, ' ', color, (ushort) size.x );
     b.moveStr( 1, path, color );
-    writeLine( 0, 0, size.x, 1, b );
+    writeLine( 0, 0, (ushort) size.x, 1, b );
 
-    b.moveChar( 0, ' ', color, size.x );
+    b.moveChar( 0, ' ', color, (ushort) size.x );
     b.moveStr( 1, file_block.name, color );
 
     if( *(file_block.name) != EOS )
@@ -281,9 +289,9 @@ void TFileInfoPane::draw()
             b.moveStr( 43, amText, color );
         }
 
-    writeLine(0, 1, size.x, 1, b );
-    b.moveChar( 0, ' ', color, size. x);
-    writeLine( 0, 2, size.x, size.y-2, b);
+    writeLine(0, 1, (ushort) size.x, 1, b );
+    b.moveChar( 0, ' ', color, (ushort) size.x );
+    writeLine( 0, 2, (ushort) size.x, (ushort) (size.y-2), b);
 }
 
 TPalette& TFileInfoPane::getPalette() const
@@ -302,7 +310,11 @@ void TFileInfoPane::handleEvent( TEvent& event )
         }
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TFileInfoPane::build()
 {
     return new TFileInfoPane( streamableInit );
 }
+
+#endif

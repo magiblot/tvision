@@ -7,19 +7,16 @@
 /*        moveCStr --   moves a char array into a buffer & adds an        */
 /*                      attribute to each char                            */
 /*------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------*/
-/*                                                                        */
-/*    Turbo Vision -  Version 1.0                                         */
-/*                                                                        */
-/*                                                                        */
-/*    Copyright (c) 1991 by Borland International                         */
-/*    All Rights Reserved.                                                */
-/*                                                                        */
-/*------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TDrawBuffer
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __DOS_H )
 #include <Dos.h>
@@ -45,46 +42,66 @@
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveBuf( ushort indent, const void far *source,
+void TDrawBuffer::moveBuf( ushort indent, const void _FAR *source,
                            ushort attr, ushort count )
 
 {
-asm {
-    MOV     CX,count
-    JCXZ    __5
-    PUSH    DS
-    }
+#if !defined( __FLAT__ )
+
+I   MOV     CX, count
+I   JCXZ    __5
+I   PUSH    DS
 
     _ES = FP_SEG( &data[indent] );
     _DI = FP_OFF( &data[indent] );
 
-    _DS = FP_SEG( source );
-    _SI = FP_OFF( source );
+//    _DS = FP_SEG( source );
+//    _SI = FP_OFF( source );
+I   LDS     SI, source
 
-asm {
-    MOV     AH,[BYTE PTR attr]
-    CLD
-    OR      AH,AH
-    JE      __3
-    }
+I   MOV     AH, [BYTE PTR attr]
+I   CLD
+I   OR      AH, AH
+I   JE      __3
+
 __1:
-asm {
-    LODSB
-    STOSW
-    LOOP    __1
-    JMP     __4
-    }
+
+I   LODSB
+I   STOSW
+I   LOOP    __1
+I   JMP     __4
+
 __2:
-asm INC     DI
+
+I   INC     DI
+
 __3:
-asm {
-    STOSB
-    LOOP    __2
-    }
+
+I   MOVSB
+I   LOOP    __2
+
 __4:
-asm POP     DS
+
+I   POP     DS
+
 __5:
         ;
+#else
+
+    register ushort *dest = &data[indent];
+    register uchar _FAR *s = (uchar _FAR *)source;
+
+    if (attr != 0)
+        for (; count; --count, ++s, ++dest)
+        {
+            ((uchar*)dest)[0] = *s;
+            ((uchar*)dest)[1] = (uchar)attr;
+        }
+    else
+        while (count--)
+            *(uchar *)dest++ = *s++;
+
+#endif
 }
 
 /*------------------------------------------------------------------------*/
@@ -107,34 +124,53 @@ __5:
 
 void TDrawBuffer::moveChar( ushort indent, char c, ushort attr, ushort count )
 {
-asm {
-    MOV     CX,count
-    JCXZ    __4
-    }
+#if !defined( __FLAT__ )
+I   MOV     CX,count
+I   JCXZ    __4
 
     _ES = FP_SEG( &data[indent] );
     _DI = FP_OFF( &data[indent] );
 
-asm {
-    MOV     AL,c
-    MOV     AH,[BYTE PTR attr]
-    CLD
-    OR      AL,AL
-    JE      __1
-    OR      AH,AH
-    JE      __3
-    REP     STOSW
-    JMP     __4
-    }
+I   MOV     AL,c
+I   MOV     AH,[BYTE PTR attr]
+I   CLD
+I   OR      AL,AL
+I   JE      __1
+I   OR      AH,AH
+I   JE      __3
+I   REP     STOSW
+I   JMP     __4
+
 __1:
-asm MOV     AL,AH
+
+I   MOV     AL,AH
+
 __2:
-asm INC     DI
+
+I   INC     DI
+
 __3:
-asm STOSB
-asm LOOP    __2
+
+I   STOSB
+I   LOOP    __2
+
 __4:
     ;
+
+#else
+    register ushort *dest = &data[indent];
+
+    if (attr != 0)
+        for (; count; --count, ++dest)
+            {
+            if (c) ((uchar*)dest)[0] = c;
+            ((uchar*)dest)[1] = (uchar)attr;
+            }
+    else
+        while (count--)
+            *(uchar *)dest++ = c;
+
+#endif
 }
 
 /*------------------------------------------------------------------------*/
@@ -156,36 +192,58 @@ __4:
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveCStr( ushort indent, const char far *str, ushort attrs )
+void TDrawBuffer::moveCStr( ushort indent, const char _FAR *str, ushort attrs)
 {
-asm {
-    PUSH    DS
-    LDS     SI,str
-    CLD
-    }
+#if !defined ( __FLAT__ )
+I   PUSH    DS
+I   LDS     SI,str
+I   CLD
 
     _ES = FP_SEG( &data[indent] );
     _DI = FP_OFF( &data[indent] );
 
-asm {
-    MOV     BX,attrs
-    MOV     AH,BL
-    }
+I   MOV     BX,attrs
+I   MOV     AH,BL
+
 __1:
-asm {
-    LODSB
-    CMP     AL,'~'
-    JE      __2
-    CMP     AL,0
-    JE      __3
-    STOSW
-    JMP     __1
-    }
+
+I   LODSB
+I   CMP     AL,'~'
+I   JE      __2
+I   CMP     AL,0
+I   JE      __3
+I   STOSW
+I   JMP     __1
+
 __2:
-asm XCHG    AH,bH
-asm JMP     __1
+
+I   XCHG    AH,bH
+I   JMP     __1
+
 __3:
-asm POP     DS
+
+I   POP     DS
+
+#else
+    register ushort *dest = &data[indent];
+    int toggle;
+    uchar c, curAttr;
+
+    for (curAttr=((uchar *)&attrs)[0], toggle=1; (c=*str) != 0; str++)
+        {
+        if (c == '~')
+            {
+            curAttr = ((uchar *)&attrs)[toggle];
+            toggle = 1-toggle;
+            }
+        else
+            {
+            ((uchar*)dest)[0] = c;
+            ((uchar*)dest)[1] = curAttr;
+            dest++;
+            }
+        }
+#endif
 }
 
 /*------------------------------------------------------------------------*/
@@ -205,31 +263,55 @@ asm POP     DS
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveStr( ushort indent, const char far *str, ushort attr )
+void TDrawBuffer::moveStr( ushort indent, const char _FAR *str, ushort attr )
 {
-asm {
-    PUSH    DS
-    LDS     SI,str
-    CLD
-    }
+#if !defined ( __FLAT__ )
+I   PUSH    DS
+I   LDS     SI,str
+I   CLD
 
     _ES = FP_SEG( &data[indent] );
     _DI = FP_OFF( &data[indent] );
 
-asm {
-    MOV     BX,attr
-    MOV     AH,BL
-    }
-__1:
-asm {
-    LODSB
-    CMP     AL,0
-    JE      __2
-    STOSW
-    JMP     __1
-    }
-__2:
-asm POP     DS
-}
+I   MOV     AH, byte ptr attr
+I   OR      AH, AH
+I   JZ      __2
 
+__1:
+
+I   LODSB
+I   OR      AL,AL
+I   JZ      __3
+I   STOSW
+I   JMP     __1
+
+__2:
+
+I   LODSB
+I   OR      AL,AL
+I   JZ      __3
+I   STOSB
+I   INC            DI
+I   JMP     __2
+
+__3:
+
+I   POP     DS
+
+#else
+
+    register ushort *dest = &data[indent];
+    uchar c;
+
+    if (attr != 0)
+        for (;(c=*str) != 0; ++str, ++dest)
+            {
+            ((uchar*)dest)[0] = c;
+            ((uchar*)dest)[1] = (uchar)attr;
+            }
+        else
+            while (*str)
+                *(uchar *)dest++ = *str++;
+#endif
+}
 #pragma warn .asc

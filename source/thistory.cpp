@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  THistory member functions                 */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_THistory
 #define Uses_TKeys
@@ -23,7 +20,7 @@
 #define Uses_THistoryWindow
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -84,8 +81,12 @@ void THistory::handleEvent( TEvent& event )
           )
       )
         {
-        link->select();
-        historyAdd( historyId, link->data );
+        if (!link->focus())
+	{
+		clearEvent(event);
+		return;
+	}
+	recordHistory(link->data);
         r = link->getBounds();
         r.a.x--;
         r.b.x++;
@@ -116,7 +117,7 @@ void THistory::handleEvent( TEvent& event )
                  event.message.infoPtr ==  link) ||
                 event.message.command ==  cmRecordHistory
               )
-                historyAdd( historyId, link->data );
+                recordHistory(link->data );
 }
 
 THistoryWindow *THistory::initHistoryWindow( const TRect& bounds )
@@ -125,6 +126,13 @@ THistoryWindow *THistory::initHistoryWindow( const TRect& bounds )
     p->helpCtx = link->helpCtx;
     return p;
 }
+
+void THistory::recordHistory(const char* s)
+{
+	historyAdd(historyId, s);
+}
+
+#if !defined(NO_STREAMABLE)
 
 void THistory::write( opstream& os )
 {
@@ -148,4 +156,4 @@ THistory::THistory( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

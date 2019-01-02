@@ -3,24 +3,23 @@
 /*                                                            */
 /* Registeration object for the class TGroup                  */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TGroup
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RView )
 
 TStreamableClass RGroup( TGroup::name,
                          TGroup::build,
-                         __DELTA(TGroup) 
+                         __DELTA(TGroup)
                        );
+#endif
 

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TStatusLine member functions              */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStatusLine
 #define Uses_TStatusItem
@@ -22,7 +19,7 @@
 #define Uses_TEvent
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRING_H )
 #include <String.h>
@@ -188,7 +185,7 @@ void TStatusLine::handleEvent( TEvent& event )
             {
             for( TStatusItem *T = items; T != 0; T = T->next )
                 {
-                if( event.keyDown.keyCode ==  T->keyCode && 
+                if( event.keyDown.keyCode ==  T->keyCode &&
                     commandEnabled(T->command))
                     {
                     event.what = evCommand;
@@ -222,6 +219,8 @@ void TStatusLine::update()
         drawView();
         }
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TStatusLine::writeItems( opstream& os, TStatusItem *ts )
 {
@@ -264,12 +263,13 @@ TStatusItem *TStatusLine::readItems( ipstream& is )
     is >> count;
     while( count-- > 0 )
         {
-        const char *t = is.readString();
+        char *t = is.readString();
         int key, cmd;
         is >> key >> cmd;
         cur = new TStatusItem( t, key, cmd );
         *last = cur;
         last = &(cur->next);
+        delete t;
         }
     *last = 0;
     return first;
@@ -294,8 +294,9 @@ TStatusDef *TStatusLine::readDefs( ipstream& is )
     return first;
 }
 
+
 void *TStatusLine::read( ipstream& is )
-{   
+{
     TView::read( is );
     defs = readDefs( is );
     findItems();
@@ -312,3 +313,4 @@ TStatusLine::TStatusLine( StreamableInit ) : TView( streamableInit )
 }
 
 
+#endif

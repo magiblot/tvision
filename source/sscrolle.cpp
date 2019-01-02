@@ -3,24 +3,24 @@
 /*                                                            */
 /* Registeration object for the class TScroller               */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TScroller
 #define Uses_TStreamableClass
-#include <tv.h>
+#include <tvision\tv.h>
 __link( RView )
+__link( RScrollBar )
 
 TStreamableClass RScroller( TScroller::name,
                              TScroller::build,
-                             __DELTA(TScroller)  
+                             __DELTA(TScroller)
                           );
 
+#endif

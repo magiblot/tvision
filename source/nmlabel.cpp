@@ -3,19 +3,17 @@
 /*                                                            */
 /* defines the streamable name for class TLabel               */
 /*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
-
+#if !defined(NO_STREAMABLE)
 #define Uses_TLabel
-#include <tv.h>
+#include <tvision\tv.h>
 
-const char * const near TLabel::name = "TLabel";
-
+const char * const _NEAR TLabel::name = "TLabel";
+#endif

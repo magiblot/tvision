@@ -2,16 +2,20 @@
 /*                                                                         */
 /*   DRAWBUF.H                                                             */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the class TDrawBuffer, which provides the high-level          */
 /*   interface to the Screen Manager.                                      */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -28,9 +32,9 @@ class TDrawBuffer
 public:
 
     void moveChar( ushort indent, char c, ushort attr, ushort count );
-    void moveStr( ushort indent, const char far *str, ushort attrs );
-    void moveCStr( ushort indent, const char far *str, ushort attrs );
-    void moveBuf( ushort indent, const void far *source,
+    void moveStr( ushort indent, const char _FAR *str, ushort attrs );
+    void moveCStr( ushort indent, const char _FAR *str, ushort attrs );
+    void moveBuf( ushort indent, const void _FAR *source,
                   ushort attr, ushort count );
 
     void putAttribute( ushort indent, ushort attr );
@@ -58,7 +62,7 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 #endif  // Uses_TDrawBuffer
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 

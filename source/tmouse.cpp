@@ -4,26 +4,28 @@
 /* function(s)                                                */
 /*                  TMouse and THWMouse member functions      */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TEvent
-#include <tv.h>
+#define Uses_TEventQueue
+#define Uses_THardwareInfo
+#include <tvision\tv.h>
 
+#if !defined( __FLAT__ )
 #if !defined( __DOS_H )
 #include <Dos.h>
 #endif  // __DOS_H
+#endif  // __FLAT__
 
-uchar near THWMouse::buttonCount = 0;
-Boolean near THWMouse::handlerInstalled = False;
+
+uchar _NEAR THWMouse::buttonCount = 0;
+Boolean _NEAR THWMouse::handlerInstalled = False;
 
 THWMouse::THWMouse()
 {
@@ -32,11 +34,15 @@ THWMouse::THWMouse()
 
 void THWMouse::resume()
 {
+#if defined( __FLAT__ )
+    buttonCount = THardwareInfo::getButtonCount();
+    show();
+#else
     if( getvect( 0x33 ) == 0 )
         return;
 
     _AX = 0;
-    geninterrupt( 0x33 );
+    _genInt( 0x33 );
 
     if( _AX == 0 )
         return;
@@ -45,7 +51,10 @@ void THWMouse::resume()
     _AX = 4;
     _CX = 0;
     _DX = 0;
-    geninterrupt( 0x33 );
+
+    _genInt( 0x33 );
+    show();
+#endif
 }
 
 THWMouse::~THWMouse()
@@ -55,6 +64,10 @@ THWMouse::~THWMouse()
 
 void THWMouse::suspend()
 {
+#if defined(__FLAT__)
+    hide();
+    buttonCount = 0;
+#else
     if( present() == False )
         return;
     hide();
@@ -64,95 +77,112 @@ void THWMouse::suspend()
         handlerInstalled = False;
         }
     buttonCount = 0;
+#endif
 }
 
 #pragma warn -asc
 
 void THWMouse::show()
 {
+#if defined( __FLAT__ )
+    THardwareInfo::cursorOn();
+#else
     asm push ax;
     asm push es;
-       
+
     if( present() )
         {
         _AX = 1;
-        geninterrupt( 0x33 );
+        _genInt( 0x33 );
         }
 
     asm pop es;
     asm pop ax;
+#endif
 }
 
 void THWMouse::hide()
 {
+#if defined( __FLAT__ )
+    THardwareInfo::cursorOff();
+#else
     asm push ax;
     asm push es;
-       
+
     if( buttonCount != 0 )
         {
         _AX = 2;
-        geninterrupt( 0x33 );
+        _genInt( 0x33 );
         }
-
     asm pop es;
     asm pop ax;
+#endif
 }
 
 #pragma warn .asc
 
+#pragma argsused
 void THWMouse::setRange( ushort rx, ushort ry )
 {
+#if !defined( __FLAT__ )
     if( buttonCount != 0 )
         {
         _DX = rx;
         _DX <<= 3;
         _CX = 0;
         _AX = 7;
-        geninterrupt( 0x33 );
+        _genInt( 0x33 );
 
         _DX = ry;
         _DX <<= 3;
         _CX = 0;
         _AX = 8;
-        geninterrupt( 0x33 );
+        _genInt( 0x33 );
         }
+#endif
 }
 
 void THWMouse::getEvent( MouseEventType& me )
 {
+#if defined( __FLAT__ )
+    me.buttons = 0;
+    me.where.x = 0;
+    me.where.y = 0;
+    me.eventFlags = 0;
+#else
     _AX = 3;
-    geninterrupt( 0x33 );
+    _genInt( 0x33 );
     _AL = _BL;
     me.buttons = _AL;
     me.where.x = _CX >> 3;
     me.where.y = _DX >> 3;
-    me.doubleClick = False;
+    me.eventFlags = 0;
+#endif
 }
 
-void THWMouse::registerHandler( unsigned mask, void (far *func)() )
+#if !defined( __FLAT__ )
+void THWMouse::registerHandler( unsigned mask, void (_FAR *func)() )
 {
     if( !present() )
         return;
 
-#if defined( ProtectVersion )
-    _AX = 20;
-#else
     _AX = 12;
-#endif
     _CX = mask;
     _DX = FP_OFF( func );
     _ES = FP_SEG( func );
-    geninterrupt( 0x33 );
+
+    _genInt( 0x33 );
     handlerInstalled = True;
 }
+#endif
 
 TMouse::TMouse()
 {
-    show();
+//    show();
 }
 
 TMouse::~TMouse()
 {
-    hide();
+//    hide();
 }
 

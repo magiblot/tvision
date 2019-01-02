@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*            TIndicator member functions                     */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TIndicator
 #define Uses_TDrawBuffer
@@ -21,7 +18,7 @@
 #define Uses_TView
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __STRSTREA_H )
 #include <strstrea.h>
@@ -87,6 +84,8 @@ void TIndicator::setValue( const TPoint& aLocation, Boolean aModified )
         }
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TIndicator::build()
 {
     return new TIndicator( streamableInit );
@@ -96,3 +95,4 @@ TIndicator::TIndicator( StreamableInit ) : TView( streamableInit )
 {
 }
 
+#endif

@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TFileList member functions                */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TVMemMgr
 #define Uses_MsgBox
@@ -22,7 +19,8 @@
 #define Uses_TSearchRec
 #define Uses_TEvent
 #define Uses_TGroup
-#include <tv.h>
+#define Uses_TKeys
+#include <tvision\tv.h>
 
 #if !defined( __DIR_H )
 #include <Dir.h>
@@ -57,6 +55,10 @@
 #endif  // __STRING_H
 
 void fexpand( char * );
+#ifdef __FLAT__
+extern "C" char _FAR * _CType _FARFUNC strupr(char _FAR *__s);
+#endif
+
 
 TFileList::TFileList( const TRect& bounds,
                       TScrollBar *aScrollBar) :
@@ -76,6 +78,11 @@ void TFileList::focusItem( short item )
     message( owner, evBroadcast, cmFileFocused, list()->at(item) );
 }
 
+void TFileList::selectItem( short item )
+{
+    message( owner, evBroadcast, cmFileDoubleClicked, list()->at(item) );
+}
+
 void TFileList::getData( void * )
 {
 }
@@ -93,7 +100,7 @@ void* TFileList::getKey( const char *s )
 {
 static TSearchRec sR;
 
-    if( (shiftState & 0x03) != 0 || *s == '.' )
+    if( (shiftState & kbShift) != 0 || *s == '.' )
         sR.attr = FA_DIREC;
     else
         sR.attr = 0;
@@ -104,26 +111,14 @@ static TSearchRec sR;
 
 void TFileList::getText( char *dest, short item, short maxChars )
 {
-	TSearchRec *f = (TSearchRec *)(list()->at(item));
+    TSearchRec *f = (TSearchRec *)(list()->at(item));
 
-	strncpy( dest, f->name, maxChars );
-	dest[maxChars] = '\0';
+    strncpy( dest, f->name, maxChars );
+    dest[maxChars] = '\0';
     if( f->attr & FA_DIREC )
         strcat( dest, "\\" );
 }
 
-void TFileList::handleEvent( TEvent & event )
-{
-    if( event.what == evMouseDown && event.mouse.doubleClick )
-        {
-        event.what = evCommand;
-        event.message.command = cmOK;
-        putEvent( event );
-        clearEvent( event );
-        }
-    else
-        TSortedListBox::handleEvent( event );
-}
 
 void TFileList::readDirectory( const char *dir, const char *wildCard )
 {
@@ -135,6 +130,13 @@ void TFileList::readDirectory( const char *dir, const char *wildCard )
 
 struct DirSearchRec : public TSearchRec
 {
+    void readFf_blk(ffblk *f)
+    {
+        attr = (char)f->ff_attrib;
+    time = (((long)(unsigned)f->ff_fdate)<<16) | f->ff_ftime;
+    size = f->ff_fsize;
+    memcpy(name, f->ff_name, sizeof(name));
+    }
 
     void *operator new( size_t );
 
@@ -153,16 +155,14 @@ void *DirSearchRec::operator new( size_t sz )
 
 void TFileList::readDirectory( const char *aWildCard )
 {
-ffblk s;
-
-char path[MAXPATH];
-char drive[MAXDRIVE];
-char dir[MAXDIR];
-char file[MAXFILE];
-char ext[MAXEXT];
-
-const unsigned findAttr = FA_RDONLY | FA_ARCH;
-
+    ffblk s;
+    char path[MAXPATH];
+    char drive[MAXDRIVE];
+    char dir[MAXDIR];
+    char file[MAXFILE];
+    char ext[MAXEXT];
+    const unsigned findAttr = FA_RDONLY | FA_ARCH;
+    memset(&s, 0, sizeof(s));
     strcpy( path, aWildCard );
     fexpand( path );
     fnsplit( path, drive, dir, file, ext );
@@ -178,7 +178,7 @@ const unsigned findAttr = FA_RDONLY | FA_ARCH;
             p = new DirSearchRec;
             if( p != 0 )
                 {
-                memcpy( p, &s.ff_attrib, sizeof( DirSearchRec ) );
+        p->readFf_blk(&s);
                 fileList->insert( p );
                 }
             }
@@ -195,14 +195,14 @@ const unsigned findAttr = FA_RDONLY | FA_ARCH;
             p = new DirSearchRec;
             if( p != 0 )
                 {
-                memcpy( p, &s.ff_attrib, sizeof( DirSearchRec ) );
+        p->readFf_blk(&s);
                 fileList->insert( p );
                 }
             }
         res = findnext( &s );
         }
 
-    if( strlen( dir ) > 4 )
+    if( strlen( dir ) > 1 )
         {
         p = new DirSearchRec;
         if( p != 0 )
@@ -211,7 +211,7 @@ const unsigned findAttr = FA_RDONLY | FA_ARCH;
                 findnext( &s ) == 0 &&
                 strcmp( s.ff_name, ".." ) == 0
             )
-                memcpy( p, &s.ff_attrib, sizeof( DirSearchRec ) );
+            p->readFf_blk(&s);
             else
                 {
                 strcpy( p->name, ".." );
@@ -261,15 +261,12 @@ void squeeze( char *path )
                 {               // have a '..'
                 src += 2;       // skip the following '\'
                 dest--;         // back up to the previous '\'
-                while( *--dest != '\\' ) // back up to the previous '\'
+                while( dest > path && *--dest != '\\' ) // back up to the previous '\'
                     ;
                 dest++;         // move to the next position
                 }
             else
-                {
                 src++;          // skip the following '\'
-                dest += 2;
-                }
             }
         }
     *dest = EOS;                // zero terminator
@@ -277,11 +274,11 @@ void squeeze( char *path )
 
 void fexpand( char *rpath )
 {
-char path[MAXPATH];
-char drive[MAXDRIVE];
-char dir[MAXDIR];
-char file[MAXFILE];
-char ext[MAXEXT];
+    char path[MAXPATH];
+    char drive[MAXDRIVE];
+    char dir[MAXDIR];
+    char file[MAXFILE];
+    char ext[MAXEXT];
 
     int flags = fnsplit( rpath, drive, dir, file, ext );
     if( (flags & DRIVE) == 0 )
@@ -314,9 +311,11 @@ char ext[MAXEXT];
     strcpy( rpath, path );
 }
 
+#if !defined(NO_STREAMABLE)
+
 TStreamable *TFileList::build()
 {
     return new TFileList( streamableInit );
 }
 
-
+#endif

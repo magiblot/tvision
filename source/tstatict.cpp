@@ -4,22 +4,19 @@
 /* function(s)                                                */
 /*                  TStaticText member functions              */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TStaticText
 #define Uses_TDrawBuffer
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
@@ -35,6 +32,7 @@ TStaticText::TStaticText( const TRect& bounds, const char *aText ) :
     TView( bounds ),
     text( newStr( aText ) )
 {
+    growMode |= gfFixed;
 }
 
 TStaticText::~TStaticText()
@@ -69,19 +67,19 @@ void TStaticText::draw()
             i = p;
             do {
                j = p;
-               while ((p < l) && (s[p] == ' ')) 
+               while ((p < l) && (s[p] == ' '))
                    ++p;
                while ((p < l) && (s[p] != ' ') && (s[p] != '\n'))
                    ++p;
                } while ((p < l) && (p < i + size.x) && (s[p] != '\n'));
             if (p > i + size.x)
                 if (j > i)
-                    p = j; 
-                else 
+                    p = j;
+                else
                     p = i + size.x;
             if (center == True)
                j = (size.x - p + i) / 2 ;
-            else 
+            else
                j = 0;
             b.moveBuf(j, &s[i], color, (p - i));
             while ((p < l) && (s[p] == ' '))
@@ -90,8 +88,6 @@ void TStaticText::draw()
                 {
                 center = False;
                 p++;
-                if ((p < l) && (s[p] == 10))
-                    p++;
                 }
             }
         writeLine(0, y++, size.x, 1, b);
@@ -109,8 +105,13 @@ void TStaticText::getText( char *s )
     if( text == 0 )
         *s = EOS;
     else
-        strcpy( s, text );
+    {
+        strncpy( s, text, 255 );
+        s[255] = EOS;
+    }
 }
+
+#if !defined(NO_STREAMABLE)
 
 void TStaticText::write( opstream& os )
 {
@@ -134,4 +135,4 @@ TStaticText::TStaticText( StreamableInit ) : TView( streamableInit )
 {
 }
 
-
+#endif

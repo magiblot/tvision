@@ -4,16 +4,13 @@
 /* function(s)                                                */
 /*                  TFileDialog member functions              */
 /*------------------------------------------------------------*/
-
-/*------------------------------------------------------------*/
-/*                                                            */
-/*    Turbo Vision -  Version 1.0                             */
-/*                                                            */
-/*                                                            */
-/*    Copyright (c) 1991 by Borland International             */
-/*    All Rights Reserved.                                    */
-/*                                                            */
-/*------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #define Uses_TFileDialog
 #define Uses_MsgBox
@@ -28,7 +25,7 @@
 #define Uses_TFileInfoPane
 #define Uses_opstream
 #define Uses_ipstream
-#include <tv.h>
+#include <tvision\tv.h>
 
 #if !defined( __DIR_H )
 #include <Dir.h>
@@ -54,7 +51,7 @@
 #include <String.h>
 #endif  // __STRING_H
 
-// File dialog flags 
+// File dialog flags
 const
     ffOpen        = 0x0001,
     ffSaveAs      = 0x0002;
@@ -70,7 +67,7 @@ TFileDialog::TFileDialog( const char *aWildCard,
                           uchar histId
                         ) :
     TDialog( TRect( 15, 1, 64, 20 ), aTitle ),
-    directory( 0 ),
+    directory( newStr("") ),
     TWindowInit( &TFileDialog::initFrame )
 {
     options |= ofCentered;
@@ -175,11 +172,13 @@ static void noWildChars( char *dest, const char *src )
     *dest = EOS;
 }
 
+/* 'src' is cast to unsigned char * so that isspace sign extends it
+   correctly. */
 static void trim( char *dest, const char *src )
 {
-    while( *src != EOS && isspace( *src ) )
+    while( *src != EOS && isspace( * (const unsigned char *) src ) )
         src++;
-    while( *src != EOS && !isspace( *src ) )
+    while( *src != EOS && !isspace( * (const unsigned char *) src ) )
         *dest++ = *src++;
     *dest = EOS;
 }
@@ -227,27 +226,36 @@ void TFileDialog::handleEvent(TEvent& event)
 {
     TDialog::handleEvent(event);
     if( event.what == evCommand )
+        {
         switch( event.message.command )
             {
             case cmFileOpen:
             case cmFileReplace:
             case cmFileClear:
-                {
                 endModal(event.message.command);
                 clearEvent(event);
-                }
                 break;
             default:
                 break;
             }
+        }
+    else if( event.what == evBroadcast && event.message.command == cmFileDoubleClicked )
+        {
+        event.what = evCommand;
+        event.message.command = cmOK;
+        putEvent( event );
+        clearEvent( event );
+        }
 }
 
 void TFileDialog::readDirectory()
 {
-    fileList->readDirectory( wildCard );
     char curDir[MAXPATH];
     getCurDir( curDir );
+    if( directory )
+        delete (char *)directory;
     directory = newStr( curDir );
+    fileList->readDirectory( wildCard );
 }
 
 void TFileDialog::setData( void *rec )
@@ -290,9 +298,10 @@ char ext[MAXEXT];
 
     if( TDialog::valid( command ) )
         {
-        getFileName( fName );
         if( command != cmCancel && command != cmFileClear )
             {
+            getFileName( fName );
+
             if( isWild( fName ) )
                 {
                 fnsplit( fName, drive, dir, name, ext );
@@ -336,6 +345,8 @@ char ext[MAXEXT];
     return False;
 }
 
+#if !defined(NO_STREAMABLE)
+
 void TFileDialog::write( opstream& os )
 {
     TDialog::write( os );
@@ -356,3 +367,6 @@ TStreamable *TFileDialog::build()
 {
     return new TFileDialog( streamableInit );
 }
+
+
+#endif

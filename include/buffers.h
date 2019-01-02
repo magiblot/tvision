@@ -2,16 +2,20 @@
 /*                                                                         */
 /*   BUFFERS.H                                                             */
 /*                                                                         */
-/*   Copyright (c) Borland International 1991                              */
-/*   All Rights Reserved.                                                  */
-/*                                                                         */
 /*   defines the functions getBufMem() and freeBufMem() for use            */
 /*   in allocating and freeing viedo buffers                               */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
+/*
+ *      Turbo Vision - Version 2.0
+ *
+ *      Copyright (c) 1994 by Borland International
+ *      All Rights Reserved.
+ *
+ */
 
 #pragma option -Vo-
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
 
@@ -36,11 +40,12 @@ private:
     TBufListEntry *prev;
     void*& owner;
 
-    static TBufListEntry *near bufList;
+    static TBufListEntry *_NEAR bufList;
     static Boolean freeHead();
 
     friend class TVMemMgr;
     friend void *operator new( size_t );
+    friend void * allocBlock( size_t );
 
 };
 
@@ -59,9 +64,9 @@ public:
 
 private:
 
-    static void * near safetyPool;
-    static size_t near safetyPoolSize;
-    static int near inited;
+    static void * _NEAR safetyPool;
+    static size_t _NEAR safetyPoolSize;
+    static int _NEAR inited;
     static int initMemMgr();
 
 };
@@ -69,7 +74,7 @@ private:
 #endif  // Uses_TVMemMgr
 
 #pragma option -Vo.
-#if defined( __BCOPT__ )
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
 
