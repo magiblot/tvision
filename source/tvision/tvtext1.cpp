@@ -52,7 +52,7 @@ static unsigned getCodePage()
 void TDisplay::updateIntlChars()
 {
     if(getCodePage() != 437 )
-        TFrame::frameChars[30] = 'О©╫';
+        TFrame::frameChars[30] = 'м';
 }
 
 extern const uchar specialChars[] =
@@ -68,12 +68,12 @@ const char _NEAR TFrame::initFrame[19] =
   "\x06\x0A\x0C\x05\x00\x05\x03\x0A\x09\x16\x1A\x1C\x15\x00\x15\x13\x1A\x19";
 
 char _NEAR TFrame::frameChars[33] =
-    "   О©╫ О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫   О©╫ О©╫О©╫О©╫ О©╫О©╫о╩О©╫О©╫ "; // for UnitedStates code page
+    "   ю Ёз? ыда©╢бе   х ╨иг ╪мо╩╤я "; // for UnitedStates code page
 
 const char * _NEAR TFrame::closeIcon = "[~\xFE~]";
 const char * _NEAR TFrame::zoomIcon = "[~\x18~]";
 const char * _NEAR TFrame::unZoomIcon = "[~\x12~]";
-const char * _NEAR TFrame::dragIcon = "~О©╫О©╫~";
+const char * _NEAR TFrame::dragIcon = "~ды~";
 
 const char _NEAR TIndicator::dragFrame = '\xCD';
 const char _NEAR TIndicator::normalFrame = '\xC4';
@@ -111,12 +111,12 @@ TScrollChars _NEAR TScrollBar::hChars = {17, 16, 177, 254, 178};
 const char * _NEAR TButton::shadows = "\xDC\xDB\xDF";
 const char * _NEAR TButton::markers = "[]";
 
-const char * _NEAR TDirListBox::pathDir   = "О©╫О©╫О©╫";
-const char * _NEAR TDirListBox::firstDir  =   "О©╫О©╫О©╫";
-const char * _NEAR TDirListBox::middleDir =   " О©╫О©╫";
-const char * _NEAR TDirListBox::lastDir   =   " О©╫О©╫";
+const char * _NEAR TDirListBox::pathDir   = "юдб";
+const char * _NEAR TDirListBox::firstDir  =   "юбд";
+const char * _NEAR TDirListBox::middleDir =   " ?д";
+const char * _NEAR TDirListBox::lastDir   =   " юд";
 const char * _NEAR TDirListBox::drives = "Drives";
-const char * _NEAR TDirListBox::graphics = "О©╫О©╫О©╫";
+const char * _NEAR TDirListBox::graphics = "ю?д";
 
 const char * _NEAR TFileEditor::backupExt = ".BAK";
 

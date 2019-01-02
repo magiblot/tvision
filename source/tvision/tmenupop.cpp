@@ -12,35 +12,36 @@
  *
  */
 
+#define Uses_TEvent
 #define Uses_TRect
 #define Uses_TMenu
 #define Uses_TMenuItem
 #define Uses_TMenuPopup
 #include <tvision/tv.h>
 
-TMenuPopup::TMenuPopup(TRect& bounds, TMenu* aMenu) :
-    TMenuBox( bounds, aMenu )
+TMenuPopup::TMenuPopup(TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) :
+    TMenuBox( bounds, aMenu, aParentMenu )
 {
 }
 
-TMenuPopup::handleEvent(Event& event)
+void TMenuPopup::handleEvent(TEvent& event)
 {
     switch (event.what)
     {
     case evKeyDown:
-        TMenuItem* p = findItem(getCtrlChar(event.keyCode));
+        TMenuItem* p = findItem(getCtrlChar(event.keyDown.keyCode));
         if (!p)
-            p = hotKey(event.keyCode);
+            p = hotKey(event.keyDown.keyCode);
         if (p && commandEnabled(p->command))
         {
             event.what = evCommand;
-            event.command = p->command;
-            event.infoPtr = NULL;
+            event.message.command = p->command;
+            event.message.infoPtr = NULL;
             putEvent(event);
             clearEvent(event);
         }
         else
-            if (getAltChar(event.keyCode))
+            if (getAltChar(event.keyDown.keyCode))
                 clearEvent(event);
         break;
     }

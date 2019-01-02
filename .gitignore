@@ -1,0 +1,6 @@
+*.bak
+*.obj
+*.lib
+*.dsw
+*.csm
+*.~*

@@ -363,8 +363,14 @@ inline opstream& operator << ( opstream& os, TMenuBox* cl )
 
 class TMenuPopup : TMenuBox
 {
-    TMenuPopup(TRect&, TMenu*);
+    TMenuPopup(TRect&, TMenu*, TMenuView*);
     virtual void handleEvent(TEvent&);
+
+public:
+
+    static const char * const _NEAR name;
+    static TStreamable *build();
+
 };
 
 
