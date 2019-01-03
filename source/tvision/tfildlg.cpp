@@ -35,10 +35,6 @@
 #include <errno.h>
 #endif  // __ERRNO_H
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H
@@ -52,11 +48,11 @@
 #endif  // __STRING_H
 
 // File dialog flags
-const
+const int
     ffOpen        = 0x0001,
     ffSaveAs      = 0x0002;
 
-const
+const int
     cmOpenDialogOpen    = 100,
     cmOpenDialogReplace = 101;
 

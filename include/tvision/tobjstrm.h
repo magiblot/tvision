@@ -539,15 +539,15 @@ class fpbase : virtual public pstream
 public:
 
     _Cdecl fpbase();
-    _Cdecl fpbase( const char _FAR *, int, int = 0644 );
-    _Cdecl fpbase( int );
-    _Cdecl fpbase( int, char _FAR *, int );
+    _Cdecl fpbase( const char _FAR *, int);
+//     _Cdecl fpbase( int );
+//     _Cdecl fpbase( int, char _FAR *, int );
     _Cdecl ~fpbase();
 
-    void _Cdecl open( const char _FAR *, int, int = 0644 );
-    void _Cdecl attach( int );
+    void _Cdecl open( const char _FAR *, int);
+//     void _Cdecl attach( int );
     void _Cdecl close();
-    void _Cdecl setbuf( char _FAR *, int );
+//     void _Cdecl setbuf( char _FAR *, int );
     filebuf _FAR * _Cdecl rdbuf();
 
 private:
@@ -585,17 +585,15 @@ public:
 
     _Cdecl ifpstream();
     _Cdecl ifpstream( const char _FAR *,
-                      int = ios::in,
-                      int = 0644
+                      int = ios::in
                     );
-    _Cdecl ifpstream( int );
-    _Cdecl ifpstream( int, char _FAR *, int );
+//     _Cdecl ifpstream( int );
+//     _Cdecl ifpstream( int, char _FAR *, int );
     _Cdecl ~ifpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
-                      int = ios::in,
-                      int = 0644
+                      int = ios::in
                     );
 
 };
@@ -630,17 +628,15 @@ public:
 
     _Cdecl ofpstream();
     _Cdecl ofpstream( const char _FAR *,
-                      int = ios::out,
-                      int = 0644
+                      int = ios::out
                     );
-    _Cdecl ofpstream( int );
-    _Cdecl ofpstream( int, char _FAR *, int );
+//     _Cdecl ofpstream( int );
+//     _Cdecl ofpstream( int, char _FAR *, int );
     _Cdecl ~ofpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
-                      int = ios::out,
-                      int = 0644
+                      int = ios::out
                     );
 
 };
@@ -674,13 +670,13 @@ class fpstream : public fpbase, public iopstream
 public:
 
     _Cdecl fpstream();
-    _Cdecl fpstream( const char _FAR *, int, int = 0644 );
-    _Cdecl fpstream( int );
-    _Cdecl fpstream( int, char _FAR *, int );
+    _Cdecl fpstream( const char _FAR *, int);
+//     _Cdecl fpstream( int );
+//     _Cdecl fpstream( int, char _FAR *, int );
     _Cdecl ~fpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
-    void _Cdecl open( const char _FAR *, int, int = 0644 );
+    void _Cdecl open( const char _FAR *, int);
 
 };
 

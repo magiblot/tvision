@@ -30,10 +30,6 @@
 #include <errno.h>
 #endif  // __ERRNO_H
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H

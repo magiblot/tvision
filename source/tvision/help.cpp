@@ -54,10 +54,6 @@
 #include <ctype.h>
 #endif  // __CTYPE_H
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 #pragma warn -dsz
 
 // THelpViewer

@@ -87,9 +87,9 @@ ushort THardwareInfo::biosSel;
 
 #endif
 
-#if defined( __FLAT__ )
+#if defined( __FLAT__ ) && defined( __BORLANDC__ )
 
-// #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
+#define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
@@ -120,7 +120,7 @@ ushort THardwareInfo::getScreenMode()
     else
         {
         _AH = 0x0F;
-//         INT10;                      // Emit CD, 10.  Supported by DPMI server.
+        INT10;                      // Emit CD, 10.  Supported by DPMI server.
         mode = _AL;
         }
 
@@ -291,4 +291,4 @@ ulong THardwareInfo::getTickCount()
     return GetTickCount() / 55;
 }
 
-#endif  // __FLAT__
+#endif  // __FLAT__ && __BORLANDC__

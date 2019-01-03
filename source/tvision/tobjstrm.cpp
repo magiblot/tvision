@@ -53,12 +53,8 @@
 #include <fstream.h>
 #endif  // __FSTREAM_H
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 #if !defined( __STAT_H )
-#include <sys\Stat.h>
+#include <sys/stat.h>
 #endif  // __STAT_H
 
 #if !defined( __FCNTL_H )
@@ -218,15 +214,15 @@ int pstream::eof() const
 {
     return state & ios::eofbit;
 }
-
+// Comment out references to ios::hardfail, just like Sergio Sigala did.
 int pstream::fail() const
 {
-    return state & (ios::failbit | ios::badbit | ios::hardfail);
+    return state & (ios::failbit | ios::badbit/* | ios::hardfail*/);
 }
 
 int pstream::bad() const
 {
-    return state & (ios::badbit | ios::hardfail);
+    return state & (ios::badbit/* | ios::hardfail*/);
 }
 
 int pstream::good() const
@@ -236,7 +232,7 @@ int pstream::good() const
 
 void pstream::clear( int i )
 {
-    state = (i & 0xFF) | (state & ios::hardfail);
+    state = (i & 0xFF)/* | (state & ios::hardfail)*/;
 }
 
 void pstream::registerType( TStreamableClass *ts )
@@ -297,20 +293,32 @@ ipstream::~ipstream()
 
 streampos ipstream::tellg()
 {
+#ifdef __BORLANDC__
     return bp->seekoff( 0, ios::cur, ios::in );
+#else
+    return bp->pubseekoff( 0, ios::cur, ios::in );
+#endif
 }
 
 ipstream& ipstream::seekg( streampos pos )
 {
     objs.removeAll();
+#ifdef __BORLANDC__
     bp->seekoff( pos, ios::beg );
+#else
+    bp->pubseekoff( pos, ios::beg );
+#endif
     return *this;
 }
 
-ipstream& ipstream::seekg( streamoff off, seek_dir dir )
+ipstream& ipstream::seekg( streamoff off, ios::seek_dir dir )
 {
     objs.removeAll();
+#ifdef __BORLANDC__
     bp->seekoff( off, dir );
+#else
+    bp->pubseekoff( off, dir );
+#endif
     return *this;
 }
 
@@ -539,25 +547,41 @@ opstream::~opstream()
 opstream& opstream::seekp( streampos pos )
 {
     objs->removeAll();
+#ifdef __BORLANDC__
     bp->seekoff( pos, ios::beg );
+#else
+    bp->pubseekoff( pos, ios::beg );
+#endif
     return *this;
 }
 
-opstream& opstream::seekp( streamoff pos, seek_dir dir )
+opstream& opstream::seekp( streamoff pos, ios::seek_dir dir )
 {
     objs->removeAll();
+#ifdef __BORLANDC__
     bp->seekoff( pos, dir );
+#else
+    bp->pubseekoff( pos, dir );
+#endif
     return *this;
 }
 
 streampos opstream::tellp()
 {
+#ifdef __BORLANDC__
     return bp->seekoff( 0, ios::cur, ios::out );
+#else
+    return bp->pubseekoff( 0, ios::cur, ios::out );
+#endif
 }
 
 opstream& opstream::flush()
 {
+#ifdef __BORLANDC__
     bp->sync();
+#else
+    bp->pubsync();
+#endif
     return *this;
 }
 
@@ -735,45 +759,45 @@ fpbase::fpbase()
     pstream::init( &buf );
 }
 
-fpbase::fpbase( const char *name, int omode, int prot )
+fpbase::fpbase( const char *name, int omode)
 {
     pstream::init( &buf );
-    open( name, omode, prot );
+    open( name, omode );
 }
 
-fpbase::fpbase( int f ) : buf( f )
-{
-    pstream::init( &buf );
-}
+// fpbase::fpbase( int f ) : buf( f )
+// {
+//     pstream::init( &buf );
+// }
 
-fpbase::fpbase( int f, char *b, int len ) : buf( f, b, len )
-{
-    pstream::init( &buf );
-}
+// fpbase::fpbase( int f, char *b, int len ) : buf( f, b, len )
+// {
+//     pstream::init( &buf );
+// }
 
 fpbase::~fpbase()
 {
 }
 
-void fpbase::open( const char *b, int m, int prot )
+void fpbase::open( const char *b, int m)
 {
     if( buf.is_open() )
         clear(ios::failbit);        // fail - already open
-    else if( buf.open(b, m, prot) )
+    else if( buf.open(b, m) )
         clear(ios::goodbit);        // successful open
     else
         clear(ios::badbit);     // open failed
 }
 
-void fpbase::attach( int f )
-{
-    if( buf.is_open() )
-        setstate(ios::failbit);
-    else if( buf.attach(f) )
-        clear(ios::goodbit);
-    else
-        clear(ios::badbit);
-}
+// void fpbase::attach( int f )
+// {
+//     if( buf.is_open() )
+//         setstate(ios::failbit);
+//     else if( buf.attach(f) )
+//         clear(ios::goodbit);
+//     else
+//         clear(ios::badbit);
+// }
 
 void fpbase::close()
 {
@@ -783,13 +807,13 @@ void fpbase::close()
         setstate(ios::failbit);
 }
 
-void fpbase::setbuf(char* b, int len)
-{
-    if( buf.setbuf(b, len) )
-        clear(ios::goodbit);
-    else
-        setstate(ios::failbit);
-}
+// void fpbase::setbuf(char* b, int len)
+// {
+//     if( buf.setbuf(b, len) )
+//         clear(ios::goodbit);
+//     else
+//         setstate(ios::failbit);
+// }
 
 filebuf *fpbase::rdbuf()
 {
@@ -800,18 +824,18 @@ ifpstream::ifpstream()
 {
 }
 
-ifpstream::ifpstream( const char* name, int omode, int prot ) :
-        fpbase( name, omode | ios::in | ios::binary, prot )
+ifpstream::ifpstream( const char* name, int omode) :
+        fpbase( name, omode | ios::in | ios::binary)
 {
 }
 
-ifpstream::ifpstream( int f ) : fpbase( f )
-{
-}
+// ifpstream::ifpstream( int f ) : fpbase( f )
+// {
+// }
 
-ifpstream::ifpstream(int f, char* b, int len) : fpbase(f, b, len)
-{
-}
+// ifpstream::ifpstream(int f, char* b, int len) : fpbase(f, b, len)
+// {
+// }
 
 ifpstream::~ifpstream()
 {
@@ -822,27 +846,27 @@ filebuf *ifpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void ifpstream::open( const char _FAR *name, int omode, int prot )
+void ifpstream::open( const char _FAR *name, int omode)
 {
-    fpbase::open( name, omode | ios::in | ios::binary, prot );
+    fpbase::open( name, omode | ios::in | ios::binary);
 }
 
 ofpstream::ofpstream()
 {
 }
 
-ofpstream::ofpstream( const char* name, int omode, int prot ) :
-        fpbase( name, omode | ios::out | ios::binary, prot )
+ofpstream::ofpstream( const char* name, int omode) :
+        fpbase( name, omode | ios::out | ios::binary)
 {
 }
 
-ofpstream::ofpstream( int f ) : fpbase( f )
-{
-}
+// ofpstream::ofpstream( int f ) : fpbase( f )
+// {
+// }
 
-ofpstream::ofpstream(int f, char* b, int len) : fpbase(f, b, len)
-{
-}
+// ofpstream::ofpstream(int f, char* b, int len) : fpbase(f, b, len)
+// {
+// }
 
 ofpstream::~ofpstream()
 {
@@ -853,27 +877,27 @@ filebuf *ofpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void ofpstream::open( const char _FAR *name, int omode, int prot )
+void ofpstream::open( const char _FAR *name, int omode)
 {
-    fpbase::open( name, omode | ios::out | ios::binary, prot );
+    fpbase::open( name, omode | ios::out | ios::binary);
 }
 
 fpstream::fpstream()
 {
 }
 
-fpstream::fpstream( const char* name, int omode, int prot ) :
-        fpbase( name, omode | ios::out | ios::binary, prot )
+fpstream::fpstream( const char* name, int omode) :
+        fpbase( name, omode | ios::out | ios::binary)
 {
 }
 
-fpstream::fpstream( int f ) : fpbase( f )
-{
-}
+// fpstream::fpstream( int f ) : fpbase( f )
+// {
+// }
 
-fpstream::fpstream(int f, char* b, int len) : fpbase(f, b, len)
-{
-}
+// fpstream::fpstream(int f, char* b, int len) : fpbase(f, b, len)
+// {
+// }
 
 fpstream::~fpstream()
 {
@@ -884,9 +908,9 @@ filebuf *fpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void fpstream::open( const char _FAR *name, int omode, int prot )
+void fpstream::open( const char _FAR *name, int omode)
 {
-    fpbase::open( name, omode | ios::in | ios::out | ios::binary, prot );
+    fpbase::open( name, omode | ios::in | ios::out | ios::binary);
 }
 
 

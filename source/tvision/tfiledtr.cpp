@@ -33,10 +33,6 @@
 #include <fstream.h>
 #endif  // __FSTREAM_H
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H
@@ -113,7 +109,7 @@ Boolean TFileEditor::loadFile()
         }
     else
         {
-        long fSize = filelength( f.rdbuf()->fd() );
+        long fSize = f.tellg();
         if( fSize > 0xFFE0L || setBufSize(ushort(fSize)) == False )
             {
             editorDialog( edOutOfMemory );
@@ -189,7 +185,9 @@ Boolean TFileEditor::saveFile()
         fnsplit( fileName, drive, dir, file, ext );
         char backupName[MAXPATH];
         fnmerge( backupName, drive, dir, file, backupExt );
+#ifdef unlink
         unlink( backupName );
+#endif
         rename( fileName, backupName );
         }
 

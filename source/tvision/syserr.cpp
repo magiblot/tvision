@@ -23,10 +23,6 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#if !defined( __CONIO_H )
-#include <conio.h>
-#endif  // __CONIO_H
-
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H

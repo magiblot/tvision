@@ -256,6 +256,7 @@ void TScreen::suspend()
 }
 
 #pragma argsused
+#if defined( __BORLANDC__ )
 ushort TScreen::fixCrtMode( ushort mode )
 {
 #if defined( __FLAT__ )
@@ -273,7 +274,7 @@ ushort TScreen::fixCrtMode( ushort mode )
         _AL = smCO80;
     return _AX;
 }
-
+#endif
 void TScreen::setCrtData()
 {
     screenMode = getCrtMode();

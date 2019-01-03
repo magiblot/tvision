@@ -32,6 +32,7 @@
 
 static unsigned getCodePage()
 {
+#if defined( __BORLANDC__ )
 #if !defined(__FLAT__)
     //  get version number, in the form of a normal number
     unsigned ver = (_version >> 8) | (_version << 8);
@@ -47,6 +48,9 @@ static unsigned getCodePage()
 
 #endif
     return _BX;
+#else
+    return 437;
+#endif
 }
 
 void TDisplay::updateIntlChars()

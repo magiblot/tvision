@@ -49,7 +49,7 @@
 #endif  // __CTYPE_H
 
 #if !defined( __IO_H )
-#include <io.h>
+//#include <io.h>
 #endif  // __IO_H
 
 #pragma warn -dsz
@@ -565,14 +565,12 @@ void THelpIndex::add( int i, long val )
 
 THelpFile::THelpFile( fpstream&  s )
 {
-    long magic;
-    int handle;
+	 long magic;
     long size;
 
     magic = 0;
-    s.seekg(0);
-    handle = s.rdbuf()->fd();
-    size = filelength(handle);
+	 s.seekg(0);
+    size = s.tellg();
     s.seekg(0);
     if (size > sizeof(magic))
         s >> magic;
@@ -590,33 +588,31 @@ THelpFile::THelpFile( fpstream&  s )
         s.seekg(indexPos);
         s >> index;
         modified = False;
-        }
+		  }
     stream = &s;
 }
 
 THelpFile::~THelpFile(void)
 {
-    long magic, size;
-    int handle;
+	 long magic, size;
 
     if (modified == True)
         {
         stream->seekp(indexPos);
         *stream << index;
         stream->seekp(0);
-        magic = magicHeader;
-        handle = stream->rdbuf()->fd();
+		  magic = magicHeader;
 //
 // note: at this time, a bug in filelength leaves the seek pointer at
 //       the end of file, so we must save and restore the seek pointer
 //       around the call; this can be removed when filelength is fixed.
 //
   streampos sp=stream->tellp();
-        size = filelength(handle) - 8;
+		  size = stream->tellg() - 8;
   stream->seekp(sp);
         *stream << magic;
         *stream << size;
-        *stream << indexPos;
+		  *stream << indexPos;
         }
     delete stream;
     delete index;

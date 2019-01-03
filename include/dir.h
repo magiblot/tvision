@@ -95,7 +95,7 @@ int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directo
 char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
 int         _RTLENTRY  _EXPFUNC32   getdisk( void );
 int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
-char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
+// char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
 int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );
 char _FAR * _RTLENTRYF _EXPFUNC32   searchpath( const char _FAR *__file );
 int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );

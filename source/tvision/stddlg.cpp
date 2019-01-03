@@ -170,7 +170,7 @@ void TSortedListBox::handleEvent(TEvent& event)
                 curString[searchPos+1] = EOS;
                 }
             k = getKey(curString);
-            list()->search( k, (ccIndex) value );
+            list()->search( k, (ccIndex&) value );
             if( value < range )
                 {
                 getText( newString, (short) value, 255 );

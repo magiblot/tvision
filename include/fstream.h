@@ -5,5 +5,7 @@
 #include <fstream>
 
 using std::filebuf;
+using std::ifstream;
+using std::ofstream;
 
 #endif

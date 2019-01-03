@@ -20,10 +20,6 @@
 #define Uses_TResourceCollection
 #include <tvision/tv.h>
 
-#if !defined( __IO_H )
-#include <io.h>
-#endif  // __IO_H
-
 const long rStreamMagic = 0x52504246uL; // 'FBPR'
 
 struct Count_type
@@ -52,15 +48,13 @@ struct THeader
 TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
 {
     THeader *header;
-    int handle;
     int found;
     int repeat;
     long streamSize;
 
     stream = aStream;
     basePos = stream->tellp();
-    handle = stream->rdbuf()->fd();
-    streamSize = filelength(handle);
+    streamSize = stream->tellg();
     header = new THeader;
     found = 0;
     do {
@@ -187,7 +181,7 @@ void TResourceFile::put(TStreamable *item, const char *key)
 
 void copyStream( fpstream* dest, fpstream* src, long n)
 {
-	const xferSize=256;
+	const int xferSize=256;
 
 	char *xferBuf = new char[xferSize];
 	size_t thisMove;
