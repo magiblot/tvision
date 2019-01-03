@@ -48,10 +48,6 @@
 #include <ctype.h>
 #endif  // __CTYPE_H
 
-#if !defined( __IO_H )
-//#include <io.h>
-#endif  // __IO_H
-
 #pragma warn -dsz
 
 TCrossRefHandler crossRefHandler = notAssigned;
@@ -565,11 +561,11 @@ void THelpIndex::add( int i, long val )
 
 THelpFile::THelpFile( fpstream&  s )
 {
-	 long magic;
+    long magic;
     long size;
 
     magic = 0;
-	 s.seekg(0);
+    s.seekg(0);
     size = s.tellg();
     s.seekg(0);
     if (size > sizeof(magic))
@@ -588,31 +584,31 @@ THelpFile::THelpFile( fpstream&  s )
         s.seekg(indexPos);
         s >> index;
         modified = False;
-		  }
+        }
     stream = &s;
 }
 
 THelpFile::~THelpFile(void)
 {
-	 long magic, size;
+    long magic, size;
 
     if (modified == True)
         {
         stream->seekp(indexPos);
         *stream << index;
         stream->seekp(0);
-		  magic = magicHeader;
+        magic = magicHeader;
 //
 // note: at this time, a bug in filelength leaves the seek pointer at
 //       the end of file, so we must save and restore the seek pointer
 //       around the call; this can be removed when filelength is fixed.
 //
   streampos sp=stream->tellp();
-		  size = stream->tellg() - 8;
+        size = stream->tellg() - 8;
   stream->seekp(sp);
         *stream << magic;
         *stream << size;
-		  *stream << indexPos;
+        *stream << indexPos;
         }
     delete stream;
     delete index;
