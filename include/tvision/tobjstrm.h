@@ -539,12 +539,12 @@ class fpbase : virtual public pstream
 public:
 
     _Cdecl fpbase();
-    _Cdecl fpbase( const char _FAR *, int, int = filebuf::openprot );
+    _Cdecl fpbase( const char _FAR *, int, int = 0644 );
     _Cdecl fpbase( int );
     _Cdecl fpbase( int, char _FAR *, int );
     _Cdecl ~fpbase();
 
-    void _Cdecl open( const char _FAR *, int, int = filebuf::openprot );
+    void _Cdecl open( const char _FAR *, int, int = 0644 );
     void _Cdecl attach( int );
     void _Cdecl close();
     void _Cdecl setbuf( char _FAR *, int );
@@ -586,7 +586,7 @@ public:
     _Cdecl ifpstream();
     _Cdecl ifpstream( const char _FAR *,
                       int = ios::in,
-                      int = filebuf::openprot
+                      int = 0644
                     );
     _Cdecl ifpstream( int );
     _Cdecl ifpstream( int, char _FAR *, int );
@@ -595,7 +595,7 @@ public:
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
                       int = ios::in,
-                      int = filebuf::openprot
+                      int = 0644
                     );
 
 };
@@ -631,7 +631,7 @@ public:
     _Cdecl ofpstream();
     _Cdecl ofpstream( const char _FAR *,
                       int = ios::out,
-                      int = filebuf::openprot
+                      int = 0644
                     );
     _Cdecl ofpstream( int );
     _Cdecl ofpstream( int, char _FAR *, int );
@@ -640,7 +640,7 @@ public:
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
                       int = ios::out,
-                      int = filebuf::openprot
+                      int = 0644
                     );
 
 };
@@ -674,13 +674,13 @@ class fpstream : public fpbase, public iopstream
 public:
 
     _Cdecl fpstream();
-    _Cdecl fpstream( const char _FAR *, int, int = filebuf::openprot );
+    _Cdecl fpstream( const char _FAR *, int, int = 0644 );
     _Cdecl fpstream( int );
     _Cdecl fpstream( int, char _FAR *, int );
     _Cdecl ~fpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
-    void _Cdecl open( const char _FAR *, int, int = filebuf::openprot );
+    void _Cdecl open( const char _FAR *, int, int = 0644 );
 
 };
 

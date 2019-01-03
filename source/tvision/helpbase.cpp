@@ -159,7 +159,7 @@ THelpTopic::~THelpTopic()
     if (crossRefs != 0)
        {
        crossRefPtr = (TCrossRef *)crossRefs;
-       delete [numRefs] crossRefPtr;
+       delete [] crossRefPtr;
        }
 }
 
@@ -173,7 +173,7 @@ void THelpTopic::addCrossRef( TCrossRef ref )
         {
         crossRefPtr = crossRefs;
         memmove(p, crossRefPtr, numRefs * sizeof(TCrossRef));
-        delete [numRefs] crossRefPtr;
+        delete [] crossRefPtr;
         }
     crossRefs = p;
     crossRefPtr = crossRefs + numRefs;
@@ -333,7 +333,7 @@ void THelpTopic::setNumCrossRefs( int i )
         else
             memmove(p, crossRefPtr, i * sizeof(TCrossRef));
 
-        delete [numRefs] crossRefPtr;
+        delete [] crossRefPtr;
         }
     crossRefs = p;
     numRefs = i;
@@ -511,7 +511,7 @@ TStreamableClass RHelpIndex( THelpIndex::name,
 
 THelpIndex::~THelpIndex()
 {
-    delete [size] index;
+    delete [] index;
 }
 
 
@@ -552,7 +552,7 @@ void THelpIndex::add( int i, long val )
             }
         if (size > 0)
             {
-            delete [size] index;
+            delete [] index;
             }
         index = p;
         size = newSize;

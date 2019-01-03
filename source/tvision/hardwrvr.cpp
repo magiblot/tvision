@@ -19,6 +19,7 @@
 #define Uses_THardwareInfo
 #define Uses_TSystemError
 #include <tvision/tv.h>
+#include <dos.h>
 
 #if defined( __FLAT__ )
 
@@ -88,7 +89,7 @@ ushort THardwareInfo::biosSel;
 
 #if defined( __FLAT__ )
 
-#define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
+// #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
@@ -119,7 +120,7 @@ ushort THardwareInfo::getScreenMode()
     else
         {
         _AH = 0x0F;
-        INT10;                      // Emit CD, 10.  Supported by DPMI server.
+//         INT10;                      // Emit CD, 10.  Supported by DPMI server.
         mode = _AL;
         }
 

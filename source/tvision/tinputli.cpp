@@ -438,7 +438,7 @@ void *TInputLine::read( ipstream& is )
     oldData = new char[maxLen + 1];
     is.readString(data, maxLen+1);
     state |= sfCursorVis;
-    is >> (void*)validator;
+    is >> (void*&)validator;
     options |= ofSelectable | ofFirstClick;
     return this;
 }

@@ -49,7 +49,7 @@ TStrListMaker::TStrListMaker( ushort aStrSize, ushort aIndexSize ) :
 TStrListMaker::~TStrListMaker()
 {
     delete strings;
-    delete [indexSize] index;
+    delete [] index;
 }
 
 #pragma warn .dsz
@@ -93,7 +93,7 @@ TStringList::TStringList( StreamableInit ) :
 
 TStringList::~TStringList()
 {
-    delete [indexSize] index;
+    delete [] index;
 }
 
 #pragma warn .dsz

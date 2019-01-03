@@ -116,7 +116,7 @@ TStreamable *TEditWindow::build()
 
 TEditWindow::TEditWindow( StreamableInit ) :
     TWindow( streamableInit ),
-    TWindowInit( streamableInit )
+    TWindowInit( (TFrame* (*)(TRect)) streamableInit )
 {
 }
 

@@ -288,7 +288,7 @@ void TGroup::getBuffer()
 {
     if( (state & sfExposed) != 0 )
         if( (options & ofBuffered) != 0 && (buffer == 0 ))
-            TVMemMgr::allocateDiscardable( (void *)buffer, size.x * size.y * sizeof(ushort) );
+            TVMemMgr::allocateDiscardable( (void *&)buffer, size.x * size.y * sizeof(ushort) );
 }
 
 void TGroup::getData(void *rec)

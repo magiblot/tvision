@@ -131,7 +131,7 @@ const int BLK_DATA = 0xA6;
 const int BLK_SIZE = 0;
 #endif
 
-static void * allocBlock( size_t sz )
+void * allocBlock( size_t sz )
 {
     assert( heapcheck() >= 0 );
 
