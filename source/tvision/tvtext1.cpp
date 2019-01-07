@@ -109,8 +109,8 @@ const char * _NEAR TStatusLine::hintSeparator = "\xB3 ";
 
 const char * _NEAR TCheckBoxes::button = " [ ] ";
 
-TScrollChars _NEAR TScrollBar::vChars = {30, 31, 177, 254, 178};
-TScrollChars _NEAR TScrollBar::hChars = {17, 16, 177, 254, 178};
+TScrollChars _NEAR TScrollBar::vChars = {'\x1E', '\x1F', '\xB1', '\xFE', '\xB2'};
+TScrollChars _NEAR TScrollBar::hChars = {'\x11', '\x10', '\xB1', '\xFE', '\xB2'};
 
 const char * _NEAR TButton::shadows = "\xDC\xDB\xDF";
 const char * _NEAR TButton::markers = "[]";
