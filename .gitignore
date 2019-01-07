@@ -5,3 +5,11 @@
 *.csm
 *.~*
 *.o
+
+*.kdev4
+
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
