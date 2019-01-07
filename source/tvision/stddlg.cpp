@@ -64,17 +64,9 @@
 #include <limits.h>
 #endif  // __LIMITS_H
 
-#if __STDC__
-extern "C"
-{
-char _FAR * _CType _FARFUNC ltoa(long __value, char _FAR *__string, int );
-char _FAR *_CType _FARFUNC itoa(int __value, char _FAR *__string, int );
-int  _CType _FARFUNC strnicmp(const char _FAR *__s1, const char _FAR *__s2,
-                size_t __maxlen);
-};
+#ifndef __BORLANDC__
+#include <_string.h>
 #endif
-
-void fexpand( char * );
 
 #define cpInfoPane "\x1E"
 
