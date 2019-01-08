@@ -6,7 +6,7 @@ include
 include/windows
 )
 
-set(CMAKE_CXX_FLAGS "-m32 -O0 -g -gstabs+ --std=c++11 -fpermissive")
+set(CMAKE_CXX_FLAGS "-O0 -g -gstabs+ --std=c++11 -fpermissive")
 
 add_compile_definitions(__FLAT__ __cdecl= __stdcall=)
 

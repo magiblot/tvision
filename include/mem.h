@@ -17,21 +17,7 @@
 #include <_null.h>
 #endif
 
-#ifndef _STDDEF
-#define _STDDEF
-#ifndef _PTRDIFF_T
-#define _PTRDIFF_T
-#if defined(__LARGE__) || defined(__HUGE__) || defined(__COMPACT__)
-typedef long    ptrdiff_t;
-#else
-typedef int ptrdiff_t;
-#endif
-#endif
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef unsigned size_t;
-#endif
-#endif
+#include <cstddef>
 
 #ifdef __cplusplus
 extern "C" {

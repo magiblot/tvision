@@ -7,9 +7,11 @@
 *.o
 
 *.kdev4
+build
 
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
 Makefile
 cmake_install.cmake
+compile_commands.json
