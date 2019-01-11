@@ -153,8 +153,10 @@ void TChDirDialog::setUpDialog()
 
 static int changeDir( const char *path )
 {
+#ifdef __BORLANDC__
     if( path[1] == ':' )
         setdisk( toupper(path[0]) - 'A' );
+#endif
     return chdir( path );
 }
 
