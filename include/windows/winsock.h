@@ -746,7 +746,7 @@ struct hostent FAR * PASCAL FAR gethostbyaddr(const char FAR * addr,
 
 struct hostent FAR * PASCAL FAR gethostbyname(const char FAR * name);
 
-int PASCAL FAR gethostname (char FAR * name, int namelen);
+// int PASCAL FAR gethostname (char FAR * name, int namelen);
 
 struct servent FAR * PASCAL FAR getservbyport(int port, const char FAR * proto);
 

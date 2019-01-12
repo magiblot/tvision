@@ -712,13 +712,13 @@ void        _RTLENTRY _EXPFUNC setdate( struct date *__datep );
 void        _RTLENTRY _EXPFUNC settime( struct time *__timep );
 void        _RTLENTRY _EXPFUNC setverify( int __value );
 
-void        _RTLENTRY _EXPFUNC _sleep( unsigned __seconds );
+// void        _RTLENTRY _EXPFUNC _sleep( unsigned __seconds );
 
 void        _RTLENTRY _EXPFUNC unixtodos( long __time, struct date *__d,
                               struct time *__t );
-int         _RTLENTRYF _EXPFUNC unlink( const char * __path );
+// int         _RTLENTRYF _EXPFUNC unlink( const char * __path );
 
-#define sleep(unsigned) _sleep(unsigned)
+// #define sleep(unsigned) _sleep(unsigned)
 
 /* Inline functions.
  */

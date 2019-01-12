@@ -16,6 +16,8 @@
 #if !defined(__DIR_H)
 #define __DIR_H
 
+#include <unistd.h>
+
 #if !defined(___DEFS_H)
 #include <_defs.h>
 #endif
@@ -91,9 +93,9 @@ int         _RTLENTRYF _EXPFUNC     fnsplit(const char _FAR *__path,
                                     char _FAR *__dir,
                                     char _FAR *__name,
                                     char _FAR *__ext );
-int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
-char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
-int         _RTLENTRY  _EXPFUNC32   getdisk( void );
+// int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
+// char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
+// int         _RTLENTRY  _EXPFUNC32   getdisk( void );
 int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
 // char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
 int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );

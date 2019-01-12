@@ -2,8 +2,6 @@ $ make 2> >(grep 'undefined reference ') | sed 's/^.*undefined/undefined/' | awk
 
 undefined reference to `scan'
 undefined reference to `iScan'
-undefined reference to `getdisk'
-undefined reference to `getcurdir'
 undefined reference to `fnsplit'
 undefined reference to `fnmerge'
 undefined reference to `findnext'

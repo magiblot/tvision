@@ -269,6 +269,7 @@ void squeeze( char *path )
 
 void fexpand( char *rpath )
 {
+#ifdef __BORLANDC__
     char path[MAXPATH];
     char drive[MAXDRIVE];
     char dir[MAXDIR];
@@ -304,6 +305,7 @@ void fexpand( char *rpath )
     fnmerge( path, drive, dir, file, ext );
     strupr( path );
     strcpy( rpath, path );
+#endif
 }
 
 #if !defined(NO_STREAMABLE)

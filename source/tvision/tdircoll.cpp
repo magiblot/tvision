@@ -108,6 +108,7 @@ Boolean validFileName( const char *fileName )
 
 void getCurDir( char *dir )
 {
+#ifdef __BORLANDC__
     dir[0] = (char) (getdisk() + 'A');
     dir[1] = ':';
     dir[2] = '\\';
@@ -115,6 +116,7 @@ void getCurDir( char *dir )
     getcurdir( 0, dir+3 );
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
+#endif
 }
 
 Boolean isWild( const char *f )

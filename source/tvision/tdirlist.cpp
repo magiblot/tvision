@@ -78,6 +78,7 @@ Boolean TDirListBox::isSelected( short item )
 
 void TDirListBox::showDrives( TDirCollection *dirs )
 {
+#ifdef __BORLANDC__
     Boolean isFirst = True;
     char oldc[5];
     strcpy( oldc, "0:\\" );
@@ -116,6 +117,7 @@ void TDirListBox::showDrives( TDirCollection *dirs )
         s[ strlen(lastDir)+1 ] = EOS;
         dirs->insert( new TDirEntry( s, oldc ) );
         }
+#endif
 }
 
 void TDirListBox::showDirs( TDirCollection *dirs )
