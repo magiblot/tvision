@@ -50,8 +50,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-void fexpand( char * );
-#ifdef __FLAT__
+#if defined( __FLAT__ ) && defined( __BORLANDC__)
 extern "C" char _FAR * _CType _FARFUNC strupr(char _FAR *__s);
 #endif
 
