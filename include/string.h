@@ -1,6 +1,9 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <cstring>
+#include <cstdio>
+
 // Workaround for obsolete functions previously in string.h
 
 #include <strings.h> // Requires POSIX, sorry
@@ -19,12 +22,18 @@ char * ltoa(long l, char * buffer, int radix) {
   char format[5] = "%l";
   strcat(format, radix2cnv(radix));
   sprintf(buffer, format, l);
+  return buffer;
 }
 
 char * itoa(int i, char * buffer, int radix) {
   char format[5] = "%";
   strcat(format, radix2cnv(radix));
   sprintf(buffer, format, i);
+  return buffer;
 }
+
+#else
+
+#include_next <string.h>
 
 #endif

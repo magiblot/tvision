@@ -64,10 +64,6 @@
 #include <limits.h>
 #endif  // __LIMITS_H
 
-#ifndef __BORLANDC__
-#include <_string.h>
-#endif
-
 #define cpInfoPane "\x1E"
 
 TFileInputLine::TFileInputLine( const TRect& bounds, short aMaxLen ) :
