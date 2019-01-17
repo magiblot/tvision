@@ -36,6 +36,10 @@
 
 #endif
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 class TEvent;
 class MouseEventType;
 
@@ -165,16 +169,21 @@ inline ushort THardwareInfo::getScreenCols()
 #pragma option -w-inl
 inline void THardwareInfo::clearScreen( ushort w, ushort h )
 {
+#ifdef __BORLANDC__
     COORD coord = { 0, 0 };
     DWORD read;
 
     FillConsoleOutputAttribute( consoleHandle[cnOutput], 0x07, w*h, coord, &read );
     FillConsoleOutputCharacterA( consoleHandle[cnOutput], ' ', w*h, coord, &read );
+#else
+    assert(false);
+#endif
 }
 #pragma option -w+inl
 
 inline ushort *THardwareInfo::allocateScreenBuffer()
 {
+#ifdef __BORLANDC__
     short x = sbInfo.dwSize.X, y = sbInfo.dwSize.Y;
 
     if( x < 80 )        // Make sure we allocate at least enough for
@@ -183,11 +192,18 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
         y = 50;
 
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
+#else
+    assert(false);
+#endif
 }
 
 inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 {
+#ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
+#else
+    assert(false);
+#endif
 }
 
 
@@ -195,19 +211,31 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 
 inline DWORD THardwareInfo::getButtonCount()
 {
+#ifdef __BORLANDC__
     DWORD num;
     GetNumberOfConsoleMouseButtons(&num);
     return num;
+#else
+    assert(false);
+#endif
 }
 
 inline void THardwareInfo::cursorOn()
 {
+#ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode | ENABLE_MOUSE_INPUT );
+#else
+    assert(false);
+#endif
 }
 
 inline void THardwareInfo::cursorOff()
 {
+#ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode & ~ENABLE_MOUSE_INPUT );
+#else
+    assert(false);
+#endif
 }
 
 
@@ -223,7 +251,11 @@ inline void THardwareInfo::clearPendingEvent()
 
 inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
 {
+#ifdef __BORLANDC__
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
+#else
+    assert(false);
+#endif
 }
 
 inline BOOL THardwareInfo::setCritErrorHandler( BOOL install )

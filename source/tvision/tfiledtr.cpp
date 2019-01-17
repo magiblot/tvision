@@ -41,6 +41,10 @@
 #include <alloc.h>
 #endif
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 inline ushort min( ushort u1, ushort u2 )
 {
     return u1 < u2 ? u1 : u2;
@@ -175,6 +179,7 @@ static void writeBlock( ofstream& f, char *buf, unsigned len )
 
 Boolean TFileEditor::saveFile()
 {
+#ifdef __BORLANDC__
     char drive[MAXDRIVE];
     char dir[MAXDIR];
     char file[MAXFILE];
@@ -215,6 +220,9 @@ Boolean TFileEditor::saveFile()
             }
         }
     return True;
+#else
+    assert(false);
+#endif
 }
 
 Boolean TFileEditor::setBufSize( ushort newSize )

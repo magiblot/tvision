@@ -150,6 +150,7 @@ void *DirSearchRec::operator new( size_t sz )
 
 void TFileList::readDirectory( const char *aWildCard )
 {
+#ifdef __BORLANDC__
     ffblk s;
     char path[MAXPATH];
     char drive[MAXDRIVE];
@@ -228,6 +229,9 @@ void TFileList::readDirectory( const char *aWildCard )
         static DirSearchRec noFile;
         message( owner, evBroadcast, cmFileFocused, &noFile );
         }
+#else
+    assert(false);
+#endif
 }
 
 /*
@@ -305,6 +309,8 @@ void fexpand( char *rpath )
     fnmerge( path, drive, dir, file, ext );
     strupr( path );
     strcpy( rpath, path );
+#else
+    assert(false);
 #endif
 }
 

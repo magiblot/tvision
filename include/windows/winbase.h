@@ -1114,13 +1114,13 @@ VirtualAlloc(
     DWORD flProtect
     );
 
-BOOL
-WINAPI
-VirtualFree(
-    LPVOID lpAddress,
-    DWORD dwSize,
-    DWORD dwFreeType
-    );
+// BOOL
+// WINAPI
+// VirtualFree(
+//     LPVOID lpAddress,
+//     DWORD dwSize,
+//     DWORD dwFreeType
+//     );
 
 BOOL
 WINAPI
@@ -1627,11 +1627,11 @@ SetHandleCount(
     UINT uNumber
     );
 
-DWORD
-WINAPI
-GetLogicalDrives(
-    VOID
-    );
+// DWORD
+// WINAPI
+// GetLogicalDrives(
+//     VOID
+//     );
 
 BOOL
 WINAPI

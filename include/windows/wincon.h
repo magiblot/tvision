@@ -387,15 +387,15 @@ WriteConsoleOutputAttribute(
     LPDWORD lpNumberOfAttrsWritten
     );
 
-BOOL
-WINAPI
-FillConsoleOutputCharacterA(
-    HANDLE hConsoleOutput,
-    CHAR  cCharacter,
-    DWORD  nLength,
-    COORD  dwWriteCoord,
-    LPDWORD lpNumberOfCharsWritten
-    );
+// BOOL
+// WINAPI
+// FillConsoleOutputCharacterA(
+//     HANDLE hConsoleOutput,
+//     CHAR  cCharacter,
+//     DWORD  nLength,
+//     COORD  dwWriteCoord,
+//     LPDWORD lpNumberOfCharsWritten
+//     );
 BOOL
 WINAPI
 FillConsoleOutputCharacterW(
@@ -407,19 +407,19 @@ FillConsoleOutputCharacterW(
     );
 #ifdef UNICODE
 #define FillConsoleOutputCharacter FillConsoleOutputCharacterW
-#else
-#define FillConsoleOutputCharacter FillConsoleOutputCharacterA
+// #else
+// #define FillConsoleOutputCharacter FillConsoleOutputCharacterA
 #endif // !UNICODE
 
-BOOL
-WINAPI
-FillConsoleOutputAttribute(
-    HANDLE hConsoleOutput,
-    WORD   wAttribute,
-    DWORD  nLength,
-    COORD  dwWriteCoord,
-    LPDWORD lpNumberOfAttrsWritten
-    );
+// BOOL
+// WINAPI
+// FillConsoleOutputAttribute(
+//     HANDLE hConsoleOutput,
+//     WORD   wAttribute,
+//     DWORD  nLength,
+//     COORD  dwWriteCoord,
+//     LPDWORD lpNumberOfAttrsWritten
+//     );
 
 BOOL
 WINAPI
@@ -455,11 +455,11 @@ GetConsoleCursorInfo(
     PCONSOLE_CURSOR_INFO lpConsoleCursorInfo
     );
 
-BOOL
-WINAPI
-GetNumberOfConsoleMouseButtons(
-    LPDWORD lpNumberOfMouseButtons
-    );
+// BOOL
+// WINAPI
+// GetNumberOfConsoleMouseButtons(
+//     LPDWORD lpNumberOfMouseButtons
+//     );
 
 BOOL
 WINAPI
@@ -540,12 +540,12 @@ SetConsoleTextAttribute(
     WORD wAttributes
     );
 
-BOOL
-WINAPI
-SetConsoleCtrlHandler(
-    PHANDLER_ROUTINE HandlerRoutine,
-    BOOL Add
-    );
+// BOOL
+// WINAPI
+// SetConsoleCtrlHandler(
+//     PHANDLER_ROUTINE HandlerRoutine,
+//     BOOL Add
+//     );
 
 BOOL
 WINAPI

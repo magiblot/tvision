@@ -30,10 +30,15 @@
 #include <dos.h>
 #endif  // __DOS_H
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 #pragma warn -asc
 
 Boolean driveValid( char drive )
 {
+#ifdef __BORLANDC__
 #if !defined( __FLAT__ )
 I       MOV     AH, 19H     // Save the current drive in BL
 I       INT     21H
@@ -59,15 +64,22 @@ I       XCHG    AX, CX      // Put the return value into AX
     DWORD mask = 0x01 << (drive - 'A');
     return (Boolean) (GetLogicalDrives() & mask);
 #endif
+#else
+    assert(false);
+#endif
 }
 
 #pragma warn .asc
 
 Boolean isDir( const char *str )
 {
+#ifdef __BORLANDC__
     ffblk ff;
     return Boolean( findfirst( str, &ff, FA_DIREC ) == 0 &&
                     (ff.ff_attrib & FA_DIREC) != 0 );
+#else
+    assert(false);
+#endif
 }
 
 Boolean pathValid( const char *path )
@@ -87,6 +99,7 @@ Boolean pathValid( const char *path )
 
 Boolean validFileName( const char *fileName )
 {
+#ifdef __BORLANDC__
     static const char * const illegalChars = ";,=+<>|\"[] \\";
 
     char path[MAXPATH];
@@ -104,6 +117,9 @@ Boolean validFileName( const char *fileName )
       )
         return False;
     return True;
+#else
+    assert(false);
+#endif
 }
 
 void getCurDir( char *dir )
@@ -116,6 +132,8 @@ void getCurDir( char *dir )
     getcurdir( 0, dir+3 );
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
+#else
+    assert(false);
 #endif
 }
 

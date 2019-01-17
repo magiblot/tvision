@@ -32,6 +32,10 @@
 #include <dos.h>
 #endif  // __DOS_H
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) :
     TListBox( bounds, 1, aScrollBar ),
     cur( 0 )
@@ -117,11 +121,14 @@ void TDirListBox::showDrives( TDirCollection *dirs )
         s[ strlen(lastDir)+1 ] = EOS;
         dirs->insert( new TDirEntry( s, oldc ) );
         }
+#else
+    assert(false);
 #endif
 }
 
 void TDirListBox::showDirs( TDirCollection *dirs )
 {
+#ifdef __BORLANDC__
     const int indentSize = 2;
     int indent = indentSize;
 
@@ -194,6 +201,9 @@ void TDirListBox::showDirs( TDirCollection *dirs )
         *(i+1) = graphics[2];
         *(i+2) = graphics[2];
         }
+#else
+    assert(false);
+#endif
 }
 
 void TDirListBox::newDirectory( const char *str )

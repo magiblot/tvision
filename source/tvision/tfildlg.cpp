@@ -47,6 +47,10 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#ifndef __BORLANC__
+#include <assert.h>
+#endif
+
 // File dialog flags
 const int
     ffOpen        = 0x0001,
@@ -181,6 +185,7 @@ static void trim( char *dest, const char *src )
 
 void TFileDialog::getFileName( char *s )
 {
+#ifdef __BORLANDC__
 char buf[2*MAXPATH];
 char drive[MAXDRIVE];
 char path[MAXDIR];
@@ -216,6 +221,9 @@ char TExt[MAXEXT];
             }
         }
     strcpy( s, buf );
+#else
+    assert(false);
+#endif
 }
 
 void TFileDialog::handleEvent(TEvent& event)
@@ -283,6 +291,7 @@ Boolean TFileDialog::checkDirectory( const char *str )
 
 Boolean TFileDialog::valid(ushort command)
 {
+#ifdef __BORLANDC__
 char fName[MAXPATH];
 char drive[MAXDRIVE];
 char dir[MAXDIR];
@@ -339,6 +348,9 @@ char ext[MAXEXT];
             return True;
         }
     return False;
+#else
+    assert(false);
+#endif
 }
 
 #if !defined(NO_STREAMABLE)
