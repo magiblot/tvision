@@ -87,14 +87,17 @@ ushort THardwareInfo::biosSel;
 
 #endif
 
-#if defined( __FLAT__ ) && defined( __BORLANDC__ )
+#if defined( __FLAT__ )
 
+#ifdef __BORLANDC__
 #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
+#endif
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
 THardwareInfo::THardwareInfo()
 {
+#ifdef __BORLANDC__
     HMODULE mod;
 
     if( (mod = GetModuleHandle( "KERNEL32" )) != 0 &&
@@ -109,10 +112,14 @@ THardwareInfo::THardwareInfo()
     GetConsoleMode( consoleHandle[cnInput], &consoleMode );
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+#else
+    assert(false);
+#endif
 }
 
 ushort THardwareInfo::getScreenMode()
 {
+#ifdef __BORLANDC__
     ushort mode;
 
     if( platform != plDPMI32 )      // B/W, mono not supported if running on
@@ -127,10 +134,14 @@ ushort THardwareInfo::getScreenMode()
     if( getScreenRows() > 25 )
         mode |= TDisplay::smFont8x8;
     return mode;
+#else
+    assert(false);
+#endif
 }
 
 void THardwareInfo::setScreenMode( ushort mode )
 {
+#ifdef __BORLANDC__
     COORD newSize = { 80, 25 };
     SMALL_RECT rect = { 0, 0, 79, 24 };
 
@@ -162,16 +173,24 @@ void THardwareInfo::setScreenMode( ushort mode )
         }
 
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+#else
+    assert(false);
+#endif
 }
 
 void THardwareInfo::setCaretPosition( ushort x, ushort y )
 {
+#ifdef __BORLANDC__
     COORD coord = { x, y };
     SetConsoleCursorPosition( consoleHandle[cnOutput], coord );
+#else
+    assert(false);
+#endif
 }
 
 void THardwareInfo::setCaretSize( ushort size )
 {
+#ifdef __BORLANDC__
     if( size == 0 )
     {
         crInfo.bVisible = False;
@@ -184,21 +203,29 @@ void THardwareInfo::setCaretSize( ushort size )
     }
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
+#else
+    assert(false);
+#endif
 }
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
+#ifdef __BORLANDC__
     COORD size = {len,1};
     COORD from = {0,0};
     SMALL_RECT to = {x,y,x+len,y+1};
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
+#else
+    assert(false);
+#endif
 }
 
 // Event functions.
 
 BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 {
+#ifdef __BORLANDC__
     if( !pendingEvent )
         {
         GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
@@ -218,11 +245,15 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
         return True;
         }
     return False;
+#else
+    assert(false);
+#endif
 }
 
 
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
+#ifdef __BORLANDC__
     if( !pendingEvent )
         {
         GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
@@ -271,6 +302,9 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
         }
 
     return False;
+#else
+    assert(false);
+#endif
 }
 
 BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
@@ -286,9 +320,13 @@ BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
 
 ulong THardwareInfo::getTickCount()
 {
+#ifdef __BORLANDC__
     // To change units from ms to clock ticks.
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
     return GetTickCount() / 55;
+#else
+    assert(false);
+#endif
 }
 
 #endif  // __FLAT__ && __BORLANDC__

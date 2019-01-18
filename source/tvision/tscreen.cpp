@@ -256,9 +256,10 @@ void TScreen::suspend()
 }
 
 #pragma argsused
-#if defined( __BORLANDC__ )
+
 ushort TScreen::fixCrtMode( ushort mode )
 {
+#ifdef __BORLANDC__
 #if defined( __FLAT__ )
     if( THardwareInfo::getPlatform() != THardwareInfo::plDPMI32 )
         {
@@ -273,8 +274,11 @@ ushort TScreen::fixCrtMode( ushort mode )
     if( _AL != smCO80 && _AL != smBW80 )
         _AL = smCO80;
     return _AX;
-}
+#else
+    assert(false);
 #endif
+}
+
 void TScreen::setCrtData()
 {
     screenMode = getCrtMode();
