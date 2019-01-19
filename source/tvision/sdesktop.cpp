@@ -15,11 +15,12 @@
 #define Uses_TDeskTop
 #define Uses_TStreamableClass
 #include <tvision/tv.h>
-__link( RBackGround )
+__link( RBackground )
 
 TStreamableClass RDeskTop( TDeskTop::name,
                            TDeskTop::build,
                            __DELTA(TDeskTop)
                          );
 #endif
+
 
