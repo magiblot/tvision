@@ -366,6 +366,10 @@ class TMenuPopup : TMenuBox
     TMenuPopup(TRect&, TMenu*, TMenuView*);
     virtual void handleEvent(TEvent&);
 
+protected:
+
+    TMenuPopup( StreamableInit );
+
 public:
 
     static const char * const _NEAR name;

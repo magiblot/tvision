@@ -196,6 +196,15 @@ void TSortedListBox::newList( TSortedCollection *aList )
     searchPos = -1;
 }
 
+#if !defined(NO_STREAMABLE)
+
+TStreamable *TSortedListBox::build()
+{
+    return new TSortedListBox( streamableInit );
+}
+
+#endif
+
 TFileInfoPane::TFileInfoPane( const TRect& bounds ) :
     TView(bounds)
 {

@@ -1,5 +1,3 @@
 $ make 2> >(grep 'undefined reference ') | sed 's/^.*undefined/undefined/' | awk '!seen[$0]++' | LC_ALL=C sort -r
 
-undefined reference to `TSortedListBox::build()'
-undefined reference to `TMenuPopup::build()'
 undefined reference to `RBackGround'
