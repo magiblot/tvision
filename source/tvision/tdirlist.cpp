@@ -122,7 +122,7 @@ void TDirListBox::showDrives( TDirCollection *dirs )
         dirs->insert( new TDirEntry( s, oldc ) );
         }
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -202,7 +202,7 @@ void TDirListBox::showDirs( TDirCollection *dirs )
         *(i+2) = graphics[2];
         }
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

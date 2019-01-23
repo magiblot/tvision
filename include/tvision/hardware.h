@@ -176,7 +176,7 @@ inline void THardwareInfo::clearScreen( ushort w, ushort h )
     FillConsoleOutputAttribute( consoleHandle[cnOutput], 0x07, w*h, coord, &read );
     FillConsoleOutputCharacterA( consoleHandle[cnOutput], ' ', w*h, coord, &read );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 #pragma option -w+inl
@@ -193,7 +193,7 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
 
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -202,7 +202,7 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 #ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -216,7 +216,7 @@ inline DWORD THardwareInfo::getButtonCount()
     GetNumberOfConsoleMouseButtons(&num);
     return num;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -225,7 +225,7 @@ inline void THardwareInfo::cursorOn()
 #ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode | ENABLE_MOUSE_INPUT );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -234,7 +234,7 @@ inline void THardwareInfo::cursorOff()
 #ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode & ~ENABLE_MOUSE_INPUT );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -254,7 +254,7 @@ inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
 #ifdef __BORLANDC__
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -277,6 +277,7 @@ inline ulong THardwareInfo::getTickCount()
 
 inline uchar THardwareInfo::getShiftState()
     { return *(uchar *) MAKELONG( biosSel, 0x17 ); }
+
 
 inline uchar THardwareInfo::getBiosScreenRows()
     { return *(uchar *) MAKELONG( biosSel, 0x84 ); }

@@ -1,3 +1,107 @@
+1.  THardwareInfo::THardwareInfo
+    #1  tapplica.cpp:'static THardwareInfo hwInfoManager;'
+
+2.  THardwareInfo::getButtonCount
+    #1  THWMouse::resume
+    #2  THWMouse::THWMouse
+    #3  TMouse::TMouse
+    #4  tapplica.cpp:'TMouse TEventQueue::mouse;'
+
+3.  THardwareInfo::cursorOn
+    #1  THardwareInfo::cursorOn
+    #2  THWMouse::show
+    #3  THWMouse::resume
+    #4  THWMouse::THWMouse
+    #5  TMouse::TMouse
+    #6  tapplica.cpp:'TMouse TEventQueue::mouse;'
+
+4.  THardwareInfo::getScreenMode
+    #1  TDisplay::getCrtMode
+    #2  TScreen::TScreen
+    #3  tapplica.cpp:'static TScreen tsc;'
+
+5.  THardwareInfo::allocateScreenBuffer
+    #1  TScreen::TScreen
+    #2  tapplica.cpp:'static TScreen tsc;'
+
+4.  THardwareInfo::getScreenMode
+    #1  TDisplay::getCrtMode
+    #2  TScreen::setCrtData
+    #3  TScreen::TScreen
+    #4  tapplica.cpp:'static TScreen tsc;'
+
+6.  THardwareInfo::setCaretSize (size=0)
+    #1  TDisplay::setCursorType (ct=0)
+    #2  TScreen::setCrtData
+    #3  TScreen::TScreen
+    #4  tapplica.cpp:'static TScreen tsc;'
+
+2.  THardwareInfo::getButtonCount
+    #1  THWMouse::resume
+    #2  TMouse::resume
+    #3  TEventQueue::resume
+    #4  TEventQueue::TEventQueue
+    #5  tapplica.cpp:'static TEventQueue teq;'
+
+3.  THardwareInfo::cursorOn
+    #1  THWMouse::show
+    #2  THWMouse::resume
+    #3  TMouse::resume
+    #4  TEventQueue::resume
+    #5  TEventQueue::TEventQueue
+    #6  tapplica.cpp:'static TEventQueue teq;'
+
+7.  THardwareInfo::setCtrlBrkHandler (install=1)
+    #1  TSystemError::resume
+    #2  TSystemError::TSystemError
+    #3  tapplica.cpp:'static TSystemError sysErr;'
+
+8.  TView::exposed
+    #1  TView::drawView
+    #2  TView::drawShow
+    #3  TView::setState (aState=1, enable=True)
+    #4  TView::show
+    #5  TGroup::insertBefore
+    #6  TGroup::insert (p= different in each breakpoint hit for TView::exposed)
+    #7  TDeskTop::TDeskTop
+    #8  TProgram::initDeskTop
+    #9  TProgram::TProgram
+    #10 TApplication::TApplication <THelloApp::initStatusLine(TRect)>
+    #11 THelloApp::THelloApp
+    #12 main
+
+8.  TView::exposed
+    #1  TView::drawView
+    #2  TView::drawShow
+    #3  TView::setState (aState=1, enable=True)
+    #4  TGroup::setState (aState=1, enable=True)
+    #5  TView::show
+    #6  TGroup::insertBefore
+    #7  TGroup::insert
+    #8  TProgram::TProgram
+    #9  TApplication::TApplication <THelloApp::initStatusLine(TRect)>
+    #10 THelloApp::THelloApp
+    #11 main
+
+8.  TView::exposed (x2)
+    #1  TView::drawView
+    #2  TView::drawShow
+    #3  TView::setState (aState=1, enable=True)
+    #4  TView::show
+    #5  TGroup::insertBefore
+    #6  TGroup::insert
+    #7  TProgram::TProgram
+    #8  TApplication::TApplication <THelloApp::initStatusLine(TRect)>
+    #9  THelloApp::THelloApp
+    #10 main
+
+9.  THardwareInfo::getKeyEvent
+    #1  TEvent::getKeyEvent
+    #2  TProgram::getEvent
+    #3  TGroup::execute
+    #4  TProgram::run
+    #5  main
+
 TEditor::bufChar
 TEditor::bufPtr
 TEditor::formatLine
@@ -11,20 +115,12 @@ edits.cpp::iScan
 TFrame::frameLine
 TGroup::removeView
 THardwareInfo::clearScreen
-THardwareInfo::allocateScreenBuffer
 THardwareInfo::freeScreenBuffer
-THardwareInfo::getButtonCount
-THardwareInfo::cursorOn
 THardwareInfo::cursorOff
-THardwareInfo::setCtrlBrkHandler
-THardwareInfo::THardwareInfo
-THardwareInfo::getScreenMode
 THardwareInfo::setScreenMode
 THardwareInfo::setCaretPosition
-THardwareInfo::setCaretSize
 THardwareInfo::screenWrite
 THardwareInfo::getMouseEvent
-THardwareInfo::getKeyEvent
 THardwareInfo::ctrlBreakHandler
 THardwareInfo::getTickCount
 tdircoll.cpp::driveValid
@@ -41,7 +137,6 @@ tfillist.cpp::fexpand
 TScreen::fixCrtMode
 TSystemError::swapStatusLine
 TTerminal::prevLines
-TView::exposed
 TView::resetCursor
 TView::writeView
 TView::writeBuf

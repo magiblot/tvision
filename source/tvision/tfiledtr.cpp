@@ -221,7 +221,7 @@ Boolean TFileEditor::saveFile()
         }
     return True;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

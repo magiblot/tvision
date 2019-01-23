@@ -21,27 +21,27 @@
 
 void TView::writeView( write_args )
 {
-    assert(false);
+    BREAK;
 }
 
 void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b )
 {
-    assert(false);
+    BREAK;
 }
 
 void TView::writeChar( short x, short y, char c, uchar color, short count )
 {
-    assert(false);
+    BREAK;
 }
 
 void TView::writeLine( short x, short y, short w, short h, const void _FAR *b )
 {
-    assert(false);
+    BREAK;
 }
 
 void TView::writeStr( short x, short y, const char *str, uchar color )
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

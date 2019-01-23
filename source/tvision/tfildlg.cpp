@@ -222,7 +222,7 @@ char TExt[MAXEXT];
         }
     strcpy( s, buf );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -349,7 +349,7 @@ char ext[MAXEXT];
         }
     return False;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

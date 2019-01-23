@@ -21,7 +21,7 @@
 
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

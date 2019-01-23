@@ -5,6 +5,8 @@
 *.csm
 *.~*
 *.o
+*.bkp
+*.dst
 
 *.kdev4
 build

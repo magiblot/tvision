@@ -230,7 +230,7 @@ void TFileList::readDirectory( const char *aWildCard )
         message( owner, evBroadcast, cmFileFocused, &noFile );
         }
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -310,7 +310,7 @@ void fexpand( char *rpath )
     strupr( path );
     strcpy( rpath, path );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

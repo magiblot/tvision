@@ -113,7 +113,7 @@ THardwareInfo::THardwareInfo()
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -135,7 +135,7 @@ ushort THardwareInfo::getScreenMode()
         mode |= TDisplay::smFont8x8;
     return mode;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -174,7 +174,7 @@ void THardwareInfo::setScreenMode( ushort mode )
 
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -184,7 +184,7 @@ void THardwareInfo::setCaretPosition( ushort x, ushort y )
     COORD coord = { x, y };
     SetConsoleCursorPosition( consoleHandle[cnOutput], coord );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -204,7 +204,7 @@ void THardwareInfo::setCaretSize( ushort size )
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -217,7 +217,7 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -246,7 +246,7 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
         }
     return False;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -303,7 +303,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
 
     return False;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -325,7 +325,7 @@ ulong THardwareInfo::getTickCount()
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
     return GetTickCount() / 55;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

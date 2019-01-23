@@ -21,7 +21,7 @@
 
 void TView::resetCursor()
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

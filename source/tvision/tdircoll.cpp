@@ -65,7 +65,7 @@ I       XCHG    AX, CX      // Put the return value into AX
     return (Boolean) (GetLogicalDrives() & mask);
 #endif
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -78,7 +78,7 @@ Boolean isDir( const char *str )
     return Boolean( findfirst( str, &ff, FA_DIREC ) == 0 &&
                     (ff.ff_attrib & FA_DIREC) != 0 );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -118,7 +118,7 @@ Boolean validFileName( const char *fileName )
         return False;
     return True;
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 
@@ -133,7 +133,7 @@ void getCurDir( char *dir )
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
 #else
-    assert(false);
+    BREAK;
 #endif
 }
 

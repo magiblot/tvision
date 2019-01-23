@@ -21,7 +21,7 @@
 
 Boolean TView::exposed()
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

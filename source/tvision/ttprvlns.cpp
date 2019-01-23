@@ -21,7 +21,7 @@
 
 ushort TTerminal::prevLines( ushort pos, ushort lines )
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

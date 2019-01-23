@@ -21,7 +21,7 @@
 
 void TGroup::removeView( TView *p )
 {
-    assert(false);
+    BREAK;
 }
 
 #endif

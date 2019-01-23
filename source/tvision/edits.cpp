@@ -21,12 +21,12 @@
 
 char TEditor::bufChar( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort TEditor::bufPtr( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 void TEditor::formatLine( void *DrawBuf,
@@ -35,44 +35,44 @@ void TEditor::formatLine( void *DrawBuf,
                           ushort Colors
                         )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort TEditor::lineEnd( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort TEditor::lineStart( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort TEditor::nextChar( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort TEditor::prevChar( ushort P )
 {
-    assert(false);
+    BREAK;
 }
 
 extern "C" {
 
 int countLines( void *buf, uint count )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort scan( const void *block, ushort size, const char *str )
 {
-    assert(false);
+    BREAK;
 }
 
 ushort iScan( const void *block, ushort size, const char *str )
 {
-    assert(false);
+    BREAK;
 }
 
 }
