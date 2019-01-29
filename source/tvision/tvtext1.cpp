@@ -56,7 +56,7 @@ static unsigned getCodePage()
 void TDisplay::updateIntlChars()
 {
     if(getCodePage() != 437 )
-        TFrame::frameChars[30] = 'Í';
+        TFrame::frameChars[30] = '\xCD';
 }
 
 extern const uchar specialChars[] =
@@ -72,7 +72,7 @@ const char _NEAR TFrame::initFrame[19] =
   "\x06\x0A\x0C\x05\x00\x05\x03\x0A\x09\x16\x1A\x1C\x15\x00\x15\x13\x1A\x19";
 
 char _NEAR TFrame::frameChars[33] =
-    "   \xC0 \xB3\xDA\xC3 \xD9\xC4\xC1\xBF\xB4\xC2\xC5   \xC8 \xBA\xC9\xC7 \xBC\xCD\xCF\xBA\xB6\xD1 "; // for UnitedStates code page
+    "   \xC0 \xB3\xDA\xC3 \xD9\xC4\xC1\xBF\xB4\xC2\xC5   \xC8 \xBA\xC9\xC7 \xBC\xCD\xCF\xBB\xB6\xD1 "; // for UnitedStates code page
 
 const char * _NEAR TFrame::closeIcon = "[~\xFE~]";
 const char * _NEAR TFrame::zoomIcon = "[~\x18~]";
