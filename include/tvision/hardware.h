@@ -193,6 +193,11 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
 
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
+/* Allocate memory for the screen buffer. Two bytes per character cell.
+ * This pointer is stored in TScreen's attribute screenBuffer, which is
+ * often copied to TGroup's attribute buffer.
+ * https://docs.microsoft.com/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc
+ */
     BREAK;
 #endif
 }
@@ -216,6 +221,11 @@ inline DWORD THardwareInfo::getButtonCount()
     GetNumberOfConsoleMouseButtons(&num);
     return num;
 #else
+/* The number of mouse buttons does not seem to be very important in the
+ * world of Linux terminal application.
+ * The only mention I could find:
+ * https://invisible-island.net/ncurses/man/curs_mouse.3x.html
+ */
     BREAK;
 #endif
 }
@@ -225,6 +235,11 @@ inline void THardwareInfo::cursorOn()
 #ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode | ENABLE_MOUSE_INPUT );
 #else
+/* By cursor we mean mouse pointer. Enables mouse input.
+ * The following will be useful:
+ * http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/mouse.html
+ * https://stackoverflow.com/a/13887057
+ */
     BREAK;
 #endif
 }
@@ -254,6 +269,11 @@ inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
 #ifdef __BORLANDC__
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
 #else
+/* Sets THardwareInfo::ctrlBreakHandle as the handler of control signals
+ * CTRL_C_EVENT and CTRL_BREAK_EVENT. When the signal is received, the
+ * handler sets the attribute TSystemError::ctrlBreakHit to true.
+ * https://docs.microsoft.com/en-us/windows/console/handlerroutine
+ */
     BREAK;
 #endif
 }

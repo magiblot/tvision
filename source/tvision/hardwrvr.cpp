@@ -21,6 +21,10 @@
 #include <tvision/tv.h>
 #include <dos.h>
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 #if defined( __FLAT__ )
 
 BOOL THardwareInfo::insertState = True;
@@ -113,6 +117,16 @@ THardwareInfo::THardwareInfo()
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
+/* From what I can gather, this function was intended to do the following:
+ * 1. Get handles for standard input and output.
+ * 2. Get the current input mode (GetConsoleMode).
+ * 3. Get the current size and visibility of the cursor (GetConsoleCursorInfo).
+ * 4. Get the current screen buffer size, cursor position and window position
+ *    (GetConsoleScreenBufferInfo).
+ * https://docs.microsoft.com/en-us/windows/console/getconsolemode
+ * https://docs.microsoft.com/en-us/windows/console/getconsolecursorinfo
+ * https://docs.microsoft.com/en-us/windows/console/getconsolescreenbufferinfo
+ */
     BREAK;
 #endif
 }
@@ -135,6 +149,16 @@ ushort THardwareInfo::getScreenMode()
         mode |= TDisplay::smFont8x8;
     return mode;
 #else
+/* The INT10 call returns the following information:
+ * AL = Video Mode
+ * AH = number of character columns
+ * BH = active page
+ * Source: https://en.wikipedia.org/wiki/INT_10H
+ * The implementation above just reads the video mode, and sets the small font
+ * if the number of rows is greater than 25.
+ * This function is called from TDisplay::getCrtMode, which just returns the
+ * value this does, and it is then assigned to a attribute of TScreen.
+ */
     BREAK;
 #endif
 }
@@ -174,6 +198,14 @@ void THardwareInfo::setScreenMode( ushort mode )
 
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
+/* This function actually updates the screen info that's stored in sbInfo.
+ * The screen resolution is 80x25 by default. If the small font has been set
+ * in mode, the screen height is raised to 50.
+ * To do this in Windows, a system call is required to resize the screen buffer
+ * and another one to set the size of the screen buffer window.
+ * https://docs.microsoft.com/en-us/windows/console/setconsolescreenbuffersize
+ * https://docs.microsoft.com/en-us/windows/console/setconsolewindowinfo
+ */
     BREAK;
 #endif
 }
@@ -204,6 +236,11 @@ void THardwareInfo::setCaretSize( ushort size )
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
 #else
+/* The caret is the keyboard cursor. If size is 0, the caret is hidden. The
+ * other possible values are from 1 to 100, theoretically, and represent the
+ * percentage of the character cell the caret fills.
+ * https://docs.microsoft.com/en-us/windows/console/console-cursor-info-str
+ */
     BREAK;
 #endif
 }
