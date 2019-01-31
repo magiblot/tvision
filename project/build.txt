@@ -1,0 +1,14 @@
+The file 'tvision.ide' was created with Borland C++ 4.52 under Windows 95.
+Borland Turbo Assembler 4.1 and Borland PowerPack are also required.
+
+Steps to build:
+
+1.  Create empty folders 'objgen32', 'objgen', 'objtvw32', 'objtvd32'
+    and 'objtvdos'.
+2.  Load 'tvision.ide' into the Borland C++ 4.52 IDE and build targets
+    'geninc32' and 'geninc'.
+3.  From this directory, run 'geninc32 > tvwrit32.inc'
+    and 'geninc > tvwrite.inc'. to generate .
+4.  Copy 'tv.inc' from the sources dir to this location. This way the assembly
+    include files are visible to Turbo Assembler.
+5.  You should now be able to compile the other targets from the IDE.
