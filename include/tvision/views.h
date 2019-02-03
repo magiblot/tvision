@@ -349,6 +349,9 @@ public:
     virtual void draw();
     void drawView();
     Boolean exposed();
+#ifdef DEBUG_TVEXPOSD
+    Boolean exposedAsm( void *, int * );
+#endif
     Boolean focus();
     void hideCursor();
     void drawHide( TView *lastView );
