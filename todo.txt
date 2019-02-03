@@ -56,44 +56,14 @@
     #2  TSystemError::TSystemError
     #3  tapplica.cpp:'static TSystemError sysErr;'
 
-8.  TView::exposed
-    #1  TView::drawView
-    #2  TView::drawShow
-    #3  TView::setState (aState=1, enable=True)
-    #4  TView::show
-    #5  TGroup::insertBefore
-    #6  TGroup::insert (p= different in each breakpoint hit for TView::exposed)
-    #7  TDeskTop::TDeskTop
-    #8  TProgram::initDeskTop
-    #9  TProgram::TProgram
-    #10 TApplication::TApplication <THelloApp::initStatusLine(TRect)>
-    #11 THelloApp::THelloApp
-    #12 main
-
-8.  TView::exposed
-    #1  TView::drawView
-    #2  TView::drawShow
-    #3  TView::setState (aState=1, enable=True)
-    #4  TGroup::setState (aState=1, enable=True)
-    #5  TView::show
-    #6  TGroup::insertBefore
-    #7  TGroup::insert
-    #8  TProgram::TProgram
-    #9  TApplication::TApplication <THelloApp::initStatusLine(TRect)>
-    #10 THelloApp::THelloApp
-    #11 main
-
-8.  TView::exposed (x2)
-    #1  TView::drawView
-    #2  TView::drawShow
-    #3  TView::setState (aState=1, enable=True)
-    #4  TView::show
-    #5  TGroup::insertBefore
-    #6  TGroup::insert
-    #7  TProgram::TProgram
-    #8  TApplication::TApplication <THelloApp::initStatusLine(TRect)>
-    #9  THelloApp::THelloApp
-    #10 main
+8.  THardwareInfo::getMouseEvent
+    #1  TEventQueue::getMouseState
+    #2  TEventQueue::getMouseEvent
+    #3  TEvent::getMouseEvent
+    #4  TProgram::getEvent
+    #5  TGroup::execute
+    #6  TProgram::run
+    #7  main
 
 9.  THardwareInfo::getKeyEvent
     #1  TEvent::getKeyEvent
@@ -120,7 +90,6 @@ THardwareInfo::cursorOff
 THardwareInfo::setScreenMode
 THardwareInfo::setCaretPosition
 THardwareInfo::screenWrite
-THardwareInfo::getMouseEvent
 THardwareInfo::ctrlBreakHandler
 THardwareInfo::getTickCount
 tdircoll.cpp::driveValid

@@ -3,8 +3,16 @@
 
 #include <cassert>
 
-#include <signal.h>
-#define BREAK raise(SIGSTOP)
+#include <unistd.h>
+
+static PressEnter()
+{
+    write(1, "Press enter to continue:\n", 25);
+    char _[80];
+    read(0, &_, sizeof(_));
+}
+
+#define BREAK PressEnter();
 
 #else
 
