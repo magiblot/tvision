@@ -62,9 +62,7 @@ void TView::writeView( short x, short y, short count, const void _FAR* b )
     L0();
 #ifdef DEBUG_TVWRITE
     endTrace();
-	// cout << "X: " << X << ", Y: " << Y << ", count: " << Count << endl;
-    // printf("X: %d, Y: %d, count: %d\n", X, Y, Count);
-    // printf("CPP: "); printTrace();
+    cerr << "X: " << X << ", Y: " << Y << ", count: " << Count << endl;
 #endif
 }
 

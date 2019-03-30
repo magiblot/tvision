@@ -451,6 +451,7 @@ private:
                  );
     void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState );
     static void writeView( write_args );
+    void writeView( short x, short y, short count, const void _FAR* b );
 
     virtual const char *streamableName() const
         { return name; }
