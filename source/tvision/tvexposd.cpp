@@ -18,21 +18,13 @@
 
 #ifdef DEBUG_TVEXPOSD
 
-#include <stdio.h>
+#include <debugAsm.h>
 
-int timesRun = 0;
+static int timesRun = 0;
+static int iterations;
+static int iterationsAsm;
 
-const char* trace[100];
-char traceAsm[100];
-
-int z = 0;
-int ii;
-
-#define CtrlRet(a,b) { trace[z++] = a; return b; }
-
-void printTrace( const char** );
-void printTraceAsm( const char* );
-void keepCursorBetween(int, int);
+#define CtrlRet(a,b) { pushArrayTrace(a); return b; }
 
 #else
 
@@ -40,45 +32,44 @@ void keepCursorBetween(int, int);
 
 #endif
 
-int i;
-
-Boolean L0( TView* );
+static Boolean L0( TView* );
 
 Boolean TView::exposed()
 {
+#ifdef DEBUG_TVEXPOSD
+    startArrayTrace();
+#endif
     Boolean b = L0(this);
 #ifdef DEBUG_TVEXPOSD
-    trace[z] = 0;
-    Boolean c = exposedAsm(traceAsm, &ii);
+    endArrayTrace();
+    Boolean c = exposedAsm(traceAsm, &iterationsAsm);
     if (b != c) {
-        keepCursorBetween(7, 22);
-        printf(" %d: CPP = %d (%d), ASM = %d (%d) \n", timesRun, b, i - 1, c, ii);
-        printf("CPP: "); printTrace(trace);
-        printf("ASM: "); printTraceAsm(traceAsm);
+        cerr << ' ' << timesRun << ": "
+             << "CPP = " << b << " (" << iterations << "), "
+             << "ASM = " << c << " (" << iterationsAsm << ") " << endl;
+        cerr << "CPP: "; printTrace();
+        cerr << "ASM: "; printTraceAsm();
     }
     timesRun++;
 #endif
     return b;
 }
 
-Boolean L1( TView* );
-Boolean L10( TView* );
-Boolean L11( TView* );
-Boolean L12( TGroup* );
-Boolean L13( TGroup* );
-Boolean L20( TView* );
-Boolean L21( TView* );
-Boolean L22( TView* );
-Boolean L23( TView* );
+static Boolean L1( TView* );
+static Boolean L10( TView* );
+static Boolean L11( TView* );
+static Boolean L12( TGroup* );
+static Boolean L13( TGroup* );
+static Boolean L20( TView* );
+static Boolean L21( TView* );
+static Boolean L22( TView* );
+static Boolean L23( TView* );
 
-int eax = 0, ebx = 0, ecx = 0, esi = 0;
-TView *target = 0;
+static int eax = 0, ebx = 0, ecx = 0, esi = 0;
+static TView *target = 0;
 
 Boolean L0( TView *dest )
 {
-#ifdef DEBUG_TVEXPOSD
-    z = 0;
-#endif
     if (!(dest->state & sfExposed))
         CtrlRet("L0.1", False);
     if (0 >= dest->size.x || 0 >= dest->size.y)
@@ -88,11 +79,11 @@ Boolean L0( TView *dest )
 
 Boolean L1( TView *dest )
 {
-    i = 0;
+    int i = 0;
     do {
 #ifdef DEBUG_TVEXPOSD
-        int _z = z;
-        trace[z++] = "L1.1";
+        int _z = traceIndex;
+        pushArrayTrace("L1.1");
 #endif
         eax = i;
         ebx = 0;
@@ -101,7 +92,8 @@ Boolean L1( TView *dest )
             return True;
         ++i;
 #ifdef DEBUG_TVEXPOSD
-        z = _z;
+        traceIndex = _z;
+        iterations = i;
 #endif
     } while (i < dest->size.y);
     CtrlRet("L1.2", False);
@@ -204,47 +196,12 @@ Boolean L23( TView *next )
     CtrlRet("L23.2", False);
 }
 
-#ifdef DEBUG_TVEXPOSD
+#if defined( DEBUG_TVEXPOSD ) && defined (__FLAT__)
 
-void printTrace(const char** tr)
+Boolean TView::exposedAsm( void * _v, int * _i)
 {
-    z = 0;
-    while (tr[z] != 0)
-    {
-        printf("%s ", tr[z]);
-        if (++z % 7 == 0)
-            printf("\n");
-    }
-    if (z % 7)
-        printf("\n");
-}
-
-void printTraceAsm(const char* tr)
-{
-    z = 0;
-    while (tr[z] != -1)
-    {
-        printf("L%d ", (int) tr[z]);
-        if (++z % 10 == 0)
-            printf("\n");
-    }
-    if (z % 10)
-        printf("\n");
-}
-
-void keepCursorBetween(int firstLine, int lastLine)
-{
-#ifdef __BORLANDC__
-    _AH = 0x0F;
-I   INT   0x10;
-    _AH = 0x03;
-I   INT   0x10;
-    if (_DH < firstLine || lastLine <= _DH) {
-        _AH = 0x02;
-        _DH = firstLine;
-I       INT   0x10;
-    }
-#endif
+    ((char *) _v)[0] = *_i = -1;
+    return -1;
 }
 
 #endif
