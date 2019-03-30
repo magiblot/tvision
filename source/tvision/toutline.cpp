@@ -567,14 +567,40 @@ void TOutlineViewer::update()
   adjustFocus(foc);
 }
 
+#ifdef DEBUG_TOUTLINE
+static int depth = 0;
+static int lastNode = 0;
+#endif
+
 void TOutlineViewer::disposeNode(TNode* node)
-{
+{  
   if (node)
   {
+#ifdef DEBUG_TOUTLINE
+      int i; 
+      for (i = 0; i < depth; ++i) cerr << "  ";
+      int numNode = lastNode++;
+      cerr << "#" << dec << numNode << ": " << hex << node << ": \"";
+      cerr << node->text << "\"" << endl;
+#endif
       if (node->childList)
+      {
+#ifdef DEBUG_TOUTLINE
+        ++depth;
+#endif
         disposeNode(node->childList);
+#ifdef DEBUG_TOUTLINE
+        --depth;
+#endif
+      }
       if (node->next)
+      {
         disposeNode(node->next);
+      }
+#ifdef DEBUG_TOUTLINE
+      for (i = 0; i < depth; ++i) cerr << "  ";
+      cerr << "*" << dec << numNode << endl;
+#endif
       delete node;
   }
 }
