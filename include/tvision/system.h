@@ -79,10 +79,10 @@ protected:
     THWMouse();
     THWMouse( const THWMouse& ) {};
     ~THWMouse();
-
+public:
     static void show();
     static void hide();
-
+protected:
     static void setRange( ushort, ushort );
     static void getEvent( MouseEventType& );
     static Boolean present();
@@ -256,8 +256,9 @@ private:
     static void setLast( TEvent& );
 
     static MouseEventType _NEAR lastMouse;
+public:
     static MouseEventType _NEAR curMouse;
-
+private:
     static MouseEventType _NEAR downMouse;
     static ushort _NEAR downTicks;
 
@@ -265,7 +266,9 @@ private:
     static TEvent _NEAR eventQueue[ eventQSize ];
     static TEvent * _NEAR eventQHead;
     static TEvent * _NEAR eventQTail;
+public:
     static Boolean _NEAR mouseIntFlag;
+private:
     static ushort _NEAR eventCount;
 #endif
 
