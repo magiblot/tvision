@@ -5,7 +5,7 @@
 
 #include <unistd.h>
 
-static PressEnter()
+static void PressEnter()
 {
     write(1, "Press enter to continue:\n", 25);
     char _[80];
