@@ -1,5 +1,5 @@
 ;/*------------------------------------------------------------*/
-;/* filename -       tvwrite.asm                               */
+;/* filename -       tvwrit.asm                               */
 ;/*                                                            */
 ;/* function(s)                                                */
 ;/*                  TView write member functions              */
