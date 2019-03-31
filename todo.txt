@@ -107,8 +107,3 @@ TScreen::fixCrtMode
 TSystemError::swapStatusLine
 TTerminal::prevLines
 TView::resetCursor
-TView::writeView
-TView::writeBuf
-TView::writeChar
-TView::writeLine
-TView::writeStr
