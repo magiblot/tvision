@@ -54,7 +54,8 @@ TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
 
     stream = aStream;
     basePos = stream->tellp();
-    streamSize = stream->tellg();
+    stream->seekp(0, ios::end);
+    streamSize = stream->tellp();
     header = new THeader;
     found = 0;
     do {

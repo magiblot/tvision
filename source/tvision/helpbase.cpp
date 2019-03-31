@@ -565,7 +565,7 @@ THelpFile::THelpFile( fpstream&  s )
     long size;
 
     magic = 0;
-    s.seekg(0);
+    s.seekg(0, ios::end);
     size = s.tellg();
     s.seekg(0);
     if (size > sizeof(magic))
@@ -598,14 +598,10 @@ THelpFile::~THelpFile(void)
         *stream << index;
         stream->seekp(0);
         magic = magicHeader;
-//
-// note: at this time, a bug in filelength leaves the seek pointer at
-//       the end of file, so we must save and restore the seek pointer
-//       around the call; this can be removed when filelength is fixed.
-//
-  streampos sp=stream->tellp();
-        size = stream->tellg() - 8;
-  stream->seekp(sp);
+        streampos sp=stream->tellp();
+        stream->seekp(0, ios::end);
+        size = stream->tellp() - 8;
+        stream->seekp(sp);
         *stream << magic;
         *stream << size;
         *stream << indexPos;

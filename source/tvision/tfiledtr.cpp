@@ -113,7 +113,9 @@ Boolean TFileEditor::loadFile()
         }
     else
         {
+        f.seekg(0, ios::end);
         long fSize = f.tellg();
+        f.seekg(0);
         if( fSize > 0xFFE0L || setBufSize(ushort(fSize)) == False )
             {
             editorDialog( edOutOfMemory );
