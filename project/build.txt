@@ -1,14 +1,22 @@
-The file 'tvision.ide' was created with Borland C++ 4.52 under Windows 95.
-Borland Turbo Assembler 4.1 and Borland PowerPack are also required.
+The file 'tvision.ide' was created with Borland C++ 4.52 under Windows XP.
+Borland Turbo Assembler 4.0 and DOS PowerPack are also required.
+All these actually work better in Windows XP than in older Windows versions.
+Turbo Assembler needs a patch to work in Windows 95, for instance.
+
+This project file includes the required targets to build 16-bit and 32-bit
+libraries which can later be linked from applications using Turbo Vision.
 
 Steps to build:
 
-1.  Create empty folders 'objgen32', 'objgen', 'objtvw32', 'objtvd32'
-    and 'objtvdos'.
-2.  Load 'tvision.ide' into the Borland C++ 4.52 IDE and build targets
-    'geninc32' and 'geninc'.
-3.  From this directory, run 'geninc32 > tvwrit32.inc'
-    and 'geninc > tvwrite.inc'. to generate .
-4.  Copy 'tv.inc' from the sources dir to this location. This way the assembly
-    include files are visible to Turbo Assembler.
-5.  You should now be able to compile the other targets from the IDE.
+1.  Create a folder for the temporal files of each target in the project:
+    'objgen32', 'objgen', 'objdos32' and 'objdos'.
+2.  Copy 'tv.inc' from the source code files to this location. It's the
+    easiest way to let the assembler find it.
+3.  Generate the include files 'tvwrite.inc' and 'tvwrit32.inc' required to
+    compile the assembly files. To do this, build in first place the targets
+    'geninc' and 'geninc32', then run the generated executables from the
+    command prompt and redirect their output, e.g. 'geninc > tvwrite.inc'
+    and 'geninc32 > tvwrit32.inc'.
+4.  Before building the Turbo Vision library, you should create a 'lib'
+    folder in the root directory so that the IDE can place the .lib files
+    there.
