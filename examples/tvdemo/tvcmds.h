@@ -23,3 +23,5 @@ const int cmMouseCmd    = 108;
 const int cmColorCmd    = 109;
 const int cmSaveCmd     = 110;
 const int cmRestoreCmd  = 111;
+const int cmVideoMode   = 2002;
+

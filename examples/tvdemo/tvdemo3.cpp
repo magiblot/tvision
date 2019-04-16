@@ -179,6 +179,8 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
 {
     TSubMenu& sub1 =
       *new TSubMenu( "~\360~", 0, hcSystem ) +
+        *new TMenuItem( "~V~ideo mode", cmVideoMode, kbNoKey, hcNoContext, "" ) +
+         newLine() +
         *new TMenuItem( "~A~bout...", cmAboutCmd, kbNoKey, hcSAbout ) +
          newLine() +
         *new TMenuItem( "~P~uzzle", cmPuzzleCmd, kbNoKey, hcSPuzzle ) +

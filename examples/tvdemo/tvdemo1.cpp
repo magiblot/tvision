@@ -24,10 +24,12 @@
 #define Uses_TApplication
 #define Uses_TWindow
 #define Uses_TDeskTop
+#define Uses_TScreen
 
 #include <tvision\tv.h>
 
 #include "tvdemo.h"
+#include "tvcmds.h"
 #include "gadgets.h"
 #include "fileview.h"
 #include "puzzle.h"
@@ -52,6 +54,8 @@
 //   File names can be specified on the command line for automatic
 //   opening.
 //
+
+extern TPoint shadowSize;
 
 int main(int argc, char **argv)
 {
@@ -85,7 +89,7 @@ TVDemo::TVDemo( int argc, char **argv ) :
     insert(clock);
 
     r = getExtent();                            // Create the heap view.
-    r.a.x = r.b.x - 13;     r.a.y = r.b.y - 1;
+    r.a.x = r.b.x - 23; r.b.x = r.a.x + 13; r.b.y = r.a.y + 1;
     heap = new THeapView( r );
     insert(heap);
 
@@ -146,6 +150,15 @@ void TVDemo::getEvent(TEvent &event)
                     }
                 helpInUse = False;
                 }
+            else if (event.message.command == cmVideoMode)
+            {
+                int newMode = TScreen::screenMode ^ TDisplay::smFont8x8;
+                if ((newMode & TDisplay::smFont8x8) != 0)
+                    shadowSize.x = 1;
+                else
+                    shadowSize.x = 2;
+                setScreenMode((ushort)newMode);
+            }
             break;
         case evMouseDown:
             if (event.mouse.buttons != 1)
