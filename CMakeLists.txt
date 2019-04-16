@@ -3,7 +3,7 @@ project (tvision)
 
 include_directories(
 include
-include/general
+include/override
 include/windows
 )
 
