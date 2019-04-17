@@ -257,15 +257,15 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;32-bit;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOVZX   EDI, WORD PTR [P]
         MOV     AL, 0DH
         CLD
-        MOV     CX, [ESI+TEditorCurPtr]
-        SUB     CX, DI
+        MOVZX   ECX, WORD PTR [ESI+TEditorCurPtr]
+        SUB     ECX, EDI
         JBE   @@1
         ADD     EDI, EBX
         REPNE   SCASB
         JE    @@2
         MOVZX   EDI, WORD PTR [ESI+TEditorCurPtr]
-@@1:    MOV     CX, [ESI+TEditorBufLen]
-        SUB     CX, DI
+@@1:    MOVZX   ECX, WORD PTR [ESI+TEditorBufLen]
+        SUB     ECX, EDI
         JCXZ  @@4
         MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
         ADD     EBX, EDX
