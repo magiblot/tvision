@@ -38,6 +38,7 @@
 
 #ifndef __BORLANDC__
 #include <assert.h>
+#include <ncurses.h>
 #endif
 
 class TEvent;
@@ -49,6 +50,7 @@ class THardwareInfo
 public:
 
     THardwareInfo();
+    ~THardwareInfo();
 
     static ulong getTickCount();
 
@@ -144,13 +146,23 @@ inline THardwareInfo::PlatformType THardwareInfo::getPlatform()
 
 inline ushort THardwareInfo::getCaretSize()
 {
+#ifdef __BORLANDC__
     return crInfo.dwSize;
+#else
+    // Stub
+    return 100;
+#endif
 }
 
 
 inline BOOL THardwareInfo::isCaretVisible()
 {
+#ifdef __BORLANDC__
     return crInfo.bVisible;
+#else
+    // Stub
+    return TRUE;
+#endif
 }
 
 
@@ -158,12 +170,20 @@ inline BOOL THardwareInfo::isCaretVisible()
 
 inline ushort THardwareInfo::getScreenRows()
 {
+#ifdef __BORLANDC__
     return sbInfo.dwSize.Y;
+#else
+    return getmaxy(stdscr);
+#endif
 }
 
 inline ushort THardwareInfo::getScreenCols()
 {
+#ifdef __BORLANDC__
     return sbInfo.dwSize.X;
+#else
+    return getmaxx(stdscr);
+#endif
 }
 
 #pragma option -w-inl
@@ -176,7 +196,7 @@ inline void THardwareInfo::clearScreen( ushort w, ushort h )
     FillConsoleOutputAttribute( consoleHandle[cnOutput], 0x07, w*h, coord, &read );
     FillConsoleOutputCharacterA( consoleHandle[cnOutput], ' ', w*h, coord, &read );
 #else
-    BREAK;
+    wclear(stdscr);
 #endif
 }
 #pragma option -w+inl
@@ -193,12 +213,19 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
 
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
-/* Allocate memory for the screen buffer. Two bytes per character cell.
+/* Allocate memory for the screen buffer. Two shorts per character cell.
  * This pointer is stored in TScreen's attribute screenBuffer, which is
  * often copied to TGroup's attribute buffer.
  * https://docs.microsoft.com/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc
  */
-    BREAK;
+    short x, y;
+    getmaxyx(stdscr, y, x);
+
+    // Preserve the assumptions.
+    if( x < 80 ) x = 80;
+    if( y < 50 ) y = 50;
+
+    return new ushort[x * y * 2];
 #endif
 }
 
@@ -207,7 +234,7 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 #ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
 #else
-    BREAK;
+    delete[] buffer;
 #endif
 }
 
@@ -226,7 +253,8 @@ inline DWORD THardwareInfo::getButtonCount()
  * The only mention I could find:
  * https://invisible-island.net/ncurses/man/curs_mouse.3x.html
  */
-    BREAK;
+    // Stub, make Turbo Vision believe there is no mouse.
+    return 0;
 #endif
 }
 
@@ -240,7 +268,7 @@ inline void THardwareInfo::cursorOn()
  * http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/mouse.html
  * https://stackoverflow.com/a/13887057
  */
-    BREAK;
+    // Stub, do nothing.
 #endif
 }
 
@@ -249,7 +277,7 @@ inline void THardwareInfo::cursorOff()
 #ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode & ~ENABLE_MOUSE_INPUT );
 #else
-    BREAK;
+    // Stub, do nothing.
 #endif
 }
 
@@ -274,7 +302,8 @@ inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
  * handler sets the attribute TSystemError::ctrlBreakHit to true.
  * https://docs.microsoft.com/en-us/windows/console/handlerroutine
  */
-    BREAK;
+    // Stub
+    return TRUE;
 #endif
 }
 

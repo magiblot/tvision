@@ -99,9 +99,9 @@ ushort THardwareInfo::biosSel;
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
+#ifdef __BORLANDC__
 THardwareInfo::THardwareInfo()
 {
-#ifdef __BORLANDC__
     HMODULE mod;
 
     if( (mod = GetModuleHandle( "KERNEL32" )) != 0 &&
@@ -116,24 +116,10 @@ THardwareInfo::THardwareInfo()
     GetConsoleMode( consoleHandle[cnInput], &consoleMode );
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
-#else
-/* From what I can gather, this function was intended to do the following:
- * 1. Get handles for standard input and output.
- * 2. Get the current input mode (GetConsoleMode).
- * 3. Get the current size and visibility of the cursor (GetConsoleCursorInfo).
- * 4. Get the current screen buffer size, cursor position and window position
- *    (GetConsoleScreenBufferInfo).
- * https://docs.microsoft.com/en-us/windows/console/getconsolemode
- * https://docs.microsoft.com/en-us/windows/console/getconsolecursorinfo
- * https://docs.microsoft.com/en-us/windows/console/getconsolescreenbufferinfo
- */
-    BREAK;
-#endif
 }
 
 ushort THardwareInfo::getScreenMode()
 {
-#ifdef __BORLANDC__
     ushort mode;
 
     if( platform != plDPMI32 )      // B/W, mono not supported if running on
@@ -148,20 +134,8 @@ ushort THardwareInfo::getScreenMode()
     if( getScreenRows() > 25 )
         mode |= TDisplay::smFont8x8;
     return mode;
-#else
-/* The INT10 call returns the following information:
- * AL = Video Mode
- * AH = number of character columns
- * BH = active page
- * Source: https://en.wikipedia.org/wiki/INT_10H
- * The implementation above just reads the video mode, and sets the small font
- * if the number of rows is greater than 25.
- * This function is called from TDisplay::getCrtMode, which just returns the
- * value this does, and it is then assigned to a attribute of TScreen.
- */
-    BREAK;
-#endif
 }
+#endif
 
 void THardwareInfo::setScreenMode( ushort mode )
 {
@@ -210,19 +184,15 @@ void THardwareInfo::setScreenMode( ushort mode )
 #endif
 }
 
+#ifdef __BORLANDC__
 void THardwareInfo::setCaretPosition( ushort x, ushort y )
 {
-#ifdef __BORLANDC__
     COORD coord = { x, y };
     SetConsoleCursorPosition( consoleHandle[cnOutput], coord );
-#else
-    BREAK;
-#endif
 }
 
 void THardwareInfo::setCaretSize( ushort size )
 {
-#ifdef __BORLANDC__
     if( size == 0 )
     {
         crInfo.bVisible = False;
@@ -235,28 +205,17 @@ void THardwareInfo::setCaretSize( ushort size )
     }
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
-#else
-/* The caret is the keyboard cursor. If size is 0, the caret is hidden. The
- * other possible values are from 1 to 100, theoretically, and represent the
- * percentage of the character cell the caret fills.
- * https://docs.microsoft.com/en-us/windows/console/console-cursor-info-str
- */
-    BREAK;
-#endif
 }
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
-#ifdef __BORLANDC__
     COORD size = {len,1};
     COORD from = {0,0};
     SMALL_RECT to = {x,y,x+len,y+1};
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
-#else
-    BREAK;
-#endif
 }
+#endif
 
 // Event functions.
 
@@ -340,7 +299,9 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
 
     return False;
 #else
-    BREAK;
+    // Stub, just block waiting for user input.
+    wgetch(stdscr);
+    return False;
 #endif
 }
 
