@@ -40,9 +40,12 @@ public:
     void putAttribute( ushort indent, ushort attr );
     void putChar( ushort indent, ushort c );
 
+    TDrawBuffer();
+    ~TDrawBuffer();
+
 protected:
 
-    ushort data[maxViewWidth];
+    ushort *data;
 
 };
 
