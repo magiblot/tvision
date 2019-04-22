@@ -59,8 +59,12 @@ void THardwareInfo::setCaretSize( ushort size )
  * other possible values are from 1 to 100, theoretically, and represent the
  * percentage of the character cell the caret fills.
  * https://docs.microsoft.com/en-us/windows/console/console-cursor-info-str
+ *
+ * ncurses supports only three levels: invisible (0), normal (1) and
+ * very visible (2). They don't make a difference in all terminals, but
+ * we can try mapping them to the values requested by Turbo Vision.
  */
-    // Stub, do nothing.
+    curs_set(size > 0 ? size == 100 ? 2 : 1 : 0);
 }
 
 /* The Turbo Vision library has all its characters encoded in code page 437.
