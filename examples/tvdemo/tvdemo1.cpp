@@ -36,7 +36,6 @@
 #include "demohelp.h"
 #include <tvision/help.h>
 
-#include <dir.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -213,9 +212,7 @@ void TVDemo::puzzle()
 
 void TVDemo::retrieveDesktop()
 {
-    struct ffblk ffblk;
-
-    if (findfirst("TVDEMO.DST", &ffblk, 0))
+    if (!ifstream("TVDEMO.DST").good())
         messageBox("Could not find desktop file", mfOKButton | mfError);
     else 
         {
