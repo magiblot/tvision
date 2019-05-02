@@ -17,7 +17,7 @@
 #define Uses_TCollection
 #define Uses_TScroller
 #define Uses_TWindow
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 const hlChangeDir = cmChangeDir;
 

@@ -17,7 +17,7 @@
 #define Uses_TEvent
 #define Uses_TRect
 #define Uses_TView
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 
 class THeapView : public TView

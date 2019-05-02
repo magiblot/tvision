@@ -19,7 +19,7 @@
 #define Uses_TProgram
 #define Uses_TDeskTop
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link(RScroller)
 __link(RScrollBar)
 

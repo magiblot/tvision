@@ -26,7 +26,7 @@
 #define Uses_TChDirDialog
 #define Uses_TScreen
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include "tvdemo.h"
 #include "tvcmds.h"

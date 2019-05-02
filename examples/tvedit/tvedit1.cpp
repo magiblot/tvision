@@ -20,7 +20,7 @@
 #define Uses_TFileDialog
 #define Uses_TChDirDialog
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include "tvedit.h"
 

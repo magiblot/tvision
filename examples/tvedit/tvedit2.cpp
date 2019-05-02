@@ -27,7 +27,7 @@
 #define Uses_TSItem
 #define Uses_TEditor
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include "tvedit.h"
 

@@ -19,7 +19,7 @@
 #define Uses_TRect
 #define Uses_TView
 #define Uses_TDrawBuffer
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include <string.h>
 #include <stdlib.h>

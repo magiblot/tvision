@@ -22,7 +22,7 @@
 #define Uses_TStreamable
 #define Uses_TView
 #define Uses_TWindow
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RView )
 __link( RWindow )
 

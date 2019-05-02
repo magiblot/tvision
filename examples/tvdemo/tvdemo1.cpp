@@ -26,7 +26,7 @@
 #define Uses_TDeskTop
 #define Uses_TScreen
 
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #include "tvdemo.h"
 #include "tvcmds.h"
@@ -34,7 +34,7 @@
 #include "fileview.h"
 #include "puzzle.h"
 #include "demohelp.h"
-#include <tvision\help.h>
+#include <tvision/help.h>
 
 #include <dir.h>
 #include <stdio.h>
