@@ -103,19 +103,29 @@ const char* cp437toUtf8[256] = {
 /* From the 8 bits used for attributes, the lower half defines the foreground
  * color while the upper half defines the background color. Each color is
  * defined as Intensity-Red-Green-Blue, while ncurses can handle 4-bit colors
- * in the format Bold-Blue-Green-Red.
+ * in the format Bright-Blue-Green-Red.
  *
- * Boldness and Intensity are the same except for the fact that terminals
- * can only apply the bold attribute to the foreground color.
+ * Bright and Intensity are the same except for the fact that not all terminals
+ * support bright background colors, and when they do, they do so in different
+ * ways. What's certain is that terminals with limited color support (such as
+ * the linux console) can display bright foreground colors by using the Bold
+ * attribute. Terminals supporting at least 16 colors should support both
+ * foreground and background bright colors without any special attribute. The
+ * number of supported colors is represented by the global variable COLORS,
+ * set by ncurses.
  *
  * Some examples here:
  * https://www.linuxjournal.com/content/about-ncurses-colors-0
  */
 
 /* The best way to use colors in ncurses is to define <foreground, background>
- * color pairs. In order to do this in terminals with limited color support
- * (such as the linux console), it's best to start counting the pairs from one.
- * Pair number 0 is reserved for default-colored text.
+ * color pairs. The number of color pairs supported by the terminal is
+ * represented by the global variable COLOR_PAIRS. Pair number 0 is reserved
+ * for the terminal's default color. Other pairs need to be first defined with
+ * init_pair and are assigned an identifier number. The easiest is to begin
+ * numerating pairs from one as they get defined. This avoids problems in
+ * terminals with limited color support. For instance, the example linked above
+ * doesn't work on the linux console because it doesn't take this approach.
  */
 
 static unordered_map<ushort, short> pairIdentifiers;
@@ -149,9 +159,13 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 uint translateAttributes(ushort attr) {
     /* To understand the bit masks, please read:
      * https://docs.microsoft.com/en-us/windows/console/char-info-str
+     * Support for bright colors is a bit inconsistent between terminals, so
+     * we do the following: if it doesn't support 16 colors, then we provide
+     * the terminal with 3-bit colors and use Bold to represent a bright
+     * foreground. Otherwise, we provide 4-bit colors directly to the terminal.
      */
-    uchar pairKey = attr & 0x77;
-    bool fgIntense = attr & 0x08,
+    uchar pairKey = attr & (COLORS < 16 ? 0x77 : 0xFF);
+    bool fgIntense = attr & (COLORS < 16 ? 0x08 : 0x00),
          reverse = attr & 0x4000,
          underscore = attr & 0x8000;
     return fgIntense*A_BOLD | reverse*A_REVERSE | underscore*A_UNDERLINE |
