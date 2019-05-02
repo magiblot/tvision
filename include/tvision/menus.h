@@ -416,7 +416,7 @@ inline TStatusItem::TStatusItem( const char *aText,
 
 inline TStatusItem::~TStatusItem()
 {
-    delete text;
+    delete[] text;
 }
 
 #endif  // Uses_TStatusItem

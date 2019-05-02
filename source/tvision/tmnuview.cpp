@@ -76,11 +76,11 @@ TMenuItem::TMenuItem( const char *aName,
 
 TMenuItem::~TMenuItem()
 {
-    delete (char *)name;
+    delete[] (char *)name;
     if( command == 0 )
         delete subMenu;
     else
-        delete (char *)param;
+        delete[] (char *)param;
 }
 
 TMenu::~TMenu()

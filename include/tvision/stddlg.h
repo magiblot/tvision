@@ -488,8 +488,8 @@ inline TDirEntry::TDirEntry( const char *txt, const char *dir ) :
 
 inline TDirEntry::~TDirEntry()
 {
-    delete displayText;
-    delete directory;
+    delete[] displayText;
+    delete[] directory;
 }
 
 #endif  // Uses_TDirEntry

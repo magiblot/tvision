@@ -66,8 +66,8 @@ TInputLine::TInputLine( const TRect& bounds, int aMaxLen, TValidator *aValid ) :
 
 TInputLine::~TInputLine()
 {
-    delete data;
-    delete oldData;
+    delete[] data;
+    delete[] oldData;
     destroy(validator);
 }
 

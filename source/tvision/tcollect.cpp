@@ -212,7 +212,7 @@ void TNSCollection::setLimit(ccIndex aLimit)
             if( count != 0 && aItems != 0 && items != 0 )
                 memcpy( aItems, items, count*sizeof(void *) );
             }
-        delete items;
+        delete[] items;
         items = aItems;
         limit = aLimit;
         }

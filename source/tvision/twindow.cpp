@@ -58,7 +58,7 @@ TWindow::TWindow( const TRect& bounds,
 
 TWindow::~TWindow()
 {
-    delete (char *)title;
+    delete[] (char *)title;
 }
 
 void TWindow::close()
