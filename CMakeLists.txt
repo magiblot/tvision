@@ -13,8 +13,10 @@ add_compile_definitions(__FLAT__ __cdecl= __stdcall=)
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvision/geninc.cpp")
+file(GLOB_RECURSE HELLOSRC "${CMAKE_CURRENT_SOURCE_DIR}/hello.cpp")
 
-add_executable(hello
-hello.cpp
-${TVSOURCE}
-)
+
+add_library(tvision STATIC ${TVSOURCE})
+add_executable(hello ${HELLOSRC})
+
+target_link_libraries(hello tvision)
