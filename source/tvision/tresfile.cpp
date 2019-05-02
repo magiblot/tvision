@@ -131,7 +131,7 @@ void TResourceFile::flush()
     {
         stream->seekp(basePos + indexPos, ios::beg);
         *stream << index;
-        lenRez =  stream->tellp() - basePos -  sizeof(long) * 2;
+        lenRez =  stream->tellp() - basePos - (streamoff) sizeof(long) * 2;
         stream->seekp(basePos, ios::beg);
         *stream << rStreamMagic;
         *stream << lenRez;

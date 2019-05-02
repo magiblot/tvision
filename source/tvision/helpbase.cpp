@@ -600,7 +600,7 @@ THelpFile::~THelpFile(void)
         magic = magicHeader;
         streampos sp=stream->tellp();
         stream->seekp(0, ios::end);
-        size = stream->tellp() - 8;
+        size = stream->tellp() - (streamoff) 8;
         stream->seekp(sp);
         *stream << magic;
         *stream << size;
