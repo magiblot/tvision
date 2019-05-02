@@ -471,13 +471,13 @@ void TOutlineViewer::handleEvent(TEvent& event)
         case kbPgDn:
                 newFocus += size.y - 1;
                 break;
-    case kbPgUp:
+        case kbPgUp:
                 newFocus -= size.y - 1;
                 break;
         case kbHome:
                 newFocus = delta.y;
                 break;
-        casekbEnd:
+        case kbEnd:
                 newFocus = delta.y + size.y - 1;
                 break;
         case kbCtrlPgUp:
