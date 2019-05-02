@@ -19,7 +19,7 @@
 #define Uses_TWindow
 #include <tvision/tv.h>
 
-const hlChangeDir = cmChangeDir;
+const int hlChangeDir = cmChangeDir;
 
 class TLineCollection : public TCollection
 {

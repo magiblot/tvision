@@ -18,7 +18,7 @@ class TStatusLine;
 class TEditWindow;
 class TDialog;
 
-const
+const int
 //  cmOpen       = 100,
 //  cmNew        = 101,
   cmChangeDrct = 102,

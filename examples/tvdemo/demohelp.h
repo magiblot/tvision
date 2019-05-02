@@ -1,4 +1,4 @@
-const
+const int
   hcAsciiTable           = 6,
   hcCalculator           = 4,
   hcCalendar             = 5,
