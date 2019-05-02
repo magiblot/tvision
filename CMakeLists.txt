@@ -7,7 +7,7 @@ include/override
 include/windows
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -g -gstabs+ --std=c++11 -fpermissive -lncurses")
+set(CMAKE_CXX_FLAGS "-O0 -g -gstabs+ --std=c++11 -fpermissive -lncurses -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-parentheses -Wall")
 
 add_compile_definitions(__FLAT__ __cdecl= __stdcall=)
 
