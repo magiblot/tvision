@@ -96,8 +96,8 @@ const char* cp437toUtf8[256] = {
 /* Turbo Vision stores char/attribute information in a CHAR_INFO struct:
  * https://docs.microsoft.com/en-us/windows/console/char-info-str
  * The lower 16 bits store the char value and the higher 16 bits store the
- * character attributes. Turbo Vision usually only fills the lower 8 bits
- * of each part.
+ * character attributes. Turbo Vision usually only uses 8 bits for the char
+ * value because it doesn't support Unicode.
  */
 
 /* From the 8 bits used for attributes, the lower half defines the foreground
@@ -121,19 +121,17 @@ const char* cp437toUtf8[256] = {
 static unordered_map<ushort, short> pairIdentifiers;
 ushort definedPairs = 0;
 
-uint translateAttributes(uchar attr);
+uint translateAttributes(ushort attr);
 uint getColorPair(uchar pairKey);
 static uchar swapRedBlue (uchar c);
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
     setCaretPosition(x, y);
-    // It takes two shorts to store a char and its attributes;
+    // It takes two shorts to store a character and its attributes:
     for (int i = 0; i < 2*len; i += 2) {
-        /* Both of these fields are 16-bit in theory, but Turbo Vision only
-         * uses the lower 8. */
         uchar character = buf[i];
-        uchar attr = buf[i + 1];
+        ushort attr = buf[i + 1];
         // Translate and apply text attributes.
         uint curses_attr = translateAttributes(attr);
         wattron(stdscr, curses_attr);
@@ -148,13 +146,16 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
      */
 }
 
-uint translateAttributes(uchar attr) {
+uint translateAttributes(ushort attr) {
     /* To understand the bit masks, please read:
      * https://docs.microsoft.com/en-us/windows/console/char-info-str
      */
     uchar pairKey = attr & 0x77;
-    bool fgIntense = attr & 0x08;
-    return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
+    bool fgIntense = attr & 0x08,
+         reverse = attr & 0x4000,
+         underscore = attr & 0x8000;
+    return fgIntense*A_BOLD | reverse*A_REVERSE | underscore*A_UNDERLINE |
+           (hasColors ? getColorPair(pairKey) : 0);
 }
 
 uint getColorPair(uchar pairKey) {
