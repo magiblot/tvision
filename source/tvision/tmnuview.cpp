@@ -42,7 +42,7 @@ TMenuItem::TMenuItem(   const char *aName,
                         ushort aCommand,
                         ushort aKeyCode,
                         ushort aHelpCtx,
-                        char *p,
+                        const char *p,
                         TMenuItem *aNext
              )
 {
