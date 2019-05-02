@@ -118,10 +118,11 @@ const char* cp437toUtf8[256] = {
  * Pair number 0 is reserved for default-colored text.
  */
 
-static unordered_map<ushort, short> pairDefinitions;
+static unordered_map<ushort, short> pairIdentifiers;
 ushort definedPairs = 0;
 
-static void defineColorPairIfNecessary(uchar attr);
+uint translateAttributes(uchar attr);
+uint getColorPair(uchar pairKey);
 static uchar swapRedBlue (uchar c);
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
@@ -133,27 +134,12 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
          * uses the lower 8. */
         uchar character = buf[i];
         uchar attr = buf[i + 1];
-        /* The bold attribute is the left-most bit of the foreground color.
-         * The intensity attribute of the background color is discarded. */
-        bool bold = attr & 0x08;
-        /* Discard intensity attributes when identifying color pairs, because
-         * the bold attribute is used separately and does not define pairs. */
-        uchar pairKey = attr & 0x77;
-        if (hasColors) {
-            defineColorPairIfNecessary(pairKey);
-            wattron(stdscr, COLOR_PAIR(pairDefinitions[pairKey]));
-        }
-        // Monochrome terminals might still support bold text.
-        if (bold)
-            wattron(stdscr, A_BOLD);
+        // Translate and apply text attributes.
+        uint curses_attr = translateAttributes(attr);
+        wattron(stdscr, curses_attr);
         // Print a single character, which might be multi-byte in UTF-8.
         wprintw(stdscr, "%s", cp437toUtf8[character]);
-        /* A future possible optimization would be not to repeat attribute
-         * setting and unsetting when unnecessary. */
-        if (hasColors)
-            wattroff(stdscr, COLOR_PAIR(pairDefinitions[pairKey]));
-        if (bold)
-            wattroff(stdscr, A_BOLD);
+        wattroff(stdscr, curses_attr);
     }
     /* Notice that we are not calling wrefresh. This function draws a single
      * row on the screen, so this is not the right place to actually send
@@ -162,21 +148,35 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
      */
 }
 
+uint translateAttributes(uchar attr) {
+    /* To understand the bit masks, please read:
+     * https://docs.microsoft.com/en-us/windows/console/char-info-str
+     */
+    uchar pairKey = attr & 0x77;
+    bool fgIntense = attr & 0x08;
+    return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
+}
+
+uint getColorPair(uchar pairKey) {
+    /* Color pairs are defined as they are used, counting from one, in order
+     * not to make any assumptions on the amount of color pairs supported by
+     * the terminal.
+     */
+    uint id = pairIdentifiers[pairKey];
+    if (id == 0) {
+        // Foreground color in the lower half, background in the upper half.
+        uchar fgColor = swapRedBlue(0x0F & pairKey),
+              bgColor = swapRedBlue(pairKey >> 4);
+        init_pair(++definedPairs, fgColor, bgColor);
+        id = pairIdentifiers[pairKey] = definedPairs;
+    }
+    return COLOR_PAIR(id);
+}
+
 uchar swapRedBlue (uchar c) {
-    /* Swap the Red and Blue bits of a color encoded in the Microsoft way, so that
-     * we can easily pass it to ncurses later.
+    /* Swap the Red and Blue bits of a color encoded in the Microsoft way,
+     * so that ncurses can easily understand it.
      */
     return (c & ~0x5) | ((c & 0x4) >> 2) | ((c & 0x1) << 2);
 }
 
-void defineColorPairIfNecessary(uchar pairKey) {
-    /* Color pairs are defined as they are used, in order not to make
-     * any assumptions on the amount of color pairs supported by the terminal.
-     */
-    if (!pairDefinitions[pairKey]) {
-        uchar fgColor = swapRedBlue (0x07 & pairKey),
-              bgColor = swapRedBlue (pairKey >> 4);
-        init_pair(++definedPairs, fgColor, bgColor);
-        pairDefinitions[pairKey] = definedPairs;
-    }
-}
