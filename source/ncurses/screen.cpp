@@ -155,9 +155,11 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
         if (bold)
             wattroff(stdscr, A_BOLD);
     }
-    /* Print to the screen, although this is not strictly necessary because
-     * it gets later done automatically when waiting for user input in getch(). */
-    wrefresh(stdscr);
+    /* Notice that we are not calling wrefresh. This function draws a single
+     * row on the screen, so this is not the right place to actually send
+     * output to the terminal, for performance reasons. Right now,
+     * refreshing is performed when waiting for user input in wgetch().
+     */
 }
 
 uchar swapRedBlue (uchar c) {
