@@ -291,7 +291,7 @@ void TCalcDisplay::calcKey(unsigned char key)
 
 
 
-static char *keyChar[20] =
+static const char *keyChar[20] =
     {    "C", "\x1B",    "%", "\xF1",   // 0x1B is escape, 0xF1 is +/- char.
          "7",    "8",    "9",    "/",
          "4",    "5",    "6",    "*",

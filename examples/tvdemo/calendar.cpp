@@ -33,7 +33,7 @@ __link( RWindow )
 #include "calendar.h"
 
 
-static char *monthNames[] = {
+static const char *monthNames[] = {
     "",
     "January",  "February", "March",    "April",    "May",      "June",
     "July",     "August",   "September","October",  "November", "December"
