@@ -11,6 +11,7 @@ using std::cerr;
 using std::cin;
 using std::cout;
 using std::endl;
+using std::hex;
 using std::ios;
 using std::ostream;
 using std::streambuf;
