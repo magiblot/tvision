@@ -137,6 +137,8 @@ static uchar swapRedBlue (uchar c);
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
+    // Save the caret position so that we can restore it later.
+    int oldx = getcurx(stdscr), oldy = getcury(stdscr);
     setCaretPosition(x, y);
     // It takes two shorts to store a character and its attributes:
     for (int i = 0; i < 2*len; i += 2) {
@@ -149,6 +151,8 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
         wprintw(stdscr, "%s", cp437toUtf8[character]);
         wattroff(stdscr, curses_attr);
     }
+    // Move the caret back to where it was.
+    setCaretPosition(oldx, oldy);
     /* Notice that we are not calling wrefresh. This function draws a single
      * row on the screen, so this is not the right place to actually send
      * output to the terminal, for performance reasons. Right now,
