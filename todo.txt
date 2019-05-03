@@ -83,14 +83,9 @@ edits.cpp::countLines
 edits.cpp::scan
 edits.cpp::iScan
 TFrame::frameLine
-TGroup::removeView
-THardwareInfo::clearScreen
 THardwareInfo::freeScreenBuffer
 THardwareInfo::cursorOff
 THardwareInfo::setScreenMode
-THardwareInfo::setCaretPosition
-THardwareInfo::screenWrite
-THardwareInfo::ctrlBreakHandler
 THardwareInfo::getTickCount
 tdircoll.cpp::driveValid
 tdircoll.cpp::isDir
@@ -106,4 +101,3 @@ tfillist.cpp::fexpand
 TScreen::fixCrtMode
 TSystemError::swapStatusLine
 TTerminal::prevLines
-TView::resetCursor
