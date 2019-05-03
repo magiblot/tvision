@@ -28,6 +28,7 @@ __link( RWindow )
 #include <ctype.h>
 #include <strstrea.h>
 #include <iomanip.h>
+#include <time.h>
 
 #include "puzzle.h"
 
@@ -88,7 +89,10 @@ static char map[15] =
 
 TPuzzleView::TPuzzleView(TRect& r) : TView(r)
 {
-    randomize();
+    /* Initialize random number generator so that rand(), later used in
+     * scramble(), works properly. */
+    srand(time(0));
+
     options |= ofSelectable;
     memset( board, ' ', sizeof(board) );
 
