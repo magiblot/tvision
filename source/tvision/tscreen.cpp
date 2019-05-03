@@ -24,8 +24,8 @@
 ushort _NEAR TScreen::startupMode = 0xFFFF;
 ushort _NEAR TScreen::startupCursor = 0;
 ushort _NEAR TScreen::screenMode = 0;
-uchar _NEAR TScreen::screenWidth = 0;
-uchar _NEAR TScreen::screenHeight = 0;
+ushort _NEAR TScreen::screenWidth = 0;
+ushort _NEAR TScreen::screenHeight = 0;
 Boolean _NEAR TScreen::hiResScreen = False;
 Boolean _NEAR TScreen::checkSnow = True;
 ushort * _NEAR TScreen::screenBuffer;

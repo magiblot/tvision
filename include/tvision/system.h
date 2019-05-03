@@ -351,8 +351,8 @@ public:
     static ushort _NEAR startupMode;
     static ushort _NEAR startupCursor;
     static ushort _NEAR screenMode;
-    static uchar _NEAR screenWidth;
-    static uchar _NEAR screenHeight;
+    static ushort _NEAR screenWidth;
+    static ushort _NEAR screenHeight;
     static Boolean _NEAR hiResScreen;
     static Boolean _NEAR checkSnow;
     static ushort * _NEAR screenBuffer;
