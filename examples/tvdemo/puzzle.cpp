@@ -164,7 +164,8 @@ void TPuzzleView::handleEvent(TEvent& event)
 
 void TPuzzleView::moveKey(int key)
 {
-    for(int i = 0; i <= 15; i++)
+    int i;
+    for(i = 0; i <= 15; i++)
         if(board[i/4][i%4] == ' ')
             break;
 
@@ -220,7 +221,8 @@ void TPuzzleView::moveTile(TPoint p)
 {
     p = makeLocal(p);
 
-    for(int i = 0; i <= 15; i++)
+    int i;
+    for(i = 0; i <= 15; i++)
         if(board[i/4][i%4] == ' ')
             break;
     int x = p.x / 3;
@@ -283,7 +285,8 @@ static char *solution = "ABCDEFGHIJKLMNO ";
 
 void TPuzzleView::winCheck()
 {
-    for(int i = 0; i <= 15; i++)
+    int i;
+    for(i = 0; i <= 15; i++)
         if(board[i/4][i%4] != solution[i])
             break;
 
