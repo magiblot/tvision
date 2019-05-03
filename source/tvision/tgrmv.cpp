@@ -13,6 +13,7 @@
  */
 
 #define Uses_TGroup
+#define Uses_TView
 #include <tvision/tv.h>
 
 #ifndef __BORLANDC__
@@ -21,7 +22,33 @@
 
 void TGroup::removeView( TView *p )
 {
-    BREAK;
+    TView *b, *s;
+    if (last == 0)
+        goto L7;
+    s = last;
+L1:
+    b = s->next;
+    goto L5;
+L3:
+    s = b;
+    goto L1;
+L4:
+    if (last != b)
+        goto L3;
+    goto L7;
+L5:
+    if (p != b)
+        goto L4;
+    s->next = p->next;
+    if (p != last)
+        goto L7;
+    if (p != p->next)
+        goto L6;
+    s = 0;
+L6:
+    last = s;
+L7:
+    ;
 }
 
 #endif
