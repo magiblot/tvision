@@ -311,7 +311,7 @@ ipstream& ipstream::seekg( streampos pos )
     return *this;
 }
 
-ipstream& ipstream::seekg( streamoff off, ios::seek_dir dir )
+ipstream& ipstream::seekg( streamoff off, pstream::seekdir dir )
 {
     objs.removeAll();
 #ifdef __BORLANDC__
@@ -555,7 +555,7 @@ opstream& opstream::seekp( streampos pos )
     return *this;
 }
 
-opstream& opstream::seekp( streamoff pos, ios::seek_dir dir )
+opstream& opstream::seekp( streamoff pos, pstream::seekdir dir )
 {
     objs->removeAll();
 #ifdef __BORLANDC__
@@ -759,7 +759,7 @@ fpbase::fpbase()
     pstream::init( &buf );
 }
 
-fpbase::fpbase( const char *name, int omode)
+fpbase::fpbase( const char *name, pstream::openmode omode)
 {
     pstream::init( &buf );
     open( name, omode );
@@ -769,7 +769,7 @@ fpbase::~fpbase()
 {
 }
 
-void fpbase::open( const char *b, int m)
+void fpbase::open( const char *b, pstream::openmode m)
 {
     if( buf.is_open() )
         clear(ios::failbit);        // fail - already open
@@ -796,7 +796,7 @@ ifpstream::ifpstream()
 {
 }
 
-ifpstream::ifpstream( const char* name, int omode) :
+ifpstream::ifpstream( const char* name, pstream::openmode omode) :
         fpbase( name, omode | ios::in | ios::binary)
 {
 }
@@ -810,7 +810,7 @@ filebuf *ifpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void ifpstream::open( const char _FAR *name, int omode)
+void ifpstream::open( const char _FAR *name, pstream::openmode omode)
 {
     fpbase::open( name, omode | ios::in | ios::binary);
 }
@@ -819,7 +819,7 @@ ofpstream::ofpstream()
 {
 }
 
-ofpstream::ofpstream( const char* name, int omode) :
+ofpstream::ofpstream( const char* name, pstream::openmode omode) :
         fpbase( name, omode | ios::out | ios::binary)
 {
 }
@@ -833,7 +833,7 @@ filebuf *ofpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void ofpstream::open( const char _FAR *name, int omode)
+void ofpstream::open( const char _FAR *name, pstream::openmode omode)
 {
     fpbase::open( name, omode | ios::out | ios::binary);
 }
@@ -842,7 +842,7 @@ fpstream::fpstream()
 {
 }
 
-fpstream::fpstream( const char* name, int omode) :
+fpstream::fpstream( const char* name, pstream::openmode omode) :
         fpbase( name, omode | ios::out | ios::binary)
 {
 }
@@ -856,7 +856,7 @@ filebuf *fpstream::rdbuf()
     return fpbase::rdbuf();
 }
 
-void fpstream::open( const char _FAR *name, int omode)
+void fpstream::open( const char _FAR *name, pstream::openmode omode)
 {
     fpbase::open( name, omode | ios::in | ios::out | ios::binary);
 }

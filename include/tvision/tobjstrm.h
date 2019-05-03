@@ -293,6 +293,19 @@ public:
     _Cdecl pstream( streambuf _FAR * );
     virtual _Cdecl ~pstream();
 
+    /* ios::open_mode and ios::seek_dir are deprecated in modern C++ and are
+     * incompatible with the implementation-defined equivalents ios::openmode
+     * and ios::seekdir. Since pstream is a simplified version of ios, we can
+     * overcome this conflict by defining pstream::openmode and psteam::seekdir,
+     * which simply redirect to the appropiate type on each platform. */
+#ifdef __BORLANDC__
+    typedef ios::open_mode openmode;
+    typedef ios::seek_dir seekdir;
+#else
+    typedef ios::openmode openmode;
+    typedef ios::seekdir seekdir;
+#endif
+
     int _Cdecl rdstate() const;
     int _Cdecl eof() const;
     int _Cdecl fail() const;
@@ -358,7 +371,7 @@ public:
 
     streampos _Cdecl tellg();
     ipstream& _Cdecl seekg( streampos );
-    ipstream& _Cdecl seekg( streamoff, ios::seek_dir );
+    ipstream& _Cdecl seekg( streamoff, pstream::seekdir );
 
     uchar _Cdecl readByte();
     void _Cdecl readBytes( void _FAR *, size_t );
@@ -435,7 +448,7 @@ public:
 
     streampos _Cdecl tellp();
     opstream& _Cdecl seekp( streampos );
-    opstream& _Cdecl seekp( streamoff, ios::seek_dir );
+    opstream& _Cdecl seekp( streamoff, pstream::seekdir );
     opstream& _Cdecl flush();
 
     void _Cdecl writeByte( uchar );
@@ -540,10 +553,10 @@ class fpbase : virtual public pstream
 public:
 
     _Cdecl fpbase();
-    _Cdecl fpbase( const char _FAR *, int);
+    _Cdecl fpbase( const char _FAR *, pstream::openmode);
     _Cdecl ~fpbase();
 
-    void _Cdecl open( const char _FAR *, int);
+    void _Cdecl open( const char _FAR *, pstream::openmode);
     void _Cdecl close();
     filebuf _FAR * _Cdecl rdbuf();
 
@@ -582,13 +595,13 @@ public:
 
     _Cdecl ifpstream();
     _Cdecl ifpstream( const char _FAR *,
-                      int = ios::in
+                      pstream::openmode = ios::in
                     );
     _Cdecl ~ifpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
-                      int = ios::in
+                      pstream::openmode = ios::in
                     );
 
 };
@@ -623,13 +636,13 @@ public:
 
     _Cdecl ofpstream();
     _Cdecl ofpstream( const char _FAR *,
-                      int = ios::out
+                      pstream::openmode = ios::out
                     );
     _Cdecl ~ofpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
     void _Cdecl open( const char _FAR *,
-                      int = ios::out
+                      pstream::openmode = ios::out
                     );
 
 };
@@ -663,11 +676,11 @@ class fpstream : public fpbase, public iopstream
 public:
 
     _Cdecl fpstream();
-    _Cdecl fpstream( const char _FAR *, int);
+    _Cdecl fpstream( const char _FAR *, pstream::openmode);
     _Cdecl ~fpstream();
 
     filebuf _FAR * _Cdecl rdbuf();
-    void _Cdecl open( const char _FAR *, int);
+    void _Cdecl open( const char _FAR *, pstream::openmode);
 
 };
 
