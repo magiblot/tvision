@@ -149,8 +149,9 @@ inline ushort THardwareInfo::getCaretSize()
 #ifdef __BORLANDC__
     return crInfo.dwSize;
 #else
-    // Stub
-    return 100;
+    int visibility = curs_set(0);
+    curs_set(visibility);
+    return visibility > 0 ? visibility == 2 ? 100 : 1 : 0;
 #endif
 }
 
@@ -160,8 +161,7 @@ inline BOOL THardwareInfo::isCaretVisible()
 #ifdef __BORLANDC__
     return crInfo.bVisible;
 #else
-    // Stub
-    return TRUE;
+    return getCaretSize() > 0;
 #endif
 }
 
