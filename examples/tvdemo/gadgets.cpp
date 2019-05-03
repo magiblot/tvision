@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <strstrea.h>
 #include <iomanip.h>
-#include <alloc.h>
+#include <malloc.h>
 #include <time.h>
 
 #include "gadgets.h"
@@ -67,6 +67,9 @@ void THeapView::update()
 
 long THeapView::heapSize()
 {
+    ostrstream totalStr( heapStr, sizeof heapStr);
+
+#ifdef __BORLANDC__
 //#if !defined( __DPMI32__ )
     long total = farcoreleft();
 //#else
@@ -76,8 +79,6 @@ long THeapView::heapSize()
 #if !defined( __DPMI16__ ) && !defined( __DPMI32__ )
     struct farheapinfo heap;
 #endif
-
-    ostrstream totalStr( heapStr, sizeof heapStr);
 
 //#if defined( __DPMI32__ )
 //    switch( _HEAPEMPTY )
@@ -106,6 +107,13 @@ long THeapView::heapSize()
             break;
         }
     return(total);
+#else
+    // mallinfo is defined in malloc.h but doesn't exist in Borlandc.
+    // It doesn't exactly measure the heap size, but it kinda does the trick.
+    int allocatedBytes = mallinfo().uordblks;
+    totalStr << setw(12) << allocatedBytes << ends;
+    return allocatedBytes;
+#endif
 }
 
 
