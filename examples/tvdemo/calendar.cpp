@@ -28,7 +28,7 @@ __link( RWindow )
 #include <ctype.h>
 #include <strstrea.h>
 #include <iomanip.h>
-#include <dos.h>
+#include <time.h>
 
 #include "calendar.h"
 
@@ -81,15 +81,17 @@ TStreamableClass RCalendarView( TCalendarView::name,
 
 TCalendarView::TCalendarView(TRect& r) : TView( r )
 {
-    struct date d;
-
     options |= ofSelectable;
     eventMask |= evMouseAuto;
 
-    getdate( &d );
-    year = curYear = d.da_year;
-    month = curMonth = d.da_mon;
-    curDay = d.da_day;
+    time_t timestamp = time(0);
+    struct tm calendar = *localtime(&timestamp);
+    // tm_year: "years since 1900"
+    year = curYear = calendar.tm_year + 1900;
+    // tm_mon: "months since January (0 to 11)"
+    month = curMonth = calendar.tm_mon + 1;
+    // tm_mday: "day of the month (1 to 31)"
+    curDay = calendar.tm_mday;
 
     drawView();
 }
