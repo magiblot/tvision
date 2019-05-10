@@ -7,7 +7,7 @@ include/override
 include/windows
 )
 
-set(CMAKE_CXX_FLAGS "-O0 -g -gstabs+ --std=c++11 -fpermissive -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-parentheses -Wall -D__FLAT__ -D__cdecl= -D__stdcall=")
+set(CMAKE_CXX_FLAGS "-O0 -g --std=c++11 -fpermissive -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-parentheses -Wall -D__FLAT__ -D__cdecl= -D__stdcall=")
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvision/geninc.cpp")
