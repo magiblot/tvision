@@ -121,7 +121,7 @@ THardwareInfo::THardwareInfo()
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
-    platf = new PlatformStrategy(new NcursesDisplay());
+    platf = new PlatformStrategy(new NcursesDisplay(), new NcursesInput());
 #endif
 }
 
@@ -287,8 +287,18 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
 #ifndef __BORLANDC__
-    // Stub, just block waiting for user input.
-    wgetch(stdscr);
+    // Unblock listener threads.
+    platf->resumeListening();
+    // Timeout after a 'tick', I guess. See getTickCount().
+    if (platf->waitForEvent(55, event))
+    {
+            // Set/Reset insert flag.
+        if( event.keyDown.keyCode == kbIns )
+            insertState = !insertState;
+        if( insertState )
+            event.keyDown.controlKeyState |= kbInsState;
+        return True;
+    }
     return False;
 #else
     if( !pendingEvent )

@@ -16,8 +16,9 @@ file(GLOB_RECURSE TVEDITSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvedit/*.cpp")
 file(GLOB_RECURSE TVDEMOSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdemo/*.cpp")
 
 find_library(NCURSES ncursesw)
+find_library(PTHREAD pthread)
 
-set(LIBS tvision ${NCURSES})
+set(LIBS tvision ${NCURSES} ${PTHREAD})
 
 add_library(tvision STATIC ${TVSOURCE})
 add_executable(hello ${HELLOSRC})

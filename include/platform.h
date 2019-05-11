@@ -1,6 +1,8 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#define Uses_TKeys
+#define Uses_TPoint
 #define Uses_TEvent
 #include <tvision/tv.h>
 
@@ -9,6 +11,7 @@
 #include <condition_variable>
 #include <unordered_map>
 #include <memory>
+#include <string>
 
 class DisplayStrategy {
 
@@ -41,6 +44,7 @@ public:
     virtual ~AsyncInputStrategy() {};
     virtual void startInput() = 0;
     virtual void endInput() = 0;
+    virtual bool getEvent(TEvent &ev) = 0;
 
     void resumeListening();
     bool waitForEvent(long ms, TEvent &ev);
@@ -61,18 +65,25 @@ private:
 class PlatformStrategy {
 
     std::shared_ptr<DisplayStrategy> display;
+    std::shared_ptr<AsyncInputStrategy> input;
 
 public:
 
-    PlatformStrategy(DisplayStrategy* d) : display(d)
+    PlatformStrategy(DisplayStrategy* d, AsyncInputStrategy *i) : display(d), input(i)
     {
         display->startDisplay();
+        input->startInput();
     }
 
     virtual ~PlatformStrategy()
     {
+        input->endInput();
         display->endDisplay();
     }
+
+    void resumeListening() { input->resumeListening(); }
+    bool waitForEvent(long ms, TEvent &ev) { return input->waitForEvent(ms, ev); }
+    void notifyEvent(TEvent &ev, AsyncInputStrategy::waiter &get) { input->notifyEvent(ev, get); }
 
     inline int getCaretSize() { return display->getCaretSize(); }
     inline bool isCaretVisible() { return display->isCaretVisible(); }
@@ -87,7 +98,6 @@ public:
 };
 
 class NcursesDisplay : public DisplayStrategy {
-
 
     bool hasColors;
     std::unordered_map<ushort, int> pairIdentifiers;
@@ -112,6 +122,27 @@ public:
     int getScreenCols();
     ushort getScreenMode();
     void screenWrite(int x, int y, ushort *buf, int len);
+
+};
+
+class NcursesInput : public AsyncInputStrategy {
+
+    std::unordered_map<std::string, char> Utf8toCp437;
+    static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
+    static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
+
+    std::thread inputThread;
+
+    void detectAlt(int keys[4], bool &Alt);
+    void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
+    void setAltModifier(TEvent &ev);
+    void readUtf8Char(int keys[4], int &num_keys);
+
+public:
+
+    void startInput();
+    void endInput();
+    bool getEvent(TEvent &ev);
 
 };
 
