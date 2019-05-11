@@ -1,9 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-// Redirect to <cstring>
-
-#include <cstring>
+#include_next <string.h>
 
 // Workaround for obsolete functions previously in string.h
 
@@ -44,9 +42,5 @@ static char * strupr(char * s) {
       p++;
   return s;
 }
-
-#else
-
-#include_next <string.h>
 
 #endif

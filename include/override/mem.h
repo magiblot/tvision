@@ -36,7 +36,7 @@ int         _FARFUNC _Cdecl memicmp(const void _FAR *__s1, const void _FAR *__s2
 // void _FAR * _CType _FARFUNC memset(void _FAR *__s, int __c, size_t __n);
 void        _FARFUNC _Cdecl movedata(unsigned __srcseg, unsigned __srcoff,
                             unsigned __dstseg,unsigned __dstoff, size_t __n);
-#include <cstring>
+#include <string.h>
 static void        _FARFUNC _Cdecl movmem(const void _FAR *__src, void _FAR *__dest,
                                    unsigned __length) {
   memmove(__dest, __src, __length);
