@@ -39,6 +39,7 @@ public:
 
     void putAttribute( ushort indent, ushort attr );
     void putChar( ushort indent, ushort c );
+    size_t length();
 
     TDrawBuffer();
     ~TDrawBuffer();
@@ -46,6 +47,7 @@ public:
 protected:
 
     ushort *data;
+    size_t dataLength;
 
 };
 
@@ -60,6 +62,11 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
 {
     loByte(data[indent]) = uchar(c);
+}
+
+inline size_t TDrawBuffer::length()
+{
+    return dataLength;
 }
 
 #endif  // Uses_TDrawBuffer

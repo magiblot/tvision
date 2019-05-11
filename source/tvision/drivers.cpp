@@ -319,9 +319,9 @@ I   POP     DS
 TDrawBuffer::TDrawBuffer() {
     /* This makes it possible to create TDrawBuffers for big screen widths,
      * but I still don't know if it'll resist screen resizing. It appearently
-     * does, since TDrawBuffer is always used for temporary, local variables.
-     */
-    data = new ushort[THardwareInfo::getScreenCols()];
+     * does, since TDrawBuffer is always used for temporary, local variables. */
+    dataLength = THardwareInfo::getScreenCols();
+    data = new ushort[dataLength];
 }
 
 TDrawBuffer::~TDrawBuffer() {
