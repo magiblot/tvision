@@ -125,7 +125,7 @@ typedef struct _INPUT_RECORD {
 //  EventType flags:
 //
 
-#define KEY_EVENT         0x0001 // Event contains key event record
+// #define KEY_EVENT         0x0001 // Event contains key event record
 #define MOUSE_EVENT       0x0002 // Event contains mouse event record
 #define WINDOW_BUFFER_SIZE_EVENT 0x0004 // Event contains window change event record
 #define MENU_EVENT 0x0008 // Event contains menu event record

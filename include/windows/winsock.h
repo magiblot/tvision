@@ -143,22 +143,22 @@ extern int PASCAL FAR __WSAFDIsSet(SOCKET, fd_set FAR *);
  * to encode the in/out status of the parameter; for now
  * we restrict parameters to at most 128 bytes.
  */
-#define IOCPARM_MASK    0x7f            /* parameters must be < 128 bytes */
-#define IOC_VOID        0x20000000      /* no parameters */
-#define IOC_OUT         0x40000000      /* copy out parameters */
-#define IOC_IN          0x80000000      /* copy in parameters */
-#define IOC_INOUT       (IOC_IN|IOC_OUT)
+// #define IOCPARM_MASK    0x7f            /* parameters must be < 128 bytes */
+// #define IOC_VOID        0x20000000      /* no parameters */
+// #define IOC_OUT         0x40000000      /* copy out parameters */
+// #define IOC_IN          0x80000000      /* copy in parameters */
+// #define IOC_INOUT       (IOC_IN|IOC_OUT)
                                         /* 0x20000000 distinguishes new &
                                            old ioctl's */
-#define _IO(x,y)        (IOC_VOID|(x<<8)|y)
+// #define _IO(x,y)        (IOC_VOID|(x<<8)|y)
 
-#define _IOR(x,y,t)     (IOC_OUT|(((long)sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
+// #define _IOR(x,y,t)     (IOC_OUT|(((long)sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
 
-#define _IOW(x,y,t)     (IOC_IN|(((long)sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
+// #define _IOW(x,y,t)     (IOC_IN|(((long)sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
 
-#define FIONREAD    _IOR('f', 127, u_long) /* get # bytes to read */
-#define FIONBIO     _IOW('f', 126, u_long) /* set/clear non-blocking i/o */
-#define FIOASYNC    _IOW('f', 125, u_long) /* set/clear async i/o */
+// #define FIONREAD    _IOR('f', 127, u_long) /* get # bytes to read */
+// #define FIONBIO     _IOW('f', 126, u_long) /* set/clear non-blocking i/o */
+// #define FIOASYNC    _IOW('f', 125, u_long) /* set/clear async i/o */
 
 /* Socket I/O Controls */
 #define SIOCSHIWAT  _IOW('s',  0, u_long)  /* set high watermark */
