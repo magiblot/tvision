@@ -28,6 +28,7 @@
 #define Uses_TWindow
 #define Uses_TKeys
 #define Uses_TPalette
+#define Uses_TScreen
 #include <tvision/tv.h>
 
 #if !defined( __HELP_H )
@@ -87,8 +88,8 @@ void THelpViewer::changeBounds( const TRect& bounds )
 void THelpViewer::draw()
 {
     TDrawBuffer b;
-    char line[256];
-    char buffer[256];
+    char *line = new char[b.length()];
+    char *buffer = new char[b.length()];
     char *bufPtr;
     int i, j, l;
     int keyCount;
@@ -150,6 +151,8 @@ void THelpViewer::draw()
             }
         writeLine(0, i-1, size.x, 1, b);
         }
+    delete[] line;
+    delete[] buffer;
 }
 
 TPalette& THelpViewer::getPalette() const
