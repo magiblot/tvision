@@ -19,7 +19,7 @@ extern const char* cp437toUtf8[256];
 extern unordered_map<char, KeyDownEvent> fromNonPrintableAscii;
 extern unordered_map<char, ushort> AltKeyCode;
 
-void NcursesInput::startInput()
+void NcursesInput::startInput(bool mouse)
 {
     // Capture keyboard input, but allow exiting with Ctrl+C.
     cbreak();
@@ -32,6 +32,20 @@ void NcursesInput::startInput()
     /* Do not delay too much on ESC key presses. This delay helps ncurses
      * distinguish special key sequences. */
     set_escdelay(10);
+
+    if (mouse)
+    {
+        buttonState = 0;
+        lastMousePos = {-1, -1};
+        mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, 0);
+        /* ncurses has the ability to recognize double/triple mouse clicks,
+         * but this results in a delay before reporting the event. We don't
+         * want this to happen. */
+        mouseinterval(0);
+        // This will do the trick for now.
+        buttonCount = 2;
+    }
+    else buttonCount = 0;
 
     /* Fill the table that translates UTF-8 sequences into CP437 characters.
      * Of course this is better than doing it by hand!
@@ -57,6 +71,13 @@ void NcursesInput::endInput()
     /* There's no way yet to terminate the input thread, so it has to be
      * detached before becoming out of scope. */
     inputThread.detach();
+    // Disable mouse mode.
+    mousemask(0, 0);
+}
+
+int NcursesInput::getButtonCount()
+{
+    return buttonCount;
 }
 
 #define KEY_ESC '\x1B'
@@ -68,6 +89,9 @@ bool NcursesInput::getEvent(TEvent &ev)
     keys[0] = wgetch(stdscr);
     if (keys[0] != ERR)
     {
+        if (keys[0] == KEY_MOUSE)
+            return parseMouseEvent(ev);
+
         ev.what = evKeyDown;
         bool Alt = false;
         // Make getch non-blocking, because we might have to read more bytes.
@@ -140,4 +164,36 @@ void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
     num_keys += Utf8BytesLeft((char) keys[0]);
     for (int i = 1; i < num_keys; ++i)
         keys[i] = wgetch(stdscr);
+}
+
+bool NcursesInput::parseMouseEvent(TEvent &ev)
+{
+    MEVENT mevent;
+    if (getmouse(&mevent) == OK)
+    {
+        ev.what = evMouse;
+        uchar oldButtons = buttonState;
+
+        if (mevent.bstate & BUTTON1_PRESSED)
+            buttonState |= mbLeftButton;
+        if (mevent.bstate & BUTTON1_RELEASED)
+            buttonState &= ~mbLeftButton;
+        if (mevent.bstate & BUTTON3_PRESSED)
+            buttonState |= mbRightButton;
+        if (mevent.bstate & BUTTON3_RELEASED)
+            buttonState &= ~mbRightButton;
+
+        /* Some terminal emulators send a mouse event every pixel the graphical
+         * mouse cursor moves over the window. Filter out those unnecessary
+         * events. */
+        if ( oldButtons != buttonState ||
+             mevent.x != lastMousePos.x || mevent.y != lastMousePos.y )
+        {
+            ev.mouse.buttons = buttonState;
+            ev.mouse.where.x = lastMousePos.x = mevent.x;
+            ev.mouse.where.y = lastMousePos.y = mevent.y;
+            return true;
+        }
+    }
+    return false;
 }

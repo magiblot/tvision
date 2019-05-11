@@ -52,6 +52,7 @@ public:
 #ifndef __BORLANDC__
     ~THardwareInfo();
     static PlatformStrategy *platf;
+    static TEvent pendingMouseEvent;
 #endif
 
     static ulong getTickCount();
@@ -214,22 +215,14 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 
 // Mouse functions.
 
+#ifdef __BORLANDC__
 inline DWORD THardwareInfo::getButtonCount()
 {
-#ifdef __BORLANDC__
     DWORD num;
     GetNumberOfConsoleMouseButtons(&num);
     return num;
-#else
-/* The number of mouse buttons does not seem to be very important in the
- * world of Linux terminal application.
- * The only mention I could find:
- * https://invisible-island.net/ncurses/man/curs_mouse.3x.html
- */
-    // Stub, make Turbo Vision believe there is no mouse.
-    return 0;
-#endif
 }
+#endif
 
 inline void THardwareInfo::cursorOn()
 {

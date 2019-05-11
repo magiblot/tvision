@@ -31,6 +31,7 @@ using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
 PlatformStrategy *THardwareInfo::platf;
+TEvent THardwareInfo::pendingMouseEvent;
 #endif
 
 #if defined( __FLAT__ )
@@ -126,6 +127,7 @@ THardwareInfo::THardwareInfo()
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
     platf = new PlatformStrategy(new NcursesDisplay(), new NcursesInput());
+    pendingEvent = 0;
 #endif
 }
 
@@ -145,6 +147,7 @@ BOOL THardwareInfo::isCaretVisible() { return platf->isCaretVisible(); }
 ushort THardwareInfo::getScreenRows() { return platf->getScreenRows(); }
 ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
 void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
+DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
 #endif
 
 ushort THardwareInfo::getScreenMode()
@@ -284,24 +287,42 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
         }
     return False;
 #else
-    BREAK;
+    if (pendingEvent) {
+        event = pendingMouseEvent.mouse;
+        pendingEvent = 0;
+        return True;
+    }
+    return False;
 #endif
 }
 
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
 #ifndef __BORLANDC__
-    // Unblock listener threads.
-    platf->resumeListening();
-    // Timeout after a 'tick', I guess. See getTickCount().
-    if (platf->waitForEvent(55, event))
+    if (!pendingEvent)
     {
-            // Set/Reset insert flag.
-        if( event.keyDown.keyCode == kbIns )
-            insertState = !insertState;
-        if( insertState )
-            event.keyDown.controlKeyState |= kbInsState;
-        return True;
+        // Unblock listener threads.
+        platf->resumeListening();
+        // Timeout after a 'tick', I guess. See getTickCount().
+        if (platf->waitForEvent(55, event))
+        {
+            if (event.what & evKeyboard)
+            {
+                // Set/Reset insert flag.
+                if( event.keyDown.keyCode == kbIns )
+                    insertState = !insertState;
+                if( insertState )
+                    event.keyDown.controlKeyState |= kbInsState;
+                return True;
+            }
+            else if (event.what & evMouse)
+            {
+                /* Like in the original implementation, let mouse events
+                 * to be treated on the following polling loop. */
+                pendingMouseEvent = event;
+                pendingEvent = 1;
+            }
+        }
     }
     return False;
 #else

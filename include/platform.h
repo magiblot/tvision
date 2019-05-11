@@ -42,9 +42,10 @@ public:
     };
 
     virtual ~AsyncInputStrategy() {};
-    virtual void startInput() = 0;
+    virtual void startInput(bool mouse = true) = 0;
     virtual void endInput() = 0;
     virtual bool getEvent(TEvent &ev) = 0;
+    virtual int getButtonCount() = 0;
 
     void resumeListening();
     bool waitForEvent(long ms, TEvent &ev);
@@ -84,6 +85,7 @@ public:
     void resumeListening() { input->resumeListening(); }
     bool waitForEvent(long ms, TEvent &ev) { return input->waitForEvent(ms, ev); }
     void notifyEvent(TEvent &ev, AsyncInputStrategy::waiter &get) { input->notifyEvent(ev, get); }
+    int getButtonCount() { return input->getButtonCount(); }
 
     inline int getCaretSize() { return display->getCaretSize(); }
     inline bool isCaretVisible() { return display->isCaretVisible(); }
@@ -132,17 +134,22 @@ class NcursesInput : public AsyncInputStrategy {
     static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
 
     std::thread inputThread;
+    TPoint lastMousePos;
+    uchar buttonState;
+    int buttonCount;
 
     void detectAlt(int keys[4], bool &Alt);
     void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
     void setAltModifier(TEvent &ev);
     void readUtf8Char(int keys[4], int &num_keys);
+    bool parseMouseEvent(TEvent&);
 
 public:
 
-    void startInput();
+    void startInput(bool mouse);
     void endInput();
     bool getEvent(TEvent &ev);
+    int getButtonCount();
 
 };
 
