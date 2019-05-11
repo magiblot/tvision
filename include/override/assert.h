@@ -3,16 +3,17 @@
 
 #include <cassert>
 
+#include <cstdio>
 #include <unistd.h>
 
-static void PressEnter()
-{
-    write(1, "Press enter to continue:\n", 25);
-    char _[80];
-    read(0, &_, sizeof(_));
+#define BREAK \
+{ \
+    printf("\rBreakpoint hit at %s, press enter to continue.\n", __func__); \
+    char _[80]; \
+    /* Take read() from the global namespace to prevent it to be confused with
+     * some member function wherever this is included in. */ \
+    ::read(0, &_, sizeof(_)); \
 }
-
-#define BREAK PressEnter();
 
 #else
 
