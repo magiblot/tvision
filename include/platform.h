@@ -1,6 +1,12 @@
-#ifndef STRATEGY_H
-#define STRATEGY_H
+#ifndef PLATFORM_H
+#define PLATFORM_H
 
+#define Uses_TEvent
+#include <tvision/tv.h>
+
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <unordered_map>
 #include <memory>
 
@@ -20,6 +26,35 @@ public:
     virtual ushort getScreenMode() = 0;
     virtual void setCaretSize(int size) = 0;
     virtual void screenWrite(int x, int y, ushort *buf, int len) = 0;
+
+};
+
+class AsyncInputStrategy {
+
+public:
+
+    struct waiter {
+        std::mutex m;
+        std::condition_variable cv;
+    };
+
+    virtual ~AsyncInputStrategy() {};
+    virtual void startInput() = 0;
+    virtual void endInput() = 0;
+
+    void resumeListening();
+    bool waitForEvent(long ms, TEvent &ev);
+    void notifyEvent(TEvent &ev, waiter &get);
+
+private:
+
+    waiter *inputListener;
+    waiter eventRequester;
+    std::mutex notifying;
+
+    bool evReceived = false;
+    bool evProcessed = true;
+    TEvent received;
 
 };
 
