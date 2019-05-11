@@ -25,6 +25,10 @@
 #include <assert.h>
 #include <platform.h>
 #include <ncurses.h>
+#include <chrono>
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 
 PlatformStrategy *THardwareInfo::platf;
 #endif
@@ -370,7 +374,9 @@ ulong THardwareInfo::getTickCount()
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
     return GetTickCount() / 55;
 #else
-    BREAK;
+    /* This effectively gives a system time reference in milliseconds.
+     * steady_clock is best suited for measuring intervals. */
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count() / 55;
 #endif
 }
 
