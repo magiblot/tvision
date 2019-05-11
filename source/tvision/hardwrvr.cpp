@@ -23,6 +23,10 @@
 
 #ifndef __BORLANDC__
 #include <assert.h>
+#include <platform.h>
+#include <ncurses.h>
+
+PlatformStrategy *THardwareInfo::platf;
 #endif
 
 #if defined( __FLAT__ )
@@ -99,9 +103,9 @@ ushort THardwareInfo::biosSel;
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
-#ifdef __BORLANDC__
 THardwareInfo::THardwareInfo()
 {
+#ifdef __BORLANDC__
     HMODULE mod;
 
     if( (mod = GetModuleHandle( "KERNEL32" )) != 0 &&
@@ -116,10 +120,32 @@ THardwareInfo::THardwareInfo()
     GetConsoleMode( consoleHandle[cnInput], &consoleMode );
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+#else
+    platf = new PlatformStrategy(new NcursesDisplay());
+#endif
 }
+
+#ifndef __BORLANDC__
+/* We don't include these in hardware.h as done originally to prevent it to
+ * depend on platform.h. Otherwise, any change in platform.h would affect
+ * hardware.h, causing the whole tvision library to recompile. */
+
+THardwareInfo::~THardwareInfo()
+{
+    delete platf;
+}
+
+// The price of composition.
+ushort THardwareInfo::getCaretSize() { return platf->getCaretSize(); }
+BOOL THardwareInfo::isCaretVisible() { return platf->isCaretVisible(); }
+ushort THardwareInfo::getScreenRows() { return platf->getScreenRows(); }
+ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
+void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
+#endif
 
 ushort THardwareInfo::getScreenMode()
 {
+#ifdef __BORLANDC__
     ushort mode;
 
     if( platform != plDPMI32 )      // B/W, mono not supported if running on
@@ -134,8 +160,10 @@ ushort THardwareInfo::getScreenMode()
     if( getScreenRows() > 25 )
         mode |= TDisplay::smFont8x8;
     return mode;
-}
+#else
+    platf->getScreenMode();
 #endif
+}
 
 void THardwareInfo::setScreenMode( ushort mode )
 {
@@ -184,15 +212,19 @@ void THardwareInfo::setScreenMode( ushort mode )
 #endif
 }
 
-#ifdef __BORLANDC__
 void THardwareInfo::setCaretPosition( ushort x, ushort y )
 {
+#ifdef __BORLANDC__
     COORD coord = { x, y };
     SetConsoleCursorPosition( consoleHandle[cnOutput], coord );
+#else
+    platf->setCaretPosition(x, y);
+#endif
 }
 
 void THardwareInfo::setCaretSize( ushort size )
 {
+#ifdef __BORLANDC__
     if( size == 0 )
     {
         crInfo.bVisible = False;
@@ -205,17 +237,23 @@ void THardwareInfo::setCaretSize( ushort size )
     }
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
+#else
+    platf->setCaretSize(size);
+#endif
 }
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
+#ifdef __BORLANDC__
     COORD size = {len,1};
     COORD from = {0,0};
     SMALL_RECT to = {x,y,x+len,y+1};
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
-}
+#else
+    platf->screenWrite(x, y, buf, len);
 #endif
+}
 
 // Event functions.
 
@@ -246,10 +284,13 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 #endif
 }
 
-
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
-#ifdef __BORLANDC__
+#ifndef __BORLANDC__
+    // Stub, just block waiting for user input.
+    wgetch(stdscr);
+    return False;
+#else
     if( !pendingEvent )
         {
         GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
@@ -298,10 +339,6 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
         }
 
     return False;
-#else
-    // Stub, just block waiting for user input.
-    wgetch(stdscr);
-    return False;
 #endif
 }
 
@@ -327,4 +364,4 @@ ulong THardwareInfo::getTickCount()
 #endif
 }
 
-#endif  // __FLAT__ && __BORLANDC__
+#endif  // __FLAT__

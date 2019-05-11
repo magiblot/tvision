@@ -37,8 +37,7 @@
 #endif
 
 #ifndef __BORLANDC__
-#include <assert.h>
-#include <ncurses.h>
+class PlatformStrategy;
 #endif
 
 class TEvent;
@@ -50,7 +49,10 @@ class THardwareInfo
 public:
 
     THardwareInfo();
+#ifndef __BORLANDC__
     ~THardwareInfo();
+    static PlatformStrategy *platf;
+#endif
 
     static ulong getTickCount();
 
@@ -142,27 +144,17 @@ inline THardwareInfo::PlatformType THardwareInfo::getPlatform()
     return platform;
 }
 
+#ifdef __BORLANDC__ // Defined in hardwrvr.cpp otherwise
 // Caret functions.
 
 inline ushort THardwareInfo::getCaretSize()
 {
-#ifdef __BORLANDC__
     return crInfo.dwSize;
-#else
-    int visibility = curs_set(0);
-    curs_set(visibility);
-    return visibility > 0 ? visibility == 2 ? 100 : 1 : 0;
-#endif
 }
-
 
 inline BOOL THardwareInfo::isCaretVisible()
 {
-#ifdef __BORLANDC__
     return crInfo.bVisible;
-#else
-    return getCaretSize() > 0;
-#endif
 }
 
 
@@ -170,60 +162,41 @@ inline BOOL THardwareInfo::isCaretVisible()
 
 inline ushort THardwareInfo::getScreenRows()
 {
-#ifdef __BORLANDC__
     return sbInfo.dwSize.Y;
-#else
-    return getmaxy(stdscr);
-#endif
 }
 
 inline ushort THardwareInfo::getScreenCols()
 {
-#ifdef __BORLANDC__
     return sbInfo.dwSize.X;
-#else
-    return getmaxx(stdscr);
-#endif
 }
 
 #pragma option -w-inl
 inline void THardwareInfo::clearScreen( ushort w, ushort h )
 {
-#ifdef __BORLANDC__
     COORD coord = { 0, 0 };
     DWORD read;
 
     FillConsoleOutputAttribute( consoleHandle[cnOutput], 0x07, w*h, coord, &read );
     FillConsoleOutputCharacterA( consoleHandle[cnOutput], ' ', w*h, coord, &read );
-#else
-    wclear(stdscr);
-#endif
 }
 #pragma option -w+inl
+#endif // __BORLANDC__
 
 inline ushort *THardwareInfo::allocateScreenBuffer()
 {
-#ifdef __BORLANDC__
-    short x = sbInfo.dwSize.X, y = sbInfo.dwSize.Y;
+    short x = getScreenCols(), y = getScreenRows();
 
     if( x < 80 )        // Make sure we allocate at least enough for
         x = 80;         //   a 80x50 screen.
     if( y < 50 )
         y = 50;
-
+#ifdef __BORLANDC__
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
 /* Allocate memory for the screen buffer. Two shorts per character cell.
  * This pointer is stored in TScreen's attribute screenBuffer, which is
- * often copied to TGroup's attribute buffer.
- * https://docs.microsoft.com/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc
- */
-    short x, y;
-    getmaxyx(stdscr, y, x);
-
-    // Preserve the assumptions.
-    if( x < 80 ) x = 80;
-    if( y < 50 ) y = 50;
+ * often assigned to TGroup's attribute buffer.
+ * https://docs.microsoft.com/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc */
 
     return new ushort[x * y * 2];
 #endif

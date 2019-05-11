@@ -17,6 +17,10 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
+#ifndef __BORLANDC__
+#include <assert.h>
+#endif
+
 #if !defined( __FLAT__ ) && !defined( __DOS_H )
 #include <dos.h>
 #endif  // __DOS_H
