@@ -33,15 +33,10 @@ int NcursesDisplay::getCaretSize()
 }
 
 bool NcursesDisplay::isCaretVisible() { return getCaretSize() > 0; }
-
 void NcursesDisplay::clearScreen() { wclear(stdscr); }
-
 int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
-
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
-
 void NcursesDisplay::setCaretPosition(int x, int y) { wmove(stdscr, y, x); }
-
 void NcursesDisplay::getCaretPosition(int &x, int &y) { getyx(stdscr, y, x); }
 
 ushort NcursesDisplay::getScreenMode()
