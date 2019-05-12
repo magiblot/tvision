@@ -53,6 +53,7 @@ public:
     ~THardwareInfo();
     static PlatformStrategy *platf;
     static TEvent pendingMouseEvent;
+    static void flushScreen();
 #endif
 
     static ulong getTickCount();

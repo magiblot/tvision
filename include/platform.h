@@ -29,6 +29,7 @@ public:
     virtual ushort getScreenMode() = 0;
     virtual void setCaretSize(int size) = 0;
     virtual void screenWrite(int x, int y, ushort *buf, int len) = 0;
+    virtual void flushScreen() = 0;
 
 };
 
@@ -96,6 +97,7 @@ public:
     inline ushort getScreenMode() { return display->getScreenMode(); }
     inline void setCaretSize(int size) { display->setCaretSize(size); }
     inline void screenWrite(int x, int y, ushort *buf, int len) { display->screenWrite(x, y, buf, len); }
+    inline void flushScreen() { display->flushScreen(); }
 
 };
 
@@ -124,6 +126,7 @@ public:
     int getScreenCols();
     ushort getScreenMode();
     void screenWrite(int x, int y, ushort *buf, int len);
+    void flushScreen();
 
 };
 

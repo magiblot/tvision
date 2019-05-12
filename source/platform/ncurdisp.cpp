@@ -1,4 +1,5 @@
 #define Uses_TScreen
+#define Uses_THardwareInfo
 #include <tvision/tv.h>
 
 #include <platform.h>
@@ -38,6 +39,7 @@ int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
 void NcursesDisplay::setCaretPosition(int x, int y) { wmove(stdscr, y, x); }
 void NcursesDisplay::getCaretPosition(int &x, int &y) { getyx(stdscr, y, x); }
+void NcursesDisplay::flushScreen() { wrefresh(stdscr); }
 
 ushort NcursesDisplay::getScreenMode()
 {
@@ -120,10 +122,7 @@ void NcursesDisplay::screenWrite( int x, int y, ushort *buf, int len )
     }
     // Move the caret back to where it was.
     setCaretPosition(oldx, oldy);
-    /* Notice that we are not calling wrefresh. This function draws a single
-     * row on the screen, so this is not the right place to actually send
-     * output to the terminal, for performance reasons. Right now,
-     * refreshing is performed when waiting for user input in wgetch(). */
+    THardwareInfo::flushScreen();
 }
 
 uint NcursesDisplay::translateAttributes(ushort attr)
