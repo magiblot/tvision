@@ -56,27 +56,30 @@ MouseEventType _NEAR TEventQueue::lastMouse;
 MouseEventType _NEAR TEventQueue::curMouse;
 MouseEventType _NEAR TEventQueue::downMouse;
 
+TMouse *TEventQueue::mouse;
 
 TEventQueue::TEventQueue()
 {
+    static TMouse mouse;
+    this->mouse = &mouse;
     resume();
 }
 
 
 void TEventQueue::resume()
 {
-    if( mouse.present() == False )
-        mouse.resume();
-    if( mouse.present() == False )
+    if( mouse->present() == False )
+        mouse->resume();
+    if( mouse->present() == False )
         return;
 
-    mouse.getEvent( curMouse );
+    mouse->getEvent( curMouse );
     lastMouse = curMouse;
 
 #if defined( __FLAT__ )
     THardwareInfo::clearPendingEvent();
 #else
-    mouse.registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
+    mouse->registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
 #endif
 
     mouseEvents = True;
@@ -86,7 +89,7 @@ void TEventQueue::resume()
 
 void TEventQueue::suspend()
 {
-    mouse.suspend();
+    mouse->suspend();
 }
 
 TEventQueue::~TEventQueue()

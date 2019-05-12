@@ -283,7 +283,7 @@ void TProgram::setScreenMode( ushort mode )
 {
     TRect  r;
 
-    TEventQueue::mouse.hide(); //HideMouse();
+    TEventQueue::mouse->hide(); //HideMouse();
     TScreen::setVideoMode( mode );
     initScreen();
     buffer = TScreen::screenBuffer;
@@ -292,7 +292,7 @@ void TProgram::setScreenMode( ushort mode )
     setState(sfExposed, False);
     setState(sfExposed, True);
     redraw();
-    TEventQueue::mouse.show(); //ShowMouse();
+    TEventQueue::mouse->show(); //ShowMouse();
 }
 
 TView* TProgram::validView(TView* p)

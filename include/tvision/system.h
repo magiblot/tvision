@@ -241,7 +241,7 @@ public:
 
 private:
 
-    static TMouse _NEAR mouse;
+    static TMouse *mouse;
     static Boolean getMouseState( TEvent& );
 
 #if !defined( __FLAT__ )

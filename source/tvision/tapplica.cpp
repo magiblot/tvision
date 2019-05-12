@@ -21,11 +21,14 @@
 #define Uses_TApplication
 #include <tvision/tv.h>
 
-static THardwareInfo hwInfoManager;
-TMouse _NEAR TEventQueue::mouse;
-static TScreen tsc;
-static TEventQueue teq;
-static TSystemError sysErr;
+TStaticInit::TStaticInit()
+{
+    // Construct on first use
+    static THardwareInfo hwInfoManager;
+    static TScreen tsc;
+    static TEventQueue teq;
+    static TSystemError sysErr;
+}
 
 void initHistory();
 void doneHistory();
