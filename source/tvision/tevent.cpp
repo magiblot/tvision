@@ -157,11 +157,11 @@ Boolean TEventQueue::getMouseState( TEvent & ev )
 #if defined( __FLAT__ )
     ev.what = evNothing;
 
-    if( THardwareInfo::getMouseEvent( curMouse ) )
-        if( mouseReverse == True && curMouse.buttons != 0 && curMouse.buttons != 3 )
-            curMouse.buttons ^= 3;
-    else
+    if( !THardwareInfo::getMouseEvent( curMouse ) )
         return False;
+
+    if( mouseReverse == True && curMouse.buttons != 0 && curMouse.buttons != 3 )
+        curMouse.buttons ^= 3;
 
     ev.what = THardwareInfo::getTickCount();  // Temporarily save tick count when event was read.
     ev.mouse = curMouse;
