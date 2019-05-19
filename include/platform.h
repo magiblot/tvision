@@ -132,7 +132,6 @@ public:
 
 class NcursesInput : public AsyncInputStrategy {
 
-    std::unordered_map<std::string, char> Utf8toCp437;
     static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
     static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
 

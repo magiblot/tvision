@@ -34,6 +34,11 @@ const char* cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
+/* The reverse version of the table above. Gets initialized at runtime from
+ * THardwareInfo's constructor. */
+
+unordered_map<string, char> Utf8toCp437;
+
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Until this is not changed, it is
  * necessary to translate ncurses keys to key codes. */

@@ -15,7 +15,6 @@ using std::thread;
 using waiter = AsyncInputStrategy::waiter;
 
 // tables.cpp
-extern const char* cp437toUtf8[256];
 extern unordered_map<char, KeyDownEvent> fromNonPrintableAscii;
 extern unordered_map<char, ushort> AltKeyCode;
 
@@ -46,13 +45,6 @@ void NcursesInput::startInput(bool mouse)
         buttonCount = 2;
     }
     else buttonCount = 0;
-
-    /* Fill the table that translates UTF-8 sequences into CP437 characters.
-     * Of course this is better than doing it by hand!
-     * The reason why this variable is not static is that it's otherwise
-     * affected by some sort of static initialization fiasco. */
-    for (int i = 0; i < 256; ++i)
-        Utf8toCp437[cp437toUtf8[i]] = i;
 
     inputThread = thread([this] {
         waiter w;

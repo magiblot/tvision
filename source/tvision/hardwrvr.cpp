@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <platform.h>
 #include <ncurses.h>
+#include <utf8.h>
 #include <chrono>
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -127,6 +128,9 @@ THardwareInfo::THardwareInfo()
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
     platf = new PlatformStrategy(new NcursesDisplay(), new NcursesInput());
+    // Initialize UTF-8 conversion table from utf8.h/tables.cpp
+    for (int i = 0; i < 256; ++i)
+        Utf8toCp437[cp437toUtf8[i]] = i;
     pendingEvent = 0;
 #endif
 }

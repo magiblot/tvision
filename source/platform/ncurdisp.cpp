@@ -3,6 +3,7 @@
 #include <tvision/tv.h>
 
 #include <platform.h>
+#include <utf8.h>
 #include <ncurses.h>
 #include <clocale>
 #include <unordered_map>
@@ -98,9 +99,6 @@ void NcursesDisplay::setCaretSize(int size)
  * numerating pairs from one as they get defined. This avoids problems in
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
-
-// tables.cpp
-extern const char* cp437toUtf8[256];
 
 void NcursesDisplay::screenWrite( int x, int y, ushort *buf, int len )
 {
