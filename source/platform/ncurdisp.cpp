@@ -9,7 +9,7 @@
 #include <unordered_map>
 using std::unordered_map;
 
-void NcursesDisplay::startDisplay()
+NcursesDisplay::NcursesDisplay()
 {
     // Allow printing UTF-8 text.
     setlocale(LC_ALL, "");
@@ -21,7 +21,7 @@ void NcursesDisplay::startDisplay()
         start_color();
 }
 
-void NcursesDisplay::endDisplay()
+NcursesDisplay::~NcursesDisplay()
 {
     // End curses mode.
     endwin();

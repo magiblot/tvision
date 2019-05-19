@@ -24,7 +24,6 @@
 #ifndef __BORLANDC__
 #include <assert.h>
 #include <platform.h>
-#include <ncurses.h>
 #include <utf8.h>
 #include <chrono>
 using std::chrono::duration_cast;
@@ -127,10 +126,13 @@ THardwareInfo::THardwareInfo()
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 #else
-    platf = new PlatformStrategy(new NcursesDisplay(), new NcursesInput());
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
     for (int i = 0; i < 256; ++i)
         Utf8toCp437[cp437toUtf8[i]] = i;
+    /* At least with the ncurses implementation, display must be initialized
+     * before input. */
+    DisplayStrategy *disp = new NcursesDisplay();
+    platf = new PlatformStrategy(disp, new NcursesInput());
     pendingEvent = 0;
 #endif
 }

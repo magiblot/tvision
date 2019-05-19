@@ -18,7 +18,7 @@ using waiter = AsyncInputStrategy::waiter;
 extern unordered_map<char, KeyDownEvent> fromNonPrintableAscii;
 extern unordered_map<char, ushort> AltKeyCode;
 
-void NcursesInput::startInput(bool mouse)
+NcursesInput::NcursesInput(bool mouse)
 {
     // Capture keyboard input, but allow exiting with Ctrl+C.
     cbreak();
@@ -45,24 +45,10 @@ void NcursesInput::startInput(bool mouse)
         buttonCount = 2;
     }
     else buttonCount = 0;
-
-    inputThread = thread([this] {
-        waiter w;
-        while (true)
-        {
-            TEvent ev = {};
-            if (getEvent(ev))
-                notifyEvent(ev, w);
-        }
-    });
-
 }
 
-void NcursesInput::endInput()
+NcursesInput::~NcursesInput()
 {
-    /* There's no way yet to terminate the input thread, so it has to be
-     * detached before becoming out of scope. */
-    inputThread.detach();
     // Disable mouse mode.
     mousemask(0, 0);
 }

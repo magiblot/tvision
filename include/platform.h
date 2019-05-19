@@ -12,14 +12,13 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <functional>
 
 class DisplayStrategy {
 
 public:
 
-    virtual void startDisplay() = 0;
-    virtual void endDisplay() = 0;
-
+    virtual ~DisplayStrategy() {}
     virtual int getCaretSize() = 0;
     virtual bool isCaretVisible() = 0;
     virtual void clearScreen() = 0;
@@ -42,25 +41,30 @@ public:
         std::condition_variable cv;
     };
 
-    virtual ~AsyncInputStrategy() {};
-    virtual void startInput(bool mouse = true) = 0;
-    virtual void endInput() = 0;
+    virtual ~AsyncInputStrategy() {}
+    virtual void startInputThread();
+    void startInputThread(std::function<bool (TEvent&)>);
+    virtual void endInputThread();
     virtual bool getEvent(TEvent &ev) = 0;
     virtual int getButtonCount() = 0;
 
-    void resumeListening();
-    bool waitForEvent(long ms, TEvent &ev);
-    void notifyEvent(TEvent &ev, waiter &get);
+    static void resumeListening();
+    static bool waitForEvent(long ms, TEvent &ev);
+    static void notifyEvent(TEvent &ev, waiter &get);
+
+protected:
+
+    std::thread inputThread;
 
 private:
 
-    waiter *inputListener;
-    waiter eventRequester;
-    std::mutex notifying;
+    static waiter *inputListener;
+    static waiter eventRequester;
+    static std::mutex notifying;
 
-    bool evReceived = false;
-    bool evProcessed = true;
-    TEvent received;
+    static bool evReceived;
+    static bool evProcessed;
+    static TEvent received;
 
 };
 
@@ -73,20 +77,17 @@ public:
 
     PlatformStrategy(DisplayStrategy* d, AsyncInputStrategy *i) : display(d), input(i)
     {
-        display->startDisplay();
-        input->startInput();
+        if (input) input->startInputThread();
     }
 
     virtual ~PlatformStrategy()
     {
-        input->endInput();
-        display->endDisplay();
+        if (input) input->endInputThread();
     }
 
-    void resumeListening() { input->resumeListening(); }
-    bool waitForEvent(long ms, TEvent &ev) { return input->waitForEvent(ms, ev); }
-    void notifyEvent(TEvent &ev, AsyncInputStrategy::waiter &get) { input->notifyEvent(ev, get); }
-    int getButtonCount() { return input->getButtonCount(); }
+    inline void resumeListening() { AsyncInputStrategy::resumeListening(); }
+    inline bool waitForEvent(long ms, TEvent &ev) { return AsyncInputStrategy::waitForEvent(ms, ev); }
+    inline int getButtonCount() { return input ? input->getButtonCount() : 0; }
 
     inline int getCaretSize() { return display->getCaretSize(); }
     inline bool isCaretVisible() { return display->isCaretVisible(); }
@@ -114,8 +115,8 @@ class NcursesDisplay : public DisplayStrategy {
 
 public:
 
-    void startDisplay();
-    void endDisplay();
+    NcursesDisplay();
+    ~NcursesDisplay();
 
     void setCaretSize(int size);
     int getCaretSize();
@@ -135,7 +136,6 @@ class NcursesInput : public AsyncInputStrategy {
     static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
     static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
 
-    std::thread inputThread;
     TPoint lastMousePos;
     uchar buttonState;
     int buttonCount;
@@ -148,8 +148,9 @@ class NcursesInput : public AsyncInputStrategy {
 
 public:
 
-    void startInput(bool mouse);
-    void endInput();
+    NcursesInput(bool mouse = true);
+    ~NcursesInput();
+
     bool getEvent(TEvent &ev);
     int getButtonCount();
 

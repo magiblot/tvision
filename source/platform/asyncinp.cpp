@@ -17,7 +17,7 @@ using waiter = AsyncInputStrategy::waiter;
  * and forwarding them asynchronously to the main thread. It serves a
  * 'several producers, one consumer' model.
  *
- * The idea is that the main thread should call 'startInput' (pure virtual)
+ * The idea is that the main thread should call 'startInputThread' (pure virtual)
  * to start the listener threads. When it is ready to receive events, it must
  * call 'waitForEvent', which times out after 'ms' milliseconds.
  *
@@ -39,11 +39,26 @@ using waiter = AsyncInputStrategy::waiter;
  * listener threads properly. In addition, listener threads might not receive
  * signals such as SIGWINCH. */
 
+/* Pointer to the mutex+condition_variable of the listener thread waiting
+ * for the main thread to call 'resumeListening'. */
+waiter *AsyncInputStrategy::inputListener;
+/* mutex+condition_variable representing the main thread, which waits for
+ * an event to be received. */
+waiter AsyncInputStrategy::eventRequester;
+// Mutex to prevent several listeners from notifying an event at the same time.
+std::mutex AsyncInputStrategy::notifying;
+
+// Did any listener receive an event?
+bool AsyncInputStrategy::evReceived = false;
+// Did the main thread finish processing the last event?
+bool AsyncInputStrategy::evProcessed = true;
+// The last received event.
+TEvent AsyncInputStrategy::received;
+
 bool AsyncInputStrategy::waitForEvent(long ms, TEvent &ev)
 {
     unique_lock<mutex> rlk(eventRequester.m);
-    return eventRequester.cv.wait_for(rlk, milliseconds(ms),
-    [&] {
+    return eventRequester.cv.wait_for(rlk, milliseconds(ms), [&] {
         bool b = evReceived;
         if (b)
         {
@@ -78,11 +93,37 @@ void AsyncInputStrategy::notifyEvent(TEvent &ev, waiter &inp)
     inputListener = &inp;
     evProcessed = false;
     eventRequester.cv.notify_one();
-    inp.cv.wait(ilk,
-    [&] {
+    inp.cv.wait(ilk, [&] {
         bool b = evProcessed;
         if (b)
             evProcessed = false;
         return b;
     });
+}
+
+void AsyncInputStrategy::startInputThread()
+{
+    startInputThread([this] (TEvent &ev) {
+        return getEvent(ev);
+    });
+}
+
+void AsyncInputStrategy::startInputThread(std::function<bool (TEvent&)> eventGetter)
+{
+    inputThread = thread([eventGetter] {
+        waiter w;
+        while (true)
+        {
+            TEvent ev = {};
+            if (eventGetter(ev))
+                notifyEvent(ev, w);
+        }
+    });
+}
+
+void AsyncInputStrategy::endInputThread()
+{
+    /* If there's no way to terminate the input thread, it must be
+     * detached before becoming out of scope. */
+    inputThread.detach();
 }
