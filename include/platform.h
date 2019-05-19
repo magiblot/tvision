@@ -176,6 +176,9 @@ class LinuxConsoleStrategy : public PlatformStrategy {
 
     std::unique_ptr<AsyncInputStrategy> keyboard;
 
+    bool patchKeyEvent(TEvent &ev);
+    static void applyKeyboardModifiers(KeyDownEvent &key);
+
 public:
 
     LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);

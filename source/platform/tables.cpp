@@ -209,3 +209,24 @@ unordered_map<string, KeyDownEvent> NcursesInput::fromCursesHighKey = {
     // Surprisingly, no Ctrl+Up/Down support in Turbo Vision.
 };
 
+unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
+    /* There are cases, such as the linux console, where it is possible to
+     * get the state of keyboard modifiers (Shift/Ctrl/Alt), but captured
+     * key events don't include that information. So, an extra translation
+     * step must be done to get the actual Turbo Vision key codes. */
+    { kbShift, {
+        { kbTab,        kbShiftTab      },
+        { kbDel,        kbShiftDel      },
+        { kbIns,        kbShiftIns      }
+    }},
+    { kbCtrlShift, {
+        { kbDel,        kbCtrlDel       },
+        { kbEnd,        kbCtrlEnd       },
+        { kbHome,       kbCtrlHome      },
+        { kbIns,        kbCtrlIns       },
+        { kbLeft,       kbCtrlLeft      },
+        { kbPgDn,       kbCtrlPgDn      },
+        { kbPgUp,       kbCtrlPgUp      },
+        { kbRight,      kbCtrlRight     }
+    }}
+};
