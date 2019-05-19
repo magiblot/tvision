@@ -70,6 +70,8 @@ private:
 
 class PlatformStrategy {
 
+protected:
+
     std::unique_ptr<DisplayStrategy> display;
     std::unique_ptr<AsyncInputStrategy> input;
 
@@ -98,7 +100,7 @@ public:
     inline ushort getScreenMode() { return display->getScreenMode(); }
     inline void setCaretSize(int size) { display->setCaretSize(size); }
     inline void screenWrite(int x, int y, ushort *buf, int len) { display->screenWrite(x, y, buf, len); }
-    inline void flushScreen() { display->flushScreen(); }
+    virtual void flushScreen() { display->flushScreen(); }
 
 };
 
@@ -183,6 +185,8 @@ public:
 
     LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
     ~LinuxConsoleStrategy();
+
+    void flushScreen();
 
 };
 

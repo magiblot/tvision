@@ -22,6 +22,12 @@ LinuxConsoleStrategy::~LinuxConsoleStrategy()
     if (keyboard) keyboard->endInputThread();
 }
 
+void LinuxConsoleStrategy::flushScreen()
+{
+    PlatformStrategy::flushScreen();
+    ((GpmInput*) input.get())->drawPointer();
+}
+
 // tables.cpp
 extern unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers;
 
