@@ -56,7 +56,7 @@ TColorItem::TColorItem( const char *nm, uchar idx, TColorItem *nxt )
 
 TColorItem::~TColorItem()
 {
-    delete (char *)name;
+    delete[] name;
 }
 
 TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt )
@@ -68,7 +68,7 @@ TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt )
 
 TColorGroup::~TColorGroup()
 {
-    delete (char *)name;
+    delete[] name;
 }
 
 TColorItem& operator + ( TColorItem& i1, TColorItem& i2 )
@@ -339,7 +339,7 @@ TColorDisplay::TColorDisplay( const TRect& bounds, const char *aText ) :
 
 TColorDisplay::~TColorDisplay()
 {
-    delete (char *)text;
+    delete[] text;
 }
 
 void TColorDisplay::draw()
@@ -801,7 +801,7 @@ void TColorDialog::setIndexes(TColorIndex*& colIdx)
     numGroups = groups->getNumGroups();
     if (colIdx && (colIdx->colorSize != numGroups))
     {
-        delete colIdx;
+        delete[] colIdx;
         colors = NULL;
     }
     if (!colIdx)

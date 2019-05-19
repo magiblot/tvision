@@ -48,7 +48,7 @@ TNSCollection::TNSCollection() :
 
 TNSCollection::~TNSCollection()
 {
-    delete items;
+    delete[] items;
 }
 
 void TNSCollection::shutDown()

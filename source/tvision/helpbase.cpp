@@ -141,7 +141,7 @@ void THelpTopic::disposeParagraphs()
         {
         t = p;
         p = p->next;
-        delete t->text;
+        delete[] t->text;
         delete t;
         }
 }
