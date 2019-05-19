@@ -54,6 +54,7 @@ public:
     static PlatformStrategy *platf;
     static TEvent pendingMouseEvent;
     static void flushScreen();
+    static bool isLinuxConsole();
 #endif
 
     static ulong getTickCount();

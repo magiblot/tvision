@@ -70,8 +70,8 @@ private:
 
 class PlatformStrategy {
 
-    std::shared_ptr<DisplayStrategy> display;
-    std::shared_ptr<AsyncInputStrategy> input;
+    std::unique_ptr<DisplayStrategy> display;
+    std::unique_ptr<AsyncInputStrategy> input;
 
 public:
 
@@ -153,6 +153,33 @@ public:
 
     bool getEvent(TEvent &ev);
     int getButtonCount();
+
+};
+
+class GpmInput : public AsyncInputStrategy {
+
+    TPoint mousePos;
+    uchar buttonState;
+    int buttonCount;
+
+public:
+
+    GpmInput();
+    ~GpmInput();
+    bool getEvent(TEvent &ev);
+    int getButtonCount();
+    void drawPointer();
+
+};
+
+class LinuxConsoleStrategy : public PlatformStrategy {
+
+    std::unique_ptr<AsyncInputStrategy> keyboard;
+
+public:
+
+    LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
+    ~LinuxConsoleStrategy();
 
 };
 

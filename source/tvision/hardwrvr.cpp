@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <platform.h>
 #include <utf8.h>
+#include <sys/ioctl.h>
 #include <chrono>
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -132,7 +133,10 @@ THardwareInfo::THardwareInfo()
     /* At least with the ncurses implementation, display must be initialized
      * before input. */
     DisplayStrategy *disp = new NcursesDisplay();
-    platf = new PlatformStrategy(disp, new NcursesInput());
+    if (isLinuxConsole())
+        platf = new LinuxConsoleStrategy(disp, new NcursesInput(false));
+    else
+        platf = new PlatformStrategy(disp, new NcursesInput());
     pendingEvent = 0;
 #endif
 }
@@ -145,6 +149,14 @@ THardwareInfo::THardwareInfo()
 THardwareInfo::~THardwareInfo()
 {
     delete platf;
+}
+
+bool THardwareInfo::isLinuxConsole()
+{
+    /* This is the same function used to get the Shift/Ctrl/Alt modifiers
+     * on the console. It fails if stdin is not a console file descriptor. */
+    char subcode = 6;
+    return ioctl(0, TIOCLINUX, &subcode) != -1;
 }
 
 // The price of composition.
