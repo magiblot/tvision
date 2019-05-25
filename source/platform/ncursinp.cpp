@@ -7,8 +7,8 @@
 #include <thread>
 #include <string>
 #include <unordered_map>
-#include <platform.h>
-#include <utf8.h>
+#include <internal/ncursinp.h>
+#include <internal/utf8.h>
 using std::unordered_map;
 using std::string;
 using std::thread;

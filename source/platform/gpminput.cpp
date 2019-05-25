@@ -3,8 +3,8 @@
 #define Uses_TKeys
 #include <tvision/tv.h>
 
+#include <internal/gpminput.h>
 #include <gpm.h>
-#include <platform.h>
 #include <unordered_map>
 using std::unordered_map;
 

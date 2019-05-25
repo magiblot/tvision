@@ -1,4 +1,4 @@
-#include <platform.h>
+#include <internal/linuxcon.h>
 #include <linux/keyboard.h>
 #include <sys/ioctl.h>
 #include <unordered_map>

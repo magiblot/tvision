@@ -1,17 +1,13 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#define Uses_TKeys
-#define Uses_TPoint
 #define Uses_TEvent
 #include <tvision/tv.h>
 
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <unordered_map>
 #include <memory>
-#include <string>
 #include <functional>
 #include <list>
 
@@ -101,91 +97,4 @@ public:
 
 };
 
-class NcursesDisplay : public DisplayStrategy {
-
-    bool hasColors;
-    std::unordered_map<ushort, int> pairIdentifiers;
-    ushort definedPairs;
-
-    void getCaretPosition(int &x, int &y);
-    uint translateAttributes(ushort attr);
-    uint getColorPair(uchar pairKey);
-    static uchar swapRedBlue (uchar c);
-
-public:
-
-    NcursesDisplay();
-    ~NcursesDisplay();
-
-    void setCaretSize(int size);
-    int getCaretSize();
-    void setCaretPosition(int x, int y);
-    bool isCaretVisible();
-    void clearScreen();
-    int getScreenRows();
-    int getScreenCols();
-    ushort getScreenMode();
-    void screenWrite(int x, int y, ushort *buf, int len);
-    void flushScreen();
-
-};
-
-class NcursesInput : public AsyncInputStrategy {
-
-    static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
-    static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
-
-    TPoint lastMousePos;
-    uchar buttonState;
-    int buttonCount;
-
-    void detectAlt(int keys[4], bool &Alt);
-    void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
-    void setAltModifier(TEvent &ev);
-    void readUtf8Char(int keys[4], int &num_keys);
-    bool parseMouseEvent(TEvent&);
-
-public:
-
-    NcursesInput(bool mouse = true);
-    ~NcursesInput();
-
-    bool getEvent(TEvent &ev);
-    int getButtonCount();
-
-};
-
-class GpmInput : public AsyncInputStrategy {
-
-    TPoint mousePos;
-    uchar buttonState;
-    int buttonCount;
-
-public:
-
-    GpmInput();
-    ~GpmInput();
-    bool getEvent(TEvent &ev);
-    int getButtonCount();
-    void drawPointer();
-
-};
-
-class LinuxConsoleStrategy : public PlatformStrategy {
-
-    std::unique_ptr<GpmInput> gpm;
-
-    bool patchKeyEvent(TEvent &ev);
-    static void applyKeyboardModifiers(KeyDownEvent &key);
-
-public:
-
-    LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
-
-    int getButtonCount();
-    void flushScreen();
-
-};
-
 #endif
-

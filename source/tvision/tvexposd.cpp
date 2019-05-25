@@ -18,7 +18,7 @@
 
 #ifdef DEBUG_TVEXPOSD
 
-#include <debugAsm.h>
+#include <internal/debugAsm.h>
 
 static int timesRun = 0;
 static int iterations;

@@ -5,7 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <list>
-#include <platform.h>
+#include <internal/platform.h>
 using std::thread;
 using std::mutex;
 using std::unique_lock;

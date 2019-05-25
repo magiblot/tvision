@@ -2,10 +2,10 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+#include <internal/ncursinp.h>
+#include <ncurses.h>
 #include <unordered_map>
 #include <string>
-#include <ncurses.h>
-#include <platform.h>
 using std::unordered_map;
 using std::string;
 

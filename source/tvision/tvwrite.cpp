@@ -23,7 +23,7 @@
 
 #ifdef DEBUG_TVWRITE
 
-#include <debugAsm.h>
+#include <internal/debugAsm.h>
 #define Call(a,b) { pushTrace(a); b; }
 
 #else

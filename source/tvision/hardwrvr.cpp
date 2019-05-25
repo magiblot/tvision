@@ -23,8 +23,11 @@
 
 #ifndef __BORLANDC__
 #include <assert.h>
-#include <platform.h>
-#include <utf8.h>
+#include <internal/platform.h>
+#include <internal/ncurdisp.h>
+#include <internal/ncursinp.h>
+#include <internal/linuxcon.h>
+#include <internal/utf8.h>
 #include <sys/ioctl.h>
 #include <chrono>
 using std::chrono::duration_cast;

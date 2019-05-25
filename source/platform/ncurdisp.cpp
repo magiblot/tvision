@@ -1,8 +1,8 @@
 #define Uses_TScreen
 #include <tvision/tv.h>
 
-#include <platform.h>
-#include <utf8.h>
+#include <internal/ncurdisp.h>
+#include <internal/utf8.h>
 #include <ncurses.h>
 #include <clocale>
 #include <unordered_map>
