@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <list>
 
 class DisplayStrategy {
 
@@ -34,6 +35,8 @@ public:
 
 class AsyncInputStrategy {
 
+    void startInputThread();
+
 public:
 
     struct waiter {
@@ -41,23 +44,22 @@ public:
         std::condition_variable cv;
     };
 
-    virtual ~AsyncInputStrategy() {}
-    virtual void startInputThread();
-    void startInputThread(std::function<bool (TEvent&)>);
-    virtual void endInputThread();
+    AsyncInputStrategy();
+    virtual ~AsyncInputStrategy();
     virtual bool getEvent(TEvent &ev) = 0;
+    void overrideEventGetter(std::function<bool (TEvent&)>&&);
     virtual int getButtonCount() = 0;
 
     static void resumeListening();
     static bool waitForEvent(long ms, TEvent &ev);
     static void notifyEvent(TEvent &ev, waiter &get);
 
-protected:
-
-    std::thread inputThread;
-
 private:
 
+    std::thread inputThread;
+    std::function<bool (TEvent&)> eventGetter;
+
+    static std::list<AsyncInputStrategy*> listeners;
     static waiter *inputListener;
     static waiter eventRequester;
     static std::mutex notifying;
@@ -77,15 +79,10 @@ protected:
 
 public:
 
-    PlatformStrategy(DisplayStrategy* d, AsyncInputStrategy *i) : display(d), input(i)
-    {
-        if (input) input->startInputThread();
-    }
+    PlatformStrategy(DisplayStrategy* d, AsyncInputStrategy *i) :
+        display(d), input(i) {}
 
-    virtual ~PlatformStrategy()
-    {
-        if (input) input->endInputThread();
-    }
+    virtual ~PlatformStrategy() {}
 
     inline void resumeListening() { AsyncInputStrategy::resumeListening(); }
     inline bool waitForEvent(long ms, TEvent &ev) { return AsyncInputStrategy::waitForEvent(ms, ev); }
@@ -184,7 +181,6 @@ class LinuxConsoleStrategy : public PlatformStrategy {
 public:
 
     LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
-    ~LinuxConsoleStrategy();
 
     void flushScreen();
 

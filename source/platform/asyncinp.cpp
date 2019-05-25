@@ -4,12 +4,14 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <list>
 #include <platform.h>
 using std::thread;
 using std::mutex;
 using std::unique_lock;
 using std::lock_guard;
 using std::condition_variable;
+using std::list;
 using std::chrono::milliseconds;
 using waiter = AsyncInputStrategy::waiter;
 
@@ -17,8 +19,10 @@ using waiter = AsyncInputStrategy::waiter;
  * and forwarding them asynchronously to the main thread. It serves a
  * 'several producers, one consumer' model.
  *
- * The idea is that the main thread should call 'startInputThread' (pure virtual)
- * to start the listener threads. When it is ready to receive events, it must
+ * The idea is that each AsyncInputStrategy instance registers itself in a list
+ * of input listeners upon construction. Later, when the main thread calls
+ * 'resumeListening' for the first time, a thread for each listener will be
+ * started. When it is ready to receive events, the main thread must
  * call 'waitForEvent', which times out after 'ms' milliseconds.
  *
  * On the other side, listener threads must call 'notifyEvent' when ready, which
@@ -39,6 +43,9 @@ using waiter = AsyncInputStrategy::waiter;
  * listener threads properly. In addition, listener threads might not receive
  * signals such as SIGWINCH. */
 
+/* List of listeners whose thread will be started the first time 'resumeListening'
+ * is executed. */
+list<AsyncInputStrategy*> AsyncInputStrategy::listeners;
 /* Pointer to the mutex+condition_variable of the listener thread waiting
  * for the main thread to call 'resumeListening'. */
 waiter *AsyncInputStrategy::inputListener;
@@ -54,6 +61,21 @@ bool AsyncInputStrategy::evReceived = false;
 bool AsyncInputStrategy::evProcessed = true;
 // The last received event.
 TEvent AsyncInputStrategy::received;
+
+AsyncInputStrategy::AsyncInputStrategy() :
+    // The default eventGetter is the virtual getEvent function.
+    eventGetter([this] (TEvent &ev) { return getEvent(ev); })
+{
+    // Register itself in the list of listeners.
+    listeners.push_back(this);
+}
+
+AsyncInputStrategy::~AsyncInputStrategy()
+{
+    /* If there's no way to terminate the input thread, it must be
+     * detached before becoming out of scope. */
+    inputThread.detach();
+}
 
 bool AsyncInputStrategy::waitForEvent(long ms, TEvent &ev)
 {
@@ -71,6 +93,7 @@ bool AsyncInputStrategy::waitForEvent(long ms, TEvent &ev)
 
 void AsyncInputStrategy::resumeListening()
 {
+    static bool firstTime = true;
     if (!evProcessed)
     {
         {
@@ -78,6 +101,12 @@ void AsyncInputStrategy::resumeListening()
             evProcessed = true;
         }
         inputListener->cv.notify_one();
+    }
+    else if (firstTime)
+    {
+        firstTime = false;
+        for (auto listener : listeners)
+            listener->startInputThread();
     }
 }
 
@@ -103,14 +132,7 @@ void AsyncInputStrategy::notifyEvent(TEvent &ev, waiter &inp)
 
 void AsyncInputStrategy::startInputThread()
 {
-    startInputThread([this] (TEvent &ev) {
-        return getEvent(ev);
-    });
-}
-
-void AsyncInputStrategy::startInputThread(std::function<bool (TEvent&)> eventGetter)
-{
-    inputThread = thread([eventGetter] {
+    inputThread = thread([this] {
         waiter w;
         while (true)
         {
@@ -121,9 +143,7 @@ void AsyncInputStrategy::startInputThread(std::function<bool (TEvent&)> eventGet
     });
 }
 
-void AsyncInputStrategy::endInputThread()
+void AsyncInputStrategy::overrideEventGetter(std::function<bool (TEvent&)> &&func)
 {
-    /* If there's no way to terminate the input thread, it must be
-     * detached before becoming out of scope. */
-    inputThread.detach();
+    eventGetter = func;
 }

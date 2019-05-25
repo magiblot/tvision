@@ -12,15 +12,11 @@ LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, AsyncInputStrateg
      * key events is stored in this class, so that we can override its
      * getEvent method. */
     if (keyboard)
-        keyboard->startInputThread([&] (TEvent &ev) {
+        keyboard->overrideEventGetter([&] (TEvent &ev) {
             return patchKeyEvent(ev);
         });
 }
 
-LinuxConsoleStrategy::~LinuxConsoleStrategy()
-{
-    if (keyboard) keyboard->endInputThread();
-}
 
 void LinuxConsoleStrategy::flushScreen()
 {
