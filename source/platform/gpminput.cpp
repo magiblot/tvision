@@ -8,7 +8,7 @@
 #include <unordered_map>
 using std::unordered_map;
 
-GpmInput::GpmInput()
+GpmInput::GpmInput() : mousePos({-1, -1})
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
@@ -41,7 +41,9 @@ int GpmInput::getButtonCount()
 
 void GpmInput::drawPointer()
 {
-    Gpm_DrawPointer(mousePos.x, mousePos.y, 0);
+    // Do not draw the pointer unless we captured its position at least once.
+    if (mousePos.x >= 0)
+        Gpm_DrawPointer(mousePos.x, mousePos.y, 0);
 }
 
 bool GpmInput::getEvent(TEvent &ev)
