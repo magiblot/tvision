@@ -5,23 +5,26 @@
 using std::unordered_map;
 
 LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, AsyncInputStrategy *i) :
-    PlatformStrategy(d, new GpmInput()), keyboard(i)
+    PlatformStrategy(d, i), gpm(new GpmInput())
 {
-    /* The GpmInput instance is stored in the 'input' attribute of
-     * PlatformStrategy, while the AsyncInputStrategy instance which reads
-     * key events is stored in this class, so that we can override its
-     * getEvent method. */
-    if (keyboard)
-        keyboard->overrideEventGetter([&] (TEvent &ev) {
+    /* The AsyncInputStrategy instance which reads key events is stored in
+     * the 'input' attribute of PlatformStrategy, while the GpmInput instance
+     * is stored in the 'gpm' attribute of this class. */
+    if (input)
+        input->overrideEventGetter([&] (TEvent &ev) {
             return patchKeyEvent(ev);
         });
 }
 
+int LinuxConsoleStrategy::getButtonCount()
+{
+    return gpm->getButtonCount();
+}
 
 void LinuxConsoleStrategy::flushScreen()
 {
     PlatformStrategy::flushScreen();
-    ((GpmInput*) input.get())->drawPointer();
+    gpm->drawPointer();
 }
 
 // tables.cpp
@@ -31,7 +34,7 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
 {
     /* The keyboard event getter is usually unaware of key modifiers in the
      * console, so we add them on top of the previous translation. */
-    if (keyboard->getEvent(ev))
+    if (input->getEvent(ev))
     {
         applyKeyboardModifiers(ev.keyDown);
         ushort keyCode = keyCodeWithModifiers[ev.keyDown.controlKeyState][ev.keyDown.keyCode];

@@ -86,7 +86,7 @@ public:
 
     inline void resumeListening() { AsyncInputStrategy::resumeListening(); }
     inline bool waitForEvent(long ms, TEvent &ev) { return AsyncInputStrategy::waitForEvent(ms, ev); }
-    inline int getButtonCount() { return input ? input->getButtonCount() : 0; }
+    virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
 
     inline int getCaretSize() { return display->getCaretSize(); }
     inline bool isCaretVisible() { return display->isCaretVisible(); }
@@ -173,7 +173,7 @@ public:
 
 class LinuxConsoleStrategy : public PlatformStrategy {
 
-    std::unique_ptr<AsyncInputStrategy> keyboard;
+    std::unique_ptr<GpmInput> gpm;
 
     bool patchKeyEvent(TEvent &ev);
     static void applyKeyboardModifiers(KeyDownEvent &key);
@@ -182,6 +182,7 @@ public:
 
     LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
 
+    int getButtonCount();
     void flushScreen();
 
 };
