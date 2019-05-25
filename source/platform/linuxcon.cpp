@@ -32,6 +32,8 @@ extern unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers;
 
 bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
 {
+    // Prevent pointer from disappearing on key press.
+    gpm->drawPointer();
     /* The keyboard event getter is usually unaware of key modifiers in the
      * console, so we add them on top of the previous translation. */
     if (input->getEvent(ev))
