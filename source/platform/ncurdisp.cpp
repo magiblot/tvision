@@ -1,5 +1,4 @@
 #define Uses_TScreen
-#define Uses_THardwareInfo
 #include <tvision/tv.h>
 
 #include <platform.h>
@@ -120,7 +119,6 @@ void NcursesDisplay::screenWrite( int x, int y, ushort *buf, int len )
     }
     // Move the caret back to where it was.
     setCaretPosition(oldx, oldy);
-    THardwareInfo::flushScreen();
 }
 
 uint NcursesDisplay::translateAttributes(ushort attr)

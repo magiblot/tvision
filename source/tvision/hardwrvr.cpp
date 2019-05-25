@@ -318,6 +318,10 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
 #ifndef __BORLANDC__
+    /* This is a good place to refresh the display, since it guarantees a
+     * a refresh each time an event is processed or there's a wait timeout,
+     * and avoids unnecessary screen refreshes. */
+    THardwareInfo::flushScreen();
     if (!pendingEvent)
     {
         // Unblock listener threads.
