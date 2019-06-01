@@ -16,7 +16,7 @@
  */
 
 #define Uses_TDrawBuffer
-#define Uses_THardwareInfo
+#define Uses_TScreen
 #include <tvision/tv.h>
 
 #if !defined( __DOS_H )
@@ -320,7 +320,7 @@ TDrawBuffer::TDrawBuffer() {
     /* This makes it possible to create TDrawBuffers for big screen widths,
      * but I still don't know if it'll resist screen resizing. It appearently
      * does, since TDrawBuffer is always used for temporary, local variables. */
-    dataLength = THardwareInfo::getScreenCols();
+    dataLength = TDisplay::getCols();
     data = new ushort[dataLength];
 }
 
