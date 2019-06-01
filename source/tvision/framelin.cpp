@@ -16,15 +16,12 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-
-#include <assert.h>
-
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
+    int i;
     uchar *FrameMask = new uchar[size.x];
     FrameMask[0] = initFrame[n];
-    for (int i = 1; i < size.x - 1; ++i)
+    for (i = 1; i < size.x - 1; ++i)
         FrameMask[i] = initFrame[n + 1];
     FrameMask[size.x - 1] = initFrame[n + 2];
     TView* v = owner->last;
@@ -71,15 +68,13 @@ L6:
     if (ah == 0)
         goto L1;
 L8:
-    for (int i = esi; i < edi; ++i)
+    for (i = esi; i < edi; ++i)
         FrameMask[i] |= ah;
     goto L1;
 L10:
-    for (int i = 0; i < size.x; ++i) {
+    for (i = 0; i < size.x; ++i) {
         frameBuf.putChar(i, frameChars[FrameMask[i]]);
         frameBuf.putAttribute(i, color);
     }
     delete[] FrameMask;
 }
-
-#endif

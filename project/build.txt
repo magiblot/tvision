@@ -9,7 +9,7 @@ libraries which can later be linked from applications using Turbo Vision.
 Steps to build:
 
 1.  Create a folder for the temporal files of each target in the project:
-    'objgen32', 'objgen', 'objdos32' and 'objdos'.
+    'objdos32' and 'objdos'.
 2.  Copy 'tv.inc' from the source code files to this location. It's the
     easiest way to let the assembler find it.
 3.  Generate the include files 'tvwrite.inc' and 'tvwrit32.inc' required to
