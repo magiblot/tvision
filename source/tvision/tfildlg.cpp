@@ -143,7 +143,7 @@ TFileDialog::TFileDialog( const char *aWildCard,
 
 TFileDialog::~TFileDialog()
 {
-    delete[] directory;
+    delete[] (char *) directory;
 }
 
 void TFileDialog::shutDown()
@@ -257,7 +257,7 @@ void TFileDialog::readDirectory()
     char curDir[MAXPATH];
     getCurDir( curDir );
     if( directory )
-        delete[] directory;
+        delete[] (char *) directory;
     directory = newStr( curDir );
     fileList->readDirectory( wildCard );
 }
@@ -315,7 +315,7 @@ char ext[MAXEXT];
                 strcat( path, dir );
                 if( checkDirectory( path ) )
                     {
-                    delete[] directory;
+                    delete[] (char *) directory;
                     directory = newStr( path );
                     strcpy( wildCard, name );
                     strcat( wildCard, ext );
@@ -328,7 +328,7 @@ char ext[MAXEXT];
                 {
                 if( checkDirectory( fName ) )
                     {
-                    delete[] directory;
+                    delete[] (char *) directory;
                     strcat( fName, "\\" );
                     directory = newStr( fName );
                     if( command != cmFileInit )

@@ -56,7 +56,7 @@ TColorItem::TColorItem( const char *nm, uchar idx, TColorItem *nxt )
 
 TColorItem::~TColorItem()
 {
-    delete[] name;
+    delete[] (char *) name;
 }
 
 TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt )
@@ -68,7 +68,7 @@ TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt )
 
 TColorGroup::~TColorGroup()
 {
-    delete[] name;
+    delete[] (char *) name;
 }
 
 TColorItem& operator + ( TColorItem& i1, TColorItem& i2 )
@@ -339,7 +339,7 @@ TColorDisplay::TColorDisplay( const TRect& bounds, const char *aText ) :
 
 TColorDisplay::~TColorDisplay()
 {
-    delete[] text;
+    delete[] (char *) text;
 }
 
 void TColorDisplay::draw()
