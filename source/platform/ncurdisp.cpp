@@ -8,7 +8,7 @@
 #include <unordered_map>
 using std::unordered_map;
 
-NcursesDisplay::NcursesDisplay()
+NcursesDisplay::NcursesDisplay() : definedPairs(0)
 {
     // Allow printing UTF-8 text.
     setlocale(LC_ALL, "");
