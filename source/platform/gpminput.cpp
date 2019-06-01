@@ -4,9 +4,12 @@
 #include <tvision/tv.h>
 
 #include <internal/gpminput.h>
-#include <gpm.h>
 #include <unordered_map>
 using std::unordered_map;
+
+#ifdef HAVE_GPM
+
+#include <gpm.h>
 
 GpmInput::GpmInput() : mousePos({-1, -1})
 {
@@ -74,3 +77,14 @@ bool GpmInput::getEvent(TEvent &ev)
     return false;
 }
 
+#else
+
+#include <unistd.h>
+
+GpmInput::GpmInput() {}
+GpmInput::~GpmInput() {}
+int GpmInput::getButtonCount() { return 0; }
+void GpmInput::drawPointer() {}
+bool GpmInput::getEvent(TEvent &ev) { while (true) pause(); }
+
+#endif

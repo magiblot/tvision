@@ -15,11 +15,16 @@ file(GLOB_RECURSE HELLOSRC "${CMAKE_CURRENT_SOURCE_DIR}/hello.cpp")
 file(GLOB_RECURSE TVEDITSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvedit/*.cpp")
 file(GLOB_RECURSE TVDEMOSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdemo/*.cpp")
 
-find_library(NCURSES ncursesw)
+find_library(NCURSESW ncursesw)
 find_library(PTHREAD pthread)
-find_library(GPM gpm)
+set(LIBS tvision ${NCURSESW} ${PTHREAD})
 
-set(LIBS tvision ${NCURSES} ${PTHREAD} ${GPM})
+# Optional dependencies
+find_library(GPM gpm)
+if (GPM)
+    list(APPEND LIBS ${GPM})
+    string(APPEND CMAKE_CXX_FLAGS " -DHAVE_GPM")
+endif()
 
 add_library(tvision STATIC ${TVSOURCE})
 add_executable(hello ${HELLOSRC})
