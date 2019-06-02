@@ -41,13 +41,19 @@ public:
     void putChar( ushort indent, ushort c );
     size_t length();
 
+#ifdef __FLAT__
     TDrawBuffer();
     ~TDrawBuffer();
+#endif
 
 protected:
 
+#ifdef __FLAT__
     ushort *data;
     size_t dataLength;
+#else
+    ushort data[maxViewWidth];
+#endif
 
 };
 
@@ -66,7 +72,11 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 
 inline size_t TDrawBuffer::length()
 {
+#ifdef __FLAT__
     return dataLength;
+#else
+    return maxViewWidth;
+#endif
 }
 
 #endif  // Uses_TDrawBuffer

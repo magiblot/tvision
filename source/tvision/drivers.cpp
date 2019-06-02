@@ -316,10 +316,12 @@ I   POP     DS
 #endif
 }
 
+#ifdef __FLAT__
 TDrawBuffer::TDrawBuffer() {
     /* This makes it possible to create TDrawBuffers for big screen widths,
      * but I still don't know if it'll resist screen resizing. It appearently
-     * does, since TDrawBuffer is always used for temporary, local variables. */
+     * does, since TDrawBuffer is always used for temporary, local variables.
+     * This does not work nor is necessary in non-Flat builds. */
     dataLength = TDisplay::getCols();
     data = new ushort[dataLength];
 }
@@ -327,5 +329,6 @@ TDrawBuffer::TDrawBuffer() {
 TDrawBuffer::~TDrawBuffer() {
     delete[] data;
 }
+#endif
 
 #pragma warn .asc

@@ -23,7 +23,9 @@
 
 const int eventQSize = 16;
 const int maxCollectionSize = (int)(( (long) UINT_MAX - 16)/sizeof( void * ));
-
+#ifndef __FLAT__
+const int maxViewWidth = 132;
+#endif
 const int maxFindStrLen    = 80;
 const int maxReplaceStrLen = 80;
 
