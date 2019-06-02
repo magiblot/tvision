@@ -18,9 +18,7 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-
-#include <assert.h>
+#ifdef __FLAT__
 
 void TView::resetCursor()
 {

@@ -16,10 +16,6 @@
 #define Uses_TView
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-
-#include <assert.h>
-
 void TGroup::removeView( TView *p )
 {
     TView *b, *s;
@@ -51,4 +47,3 @@ L7:
     ;
 }
 
-#endif

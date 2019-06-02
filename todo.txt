@@ -82,11 +82,8 @@ TEditor::prevChar
 edits.cpp::countLines
 edits.cpp::scan
 edits.cpp::iScan
-TFrame::frameLine
-THardwareInfo::freeScreenBuffer
 THardwareInfo::cursorOff
 THardwareInfo::setScreenMode
-THardwareInfo::getTickCount
 tdircoll.cpp::driveValid
 tdircoll.cpp::isDir
 tdircoll.cpp::validFileName
