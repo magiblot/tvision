@@ -4,7 +4,6 @@ project (tvision)
 include_directories(
 include
 include/override
-include/windows
 )
 
 set(CXX_WARNINGS "-Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas")
