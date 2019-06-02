@@ -143,7 +143,7 @@ void TListViewer::draw()
             else if( i == 0 && j == 0 )
                 b.moveStr( curCol+1, emptyText, getColor(1) );
 
-            b.moveChar( curCol+colWidth-1, 179, getColor(5), 1 );
+            b.moveChar( curCol+colWidth-1, '\xB3', getColor(5), 1 );
             }
         writeLine( 0, i, size.x, 1, b );
         }

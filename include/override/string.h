@@ -38,7 +38,7 @@ static char * itoa(int i, char * buffer, int radix) {
 // http://www.cplusplus.com/forum/general/21215/#msg111074
 static char * strupr(char * s) {
   char* p = s;
-    while (*p = toupper(*p))
+    while ((*p = toupper(*p)))
       p++;
   return s;
 }
