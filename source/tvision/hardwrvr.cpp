@@ -190,7 +190,7 @@ ushort THardwareInfo::getScreenMode()
         mode |= TDisplay::smFont8x8;
     return mode;
 #else
-    platf->getScreenMode();
+    return platf->getScreenMode();
 #endif
 }
 
