@@ -328,7 +328,7 @@ public:
 
     TSItem( const char *aValue, TSItem *aNext )
         { value = newStr(aValue); next = aNext; }
-    ~TSItem() { delete (void *)value; }
+    ~TSItem() { delete[] (char *) value; }
 
     const char *value;
     TSItem *next;
