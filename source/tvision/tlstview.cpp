@@ -71,7 +71,7 @@ void TListViewer::changeBounds( const TRect& bounds )
     if( hScrollBar != 0 )
         hScrollBar->setStep( size.x / numCols, hScrollBar->arStep);
     if( vScrollBar != 0 )
-        vScrollBar->setStep( size.y, hScrollBar->arStep);
+        vScrollBar->setStep( size.y, vScrollBar->arStep);
 }
 
 void TListViewer::draw()
