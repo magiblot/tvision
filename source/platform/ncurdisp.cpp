@@ -18,6 +18,7 @@ NcursesDisplay::NcursesDisplay() : definedPairs(0)
     hasColors = getScreenMode() & TDisplay::smCO80;
     if (hasColors)
         start_color();
+    initBuffer();
 }
 
 NcursesDisplay::~NcursesDisplay()
@@ -37,9 +38,8 @@ bool NcursesDisplay::isCaretVisible() { return getCaretSize() > 0; }
 void NcursesDisplay::clearScreen() { wclear(stdscr); }
 int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
-void NcursesDisplay::setCaretPosition(int x, int y) { wmove(stdscr, y, x); }
-void NcursesDisplay::getCaretPosition(int &x, int &y) { getyx(stdscr, y, x); }
-void NcursesDisplay::flushScreen() { wrefresh(stdscr); }
+void NcursesDisplay::lowlevelMoveCursor(int x, int y) { wmove(stdscr, y, x); }
+void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
 
 ushort NcursesDisplay::getScreenMode()
 {
@@ -99,26 +99,14 @@ void NcursesDisplay::setCaretSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::screenWrite( int x, int y, ushort *buf, int len )
+void NcursesDisplay::lowlevelWriteChar(int x, int y, uchar character, ushort attr)
 {
-    // Save the caret position so that we can restore it later.
-    int oldx, oldy;
-    getCaretPosition(oldx, oldy);
-    setCaretPosition(x, y);
-    // It takes two shorts to store a character and its attributes:
-    for (int i = 0; i < 2*len; i += 2)
-    {
-        uchar character = buf[i];
-        ushort attr = buf[i + 1];
-        // Translate and apply text attributes.
-        uint curses_attr = translateAttributes(attr);
-        wattron(stdscr, curses_attr);
-        // Print a single character, which might be multi-byte in UTF-8.
-        wprintw(stdscr, "%s", cp437toUtf8[character]);
-        wattroff(stdscr, curses_attr);
-    }
-    // Move the caret back to where it was.
-    setCaretPosition(oldx, oldy);
+    // Translate and apply text attributes.
+    uint curses_attr = translateAttributes(attr);
+    wattron(stdscr, curses_attr);
+    // Print a single character, which might be multi-byte in UTF-8.
+    mvprintw(y, x, "%s", cp437toUtf8[character]);
+    wattroff(stdscr, curses_attr);
 }
 
 uint NcursesDisplay::translateAttributes(ushort attr)
@@ -160,4 +148,3 @@ uchar NcursesDisplay::swapRedBlue (uchar c)
      * so that ncurses can easily understand it. */
     return (c & ~0x5) | ((c & 0x4) >> 2) | ((c & 0x1) << 2);
 }
-

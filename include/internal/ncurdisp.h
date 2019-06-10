@@ -1,10 +1,10 @@
 #ifndef NCURDISP_H
 #define NCURDISP_H
 
-#include <internal/platform.h>
+#include <internal/buffdisp.h>
 #include <unordered_map>
 
-class NcursesDisplay : public DisplayStrategy {
+class NcursesDisplay : public BufferedDisplay {
 
     bool hasColors;
     std::unordered_map<ushort, int> pairIdentifiers;
@@ -22,14 +22,17 @@ public:
 
     void setCaretSize(int size);
     int getCaretSize();
-    void setCaretPosition(int x, int y);
     bool isCaretVisible();
     void clearScreen();
     int getScreenRows();
     int getScreenCols();
     ushort getScreenMode();
-    void screenWrite(int x, int y, ushort *buf, int len);
-    void flushScreen();
+
+protected:
+
+    void lowlevelWriteChar(int x, int y, uchar character, ushort attr);
+    void lowlevelMoveCursor(int x, int y);
+    void lowlevelFlush();
 
 };
 
