@@ -30,7 +30,7 @@ public:
 
 protected:
 
-    void lowlevelWriteChar(int x, int y, uchar character, ushort attr);
+    void lowlevelWriteChar(uchar character, ushort attr);
     void lowlevelMoveCursor(int x, int y);
     void lowlevelFlush();
 

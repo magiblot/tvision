@@ -40,10 +40,14 @@ void BufferedDisplay::flushScreen()
 {
     if (needsFlush || cursorMoved)
     {
+        struct { int x, y; } last = {-1, -1};
         for (const pair<int, int> &pos : changes)
         {
             int x = pos.second, y = pos.first;
-            lowlevelWriteChar(x, y, charBuffer[y][x], attrBuffer[y][x]);
+            if (y != last.y || x != last.x + 1)
+                lowlevelMoveCursor(x, y);
+            lowlevelWriteChar(charBuffer[y][x], attrBuffer[y][x]);
+            last = {x, y};
         }
         if (lastX != -1)
             lowlevelMoveCursor(lastX, lastY);

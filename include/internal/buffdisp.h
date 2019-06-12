@@ -23,7 +23,7 @@ protected:
     void screenWrite(int x, int y, ushort *buf, int len);
     void flushScreen();
 
-    virtual void lowlevelWriteChar(int x, int y, uchar character, ushort attr) = 0;
+    virtual void lowlevelWriteChar(uchar character, ushort attr) = 0;
     virtual void lowlevelMoveCursor(int x, int y) = 0;
     virtual void lowlevelFlush() = 0;
 
