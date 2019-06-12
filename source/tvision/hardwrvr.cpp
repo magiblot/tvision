@@ -26,8 +26,10 @@
 #include <internal/platform.h>
 #include <internal/ncurdisp.h>
 #include <internal/ncursinp.h>
+#include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
 #include <internal/utf8.h>
+#include <strings.h>
 #include <sys/ioctl.h>
 #include <chrono>
 using std::chrono::duration_cast;
@@ -133,9 +135,15 @@ THardwareInfo::THardwareInfo()
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
     for (int i = 0; i < 256; ++i)
         Utf8toCp437[cp437toUtf8[i]] = i;
+    // Get preferences from environment variables.
+    const char* display_env = std::getenv("TVISION_DISPLAY");
     /* At least with the ncurses implementation, display must be initialized
      * before input. */
-    DisplayStrategy *disp = new NcursesDisplay();
+    DisplayStrategy *disp;
+    if (display_env && strcasecmp(display_env, "ansi") == 0)
+        disp = new AnsiDisplay<NcursesDisplay>();
+    else
+        disp = new NcursesDisplay();
     if (isLinuxConsole())
         platf = new LinuxConsoleStrategy(disp, new NcursesInput(false));
     else
