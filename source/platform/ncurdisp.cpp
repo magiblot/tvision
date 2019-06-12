@@ -19,6 +19,9 @@ NcursesDisplay::NcursesDisplay() : definedPairs(0)
     if (hasColors)
         start_color();
     initBuffer();
+    /* Refresh now so that a possible first getch() doesn't make any relevant
+     * changes to the screen due to its implicit refresh(). */
+    wrefresh(stdscr);
 }
 
 NcursesDisplay::~NcursesDisplay()
