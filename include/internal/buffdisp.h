@@ -5,6 +5,7 @@
 #include <internal/array2d.h>
 #include <utility>
 #include <set>
+#include <chrono>
 
 class BufferedDisplay : public DisplayStrategy {
 
@@ -14,6 +15,10 @@ class BufferedDisplay : public DisplayStrategy {
     int lastX, lastY;
     bool needsFlush;
     bool cursorMoved;
+
+    static const int defaultFPS = 60;
+    std::chrono::microseconds flushDelay;
+    std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 
 protected:
 

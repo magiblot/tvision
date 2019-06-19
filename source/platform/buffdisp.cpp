@@ -1,9 +1,16 @@
 #include <internal/buffdisp.h>
+#include <internal/getenv.h>
+#include <chrono>
 #include <utility>
 using std::pair;
+using std::chrono::microseconds;
+using std::chrono::steady_clock;
 
 void BufferedDisplay::initBuffer()
 {
+    int fps = getEnv<int>("TVISION_MAX_FPS");
+    fps = fps > 0 ? fps : defaultFPS;
+    flushDelay = microseconds((int) 1e6/fps);
     // Initialize variables.
     lastX = lastY = -1;
     needsFlush = true;
@@ -38,8 +45,10 @@ void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
 
 void BufferedDisplay::flushScreen()
 {
-    if (needsFlush || cursorMoved)
+    auto now = steady_clock::now();
+    if ((needsFlush || cursorMoved) && (now - lastFlush) >= flushDelay)
     {
+        lastFlush = now;
         struct { int x, y; } last = {-1, -1};
         for (const pair<int, int> &pos : changes)
         {
