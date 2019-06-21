@@ -5,12 +5,14 @@
 using std::pair;
 using std::chrono::microseconds;
 using std::chrono::steady_clock;
+using std::chrono::time_point;
 
 void BufferedDisplay::initBuffer()
 {
-    int fps = getEnv<int>("TVISION_MAX_FPS");
-    fps = fps > 0 ? fps : defaultFPS;
-    flushDelay = microseconds((int) 1e6/fps);
+    int fps = getEnv<int>("TVISION_MAX_FPS", defaultFPS);
+    limitFPS = (fps > 0);
+    if (limitFPS)
+        flushDelay = microseconds((int) 1e6/fps);
     // Initialize variables.
     lastX = lastY = -1;
     needsFlush = true;
@@ -43,12 +45,23 @@ void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
     }
 }
 
+bool BufferedDisplay::timeToFlush()
+{
+    // Avoid flushing faster than the maximum FPS.
+    bool b = true;
+    if (limitFPS)
+    {
+        auto now = steady_clock::now();
+        if ((b = ((now - lastFlush) >= flushDelay)))
+            lastFlush = now;
+    }
+    return b;
+}
+
 void BufferedDisplay::flushScreen()
 {
-    auto now = steady_clock::now();
-    if ((needsFlush || cursorMoved) && (now - lastFlush) >= flushDelay)
+    if ((needsFlush || cursorMoved) && timeToFlush())
     {
-        lastFlush = now;
         struct { int x, y; } last = {-1, -1};
         for (const pair<int, int> &pos : changes)
         {

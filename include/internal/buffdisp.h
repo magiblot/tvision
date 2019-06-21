@@ -16,9 +16,11 @@ class BufferedDisplay : public DisplayStrategy {
     bool needsFlush;
     bool cursorMoved;
 
+    bool limitFPS;
     static const int defaultFPS = 60;
     std::chrono::microseconds flushDelay;
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
+    bool timeToFlush();
 
 protected:
 
