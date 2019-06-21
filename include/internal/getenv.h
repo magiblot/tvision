@@ -6,20 +6,20 @@
 #include <string>
 
 template<typename T>
-static inline T getEnv(const char* name);
+static inline T getEnv(const char* name, T def = T{});
 
 template<>
-int getEnv<int>(const char* name)
+int getEnv<int>(const char* name, int def)
 {
     const char* body = std::getenv(name);
-    return body ? atoi(body) : 0;
+    return body ? atoi(body) : def;
 }
 
 template<>
-std::string getEnv<std::string>(const char* name)
+std::string getEnv<std::string>(const char* name, std::string def)
 {
     const char* body = std::getenv(name);
-    return body ? body : "";
+    return body ? body : def;
 }
 
 #endif
