@@ -3,18 +3,26 @@
 
 #include <internal/platform.h>
 #include <internal/array2d.h>
-#include <utility>
 #include <set>
 #include <chrono>
 
 class BufferedDisplay : public DisplayStrategy {
 
+    struct CellPos {
+        int y, x;  // row, col
+        bool operator<(const CellPos& other) const { // Required by std::set
+            return y == other.y ? x < other.x : y < other.y;
+        }
+    };
+
     Array2D<uchar> charBuffer;
     Array2D<ushort> attrBuffer;
-    std::set<std::pair<int, int>> changes;
-    int lastX, lastY;
-    bool needsFlush;
-    bool cursorMoved;
+
+    bool screenChanged;
+    std::set<CellPos> changedCells;
+
+    bool caretMoved;
+    CellPos caretPosition;
 
     bool limitFPS;
     static const int defaultFPS = 60;
