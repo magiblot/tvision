@@ -271,11 +271,12 @@ $(GENOBJ): $(GENSRC)
 
 !endif
 
+OBJPFX=+$(OBJDIR)\\
+
 $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
      @if exist $(TVLIBDIR)\$(LIBNAME) del $(TVLIBDIR)\$(LIBNAME)
-     @cd $(OBJDIR)
      $(LIB) $(LIBFLAGS) $(TVLIBDIR)\$(LIBNAME) @&&|
-     $(OBJS:pfx=-+)
+     $(OBJS:pfx=$(OBJPFX))
 |
 !if $d(OVERLAY)
      @if exist $(TVLIBDIR)\tvno.lib del $(TVLIBDIR)\tvno.lib
@@ -287,7 +288,6 @@ $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
      +syserr +tscreen +drivers +drivers2 +swapst +tevent +sysint +hardware
 |
 !endif
-     @cd $(SRCDIR)
 
 clean:
      del $(OBJDIR)\*.obj
