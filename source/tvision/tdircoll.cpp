@@ -100,7 +100,11 @@ Boolean pathValid( const char *path )
 Boolean validFileName( const char *fileName )
 {
 #ifdef __BORLANDC__
+#ifndef __FLAT__
     static const char * const illegalChars = ";,=+<>|\"[] \\";
+#else
+    static const char * const illegalChars = "<>|\"\\";
+#endif
 
     char path[MAXPATH];
     char dir[MAXDIR];
