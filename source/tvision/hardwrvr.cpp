@@ -51,6 +51,8 @@ DWORD THardwareInfo::pendingEvent;
 INPUT_RECORD THardwareInfo::irBuffer;
 CONSOLE_CURSOR_INFO THardwareInfo::crInfo;
 CONSOLE_SCREEN_BUFFER_INFO THardwareInfo::sbInfo;
+// Timeout after a 'tick', I guess. See getTickCount().
+int THardwareInfo::eventTimeoutMs = 55;
 
 static ushort ShiftCvt[89] = {
          0,      0,      0,      0,      0,      0,      0,      0,
@@ -336,8 +338,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     {
         // Unblock listener threads.
         platf->resumeListening();
-        // Timeout after a 'tick', I guess. See getTickCount().
-        if (platf->waitForEvent(55, event))
+        if (platf->waitForEvent(eventTimeoutMs, event))
         {
             if (event.what & evKeyboard)
             {
@@ -361,7 +362,8 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
 #else
     if( !pendingEvent )
         {
-        GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
+        // Don't do busy polling. Wait for a timeout instead.
+        pendingEvent = (WAIT_OBJECT_0 == WaitForSingleObject(consoleHandle[cnInput], eventTimeoutMs));
         if( pendingEvent )
             ReadConsoleInput( consoleHandle[cnInput], &irBuffer, 1, &pendingEvent );
         }

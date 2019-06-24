@@ -113,6 +113,7 @@ private:
     static INPUT_RECORD irBuffer;
     static CONSOLE_CURSOR_INFO crInfo;
     static CONSOLE_SCREEN_BUFFER_INFO sbInfo;
+    static int eventTimeoutMs;
 
 #else
 
