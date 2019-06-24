@@ -1,9 +1,6 @@
 .autodepend
 .swap
 
-!if !$d(BCROOT)
-TVFLAGS = $(TVFLAGS) -DBCROOT=$(BCROOT)
-!endif
 !if !$d(TVDIR)  # From the point of view of the underlying targets.
 TVDIR = ..\..
 TVFLAGS = $(TVFLAGS) -DTVDIR=$(TVDIR)
@@ -37,7 +34,11 @@ TVFLAGS = $(TVFLAGS) -DNOTASM
 PRJDIR = $(TVDIR)\PROJECT
 !endif
 !if !$d(EXCLUDE)  # To avoid conflicts in files with both a CPP and ASM version.
+!if $d(DOS32)
 EXCLUDE=EDITS.CPP FRAMELIN.ASM TVCURSOR.ASM TGRMV.ASM
+!else
+EXCLUDE=EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP
+!endif
 !endif
 
 all: source\tvision examples\tvdemo examples\tvedit
