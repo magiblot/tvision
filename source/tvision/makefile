@@ -274,6 +274,7 @@ $(GENOBJ): $(GENSRC)
 OBJPFX=+$(OBJDIR)\\
 
 $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
+     @if not exist $(TVLIBDIR) md $(TVLIBDIR)
      @if exist $(TVLIBDIR)\$(LIBNAME) del $(TVLIBDIR)\$(LIBNAME)
      $(LIB) $(LIBFLAGS) $(TVLIBDIR)\$(LIBNAME) @&&|
      $(OBJS:pfx=$(OBJPFX))
