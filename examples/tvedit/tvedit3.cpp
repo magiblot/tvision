@@ -106,7 +106,7 @@ ushort doEditDialog( int dialog, ... )
 {
     va_list arg;
 
-    char buf[80];
+    char buf[100];
     ostrstream os( buf, sizeof( buf ) );
     switch( dialog )
         {
