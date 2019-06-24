@@ -256,7 +256,7 @@ void squeeze( char *path )
         else
             {
             src++;
-            if( *src == '.' )
+            if( *src == '.' && *(src + 1) == '\\') // if it's a '..' followed by '\'
                 {               // have a '..'
                 src += 2;       // skip the following '\'
                 dest--;         // back up to the previous '\'
@@ -264,8 +264,10 @@ void squeeze( char *path )
                     ;
                 dest++;         // move to the next position
                 }
-            else
+            else if (*src == '\\') // if it's a '.' followed by '\'
                 src++;          // skip the following '\'
+            else
+                *dest++ = *(src - 1); // copy the '.' we just skipped
             }
         }
     *dest = EOS;                // zero terminator
