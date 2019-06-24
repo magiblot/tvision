@@ -20,3 +20,17 @@ Steps to build:
 4.  Before building the Turbo Vision library, you should create a 'lib'
     folder in the root directory so that the IDE can place the .lib files
     there.
+
+Update 2019/06/23:
+
+A makefile has been added to build the Turbo Vision library and sample applications
+from the command line, using Borland's MAKE utility. The requirements are the same:
+Borland C++, Turbo Assembler, DOS PowerPack. Doing it this way makes it possible to
+build 32-bit binaries under 64-bit Windows 10 (although the installers for these
+tools are 16-bit, so you'll have to run them somewhere else).
+
+If you get the error "Fatal: Command arguments too long", upgrade MAKE to the one
+bundled with Borland C++ 5.x.
+
+The makefile requires being built from the 'project' folder. It is not currently
+possible to change this behaviour.
