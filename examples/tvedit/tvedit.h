@@ -31,7 +31,7 @@ class TEditorApp : public TApplication
 
 public:
 
-    TEditorApp();
+    TEditorApp( int argc, char **argv );
 
     virtual void handleEvent( TEvent& event );
     static TMenuBar *initMenuBar( TRect );

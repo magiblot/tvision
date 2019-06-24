@@ -41,7 +41,7 @@ TEditWindow *TEditorApp::openEditor( const char *fileName, Boolean visible )
     return (TEditWindow *)p;
 }
 
-TEditorApp::TEditorApp() :
+TEditorApp::TEditorApp( int argc, char **argv ) :
     TProgInit( TEditorApp::initStatusLine,
                TEditorApp::initMenuBar,
                TEditorApp::initDeskTop
@@ -69,6 +69,21 @@ TEditorApp::TEditorApp() :
         TEditor::clipboard = clipWindow->editor;
         TEditor::clipboard->canUndo = False;
         }
+#ifdef __BORLANDC__
+    char fileName[MAXPATH];
+    while (--argc > 0)                              // Open files specified
+        {                                           // on command line.
+        strcpy( fileName, "");
+        int len = strlen( *++argv );
+        if (len > 1 && (*argv)[1] != ':' && (*argv)[0] != '\\')
+        /* If it's a relative path, append the current directory in front.
+         * Otherwise, Turbo Vision will assume the root directory. */
+            getCurDir( fileName );
+        strcat( fileName, *argv );
+        openEditor(fileName, True);
+        }
+    cascade();
+#endif
 }
 
 void TEditorApp::fileOpen()
@@ -95,7 +110,7 @@ void TEditorApp::dosShell()
 {
     suspend();
     system("cls");
-    cout << "Type EXIT to return...";
+    cout << "Type EXIT to return..." << endl;
     system( getenv( "COMSPEC"));
     resume();
     redraw();
@@ -158,9 +173,9 @@ void TEditorApp::handleEvent( TEvent& event )
             }
     clearEvent( event );
 }
-int main()
+int main( int argc, char **argv )
 {
-    TEditorApp editorApp;
+    TEditorApp editorApp( argc, argv );
     editorApp.run();
     return 0;
 }
