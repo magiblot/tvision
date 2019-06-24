@@ -178,7 +178,11 @@ static void trim( char *dest, const char *src )
 {
     while( *src != EOS && isspace( * (const unsigned char *) src ) )
         src++;
-    while( *src != EOS && !isspace( * (const unsigned char *) src ) )
+    while( *src != EOS
+#ifndef __FLAT__
+           && !isspace( * (const unsigned char *) src )
+#endif
+         )
         *dest++ = *src++;
     *dest = EOS;
 }
