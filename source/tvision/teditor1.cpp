@@ -43,7 +43,7 @@ inline int isWordChar( int ch )
 const ushort firstKeys[] =
 {
     37,
-    kbCtrlA, cmWordLeft,
+    kbCtrlA, cmSelectAll,
     kbCtrlC, cmPageDown,
     kbCtrlD, cmCharRight,
     kbCtrlE, cmLineUp,
@@ -72,8 +72,8 @@ const ushort firstKeys[] =
     kbDown, cmLineDown,
     kbPgUp, cmPageUp,
     kbPgDn, cmPageDown,
-    kbCtrlPgUp, cmTextStart,
-    kbCtrlPgDn, cmTextEnd,
+    kbCtrlHome, cmTextStart,
+    kbCtrlEnd, cmTextEnd,
     kbIns, cmInsMode,
     kbDel, cmDelChar,
     kbShiftIns, cmPaste,
@@ -606,6 +606,11 @@ void TEditor::handleEvent( TEvent& event )
                             break;
                         case cmIndentMode:
                             autoIndent = Boolean(!autoIndent);
+                            break;
+                        case cmSelectAll:
+                            setCurPtr(0, selectMode);
+                            selectMode |= smExtend;
+                            setCurPtr(bufLen, selectMode);
                             break;
                         default:
                             unlock();
