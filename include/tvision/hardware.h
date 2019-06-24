@@ -83,6 +83,10 @@ public:
     static void screenWrite( ushort x, ushort y, ushort *buf, DWORD len );
     static ushort *allocateScreenBuffer();
     static void freeScreenBuffer( ushort *buffer );
+#ifdef __BORLANDC__
+    static void placeConsoleWindow();
+    static void resetConsoleWindow();
+#endif
 
 // Mouse functions.
 

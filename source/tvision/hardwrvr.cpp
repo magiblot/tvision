@@ -153,6 +153,25 @@ THardwareInfo::THardwareInfo()
 #endif
 }
 
+#if defined(__FLAT__) && defined(__BORLANDC__)
+void THardwareInfo::placeConsoleWindow()
+{
+    // Back up the current screen info.
+    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+    /* Move the console window to the beginning of the buffer, where Turbo Vision
+     * assumes screen writings, caret movements and mouse events take place. */
+    SMALL_RECT rect = { 0, 0, getScreenCols() - 1, getScreenRows() - 1 };
+    SetConsoleWindowInfo( consoleHandle[cnOutput], True, &rect );
+}
+
+void THardwareInfo::resetConsoleWindow()
+{
+    /* Restore the last backed-up console window. sbInfo may be updated from
+     * THardwareInfo's constructor, placeConsoleWindow() or setScreenMode(). */
+    SetConsoleWindowInfo( consoleHandle[cnOutput], True, &sbInfo.srWindow );
+}
+#endif
+
 #ifndef __BORLANDC__
 /* We don't include these in hardware.h as done originally to prevent it to
  * depend on platform.h. Otherwise, any change in platform.h would affect
