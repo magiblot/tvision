@@ -38,17 +38,17 @@ TMenuBar *TEditorApp::initMenuBar( TRect r )
 {
 
       TSubMenu& sub1 = *new TSubMenu( "~F~ile", kbAltF ) +
-        *new TMenuItem( "~O~pen", cmOpen, kbF3 ) +
-        *new TMenuItem( "~N~ew", cmNew, kbNoKey ) +
+        *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
+        *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
         *new TMenuItem( "~S~ave", cmSave, kbF2, hcNoContext, "F2" ) +
         *new TMenuItem( "S~a~ve as...", cmSaveAs, kbNoKey ) +
              newLine() +
         *new TMenuItem( "~C~hange dir...", cmChangeDrct, kbNoKey ) +
         *new TMenuItem( "~D~OS shell", cmDosShell, kbNoKey ) +
-        *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" );
+        *new TMenuItem( "E~x~it", cmQuit, kbCtrlQ, hcNoContext, "Ctrl-Q" );
 
       TSubMenu& sub2 = *new TSubMenu( "~E~dit", kbAltE ) +
-        *new TMenuItem( "~U~ndo", cmUndo, kbNoKey ) +
+        *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" ) +
              newLine() +
         *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
         *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
@@ -69,7 +69,7 @@ TMenuBar *TEditorApp::initMenuBar( TRect r )
         *new TMenuItem( "C~a~scade", cmCascade, kbNoKey ) +
         *new TMenuItem( "~N~ext", cmNext, kbF6, hcNoContext, "F6" ) +
         *new TMenuItem( "~P~revious", cmPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
-        *new TMenuItem( "~C~lose", cmClose, kbAltF3, hcNoContext, "Alt-F3" );
+        *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl+W" );
 
     r.b.y = r.a.y+1;
     return new TMenuBar( r, sub1 + sub2 + sub3 + sub4 );
@@ -80,9 +80,10 @@ TStatusLine *TEditorApp::initStatusLine( TRect r )
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
-            *new TStatusItem("~F2~ Save", kbF2, cmSave ) +
-            *new TStatusItem( "~F3~ Open", kbF3, cmOpen ) +
-            *new TStatusItem( "~Alt-F3~ Close", kbAltF3, cmClose ) +
+            *new TStatusItem( 0, kbAltX, cmQuit) +
+            *new TStatusItem( "~F2~ Save", kbF2, cmSave ) +
+            *new TStatusItem( "~Ctrl-O~ Open", kbF3, cmOpen ) +
+            *new TStatusItem( "~Ctrl-W~ Close", kbAltF3, cmClose ) +
             *new TStatusItem( "~F5~ Zoom", kbF5, cmZoom ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmNext ) +
             *new TStatusItem( "~F10~ Menu", kbF10, cmMenu ) +
