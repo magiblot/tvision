@@ -139,7 +139,6 @@ int TScrollBar::getPartCode()
 
 void TScrollBar::handleEvent( TEvent& event )
 {
-    Boolean Tracking;
     int i, clickPart;
 
     TView::handleEvent(event);
@@ -148,46 +147,36 @@ void TScrollBar::handleEvent( TEvent& event )
         case evMouseDown:
             message(owner, evBroadcast, cmScrollBarClicked,this); // Clicked()
             mouse = makeLocal( event.mouse.where );
-            extent = getExtent();
-            extent.grow(1, 1);
             p = getPos();
-            s = getSize() - 1;
+            s = getSize() - 3; // free scroll space (discarding arrows and thumb).
             clickPart= getPartCode();
-            if( clickPart != sbIndicator )
+            switch( clickPart )
                 {
-                do  {
-                    mouse = makeLocal( event.mouse.where );
-                    if( getPartCode() == clickPart )
-                        setValue(value + scrollStep(clickPart) );
-                    } while( mouseEvent(event, evMouseAuto) );
-                }
-            else
-                {
-                do  {
-                    mouse = makeLocal( event.mouse.where );
-                    Tracking = extent.contains(mouse);
-                    if( Tracking )
-                        {
+                case sbLeftArrow:   // If an arrow was pressed,
+                case sbRightArrow:  // do the appropiate action.
+                case sbUpArrow:
+                case sbDownArrow:
+                    do  {
+                        mouse = makeLocal( event.mouse.where );
+                        if( getPartCode() == clickPart )
+                            setValue(value + scrollStep(clickPart) );
+                        } while( mouseEvent(event, evMouseAuto) );
+                    break;
+                default:            // Otherwise, move the thumb along the mouse cursor.
+                    do  {
+                        mouse = makeLocal( event.mouse.where );
                         if( size.x == 1 )
                             i = mouse.y;
                         else
                             i = mouse.x;
-                        i = max( i, 1 );
-                        i = min( i, s-1 );
-                        }
-                    else
-                        i = getPos();
-                    if(i != p )
-                        {
-                        drawPos(i);
+                        i = max( i, 1 ); // Keep the thumb between the two arrows.
+                        i = min( i, s+1 );
                         p = i;
-                        }
-                    } while( mouseEvent(event,evMouseMove) );
-                if( Tracking && s > 2 )
-                    {
-                    s -= 2;
-                    setValue( int(((long(p - 1) * (maxVal - minVal) + (s >> 1)) / s) + minVal));
-                    }
+                        if( s > 0 ) // Update the scroll value if there's free scroll space.
+                            setValue( int(((long(p - 1) * (maxVal - minVal) + (s >> 1)) / s) + minVal) );
+                        drawPos(p);
+                        } while( mouseEvent(event, evMouseMove) );
+                    break;
                 }
             clearEvent(event);
             break;
