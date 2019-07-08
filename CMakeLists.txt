@@ -6,7 +6,7 @@ include
 include/override
 )
 
-set(CXX_WARNINGS "-Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas")
+set(CXX_WARNINGS "-Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder")
 set(CXX_DEFINITIONS "-D__FLAT__ -D__cdecl= -D__stdcall= -Dregister=")
 set(CMAKE_CXX_FLAGS "-O0 -g --std=c++17 -fpermissive ${CXX_WARNINGS} ${CXX_DEFINITIONS}")
 
