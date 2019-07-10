@@ -8,7 +8,7 @@
 
 #define BREAK \
 { \
-    printf("\rBreakpoint hit at %s, press enter to continue.\n", __func__); \
+    printf("\rBreakpoint hit at %s:%d::%s, press enter to continue.\n", __FILE__, __LINE__, __func__); \
     char _[80]; \
     /* Take read() from the global namespace to prevent it to be confused with
      * some member function wherever this is included in. */ \
