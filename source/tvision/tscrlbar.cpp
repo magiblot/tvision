@@ -147,8 +147,10 @@ void TScrollBar::handleEvent( TEvent& event )
         case evMouseDown:
             message(owner, evBroadcast, cmScrollBarClicked,this); // Clicked()
             mouse = makeLocal( event.mouse.where );
+            extent = getExtent();
+            extent.grow(1, 1);
             p = getPos();
-            s = getSize() - 3; // free scroll space (discarding arrows and thumb).
+            s = getSize() - 1;
             clickPart= getPartCode();
             switch( clickPart )
                 {
@@ -170,10 +172,10 @@ void TScrollBar::handleEvent( TEvent& event )
                         else
                             i = mouse.x;
                         i = max( i, 1 ); // Keep the thumb between the two arrows.
-                        i = min( i, s+1 );
+                        i = min( i, s-1 );
                         p = i;
-                        if( s > 0 ) // Update the scroll value if there's free scroll space.
-                            setValue( int(((long(p - 1) * (maxVal - minVal) + (s >> 1)) / s) + minVal) );
+                        if( s > 2 ) // Update the scroll value if there's free scroll space.
+                            setValue( int(((long(p - 1) * (maxVal - minVal) + ((s - 2) >> 1)) / (s - 2)) + minVal) );
                         drawPos(p);
                         } while( mouseEvent(event, evMouseMove) );
                     break;
