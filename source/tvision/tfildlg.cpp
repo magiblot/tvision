@@ -47,6 +47,10 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#if !defined( __STRSTREAM_H )
+#include <strstrea.h>
+#endif
+
 #ifndef __BORLANC__
 #include <assert.h>
 #endif
@@ -287,7 +291,10 @@ Boolean TFileDialog::checkDirectory( const char *str )
         return True;
     else
         {
-        messageBox( invalidDriveText, mfError | mfOKButton );
+        char buf[100];
+        ostrstream os( buf, sizeof( buf ) );
+        os << invalidDriveText << ": '" << str << "'" << ends;
+        messageBox( buf, mfError | mfOKButton );
         fileName->select();
         return False;
         }
@@ -344,7 +351,10 @@ char ext[MAXEXT];
                 return True;
             else
                 {
-                messageBox( invalidFileText, mfError | mfOKButton );
+                char buf[100];
+                ostrstream os( buf, sizeof( buf ) );
+                os << invalidFileText << ": '" << fName << "'" << ends;
+                messageBox( buf, mfError | mfOKButton );
                 return False;
                 }
             }

@@ -28,6 +28,7 @@ __link(RScrollBar)
 #include <stdlib.h>
 #include <ctype.h>
 
+#include <strstrea.h>
 #include <fstream.h>
 
 #include "tvcmds.h"
@@ -98,7 +99,10 @@ void TFileViewer::readFile( const char *fName )
     ifstream fileToView( fName );
     if( !fileToView )
         {
-        messageBox( "Invalid drive or directory", mfError | mfOKButton );
+        char buf[100];
+        ostrstream os( buf, sizeof( buf ) );
+        os << "Failed to open file '" << fName << "'." << ends;
+        messageBox( buf, mfError | mfOKButton );
         isValid = False;
         }
     else

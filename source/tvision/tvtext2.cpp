@@ -147,7 +147,7 @@ const char * _NEAR TFileDialog::clearText = "~C~lear";
 const char * _NEAR TFileDialog::cancelText = "Cancel";
 const char * _NEAR TFileDialog::helpText = "~H~elp";
 const char * _NEAR TFileDialog::invalidDriveText = "Invalid drive or directory";
-const char * _NEAR TFileDialog::invalidFileText = "Invalid file name.";
+const char * _NEAR TFileDialog::invalidFileText = "Invalid file name";
 
 const char * _NEAR TFileInfoPane::pmText = "p";
 const char * _NEAR TFileInfoPane::amText = "a";
