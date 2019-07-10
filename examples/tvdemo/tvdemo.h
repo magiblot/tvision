@@ -42,7 +42,7 @@ private:
     void calendar();                  // Calendar
     void asciiTable();                // Ascii table
     void calculator();                // Calculator
-    void openFile( char *fileSpec );  // File Viewer
+    void openFile( const char *fileSpec );  // File Viewer
     void changeDir();                 // Change directory
     void shell();                     // DOS shell
     void tile();                      // Tile windows

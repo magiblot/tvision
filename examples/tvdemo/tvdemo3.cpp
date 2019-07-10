@@ -62,7 +62,7 @@ void TVDemo::mouse()
 // File Viewer function
 //
 
-void TVDemo::openFile( char *fileSpec )
+void TVDemo::openFile( const char *fileSpec )
 {
     TFileDialog *d= (TFileDialog *)validView(
     new TFileDialog(fileSpec, "Open a File", "~N~ame", fdOpenButton, 100 ));

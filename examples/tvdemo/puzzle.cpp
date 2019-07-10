@@ -285,7 +285,7 @@ void TPuzzleView::scramble()
 }
 
 
-static char *solution = "ABCDEFGHIJKLMNO ";
+static const char *solution = "ABCDEFGHIJKLMNO ";
 
 void TPuzzleView::winCheck()
 {

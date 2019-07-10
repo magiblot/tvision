@@ -16,7 +16,7 @@ class TClickTester : public TStaticText
 
 public:
 
-    TClickTester(TRect& r, char *aText);
+    TClickTester(TRect& r, const char *aText);
     virtual TPalette& getPalette() const;
     virtual void handleEvent(TEvent& event);
     virtual void draw();
