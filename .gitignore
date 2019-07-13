@@ -12,6 +12,7 @@
 *.kate-swp
 *.CFG
 *.INC
+.*
 
 objdos
 objtvdos
