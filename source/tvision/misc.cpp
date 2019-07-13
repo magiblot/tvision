@@ -17,6 +17,8 @@
 #define Uses_TObject
 #define Uses_TVMemMgr
 #include <tvision/tv.h>
+#include <stddef.h>
+#include <string.h>
 
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr)
 {
@@ -39,3 +41,10 @@ Boolean lowMemory()
     return Boolean(TVMemMgr::safetyPoolExhausted());
 }
 
+char *strnzcpy( char *dest, const char *src, size_t n )
+{
+    // Same as strncpy, but always adds a terminator.
+    strncpy( dest, src, n-1 );
+    dest[n-1] = '\0';
+    return dest;
+}

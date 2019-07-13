@@ -345,8 +345,7 @@ void fexpand( char *rpath )
     strupr( path );
     strcpy( rpath, path );
 #else
-    strncpy(rpath, fexpand(fs::path(rpath)).c_str(), MAXPATH);
-    rpath[MAXPATH - 1] = '\0';
+    strnzcpy(rpath, fexpand(fs::path(rpath)).c_str(), MAXPATH);
 #endif
 }
 

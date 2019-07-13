@@ -77,10 +77,10 @@ TFileDialog::TFileDialog( const char *aWildCard,
     TWindowInit( &TFileDialog::initFrame )
 {
     options |= ofCentered;
-    strcpy( wildCard, aWildCard );
+    strnzcpy( wildCard, aWildCard, sizeof( wildCard ) );
 
-    fileName = new TFileInputLine( TRect( 3, 3, 31, 4 ), 79 );
-    strcpy( fileName->data, wildCard );
+    fileName = new TFileInputLine( TRect( 3, 3, 31, 4 ), MAXPATH );
+    strnzcpy( fileName->data, wildCard, MAXPATH );
     insert( fileName );
 
     insert( new TLabel( TRect( 2, 2, 3+cstrlen(inputName), 3 ),
@@ -252,8 +252,7 @@ char TExt[MAXEXT];
 
 void TFileDialog::getFileName( char *s )
 {
-    strncpy( s, getFileName(), MAXPATH );
-    s[MAXPATH - 1] = '\0';
+    strnzcpy( s, getFileName(), MAXPATH );
 }
 
 void TFileDialog::handleEvent(TEvent& event)

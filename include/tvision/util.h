@@ -16,6 +16,8 @@
 #if !defined( __UTIL_H )
 #define __UTIL_H
 
+#include <stddef.h>
+
 inline int min( int a, int b )
 {
     return (a>b) ? b : a;
@@ -59,5 +61,6 @@ void getCurDir( char *dir );
 
 Boolean isWild( const char *f );
 
+char *strnzcpy( char *dest, const char *src, size_t n ); // misc.cpp
 
 #endif  // __UTIL_H
