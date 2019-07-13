@@ -108,13 +108,22 @@ void TFileViewer::readFile( const char *fName )
     else
         {
         char line[maxLineLength+1];
+        char c;
         while( !lowMemory() &&
                !fileToView.eof() && 
-               fileToView.get( line, sizeof line )
+               fileToView.get( c )
              )
             {
-            char c;
-            fileToView.get(c);      // grab trailing newline
+            int i = 0;
+            while ( !fileToView.eof() && c != '\n' && c != '\r' ) // read a whole line
+                {
+                if ( i < maxLineLength )
+                    line[i++] = c;
+                fileToView.get( c );
+                }
+            line[i] = '\0';
+            if ( c == '\r' && fileToView.peek() == '\n')
+                fileToView.get( c ); // grab trailing newline on CRLF
             limit.x = max( limit.x, strlen( line ) );
             fileLines->insert( newStr( line ) );
             }
