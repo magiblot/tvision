@@ -50,6 +50,12 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#ifndef __BORLANDC__
+#include <internal/filesys.h>
+#include <system_error>
+static std::error_code ec = {};
+#endif
+
 #if defined( __FLAT__ ) && defined( __BORLANDC__)
 extern "C" char _FAR * _CType _FARFUNC strupr(char _FAR *__s);
 #endif
@@ -312,9 +318,17 @@ void fexpand( char *rpath )
     strupr( path );
     strcpy( rpath, path );
 #else
-    BREAK;
+    strncpy(rpath, fexpand(fs::path(rpath)).c_str(), MAXPATH);
+    rpath[MAXPATH - 1] = '\0';
 #endif
 }
+
+#ifndef __BORLANDC__
+fs::path fexpand(const fs::path &p)
+{
+    return fs::absolute(p.lexically_normal());
+}
+#endif
 
 #if !defined(NO_STREAMABLE)
 

@@ -94,7 +94,6 @@ TFileDialog::getFileName
 TFileDialog::valid
 TFileEditor::saveFile
 TFileList::readDirectory
-tfillist.cpp::fexpand
 TScreen::fixCrtMode
 TSystemError::swapStatusLine
 TTerminal::prevLines

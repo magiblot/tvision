@@ -31,7 +31,10 @@
 #endif  // __DOS_H
 
 #ifndef __BORLANDC__
+#include <internal/filesys.h>
+#include <system_error>
 #include <assert.h>
+static std::error_code ec = {};
 #endif
 
 #pragma warn -asc
@@ -140,6 +143,13 @@ void getCurDir( char *dir )
     BREAK;
 #endif
 }
+
+#ifndef __BORLANDC__
+fs::path getCurDir()
+{   // Append a separator at the end, as the original does.
+    return fs::current_path(ec) / "";
+}
+#endif
 
 Boolean isWild( const char *f )
 {
