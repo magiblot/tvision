@@ -269,9 +269,12 @@ void TFileList::readDirectory( const char *aWildCard )
     for ( const fs::directory_entry &d : fs::directory_iterator(dir, ec) )
         {
         const char* fName = d.path().filename().c_str();
-        DirSearchRec *p = new DirSearchRec;
-        p->readDirEntry( d );
-        fileList->insert( p );
+        if ( d.is_directory(ec) || match(wild.c_str(), fName) )
+            {
+            DirSearchRec *p = new DirSearchRec;
+            p->readDirEntry( d );
+            fileList->insert( p );
+            }
         }
 #endif
     newList(fileList);
@@ -283,6 +286,34 @@ void TFileList::readDirectory( const char *aWildCard )
         message( owner, evBroadcast, cmFileFocused, &noFile );
         }
 }
+
+#ifndef __BORLANDC__
+bool match(char const *wildcard, char const *filename)
+{
+    // https://stackoverflow.com/a/3300547
+    for (; *wildcard != '\0'; ++wildcard)
+        switch (*wildcard)
+        {
+            case '?': 
+                if (*filename == '\0')
+                    return false;
+                ++filename;
+                break;
+            case '*':
+                if (wildcard[1] == '\0')
+                    return true;
+                for (size_t i = 0; filename[i] != '\0'; ++i)
+                    if (match(&wildcard[1], &filename[i]))
+                        return true;
+                return false;
+            default:
+                if (*filename != *wildcard)
+                    return false;
+                ++filename;
+        }
+    return *filename == '\0';
+}
+#endif
 
 /*
     fexpand:    reimplementation of pascal's FExpand routine.  Takes a

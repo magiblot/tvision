@@ -7,6 +7,7 @@ namespace fs = std::filesystem;
 
 fs::path getCurDir(); // tdircoll.cpp
 fs::path fexpand(const fs::path&); // tfillist.cpp
+bool match(char const *wildcard, char const *filename); // tfillist.cpp
 
 /* Quick workaround for C++'s inhability to translate std::filesystem::file_time_type
  * into an easily readable format such as std::time_t. */
