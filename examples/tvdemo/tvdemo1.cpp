@@ -96,8 +96,8 @@ TVDemo::TVDemo( int argc, char **argv ) :
         {                                           //  on command line.
         strcpy( fileSpec, *++argv );
         len = strlen( fileSpec );
-            strcat( fileSpec, "*.*" );
         if( fileSpec[len-1] == *dirSeparator )
+            strcat( fileSpec, wildcardAll );
         if( strchr( fileSpec, '*' ) || strchr( fileSpec, '?' ) )
             openFile( fileSpec );
         else

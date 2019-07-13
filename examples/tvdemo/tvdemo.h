@@ -11,6 +11,12 @@
  *
  */
 
+#ifndef __FLAT__
+#define wildcardAll "*.*"
+#else
+#define wildcardAll "*"
+#endif
+
 class TStatusLine;
 class TMenuBar;
 class TEvent;

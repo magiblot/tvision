@@ -257,7 +257,7 @@ void TFileList::readDirectory( const char *aWildCard )
 #else
     fs::path wild(aWildCard);
     fs::path dir(wild.has_parent_path() ? wild.parent_path() : ".");
-    wild = wild.has_filename() ? wild.filename() : "*.*";
+    wild = wild.has_filename() ? wild.filename() : "*";
     
     if ( const auto &parent = fs::directory_entry(fs::path(".."), ec); !ec )
         {
