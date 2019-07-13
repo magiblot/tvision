@@ -72,10 +72,9 @@ void TFileViewer::draw()
             if( p == 0 || strlen(p) < delta.x )
                 s[0] = EOS;
             else
-            {
+                {
                 strncpy( s, p+delta.x, size.x );
-                if( strlen( p + delta.x ) > size.x )
-                    s[size.x] = EOS;
+                s[size.x] = EOS;
                 }
             b.moveStr( 0, s, c );
             }
