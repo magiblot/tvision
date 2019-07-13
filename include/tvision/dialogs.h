@@ -948,6 +948,7 @@ public:
 
     virtual TPalette& getPalette() const;
     virtual void getSelection( char *dest );
+    virtual void handleEvent( TEvent& event );
     static TListViewer *initViewer( TRect, TWindow *, ushort );
 
 protected:

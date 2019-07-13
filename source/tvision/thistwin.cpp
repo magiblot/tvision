@@ -12,8 +12,10 @@
  *
  */
 
+#define Uses_TKeys
 #define Uses_THistoryWindow
 #define Uses_THistoryViewer
+#define Uses_TEvent
 #include <tvision/tv.h>
 
 THistInit::THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) :
@@ -44,6 +46,16 @@ TPalette& THistoryWindow::getPalette() const
 void THistoryWindow::getSelection( char *dest )
 {
     viewer->getText( dest, viewer->focused, 255 );
+}
+
+void THistoryWindow::handleEvent( TEvent& event )
+{
+    TWindow::handleEvent( event );
+    if( event.what == evMouseDown && !mouseInView( event.mouse.where ) )
+        {
+        endModal( cmCancel );
+        clearEvent( event );
+        }
 }
 
 TListViewer *THistoryWindow::initViewer( TRect r, TWindow * win, ushort historyId )
