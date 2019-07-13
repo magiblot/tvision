@@ -211,19 +211,8 @@ void TListViewer::handleEvent( TEvent& event )
         {
         colWidth = size.x / numCols + 1;
         oldItem =  focused;
-        mouse = makeLocal( event.mouse.where );
-        if (mouseInView(event.mouse.where))
-            newItem = mouse.y + (size.y * (mouse.x / colWidth)) + topItem;
-        else
-            newItem = oldItem;
         count = 0;
         do  {
-            if( newItem != oldItem )
-                {
-                focusItemNum( newItem );
-                drawView();
-                }
-            oldItem = newItem;
             mouse = makeLocal( event.mouse.where );
             if( mouseInView( event.mouse.where ) )
                 newItem = mouse.y + (size.y * (mouse.x / colWidth)) + topItem;
@@ -232,7 +221,7 @@ void TListViewer::handleEvent( TEvent& event )
                 if( numCols == 1 )
                     {
                     if( event.what == evMouseAuto )
-                    count++;
+                        count++;
                     if( count == mouseAutosToSkip )
                         {
                         count = 0;
@@ -260,8 +249,14 @@ void TListViewer::handleEvent( TEvent& event )
                         }
                     }
                 }
-                if( event.mouse.eventFlags & meDoubleClick )
-                    break;
+            if( newItem != oldItem )
+                {
+                focusItemNum( newItem );
+                drawView();
+                }
+            oldItem = newItem;
+            if( event.mouse.eventFlags & meDoubleClick )
+                break;
             } while( mouseEvent( event, evMouseMove | evMouseAuto ) );
         focusItemNum( newItem );
         drawView();
