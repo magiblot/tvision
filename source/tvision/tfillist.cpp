@@ -53,6 +53,8 @@
 #ifndef __BORLANDC__
 #include <internal/filesys.h>
 #include <system_error>
+#include <ctime>
+using std::tm;
 static std::error_code ec = {};
 #endif
 
@@ -144,9 +146,24 @@ struct DirSearchRec : public TSearchRec
     {
         attr = d.is_regular_file() ? FA_NORMAL : d.is_directory() ? FA_DIREC : FA_SYSTEM;
         size = max(d.file_size(ec), 0);
-        time = 0x000000uL;
+        readTime(to_time_t(d.last_write_time(ec)));
         strncpy(name, d.path().filename().c_str(), sizeof(DirSearchRec::name));
         name[sizeof(DirSearchRec::name) - 1] = '\0';
+    }
+
+    void readTime(const time_t &t)
+    {
+        struct tm *lt = localtime(&t);
+        // From ffblk spec: http://www.delorie.com/djgpp/doc/libc/libc_326.html
+        // unsigned short ff_ftime;  /* hours:5, minutes:6, (seconds/2):5 */
+        // unsigned short ff_fdate;  /* (year-1980):7, month:4, day:5 */
+        time = (((( // Concatenation of ff_fdate and ff_ftime.
+            (lt->tm_year - 80)
+            << 4 | (lt->tm_mon + 1))
+            << 5 | lt->tm_mday)
+            << 5 | lt->tm_hour)
+            << 6 | lt->tm_min)
+            << 5 | (lt->tm_sec/2);
     }
 #endif
 
