@@ -26,6 +26,9 @@
 #include <mem.h>
 #endif  // __MEM_H
 
+#if !defined( __ALLOC_H )
+#include <alloc.h>
+#endif  // __ALLOC_H
 
 TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) :
     count( 0 ),
@@ -48,7 +51,7 @@ TNSCollection::TNSCollection() :
 
 TNSCollection::~TNSCollection()
 {
-    delete[] items;
+    ::free(items);
 }
 
 void TNSCollection::shutDown()
@@ -205,14 +208,12 @@ void TNSCollection::setLimit(ccIndex aLimit)
         {
         void **aItems;
         if (aLimit == 0 )
-            aItems = 0;
-        else
             {
-            aItems = new void *[aLimit];
-            if( count != 0 && aItems != 0 && items != 0 )
-                memcpy( aItems, items, count*sizeof(void *) );
+            aItems = 0;
+            ::free(items);
             }
-        delete[] items;
+        else
+            aItems = (void **) realloc( items, aLimit*sizeof(void *) );
         items = aItems;
         limit = aLimit;
         }
