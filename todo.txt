@@ -90,7 +90,6 @@ tdircoll.cpp::validFileName
 tdircoll.cpp::getCurDir
 TDirListBox::showDrives
 TDirListBox::showDirs
-TFileDialog::getFileName
 TFileDialog::valid
 TFileEditor::saveFile
 TFileList::readDirectory

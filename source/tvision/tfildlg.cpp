@@ -52,6 +52,7 @@
 #endif
 
 #ifndef __BORLANC__
+#include <internal/filesys.h>
 #include <assert.h>
 #endif
 
@@ -72,6 +73,7 @@ TFileDialog::TFileDialog( const char *aWildCard,
                         ) :
     TDialog( TRect( 15, 1, 64, 20 ), aTitle ),
     directory( newStr("") ),
+    fullPath( newStr("") ),
     TWindowInit( &TFileDialog::initFrame )
 {
     options |= ofCentered;
@@ -148,6 +150,8 @@ TFileDialog::TFileDialog( const char *aWildCard,
 TFileDialog::~TFileDialog()
 {
     delete[] (char *) directory;
+    if ( fullPath )
+        delete[] (char *) fullPath;
 }
 
 void TFileDialog::shutDown()
@@ -191,7 +195,7 @@ static void trim( char *dest, const char *src )
     *dest = EOS;
 }
 
-void TFileDialog::getFileName( char *s )
+const char* TFileDialog::getFileName()
 {
 #ifdef __BORLANDC__
 char buf[2*MAXPATH];
@@ -228,10 +232,28 @@ char TExt[MAXEXT];
                 }
             }
         }
-    strcpy( s, buf );
+    if ( fullPath )
+        delete[] fullPath;
+    fullPath = newStr( buf );
 #else
-    BREAK;
+    fs::path file(fileName->data);
+    if (directory && file.is_relative())
+        {
+        fs::path dir(directory);
+        file = dir/file;
+        }
+    file = fexpand(file);
+    if ( fullPath )
+        delete[] fullPath;
+    fullPath = newStr( file.c_str() );
 #endif
+    return fullPath;
+}
+
+void TFileDialog::getFileName( char *s )
+{
+    strncpy( s, getFileName(), MAXPATH );
+    s[MAXPATH - 1] = '\0';
 }
 
 void TFileDialog::handleEvent(TEvent& event)
