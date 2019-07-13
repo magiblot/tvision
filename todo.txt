@@ -92,7 +92,6 @@ TDirListBox::showDrives
 TDirListBox::showDirs
 TFileDialog::valid
 TFileEditor::saveFile
-TFileList::readDirectory
 TScreen::fixCrtMode
 TSystemError::swapStatusLine
 TTerminal::prevLines

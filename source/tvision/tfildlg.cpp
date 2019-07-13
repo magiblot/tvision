@@ -284,8 +284,13 @@ void TFileDialog::handleEvent(TEvent& event)
 
 void TFileDialog::readDirectory()
 {
+#ifdef __BORLANDC__
     char curDir[MAXPATH];
     getCurDir( curDir );
+#else
+    fs::path p = getCurDir();
+    const char* curDir = p.c_str();
+#endif
     if( directory )
         delete[] (char *) directory;
     directory = newStr( curDir );

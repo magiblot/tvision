@@ -139,6 +139,17 @@ struct DirSearchRec : public TSearchRec
     memcpy(name, f->ff_name, sizeof(name));
     }
 
+#ifndef __BORLANDC__
+    void readDirEntry(const fs::directory_entry &d) 
+    {
+        attr = d.is_regular_file() ? FA_NORMAL : d.is_directory() ? FA_DIREC : FA_SYSTEM;
+        size = max(d.file_size(ec), 0);
+        time = 0x000000uL;
+        strncpy(name, d.path().filename().c_str(), sizeof(DirSearchRec::name));
+        name[sizeof(DirSearchRec::name) - 1] = '\0';
+    }
+#endif
+
     void *operator new( size_t );
 
 };
@@ -156,6 +167,7 @@ void *DirSearchRec::operator new( size_t sz )
 
 void TFileList::readDirectory( const char *aWildCard )
 {
+    TFileCollection *fileList = new TFileCollection( 5, 5 );
 #ifdef __BORLANDC__
     ffblk s;
     char path[MAXPATH];
@@ -168,8 +180,6 @@ void TFileList::readDirectory( const char *aWildCard )
     strcpy( path, aWildCard );
     fexpand( path );
     fnsplit( path, drive, dir, file, ext );
-
-    TFileCollection *fileList = new TFileCollection( 5, 5 );
 
     int res = findfirst( aWildCard, &s, findAttr );
     DirSearchRec *p = (DirSearchRec *)&p;
@@ -227,6 +237,26 @@ void TFileList::readDirectory( const char *aWildCard )
 
     if( p == 0 )
         messageBox( tooManyFiles, mfOKButton | mfWarning );
+#else
+    fs::path wild(aWildCard);
+    fs::path dir(wild.has_parent_path() ? wild.parent_path() : ".");
+    wild = wild.has_filename() ? wild.filename() : "*.*";
+    
+    if ( const auto &parent = fs::directory_entry(fs::path(".."), ec); !ec )
+        {
+        DirSearchRec *p = new DirSearchRec;
+        p->readDirEntry( parent );
+        fileList->insert( p );
+        }
+
+    for ( const fs::directory_entry &d : fs::directory_iterator(dir, ec) )
+        {
+        const char* fName = d.path().filename().c_str();
+        DirSearchRec *p = new DirSearchRec;
+        p->readDirEntry( d );
+        fileList->insert( p );
+        }
+#endif
     newList(fileList);
     if( list()->getCount() > 0 )
         message( owner, evBroadcast, cmFileFocused, list()->at(0) );
@@ -235,9 +265,6 @@ void TFileList::readDirectory( const char *aWildCard )
         static DirSearchRec noFile;
         message( owner, evBroadcast, cmFileFocused, &noFile );
         }
-#else
-    BREAK;
-#endif
 }
 
 /*
