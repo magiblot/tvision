@@ -334,6 +334,7 @@ char drive[MAXDRIVE];
 char dir[MAXDIR];
 char name[MAXFILE];
 char ext[MAXEXT];
+#endif
 
     if( command == 0 )
         return True;
@@ -342,6 +343,7 @@ char ext[MAXEXT];
         {
         if( command != cmCancel && command != cmFileClear )
             {
+#ifdef __BORLANDC__
             getFileName( fName );
 
             if( isWild( fName ) )
@@ -373,6 +375,30 @@ char ext[MAXEXT];
                     fileList->readDirectory( directory, wildCard );
                     }
                 }
+#else
+            const char* fName = getFileName();
+            fs::path path(fName);
+            fs::path wild(wildCard);
+            bool isWild = ::isWild(fName), isDir = ::isDir(fName);
+            if ( isWild )
+                {
+                wild = path.filename();
+                path = path.parent_path();
+                }
+            if ( isWild || isDir )
+                {
+                if (checkDirectory(path.c_str()))
+                    {
+                    delete[] (char *) directory;
+                    path /= "";
+                    directory = newStr( path.c_str() );
+                    strnzcpy( wildCard, wild.c_str(), sizeof(wildCard) );
+                    if( command != cmFileInit )
+                        fileList->select();
+                    fileList->readDirectory( directory, wildCard );
+                    }
+                }
+#endif
             else if( validFileName( fName ) )
                 return True;
             else
@@ -388,9 +414,6 @@ char ext[MAXEXT];
             return True;
         }
     return False;
-#else
-    BREAK;
-#endif
 }
 
 #if !defined(NO_STREAMABLE)
