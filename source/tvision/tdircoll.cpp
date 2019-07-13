@@ -81,12 +81,13 @@ Boolean isDir( const char *str )
     return Boolean( findfirst( str, &ff, FA_DIREC ) == 0 &&
                     (ff.ff_attrib & FA_DIREC) != 0 );
 #else
-    BREAK;
+    return (Boolean) fs::is_directory(str, ec);
 #endif
 }
 
 Boolean pathValid( const char *path )
 {
+#ifdef __BORLANDC__
     char expPath[MAXPATH];
     strcpy( expPath, path );
     fexpand( expPath );
@@ -98,6 +99,9 @@ Boolean pathValid( const char *path )
         expPath[len-1] = EOS;
 
     return isDir( expPath );
+#else
+    return isDir( path );
+#endif
 }
 
 Boolean validFileName( const char *fileName )
@@ -125,7 +129,7 @@ Boolean validFileName( const char *fileName )
         return False;
     return True;
 #else
-    BREAK;
+    return (Boolean) fs::is_regular_file(fileName, ec);
 #endif
 }
 

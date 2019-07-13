@@ -85,8 +85,6 @@ edits.cpp::iScan
 THardwareInfo::cursorOff
 THardwareInfo::setScreenMode
 tdircoll.cpp::driveValid
-tdircoll.cpp::isDir
-tdircoll.cpp::validFileName
 tdircoll.cpp::getCurDir
 TDirListBox::showDrives
 TDirListBox::showDirs
