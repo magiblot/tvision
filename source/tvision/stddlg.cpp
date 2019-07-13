@@ -80,14 +80,12 @@ void TFileInputLine::handleEvent( TEvent& event )
         !(state & sfSelected)
       )
         {
+        strcpy( data, ((TSearchRec *)event.message.infoPtr)->name );
         if( (((TSearchRec *)event.message.infoPtr)->attr & FA_DIREC) != 0 )
             {
-            strcpy( data, ((TSearchRec *)event.message.infoPtr)->name );
-            strcat( data, "\\" );
+            strcat( data, dirSeparator );
             strcat( data, ((TFileDialog *)owner)->wildCard );
             }
-        else
-            strcpy( data, ((TSearchRec *)event.message.infoPtr)->name );
         drawView();
         }
 }

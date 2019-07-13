@@ -117,7 +117,7 @@ void TFileList::getText( char *dest, short item, short maxChars )
     strncpy( dest, f->name, maxChars );
     dest[maxChars] = '\0';
     if( f->attr & FA_DIREC )
-        strcat( dest, "\\" );
+        strcat( dest, dirSeparator );
 }
 
 

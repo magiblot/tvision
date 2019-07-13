@@ -63,4 +63,6 @@ Boolean isWild( const char *f );
 
 char *strnzcpy( char *dest, const char *src, size_t n ); // misc.cpp
 
+extern const char* dirSeparator; // tdircoll.cpp
+
 #endif  // __UTIL_H

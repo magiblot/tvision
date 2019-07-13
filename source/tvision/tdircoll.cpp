@@ -160,6 +160,12 @@ Boolean isWild( const char *f )
     return Boolean( strpbrk( f, "?*" ) != 0 );
 }
 
+#ifdef __BORLANDC__
+const char* dirSeparator = "\\";
+#else // Allow the compiler to decide what the separator is.
+static const fs::path preferredSeparator = fs::path("/").make_preferred();
+const char* dirSeparator = preferredSeparator.c_str();
+#endif
 
 TStreamable *TDirCollection::build()
 {
