@@ -207,8 +207,11 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
       *new TSubMenu( "~O~ptions", 0, hcOptions ) +
         *new TMenuItem( "~M~ouse...", cmMouseCmd, kbNoKey, hcOMouse ) +
         *new TMenuItem( "~C~olors...", cmColorCmd, kbNoKey, hcOColors ) +
-        *new TMenuItem( "~S~ave desktop", cmSaveCmd, kbNoKey, hcOSaveDesktop ) +
-        *new TMenuItem( "~R~etrieve desktop", cmRestoreCmd, kbNoKey, hcORestoreDesktop );
+        (TMenuItem&) (
+            *new TSubMenu( "~D~esktop", 0 ) +
+            *new TMenuItem( "~S~ave desktop", cmSaveCmd, kbNoKey, hcOSaveDesktop ) +
+            *new TMenuItem( "~R~etrieve desktop", cmRestoreCmd, kbNoKey, hcORestoreDesktop )
+        );
 
     r.b.y =  r.a.y + 1;
     return (new TMenuBar( r, sub1 + sub2 + sub3 + sub4 ) );
