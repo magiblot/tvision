@@ -140,7 +140,7 @@ void TMenuView::trackKey( Boolean findNext )
 
 Boolean TMenuView::mouseInOwner( TEvent& e )
 {
-    if( parentMenu == 0 || parentMenu->size.y != 1 )
+    if( parentMenu == 0 )
         return False;
     else
         {
@@ -178,6 +178,7 @@ ushort TMenuView::execute()
     TMenuItem *itemShown = 0;
     TMenuItem *p;
     TMenuView *target;
+    TMenuItem *lastTargetItem = 0;
     TRect  r;
     TEvent e;
     Boolean mouseActive;
@@ -193,8 +194,17 @@ ushort TMenuView::execute()
                 if( mouseInView(e.mouse.where) || mouseInOwner(e) )
                     {
                     trackMouse(e, mouseActive);
+                    // autoSelect makes it possible to open the selected submenu directly
+                    // on a MouseDown event. This should be avoided, however, when said
+                    // submenu was just closed by clicking on its name, or when this is
+                    // not a menu bar.
                     if( size.y == 1 )
-                        autoSelect = True;
+                        autoSelect = (Boolean) (!current || lastTargetItem != current);
+                    // A submenu will close if the MouseDown event takes place on the
+                    // parent menu, except when this submenu has just been opened and
+                    // still doesn't have a highlighted entry.
+                    else if ( itemShown && mouseInOwner(e) )
+                        action = doReturn;
                     }
                 else
                     action =  doReturn;
@@ -204,16 +214,33 @@ ushort TMenuView::execute()
                 if( mouseInOwner(e) )
                     current = menu->deflt;
                 else if( current != 0 && current->name != 0 )
-                    action = doSelect;
+                    {
+                    if ( current != lastTargetItem )
+                        action = doSelect;
+                    else
+                    // MouseUp won't open up a submenu that was just closed by clicking
+                    // on its name.
+                        {
+                        action = doNothing;
+                        // But the next one will.
+                        lastTargetItem = 0;
+                        // And if it's a menu bar, the selected submenu will be unhighlighted.
+                        if (!parentMenu)
+                            current = 0;
+                        }
+                    }
                 else if (mouseActive)
                     action = doReturn;
-        else
-            {
-            current = menu->deflt;
-            if (current == 0)
-                current = menu->items;
-            action = doNothing;
-            }
+                else
+                // When MouseUp happens inside the Box but not on a highlightable entry
+                // (e.g. on a margin, or a separator), either the default or the first
+                // entry will be automatically highlighted. This was added in Turbo Vision 2.0.
+                    {
+                    current = menu->deflt;
+                    if (current == 0)
+                        current = menu->items;
+                    action = doNothing;
+                    }
                 break;
             case  evMouseMove:
                 if( e.mouse.buttons != 0 )
@@ -222,6 +249,11 @@ ushort TMenuView::execute()
                     if( !(mouseInView(e.mouse.where) || mouseInOwner(e)) &&
                         mouseInMenus(e) )
                         action = doReturn;
+                    // A menu bar entry closed by clicking on its name stays highlighted
+                    // until MouseUp. If mouse drag is then performed and a different
+                    // entry is selected, it will open up automatically.
+                    else if ( mouseActive && !parentMenu && current != lastTargetItem )
+                        autoSelect = True;
                     }
                 break;
             case  evKeyDown:
@@ -301,6 +333,12 @@ ushort TMenuView::execute()
                 break;
             }
 
+        // If a submenu was closed by clicking on its name, and the mouse is dragged
+        // to another menu entry, then the submenu will be opened the next time it
+        // is hovered over.
+        if( lastTargetItem != current )
+            lastTargetItem = 0;
+
         if( itemShown != current )
             {
             itemShown =  current;
@@ -323,6 +361,7 @@ ushort TMenuView::execute()
                     target = topMenu()->newSubView(r, current->subMenu,this);
                     result = owner->execView(target);
                     destroy( target );
+                    lastTargetItem = current;
                     }
                 else if( action == doSelect )
                     result = current->command;
