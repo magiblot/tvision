@@ -90,7 +90,7 @@ class TSubMenu : public TMenuItem
 
 public:
 
-    TSubMenu( const char *, ushort, ushort = hcNoContext );
+    TSubMenu( const char *nm, ushort key, ushort helpCtx = hcNoContext );
 
 };
 
