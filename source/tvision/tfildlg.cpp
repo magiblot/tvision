@@ -51,7 +51,7 @@
 #include <strstrea.h>
 #endif
 
-#ifndef __BORLANC__
+#ifndef __BORLANDC__
 #include <internal/filesys.h>
 #include <assert.h>
 #endif
@@ -233,7 +233,7 @@ char TExt[MAXEXT];
             }
         }
     if ( fullPath )
-        delete[] fullPath;
+        delete[] (char *) fullPath;
     fullPath = newStr( buf );
 #else
     fs::path file(fileName->data);
