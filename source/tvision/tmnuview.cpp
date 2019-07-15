@@ -231,10 +231,11 @@ ushort TMenuView::execute()
                     }
                 else if ( !mouseInView(e.mouse.where) )
                     action = doReturn;
-                else
+                else if ( parentMenu )
                 // When MouseUp happens inside the Box but not on a highlightable entry
                 // (e.g. on a margin, or a separator), either the default or the first
                 // entry will be automatically highlighted. This was added in Turbo Vision 2.0.
+                // But this doesn't make sense in a menu bar, which was the original behaviour.
                     {
                     current = menu->deflt;
                     if (current == 0)
