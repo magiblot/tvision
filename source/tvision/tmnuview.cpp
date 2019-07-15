@@ -100,11 +100,11 @@ void TMenuView::trackMouse( TEvent& e, Boolean& mouseActive )
         {
         TRect r = getItemRect( current );
         if( r.contains(mouse) )
-        {
-        mouseActive = True;
+            {
+            mouseActive = True;
             return;
-        }
-        }
+            }
+        }        
 }
 
 void TMenuView::nextItem()
@@ -363,6 +363,7 @@ ushort TMenuView::execute()
                     result = owner->execView(target);
                     destroy( target );
                     lastTargetItem = current;
+                    menu->deflt = current;
                     }
                 else if( action == doSelect )
                     result = current->command;
