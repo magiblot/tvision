@@ -229,7 +229,7 @@ ushort TMenuView::execute()
                             current = 0;
                         }
                     }
-                else if (mouseActive)
+                else if ( !mouseInView(e.mouse.where) )
                     action = doReturn;
                 else
                 // When MouseUp happens inside the Box but not on a highlightable entry
