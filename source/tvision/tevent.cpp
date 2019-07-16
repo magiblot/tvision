@@ -136,6 +136,11 @@ void TEventQueue::getMouseEvent( TEvent & ev)
         if( ev.mouse.wheel != 0 )
             {
             ev.what = evMouseWheel;
+#ifdef __BORLANDC__
+        // A bug in Borland C++ causes mouse position to be trash on
+        // MOUSE_WHEELED events.
+            ev.mouse.where = lastMouse.where;
+#endif
             lastMouse = ev.mouse;
             return;
             }

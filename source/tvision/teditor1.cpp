@@ -485,10 +485,16 @@ void TEditor::handleEvent( TEvent& event )
                         d.y++;
                     scrollTo(d.x, d.y);
                     }
+                else if( event.what == evMouseWheel )
+                    {
+                    TEvent ev = event;
+                    vScrollBar->handleEvent(ev);
+                    hScrollBar->handleEvent(ev);
+                    }
                 setCurPtr(getMousePtr(event.mouse.where), selectMode);
                 selectMode |= smExtend;
                 unlock();
-                } while( mouseEvent(event, evMouseMove + evMouseAuto) );
+                } while( mouseEvent(event, evMouseMove + evMouseAuto + evMouseWheel) );
             break;
 
         case evKeyDown:
