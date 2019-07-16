@@ -27,6 +27,12 @@
 #include <windows.h>
 #endif
 
+#ifdef __BORLANDC__
+// Missing symbols in wincon.h
+#define MOUSE_WHEELED   0x0004
+#define MOUSE_HWHEELED  0x0008
+#endif
+
 #else
 
 #if !defined( MAKELONG )

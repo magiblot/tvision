@@ -133,6 +133,13 @@ void TEventQueue::getMouseEvent( TEvent & ev)
 
         ev.mouse.buttons = lastMouse.buttons;
 
+        if( ev.mouse.wheel != 0 )
+            {
+            ev.what = evMouseWheel;
+            lastMouse = ev.mouse;
+            return;
+            }
+
         if( ev.mouse.where != lastMouse.where )
             {
             ev.what = evMouseMove;

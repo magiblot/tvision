@@ -161,15 +161,26 @@ bool NcursesInput::parseMouseEvent(TEvent &ev)
         if (mevent.bstate & BUTTON3_RELEASED)
             buttonState &= ~mbRightButton;
 
+        int mouseWheel = 0;
+#if NCURSES_MOUSE_VERSION > 1
+        // Mouse wheel support was added in Ncurses v6. Before that, only
+        // scroll up would work. It's better not to support wheel scrolling
+        // in that case.
+        if (mevent.bstate & BUTTON4_PRESSED)
+            mouseWheel = mwUp;
+        else if (mevent.bstate & BUTTON5_PRESSED)
+            mouseWheel = mwDown;
+#endif
         /* Some terminal emulators send a mouse event every pixel the graphical
          * mouse cursor moves over the window. Filter out those unnecessary
          * events (except when dragging, because that's how evMouseAuto works). */
-        if ( oldButtons != buttonState || buttonState ||
+        if ( oldButtons != buttonState || buttonState || mouseWheel ||
              mevent.x != lastMousePos.x || mevent.y != lastMousePos.y )
         {
             ev.mouse.buttons = buttonState;
             ev.mouse.where.x = lastMousePos.x = mevent.x;
             ev.mouse.where.y = lastMousePos.y = mevent.y;
+            ev.mouse.wheel = mouseWheel;
             return true;
         }
     }
