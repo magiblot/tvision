@@ -187,7 +187,7 @@ const ushort
 
 //  Event masks
 
-    positionalEvents    = evMouse,
+    positionalEvents    = evMouse & ~evMouseWheel,
     focusedEvents       = evKeyboard | evCommand;
 
 #endif  // __COMMAND_CODES

@@ -54,6 +54,7 @@ TScrollBar::TScrollBar( const TRect& bounds ) :
         growMode = gfGrowLoY | gfGrowHiX | gfGrowHiY;
         memcpy( chars, hChars, sizeof(hChars) );
         }
+    eventMask |= evMouseWheel;
 }
 
 void TScrollBar::draw()
@@ -139,11 +140,33 @@ int TScrollBar::getPartCode()
 
 void TScrollBar::handleEvent( TEvent& event )
 {
-    int i, clickPart;
+    int i, clickPart, step = 0;
 
     TView::handleEvent(event);
     switch( event.what )
         {
+        case evMouseWheel:
+            if( size.x == 1 )
+                switch ( event.mouse.wheel )
+                    {
+                    case mwUp: step = -arStep; break;
+                    case mwDown: step = arStep; break;
+                    }
+            else
+                switch ( event.mouse.wheel )
+                    {
+                    case mwLeft: step = -arStep; break;
+                    case mwRight: step = arStep; break;
+                    }
+            if( step )
+                {
+                // E.g. when the bar is associated to a TListViewer, this message
+                // causes it to become selected.
+                message(owner, evBroadcast, cmScrollBarClicked, this);
+                setValue(value + 3*step);
+                clearEvent(event);
+                }
+            break;
         case evMouseDown:
             message(owner, evBroadcast, cmScrollBarClicked,this); // Clicked()
             mouse = makeLocal( event.mouse.where );
