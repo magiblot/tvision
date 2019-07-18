@@ -224,7 +224,7 @@ void TDisplay::setCrtMode( ushort mode )
 TScreen::TScreen()
 {
 #if defined(__FLAT__) && defined(__BORLANDC__)
-    THardwareInfo::placeConsoleWindow();
+    THardwareInfo::setUpConsoleBuffer();
 #endif
     startupMode = getCrtMode();
     startupCursor = getCursorType();
@@ -239,7 +239,7 @@ TScreen::TScreen()
 void TScreen::resume()
 {
 #if defined(__FLAT__) && defined(__BORLANDC__)
-    THardwareInfo::placeConsoleWindow();
+    THardwareInfo::setUpConsoleBuffer();
 #endif
     startupMode = getCrtMode();
     startupCursor = getCursorType();
@@ -264,7 +264,7 @@ void TScreen::suspend()
       clearScreen();
     setCursorType( startupCursor );
 #if defined(__FLAT__) && defined(__BORLANDC__)
-    THardwareInfo::resetConsoleWindow();
+    THardwareInfo::restoreConsoleBuffer();
 #endif
 }
 

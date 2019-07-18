@@ -45,7 +45,7 @@ TEvent THardwareInfo::pendingMouseEvent;
 
 BOOL THardwareInfo::insertState = True;
 THardwareInfo::PlatformType THardwareInfo::platform = THardwareInfo::plDPMI32;
-HANDLE THardwareInfo::consoleHandle[2];
+HANDLE THardwareInfo::consoleHandle[3];
 DWORD THardwareInfo::consoleMode;
 DWORD THardwareInfo::pendingEvent;
 INPUT_RECORD THardwareInfo::irBuffer;
@@ -134,6 +134,17 @@ THardwareInfo::THardwareInfo()
     GetConsoleMode( consoleHandle[cnInput], &consoleMode );
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+
+    if( platform == plWinNT )
+        {
+        consoleHandle[cnStartup] = consoleHandle[cnOutput];
+        consoleHandle[cnOutput] = CreateConsoleScreenBuffer(
+            GENERIC_READ | GENERIC_WRITE,
+            0,
+            0,
+            CONSOLE_TEXTMODE_BUFFER,
+            0);
+        }
 #else
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
     for (int i = 0; i < 256; ++i)
@@ -153,22 +164,18 @@ THardwareInfo::THardwareInfo()
 #endif
 }
 
-#if defined(__FLAT__) && defined(__BORLANDC__)
-void THardwareInfo::placeConsoleWindow()
+void THardwareInfo::setUpConsoleBuffer()
 {
-    // Back up the current screen info.
-    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
-    /* Move the console window to the beginning of the buffer, where Turbo Vision
-     * assumes screen writings, caret movements and mouse events take place. */
-    SMALL_RECT rect = { 0, 0, getScreenCols() - 1, getScreenRows() - 1 };
-    SetConsoleWindowInfo( consoleHandle[cnOutput], True, &rect );
+    // SetConsoleActiveScreenBuffer depends on Kernel32.dll.
+    // It can't be executed in DOS mode.
+    if( platform == plWinNT )
+        SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
 }
 
-void THardwareInfo::resetConsoleWindow()
+void THardwareInfo::restoreConsoleBuffer()
 {
-    /* Restore the last backed-up console window. sbInfo may be updated from
-     * THardwareInfo's constructor, placeConsoleWindow() or setScreenMode(). */
-    SetConsoleWindowInfo( consoleHandle[cnOutput], True, &sbInfo.srWindow );
+    if( platform == plWinNT )
+        SetConsoleActiveScreenBuffer( consoleHandle[cnStartup] );
 }
 #endif
 

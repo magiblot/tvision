@@ -67,7 +67,7 @@ public:
 
 #if defined( __FLAT__ )
 
-    enum ConsoleType { cnInput = 0, cnOutput = 1 };
+    enum ConsoleType { cnInput = 0, cnOutput = 1, cnStartup = 2 };
     enum PlatformType { plDPMI32 = 1, plWinNT = 2, plOS2 = 4 };
 
     static PlatformType getPlatform();
@@ -90,8 +90,8 @@ public:
     static ushort *allocateScreenBuffer();
     static void freeScreenBuffer( ushort *buffer );
 #ifdef __BORLANDC__
-    static void placeConsoleWindow();
-    static void resetConsoleWindow();
+    static void setUpConsoleBuffer();
+    static void restoreConsoleBuffer();
 #endif
 
 // Mouse functions.
@@ -117,7 +117,7 @@ private:
 
     static BOOL insertState;
     static PlatformType platform;
-    static HANDLE consoleHandle[2];
+    static HANDLE consoleHandle[3];
     static DWORD consoleMode;
     static DWORD pendingEvent;
     static INPUT_RECORD irBuffer;
