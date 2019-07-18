@@ -109,7 +109,6 @@ void TEditorApp::changeDir()
 void TEditorApp::dosShell()
 {
     suspend();
-    system("cls");
     cout << "Type EXIT to return..." << endl;
     system( getenv( "COMSPEC"));
     resume();

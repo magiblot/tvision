@@ -44,7 +44,6 @@
 void TVDemo::shell()
 {
     suspend();
-    system("cls");
     cout << "Type EXIT to return...";
     system( getenv( "COMSPEC"));
     resume();
