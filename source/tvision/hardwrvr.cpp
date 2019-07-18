@@ -144,6 +144,12 @@ THardwareInfo::THardwareInfo()
             0,
             CONSOLE_TEXTMODE_BUFFER,
             0);
+        // Force the screen buffer size to match the window size.
+        // The Console API guarantees this, but some implementations
+        // are not compliant (e.g. Wine).
+        sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
+        sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
+        SetConsoleScreenBufferSize(consoleHandle[cnOutput], sbInfo.dwSize);
         }
 #else
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
