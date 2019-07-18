@@ -151,6 +151,9 @@ THardwareInfo::THardwareInfo()
         sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
         SetConsoleScreenBufferSize(consoleHandle[cnOutput], sbInfo.dwSize);
         }
+
+    consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
+    SetConsoleMode( consoleHandle[cnInput], consoleMode );
 #else
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
     for (int i = 0; i < 256; ++i)
@@ -168,6 +171,13 @@ THardwareInfo::THardwareInfo()
         platf = new PlatformStrategy(disp, new NcursesInput());
     pendingEvent = 0;
 #endif
+}
+
+#ifdef __BORLANDC__
+void THardwareInfo::reloadScreenBufferInfo()
+{
+    // Update sbInfo with the current screen buffer info.
+    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 }
 
 void THardwareInfo::setUpConsoleBuffer()
@@ -268,7 +278,7 @@ void THardwareInfo::setScreenMode( ushort mode )
         SetConsoleScreenBufferSize( consoleHandle[cnOutput], newSize );
         }
 
-    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+    reloadScreenBufferInfo();
 #else
 /* This function actually updates the screen info that's stored in sbInfo.
  * The screen resolution is 80x25 by default. If the small font has been set
@@ -443,10 +453,19 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
             pendingEvent = 0;
             return True;
             }
-        // Ignore all events except mouse events.  Pending mouse events will
-        // be read on the next polling loop.
+        // Ignore all events except mouse and buffer size events.
+        // Pending mouse events will be read on the next polling loop.
         else if( irBuffer.EventType != MOUSE_EVENT )
+            {
             pendingEvent = 0;
+            if( irBuffer.EventType == WINDOW_BUFFER_SIZE_EVENT )
+                {
+                reloadScreenBufferInfo();
+                event.what = evCommand;
+                event.message.command = cmScreenChanged;
+                return True;
+                }
+            }
         }
 
     return False;

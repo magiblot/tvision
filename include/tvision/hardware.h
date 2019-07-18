@@ -90,6 +90,7 @@ public:
     static ushort *allocateScreenBuffer();
     static void freeScreenBuffer( ushort *buffer );
 #ifdef __BORLANDC__
+    static void reloadScreenBufferInfo();
     static void setUpConsoleBuffer();
     static void restoreConsoleBuffer();
 #endif
