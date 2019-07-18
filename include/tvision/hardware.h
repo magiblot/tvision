@@ -176,12 +176,12 @@ inline BOOL THardwareInfo::isCaretVisible()
 
 inline ushort THardwareInfo::getScreenRows()
 {
-    return sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
+    return sbInfo.dwSize.Y;
 }
 
 inline ushort THardwareInfo::getScreenCols()
 {
-    return sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
+    return sbInfo.dwSize.X;
 }
 
 #pragma option -w-inl
