@@ -185,7 +185,10 @@ void THardwareInfo::setUpConsoleBuffer()
     // SetConsoleActiveScreenBuffer depends on Kernel32.dll.
     // It can't be executed in DOS mode.
     if( platform == plWinNT )
+        {
         SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
+        reloadScreenBufferInfo();
+        }
 }
 
 void THardwareInfo::restoreConsoleBuffer()

@@ -59,4 +59,8 @@ void TApplication::resume()
     TScreen::resume();
     TEventQueue::resume();
     TSystemError::resume();
+    if( size.x != TScreen::screenWidth || size.y != TScreen::screenHeight )
+        // If these don't match and screen size shrinked, views will attempt
+        // to draw beyond TDrawBuffer's limits.
+        setScreenMode( TDisplay::smChanged );
 }
