@@ -324,7 +324,15 @@ void TScreen::clearScreen()
 
 void TScreen::setVideoMode( ushort mode )
 {
-    setCrtMode( fixCrtMode( mode ) );
+    if ( mode != smChanged )
+        setCrtMode( fixCrtMode( mode ) );
+#ifdef __FLAT__
+    else
+        {
+        THardwareInfo::freeScreenBuffer( screenBuffer );
+        screenBuffer = THardwareInfo::allocateScreenBuffer();
+        }
+#endif
     setCrtData();
 
     if (TMouse::present())

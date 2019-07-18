@@ -185,6 +185,9 @@ const ushort
 
     cmListItemSelected  = 56,
 
+//  TProgram messages
+    cmScreenChanged     = 57,
+
 //  Event masks
 
     positionalEvents    = evMouse & ~evMouseWheel,

@@ -165,6 +165,11 @@ TPalette& TProgram::getPalette() const
 
 void TProgram::handleEvent( TEvent& event )
 {
+    if( event.what == evCommand && event.message.command == cmScreenChanged )
+        {
+        setScreenMode( TDisplay::smChanged );
+        clearEvent(event);
+        }
     if( event.what == evKeyDown )
         {
         char c = getAltChar( event.keyDown.keyCode );
