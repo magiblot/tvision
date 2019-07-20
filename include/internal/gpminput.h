@@ -7,7 +7,7 @@
 
 #include <internal/platform.h>
 
-class GpmInput : public AsyncInputStrategy {
+class GpmInput : public FdInputStrategy {
 
     TPoint mousePos;
     uchar buttonState;

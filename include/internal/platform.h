@@ -4,12 +4,8 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <memory>
 #include <functional>
-#include <list>
 #include <queue>
 #include <vector>
 #include <cstddef>
@@ -55,59 +51,21 @@ public:
 
 };
 
-class AsyncInputStrategy {
-
-    void startInputThread();
-
-public:
-
-    struct waiter {
-        std::mutex m;
-        std::condition_variable cv;
-    };
-
-    AsyncInputStrategy();
-    virtual ~AsyncInputStrategy();
-    virtual bool getEvent(TEvent &ev) = 0;
-    void overrideEventGetter(std::function<bool (TEvent&)>&&);
-    virtual int getButtonCount() = 0;
-
-    static void resumeListening();
-    static bool waitForEvent(long ms, TEvent &ev);
-    static void notifyEvent(TEvent &ev, waiter &get);
-
-private:
-
-    std::thread inputThread;
-    std::function<bool (TEvent&)> eventGetter;
-
-    static std::list<AsyncInputStrategy*> listeners;
-    static waiter *inputListener;
-    static waiter eventRequester;
-    static std::mutex notifying;
-
-    static bool evReceived;
-    static bool evProcessed;
-    static TEvent received;
-
-};
-
 class PlatformStrategy {
 
 protected:
 
     std::unique_ptr<DisplayStrategy> display;
-    std::unique_ptr<AsyncInputStrategy> input;
+    std::unique_ptr<FdInputStrategy> input;
 
 public:
 
-    PlatformStrategy(DisplayStrategy* d, AsyncInputStrategy *i) :
+    PlatformStrategy(DisplayStrategy* d, FdInputStrategy *i) :
         display(d), input(i) {}
 
     virtual ~PlatformStrategy() {}
 
-    inline void resumeListening() { AsyncInputStrategy::resumeListening(); }
-    inline bool waitForEvent(long ms, TEvent &ev) { return AsyncInputStrategy::waitForEvent(ms, ev); }
+    inline bool waitForEvent(long ms, TEvent &ev) { return FdInputStrategy::waitForEvent(ms, ev); }
     virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
 
     inline int getCaretSize() { return display->getCaretSize(); }

@@ -11,7 +11,7 @@
 #include <string>
 #include <functional>
 
-class NcursesInput : public AsyncInputStrategy {
+class NcursesInput : public FdInputStrategy {
 
     static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
     static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;

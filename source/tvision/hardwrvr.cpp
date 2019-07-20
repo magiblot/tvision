@@ -390,8 +390,6 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     THardwareInfo::flushScreen();
     if (!pendingEvent)
     {
-        // Unblock listener threads.
-        platf->resumeListening();
         if (platf->waitForEvent(eventTimeoutMs, event))
         {
             if (event.what & evKeyboard)

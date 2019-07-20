@@ -18,7 +18,7 @@ class LinuxConsoleStrategy : public PlatformStrategy {
 
 public:
 
-    LinuxConsoleStrategy(DisplayStrategy*, AsyncInputStrategy*);
+    LinuxConsoleStrategy(DisplayStrategy*, FdInputStrategy*);
 
     int getButtonCount();
     void flushScreen();

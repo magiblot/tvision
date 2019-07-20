@@ -24,6 +24,7 @@ GpmInput::GpmInput() : mousePos({-1, -1})
         .minMod = 0,
         .maxMod = 0 };
     Gpm_Open(&conn, 0);
+    addListener(this, gpm_fd);
 }
 
 GpmInput::~GpmInput()

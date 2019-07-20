@@ -4,15 +4,10 @@
 #include <tvision/tv.h>
 
 #include <ncurses.h>
-#include <thread>
-#include <string>
 #include <unordered_map>
 #include <internal/ncursinp.h>
 #include <internal/utf8.h>
 using std::unordered_map;
-using std::string;
-using std::thread;
-using waiter = AsyncInputStrategy::waiter;
 
 // tables.cpp
 extern unordered_map<char, KeyDownEvent> fromNonPrintableAscii;
@@ -45,6 +40,8 @@ NcursesInput::NcursesInput(bool mouse)
         buttonCount = 2;
     }
     else buttonCount = 0;
+
+    addListener(this, 0);
 }
 
 NcursesInput::~NcursesInput()

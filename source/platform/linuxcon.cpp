@@ -4,10 +4,10 @@
 #include <unordered_map>
 using std::unordered_map;
 
-LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, AsyncInputStrategy *i) :
+LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, FdInputStrategy *i) :
     PlatformStrategy(d, i), gpm(new GpmInput())
 {
-    /* The AsyncInputStrategy instance which reads key events is stored in
+    /* The FdInputStrategy instance which reads key events is stored in
      * the 'input' attribute of PlatformStrategy, while the GpmInput instance
      * is stored in the 'gpm' attribute of this class. */
     if (input)
