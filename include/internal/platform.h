@@ -10,6 +10,9 @@
 #include <memory>
 #include <functional>
 #include <list>
+#include <queue>
+#include <vector>
+#include <cstddef>
 
 class DisplayStrategy {
 
@@ -26,6 +29,29 @@ public:
     virtual void setCaretSize(int size) = 0;
     virtual void screenWrite(int x, int y, ushort *buf, int len) = 0;
     virtual void flushScreen() = 0;
+
+};
+
+struct pollfd;
+
+class FdInputStrategy {
+
+    std::function<bool (TEvent&)> eventGetter;
+    static std::vector<FdInputStrategy*> listeners;
+    static std::vector<struct pollfd> fds;
+    static std::queue<size_t> ready;
+
+public:
+
+    FdInputStrategy();
+    virtual ~FdInputStrategy();
+
+    virtual bool getEvent(TEvent &ev) = 0;
+    virtual int getButtonCount() = 0;
+
+    static void addListener(FdInputStrategy*, int);
+    static bool waitForEvent(int ms, TEvent &ev);
+    void overrideEventGetter(std::function<bool (TEvent&)>&&);
 
 };
 
