@@ -407,7 +407,9 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
                  * to be treated on the following polling loop. */
                 pendingMouseEvent = event;
                 pendingEvent = 1;
+                return False;
             }
+            return (Boolean) event.what != evNothing;
         }
     }
     return False;
