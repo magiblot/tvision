@@ -23,6 +23,8 @@ NcursesInput::NcursesInput(bool mouse)
     nonl();
     // Allow capturing function keys.
     keypad(stdscr, true);
+    // Make getch non-blocking.
+    nodelay(stdscr, true);
     /* Do not delay too much on ESC key presses. This delay helps ncurses
      * distinguish special key sequences. */
     set_escdelay(10);
@@ -42,6 +44,7 @@ NcursesInput::NcursesInput(bool mouse)
     else buttonCount = 0;
 
     addListener(this, 0);
+    addListener(this, winchFd());
 }
 
 NcursesInput::~NcursesInput()
@@ -66,11 +69,11 @@ bool NcursesInput::getEvent(TEvent &ev)
     {
         if (keys[0] == KEY_MOUSE)
             return parseMouseEvent(ev);
+        else if (keys[0] == KEY_RESIZE)
+            return winchEvent(ev);
 
         ev.what = evKeyDown;
         bool Alt = false;
-        // Make getch non-blocking, because we might have to read more bytes.
-        nodelay(stdscr, true);
 
         if ((char) keys[0] == KEY_ESC)
             detectAlt(keys, Alt);
@@ -90,7 +93,6 @@ bool NcursesInput::getEvent(TEvent &ev)
         if (Alt)
             setAltModifier(ev);
 
-        nodelay(stdscr, false);
         return ev.keyDown.keyCode != kbNoKey;
     }
     return false;
