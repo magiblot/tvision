@@ -76,8 +76,11 @@ void TView::blockCursor()
      setState(sfCursorIns, True);
 }
 
-#define grow(i) (( (growMode & gfGrowRel)) ? \
-                (i = (i * s + ((s - d) >> 1)) / (s - d)) : (i += d))
+#define grow(i) (( growMode & gfGrowRel ) ? \
+                    ( s > d ) ? \
+                        (i = (i * s + ((s - d) >> 1)) / (s - d)) \
+                      : (i = 0) \
+                  : (i += d))
 
 inline int range( int val, int min, int max )
 {
