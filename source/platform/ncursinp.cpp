@@ -65,12 +65,15 @@ bool NcursesInput::getEvent(TEvent &ev)
     // A Unicode character might be composed of up to 4 UTF-8 bytes.
     int keys[4], num_keys = 1;
     keys[0] = wgetch(stdscr);
+
+    if (keys[0] == KEY_RESIZE)
+        return winchEvent(ev);
+    else winchClear();
+
     if (keys[0] != ERR)
     {
         if (keys[0] == KEY_MOUSE)
             return parseMouseEvent(ev);
-        else if (keys[0] == KEY_RESIZE)
-            return winchEvent(ev);
 
         ev.what = evKeyDown;
         bool Alt = false;
