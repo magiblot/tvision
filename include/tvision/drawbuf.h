@@ -62,11 +62,17 @@ protected:
 
 inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 {
+#ifdef __FLAT__
+    if (indent < dataLength)
+#endif
     hiByte(data[indent]) = uchar(attr);
 }
 
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
 {
+#ifdef __FLAT__
+    if (indent < dataLength)
+#endif
     loByte(data[indent]) = uchar(c);
 }
 

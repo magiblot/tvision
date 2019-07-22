@@ -90,16 +90,17 @@ __5:
 #else
 
     register ushort *dest = &data[indent];
+    ushort *limit = &data[dataLength];
     register uchar _FAR *s = (uchar _FAR *)source;
 
     if (attr != 0)
-        for (; count; --count, ++s, ++dest)
+        for (; dest < limit && count; --count, ++s, ++dest)
         {
             ((uchar*)dest)[0] = *s;
             ((uchar*)dest)[1] = (uchar)attr;
         }
     else
-        while (count--)
+        while (dest < limit && count--)
             *(uchar *)dest++ = *s++;
 
 #endif
@@ -160,9 +161,10 @@ __4:
 
 #else
     register ushort *dest = &data[indent];
+    ushort *limit = &data[dataLength];
 
     if (attr != 0)
-        for (; count; --count, ++dest)
+        for (; dest < limit && count; --count, ++dest)
             {
             if (c) ((uchar*)dest)[0] = c;
             ((uchar*)dest)[1] = (uchar)attr;
@@ -227,10 +229,11 @@ I   POP     DS
 
 #else
     register ushort *dest = &data[indent];
+    ushort *limit = &data[dataLength];
     int toggle;
     uchar c, curAttr;
 
-    for (curAttr=((uchar *)&attrs)[0], toggle=1; (c=*str) != 0; str++)
+    for (curAttr=((uchar *)&attrs)[0], toggle=1; dest < limit && (c=*str) != 0; str++)
         {
         if (c == '~')
             {
@@ -302,16 +305,17 @@ I   POP     DS
 #else
 
     register ushort *dest = &data[indent];
+    ushort *limit = &data[dataLength];
     uchar c;
 
     if (attr != 0)
-        for (;(c=*str) != 0; ++str, ++dest)
+        for (;dest < limit && (c=*str) != 0; ++str, ++dest)
             {
             ((uchar*)dest)[0] = c;
             ((uchar*)dest)[1] = (uchar)attr;
             }
         else
-            while (*str)
+            while (dest < limit && *str)
                 *(uchar *)dest++ = *str++;
 #endif
 }
