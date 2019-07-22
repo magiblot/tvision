@@ -25,6 +25,7 @@ public:
     virtual void setCaretSize(int size) = 0;
     virtual void screenWrite(int x, int y, ushort *buf, int len) = 0;
     virtual void flushScreen() = 0;
+    virtual void onScreenResize() {}
 
 };
 
@@ -78,6 +79,7 @@ public:
     inline void setCaretSize(int size) { display->setCaretSize(size); }
     inline void screenWrite(int x, int y, ushort *buf, int len) { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() { display->flushScreen(); }
+    void onScreenResize() { display->onScreenResize(); }
 
 };
 

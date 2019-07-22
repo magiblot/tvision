@@ -328,10 +328,7 @@ void TScreen::setVideoMode( ushort mode )
         setCrtMode( fixCrtMode( mode ) );
 #ifdef __FLAT__
     else
-        {
-        THardwareInfo::freeScreenBuffer( screenBuffer );
-        screenBuffer = THardwareInfo::allocateScreenBuffer();
-        }
+        THardwareInfo::resizeScreenBuffer( screenBuffer );
 #endif
     setCrtData();
 

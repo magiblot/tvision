@@ -37,6 +37,7 @@ protected:
     void setCaretPosition(int x, int y);
     void screenWrite(int x, int y, ushort *buf, int len);
     void flushScreen();
+    void onScreenResize();
 
     virtual void lowlevelWriteChar(uchar character, ushort attr) = 0;
     virtual void lowlevelMoveCursor(int x, int y) = 0;

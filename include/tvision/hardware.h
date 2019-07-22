@@ -89,6 +89,7 @@ public:
     static void screenWrite( ushort x, ushort y, ushort *buf, DWORD len );
     static ushort *allocateScreenBuffer();
     static void freeScreenBuffer( ushort *buffer );
+    static void resizeScreenBuffer( ushort *&buffer );
 #ifdef __BORLANDC__
     static void reloadScreenBufferInfo();
     static void setUpConsoleBuffer();
@@ -226,6 +227,13 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 #endif
 }
 
+#ifdef __BORLANDC__ // In hardwrvr.cpp otherwise
+inline void THardwareInfo::resizeScreenBuffer( ushort *&buffer )
+{
+    freeScreenBuffer(buffer);
+    buffer = allocateScreenBuffer();
+}
+#endif
 
 // Mouse functions.
 

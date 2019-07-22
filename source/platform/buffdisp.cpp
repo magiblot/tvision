@@ -78,3 +78,11 @@ void BufferedDisplay::flushScreen()
     }
 }
 
+void BufferedDisplay::onScreenResize()
+{
+    int rows = getScreenRows(), cols = getScreenCols();
+    charBuffer = Array2D<uchar>(rows, cols, 0);
+    attrBuffer = Array2D<ushort>(rows, cols, 0);
+    changedCells.clear();
+}
+

@@ -224,6 +224,12 @@ ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
 void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
 DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
 void THardwareInfo::flushScreen() { platf->flushScreen(); }
+void THardwareInfo::resizeScreenBuffer( ushort *&buffer )
+{
+    freeScreenBuffer(buffer);
+    buffer = allocateScreenBuffer();
+    platf->onScreenResize();
+}
 #endif
 
 ushort THardwareInfo::getScreenMode()
