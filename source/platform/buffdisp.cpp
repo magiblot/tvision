@@ -34,6 +34,7 @@ void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
     {
         uchar character = buf[i*2];
         ushort attr = buf[i*2 + 1];
+        if (character == '\0') character = ' ';
         if (character != charBuffer[y][x] || attr != attrBuffer[y][x])
         {
             screenChanged = true;
