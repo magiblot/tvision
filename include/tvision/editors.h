@@ -215,7 +215,7 @@ public:
     void doUpdate();
     void doSearchReplace();
     void drawLines( int, int, ushort );
-    void formatLine(void *, ushort, int, ushort );
+    void formatLine(ushort *, ushort, int, ushort );
     void find();
     ushort getMousePtr( TPoint );
     Boolean hasSelection();

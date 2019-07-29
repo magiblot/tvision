@@ -29,7 +29,7 @@ ushort TEditor::bufPtr( ushort P )
     BREAK;
 }
 
-void TEditor::formatLine( void *DrawBuf,
+void TEditor::formatLine( ushort *DrawBuf,
                           ushort LinePtr,
                           int Width,
                           ushort Colors

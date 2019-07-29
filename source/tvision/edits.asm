@@ -15,9 +15,9 @@
         PUBLIC  @TEditor@bufChar$qus
         PUBLIC  @TEditor@bufPtr$qus
 IFNDEF __FLAT__
-        PUBLIC  @TEditor@formatLine$qnvusius
+        PUBLIC  @TEditor@formatLine$qnususius
 ELSE
-        PUBLIC  @TEditor@formatLine$qpvusius
+        PUBLIC  @TEditor@formatLine$qpususius
 ENDIF
         PUBLIC  @TEditor@lineEnd$qus
         PUBLIC  @TEditor@lineStart$qus
@@ -84,15 +84,15 @@ ENDIF
 
 ENDP @TEditor@bufPtr$qus
 
-;void TEditor::formatLine( void *DrawBuf,
+;void TEditor::formatLine( ushort *DrawBuf,
 ;                          ushort LinePtr,
 ;                          int Width,
 ;                          ushort Colors
 ;                        )
 IFNDEF __FLAT__
-@TEditor@formatLine$qnvusius PROC
+@TEditor@formatLine$qnususius PROC
 ELSE
-@TEditor@formatLine$qpvusius PROC
+@TEditor@formatLine$qpususius PROC
 ENDIF
         ARG     thisPtr:PTR, DrawBuf:PTR, LinePtr:ARGINT, \
                         W:ARGINT, Colors:ARGINT
@@ -214,9 +214,9 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ENDIF
 
 IFNDEF __FLAT__
-ENDP @TEditor@formatLine$qnvusius
+ENDP @TEditor@formatLine$qnususius
 ELSE
-ENDP @TEditor@formatLine$qpvusius
+ENDP @TEditor@formatLine$qpususius
 ENDIF
 
 ;function TEditor.lineEnd(P: Word): Word; assembler;
