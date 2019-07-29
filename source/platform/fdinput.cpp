@@ -39,6 +39,7 @@ bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
 
     if (!ready.empty())
     {
+        ev = {};
         size_t i = ready.front(); ready.pop();
         return listeners[i]->eventGetter(ev);
     }
