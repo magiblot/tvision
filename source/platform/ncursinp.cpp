@@ -143,7 +143,11 @@ void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
  * have to predict the number of bytes it is composed of, then read as many. */
     num_keys += Utf8BytesLeft((char) keys[0]);
     for (int i = 1; i < num_keys; ++i)
-        keys[i] = wgetch(stdscr);
+        if ( ERR == (keys[i] = wgetch(stdscr)) )
+        {
+            num_keys = i;
+            break;
+        }
 }
 
 bool NcursesInput::parseMouseEvent(TEvent &ev)
