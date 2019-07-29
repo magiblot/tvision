@@ -268,8 +268,8 @@ void TFileList::readDirectory( const char *aWildCard )
 
     for ( const fs::directory_entry &d : fs::directory_iterator(dir, ec) )
         {
-        const char* fName = d.path().filename().c_str();
-        if ( d.is_directory(ec) || match(wild.c_str(), fName) )
+        fs::path fName = d.path().filename();
+        if ( d.is_directory(ec) || match(wild.c_str(), fName.c_str()) )
             {
             DirSearchRec *p = new DirSearchRec;
             p->readDirEntry( d );
