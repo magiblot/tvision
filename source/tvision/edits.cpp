@@ -17,52 +17,112 @@
 
 #ifndef __BORLANDC__
 
+#include <utility>
 #include <assert.h>
 
 char TEditor::bufChar( ushort P )
 {
-    BREAK;
+    return buffer[bufPtr(P)];
 }
 
 ushort TEditor::bufPtr( ushort P )
 {
-    BREAK;
+    return P < curPtr ? P : P + gapLen;
 }
 
+#define loByte(w)    (((uchar *)&w)[0])
+#define hiByte(w)    (((uchar *)&w)[1])
+
 void TEditor::formatLine( ushort *DrawBuf,
-                          ushort LinePtr,
+                          ushort P,
                           int Width,
                           ushort Colors
                         )
 {
-    BREAK;
+    ushort ColorChar;
+    uchar &Char = loByte(ColorChar);
+    uchar &Color = hiByte(ColorChar);
+    int Limit;
+    int X = 0;
+
+    for (const auto& [c, l] : { std::make_pair(loByte(Colors), selStart),
+                                std::make_pair(hiByte(Colors), selEnd),
+                                std::make_pair(loByte(Colors), bufLen) })
+    {
+        Color = c; Limit = l;
+        while (P < Limit && X < Width)
+        {
+            Char = bufChar(P++);
+            if (Char == '\r')
+                goto fill;
+            if (Char == '\t') {
+                Char = ' ';
+                do {
+                    DrawBuf[X++] = ColorChar;
+                } while (X%8 != 0 && X < Width);
+            } else {
+                DrawBuf[X++] = ColorChar;
+            }
+        }
+    }
+fill:
+    Char = ' ';
+    while (X < Width)
+        DrawBuf[X++] = ColorChar;
 }
 
 ushort TEditor::lineEnd( ushort P )
 {
-    BREAK;
+    for (ushort i = P; i < bufLen; ++i)
+        if (bufChar(i) == '\r')
+            return i;
+    return bufLen;
 }
 
 ushort TEditor::lineStart( ushort P )
 {
-    BREAK;
+    for (int i = P - 1; i >= 0; --i)
+        if (bufChar(i) == '\r')
+        {
+            if ( i + 1 != curPtr && i + 1 != bufLen
+                 && bufChar(i + 1) == '\n' )
+                return i + 2;
+            return i + 1;
+        }
+    return 0;
 }
 
 ushort TEditor::nextChar( ushort P )
 {
-    BREAK;
+    if (P + 1 < bufLen)
+    {
+        if (bufChar(P) == '\r' && bufChar(P + 1) == '\n')
+            return P + 2;
+        return P + 1;
+    }
+    return bufLen;
 }
 
 ushort TEditor::prevChar( ushort P )
 {
-    BREAK;
+    if (P > 1)
+    {
+        if (bufChar(P - 2) == '\r' && bufChar(P - 1) == '\n')
+            return P - 2;
+        return P - 1;
+    }
+    return 0;
 }
 
 extern "C" {
 
-int countLines( void *buf, uint count )
+int countLines( const char *buf, uint count )
 {
-    BREAK;
+    int lines = 0;
+    for (uint i = 0; i < count; ++i)
+        if (buf[i] == '\r')
+            ++lines;
+    return lines;
 }
 
 ushort scan( const void *block, ushort size, const char *str )
