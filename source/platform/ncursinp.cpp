@@ -6,6 +6,7 @@
 #include <ncurses.h>
 #include <unordered_map>
 #include <internal/ncursinp.h>
+#include <internal/getenv.h>
 #include <internal/utf8.h>
 using std::unordered_map;
 
@@ -40,6 +41,13 @@ NcursesInput::NcursesInput(bool mouse)
         mouseinterval(0);
         // This will do the trick for now.
         buttonCount = 2;
+        // Enable mouse drag support.
+        std::string TERM = getEnv<std::string>("TERM");
+        if (TERM.find("xterm") == 0 || TERM.find("rxvt") == 0)
+        {
+            fprintf(stdout, "\x1B[?1002h");
+            fflush(stdout);
+        }
     }
     else buttonCount = 0;
 
