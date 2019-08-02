@@ -399,14 +399,21 @@ void TEditor::draw()
 void TEditor::drawLines( int y, int count, ushort linePtr )
 {
     ushort color = getColor(0x0201);
+#ifndef __FLAT__
+    ushort b[maxLineLength];
+#else
+    ushort *b = new ushort[delta.x+size.x];
+#endif
     while( count-- > 0 )
         {
-        ushort b[maxLineLength];
         formatLine( b, linePtr, delta.x+size.x, color );
         writeBuf(0, y, size.x, 1, &b[delta.x]);
         linePtr = nextLine(linePtr);
         y++;
         }
+#ifdef __FLAT__
+    delete[] b;
+#endif
 }
 
 void TEditor::find()
