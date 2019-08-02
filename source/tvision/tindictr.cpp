@@ -27,7 +27,9 @@
 #define cpIndicator "\x02\x03"
 
 TIndicator::TIndicator( const TRect& bounds ) :
-    TView( bounds )
+    TView( bounds ),
+    location( TPoint() ),
+    modified( False )
 {
     growMode = gfGrowLoY | gfGrowHiY;
 }
