@@ -167,7 +167,7 @@ inline opstream& operator << ( opstream& os, TIndicator* cl )
 class _FAR TRect;
 class _FAR TScrollBar;
 class _FAR TIndicator;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TEditor : public TView
 {
@@ -307,7 +307,7 @@ inline opstream& operator << ( opstream& os, TEditor* cl )
 #if defined( Uses_TMemo ) && !defined( __TMemo )
 #define __TMemo
 
-class _FAR TEvent;
+struct _FAR TEvent;
 
 struct TMemoData
 {
@@ -368,7 +368,7 @@ inline opstream& operator << ( opstream& os, TMemo* cl )
 class _FAR TRect;
 class _FAR TScrollBar;
 class _FAR TIndicator;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TFileEditor : public TEditor
 {

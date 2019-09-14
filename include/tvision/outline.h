@@ -70,7 +70,7 @@ inline TNode::~TNode() {
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TOutlineViewer : public TScroller
 {
@@ -144,7 +144,7 @@ inline TOutlineViewer::TOutlineViewer( StreamableInit s) :
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TOutline : public TOutlineViewer
 {

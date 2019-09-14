@@ -19,7 +19,7 @@
 
 class TStatusLine;
 class TMenuBar;
-class TEvent;
+struct TEvent;
 class TPalette;
 class THeapView;
 class TClockView;

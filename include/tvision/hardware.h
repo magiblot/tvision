@@ -46,8 +46,8 @@
 class PlatformStrategy;
 #endif
 
-class TEvent;
-class MouseEventType;
+struct TEvent;
+struct MouseEventType;
 
 class THardwareInfo
 {

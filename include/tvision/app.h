@@ -72,7 +72,7 @@ inline opstream& operator << ( opstream& os, TBackground* cl )
 
 class _FAR TBackground;
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TDeskInit
 {
@@ -206,7 +206,7 @@ const unsigned short hcClose        = 0xFF27;
 class _FAR TStatusLine;
 class _FAR TMenuBar;
 class _FAR TDeskTop;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TView;
 
 class TProgInit

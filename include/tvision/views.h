@@ -311,7 +311,7 @@ struct write_args
 };
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TGroup;
 
 class TView : public TObject, public TStreamable
@@ -514,7 +514,7 @@ inline void TView::writeLine( short x, short y, short w, short h,
 #define __TFrame
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TDrawBuffer;
 
 class TFrame : public TView
@@ -581,7 +581,7 @@ inline opstream& operator << ( opstream& os, TFrame* cl )
 #define __TScrollBar
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 typedef char TScrollChars[5];
 
@@ -663,7 +663,7 @@ inline opstream& operator << ( opstream& os, TScrollBar* cl )
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TScroller : public TView
 {
@@ -731,7 +731,7 @@ inline opstream& operator << ( opstream& os, TScroller* cl )
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TListViewer : public TView
 {
@@ -919,7 +919,7 @@ inline opstream& operator << ( opstream& os, TGroup* cl )
 class _FAR TFrame;
 class _FAR TRect;
 class _FAR TPoint;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TFrame;
 class _FAR TScrollBar;
 

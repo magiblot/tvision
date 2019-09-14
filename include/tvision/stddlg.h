@@ -65,7 +65,7 @@ struct TSearchRec
 #define __TFileInputLine
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TFileInputLine : public TInputLine
 {
@@ -107,7 +107,7 @@ inline opstream& operator << ( opstream& os, TFileInputLine* cl )
 #if defined( Uses_TFileCollection ) && !defined( __TFileCollection )
 #define __TFileCollection
 
-class _FAR TSearchRec;
+struct _FAR TSearchRec;
 
 class TFileCollection: public TSortedCollection
 {
@@ -188,7 +188,7 @@ inline TSearchRec *TFileCollection::lastThat( ccTestFunc func, void *arg )
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TSortedCollection;
 
 class TSortedListBox: public TListBox
@@ -252,7 +252,7 @@ inline TSortedCollection *TSortedListBox::list()
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TFileList : public TSortedListBox
 {
@@ -324,7 +324,7 @@ inline TFileCollection *TFileList::list()
 #define __TFileInfoPane
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TFileInfoPane : public TView
 {
@@ -390,7 +390,7 @@ const int
 #include <dir.h>
 #endif  // __DIR_H
 
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TFileInputLine;
 class _FAR TFileList;
 
@@ -582,7 +582,7 @@ inline TDirEntry *TDirCollection::lastThat( ccTestFunc func, void *arg )
 
 class _FAR TRect;
 class _FAR TScrollBar;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TDirCollection;
 
 class TDirListBox : public TListBox
@@ -656,7 +656,7 @@ const int
     cdNoLoadDir  = 0x0001, // Option to init the dialog to store on a stream
     cdHelpButton = 0x0002; // Put a help button in the dialog
 
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TInputLine;
 class _FAR TDirListBox;
 class _FAR TButton;

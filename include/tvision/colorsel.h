@@ -97,7 +97,7 @@ public:
 #define __TColorSelector
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TColorSelector : public TView
 {
@@ -154,7 +154,7 @@ inline opstream& operator << ( opstream& os, TColorSelector* cl )
 #define __TMonoSelector
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TMonoSelector : public TCluster
 {
@@ -207,7 +207,7 @@ inline opstream& operator << ( opstream& os, TMonoSelector* cl )
 #define __TColorDisplay
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TColorDisplay : public TView
 {
@@ -329,7 +329,7 @@ inline opstream& operator << ( opstream& os, TColorGroupList* cl )
 class _FAR TRect;
 class _FAR TScrollBar;
 class _FAR TColorItem;
-class _FAR TEvent;
+struct _FAR TEvent;
 
 class TColorItemList : public TListViewer
 {
@@ -381,7 +381,7 @@ inline opstream& operator << ( opstream& os, TColorItemList* cl )
 #define __TColorDialog
 
 class _FAR TColorGroup;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TColorDisplay;
 class _FAR TColorGroupList;
 class _FAR TLabel;

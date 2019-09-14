@@ -95,7 +95,7 @@ const int
       dpGrayDialog = 2;
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TValidator;
 
 class TDialog : public TWindow
@@ -151,7 +151,7 @@ inline opstream& operator << ( opstream& os, TDialog* cl )
 #define __TInputLine
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TValidator;
 
 class TInputLine : public TView
@@ -249,7 +249,7 @@ inline opstream& operator << ( opstream& os, TInputLine* cl )
 #define __TButton
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TDrawBuffer;
 
 class TButton : public TView
@@ -352,7 +352,7 @@ public:
 
 class _FAR TRect;
 class _FAR TSItem;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TPoint;
 class _FAR TStringCollection;
 
@@ -812,7 +812,7 @@ inline opstream& operator << ( opstream& os, TParamText* cl )
 #define __TLabel
 
 class _FAR TRect;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR TView;
 
 class TLabel : public TStaticText
@@ -963,7 +963,7 @@ protected:
 
 class _FAR TRect;
 class _FAR TInputLine;
-class _FAR TEvent;
+struct _FAR TEvent;
 class _FAR THistoryWindow;
 
 class THistory : public TView
