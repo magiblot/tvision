@@ -14,6 +14,16 @@
  *
  */
 
+#if !defined( __BORLANDC__ )
+#define __FLAT__
+
+#if !defined( _WIN32 )
+#define __cdecl
+#define __stdcall
+#endif
+
+#endif
+
 #if defined( __FLAT__ )
 #define _NEAR
 #define _FAR

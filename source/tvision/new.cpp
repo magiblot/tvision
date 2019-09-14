@@ -9,6 +9,9 @@
  *
  */
 
+#define Uses_TVMemMgr
+#include <tvision/tv.h>
+
 #define NDEBUG
 #include <assert.h>
 
@@ -24,9 +27,6 @@
 #if !defined( __STDLIB_H )
 #include <stdlib.h>
 #endif  // __STDLIB_H
-
-#define Uses_TVMemMgr
-#include <tvision/tv.h>
 
 TBufListEntry * _NEAR TBufListEntry::bufList = 0;
 
