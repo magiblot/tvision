@@ -37,6 +37,10 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#if !defined( __STRSTREAM_H )
+#include <strstrea.h>
+#endif
+
 TChDirDialog::TChDirDialog( ushort opts, ushort histId ) :
     TDialog( TRect( 16, 2, 64, 20 ), changeDirTitle ),
     TWindowInit( &TChDirDialog::initFrame )
@@ -84,6 +88,17 @@ void TChDirDialog::getData( void * )
 {
 }
 
+static void trimEndSeparator(char *path)
+{
+    int len = strlen( path );
+#ifdef __BORLANDC__
+    if( len > 3 && path[len-1] == '\\' )
+#else
+    if( len > 1 && path[len-1] == *dirSeparator )
+#endif
+        path[len-1] = EOS;
+}
+
 void TChDirDialog::handleEvent( TEvent& event )
 {
     TDialog::handleEvent( event );
@@ -105,8 +120,8 @@ void TChDirDialog::handleEvent( TEvent& event )
                         break;
                     else if( driveValid( curDir[0] ) )
                         {
-                        if( curDir[strlen(curDir)-1] != '\\' )
-                            strcat( curDir, "\\" );
+                        if( curDir[strlen(curDir)-1] != *dirSeparator )
+                            strcat( curDir, dirSeparator );
                         }
                     else
                         return;
@@ -116,9 +131,7 @@ void TChDirDialog::handleEvent( TEvent& event )
                     return;
                 }
             dirList->newDirectory( curDir );
-            int len = strlen( curDir );
-            if( len > 3 && curDir[len-1] == '\\' )
-                curDir[len-1] = EOS;
+            trimEndSeparator( curDir );
             strcpy( dirInput->data, curDir );
             dirInput->drawView();
             dirList->select();
@@ -142,9 +155,7 @@ void TChDirDialog::setUpDialog()
         dirList->newDirectory( curDir );
         if( dirInput != 0 )
             {
-            int len = strlen( curDir );
-            if( len > 3 && curDir[len-1] == '\\' )
-                curDir[len-1] = EOS;
+            trimEndSeparator( curDir );
             strcpy( dirInput->data, curDir );
             dirInput->drawView();
             }
@@ -169,13 +180,14 @@ Boolean TChDirDialog::valid( ushort command )
     strcpy( path, dirInput->data );
     fexpand( path );
 
-    int len = strlen( path );
-    if( len > 3 && path[len-1] == '\\' )
-        path[len-1] = EOS;
+    trimEndSeparator( path );
 
     if( changeDir( path ) != 0 )
         {
-        messageBox( invalidText, mfError | mfOKButton );
+        char buf[100];
+        ostrstream os( buf, sizeof( buf ) );
+        os << invalidText << ": '" << path << "'." << ends;
+        messageBox( buf, mfError | mfOKButton );
         return False;
         }
     return True;
