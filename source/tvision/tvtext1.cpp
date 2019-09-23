@@ -122,5 +122,5 @@ const char * _NEAR TDirListBox::lastDir   =   " \xC0\xC4";
 const char * _NEAR TDirListBox::drives = "Drives";
 const char * _NEAR TDirListBox::graphics = "\xC0\xC3\xC4";
 
-const char * _NEAR TFileEditor::backupExt = ".BAK";
+const char * _NEAR TFileEditor::backupExt = ".bak";
 
