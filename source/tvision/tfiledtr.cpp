@@ -42,7 +42,7 @@
 #endif
 
 #ifndef __BORLANDC__
-#include <assert.h>
+#include <internal/filesys.h>
 #endif
 
 inline ushort min( ushort u1, ushort u2 )
@@ -181,19 +181,22 @@ static void writeBlock( ofstream& f, char *buf, unsigned len )
 
 Boolean TFileEditor::saveFile()
 {
-#ifdef __BORLANDC__
-    char drive[MAXDRIVE];
-    char dir[MAXDIR];
-    char file[MAXFILE];
-    char ext[MAXEXT];
-
     if( (editorFlags & efBackupFiles) != 0 )
         {
+#ifdef __BORLANDC__
+        char drive[MAXDRIVE];
+        char dir[MAXDIR];
+        char file[MAXFILE];
+        char ext[MAXEXT];
         fnsplit( fileName, drive, dir, file, ext );
         char backupName[MAXPATH];
         fnmerge( backupName, drive, dir, file, backupExt );
 #ifdef unlink
         unlink( backupName );
+#endif
+#else
+        fs::path backup_path{fs::path(fileName).replace_extension(backupExt)};
+        const char* backupName = backup_path.c_str();
 #endif
         rename( fileName, backupName );
         }
@@ -222,9 +225,6 @@ Boolean TFileEditor::saveFile()
             }
         }
     return True;
-#else
-    BREAK;
-#endif
 }
 
 Boolean TFileEditor::setBufSize( ushort newSize )
