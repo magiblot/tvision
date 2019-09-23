@@ -38,7 +38,7 @@ int NcursesDisplay::getCaretSize()
 }
 
 bool NcursesDisplay::isCaretVisible() { return getCaretSize() > 0; }
-void NcursesDisplay::clearScreen() { wclear(stdscr); }
+void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
 void NcursesDisplay::lowlevelMoveCursor(int x, int y) { wmove(stdscr, y, x); }
