@@ -33,7 +33,9 @@
 #endif  // __DOS_H
 
 #ifndef __BORLANDC__
-#include <assert.h>
+#include <internal/filesys.h>
+#include <system_error>
+static std::error_code ec;
 #endif
 
 TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) :
@@ -122,13 +124,13 @@ void TDirListBox::showDrives( TDirCollection *dirs )
         dirs->insert( new TDirEntry( s, oldc ) );
         }
 #else
-    BREAK;
+    // Only show the filesystem root
+    dirs->insert( new TDirEntry( "\xC0\xC4\xC4/", "/" ) );
 #endif
 }
 
 void TDirListBox::showDirs( TDirCollection *dirs )
 {
-#ifdef __BORLANDC__
     const int indentSize = 2;
     int indent = indentSize;
 
@@ -140,7 +142,11 @@ void TDirListBox::showDirs( TDirCollection *dirs )
     strcpy( org, pathDir );
 
     char *curDir = dir;
+#ifdef __BORLANDC__
     char *end = dir + 3;
+#else
+    char *end = dir + 1; // Assuming UNIX filesystem
+#endif
     char hold = *end;
     *end = EOS;         // mark end of drive name
     strcpy( name, curDir );
@@ -148,31 +154,46 @@ void TDirListBox::showDirs( TDirCollection *dirs )
 
     *end = hold;        // restore full path
     curDir = end;
-    while( (end = strchr( curDir, '\\' )) != 0 )
+    while( (end = strchr( curDir, *dirSeparator )) != 0 )
         {
         *end = EOS;
         strncpy( name, curDir, size_t(end-curDir) );
         name[size_t(end-curDir)] = EOS;
         dirs->insert( new TDirEntry( org - indent, dir ) );
-        *end = '\\';
+        *end = *dirSeparator;
         curDir = end+1;
         indent += indentSize;
         }
 
     cur = dirs->getCount() - 1;
 
-    end = strrchr( dir, '\\' );
+    end = strrchr( dir, *dirSeparator );
     char path[MAXPATH];
     strncpy( path, dir, size_t(end-dir+1) );
     end = path + unsigned(end-dir)+1;
+#ifdef __BORLANDC__
     strcpy( end, "*.*" );
+#else
+    *end = '\0';
+#endif
 
     Boolean isFirst = True;
+    const char* fName;
+#ifdef __BORLANDC__
     ffblk ff;
     int res = findfirst( path, &ff, FA_DIREC );
     while( res == 0 )
         {
+        fName = ff.ff_name;
         if( (ff.ff_attrib & FA_DIREC) != 0 && ff.ff_name[0] != '.' )
+#else
+    fs::path dir_path(path);
+    for (const fs::directory_entry &entry : fs::directory_iterator(dir_path, ec)) // Unsorted
+        {
+        fs::path name_path = entry.path().filename();
+        fName = name_path.c_str();
+        if (entry.is_directory(ec) && (name_path != ".") && (name_path != ".."))
+#endif
             {
             if( isFirst )
                 {
@@ -181,11 +202,13 @@ void TDirListBox::showDirs( TDirCollection *dirs )
                 }
             else
                 memcpy( org, middleDir, strlen(middleDir)+1 );
-            strcpy( name, ff.ff_name );
-            strcpy( end, ff.ff_name );
+            strcpy( name, fName );
+            strcpy( end, fName );
             dirs->insert( new TDirEntry( org - indent, path ) );
             }
+#ifdef __BORLANDC__
         res = findnext( &ff );
+#endif
         }
 
     char *p = dirs->at(dirs->getCount()-1)->text();
@@ -201,9 +224,6 @@ void TDirListBox::showDirs( TDirCollection *dirs )
         *(i+1) = graphics[2];
         *(i+2) = graphics[2];
         }
-#else
-    BREAK;
-#endif
 }
 
 void TDirListBox::newDirectory( const char *str )

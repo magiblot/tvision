@@ -33,7 +33,6 @@
 #ifndef __BORLANDC__
 #include <internal/filesys.h>
 #include <system_error>
-#include <assert.h>
 static std::error_code ec = {};
 #endif
 
@@ -68,7 +67,7 @@ I       XCHG    AX, CX      // Put the return value into AX
     return (Boolean) (GetLogicalDrives() & mask);
 #endif
 #else
-    BREAK;
+    return True;
 #endif
 }
 
@@ -144,7 +143,7 @@ void getCurDir( char *dir )
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
 #else
-    BREAK;
+    strnzcpy(dir, getCurDir().c_str(), MAXPATH);
 #endif
 }
 
