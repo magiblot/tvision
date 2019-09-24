@@ -37,7 +37,7 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
-PlatformStrategy *THardwareInfo::platf;
+std::unique_ptr<PlatformStrategy> platf;
 TEvent THardwareInfo::pendingMouseEvent;
 #endif
 
@@ -158,17 +158,6 @@ THardwareInfo::THardwareInfo()
     // Initialize UTF-8 conversion table from utf8.h/tables.cpp
     for (int i = 0; i < 256; ++i)
         Utf8toCp437[cp437toUtf8[i]] = i;
-    /* At least with the ncurses implementation, display must be initialized
-     * before input. */
-    DisplayStrategy *disp;
-    if (getEnv<std::string>("TVISION_DISPLAY") == "ansi")
-        disp = new AnsiDisplay<NcursesDisplay>();
-    else
-        disp = new NcursesDisplay();
-    if (isLinuxConsole())
-        platf = new LinuxConsoleStrategy(disp, new NcursesInput(false));
-    else
-        platf = new PlatformStrategy(disp, new NcursesInput());
     pendingEvent = 0;
 #endif
 }
@@ -179,9 +168,11 @@ void THardwareInfo::reloadScreenBufferInfo()
     // Update sbInfo with the current screen buffer info.
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 }
+#endif
 
-void THardwareInfo::setUpConsoleBuffer()
+void THardwareInfo::setUpConsole()
 {
+#ifdef __BORLANDC__
     // SetConsoleActiveScreenBuffer depends on Kernel32.dll.
     // It can't be executed in DOS mode.
     if( platform == plWinNT )
@@ -189,24 +180,40 @@ void THardwareInfo::setUpConsoleBuffer()
         SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
         reloadScreenBufferInfo();
         }
+#else
+    // Set up input/output control.
+    /* At least with the ncurses implementation, display must be initialized
+     * before input. */
+    if (!platf)
+    {
+        DisplayStrategy *disp;
+        if (getEnv<std::string>("TVISION_DISPLAY") == "ansi")
+            disp = new AnsiDisplay<NcursesDisplay>();
+        else
+            disp = new NcursesDisplay();
+        if (isLinuxConsole())
+            platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
+        else
+            platf.reset(new PlatformStrategy(disp, new NcursesInput()));
+    }
+#endif
 }
 
-void THardwareInfo::restoreConsoleBuffer()
+void THardwareInfo::restoreConsole()
 {
+#ifdef __BORLANDC__
     if( platform == plWinNT )
         SetConsoleActiveScreenBuffer( consoleHandle[cnStartup] );
-}
+#else
+    // Tear down input/output control by deleting the platform strategy.
+    platf.reset();
 #endif
+}
 
 #ifndef __BORLANDC__
 /* We don't include these in hardware.h as done originally to prevent it to
  * depend on platform.h. Otherwise, any change in platform.h would affect
  * hardware.h, causing the whole tvision library to recompile. */
-
-THardwareInfo::~THardwareInfo()
-{
-    delete platf;
-}
 
 bool THardwareInfo::isLinuxConsole()
 {

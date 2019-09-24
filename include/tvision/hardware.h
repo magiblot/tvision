@@ -56,8 +56,6 @@ public:
 
     THardwareInfo();
 #ifndef __BORLANDC__
-    ~THardwareInfo();
-    static PlatformStrategy *platf;
     static TEvent pendingMouseEvent;
     static void flushScreen();
     static bool isLinuxConsole();
@@ -92,9 +90,9 @@ public:
     static void resizeScreenBuffer( ushort *&buffer );
 #ifdef __BORLANDC__
     static void reloadScreenBufferInfo();
-    static void setUpConsoleBuffer();
-    static void restoreConsoleBuffer();
 #endif
+    static void setUpConsole();
+    static void restoreConsole();
 
 // Mouse functions.
 
