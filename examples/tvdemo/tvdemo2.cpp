@@ -36,6 +36,7 @@
 #include "calc.h"
 
 #include <stdlib.h>
+#include <signal.h>
 
 //
 //  DOS Shell Command.
@@ -44,8 +45,13 @@
 void TVDemo::shell()
 {
     suspend();
-    cout << "Type EXIT to return...";
+#ifdef __BORLANDC__
+    cout << "Type EXIT to return..." << endl;
     system( getenv( "COMSPEC"));
+#else
+    cout << "The application has been stopped. You can return by entering 'fg'." << endl;
+    raise(SIGTSTP);
+#endif
     resume();
     redraw();
 }

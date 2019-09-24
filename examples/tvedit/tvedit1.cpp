@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <strstrea.h>
 #include <iomanip.h>
+#include <signal.h>
 
 TEditWindow *clipWindow;
 
@@ -109,8 +110,13 @@ void TEditorApp::changeDir()
 void TEditorApp::dosShell()
 {
     suspend();
+#ifdef __BORLANDC__
     cout << "Type EXIT to return..." << endl;
     system( getenv( "COMSPEC"));
+#else
+    cout << "The application has been stopped. You can return by entering 'fg'." << endl;
+    raise(SIGTSTP);
+#endif
     resume();
     redraw();
 }
