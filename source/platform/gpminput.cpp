@@ -11,7 +11,7 @@ using std::unordered_map;
 
 #include <gpm.h>
 
-GpmInput::GpmInput() : mousePos({-1, -1})
+GpmInput::GpmInput() : mousePos({-1, -1}), buttonState(0)
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
