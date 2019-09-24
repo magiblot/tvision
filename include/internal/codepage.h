@@ -21,16 +21,12 @@ class CpTranslator {
 public:
 
     static void use(int cp) {
-        bool valid = false;
-        for (const CpTable &t : tables) {
+        for (const CpTable &t : tables)
             if (t.cp == cp) {
-                valid = true;
                 activeTable = &t;
+                return;
             }
-            break;
-        }
-        if (!valid)
-            activeTable = &tables[0];
+        activeTable = &tables[0];
     }
 
     static const char* toUtf8(unsigned char c) {

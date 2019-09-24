@@ -3,6 +3,7 @@
 #include <tvision/tv.h>
 
 #include <internal/codepage.h>
+#include <internal/getenv.h>
 #include <internal/ncursinp.h>
 #include <ncurses.h>
 using std::unordered_map;
@@ -41,8 +42,8 @@ const CpTranslator::CpTable *CpTranslator::activeTable;
 CpTranslator CpTranslator::instance;
 
 CpTranslator::CpTranslator() {
-    // Set cp437 as active codepage.
-    activeTable = &tables[0];
+    // Set the active codepage. 437 is the default.
+    use(getEnv<int>("TVISION_CODEPAGE", 437));
     // Initialize UTF-8 conversion tables.
     for (int i = 0; i < 256; ++i)
         for (auto &t : tables)
