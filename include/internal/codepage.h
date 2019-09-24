@@ -14,7 +14,7 @@ class CpTranslator {
         const int cp;
         const char** toUtf8;
         std::unordered_map<std::string, char> toCp;
-    } static tables[1];
+    } static tables[2];
 
     static const CpTable *activeTable;
 
