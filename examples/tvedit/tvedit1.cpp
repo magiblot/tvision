@@ -70,13 +70,17 @@ TEditorApp::TEditorApp( int argc, char **argv ) :
         TEditor::clipboard = clipWindow->editor;
         TEditor::clipboard->canUndo = False;
         }
-#ifdef __BORLANDC__
+
     char fileName[MAXPATH];
     while (--argc > 0)                              // Open files specified
         {                                           // on command line.
         strcpy( fileName, "");
         int len = strlen( *++argv );
+#ifdef __BORLANDC__
         if (len > 1 && (*argv)[1] != ':' && (*argv)[0] != '\\')
+#else
+        if (len > 0 && (*argv)[0] != *dirSeparator)
+#endif
         /* If it's a relative path, append the current directory in front.
          * Otherwise, Turbo Vision will assume the root directory. */
             getCurDir( fileName );
@@ -84,7 +88,6 @@ TEditorApp::TEditorApp( int argc, char **argv ) :
         openEditor(fileName, True);
         }
     cascade();
-#endif
 }
 
 void TEditorApp::fileOpen()
