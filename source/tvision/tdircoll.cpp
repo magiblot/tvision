@@ -32,6 +32,7 @@
 
 #ifndef __BORLANDC__
 #include <internal/filesys.h>
+#include <fstream.h>
 #include <system_error>
 static std::error_code ec = {};
 #endif
@@ -128,7 +129,8 @@ Boolean validFileName( const char *fileName )
         return False;
     return True;
 #else
-    return (Boolean) fs::is_regular_file(fileName, ec);
+    // Check if file exists or could be written to.
+    return (Boolean) (ifstream(fileName) || ofstream(fileName));
 #endif
 }
 
