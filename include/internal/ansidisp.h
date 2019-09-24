@@ -3,7 +3,7 @@
 
 #define Uses_TScreen
 #include <tvision/tv.h>
-#include <internal/utf8.h>
+#include <internal/codepage.h>
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <cstdio>
@@ -89,7 +89,7 @@ protected:
 
     void lowlevelWriteChar(uchar character, ushort attr)
     {
-        fprintf(stderr, "%s", cp437toUtf8[character]);
+        fprintf(stderr, "%s", CpTranslator::toUtf8(character));
     }
 
     void lowlevelMoveCursor(int x, int y)

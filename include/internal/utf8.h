@@ -3,10 +3,6 @@
 #include <string>
 #include <unordered_map>
 
-// tables.cpp
-extern const char* cp437toUtf8[256];
-extern std::unordered_map<std::string, char> Utf8toCp437;
-
 static inline int Utf8BytesLeft(char first_byte)
 {
     // https://en.wikipedia.org/wiki/UTF-8

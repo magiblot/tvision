@@ -2,7 +2,7 @@
 #include <tvision/tv.h>
 
 #include <internal/ncurdisp.h>
-#include <internal/utf8.h>
+#include <internal/codepage.h>
 #include <ncurses.h>
 #include <clocale>
 #include <unordered_map>
@@ -108,7 +108,7 @@ void NcursesDisplay::lowlevelWriteChar(uchar character, ushort attr)
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);
     // Print a single character, which might be multi-byte in UTF-8.
-    wprintw(stdscr, "%s", cp437toUtf8[character]);
+    wprintw(stdscr, "%s", CpTranslator::toUtf8(character));
     wattroff(stdscr, curses_attr);
 }
 

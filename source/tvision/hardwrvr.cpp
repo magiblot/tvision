@@ -29,7 +29,6 @@
 #include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
 #include <internal/getenv.h>
-#include <internal/utf8.h>
 #include <string>
 #include <sys/ioctl.h>
 #include <chrono>
@@ -155,9 +154,6 @@ THardwareInfo::THardwareInfo()
     consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
 #else
-    // Initialize UTF-8 conversion table from utf8.h/tables.cpp
-    for (int i = 0; i < 256; ++i)
-        Utf8toCp437[cp437toUtf8[i]] = i;
     pendingEvent = 0;
 #endif
 }

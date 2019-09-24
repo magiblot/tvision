@@ -8,6 +8,7 @@
 #include <internal/ncursinp.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
+#include <internal/codepage.h>
 using std::unordered_map;
 
 // tables.cpp
@@ -132,8 +133,9 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
     for (int i = 0; i < num_keys; ++i)
         Utf8str[i] = (char) keys[i];
     Utf8str[num_keys] = '\0';
-    // If we are lucky enough, the character will be representable in CP437.
-    ev.keyDown.charScan.charCode = Utf8toCp437[Utf8str];
+    // If we are lucky enough, the character will be representable in
+    // the active codepage.
+    ev.keyDown.charScan.charCode = CpTranslator::toCp(Utf8str);
 }
 
 void NcursesInput::setAltModifier(TEvent &ev)

@@ -2,10 +2,9 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+#include <internal/codepage.h>
 #include <internal/ncursinp.h>
 #include <ncurses.h>
-#include <unordered_map>
-#include <string>
 using std::unordered_map;
 using std::string;
 
@@ -15,7 +14,7 @@ using std::string;
  * stored by Turbo Vision into the corresponding UTF-8 mulibyte characters.
  * Taken from https://en.wikipedia.org/wiki/Code_page_437 */
 
-const char* cp437toUtf8[256] = {
+static const char* cp437toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -34,11 +33,21 @@ const char* cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
-/* The reverse version of the table above. Gets initialized at runtime from
- * THardwareInfo's constructor. */
+CpTranslator::CpTable CpTranslator::tables[1] = {
+    { 437, cp437toUtf8, {} }
+};
 
-unordered_map<string, char> Utf8toCp437;
+const CpTranslator::CpTable *CpTranslator::activeTable;
+CpTranslator CpTranslator::instance;
 
+CpTranslator::CpTranslator() {
+    // Set cp437 as active codepage.
+    activeTable = &tables[0];
+    // Initialize UTF-8 conversion tables.
+    for (int i = 0; i < 256; ++i)
+        for (auto &t : tables)
+            t.toCp[t.toUtf8[i]] = i;
+}
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Until this is not changed, it is
  * necessary to translate ncurses keys to key codes. */
