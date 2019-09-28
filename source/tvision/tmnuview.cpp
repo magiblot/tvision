@@ -217,6 +217,10 @@ ushort TMenuView::execute()
                     {
                     if ( current != lastTargetItem )
                         action = doSelect;
+                    else if ( !parentMenu )
+                    // If a main menu entry was closed, exit and stop listening
+                    // for events.
+                        action = doReturn;
                     else
                     // MouseUp won't open up a submenu that was just closed by clicking
                     // on its name.
@@ -224,9 +228,6 @@ ushort TMenuView::execute()
                         action = doNothing;
                         // But the next one will.
                         lastTargetItem = 0;
-                        // And if it's a menu bar, the selected submenu will be unhighlighted.
-                        if (!parentMenu)
-                            current = 0;
                         }
                     }
                 else if ( !mouseInView(e.mouse.where) )
