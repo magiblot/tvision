@@ -146,18 +146,21 @@ void TScrollBar::handleEvent( TEvent& event )
     switch( event.what )
         {
         case evMouseWheel:
-            if( size.x == 1 )
-                switch ( event.mouse.wheel )
-                    {
-                    case mwUp: step = -arStep; break;
-                    case mwDown: step = arStep; break;
-                    }
-            else
-                switch ( event.mouse.wheel )
-                    {
-                    case mwLeft: step = -arStep; break;
-                    case mwRight: step = arStep; break;
-                    }
+            if (state & sfVisible)
+                {
+                if( size.x == 1 )
+                    switch ( event.mouse.wheel )
+                        {
+                        case mwUp: step = -arStep; break;
+                        case mwDown: step = arStep; break;
+                        }
+                else
+                    switch ( event.mouse.wheel )
+                        {
+                        case mwLeft: step = -arStep; break;
+                        case mwRight: step = arStep; break;
+                        }
+                }
             if( step )
                 {
                 // E.g. when the bar is associated to a TListViewer, this message
