@@ -15,6 +15,7 @@ list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvision/geninc.cpp
 file(GLOB_RECURSE HELLOSRC "${CMAKE_CURRENT_SOURCE_DIR}/hello.cpp")
 file(GLOB_RECURSE TVEDITSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvedit/*.cpp")
 file(GLOB_RECURSE TVDEMOSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdemo/*.cpp")
+file(GLOB_RECURSE TVDIRSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdir/*.cpp")
 
 find_library(NCURSESW ncursesw)
 find_library(PTHREAD pthread)
@@ -31,7 +32,9 @@ add_library(tvision STATIC ${TVSOURCE})
 add_executable(hello ${HELLOSRC})
 add_executable(tvedit ${TVEDITSRC})
 add_executable(tvdemo ${TVDEMOSRC})
+add_executable(tvdir ${TVDIRSRC})
 
 target_link_libraries(hello ${LIBS})
 target_link_libraries(tvedit ${LIBS})
 target_link_libraries(tvdemo ${LIBS})
+target_link_libraries(tvdir ${LIBS})

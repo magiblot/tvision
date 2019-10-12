@@ -44,7 +44,7 @@ EXCLUDE=EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
 !endif
 !endif
 
-all: source\tvision examples\tvdemo examples\tvedit
+all: source\tvision examples\tvdemo examples\tvdir examples\tvedit
 
 source\tvision:
     CD ..\$@
@@ -57,6 +57,12 @@ source\tvision:
     CD $(PRJDIR)
 
 examples\tvdemo: source\tvision
+    CD ..\$@
+    IF EXIST *.CFG DEL *.CFG
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
+    CD $(PRJDIR)
+
+examples\tvdir: source\tvision
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
