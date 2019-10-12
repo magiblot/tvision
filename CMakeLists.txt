@@ -18,8 +18,7 @@ file(GLOB_RECURSE TVDEMOSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdemo/*.cpp")
 file(GLOB_RECURSE TVDIRSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdir/*.cpp")
 
 find_library(NCURSESW ncursesw)
-find_library(PTHREAD pthread)
-set(LIBS tvision ${NCURSESW} ${PTHREAD})
+set(LIBS tvision ${NCURSESW})
 
 # Optional dependencies
 find_library(GPM gpm)
