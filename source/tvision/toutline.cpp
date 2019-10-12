@@ -21,7 +21,7 @@
 #include <tvision/tv.h>
 #include <string.h>
 
-TOutlineViewer::TOutlineViewer(TRect& bounds, TScrollBar* aHScrollBar,
+TOutlineViewer::TOutlineViewer(const TRect& bounds, TScrollBar* aHScrollBar,
   TScrollBar* aVScrollBar) : TScroller(bounds, aHScrollBar, aVScrollBar)
 {
   growMode = gfGrowHiX + gfGrowHiY;
@@ -627,7 +627,7 @@ void TOutlineViewer::write(opstream& op)
 
 // TOutline
 
-TOutline::TOutline(TRect& bounds, TScrollBar* aHScrollBar,
+TOutline::TOutline(const TRect& bounds, TScrollBar* aHScrollBar,
                         TScrollBar* aVScrollBar,  TNode* aRoot) :
                 TOutlineViewer(bounds,    aHScrollBar, aVScrollBar)
 {

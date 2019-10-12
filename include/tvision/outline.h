@@ -75,7 +75,7 @@ struct _FAR TEvent;
 class TOutlineViewer : public TScroller
 {
 public:
-    TOutlineViewer(TRect& bounds, TScrollBar* aHScrollBar,
+    TOutlineViewer(const TRect& bounds, TScrollBar* aHScrollBar,
         TScrollBar* aVScrollBar);
     TOutlineViewer(StreamableInit s);
     virtual void adjust(TNode* node, Boolean expand)=0;
@@ -149,7 +149,7 @@ struct _FAR TEvent;
 class TOutline : public TOutlineViewer
 {
 public:
-    TOutline(TRect& bounds, TScrollBar* aHScrollBar, TScrollBar* aVScrollBar,
+    TOutline(const TRect& bounds, TScrollBar* aHScrollBar, TScrollBar* aVScrollBar,
         TNode* aRoot);
     ~TOutline();
 
