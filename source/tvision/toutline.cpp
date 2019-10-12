@@ -44,7 +44,7 @@ void TOutlineViewer::adjustFocus(int newFocus)
     scrollTo(delta.x, newFocus - size.y + 1);
 }
 
-static TDrawBuffer dBuf;
+static TDrawBuffer *pdBuf;
 static int auxPos;
 
 // Called to draw the outline
@@ -52,6 +52,7 @@ static int auxPos;
 Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
                   int position, long lines, ushort flags )
 {
+  TDrawBuffer &dBuf = *pdBuf;
   ushort  color;
   char s[256];
   char* graph;
@@ -96,6 +97,8 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
 void TOutlineViewer::draw()
 {
   ushort nrmColor = getColor(0x0401);
+  TDrawBuffer dBuf;
+  pdBuf = &dBuf;
 
   firstThat(drawTree);
   dBuf.moveChar(0, ' ', nrmColor, size.x);
