@@ -26,15 +26,14 @@
 #define Uses_TOutline
 #define Uses_TScrollBar
 #define Uses_TParamText
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 #include <dos.h>
 #include <string.h>
 #include <stdio.h>
-#include <conio.h>
 
-const cmDirTree       = 100;
-const cmAbout         = 101;
-const cmNewDirFocused = 102;
+const int cmDirTree       = 100;
+const int cmAbout         = 101;
+const int cmNewDirFocused = 102;
 
 class QuickMessage: public TWindow
 {
@@ -64,9 +63,9 @@ public:
 class TDirOutline: public TOutline {
   static TNode *parentSearch;
 public:
-  TDirOutline( TRect &bounds, TScrollBar *hsb, TScrollBar *vsb, TNode *root ):
+  TDirOutline( const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb, TNode *root ):
     TOutline( bounds, hsb, vsb, root ) {}
-  virtual void focused( i ) {
+  virtual void focused( int i ) {
     foc=i;
     message( owner, evCommand, cmNewDirFocused, 0 );
   }
@@ -145,7 +144,7 @@ class TFilePane: public TScroller {
   short fileCount;
 
 public:
-  TFilePane( TRect &bounds, TScrollBar *hsb, TScrollBar *vsb ):
+  TFilePane( const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb ):
     TScroller( bounds, hsb, vsb ) {
     fileCount=0;
     files=0;
