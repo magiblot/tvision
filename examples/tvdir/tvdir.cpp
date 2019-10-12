@@ -37,6 +37,8 @@
 static std::error_code ec = {};
 #endif
 
+#define ssprintf(buf, ...) snprintf(buf, sizeof(buf), __VA_ARGS__)
+
 const int cmDirTree       = 100;
 const int cmAbout         = 101;
 const int cmNewDirFocused = 102;
@@ -53,7 +55,7 @@ public:
     options |= ofCentered;
     palette = wpGrayWindow;
     char temp[30];
-    sprintf(temp,"Scanning Drive %s\n",drive );
+    ssprintf(temp,"Scanning Drive '%s'\n",drive );
     insert( new TStaticText( TRect( 2,2,28,3 ), temp ) );
     currentDir = new TParamText( TRect( 2,3,28,4 ) );
     insert( currentDir );
@@ -122,13 +124,13 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
 #ifdef __BORLANDC__
   find_t searchRec;
   int    result;
-  sprintf(searchPath,"%s\\*.*",path);
+  ssprintf(searchPath,"%s\\*.*",path);
   result = _dos_findfirst( searchPath, 0xff, &searchRec );
 
   while (result==0) {
     if (searchRec.name[0]!='.') {
       if (searchRec.attrib & FA_DIREC) {
-        sprintf(searchPath,"%s\\%s",path,searchRec.name);
+        ssprintf(searchPath,"%s\\%s",path,searchRec.name);
         qm->setCurrentDir(searchPath);
         temp = new TNode( searchRec.name, getDirList(searchPath,qm), 0, False );
         if (current) {
@@ -146,7 +148,7 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
     const char* name = name_path.c_str();
     if (name_path != "." && name_path != "..") {
       if (entry.is_directory(ec) && !entry.is_symlink(ec)) {
-        sprintf(searchPath,"%s%s%s",path,dirSeparator,name);
+        ssprintf(searchPath,"%s%s%s",path,dirSeparator,name);
         qm->setCurrentDir(searchPath);
         temp = new TNode( name, getDirList(searchPath,qm), 0, False );
         if (current) {
@@ -201,7 +203,7 @@ void TFilePane::newDir( const char *path ) {
 #ifdef __BORLANDC__
     find_t searchRec;
     int result;
-    sprintf(searchPath,"%s*.*",path);
+    ssprintf(searchPath,"%s*.*",path);
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC))
@@ -219,7 +221,7 @@ void TFilePane::newDir( const char *path ) {
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC)) {
-          sprintf(searchPath,"%-12s  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",searchRec.name,searchRec.size,
+          ssprintf(searchPath,"%-12s  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",searchRec.name,searchRec.size,
                     ((searchRec.wr_date & 0x01E0) >> 5),
                     (searchRec.wr_date & 0x001F),
                     ((searchRec.wr_date >> 9)+1980)%100,
@@ -239,7 +241,7 @@ void TFilePane::newDir( const char *path ) {
         fs::path name_path = entry.path().filename();
         const char* name = name_path.c_str();
         struct tm *lt = localtime(&((const time_t&) to_time_t(entry.last_write_time(ec))));
-          sprintf(searchPath,"%-20.20s  %8ld %2d-%02d-%02d  %2d:%02d",name,entry.file_size(ec),
+          ssprintf(searchPath,"%-20.20s  %8ld %2d-%02d-%02d  %2d:%02d",name,entry.file_size(ec),
                     lt->tm_mday,
                     lt->tm_mon + 1,
                     (lt->tm_year+1900)%100,
