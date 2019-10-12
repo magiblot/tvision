@@ -314,7 +314,7 @@ public:
         (event.message.command == cmNewDirFocused )) {
        ol->getCurrentPath(buffer,128);
        fp->newDir(buffer);
-       delete (void *)title;
+       delete[] (char *) title;
        title = newStr(buffer);
        clearEvent(event);
        ((TView *)frame)->drawView();
