@@ -32,22 +32,22 @@ const int
 class TNode
 {
 public:
-    TNode(char* aText);
-    TNode(char* aText, TNode* aChildren, TNode* aNext, Boolean initialState = True);
+    TNode(const char* aText);
+    TNode(const char* aText, TNode* aChildren, TNode* aNext, Boolean initialState = True);
     virtual ~TNode();
 
     TNode* next;
-    char* text;
+    const char* text;
     TNode* childList;
     Boolean expanded;
 };
 
-inline TNode::TNode(char* aText) :
+inline TNode::TNode(const char* aText) :
     next(0), text(newStr(aText)), childList(0), expanded(True)
 {
 }
 
-inline TNode::TNode( char* aText, TNode* aChildren,
+inline TNode::TNode( const char* aText, TNode* aChildren,
                      TNode* aNext, Boolean initialState ) :
     next(aNext), text(newStr(aText)),
     childList(aChildren), expanded(initialState)
@@ -55,7 +55,7 @@ inline TNode::TNode( char* aText, TNode* aChildren,
 }
 
 inline TNode::~TNode() {
-  delete [] text;
+  delete [] (char *) text;
 }
 
 /* ------------------------------------------------------------------------*/
