@@ -224,6 +224,7 @@ public:
     ushort lineEnd( ushort );
     ushort lineMove( ushort, int );
     ushort lineStart( ushort );
+    ushort indentedLineStart( ushort );
     void lock();
     void newLine();
     ushort nextChar( ushort );

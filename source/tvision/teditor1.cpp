@@ -564,7 +564,7 @@ void TEditor::handleEvent( TEvent& event )
                             setCurPtr(nextWord(curPtr), selectMode);
                             break;
                         case cmLineStart:
-                            setCurPtr(lineStart(curPtr), selectMode);
+                            setCurPtr(autoIndent ? indentedLineStart(curPtr) : lineStart(curPtr), selectMode);
                             break;
                         case cmLineEnd:
                             setCurPtr(lineEnd(curPtr), selectMode);

@@ -246,6 +246,15 @@ ushort TEditor::prevWord( ushort p )
     return p;
 }
 
+ushort TEditor::indentedLineStart( ushort P )
+{
+    ushort startPtr = lineStart(P);
+    ushort destPtr = startPtr;
+    char c;
+    while ( (c = bufChar(destPtr)) == ' ' || c == '\t' ) ++destPtr;
+    return destPtr == P ? startPtr : destPtr;
+}
+
 void TEditor::replace()
 {
     TReplaceDialogRec replaceRec( findStr, replaceStr, editorFlags );
