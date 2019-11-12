@@ -125,14 +125,32 @@ int countLines( const char *buf, uint count )
     return lines;
 }
 
-ushort scan( const void *block, ushort size, const char *str )
+ushort scan( const char *block, uint size, const char *str )
 {
-    BREAK;
+    uint i = 0, len = strlen(str);
+    if (len > 0)
+        while (i < size)
+        {
+            uint begin = i, j = 0;
+            while (i < size && block[i++] == str[j])
+                if (++j == len)
+                    return begin;
+        }
+    return sfSearchFailed;
 }
 
-ushort iScan( const void *block, ushort size, const char *str )
+ushort iScan( const char *block, uint size, const char *str )
 {
-    BREAK;
+    uint i = 0, len = strlen(str);
+    if (len > 0)
+        while (i < size)
+        {
+            uint begin = i, j = 0;
+            while (i < size && toupper(block[i++]) == toupper(str[j]))
+                if (++j == len)
+                    return begin;
+        }
+    return sfSearchFailed;
 }
 
 }
