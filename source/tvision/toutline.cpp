@@ -678,7 +678,7 @@ TNode* TOutline::getChild(TNode* node, int i)
   return p;
 }
 
-char* TOutline::getText(TNode* node)
+const char* TOutline::getText(TNode* node)
 {
   return node->text;
 }

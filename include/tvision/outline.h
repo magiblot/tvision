@@ -87,7 +87,7 @@ public:
     virtual TNode* getNode(int i);
     virtual TPalette& getPalette() const;
     virtual TNode* getRoot()=0;
-    virtual char* getText(TNode* node)=0;
+    virtual const char* getText(TNode* node)=0;
     virtual void handleEvent(TEvent& event);
     virtual Boolean hasChildren(TNode* node)=0;
     virtual Boolean isExpanded(TNode* node)=0;
@@ -157,7 +157,7 @@ public:
     virtual TNode* getRoot();
     virtual int getNumChildren(TNode* node);
     virtual TNode* getChild(TNode* node, int i);
-    virtual char* getText(TNode* node);
+    virtual const char* getText(TNode* node);
     virtual Boolean isExpanded(TNode* node);
     virtual Boolean hasChildren(TNode* node);
 
