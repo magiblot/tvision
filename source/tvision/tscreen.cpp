@@ -288,7 +288,7 @@ ushort TScreen::fixCrtMode( ushort mode )
         _AL = smCO80;
     return _AX;
 #else
-    BREAK;
+    return mode;
 #endif
 }
 

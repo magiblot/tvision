@@ -300,7 +300,6 @@ void THardwareInfo::setScreenMode( ushort mode )
  * https://docs.microsoft.com/en-us/windows/console/setconsolescreenbuffersize
  * https://docs.microsoft.com/en-us/windows/console/setconsolewindowinfo
  */
-    BREAK;
 #endif
 }
 
