@@ -523,7 +523,7 @@ void *TEditor::read( ipstream& is )
     canUndo = Boolean(temp);
     selecting = False;
     overwrite = False;
-    autoIndent = False;
+    autoIndent = True;
     lockCount = 0;
     keyState = 0;
     initBuffer();

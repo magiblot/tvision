@@ -178,7 +178,7 @@ TEditor::TEditor( const TRect& bounds,
     canUndo( True ),
     selecting( False ),
     overwrite( False ),
-    autoIndent( False ) ,
+    autoIndent( True ) ,
     lockCount( 0 ),
     keyState( 0 )
 {
