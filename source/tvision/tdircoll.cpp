@@ -129,8 +129,7 @@ Boolean validFileName( const char *fileName )
         return False;
     return True;
 #else
-    // Check if file exists or could be written to.
-    return (Boolean) (ifstream(fileName) || ofstream(fileName));
+    return (Boolean) (pathValid(fs::path(fileName).parent_path().c_str()));
 #endif
 }
 
