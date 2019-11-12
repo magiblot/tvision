@@ -38,7 +38,7 @@ TMenuBar *TEditorApp::initMenuBar( TRect r )
 {
 
       TSubMenu& sub1 = *new TSubMenu( "~F~ile", kbAltF ) +
-        *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
+        *new TMenuItem( "~O~pen", cmOpen, kbF3, hcNoContext, "F3" ) +
         *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
         *new TMenuItem( "~S~ave", cmSave, kbF2, hcNoContext, "F2" ) +
         *new TMenuItem( "S~a~ve as...", cmSaveAs, kbNoKey ) +
@@ -82,7 +82,7 @@ TStatusLine *TEditorApp::initStatusLine( TRect r )
         *new TStatusDef( 0, 0xFFFF ) +
             *new TStatusItem( 0, kbAltX, cmQuit) +
             *new TStatusItem( "~F2~ Save", kbF2, cmSave ) +
-            *new TStatusItem( "~Ctrl-O~ Open", kbF3, cmOpen ) +
+            *new TStatusItem( "~F3~ Open", kbF3, cmOpen ) +
             *new TStatusItem( "~Ctrl-W~ Close", kbAltF3, cmClose ) +
             *new TStatusItem( "~F5~ Zoom", kbF5, cmZoom ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmNext ) +
