@@ -38,9 +38,12 @@ PRJDIR = $(TVDIR)\PROJECT
 !endif
 !if !$d(EXCLUDE)  # To avoid conflicts in files with both a CPP and ASM version.
 !if $d(DOS32)
-EXCLUDE=EDITS.CPP FRAMELIN.ASM TVCURSOR.ASM TGRMV.ASM TTPRVLNS.ASM
+# This is done in several variables to work around the 'Command arguments too long' bug.
+EXCLUDE1 = EDITS.CPP FRAMELIN.ASM TVCURSOR.ASM TGRMV.ASM TTPRVLNS.ASM
+EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
 !else
-EXCLUDE=EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
+EXCLUDE1 = EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
+EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
 !endif
 !endif
 
@@ -50,7 +53,8 @@ source\tvision:
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG  # In case build failed last time.
     IF NOT EXIST excluded MD excluded
-    @for %f in ($(EXCLUDE)) do IF EXIST %f MOVE %f excluded
+    @for %f in ($(EXCLUDE1)) do IF EXIST %f MOVE %f excluded
+    @for %f in ($(EXCLUDE2)) do IF EXIST %f MOVE %f excluded
     $(MAKEDIR)\$(MAKE) $(TVFLAGS) -DSRCDIR=.
     MOVE excluded\* .
     RD excluded
@@ -72,4 +76,9 @@ examples\tvedit: source\tvision
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
+    CD $(PRJDIR)
+
+clean:
+    CD ..\source\tvision
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS) clean
     CD $(PRJDIR)
