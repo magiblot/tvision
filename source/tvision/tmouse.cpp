@@ -146,14 +146,16 @@ void THWMouse::getEvent( MouseEventType& me )
 {
 #if defined( __FLAT__ )
     me.buttons = 0;
+    me.wheel = 0;
     me.where.x = 0;
     me.where.y = 0;
     me.eventFlags = 0;
 #else
     _AX = 3;
     _genInt( 0x33 );
-    _AL = _BL;
+    _AX = _BX;
     me.buttons = _AL;
+    me.wheel = _AH == 0 ? 0 : char(_AH) > 0 ? mwDown : mwUp; // CuteMouse
     me.where.x = _CX >> 3;
     me.where.y = _DX >> 3;
     me.eventFlags = 0;

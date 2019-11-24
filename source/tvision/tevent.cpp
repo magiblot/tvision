@@ -190,6 +190,9 @@ Boolean TEventQueue::getMouseState( TEvent & ev )
         ev.what = THardwareInfo::getTickCount();
         ev.mouse = curMouse;
         result = True;
+        // 'wheel' represents an event, not a state. So, in order not to process
+        // a mouse wheel event more than once, this field must be set back to zero.
+        curMouse.wheel = 0;
         }
     else
         {
@@ -225,6 +228,7 @@ I   POP  AX
     MouseEventType tempMouse;
 
     tempMouse.buttons = _BL;
+    tempMouse.wheel = _BH == 0 ? 0 : char(_BH) > 0 ? mwDown : mwUp; // CuteMouse
     tempMouse.eventFlags = 0;
     tempMouse.where.x = _CX >> 3;
     tempMouse.where.y = _DX >> 3;
