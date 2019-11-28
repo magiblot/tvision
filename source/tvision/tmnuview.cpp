@@ -332,6 +332,7 @@ ushort TMenuView::execute()
                 if( e.message.command == cmMenu )
                     {
                     autoSelect = False;
+                    lastTargetItem = 0;
                     if (parentMenu != 0 )
                         action = doReturn;
                     }
