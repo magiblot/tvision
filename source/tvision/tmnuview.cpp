@@ -207,7 +207,12 @@ ushort TMenuView::execute()
                         action = doReturn;
                     }
                 else
+                    {
+                    // Menu gets closed by a click outside its bounds.
+                    // Let the event reach the view recovering focus.
+                    putEvent(e);
                     action =  doReturn;
+                    }
                 break;
             case  evMouseUp:
                 trackMouse(e, mouseActive);
