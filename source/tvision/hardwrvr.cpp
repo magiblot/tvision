@@ -21,25 +21,6 @@
 #include <tvision/tv.h>
 #include <dos.h>
 
-#ifndef __BORLANDC__
-#include <assert.h>
-#include <internal/platform.h>
-#include <internal/ncurdisp.h>
-#include <internal/ncursinp.h>
-#include <internal/ansidisp.h>
-#include <internal/linuxcon.h>
-#include <internal/getenv.h>
-#include <string>
-#include <sys/ioctl.h>
-#include <chrono>
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::steady_clock;
-
-std::unique_ptr<PlatformStrategy> platf;
-TEvent THardwareInfo::pendingMouseEvent;
-#endif
-
 #if defined( __FLAT__ )
 
 BOOL THardwareInfo::insertState = True;
@@ -98,7 +79,6 @@ static ushort AltCvt[89] = {
     0x8C00
 };
 
-
 #else
 
 Boolean THardwareInfo::dpmiFlag;
@@ -111,14 +91,13 @@ ushort THardwareInfo::biosSel;
 #if defined( __FLAT__ )
 
 #ifdef __BORLANDC__
+
 #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
-#endif
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
 THardwareInfo::THardwareInfo()
 {
-#ifdef __BORLANDC__
     HMODULE mod;
 
     if( (mod = GetModuleHandle( "KERNEL32" )) != 0 &&
@@ -153,22 +132,16 @@ THardwareInfo::THardwareInfo()
 
     consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
-#else
-    pendingEvent = 0;
-#endif
 }
 
-#ifdef __BORLANDC__
 void THardwareInfo::reloadScreenBufferInfo()
 {
     // Update sbInfo with the current screen buffer info.
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 }
-#endif
 
 void THardwareInfo::setUpConsole()
 {
-#ifdef __BORLANDC__
     // SetConsoleActiveScreenBuffer depends on Kernel32.dll.
     // It can't be executed in DOS mode.
     if( platform == plWinNT )
@@ -176,68 +149,16 @@ void THardwareInfo::setUpConsole()
         SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
         reloadScreenBufferInfo();
         }
-#else
-    // Set up input/output control.
-    /* At least with the ncurses implementation, display must be initialized
-     * before input. */
-    if (!platf)
-    {
-        DisplayStrategy *disp;
-        if (getEnv<std::string>("TVISION_DISPLAY") == "ansi")
-            disp = new AnsiDisplay<NcursesDisplay>();
-        else
-            disp = new NcursesDisplay();
-        if (isLinuxConsole())
-            platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
-        else
-            platf.reset(new PlatformStrategy(disp, new NcursesInput()));
-    }
-#endif
 }
 
 void THardwareInfo::restoreConsole()
 {
-#ifdef __BORLANDC__
     if( platform == plWinNT )
         SetConsoleActiveScreenBuffer( consoleHandle[cnStartup] );
-#else
-    // Tear down input/output control by deleting the platform strategy.
-    platf.reset();
-#endif
 }
-
-#ifndef __BORLANDC__
-/* We don't include these in hardware.h as done originally to prevent it to
- * depend on platform.h. Otherwise, any change in platform.h would affect
- * hardware.h, causing the whole tvision library to recompile. */
-
-bool THardwareInfo::isLinuxConsole()
-{
-    /* This is the same function used to get the Shift/Ctrl/Alt modifiers
-     * on the console. It fails if stdin is not a console file descriptor. */
-    char subcode = 6;
-    return ioctl(0, TIOCLINUX, &subcode) != -1;
-}
-
-// The price of composition.
-ushort THardwareInfo::getCaretSize() { return platf->getCaretSize(); }
-BOOL THardwareInfo::isCaretVisible() { return platf->isCaretVisible(); }
-ushort THardwareInfo::getScreenRows() { return platf->getScreenRows(); }
-ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
-void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
-DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
-void THardwareInfo::flushScreen() { platf->flushScreen(); }
-void THardwareInfo::resizeScreenBuffer( ushort *&buffer )
-{
-    freeScreenBuffer(buffer);
-    buffer = allocateScreenBuffer();
-    platf->onScreenResize();
-}
-#endif
 
 ushort THardwareInfo::getScreenMode()
 {
-#ifdef __BORLANDC__
     ushort mode;
 
     if( platform != plDPMI32 )      // B/W, mono not supported if running on
@@ -252,14 +173,10 @@ ushort THardwareInfo::getScreenMode()
     if( getScreenRows() > 25 )
         mode |= TDisplay::smFont8x8;
     return mode;
-#else
-    return platf->getScreenMode();
-#endif
 }
 
 void THardwareInfo::setScreenMode( ushort mode )
 {
-#ifdef __BORLANDC__
     COORD newSize = { 80, 25 };
     SMALL_RECT rect = { 0, 0, 79, 24 };
 
@@ -268,7 +185,6 @@ void THardwareInfo::setScreenMode( ushort mode )
         newSize.Y = 50;
         rect.Bottom = 49;
         }
-
     if( platform != plDPMI32 )
         {
         COORD maxSize = GetLargestConsoleWindowSize( consoleHandle[cnOutput] );
@@ -291,31 +207,16 @@ void THardwareInfo::setScreenMode( ushort mode )
         }
 
     reloadScreenBufferInfo();
-#else
-/* This function actually updates the screen info that's stored in sbInfo.
- * The screen resolution is 80x25 by default. If the small font has been set
- * in mode, the screen height is raised to 50.
- * To do this in Windows, a system call is required to resize the screen buffer
- * and another one to set the size of the screen buffer window.
- * https://docs.microsoft.com/en-us/windows/console/setconsolescreenbuffersize
- * https://docs.microsoft.com/en-us/windows/console/setconsolewindowinfo
- */
-#endif
 }
 
 void THardwareInfo::setCaretPosition( ushort x, ushort y )
 {
-#ifdef __BORLANDC__
     COORD coord = { x, y };
     SetConsoleCursorPosition( consoleHandle[cnOutput], coord );
-#else
-    platf->setCaretPosition(x, y);
-#endif
 }
 
 void THardwareInfo::setCaretSize( ushort size )
 {
-#ifdef __BORLANDC__
     if( size == 0 )
     {
         crInfo.bVisible = False;
@@ -328,29 +229,21 @@ void THardwareInfo::setCaretSize( ushort size )
     }
 
     SetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
-#else
-    platf->setCaretSize(size);
-#endif
 }
 
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
-#ifdef __BORLANDC__
     COORD size = {len,1};
     COORD from = {0,0};
     SMALL_RECT to = {x,y,x+len,y+1};
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
-#else
-    platf->screenWrite(x, y, buf, len);
-#endif
 }
 
 // Event functions.
 
 BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 {
-#ifdef __BORLANDC__
     if( !pendingEvent )
         {
         GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
@@ -379,49 +272,10 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
         return True;
         }
     return False;
-#else
-    if (pendingEvent) {
-        event = pendingMouseEvent.mouse;
-        pendingEvent = 0;
-        return True;
-    }
-    return False;
-#endif
 }
 
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
-#ifndef __BORLANDC__
-    /* This is a good place to refresh the display, since it guarantees a
-     * a refresh each time an event is processed or there's a wait timeout,
-     * and avoids unnecessary screen refreshes. */
-    THardwareInfo::flushScreen();
-    if (!pendingEvent)
-    {
-        if (platf->waitForEvent(eventTimeoutMs, event))
-        {
-            if (event.what & evKeyboard)
-            {
-                // Set/Reset insert flag.
-                if( event.keyDown.keyCode == kbIns )
-                    insertState = !insertState;
-                if( insertState )
-                    event.keyDown.controlKeyState |= kbInsState;
-                return True;
-            }
-            else if (event.what & evMouse)
-            {
-                /* Like in the original implementation, let mouse events
-                 * to be treated on the following polling loop. */
-                pendingMouseEvent = event;
-                pendingEvent = 1;
-                return False;
-            }
-            return (Boolean) event.what != evNothing;
-        }
-    }
-    return False;
-#else
     if( !pendingEvent )
         {
         // Don't do busy polling. Wait for a timeout instead.
@@ -480,8 +334,16 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
         }
 
     return False;
-#endif
 }
+
+ulong THardwareInfo::getTickCount()
+{
+    // To change units from ms to clock ticks.
+    //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
+    return GetTickCount() / 55;
+}
+
+#endif  // __BORLANDC__
 
 BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
 {
@@ -492,19 +354,6 @@ BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
         }
     else
         return FALSE; // Don't handle 'CLOSE', 'LOGOFF' or 'SHUTDOWN' events.
-}
-
-ulong THardwareInfo::getTickCount()
-{
-#ifdef __BORLANDC__
-    // To change units from ms to clock ticks.
-    //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
-    return GetTickCount() / 55;
-#else
-    /* This effectively gives a system time reference in milliseconds.
-     * steady_clock is best suited for measuring intervals. */
-    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count() / 55;
-#endif
 }
 
 #endif  // __FLAT__
