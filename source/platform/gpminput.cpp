@@ -4,6 +4,7 @@
 #include <tvision/tv.h>
 
 #include <internal/gpminput.h>
+#include <internal/linuxcon.h>
 #include <unordered_map>
 using std::unordered_map;
 
@@ -45,9 +46,15 @@ int GpmInput::getButtonCount()
 
 void GpmInput::drawPointer()
 {
-    // Do not draw the pointer unless we captured its position at least once.
-    if (mousePos.x >= 0)
-        Gpm_DrawPointer(mousePos.x, mousePos.y, 0);
+    // Do not draw the pointer if our tty is not active.
+    if (LinuxConsoleStrategy::ttyActive())
+    {
+        // Do not draw the pointer unless we captured its position at least once.
+        if (mousePos.x >= 0)
+            Gpm_DrawPointer(mousePos.x, mousePos.y, 0);
+    }
+    else
+        mousePos = {-1, -1};
 }
 
 bool GpmInput::getEvent(TEvent &ev)
