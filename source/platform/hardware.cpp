@@ -1,6 +1,5 @@
 #define Uses_TKeys
 #define Uses_TEvent
-#define Uses_TProgram
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
@@ -9,6 +8,7 @@
 #include <internal/ncursinp.h>
 #include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
+#include <internal/sighandl.h>
 #include <internal/getenv.h>
 #include <string>
 #include <sys/ioctl.h>
@@ -22,6 +22,7 @@ TEvent THardwareInfo::pendingMouseEvent;
 THardwareInfo::THardwareInfo()
 {
     pendingEvent = 0;
+    static TSignalHandler h;
 }
 
 bool THardwareInfo::isLinuxConsole()
