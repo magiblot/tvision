@@ -16,6 +16,8 @@
 #if !defined(__DIR_H)
 #define __DIR_H
 
+// For the functions commented out below, which have slightly different
+// specifiers in modern POSIX.
 #include <unistd.h>
 
 #if !defined(___DEFS_H)
@@ -74,37 +76,29 @@ struct  ffblk   {
 
 #endif  /* __FLAT__  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int         _RTLENTRYF _EXPFUNC32   chdir( const char _FAR *__path );
-// int         _RTLENTRYF _EXPFUNC     findfirst( const char _FAR *__path,
-//                                     struct ffblk _FAR *__ffblk,
-//                                     int __attrib );
-// int         _RTLENTRYF _EXPFUNC     findnext( struct ffblk _FAR *__ffblk );
-// void        _RTLENTRYF _EXPFUNC     fnmerge( char _FAR *__path,
-//                                     const char _FAR *__drive,
-//                                     const char _FAR *__dir,
-//                                     const char _FAR *__name,
-//                                     const char _FAR *__ext );
-// int         _RTLENTRYF _EXPFUNC     fnsplit(const char _FAR *__path,
-//                                     char _FAR *__drive,
-//                                     char _FAR *__dir,
-//                                     char _FAR *__name,
-//                                     char _FAR *__ext );
-// int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
+// int         _RTLENTRYF _EXPFUNC32   chdir( const char _FAR *__path );
+int         _RTLENTRYF _EXPFUNC     findfirst( const char _FAR *__path,
+                                    struct ffblk _FAR *__ffblk,
+                                    int __attrib );
+int         _RTLENTRYF _EXPFUNC     findnext( struct ffblk _FAR *__ffblk );
+void        _RTLENTRYF _EXPFUNC     fnmerge( char _FAR *__path,
+                                    const char _FAR *__drive,
+                                    const char _FAR *__dir,
+                                    const char _FAR *__name,
+                                    const char _FAR *__ext );
+int         _RTLENTRYF _EXPFUNC     fnsplit(const char _FAR *__path,
+                                    char _FAR *__drive,
+                                    char _FAR *__dir,
+                                    char _FAR *__name,
+                                    char _FAR *__ext );
+int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
 // char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
-// int         _RTLENTRY  _EXPFUNC32   getdisk( void );
+int         _RTLENTRY  _EXPFUNC32   getdisk( void );
 int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
-// char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
-int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );
+char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
+// int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );
 char _FAR * _RTLENTRYF _EXPFUNC32   searchpath( const char _FAR *__file );
-// int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );
-
-#ifdef __cplusplus
-}
-#endif
+int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );
 
 #endif  /* __DIR_H */
 

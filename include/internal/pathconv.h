@@ -1,0 +1,35 @@
+#ifndef PATHCONV_H
+#define PATHCONV_H
+
+#include <string>
+#include <algorithm>
+#include <string.h>
+#include <cctype>
+
+// path_dos2unix: replaces '\' with '/' and removes drive letter.
+
+inline void path_dos2unix(std::string &s) {
+    std::replace(s.begin(), s.end(), '\\', '/');
+    if (s.size() > 1 && s[1] == ':' && isalpha(s[0]))
+        s = s.substr(2);
+}
+
+inline void path_dos2unix(char *c) {
+    char *d = c;
+    while ((d = strchr(d, '\\')))
+        *d = '/';
+    if (*c && c[1] == ':' && isalpha(*c))
+        memmove(c, c+2, strlen(c)-1); // Copies null terminator as well.
+}
+
+// path_unix2dos: replaces '/' with '\'.
+
+inline void path_unix2dos(std::string &s) {
+    std::replace(s.begin(), s.end(), '/', '\\');
+}
+
+inline void path_unix2dos(char *c) {
+    while ((c = strchr(c, '/')))
+        *c = '\\';
+}
+#endif
