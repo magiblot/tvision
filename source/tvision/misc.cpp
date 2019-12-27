@@ -44,7 +44,10 @@ Boolean lowMemory()
 char *strnzcpy( char *dest, const char *src, size_t n )
 {
     // Same as strncpy, but always adds a terminator.
-    strncpy( dest, src, n-1 );
-    dest[n-1] = '\0';
+    if (n)
+    {
+        strncpy( dest, src, n-1 );
+        dest[n-1] = '\0';
+    }
     return dest;
 }
