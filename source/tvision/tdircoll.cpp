@@ -61,7 +61,9 @@ I       XCHG    AX, CX      // Put the return value into AX
     return (Boolean) (GetLogicalDrives() & mask);
 #endif
 #else
-    return True;
+    // Unless otherwise necessary, we will emulate there's only one disk:
+    // the one returned by getdisk(), which is C by default.
+    return Boolean( drive - 'A' == getdisk() );
 #endif
 }
 
