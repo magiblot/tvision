@@ -304,7 +304,9 @@ void fexpand( char *rpath )
     while( (p = strchr( p, '/' )) != 0 )
         *p = '\\';
     fnmerge( path, drive, dir, file, ext );
+#ifndef __FLAT__
     strupr( path );
+#endif
     strcpy( rpath, path );
 }
 
