@@ -51,11 +51,6 @@
 #include <strstrea.h>
 #endif
 
-#ifndef __BORLANDC__
-#include <internal/filesys.h>
-#include <assert.h>
-#endif
-
 // File dialog flags
 const int
     ffOpen        = 0x0001,
@@ -73,7 +68,6 @@ TFileDialog::TFileDialog( const char *aWildCard,
                         ) :
     TDialog( TRect( 15, 1, 64, 20 ), aTitle ),
     directory( newStr("") ),
-    fullPath( newStr("") ),
     TWindowInit( &TFileDialog::initFrame )
 {
     options |= ofCentered;
@@ -150,8 +144,6 @@ TFileDialog::TFileDialog( const char *aWildCard,
 TFileDialog::~TFileDialog()
 {
     delete[] (char *) directory;
-    if ( fullPath )
-        delete[] (char *) fullPath;
 }
 
 void TFileDialog::shutDown()
@@ -195,9 +187,8 @@ static void trim( char *dest, const char *src )
     *dest = EOS;
 }
 
-const char* TFileDialog::getFileName()
+void TFileDialog::getFileName( char *s )
 {
-#ifdef __BORLANDC__
 char buf[2*MAXPATH];
 char drive[MAXDRIVE];
 char path[MAXDIR];
@@ -232,27 +223,7 @@ char TExt[MAXEXT];
                 }
             }
         }
-    if ( fullPath )
-        delete[] (char *) fullPath;
-    fullPath = newStr( buf );
-#else
-    fs::path file(fileName->data);
-    if (directory && file.is_relative())
-        {
-        fs::path dir(directory);
-        file = dir/file;
-        }
-    file = fexpand(file);
-    if ( fullPath )
-        delete[] fullPath;
-    fullPath = newStr( file.c_str() );
-#endif
-    return fullPath;
-}
-
-void TFileDialog::getFileName( char *s )
-{
-    strnzcpy( s, getFileName(), MAXPATH );
+    strcpy( s, buf );
 }
 
 void TFileDialog::handleEvent(TEvent& event)
@@ -283,13 +254,8 @@ void TFileDialog::handleEvent(TEvent& event)
 
 void TFileDialog::readDirectory()
 {
-#ifdef __BORLANDC__
     char curDir[MAXPATH];
     getCurDir( curDir );
-#else
-    fs::path p = getCurDir();
-    const char* curDir = p.c_str();
-#endif
     if( directory )
         delete[] (char *) directory;
     directory = newStr( curDir );
@@ -328,13 +294,11 @@ Boolean TFileDialog::checkDirectory( const char *str )
 
 Boolean TFileDialog::valid(ushort command)
 {
-#ifdef __BORLANDC__
 char fName[MAXPATH];
 char drive[MAXDRIVE];
 char dir[MAXDIR];
 char name[MAXFILE];
 char ext[MAXEXT];
-#endif
 
     if( command == 0 )
         return True;
@@ -343,7 +307,6 @@ char ext[MAXEXT];
         {
         if( command != cmCancel && command != cmFileClear )
             {
-#ifdef __BORLANDC__
             getFileName( fName );
 
             if( isWild( fName ) )
@@ -375,30 +338,6 @@ char ext[MAXEXT];
                     fileList->readDirectory( directory, wildCard );
                     }
                 }
-#else
-            const char* fName = getFileName();
-            fs::path path(fName);
-            fs::path wild(wildCard);
-            bool isWild = ::isWild(fName), isDir = ::isDir(fName);
-            if ( isWild )
-                {
-                wild = path.filename();
-                path = path.parent_path();
-                }
-            if ( isWild || isDir )
-                {
-                if (checkDirectory(path.c_str()))
-                    {
-                    delete[] (char *) directory;
-                    path /= "";
-                    directory = newStr( path.c_str() );
-                    strnzcpy( wildCard, wild.c_str(), sizeof(wildCard) );
-                    if( command != cmFileInit )
-                        fileList->select();
-                    fileList->readDirectory( directory, wildCard );
-                    }
-                }
-#endif
             else if( validFileName( fName ) )
                 return True;
             else

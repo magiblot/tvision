@@ -30,13 +30,6 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#ifndef __BORLANDC__
-#include <internal/filesys.h>
-#include <fstream.h>
-#include <system_error>
-static std::error_code ec = {};
-#endif
-
 #pragma warn -asc
 
 Boolean driveValid( char drive )
@@ -76,18 +69,13 @@ I       XCHG    AX, CX      // Put the return value into AX
 
 Boolean isDir( const char *str )
 {
-#ifdef __BORLANDC__
     ffblk ff;
     return Boolean( findfirst( str, &ff, FA_DIREC ) == 0 &&
                     (ff.ff_attrib & FA_DIREC) != 0 );
-#else
-    return (Boolean) fs::is_directory(str, ec);
-#endif
 }
 
 Boolean pathValid( const char *path )
 {
-#ifdef __BORLANDC__
     char expPath[MAXPATH];
     strcpy( expPath, path );
     fexpand( expPath );
@@ -99,14 +87,10 @@ Boolean pathValid( const char *path )
         expPath[len-1] = EOS;
 
     return isDir( expPath );
-#else
-    return isDir( path );
-#endif
 }
 
 Boolean validFileName( const char *fileName )
 {
-#ifdef __BORLANDC__
 #ifndef __FLAT__
     static const char * const illegalChars = ";,=+<>|\"[] \\";
 #else
@@ -128,14 +112,10 @@ Boolean validFileName( const char *fileName )
       )
         return False;
     return True;
-#else
-    return (Boolean) (pathValid(fs::path(fileName).parent_path().c_str()));
-#endif
 }
 
 void getCurDir( char *dir )
 {
-#ifdef __BORLANDC__
     dir[0] = (char) (getdisk() + 'A');
     dir[1] = ':';
     dir[2] = '\\';
@@ -143,29 +123,13 @@ void getCurDir( char *dir )
     getcurdir( 0, dir+3 );
     if( strlen( dir ) > 3 )
         strcat( dir, "\\" );
-#else
-    strnzcpy(dir, getCurDir().c_str(), MAXPATH);
-#endif
 }
-
-#ifndef __BORLANDC__
-fs::path getCurDir()
-{   // Append a separator at the end, as the original does.
-    return fs::current_path(ec) / "";
-}
-#endif
 
 Boolean isWild( const char *f )
 {
     return Boolean( strpbrk( f, "?*" ) != 0 );
 }
 
-#ifdef __BORLANDC__
-const char* dirSeparator = "\\";
-#else // Allow the compiler to decide what the separator is.
-static const fs::path preferredSeparator = fs::path("/").make_preferred();
-const char* dirSeparator = preferredSeparator.c_str();
-#endif
 
 TStreamable *TDirCollection::build()
 {

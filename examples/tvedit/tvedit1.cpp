@@ -76,11 +76,7 @@ TEditorApp::TEditorApp( int argc, char **argv ) :
         {                                           // on command line.
         strcpy( fileName, "");
         int len = strlen( *++argv );
-#ifdef __BORLANDC__
         if (len > 1 && (*argv)[1] != ':' && (*argv)[0] != '\\')
-#else
-        if (len > 0 && (*argv)[0] != *dirSeparator)
-#endif
         /* If it's a relative path, append the current directory in front.
          * Otherwise, Turbo Vision will assume the root directory. */
             getCurDir( fileName );

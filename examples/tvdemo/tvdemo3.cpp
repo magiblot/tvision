@@ -69,8 +69,10 @@ void TVDemo::openFile( const char *fileSpec )
 
     if( d != 0 && deskTop->execView( d ) != cmCancel )
         {
+        char fileName[MAXPATH];
+        d->getFileName( fileName );
         d->helpCtx = hcFOFileOpenDBox;
-        TView *w= validView( new TFileWindow( d->getFileName() ) );
+        TView *w= validView( new TFileWindow( fileName ) );
         if( w != 0 )
             deskTop->insert(w);
     }

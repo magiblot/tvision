@@ -405,7 +405,6 @@ public:
 
     virtual void getData( void *rec );
     void getFileName( char *s );
-    const char* getFileName();
     virtual void handleEvent( TEvent& event );
     virtual void setData( void *rec );
     virtual Boolean valid( ushort command );
@@ -417,8 +416,6 @@ public:
     const char *directory;
 
 private:
-
-    const char *fullPath;
 
     void readDirectory();
 

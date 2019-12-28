@@ -91,7 +91,7 @@ void TVDemo::handleEvent(TEvent &event)
                 break;
 
             case cmOpenCmd:             //  View a file
-                openFile(wildcardAll);
+                openFile("*.*");
                 break;
 
             case cmChDirCmd:            //  Change directory

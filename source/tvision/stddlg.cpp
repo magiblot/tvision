@@ -83,7 +83,7 @@ void TFileInputLine::handleEvent( TEvent& event )
         strcpy( data, ((TSearchRec *)event.message.infoPtr)->name );
         if( (((TSearchRec *)event.message.infoPtr)->attr & FA_DIREC) != 0 )
             {
-            strcat( data, dirSeparator );
+            strcat( data, "\\" );
             strcat( data, ((TFileDialog *)owner)->wildCard );
             }
         drawView();

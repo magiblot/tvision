@@ -91,11 +91,7 @@ void TChDirDialog::getData( void * )
 static void trimEndSeparator(char *path)
 {
     int len = strlen( path );
-#ifdef __BORLANDC__
     if( len > 3 && path[len-1] == '\\' )
-#else
-    if( len > 1 && path[len-1] == *dirSeparator )
-#endif
         path[len-1] = EOS;
 }
 
@@ -120,8 +116,8 @@ void TChDirDialog::handleEvent( TEvent& event )
                         break;
                     else if( driveValid( curDir[0] ) )
                         {
-                        if( curDir[strlen(curDir)-1] != *dirSeparator )
-                            strcat( curDir, dirSeparator );
+                        if( curDir[strlen(curDir)-1] != '\\' )
+                            strcat( curDir, "\\" );
                         }
                     else
                         return;
@@ -164,10 +160,8 @@ void TChDirDialog::setUpDialog()
 
 static int changeDir( const char *path )
 {
-#ifdef __BORLANDC__
     if( path[1] == ':' )
         setdisk( toupper(path[0]) - 'A' );
-#endif
     return chdir( path );
 }
 

@@ -32,12 +32,6 @@
 #include <stdio.h>
 #include <strstrea.h>
 
-#ifndef __BORLANDC__
-#include <internal/filesys.h>
-#include <system_error>
-static std::error_code ec = {};
-#endif
-
 const int cmDirTree       = 100;
 const int cmAbout         = 101;
 const int cmNewDirFocused = 102;
@@ -104,12 +98,12 @@ void TDirOutline::getCurrentPath( char *buffer, short bufferSize ) {
     while (current!=root) {
       strcpy(temp2,temp1);
       strcpy(temp1,current->text);
-      strcat(temp1,dirSeparator);
+      strcat(temp1,"\\");
       strcat(temp1,temp2);
       current = getParent( current );
     }
     strncpy(buffer,root->text,bufferSize);
-    strncat(buffer,dirSeparator,bufferSize);
+    strncat(buffer,"\\",bufferSize);
     strncat(buffer,temp1,bufferSize);
 }
 
@@ -119,12 +113,11 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
   TNode  *dirList = 0,
          *current = 0;
   char   searchPath[128];
-  ostrstream os( searchPath, sizeof( searchPath ) );
-  TNode  *temp;
-
-#ifdef __BORLANDC__
   find_t searchRec;
   int    result;
+  TNode  *temp;
+
+  ostrstream os( searchPath, sizeof( searchPath ) );
   os << path << "\\*.*" << ends;
   result = _dos_findfirst( searchPath, 0xff, &searchRec );
 
@@ -144,25 +137,6 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
     }
     result = _dos_findnext( &searchRec );
   }
-#else
-  for (const fs::directory_entry &entry : fs::directory_iterator(fs::path(path), ec)) {
-    fs::path name_path = entry.path().filename();
-    const char* name = name_path.c_str();
-    if (name_path != "." && name_path != "..") {
-      if (entry.is_directory(ec) && !entry.is_symlink(ec)) {
-        os.seekp(0);
-        os << path << dirSeparator << name << ends;
-        qm->setCurrentDir(searchPath);
-        temp = new TNode( name, getDirList(searchPath,qm), 0, False );
-        if (current) {
-          current->next = temp;
-          current=current->next;
-        } else
-          current = dirList = temp;
-      }
-    }
-  }
-#endif
   return dirList;
 }
 
@@ -196,33 +170,26 @@ void TFilePane::draw() {
 
 void TFilePane::newDir( const char *path ) {
     char searchPath[128];
-    ostrstream os( searchPath, sizeof( searchPath ) );
+    find_t searchRec;
+    int result;
     short i;
 
     for (i=0;i<fileCount;i++)
       delete files[i];
     delete [] files;
-    fileCount=0;
 
-#ifdef __BORLANDC__
-    find_t searchRec;
-    int result;
+    ostrstream os( searchPath, sizeof( searchPath ) );
     os << path << "*.*" << ends;
+    fileCount=0;
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC))
         fileCount++;
       result=_dos_findnext( &searchRec );
     }
-#else
-    for (const fs::directory_entry &entry : fs::directory_iterator(fs::path(path), ec))
-      if (!entry.is_directory(ec))
-        fileCount++;
-#endif
     files = new char *[fileCount];
-    i=0;
-#ifdef __BORLANDC__
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
+    i=0;
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC)) {
           sprintf(searchPath,"%-18.18s  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",searchRec.name,searchRec.size,
@@ -239,23 +206,6 @@ void TFilePane::newDir( const char *path ) {
       }
       result=_dos_findnext( &searchRec );
     }
-#else
-    for (const fs::directory_entry &entry : fs::directory_iterator(fs::path(path), ec)) {
-      if (!entry.is_directory(ec)) {
-        fs::path name_path = entry.path().filename();
-        const char* name = name_path.c_str();
-        struct tm *lt = localtime(&((const time_t&) to_time_t(entry.last_write_time(ec))));
-          sprintf(searchPath,"%-20.20s  %8ld %2d-%02d-%02d  %2d:%02d",name,entry.file_size(ec),
-                    lt->tm_mday,
-                    lt->tm_mon + 1,
-                    (lt->tm_year+1900)%100,
-                    lt->tm_hour,
-                    lt->tm_min);
-          //TODO: file attributes/permissions
-        files[i++] = newStr(searchPath);
-      }
-    }
-#endif
     if (fileCount==0)
       setLimit( 1, 1 );
     else
@@ -367,7 +317,7 @@ void TDirApp::handleEvent( TEvent& event )
         switch( event.message.command )
             {
             case cmAbout:
-                aboutBox();
+                    aboutBox();
                 clearEvent( event );
                 break;
             case cmDirTree:
@@ -434,12 +384,9 @@ int main( int argc, char *argv[] )
     if (argc==2)
       strcpy(drive,argv[1]);
     else
-#ifdef __BORLANDC__
-      strcpy(drive,"C:");
-#else
+      // strcpy(drive,"C:");
       // Traversing the whole drive is insane.
-      strcat(drive,".");
-#endif
+      strcpy(drive,".");
 
     TDirApp *dirApp = new TDirApp( drive );
     dirApp->run();
