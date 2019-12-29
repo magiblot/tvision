@@ -161,17 +161,6 @@ static Boolean relativePath( const char *path )
         return True;
 }
 
-static void noWildChars( char *dest, const char *src )
-{
-    while( *src != EOS )
-        {
-        if( *src != '?' && *src != '*' )
-            *dest++ = *src;
-        src++;
-        }
-    *dest = EOS;
-}
-
 /* 'src' is cast to unsigned char * so that isspace sign extends it
    correctly. */
 static void trim( char *dest, const char *src )
@@ -205,23 +194,10 @@ char TExt[MAXEXT];
         }
     fexpand( buf );
     fnsplit( buf, drive, path, name, ext );
-    if( (name[0] == EOS || ext[0] == EOS) && !isDir( buf ) )
+    if( name[0] == EOS && ext[0] == EOS )
         {
         fnsplit( wildCard, 0, 0, TName, TExt );
-        if( name[0] == EOS && ext[0] == EOS )
-            fnmerge( buf, drive, path, TName, TExt );
-        else if( name[0] == EOS )
-            fnmerge( buf, drive, path, TName, ext );
-        else if( ext[0] == EOS )
-            {
-            if( isWild( name ) )
-                fnmerge( buf, drive, path, name, TExt );
-            else
-                {
-                fnmerge( buf, drive, path, name, 0 );
-                noWildChars( buf + strlen(buf), TExt );
-                }
-            }
+        fnmerge( buf, drive, path, TName, TExt );
         }
     strcpy( s, buf );
 }
