@@ -71,18 +71,8 @@ TEditorApp::TEditorApp( int argc, char **argv ) :
         TEditor::clipboard->canUndo = False;
         }
 
-    char fileName[MAXPATH];
     while (--argc > 0)                              // Open files specified
-        {                                           // on command line.
-        strcpy( fileName, "");
-        int len = strlen( *++argv );
-        if (len > 1 && (*argv)[1] != ':' && (*argv)[0] != '\\')
-        /* If it's a relative path, append the current directory in front.
-         * Otherwise, Turbo Vision will assume the root directory. */
-            getCurDir( fileName );
-        strcat( fileName, *argv );
-        openEditor(fileName, True);
-        }
+        openEditor(*++argv, True);                  // on command line.
     cascade();
 }
 
