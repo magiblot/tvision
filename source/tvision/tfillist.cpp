@@ -241,30 +241,40 @@ void TFileList::readDirectory( const char *aWildCard )
 
 */
 
+inline static void skip( char *&src, char k )
+{
+    while( *src == k )
+        src++;
+}
+
 void squeeze( char *path )
 {
     char *dest = path;
     char *src = path;
+    char last = '\0';
     while( *src != 0 )
         {
-        if( *src != '.' )
-            *dest++ = *src++;   // just copy it...
-        else
+        if( last == '\\' )
+            skip( src, '\\' );  // skip repeated '\'
+        if( (!last || last == '\\') && *src == '.' )
             {
             src++;
-            if( *src == '.' && *(src + 1) == '\\') // if it's a '..' followed by '\'
-                {               // have a '..'
-                src += 2;       // skip the following '\'
+            if( !*src || *src == '\\' ) // have a '.' or '.\'
+                skip( src, '\\' );
+            else if( *src == '.' && (!src[1] || src[1] == '\\'))
+                {               // have a '..' or '..\'
+                src++;          // skip the following '.'
+                skip( src, '\\' );
                 dest--;         // back up to the previous '\'
                 while( dest > path && *--dest != '\\' ) // back up to the previous '\'
                     ;
                 dest++;         // move to the next position
                 }
-            else if (*src == '\\') // if it's a '.' followed by '\'
-                src++;          // skip the following '\'
             else
-                *dest++ = *(src - 1); // copy the '.' we just skipped
+                last = *dest++ = src[-1]; // copy the '.' we just skipped
             }
+        else
+            last = *dest++ = *src++;   // just copy it...
         }
     *dest = EOS;                // zero terminator
 }
@@ -287,8 +297,9 @@ void fexpand( char *rpath )
     drive[0] = toupper(drive[0]);
     if( (flags & DIRECTORY) == 0 || (dir[0] != '\\' && dir[0] != '/') )
         {
-        char curdir[MAXDIR];
+        char curdir[MAXDIR+1];
         getcurdir( drive[0] - 'A' + 1, curdir );
+        strcat( curdir, "\\" );
         strcat( curdir, dir );
         if( *curdir != '\\' && *curdir != '/' )
             {
@@ -299,10 +310,10 @@ void fexpand( char *rpath )
             strcpy( dir, curdir );
         }
 
-    squeeze( dir );
     char *p = dir;
     while( (p = strchr( p, '/' )) != 0 )
         *p = '\\';
+    squeeze( dir );
     fnmerge( path, drive, dir, file, ext );
 #ifndef __FLAT__
     strupr( path );
