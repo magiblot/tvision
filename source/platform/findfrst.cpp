@@ -127,16 +127,11 @@ bool FindFirstRec::setPath(const char* pathname)
 bool FindFirstRec::matchEntry(struct dirent* e)
 {
     struct stat st;
-    // Read file stats and apply wildcard pattern on its name.
-    if (stat((searchDir + e->d_name).c_str(), &st) == 0
-        && wildcardMatch(wildcard.c_str(), e->d_name))
+    if (wildcardMatch(wildcard.c_str(), e->d_name) &&
+        stat((searchDir + e->d_name).c_str(), &st) == 0)
     {
         unsigned int fileAttr = cvtAttr(&st, e->d_name);
-        // Behaviour from the original _dos_findnext: 'if requested attribute
-        // word includes hidden, system, or subdirectory bits, return
-        // normal files AND those with any of the requested attributes'.
-        if (!(fileAttr & SPECIAL_BITS) ||
-             (searchAttr & fileAttr & SPECIAL_BITS))
+        if (attrMatch(fileAttr))
         {
             // Match found, fill finfo.
             finfo->size = st.st_size;
@@ -147,6 +142,14 @@ bool FindFirstRec::matchEntry(struct dirent* e)
         }
     }
     return false;
+}
+
+bool FindFirstRec::attrMatch(unsigned int attrib)
+{
+    // Behaviour from the original _dos_findnext: 'if requested attribute
+    // word includes hidden, system, or subdirectory bits, return
+    // normal files AND those with any of the requested attributes'.
+    return !(attrib & SPECIAL_BITS) || (searchAttr & attrib & SPECIAL_BITS);
 }
 
 bool FindFirstRec::wildcardMatch(char const *wildcard, char const *filename)

@@ -40,6 +40,7 @@ private:
     bool setPath(const char*);
     bool matchEntry(struct dirent*);
 
+    bool attrMatch(unsigned int attrib);
     static bool wildcardMatch(char const *wildcard, char const *filename);
     static unsigned int cvtAttr(struct stat *st, const char* filename);
     static void cvtTime(struct stat *st, struct find_t *fileinfo);
