@@ -88,10 +88,12 @@ void TChDirDialog::getData( void * )
 {
 }
 
+#define isSeparator(c) (c == '\\' || c == '/')
+
 static void trimEndSeparator(char *path)
 {
     int len = strlen( path );
-    if( len > 3 && path[len-1] == '\\' )
+    if( len > 3 && isSeparator(path[len-1]) )
         path[len-1] = EOS;
 }
 
@@ -116,7 +118,8 @@ void TChDirDialog::handleEvent( TEvent& event )
                         break;
                     else if( driveValid( curDir[0] ) )
                         {
-                        if( curDir[strlen(curDir)-1] != '\\' )
+                        int len = strlen( curDir );
+                        if( !isSeparator(curDir[len-1]) )
                             strcat( curDir, "\\" );
                         }
                     else
