@@ -173,7 +173,7 @@ void TFileList::readDirectory( const char *aWildCard )
             p = new DirSearchRec;
             if( p != 0 )
                 {
-        p->readFf_blk(&s);
+                p->readFf_blk(&s);
                 fileList->insert( p );
                 }
             }
@@ -190,7 +190,7 @@ void TFileList::readDirectory( const char *aWildCard )
             p = new DirSearchRec;
             if( p != 0 )
                 {
-        p->readFf_blk(&s);
+                p->readFf_blk(&s);
                 fileList->insert( p );
                 }
             }
@@ -202,11 +202,9 @@ void TFileList::readDirectory( const char *aWildCard )
         p = new DirSearchRec;
         if( p != 0 )
             {
-            if( findfirst( path, &s, FA_DIREC ) == 0 &&
-                findnext( &s ) == 0 &&
-                strcmp( s.ff_name, ".." ) == 0
-            )
-            p->readFf_blk(&s);
+            fnmerge( path, drive, dir, "..", 0 );
+            if( findfirst( path, &s, FA_DIREC ) == 0 )
+                p->readFf_blk(&s);
             else
                 {
                 strcpy( p->name, ".." );
