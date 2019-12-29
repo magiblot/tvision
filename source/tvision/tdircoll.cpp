@@ -76,16 +76,22 @@ Boolean isDir( const char *str )
                     (ff.ff_attrib & FA_DIREC) != 0 );
 }
 
+#define isSeparator(c) (c == '\\' || c == '/')
+
 Boolean pathValid( const char *path )
 {
     char expPath[MAXPATH];
     strcpy( expPath, path );
     fexpand( expPath );
     int len = strlen(expPath);
+#ifdef __BORLANDC__
     if( len <= 3 )
         return driveValid(expPath[0]);
-
-    if( expPath[len-1] == '\\' )
+#else
+    if( len == 1 && isSeparator(expPath[0]) )
+        return True; // Root directory is always valid.
+#endif
+    if( isSeparator(expPath[len-1]) )
         expPath[len-1] = EOS;
 
     return isDir( expPath );
