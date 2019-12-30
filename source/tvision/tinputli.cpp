@@ -101,11 +101,13 @@ void TInputLine::draw()
     uchar color = (state & sfFocused) ? getColor( 2 ) : getColor( 1 );
 
     b.moveChar( 0, ' ', color, size.x );
-    char buf[256];
-    strncpy( buf, data+firstPos, size.x - 2 );
-    buf[size.x - 2 ] = EOS;
-    b.moveStr( 1, buf, color );
-
+    if( size.x > 1 )
+        {
+        char buf[256];
+        strncpy( buf, data+firstPos, size.x - 2 );
+        buf[size.x - 2 ] = EOS;
+        b.moveStr( 1, buf, color );
+        }
     if( canScroll(1) )
         b.moveChar( size.x-1, rightArrow, getColor(4), 1 );
     if( (state & sfSelected) != 0 )
