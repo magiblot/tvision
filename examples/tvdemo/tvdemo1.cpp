@@ -85,11 +85,13 @@ TVDemo::TVDemo( int argc, char **argv ) :
     TRect r = getExtent();                      // Create the clock view.
     r.a.x = r.b.x - 9;      r.b.y = r.a.y + 1;
     clock = new TClockView( r );
+    clock->growMode = gfGrowLoX | gfGrowHiX;
     insert(clock);
 
     r = getExtent();                            // Create the heap view.
     r.a.x = r.b.x - 23; r.b.x = r.a.x + 13; r.b.y = r.a.y + 1;
     heap = new THeapView( r );
+    heap->growMode = gfGrowLoX | gfGrowHiX;
     insert(heap);
 
     while (--argc > 0)                              // Display files specified
