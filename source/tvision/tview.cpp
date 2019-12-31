@@ -61,6 +61,7 @@ TView::TView( const TRect& bounds) :
 {
     setBounds( bounds);
     cursor.x = cursor.y = 0;
+    resizeBalance.x = resizeBalance.y = 0;
 }
 
 TView::~TView()
@@ -77,9 +78,8 @@ void TView::blockCursor()
 }
 
 #define grow(i) (( growMode & gfGrowRel ) ? \
-                    ( s > d ) ? \
+                    ( s != d ) && \
                         (i = (i * s + ((s - d) >> 1)) / (s - d)) \
-                      : (i = 0) \
                   : (i += d))
 
 inline int range( int val, int min, int max )
@@ -91,6 +91,32 @@ inline int range( int val, int min, int max )
     else
         return val;
 }
+
+static int balancedRange( int val, int min, int max, int &balance)
+{
+    // Fit val into the range, but keep track of the remainders,
+    // and apply them back when possible. This allows views to recover
+    // their original sizes.
+    if( val < min )
+        {
+        balance += val - min;
+        return min;
+        }
+    else if( val > max )
+        {
+        balance += val - max;
+        return max;
+        }
+    else
+        {
+        int offset = range( val+balance, min, max ) - val;
+        balance -= offset;
+        return val + offset;
+        }
+}
+
+#define fitToLimits(a, b, min, max, balance) \
+    b = a + balancedRange( b - a, min, max, balance );
 
 void TView::calcBounds( TRect& bounds, TPoint delta )
 {
@@ -116,8 +142,8 @@ void TView::calcBounds( TRect& bounds, TPoint delta )
 
     TPoint minLim, maxLim;
     sizeLimits( minLim, maxLim );
-    bounds.b.x = bounds.a.x + range( bounds.b.x-bounds.a.x, minLim.x, maxLim.x );
-    bounds.b.y = bounds.a.y + range( bounds.b.y-bounds.a.y, minLim.y, maxLim.y );
+    fitToLimits( bounds.a.x, bounds.b.x, minLim.x, maxLim.x, resizeBalance.x );
+    fitToLimits( bounds.a.y, bounds.b.y, minLim.y, maxLim.y, resizeBalance.y );
 }
 
 void TView::changeBounds( const TRect& bounds )

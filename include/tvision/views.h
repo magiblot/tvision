@@ -456,6 +456,8 @@ private:
     static void writeView( write_args );
     void writeView( short x, short y, short count, const void _FAR* b );
 
+    TPoint resizeBalance;
+
     virtual const char *streamableName() const
         { return name; }
 
