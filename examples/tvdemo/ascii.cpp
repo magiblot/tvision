@@ -271,6 +271,7 @@ TAsciiChart::TAsciiChart() :
     TView *control;
 
     flags &= ~(wfGrow | wfZoom);
+    growMode = 0;
     palette = wpGrayWindow;
 
     TRect r = getExtent();
