@@ -232,6 +232,7 @@ I   POP  AX
     tempMouse.eventFlags = 0;
     tempMouse.where.x = _CX >> 3;
     tempMouse.where.y = _DX >> 3;
+    tempMouse.controlKeyState = THardwareInfo::getShiftState();
 
     if( (flag & 0x1e) != 0 && eventCount < eventQSize )
         {
