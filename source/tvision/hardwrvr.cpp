@@ -109,7 +109,12 @@ THardwareInfo::THardwareInfo()
 
     consoleHandle[cnInput] = GetStdHandle( STD_INPUT_HANDLE );
     consoleHandle[cnOutput] = GetStdHandle( STD_OUTPUT_HANDLE );
-    GetConsoleMode( consoleHandle[cnInput], &consoleMode );
+    if (!GetConsoleMode( consoleHandle[cnInput], &consoleMode ))
+        {
+        cerr << "Error: standard input is being redirected or is not a "
+                "Win32 console." << endl;
+        ExitProcess(1);
+        }
     GetConsoleCursorInfo( consoleHandle[cnOutput], &crInfo );
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 
