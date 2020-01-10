@@ -175,8 +175,12 @@ int TTerminal::do_sputn( const char *s, int count )
         queFront += count;
         }
 
+    // drawLock: avoid redundant calls to drawView()
+    drawLock++;
     setLimit( limit.x, screenLines );
     scrollTo( 0, screenLines + 1 );
+    drawLock--;
+
     i = prevLines( queFront, 1 );
     if( i <= queFront )
         i = queFront - i;
