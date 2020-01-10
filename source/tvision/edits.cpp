@@ -53,7 +53,7 @@ void TEditor::formatLine( ushort *DrawBuf,
         while (P < Limit && X < Width)
         {
             Char = bufChar(P++);
-            if (Char == '\r')
+            if (Char == '\r' || Char == '\n')
                 goto fill;
             if (Char == '\t') {
                 Char = ' ';
@@ -73,22 +73,26 @@ fill:
 
 ushort TEditor::lineEnd( ushort P )
 {
+    char c;
     for (ushort i = P; i < bufLen; ++i)
-        if (bufChar(i) == '\r')
+        if ((c = bufChar(i)) == '\r' || c == '\n')
             return i;
     return bufLen;
 }
 
 ushort TEditor::lineStart( ushort P )
 {
+    char c;
     for (int i = P - 1; i >= 0; --i)
-        if (bufChar(i) == '\r')
+        if ((c = bufChar(i)) == '\r')
         {
             if ( i + 1 != curPtr && i + 1 != bufLen
                  && bufChar(i + 1) == '\n' )
                 return i + 2;
             return i + 1;
         }
+        else if (c == '\n')
+            return i + 1;
     return 0;
 }
 
@@ -121,6 +125,12 @@ int countLines( const char *buf, uint count )
     int lines = 0;
     for (uint i = 0; i < count; ++i)
         if (buf[i] == '\r')
+        {
+            ++lines;
+            if (i+1 < count && buf[i+1] == '\n')
+                ++i;
+        }
+        else if (buf[i] == '\n')
             ++lines;
     return lines;
 }

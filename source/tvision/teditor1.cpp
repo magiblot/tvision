@@ -232,9 +232,10 @@ int TEditor::charPos( ushort p, ushort target )
 ushort TEditor::charPtr( ushort p, int target )
 {
   int pos = 0;
-  while( (pos < target) && (p < bufLen) && (bufChar(p) != '\x0D') )
+  char c;
+  while( (pos < target) && (p < bufLen) && (c = bufChar(p)) != '\r' && c != '\n' )
     {
-    if( bufChar(p) == '\x09' )
+    if( c == '\x09' )
         pos |= 7;
     pos++;
     p++;

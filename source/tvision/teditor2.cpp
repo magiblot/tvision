@@ -51,6 +51,32 @@ inline int isWordChar( int ch )
 
 #pragma warn .asc
 
+void TEditor::detectEolType()
+{
+    for (ushort p = 0; p < bufLen; ++p)
+        if (bufChar(p) == '\r')
+        {
+            if (p+1 < bufLen && bufChar(p+1) == '\n')
+                setEolType("\r\n");
+            else
+                setEolType("\r");
+            return;
+        }
+        else if (bufChar(p) == '\n')
+        {
+            setEolType("\n");
+            return;
+        }
+    // Default to CRLF
+    setEolType("\r\n");
+}
+
+void TEditor::setEolType( const char* eol )
+{
+    eolBytes = eol;
+    eolSize = strlen(eol);
+}
+
 Boolean TEditor::hasSelection()
 {
     return Boolean(selStart != selEnd);
@@ -206,14 +232,13 @@ void TEditor::lock()
 
 void TEditor::newLine()
 {
-    const char crlf[] = "\x0D\x0A";
     ushort p = lineStart(curPtr);
     ushort i = p;
     while( i < curPtr &&
            ( (buffer[i] == ' ') || (buffer[i] == '\x9'))
          )
          i++;
-    insertText(crlf, 2, False);
+    insertText(eolBytes, eolSize, False);
     if( autoIndent == True )
         insertText( &buffer[p], i - p, False);
 }
@@ -331,6 +356,7 @@ void TEditor::setBufLen( ushort length )
     delCount = 0;
     insCount = 0;
     modified = False;
+    detectEolType();
     update(ufView);
 }
 

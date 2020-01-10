@@ -241,6 +241,8 @@ public:
     void unlock();
     void update( uchar );
     void checkScrollBar( const TEvent&, TScrollBar *, int& );
+    void detectEolType();
+    void setEolType( const char* );
 
     TScrollBar *hScrollBar;
     TScrollBar *vScrollBar;
@@ -265,6 +267,9 @@ public:
     Boolean selecting;
     Boolean overwrite;
     Boolean autoIndent;
+
+    const char* eolBytes;
+    ushort eolSize;
 
     static TEditorDialog _NEAR editorDialog;
     static ushort _NEAR editorFlags;
