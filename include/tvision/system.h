@@ -44,6 +44,7 @@ const int evMessage   = 0xFF00;
 
 const int mbLeftButton  = 0x01;
 const int mbRightButton = 0x02;
+const int mbMiddleButton= 0x04;
 
 /* Mouse wheel state masks */
 
