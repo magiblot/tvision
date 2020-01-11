@@ -172,6 +172,10 @@ bool NcursesInput::parseMouseEvent(TEvent &ev)
             buttonState |= mbLeftButton;
         if (mevent.bstate & BUTTON1_RELEASED)
             buttonState &= ~mbLeftButton;
+        if (mevent.bstate & BUTTON2_PRESSED)
+            buttonState |= mbMiddleButton;
+        if (mevent.bstate & BUTTON2_RELEASED)
+            buttonState &= ~mbMiddleButton;
         if (mevent.bstate & BUTTON3_PRESSED)
             buttonState |= mbRightButton;
         if (mevent.bstate & BUTTON3_RELEASED)
