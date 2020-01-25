@@ -34,6 +34,7 @@
 #include "ascii.h"
 #include "calendar.h"
 #include "calc.h"
+#include "evntview.h"
 
 #include <stdlib.h>
 #include <signal.h>
@@ -88,6 +89,10 @@ void TVDemo::handleEvent(TEvent &event)
 
             case cmPuzzleCmd:           //  Puzzle
                 puzzle();
+                break;
+
+            case cmEventViewCmd:        //  Open Event Viewer
+                eventViewer();
                 break;
 
             case cmOpenCmd:             //  View a file
@@ -209,6 +214,17 @@ void TVDemo::calculator()
         calc->helpCtx = hcCalculator;
         deskTop->insert(calc);
     }
+}
+
+//
+// Event Viewer function
+//
+
+void TVDemo::eventViewer()
+{
+    TEventViewer *viewer = (TEventViewer *) validView(TEventViewer::toggle());
+    if(viewer != 0)
+        deskTop->insert(viewer);
 }
 
 //

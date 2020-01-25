@@ -34,6 +34,7 @@
 #include "fileview.h"
 #include "puzzle.h"
 #include "demohelp.h"
+#include "evntview.h"
 #include <tvision/help.h>
 
 #include <stdio.h>
@@ -126,6 +127,7 @@ void TVDemo::getEvent(TEvent &event)
     static Boolean helpInUse = False;
 
     TApplication::getEvent(event);
+    TEventViewer::print(event);
     switch (event.what)
         {
         case evCommand:

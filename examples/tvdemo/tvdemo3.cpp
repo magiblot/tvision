@@ -186,7 +186,8 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
         *new TMenuItem( "~P~uzzle", cmPuzzleCmd, kbNoKey, hcSPuzzle ) +
         *new TMenuItem( "Ca~l~endar", cmCalendarCmd, kbNoKey, hcSCalendar ) +
         *new TMenuItem( "Ascii ~T~able", cmAsciiCmd, kbNoKey, hcSAsciiTable ) +
-        *new TMenuItem( "~C~alculator", cmCalcCmd, kbNoKey, hcCalculator );
+        *new TMenuItem( "~C~alculator", cmCalcCmd, kbNoKey, hcCalculator ) +
+        *new TMenuItem( "~E~vent Viewer", cmEventViewCmd, kbAlt0, hcNoContext, "Alt-0" );
 
     TSubMenu& sub2 =
       *new TSubMenu( "~F~ile", 0, hcFile ) +
