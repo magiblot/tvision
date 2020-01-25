@@ -204,7 +204,10 @@ void TFileList::readDirectory( const char *aWildCard )
             {
             fnmerge( path, drive, dir, "..", 0 );
             if( findfirst( path, &s, FA_DIREC ) == 0 )
-                p->readFf_blk(&s);
+                {
+                strcpy( s.ff_name, ".." ); // findfirst returns the actual
+                p->readFf_blk(&s);         // directory name.
+                }
             else
                 {
                 strcpy( p->name, ".." );
