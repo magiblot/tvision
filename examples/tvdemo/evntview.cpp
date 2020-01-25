@@ -58,7 +58,7 @@ TEventViewer::~TEventViewer()
 }
 
 struct flagName {
-    const unsigned flag;
+    uint flag;
     const char* name;
 };
 
