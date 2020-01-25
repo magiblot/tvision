@@ -10,6 +10,7 @@
 using std::cerr;
 using std::cin;
 using std::cout;
+using std::dec;
 using std::endl;
 using std::hex;
 using std::ios;
