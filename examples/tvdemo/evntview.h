@@ -34,6 +34,7 @@ private:
     TTerminal *interior;
     otstream *out;
     Boolean resumed;
+    uint eventCount;
 
 };
 

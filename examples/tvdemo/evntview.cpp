@@ -32,14 +32,19 @@ TEventViewer* TEventViewer::toggle()
 void TEventViewer::print(const TEvent &ev)
 {
     if (ev.what != evNothing && viewer && viewer->resumed && viewer->out)
+    {
+        viewer->lock();
+        *viewer->out << "Received event #" << ++viewer->eventCount << endl;
         printEvent(*viewer->out, ev);
+        viewer->unlock();
+    }
 }
 
 TEventViewer::TEventViewer( TRect bounds, const char *aTitle,
                             ushort aBufSize ) :
     TWindowInit( &TEventViewer::initFrame ),
     TWindow(bounds, aTitle, wnNoNumber ),
-    interior(0), out(0), resumed(True)
+    interior(0), out(0), resumed(True), eventCount(0)
 {
     bounds = getExtent();
     bounds.grow( -1, -1 );
