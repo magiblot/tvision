@@ -137,6 +137,8 @@ IFNDEF __FLAT__
         RETN
 @@20:   CMP     AL, 0DH
         JE    @@30
+        CMP     AL, 0AH
+        JE    @@30
         CMP     AL, 09H
         JNE   @@13
         MOV     AL, ' '
@@ -195,6 +197,8 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         RETN
 @@20:   CMP     AL, 0DH
         JE    @@30
+        CMP     AL, 0AH
+        JE    @@30
         CMP     AL, 09H
         JNE   @@13
         MOV     AL, ' '
@@ -229,7 +233,7 @@ IFNDEF __FLAT__
         LDS     SI, [thisPtr]
         LES     BX, DS:[SI+TEditorBuffer]
         MOV     DI, [P]
-        MOV     AL, 0DH
+        MOV     AL, 0AH
         CLD
         MOV     CX, DS:[SI+TEditorCurPtr]
         SUB     CX, DI
@@ -246,6 +250,9 @@ IFNDEF __FLAT__
         REPNE   SCASB
         JNE   @@3
 @@2:    DEC     DI
+        CMP     BYTE PTR ES:[DI], 0DH
+        JNE   @@3
+        DEC     DI
 @@3:    SUB     DI, BX
 @@4:    MOV     AX, DI
         RET
@@ -255,7 +262,7 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;32-bit;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOV     ESI, DWORD PTR [thisPtr]
         MOV     EBX, [ESI+TEditorBuffer]
         MOVZX   EDI, WORD PTR [P]
-        MOV     AL, 0DH
+        MOV     AL, 0AH
         CLD
         MOVZX   ECX, WORD PTR [ESI+TEditorCurPtr]
         SUB     ECX, EDI
@@ -273,6 +280,9 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;32-bit;;;;;;;;;;;;;;;;;;;;;;;;;;
         REPNE   SCASB
         JNE   @@3
 @@2:    DEC     EDI
+        CMP     BYTE PTR [EDI], 0DH
+        JNE   @@3
+        DEC     EDI
 @@3:    SUB     EDI, EBX
 @@4:    MOV     EAX, EDI
         RET
@@ -290,7 +300,7 @@ IFNDEF __FLAT__
         LDS     SI, [thisPtr]
         LES     BX, DS:[SI+TEditorBuffer]
         MOV     DI, [P]
-        MOV     AL, 0DH
+        MOV     AL, 0AH
         STD
         MOV     CX, DI
         SUB     CX, DS:[SI+TEditorCurPtr]
@@ -309,7 +319,6 @@ IFNDEF __FLAT__
         REPNE   SCASB
         JNE   @@3
 @@2:    INC     DI
-        INC     DI
         SUB     DI, BX
         CMP     DI, DS:[SI+TEditorCurPtr]
         JE    @@4
@@ -329,7 +338,7 @@ ELSE
         MOV     ESI, [thisPtr]
         MOV     EBX, [ESI+TEditorBuffer]
         MOVZX   EDI, WORD PTR [P]
-        MOV     AL, 0DH
+        MOV     AL, 0AH
         STD
         MOV     ECX, EDI
         MOVZX   EDX, WORD PTR [ESI+TEditorCurPtr]
@@ -351,7 +360,6 @@ ELSE
         REPNE   SCASB
         JNE   @@3
 @@2:    INC     EDI
-        INC     EDI
         SUB     EDI, EBX
         CMP     EDI, [ESI+TEditorCurPtr]
         JE    @@4
@@ -474,7 +482,7 @@ IFNDEF __FLAT__
         LES     DI, buf
         MOV     CX, count
         XOR     DX, DX
-        MOV     AL, 0Dh
+        MOV     AL, 0Ah
         CLD
 @@1:
         JCXZ  @@2
@@ -491,7 +499,7 @@ ELSE
         MOV     EDI, DWORD PTR [buf]
         MOV     ECX, count
         XOR     EDX, EDX
-        MOV     AL, 0Dh
+        MOV     AL, 0Ah
         CLD
 @@1:
         JECXZ @@2
