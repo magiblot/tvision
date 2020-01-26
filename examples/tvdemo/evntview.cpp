@@ -212,20 +212,20 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
     if (ev.what & evMouse)
     {
         out << "  .mouse = MouseEventType {\n"
-            << "  .where = TPoint {\n"
-            << "    .x = " << ev.mouse.where.x << "\n"
-            << "    .y = " << ev.mouse.where.y << "\n"
-            << "  },\n"
-            << "  .eventFlags = ";
+            << "    .where = TPoint {\n"
+            << "      .x = " << ev.mouse.where.x << "\n"
+            << "      .y = " << ev.mouse.where.y << "\n"
+            << "    },\n"
+            << "    .eventFlags = ";
         decomposeFlag(out, ev.mouse.eventFlags, mouseEvFlags);
         out << ",\n"
-            << "  .controlKeyState = ";
+            << "    .controlKeyState = ";
         decomposeFlag(out, ev.mouse.controlKeyState, controlKeyFlags);
         out << ",\n"
-            << "  .buttons = ";
+            << "    .buttons = ";
         decomposeFlag(out, ev.mouse.buttons, buttonFlags);
         out << ",\n"
-            << "  .wheel = ";
+            << "    .wheel = ";
         decomposeFlag(out, ev.mouse.wheel, wheelFlags);
         out << "\n"
             << "  }\n";
@@ -234,16 +234,16 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
     {
         char charCode = ev.keyDown.charScan.charCode;
         out << "  .keyDown = KeyDownEvent {\n"
-            << "  .keyCode = ";
+            << "    .keyCode = ";
         decomposeFlag(out, ev.keyDown.keyCode, keyCodeFlags, False);
-        out << ", \n"
-            << "  .charScan = CharScanType {\n"
-            << "    .charCode = " << (int) (uchar) charCode;
+        out << ",\n"
+            << "    .charScan = CharScanType {\n"
+            << "      .charCode = " << (int) (uchar) charCode;
         if (charCode)
             out << " ('" << charCode << "')";
         out << ",\n"
-            << "    .scanCode = " << (int) (uchar) ev.keyDown.charScan.scanCode << "\n"
-            << "  },\n"
+            << "      .scanCode = " << (int) (uchar) ev.keyDown.charScan.scanCode << "\n"
+            << "    },\n"
             << "  .controlKeyState = ";
         decomposeFlag(out, ev.keyDown.controlKeyState, controlKeyFlags);
         out << ",\n"
@@ -251,8 +251,8 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
     }
     if (ev.what & evCommand)
         out << "  .message = MessageEvent {\n"
-            << "  .command = " << ev.message.command << ",\n"
-            << "  .infoPtr = " << ev.message.infoPtr << "\n"
+            << "    .command = " << ev.message.command << ",\n"
+            << "    .infoPtr = " << ev.message.infoPtr << "\n"
             << "  }\n";
     out << "}\n";
 }
