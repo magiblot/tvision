@@ -304,7 +304,15 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
                 {
                 uchar index = irBuffer.Event.KeyEvent.wVirtualScanCode;
 
-                if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
+                if ((event.keyDown.controlKeyState & kbCtrlShift) &&
+                    (event.keyDown.controlKeyState & kbAltShift)) // Ctrl+Alt is AltGr
+                    {
+                        // When AltGr+Key does not produce a character, a
+                        // keyCode with unwanted effects may be read instead.
+                        if (!event.keyDown.charScan.charCode)
+                            event.keyDown.keyCode = kbNoKey;
+                    }
+                else if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
                     event.keyDown.keyCode = ShiftCvt[index];
                 else if ((event.keyDown.controlKeyState & kbCtrlShift) && CtrlCvt[index] != 0)
                     event.keyDown.keyCode = CtrlCvt[index];
