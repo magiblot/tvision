@@ -211,7 +211,8 @@ void TButton::handleEvent( TEvent& event )
             break;
 
         case evKeyDown:
-            if( event.keyDown.keyCode == getAltCode(c) ||
+            if( event.keyDown.keyCode != 0 &&
+                event.keyDown.keyCode == getAltCode(c) ||
                 ( owner->phase == phPostProcess &&
                   c != 0 &&
                   toupper(event.keyDown.charScan.charCode) == c
