@@ -145,7 +145,6 @@ public:
     TMenuView( const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0 );
     TMenuView( const TRect& bounds );
 
-    void setBounds( const TRect& bounds );
     virtual ushort execute();
     TMenuItem *findItem( char ch );
     virtual TRect getItemRect( TMenuItem *item );
