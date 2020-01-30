@@ -361,8 +361,11 @@ inline opstream& operator << ( opstream& os, TMenuBox* cl )
 /*        6 = Shortcut selection                                          */
 /* ---------------------------------------------------------------------- */
 
-class TMenuPopup : TMenuBox
+class TMenuPopup : public TMenuBox
 {
+
+public:
+
     TMenuPopup(TRect&, TMenu*, TMenuView*);
     virtual void handleEvent(TEvent&);
 
