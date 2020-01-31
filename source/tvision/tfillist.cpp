@@ -299,7 +299,8 @@ void fexpand( char *rpath )
     if( (flags & DIRECTORY) == 0 || (dir[0] != '\\' && dir[0] != '/') )
         {
         char curdir[MAXDIR+1];
-        getcurdir( drive[0] - 'A' + 1, curdir );
+        if ( getcurdir( drive[0] - 'A' + 1, curdir ) != 0 )
+            *curdir = '\0';
         strcat( curdir, "\\" );
         strcat( curdir, dir );
         if( *curdir != '\\' && *curdir != '/' )
