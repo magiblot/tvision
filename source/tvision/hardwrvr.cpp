@@ -136,6 +136,7 @@ THardwareInfo::THardwareInfo()
         }
 
     consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
+    consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
 }
 
