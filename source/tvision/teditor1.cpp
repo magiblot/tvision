@@ -180,6 +180,7 @@ TEditor::TEditor( const TRect& bounds,
     overwrite( False ),
     autoIndent( True ) ,
     lockCount( 0 ),
+    updateFlags( 0 ),
     keyState( 0 )
 {
     growMode = gfGrowHiX | gfGrowHiY;
