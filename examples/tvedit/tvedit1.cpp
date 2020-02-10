@@ -171,6 +171,7 @@ int main( int argc, char **argv )
 {
     TEditorApp editorApp( argc, argv );
     editorApp.run();
+    editorApp.shutDown();
     return 0;
 }
 
