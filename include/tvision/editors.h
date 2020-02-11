@@ -44,7 +44,7 @@ const int
   smDouble = 0x02;
 
 const unsigned
-  sfSearchFailed = 0xFFFF;
+  sfSearchFailed = -0x01;
 
 const int
   cmFind        = 82,
