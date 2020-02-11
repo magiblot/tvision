@@ -169,7 +169,7 @@ TEditor::TEditor( const TRect& bounds,
                   TScrollBar *aHScrollBar,
                   TScrollBar *aVScrollBar,
                   TIndicator *aIndicator,
-                  ushort aBufSize ) :
+                  uint aBufSize ) :
     TView( bounds ),
     hScrollBar( aHScrollBar ),
     vScrollBar( aVScrollBar ),
@@ -217,7 +217,7 @@ void TEditor::changeBounds( const TRect& bounds )
     update(ufView);
 }
 
-int TEditor::charPos( ushort p, ushort target )
+int TEditor::charPos( uint p, uint target )
 {
     int pos = 0;
     while( p < target )
@@ -230,7 +230,7 @@ int TEditor::charPos( ushort p, ushort target )
     return pos;
 }
 
-ushort TEditor::charPtr( ushort p, int target )
+uint TEditor::charPtr( uint p, int target )
 {
   int pos = 0;
   char c;
@@ -309,8 +309,8 @@ Boolean TEditor::cursorVisible()
   return Boolean((curPos.y >= delta.y) && (curPos.y < delta.y + size.y));
 }
 
-void TEditor::deleteRange( ushort startPtr,
-                           ushort endPtr,
+void TEditor::deleteRange( uint startPtr,
+                           uint endPtr,
                            Boolean delSelect
                          )
 {
@@ -398,7 +398,7 @@ void TEditor::draw()
     drawLines( 0, size.y, drawPtr );
 }
 
-void TEditor::drawLines( int y, int count, ushort linePtr )
+void TEditor::drawLines( int y, int count, uint linePtr )
 {
     ushort color = getColor(0x0201);
 #ifndef __FLAT__
@@ -429,7 +429,7 @@ void TEditor::find()
         }
 }
 
-ushort TEditor::getMousePtr( TPoint m )
+uint TEditor::getMousePtr( TPoint m )
 {
     TPoint mouse = makeLocal( m );
     mouse.x = max(0, min(mouse.x, size.x - 1));

@@ -41,7 +41,7 @@
 #include <alloc.h>
 #endif
 
-inline ushort min( ushort u1, ushort u2 )
+inline uint min( uint u1, uint u2 )
 {
     return u1 < u2 ? u1 : u2;
 }
@@ -112,7 +112,7 @@ Boolean TFileEditor::loadFile()
         f.seekg(0, ios::end);
         long fSize = f.tellg();
         f.seekg(0);
-        if( fSize > 0xFFE0L || setBufSize(ushort(fSize)) == False )
+        if( fSize > UINT_MAX-0x1Fl || setBufSize(uint(fSize)) == False )
             {
             editorDialog( edOutOfMemory );
             return False;
@@ -121,13 +121,13 @@ Boolean TFileEditor::loadFile()
             {
             if ( fSize > INT_MAX )
             {
-               f.read( &buffer[bufSize - ushort(fSize)], INT_MAX );
-               f.read( &buffer[bufSize - ushort(fSize) + INT_MAX],
-                                ushort(fSize - INT_MAX) );
+               f.read( &buffer[bufSize - uint(fSize)], INT_MAX );
+               f.read( &buffer[bufSize - uint(fSize) + INT_MAX],
+                                uint(fSize - INT_MAX) );
 
             }
             else
-               f.read( &buffer[bufSize - ushort(fSize)], ushort(fSize) );
+               f.read( &buffer[bufSize - uint(fSize)], uint(fSize) );
             if( !f )
                 {
                 editorDialog( edReadError, fileName );
@@ -135,7 +135,7 @@ Boolean TFileEditor::loadFile()
                 }
             else
                 {
-                setBufLen(ushort(fSize));
+                setBufLen(uint(fSize));
                 return True;
                 }
             }
@@ -218,14 +218,14 @@ Boolean TFileEditor::saveFile()
     return True;
 }
 
-Boolean TFileEditor::setBufSize( ushort newSize )
+Boolean TFileEditor::setBufSize( uint newSize )
 {
     if( newSize == 0)
-    	newSize = 0x1000;
-    else if( newSize > 0xF000 )
-        newSize = 0xFFE0;
+        newSize = 0x1000;
+    else if( newSize > uint(-0x1000) )
+        newSize = UINT_MAX-0x1F;
     else
-        newSize = (newSize + 0x0FFF) & 0xF000;
+        newSize = (newSize + 0x0FFF) & -0x1000; // 0x....F000
     if( newSize != bufSize )
         {
         char *temp = buffer;
@@ -236,7 +236,7 @@ Boolean TFileEditor::setBufSize( ushort newSize )
             delete temp;
             return False;
             }
-        ushort n = bufLen - curPtr + delCount;
+        uint n = bufLen - curPtr + delCount;
         memcpy( buffer, temp, min( newSize, bufSize ) );
         memmove( &buffer[newSize - n], &temp[bufSize - n], n );
         delete temp;
@@ -306,7 +306,7 @@ void *TFileEditor::read( ipstream& is )
     if( isValid )
         {
         isValid = loadFile();
-        ushort sStart, sEnd, curs;
+        uint sStart, sEnd, curs;
         is >> sStart >> sEnd >> curs;
         if( isValid && sEnd <= bufLen )
             {

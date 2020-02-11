@@ -12,27 +12,27 @@
 ;       All Rights Reserved.
 ; 
 
-        PUBLIC  @TEditor@bufChar$qus
-        PUBLIC  @TEditor@bufPtr$qus
+        PUBLIC  @TEditor@bufChar$qui
+        PUBLIC  @TEditor@bufPtr$qui
 IFNDEF __FLAT__
-        PUBLIC  @TEditor@formatLine$qnususius
+        PUBLIC  @TEditor@formatLine$qnusuiius
 ELSE
-        PUBLIC  @TEditor@formatLine$qpususius
+        PUBLIC  @TEditor@formatLine$qpusuiius
 ENDIF
-        PUBLIC  @TEditor@lineEnd$qus
-        PUBLIC  @TEditor@lineStart$qus
-        PUBLIC  @TEditor@nextChar$qus
-        PUBLIC  @TEditor@prevChar$qus
+        PUBLIC  @TEditor@lineEnd$qui
+        PUBLIC  @TEditor@lineStart$qui
+        PUBLIC  @TEditor@nextChar$qui
+        PUBLIC  @TEditor@prevChar$qui
         PUBLIC  _scan, _iScan, _countLines
 
         INCLUDE TV.INC
 
 CODESEG
 
-;char TEditor::bufChar( ushort P )
-@TEditor@bufChar$qus PROC
+;char TEditor::bufChar( uint P )
+@TEditor@bufChar$qui PROC
 
-        ARG     thisPtr :PTR, P : WORD
+        ARG     thisPtr :PTR, P : ARGINT
 IFNDEF __FLAT__
         USES    DI
 
@@ -48,20 +48,20 @@ ELSE
         USES    EDI, EBX
 
         MOV     EDI, [thisPtr]
-        MOVZX   EBX, [P]
-        CMP     BX, [EDI+TEditorCurPtr]
+        MOV     EBX, [P]
+        CMP     EBX, [EDI+TEditorCurPtr]
         JB    @@1
-        ADD     BX, [EDI+TEditorGapLen]
+        ADD     EBX, [EDI+TEditorGapLen]
 @@1:    MOV     EDI, [EDI+TEditorBuffer]
         MOV     AL, [EDI+EBX]
         RET
 ENDIF
-@TEditor@bufChar$qus ENDP
+@TEditor@bufChar$qui ENDP
 
-;function TEditor.bufPtr(P: Word): Word; assembler;
+;function TEditor.bufPtr(P: uint): uint; assembler;
 
-@TEditor@bufPtr$qus PROC
-        ARG     thisPtr : PTR, P : WORD
+@TEditor@bufPtr$qui PROC
+        ARG     thisPtr : PTR, P : ARGINT
 IFNDEF __FLAT__
         USES    DI
 
@@ -75,27 +75,27 @@ ELSE
         USES    EBX
 
         MOV     EBX, [thisPtr]
-        MOV     AX, [P]
-        CMP     AX, [EBX+TEditorCurPtr]
+        MOV     EAX, [P]
+        CMP     EAX, [EBX+TEditorCurPtr]
         JB    @@1
-        ADD     AX, [EBX+TEditorGapLen]
+        ADD     EAX, [EBX+TEditorGapLen]
 @@1:    RET
 ENDIF
 
-ENDP @TEditor@bufPtr$qus
+ENDP @TEditor@bufPtr$qui
 
 ;void TEditor::formatLine( ushort *DrawBuf,
-;                          ushort LinePtr,
+;                          uint LinePtr,
 ;                          int Width,
 ;                          ushort Colors
 ;                        )
 IFNDEF __FLAT__
-@TEditor@formatLine$qnususius PROC
+@TEditor@formatLine$qnusuiius PROC
 ELSE
-@TEditor@formatLine$qpususius PROC
+@TEditor@formatLine$qpusuiius PROC
 ENDIF
         ARG     thisPtr:PTR, DrawBuf:PTR, LinePtr:ARGINT, \
-                        W:ARGINT, Colors:ARGINT
+                        W:ARGINT, Colors:WORD
 IFNDEF __FLAT__
         USES    DS, SI, DI
 
@@ -163,18 +163,18 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         XOR     EDX, EDX
         CLD
         MOV     AH, BYTE PTR [Colors]
-        MOVZX   ECX, WORD PTR [EBX+TEditorSelStart]
+        MOV     ECX, [EBX+TEditorSelStart]
         CALL  @@10
         MOV     AH, BYTE PTR [Colors+1]
-        MOVZX   ECX, WORD PTR [EBX+TEditorCurPtr]
+        MOV     ECX, [EBX+TEditorCurPtr]
         CALL  @@10
-        MOVZX   ECX, WORD PTR [EBX+TEditorGapLen]
+        MOV     ECX, [EBX+TEditorGapLen]
         ADD     ESI, ECX
-        MOVZX   ECX, WORD PTR [EBX+TEditorSelEnd]
-        ADD     CX, [EBX+TEditorGapLen]
+        MOV     ECX, [EBX+TEditorSelEnd]
+        ADD     ECX, [EBX+TEditorGapLen]
         CALL  @@10
         MOV     AH, BYTE PTR [Colors]
-        MOVZX   ECX, WORD PTR [EBX+TEditorBufSize]
+        MOV     ECX, [EBX+TEditorBufSize]
         CALL  @@10
         JMP   @@31
 
@@ -188,8 +188,8 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CMP     AL, ' '
         JB    @@20
 @@13:   STOSW
-        INC     DX
-@@14:   CMP     DX, BX
+        INC     EDX
+@@14:   CMP     EDX, EBX
         JAE   @@30
         LOOP  @@12
         MOV     EBX, [thisPtr]
@@ -203,30 +203,30 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         JNE   @@13
         MOV     AL, ' '
 @@21:   STOSW
-        INC     DX
+        INC     EDX
         TEST    DL, 7
         JNE   @@21
         JMP   @@14
 
 @@30:   POP     ECX
 @@31:   MOV     AL, ' '
-        MOVZX   ECX, WORD PTR [W]
-        SUB     CX, DX
+        MOV     ECX, [W]
+        SUB     ECX, EDX
         JBE   @@32
         REP     STOSW
 @@32:   RET
 ENDIF
 
 IFNDEF __FLAT__
-ENDP @TEditor@formatLine$qnususius
+ENDP @TEditor@formatLine$qnusuiius
 ELSE
-ENDP @TEditor@formatLine$qpususius
+ENDP @TEditor@formatLine$qpusuiius
 ENDIF
 
-;function TEditor.lineEnd(P: Word): Word; assembler;
-@TEditor@lineEnd$qus PROC
+;function TEditor.lineEnd(P: uint): uint; assembler;
+@TEditor@lineEnd$qui PROC
 
-        ARG     thisPtr: PTR, P:WORD
+        ARG     thisPtr: PTR, P:ARGINT
 IFNDEF __FLAT__
         USES    DS, SI, DI
 
@@ -261,20 +261,20 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;32-bit;;;;;;;;;;;;;;;;;;;;;;;;;;
 
         MOV     ESI, DWORD PTR [thisPtr]
         MOV     EBX, [ESI+TEditorBuffer]
-        MOVZX   EDI, WORD PTR [P]
+        MOV     EDI, [P]
         MOV     AL, 0AH
         CLD
-        MOVZX   ECX, WORD PTR [ESI+TEditorCurPtr]
+        MOV     ECX, [ESI+TEditorCurPtr]
         SUB     ECX, EDI
         JBE   @@1
         ADD     EDI, EBX
         REPNE   SCASB
         JE    @@2
-        MOVZX   EDI, WORD PTR [ESI+TEditorCurPtr]
-@@1:    MOVZX   ECX, WORD PTR [ESI+TEditorBufLen]
+        MOV     EDI, [ESI+TEditorCurPtr]
+@@1:    MOV     ECX, [ESI+TEditorBufLen]
         SUB     ECX, EDI
         JCXZ  @@4
-        MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
+        MOV     EDX, [ESI+TEditorGapLen]
         ADD     EBX, EDX
         ADD     EDI, EBX
         REPNE   SCASB
@@ -288,12 +288,12 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;32-bit;;;;;;;;;;;;;;;;;;;;;;;;;;
         RET
 
 ENDIF
-@TEditor@lineEnd$qus ENDP
+@TEditor@lineEnd$qui ENDP
 
-;function TEditor.lineStart(P: Word): Word; assembler;
-@TEditor@lineStart$qus PROC
+;function TEditor.lineStart(P: uint): uint; assembler;
+@TEditor@lineStart$qui PROC
 
-        ARG     thisPtr :  PTR, P : WORD
+        ARG     thisPtr :  PTR, P : ARGINT
 IFNDEF __FLAT__
         USES    DS, SI, DI
 
@@ -337,22 +337,22 @@ ELSE
 
         MOV     ESI, [thisPtr]
         MOV     EBX, [ESI+TEditorBuffer]
-        MOVZX   EDI, WORD PTR [P]
+        MOV     EDI, [P]
         MOV     AL, 0AH
         STD
         MOV     ECX, EDI
-        MOVZX   EDX, WORD PTR [ESI+TEditorCurPtr]
+        MOV     EDX, [ESI+TEditorCurPtr]
         SUB     ECX, EDX
         JBE   @@1
-        MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
+        MOV     EDX, [ESI+TEditorGapLen]
         ADD     EBX, EDX
         ADD     EDI, EBX
         DEC     EDI
         REPNE   SCASB
         JE    @@2
-        MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
+        MOV     EDX, [ESI+TEditorGapLen]
         SUB     EBX, EDX
-        MOVZX   EDI, WORD PTR [ESI+TEditorCurPtr]
+        MOV     EDI, [ESI+TEditorCurPtr]
 @@1:    MOV     ECX, EDI
         JECXZ @@4
         ADD     EDI, EBX
@@ -374,12 +374,12 @@ ELSE
         CLD
         RET
 ENDIF
-@TEditor@lineStart$qus ENDP
+@TEditor@lineStart$qui ENDP
 
-;function TEditor.nextChar(P: Word): Word; assembler;
-@TEditor@nextChar$qus PROC
+;function TEditor.nextChar(P: uint): uint; assembler;
+@TEditor@nextChar$qui PROC
 
-        ARG     thisPtr : PTR, P : WORD
+        ARG     thisPtr : PTR, P : ARGINT
 
 IFNDEF __FLAT__
         USES    DS, SI, DI
@@ -404,30 +404,30 @@ ELSE
         USES    ESI, EDI, EBX
 
         MOV     ESI, [thisPtr]
-        MOVZX   EDI, [P]
-        CMP     DI, [ESI+TEditorBufLen]
+        MOV     EDI, [P]
+        CMP     EDI, [ESI+TEditorBufLen]
         JE    @@2
-        INC     DI
-        CMP     DI, [ESI+TEditorBufLen]
+        INC     EDI
+        CMP     EDI, [ESI+TEditorBufLen]
         JE    @@2
         MOV     EBX, [ESI+TEditorBuffer]
-        CMP     DI, [ESI+TEditorCurPtr]
+        CMP     EDI, [ESI+TEditorCurPtr]
         JB    @@1
-        MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
+        MOV     EDX, [ESI+TEditorGapLen]
         ADD     EBX, EDX
 @@1:    CMP     WORD PTR [EBX+EDI-1], 0A0DH
         JNE   @@2
-        INC     DI
-@@2:    MOV     AX, DI
+        INC     EDI
+@@2:    MOV     EAX, EDI
         RET
 ENDIF
 
-@TEditor@nextChar$qus ENDP
+@TEditor@nextChar$qui ENDP
 
-;function TEditor.prevChar(P: Word): Word; assembler;
-@TEditor@prevChar$qus PROC
+;function TEditor.prevChar(P: uint): uint; assembler;
+@TEditor@prevChar$qui PROC
 
-        ARG     thisPtr :  PTR, P : WORD
+        ARG     thisPtr :  PTR, P : ARGINT
 IFNDEF __FLAT__
         USES    DS, SI, DI
 
@@ -450,16 +450,16 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         USES   ESI, EDI, EBX
 
         MOV     ESI, DWORD PTR [thisPtr]
-        MOVZX   EDI, [P]
+        MOV     EDI, [P]
         OR      EDI, EDI
         JE    @@2
         DEC     EDI
         JE    @@2
         MOV     EBX, [ESI+TEditorBuffer]
-        MOVZX   EDX, WORD PTR [ESI+TEditorCurPtr]
+        MOV     EDX, [ESI+TEditorCurPtr]
         CMP     EDI, EDX
         JB    @@1
-        MOVZX   EDX, WORD PTR [ESI+TEditorGapLen]
+        MOV     EDX, [ESI+TEditorGapLen]
         ADD     EBX, EDX
 @@1:    CMP     WORD PTR [EBX+EDI-1], 0A0DH
         JNE   @@2
@@ -467,7 +467,7 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @@2:    MOV     EAX, EDI
         RET
 ENDIF
-@TEditor@prevChar$qus ENDP
+@TEditor@prevChar$qui ENDP
 
 
 ;-----------------------------------------------------------------------------
@@ -824,7 +824,7 @@ ELSE                ; 32-bit version
         SUB     EAX, DWORD PTR [block]
         INC     EAX
 @@11:
-        DEC     AX
+        DEC     EAX
         RET
 ENDIF
 ENDP

@@ -37,8 +37,8 @@
 
 extern "C" {
 int countLines( void *buf, uint count );
-ushort scan( const void *block, uint size, const char *str );
-ushort iScan( const void *block, uint size, const char *str );
+uint scan( const void *block, uint size, const char *str );
+uint iScan( const void *block, uint size, const char *str );
 };
 
 inline int isWordChar( int ch )
@@ -53,7 +53,7 @@ inline int isWordChar( int ch )
 
 void TEditor::detectEolType()
 {
-    for (ushort p = 0; p < bufLen; ++p)
+    for (uint p = 0; p < bufLen; ++p)
         if (bufChar(p) == '\r')
         {
             if (p+1 < bufLen && bufChar(p+1) == '\n')
@@ -93,19 +93,19 @@ void TEditor::initBuffer()
     buffer = new char[bufSize];
 }
 
-Boolean TEditor::insertBuffer( char *p,
-                               ushort offset,
-                               ushort length,
+Boolean TEditor::insertBuffer( const char *p,
+                               uint offset,
+                               uint length,
                                Boolean allowUndo,
                                Boolean selectText
                              )
 {
     selecting = False;
-    ushort selLen = selEnd - selStart;
+    uint selLen = selEnd - selStart;
     if( selLen == 0 && length == 0 )
         return True;
 
-    ushort delLen = 0;
+    uint delLen = 0;
     if( allowUndo == True )
         if( curPtr == selStart )
             delLen = selLen;
@@ -116,14 +116,14 @@ Boolean TEditor::insertBuffer( char *p,
     long newSize = long(bufLen + delCount - selLen + delLen) + length;
 
     if( newSize > bufLen + delCount )
-        if( newSize > 0xFFE0l || setBufSize(ushort(newSize)) == False )
+        if( newSize > UINT_MAX-0x1Fl || setBufSize(uint(newSize)) == False )
             {
             editorDialog( edOutOfMemory );
-	    selEnd = selStart;
+            selEnd = selStart;
             return False;
             }
 
-    ushort selLines = countLines( &buffer[bufPtr(selStart)], selLen );
+    uint selLines = countLines( &buffer[bufPtr(selStart)], selLen );
     if( curPtr == selEnd )
         {
         if( allowUndo == True )
@@ -153,7 +153,7 @@ Boolean TEditor::insertBuffer( char *p,
                 length
                );
 
-    ushort lines = countLines( &buffer[curPtr], length );
+    uint lines = countLines( &buffer[curPtr], length );
     curPtr += length;
     curPos.y += lines;
     drawLine = curPos.y;
@@ -191,9 +191,9 @@ Boolean TEditor::insertFrom( TEditor *editor )
                         );
 }
 
-Boolean TEditor::insertText( const void *text, ushort length, Boolean selectText )
+Boolean TEditor::insertText( const void *text, uint length, Boolean selectText )
 {
-  return insertBuffer( (char *)text, 0, length, canUndo, selectText);
+  return insertBuffer( (const char *)text, 0, length, canUndo, selectText);
 }
 
 Boolean TEditor::isClipboard()
@@ -201,9 +201,9 @@ Boolean TEditor::isClipboard()
     return Boolean(clipboard == this);
 }
 
-ushort TEditor::lineMove( ushort p, int count )
+uint TEditor::lineMove( uint p, int count )
 {
-    ushort i = p;
+    uint i = p;
     p = lineStart(p);
     int pos = charPos(p, i);
     while( count != 0 )
@@ -232,8 +232,8 @@ void TEditor::lock()
 
 void TEditor::newLine()
 {
-    ushort p = lineStart(curPtr);
-    ushort i = p;
+    uint p = lineStart(curPtr);
+    uint i = p;
     while( i < curPtr &&
            ( (buffer[i] == ' ') || (buffer[i] == '\x9'))
          )
@@ -243,12 +243,12 @@ void TEditor::newLine()
         insertText( &buffer[p], i - p, False);
 }
 
-ushort TEditor::nextLine( ushort p )
+uint TEditor::nextLine( uint p )
 {
     return nextChar(lineEnd(p));
 }
 
-ushort TEditor::nextWord( ushort p )
+uint TEditor::nextWord( uint p )
 {
     while( p < bufLen && isWordChar(bufChar(p)) != 0 )
         p = nextChar(p);
@@ -257,12 +257,12 @@ ushort TEditor::nextWord( ushort p )
     return p;
 }
 
-ushort TEditor::prevLine( ushort p )
+uint TEditor::prevLine( uint p )
 {
   return lineStart(prevChar(p));
 }
 
-ushort TEditor::prevWord( ushort p )
+uint TEditor::prevWord( uint p )
 {
     while( p > 0 && isWordChar(bufChar(prevChar(p))) == 0 )
         p = prevChar(p);
@@ -271,10 +271,10 @@ ushort TEditor::prevWord( ushort p )
     return p;
 }
 
-ushort TEditor::indentedLineStart( ushort P )
+uint TEditor::indentedLineStart( uint P )
 {
-    ushort startPtr = lineStart(P);
-    ushort destPtr = startPtr;
+    uint startPtr = lineStart(P);
+    uint destPtr = startPtr;
     char c;
     while ( (c = bufChar(destPtr)) == ' ' || c == '\t' ) ++destPtr;
     return destPtr == P ? startPtr : destPtr;
@@ -307,8 +307,8 @@ void TEditor::scrollTo( int x, int y )
 
 Boolean TEditor::search( const char *findStr, ushort opts )
 {
-    ushort pos = curPtr;
-    ushort i;
+    uint pos = curPtr;
+    uint i;
     do  {
         if( (opts & efCaseSensitive) != 0 )
             i = scan( &buffer[bufPtr(pos)], bufLen - pos, findStr);
@@ -339,7 +339,7 @@ Boolean TEditor::search( const char *findStr, ushort opts )
     return False;
 }
 
-void TEditor::setBufLen( ushort length )
+void TEditor::setBufLen( uint length )
 {
     bufLen = length;
     gapLen = bufSize - length;
@@ -360,7 +360,7 @@ void TEditor::setBufLen( ushort length )
     update(ufView);
 }
 
-Boolean TEditor::setBufSize( ushort newSize )
+Boolean TEditor::setBufSize( uint newSize )
 {
     return Boolean(newSize <= bufSize);
 }
@@ -375,9 +375,9 @@ void TEditor::setCmdState( ushort command, Boolean enable )
         disableCommands(s);
 }
 
-void TEditor::setCurPtr( ushort p, uchar selectMode )
+void TEditor::setCurPtr( uint p, uchar selectMode )
 {
-    ushort anchor;
+    uint anchor;
     if( (selectMode & smExtend) == 0 )
         anchor = p;
     else if( curPtr == selStart )
@@ -405,9 +405,9 @@ void TEditor::setCurPtr( ushort p, uchar selectMode )
         }
 }
 
-void TEditor::setSelect( ushort newStart, ushort newEnd, Boolean curStart )
+void TEditor::setSelect( uint newStart, uint newEnd, Boolean curStart )
 {
-    ushort p;
+    uint p;
     if( curStart != 0 )
         p = newStart;
     else
@@ -423,14 +423,14 @@ void TEditor::setSelect( ushort newStart, ushort newEnd, Boolean curStart )
         {
         if( p > curPtr )
             {
-            ushort l = p - curPtr;
+            uint l = p - curPtr;
             memmove( &buffer[curPtr], &buffer[curPtr + gapLen], l);
             curPos.y += countLines(&buffer[curPtr], l);
             curPtr = p;
             }
         else
             {
-            ushort l = curPtr - p;
+            uint l = curPtr - p;
             curPtr = p;
             curPos.y -= countLines(&buffer[curPtr], l);
             memmove( &buffer[curPtr + gapLen], &buffer[curPtr], l);
@@ -495,7 +495,7 @@ void TEditor::undo()
         {
         selStart = curPtr - insCount;
         selEnd = curPtr;
-        ushort length = delCount;
+        uint length = delCount;
         delCount = 0;
         insCount = 0;
         insertBuffer(buffer, curPtr + gapLen - length, length, False, True);

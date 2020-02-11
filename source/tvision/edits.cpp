@@ -20,12 +20,12 @@
 #include <utility>
 #include <assert.h>
 
-char TEditor::bufChar( ushort P )
+char TEditor::bufChar( uint P )
 {
     return buffer[bufPtr(P)];
 }
 
-ushort TEditor::bufPtr( ushort P )
+uint TEditor::bufPtr( uint P )
 {
     return P < curPtr ? P : P + gapLen;
 }
@@ -34,7 +34,7 @@ ushort TEditor::bufPtr( ushort P )
 #define hiByte(w)    (((uchar *)&w)[1])
 
 void TEditor::formatLine( ushort *DrawBuf,
-                          ushort P,
+                          uint P,
                           int Width,
                           ushort Colors
                         )
@@ -71,16 +71,16 @@ fill:
         DrawBuf[X++] = ColorChar;
 }
 
-ushort TEditor::lineEnd( ushort P )
+uint TEditor::lineEnd( uint P )
 {
     char c;
-    for (ushort i = P; i < bufLen; ++i)
+    for (uint i = P; i < bufLen; ++i)
         if ((c = bufChar(i)) == '\r' || c == '\n')
             return i;
     return bufLen;
 }
 
-ushort TEditor::lineStart( ushort P )
+uint TEditor::lineStart( uint P )
 {
     char c;
     for (int i = P - 1; i >= 0; --i)
@@ -96,7 +96,7 @@ ushort TEditor::lineStart( ushort P )
     return 0;
 }
 
-ushort TEditor::nextChar( ushort P )
+uint TEditor::nextChar( uint P )
 {
     if (P + 1 < bufLen)
     {
@@ -107,7 +107,7 @@ ushort TEditor::nextChar( ushort P )
     return bufLen;
 }
 
-ushort TEditor::prevChar( ushort P )
+uint TEditor::prevChar( uint P )
 {
     if (P > 1)
     {
@@ -135,7 +135,7 @@ int countLines( const char *buf, uint count )
     return lines;
 }
 
-ushort scan( const char *block, uint size, const char *str )
+uint scan( const char *block, uint size, const char *str )
 {
     uint i = 0, len = strlen(str);
     if (len > 0)
@@ -149,7 +149,7 @@ ushort scan( const char *block, uint size, const char *str )
     return sfSearchFailed;
 }
 
-ushort iScan( const char *block, uint size, const char *str )
+uint iScan( const char *block, uint size, const char *str )
 {
     uint i = 0, len = strlen(str);
     if (len > 0)
