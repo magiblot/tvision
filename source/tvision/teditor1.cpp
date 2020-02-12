@@ -42,7 +42,7 @@ inline int isWordChar( int ch )
 
 const ushort firstKeys[] =
 {
-    41,
+    39,
     kbCtrlA, cmSelectAll,
     kbCtrlC, cmPageDown,
     kbCtrlD, cmCharRight,
