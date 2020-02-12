@@ -144,6 +144,8 @@ IFNDEF __FLAT__
         MOV     AL, ' '
 @@21:   STOSW
         INC     DX
+        CMP     DX, BX
+        JAE   @@30
         TEST    DL, 7
         JNE   @@21
         JMP   @@14
@@ -204,6 +206,8 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOV     AL, ' '
 @@21:   STOSW
         INC     EDX
+        CMP     EDX, EBX
+        JAE   @@30
         TEST    DL, 7
         JNE   @@21
         JMP   @@14
