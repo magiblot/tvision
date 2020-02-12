@@ -42,7 +42,7 @@ inline int isWordChar( int ch )
 
 const ushort firstKeys[] =
 {
-    37,
+    41,
     kbCtrlA, cmSelectAll,
     kbCtrlC, cmPageDown,
     kbCtrlD, cmCharRight,
@@ -64,6 +64,8 @@ const ushort firstKeys[] =
     kbCtrlY, cmDelLine,
     kbLeft, cmCharLeft,
     kbRight, cmCharRight,
+    kbCtrlBack, cmDelWordLeft,
+    kbCtrlDel, cmDelWord,
     kbCtrlLeft, cmWordLeft,
     kbCtrlRight, cmWordRight,
     kbHome, cmLineStart,
@@ -600,6 +602,9 @@ void TEditor::handleEvent( TEvent& event )
                             break;
                         case cmDelWord:
                             deleteRange(curPtr, nextWord(curPtr), False);
+                            break;
+                        case cmDelWordLeft:
+                            deleteRange(prevWord(curPtr), curPtr, False);
                             break;
                         case cmDelStart:
                             deleteRange(lineStart(curPtr), curPtr, False);

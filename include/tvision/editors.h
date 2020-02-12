@@ -76,7 +76,8 @@ const int
   cmHideSelect  = 521,
   cmIndentMode  = 522,
   cmUpdateTitle = 523,
-  cmSelectAll   = 524;
+  cmSelectAll   = 524,
+  cmDelWordLeft = 525;
 
 const int
   edOutOfMemory   = 0,
