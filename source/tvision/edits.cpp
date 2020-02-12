@@ -15,11 +15,6 @@
 #define Uses_TEditor
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-
-#include <utility>
-#include <assert.h>
-
 char TEditor::bufChar( uint P )
 {
     return buffer[bufPtr(P)];
@@ -30,45 +25,44 @@ uint TEditor::bufPtr( uint P )
     return P < curPtr ? P : P + gapLen;
 }
 
-#define loByte(w)    (((uchar *)&w)[0])
-#define hiByte(w)    (((uchar *)&w)[1])
-
 void TEditor::formatLine( ushort *DrawBuf,
                           uint P,
                           int Width,
                           ushort Colors
                         )
 {
-    ushort ColorChar;
-    uchar &Char = loByte(ColorChar);
-    uchar &Color = hiByte(ColorChar);
-    int Limit;
-    int X = 0;
-
-    for (const auto& [c, l] : { std::make_pair(loByte(Colors), selStart),
-                                std::make_pair(hiByte(Colors), selEnd),
-                                std::make_pair(loByte(Colors), bufLen) })
+    const struct { uchar color; uint end; } ranges[] =
     {
-        Color = c; Limit = l;
-        while (P < Limit && X < Width)
+        // The attributes for normal text are in the lower byte of 'Colors'.
+        // The attributes for text selection are in the upper byte.
+        { uchar(Colors), selStart },
+        { uchar(Colors >> 8), selEnd },
+        { uchar(Colors), bufLen }
+    };
+
+    uchar Color = uchar(Colors);
+    uint X = 0;
+
+    for (int r = 0; r < 3; ++r)
+    {
+        Color = ranges[r].color;
+        while (P < ranges[r].end && X < Width)
         {
-            Char = bufChar(P++);
+            uchar Char = bufChar(P++);
             if (Char == '\r' || Char == '\n')
                 goto fill;
             if (Char == '\t') {
-                Char = ' ';
                 do {
-                    DrawBuf[X++] = ColorChar;
+                    DrawBuf[X++] = (Color << 8) | ' ';
                 } while (X%8 != 0 && X < Width);
             } else {
-                DrawBuf[X++] = ColorChar;
+                DrawBuf[X++] = (Color << 8) | Char;
             }
         }
     }
 fill:
-    Char = ' ';
     while (X < Width)
-        DrawBuf[X++] = ColorChar;
+        DrawBuf[X++] = (Color << 8) | ' ';
 }
 
 uint TEditor::lineEnd( uint P )
@@ -164,5 +158,3 @@ uint iScan( const char *block, uint size, const char *str )
 }
 
 }
-
-#endif
