@@ -37,11 +37,17 @@ public:
 
     TTextDevice( const TRect& bounds,
                  TScrollBar *aHScrollBar,
-                 TScrollBar *aVScrollBar
+                 TScrollBar *aVScrollBar,
+                 ushort aBufSize = 256
                );
+    ~TTextDevice();
 
     virtual int do_sputn( const char *s, int count ) = 0;
     virtual int overflow( int = EOF );
+
+protected:
+
+    virtual int sync();
 
 };
 

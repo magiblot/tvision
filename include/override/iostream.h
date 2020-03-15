@@ -12,6 +12,7 @@ using std::cin;
 using std::cout;
 using std::dec;
 using std::endl;
+using std::flush;
 using std::hex;
 using std::ios;
 using std::ostream;

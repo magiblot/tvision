@@ -34,8 +34,9 @@ void TEventViewer::print(const TEvent &ev)
     if (ev.what != evNothing && viewer && viewer->resumed && viewer->out)
     {
         viewer->lock();
-        *viewer->out << "Received event #" << ++viewer->eventCount << endl;
+        *viewer->out << "Received event #" << ++viewer->eventCount << '\n';
         printEvent(*viewer->out, ev);
+        *viewer->out << flush;
         viewer->unlock();
     }
 }
