@@ -221,9 +221,8 @@ void TView::writeChar( short x, short y, char c, uchar color, short count )
 {
     if (count > 0)
     {
-        count = min(count, 256);
-        ushort* attributed = new ushort[count];
         ushort attrcolor = (mapColor(color) << 8) | (uchar) c;
+        ushort* attributed = new ushort[count];
         for (int i = 0; i < count; ++i)
         {
             attributed[i] = attrcolor;
@@ -248,8 +247,8 @@ void TView::writeStr( short x, short y, const char *str, uchar color )
         int length = strlen(str);
         if (length > 0)
         {
-            ushort *attributed = new ushort[length];
             uchar attr = mapColor(color);
+            ushort *attributed = new ushort[length];
             for (int i = 0; i < length; ++i)
             {
         // The lower byte must be unsigned for concatenation to always work.
