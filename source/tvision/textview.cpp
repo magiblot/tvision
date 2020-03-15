@@ -155,10 +155,11 @@ void TTerminal::draw()
             memcpy( s+T, buffer, endLine );
             s[T+endLine] = EOS;
             }
-        if( delta.x >= strlen(s) )
+        int l = strlen(s);
+        if( delta.x >= l )
             *s = EOS;
         else
-            strcpy( s, &s[delta.x] );
+            memmove( s, &s[delta.x], l );
 
         writeStr( 0, i, s, 1 );
         writeChar( strlen(s), i, ' ', 1, size.x );
