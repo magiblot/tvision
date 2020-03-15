@@ -227,6 +227,12 @@ void TScrollBar::handleEvent( TEvent& event )
                         case kbCtrlRight:
                             clickPart = sbPageRight;
                             break;
+                        case kbCtrlUp:
+                            clickPart = sbPageUp;
+                            break;
+                        case kbCtrlDown:
+                            clickPart = sbPageDown;
+                            break;
                         case kbHome:
                             i = minVal;
                             break;

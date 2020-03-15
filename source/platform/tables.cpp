@@ -94,7 +94,7 @@ CpTranslator::CpTranslator() {
    - Ctrl+Backspace/Enter can't be recognized on terminal emulators.
    - Shift/Ctrl+Ins/Del/Home/End/PgDn/PgUp seem to work, too.
    - Arrow keys work, as well as combined with Shift, but Turbo Vision doesn't
-     support Ctrl+Up/Down.
+     support Ctrl+Up/Down (EDIT: it now does).
    - Tab and Backtab are supported too, although the linux console confuses the
      latter with Alt+Tab.
    - Some other key combinations are supported on terminal but not in Turbo Vision.
@@ -237,8 +237,9 @@ unordered_map<string, KeyDownEvent> NcursesInput::fromCursesHighKey = {
     { "kLFT5",      {{kbCtrlLeft},      kbCtrlShift}},
     { "kNXT5",      {{kbCtrlPgDn},      kbCtrlShift}},
     { "kPRV5",      {{kbCtrlPgUp},      kbCtrlShift}},
-    { "kRIT5",      {{kbCtrlRight},     kbCtrlShift}}
-    // Surprisingly, no Ctrl+Up/Down support in Turbo Vision.
+    { "kRIT5",      {{kbCtrlRight},     kbCtrlShift}},
+    { "kUP5",       {{kbCtrlUp},        kbCtrlShift}},
+    { "kDN5",       {{kbCtrlDown},      kbCtrlShift}}
 };
 
 unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
@@ -259,6 +260,8 @@ unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
         { kbLeft,       kbCtrlLeft      },
         { kbPgDn,       kbCtrlPgDn      },
         { kbPgUp,       kbCtrlPgUp      },
-        { kbRight,      kbCtrlRight     }
+        { kbRight,      kbCtrlRight     },
+        { kbUp,         kbCtrlUp        },
+        { kbDown,       kbCtrlDown      }
     }}
 };

@@ -267,7 +267,9 @@ void TView::dragView( TEvent& event,
             goUp        =   { 0,-1},
             goDown      =   { 0, 1},
             goCtrlLeft  =   {-8, 0},
-            goCtrlRight =   { 8, 0};
+            goCtrlRight =   { 8, 0},
+            goCtrlUp    =   { 0,-4},
+            goCtrlDown  =   { 0, 4};
 
         saveBounds = getBounds();
         do  {
@@ -293,6 +295,12 @@ void TView::dragView( TEvent& event,
                     break;
                 case kbCtrlRight:
                     change(mode,goCtrlRight,p,s,event.keyDown.controlKeyState);
+                    break;
+                case kbCtrlUp:
+                    change(mode,goCtrlUp,p,s,event.keyDown.controlKeyState);
+                    break;
+                case kbCtrlDown:
+                    change(mode,goCtrlDown,p,s,event.keyDown.controlKeyState);
                     break;
                 case kbHome:
                     p.x = limits.a.x;

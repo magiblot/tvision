@@ -77,6 +77,7 @@ const ushort
     kbAlt7      = 0x7e00,   kbAlt8      = 0x7f00,   kbAlt9      = 0x8000,
     kbAlt0      = 0x8100,   kbAltMinus  = 0x8200,   kbAltEqual  = 0x8300,
     kbCtrlPgUp  = 0x8400,   kbAltBack   = 0x0800,   kbNoKey     = 0x0000,
+    kbCtrlUp    = 0x8D00,   kbCtrlDown  = 0x9100,
 
 #if defined( __FLAT__ )
     kbF11       = 0x5700,   kbF12       = 0x5800,   kbShiftF11  = 0x8700,
