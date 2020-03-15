@@ -326,12 +326,11 @@ void TScreen::setVideoMode( ushort mode )
 {
     if ( mode != smChanged )
         setCrtMode( fixCrtMode( mode ) );
+    setCrtData();
 #ifdef __FLAT__
-    else
+    if ( mode == smChanged )
         THardwareInfo::resizeScreenBuffer( screenBuffer );
 #endif
-    setCrtData();
-
     if (TMouse::present())
         TMouse::setRange( getCols()-1, getRows()-1 );
 }
