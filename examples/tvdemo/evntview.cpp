@@ -58,8 +58,10 @@ TEventViewer::TEventViewer( TRect bounds, const char *aTitle,
 
 TEventViewer::~TEventViewer()
 {
+    delete out;
     title = 0; // Not heap-allocated.
     viewer = 0;
+    out = 0;
 }
 
 struct flagName {
