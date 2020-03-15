@@ -6,7 +6,10 @@
 #include <vector>
 #include <queue>
 #include <utility>
+#include <chrono>
 #include <poll.h>
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 using std::vector;
 using std::queue;
 
@@ -22,32 +25,39 @@ FdInputStrategy::FdInputStrategy() :
 {
 }
 
-void FdInputStrategy::addListener(FdInputStrategy* a, int fd)
+FdInputStrategy::~FdInputStrategy()
 {
-    listeners.push_back(a);
-    fds.push_back({ .fd = fd, .events = POLLIN });
+    deleteListener(this);
 }
 
 bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
 {
     if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
-    {
         for (size_t i = 0; i < fds.size(); ++i)
-            if (fds[i].revents & POLLIN)
+        {
+            if (fds[i].revents & POLLHUP)
+                // Broken pipe will cause poll to return immediately, so
+                // remove it from the list.
+                deleteListener(listeners[i]);
+            else if (fds[i].revents & POLLIN)
                 ready.push(i);
-    }
-
+        }
     if (!ready.empty())
     {
         ev = {};
         size_t i = ready.front(); ready.pop();
         return listeners[i]->eventGetter(ev);
     }
-
     return false;
 }
 
-FdInputStrategy::~FdInputStrategy()
+void FdInputStrategy::addListener(FdInputStrategy* a, int fd)
+{
+    listeners.push_back(a);
+    fds.push_back({ .fd = fd, .events = POLLIN });
+}
+
+void FdInputStrategy::deleteListener(FdInputStrategy* listener)
 {
     size_t shrink = 0;
     size_t i = 0;
@@ -55,7 +65,7 @@ FdInputStrategy::~FdInputStrategy()
     while (i < listeners.size() - shrink)
     {
         bool found = false;
-        if (listeners[i] == this)
+        if (listeners[i] == listener)
         {
             found = true;
             ++shrink;
