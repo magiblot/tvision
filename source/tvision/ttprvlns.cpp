@@ -17,7 +17,6 @@
 
 ushort TTerminal::prevLines( ushort pos, ushort lines )
 {
-    ushort ecx;
     if (lines != 0)
     {
         if (pos == queBack)
@@ -25,8 +24,8 @@ ushort TTerminal::prevLines( ushort pos, ushort lines )
         pos = (pos > 0 ? pos : bufSize) - 1;
         while (lines > 0)
         {
-            ecx = (pos > queBack ? pos - queBack : pos) + 1;
-            while (ecx-- && buffer[pos--] != '\n');
+            ushort count = (pos > queBack ? pos - queBack : pos) + 1;
+            while (count-- && buffer[pos--] != '\n');
             if (buffer[ushort(pos + 1)] == '\n')
                 --lines;
             else if (ushort(pos + 1) == queBack)
