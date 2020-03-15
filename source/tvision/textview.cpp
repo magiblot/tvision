@@ -88,7 +88,7 @@ TTerminal::TTerminal( const TRect& bounds,
 
 TTerminal::~TTerminal()
 {
-    delete buffer;
+    delete[] buffer;
 }
 
 void TTerminal::bufDec( ushort& val )
