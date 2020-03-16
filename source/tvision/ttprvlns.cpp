@@ -25,14 +25,17 @@ ushort TTerminal::prevLines( ushort pos, ushort lines )
         while (lines > 0)
         {
             ushort count = (pos > queBack ? pos - queBack : pos) + 1;
-            while (count-- && buffer[pos--] != '\n');
-            if (buffer[ushort(pos + 1)] == '\n')
+            char c = '\0';
+            while (count-- && (c = buffer[pos--]) != '\n');
+            if (c == '\n')
                 --lines;
             else if (ushort(pos + 1) == queBack)
                 return queBack;
             else pos = bufSize - 1;
         };
     }
-    pos = (pos + 2 < bufSize) ? pos + 2 : 0;
+    pos += 2;
+    if (pos >= bufSize)
+        pos -= bufSize;
     return pos;
 }
