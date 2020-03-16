@@ -130,7 +130,7 @@ struct DirSearchRec : public TSearchRec
         attr = (char)f->ff_attrib;
         time = (((long)(unsigned)f->ff_fdate)<<16) | f->ff_ftime;
         size = f->ff_fsize;
-        memcpy(name, f->ff_name, sizeof(name));
+        memcpy(name, f->ff_name, sizeof(f->ff_name));
     }
 
     void *operator new( size_t );
