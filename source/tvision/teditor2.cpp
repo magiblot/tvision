@@ -37,8 +37,8 @@
 
 extern "C" {
 int countLines( void *buf, uint count );
-uint scan( const void *block, uint size, const char *str );
-uint iScan( const void *block, uint size, const char *str );
+uint scan( const char *block, uint size, const char *str );
+uint iScan( const char *block, uint size, const char *str );
 };
 
 inline int isWordChar( int ch )
