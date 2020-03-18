@@ -47,6 +47,7 @@ public:
     virtual int getButtonCount() = 0;
 
     static void addListener(FdInputStrategy*, int);
+    static void deleteListener(FdInputStrategy*);
     static bool waitForEvent(int ms, TEvent &ev);
     void overrideEventGetter(std::function<bool (TEvent&)>&&);
 
