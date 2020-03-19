@@ -480,6 +480,19 @@ void TEditor::handleEvent( TEvent& event )
             if( event.mouse.eventFlags & meDoubleClick )
                 selectMode |= smDouble;
 
+            if( event.mouse.buttons & mbMiddleButton )
+                {
+                TPoint lastMouse = makeLocal( event.mouse.where );
+                while( mouseEvent(event, evMouse) )
+                    {
+                    TPoint mouse = makeLocal( event.mouse.where );
+                    TPoint d = delta + (lastMouse - mouse);
+                    scrollTo(d.x, d.y);
+                    lastMouse = mouse;
+                    }
+                break;
+                }
+
             do  {
                 lock();
                 if( event.what == evMouseAuto )
