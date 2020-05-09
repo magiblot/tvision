@@ -17,8 +17,8 @@ extern unordered_map<char, ushort> AltKeyCode;
 
 NcursesInput::NcursesInput(bool mouse)
 {
-    // Capture keyboard input, but allow exiting with Ctrl+C.
-    cbreak();
+    // Capture all keyboard input.
+    raw();
     // Disable echoing of pressed keys.
     noecho();
     // No need for ncurses to translate CR into LF.
