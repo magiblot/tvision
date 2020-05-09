@@ -71,28 +71,34 @@ TFileDialog::TFileDialog( const char *aWildCard,
     TWindowInit( &TFileDialog::initFrame )
 {
     options |= ofCentered;
+    flags |= wfGrow;
     strnzcpy( wildCard, aWildCard, sizeof( wildCard ) );
 
     fileName = new TFileInputLine( TRect( 3, 3, 31, 4 ), MAXPATH );
     strnzcpy( fileName->data, wildCard, MAXPATH );
     insert( fileName );
+    first()->growMode = gfGrowHiX;
 
     insert( new TLabel( TRect( 2, 2, 3+cstrlen(inputName), 3 ),
                         inputName,
                         fileName
                       ) );
+    first()->growMode = 0;
     insert( new THistory( TRect( 31, 3, 34, 4 ), fileName, histId ) );
+    first()->growMode = gfGrowLoX | gfGrowHiX;
     TScrollBar *sb = new TScrollBar( TRect( 3, 14, 34, 15 ) );
     insert( sb );
     insert( fileList = new TFileList( TRect( 3, 6, 34, 14 ), sb ) );
+    first()->growMode = gfGrowHiX | gfGrowHiY;
     insert( new TLabel( TRect( 2, 5, 8, 6 ), filesText, fileList ) );
-
+    first()->growMode = 0;
     ushort opt = bfDefault;
     TRect r( 35, 3, 46, 5 );
 
     if( (aOptions & fdOpenButton) != 0 )
         {
         insert( new TButton( r, openText, cmFileOpen, opt ) );
+        first()->growMode = gfGrowLoX | gfGrowHiX;
         opt = bfNormal;
         r.a.y += 3;
         r.b.y += 3;
@@ -101,6 +107,7 @@ TFileDialog::TFileDialog( const char *aWildCard,
     if( (aOptions & fdOKButton) != 0 )
         {
         insert( new TButton( r, okText, cmFileOpen, opt ) );
+        first()->growMode = gfGrowLoX | gfGrowHiX;
         opt = bfNormal;
         r.a.y += 3;
         r.b.y += 3;
@@ -109,6 +116,7 @@ TFileDialog::TFileDialog( const char *aWildCard,
     if( (aOptions & fdReplaceButton) != 0 )
         {
         insert( new TButton( r, replaceText, cmFileReplace, opt ) );
+        first()->growMode = gfGrowLoX | gfGrowHiX;
         opt = bfNormal;
         r.a.y += 3;
         r.b.y += 3;
@@ -117,25 +125,28 @@ TFileDialog::TFileDialog( const char *aWildCard,
     if( (aOptions & fdClearButton) != 0 )
         {
         insert( new TButton( r, clearText, cmFileClear, opt ) );
+        first()->growMode = gfGrowLoX | gfGrowHiX;
         opt = bfNormal;
         r.a.y += 3;
         r.b.y += 3;
         }
 
     insert( new TButton( r, cancelText, cmCancel, bfNormal ) );
+    first()->growMode = gfGrowLoX | gfGrowHiX;
     r.a.y += 3;
     r.b.y += 3;
 
     if( (aOptions & fdHelpButton) != 0 )
         {
         insert( new TButton( r, helpText, cmHelp, bfNormal ) );
+        first()->growMode = gfGrowLoX | gfGrowHiX;
         opt = bfNormal;
         r.a.y += 3;
         r.b.y += 3;
         }
 
     insert( new TFileInfoPane( TRect( 1, 16, 48, 18 ) ) );
-
+    first()->growMode = gfGrowAll & ~gfGrowLoX;
     selectNext( False );
     if( (aOptions & fdNoLoadDir) == 0 )
         readDirectory();
