@@ -194,8 +194,8 @@ bool NcursesInput::parseMouseEvent(TEvent &ev)
 #endif
         /* Some terminal emulators send a mouse event every pixel the graphical
          * mouse cursor moves over the window. Filter out those unnecessary
-         * events (except when dragging, because that's how evMouseAuto works). */
-        if ( oldButtons != buttonState || buttonState || mouseWheel ||
+         * events. */
+        if ( oldButtons != buttonState || mouseWheel ||
              mevent.x != lastMousePos.x || mevent.y != lastMousePos.y )
         {
             ev.mouse.buttons = buttonState;
