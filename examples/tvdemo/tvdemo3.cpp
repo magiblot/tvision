@@ -210,6 +210,7 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
       *new TSubMenu( "~O~ptions", 0, hcOptions ) +
         *new TMenuItem( "~M~ouse...", cmMouseCmd, kbNoKey, hcOMouse ) +
         *new TMenuItem( "~C~olors...", cmColorCmd, kbNoKey, hcOColors ) +
+        *new TMenuItem( "~B~ackground...", cmChBackground, kbNoKey ) +
         (TMenuItem&) (
             *new TSubMenu( "~D~esktop", 0 ) +
             *new TMenuItem( "~S~ave desktop", cmSaveCmd, kbNoKey, hcOSaveDesktop ) +

@@ -35,6 +35,7 @@
 #include "calendar.h"
 #include "calc.h"
 #include "evntview.h"
+#include "backgrnd.h"
 
 #include <stdlib.h>
 #include <signal.h>
@@ -93,6 +94,10 @@ void TVDemo::handleEvent(TEvent &event)
 
             case cmEventViewCmd:        //  Open Event Viewer
                 eventViewer();
+                break;
+
+            case cmChBackground:        //  Change Background pattern
+                chBackground();
                 break;
 
             case cmOpenCmd:             //  View a file
@@ -181,6 +186,16 @@ void TVDemo::asciiTable()
     {
         chart->helpCtx = hcAsciiTable;
         deskTop->insert(chart);
+    }
+}
+
+void TVDemo::chBackground()
+{
+    TChBackground *b = (TChBackground *) validView(new TChBackground(deskTop->background));
+    if (b != 0)
+    {
+        deskTop->execView(b);
+        destroy(b);
     }
 }
 
