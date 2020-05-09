@@ -10,4 +10,15 @@ struct  ftime   {
   unsigned    ft_year  : 7;   /* Year */
 };
 
+#include <unistd.h>
+#include <sys/stat.h>
+
+inline off_t filelength( int fd )
+{
+    struct stat s;
+    if ( fstat( fd, &s ) == (off_t) -1 )
+        return -1;
+    return s.st_size;
+}
+
 #endif
