@@ -27,9 +27,10 @@ NcursesInput::NcursesInput(bool mouse)
     keypad(stdscr, true);
     // Make getch non-blocking.
     nodelay(stdscr, true);
-    /* Do not delay too much on ESC key presses. This delay helps ncurses
-     * distinguish special key sequences. */
-    set_escdelay(10);
+    /* Do not delay too much on ESC key presses, as the Alt modifier works well
+     * in most modern terminals. Still, this delay helps ncurses distinguish
+     * special key sequences, I believe. */
+    set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
     if (mouse)
     {
