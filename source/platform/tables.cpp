@@ -129,6 +129,10 @@ unordered_map<char, KeyDownEvent> fromNonPrintableAscii = {
     { '\x19',       {{kbCtrlY},     kbCtrlShift}},
     { '\x1A',       {{kbCtrlZ},     kbCtrlShift}},
     { '\x1B',       {{kbEsc},       0}          }, // ^[, Escape
+    { '\x1C',       {{0x1C},        0}          }, // ^\, ?
+    { '\x1D',       {{0x1D},        0}          }, // ^], ?
+    { '\x1E',       {{0x1E},        0}          }, // ^^, ?
+    { '\x1F',       {{0x1F},        0}          }, // ^_, ?
     { '\x7F',       {{kbBack},      0}          }  // ^?, Delete
 };
 
@@ -253,6 +257,7 @@ unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
         { kbIns,        kbShiftIns      }
     }},
     { kbCtrlShift, {
+        { 0x001F,       kbCtrlBack      },
         { kbDel,        kbCtrlDel       },
         { kbEnd,        kbCtrlEnd       },
         { kbHome,       kbCtrlHome      },
