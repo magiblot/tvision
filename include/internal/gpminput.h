@@ -8,11 +8,18 @@
 #include <internal/platform.h>
 #include <internal/cursor.h>
 
+#ifdef HAVE_GPM
+#include <gpm.h>
+#endif
+
 class GpmInput : public FdInputStrategy {
 
     ScreenCursor cursor;
     uchar buttonState;
     int buttonCount;
+#ifdef HAVE_GPM    
+    static void fitEvent(Gpm_Event&);
+#endif
 
 public:
 

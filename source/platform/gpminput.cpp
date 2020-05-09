@@ -1,6 +1,7 @@
 #define Uses_TPoint
 #define Uses_TEvent
 #define Uses_TKeys
+#define Uses_TScreen
 #include <tvision/tv.h>
 
 #include <internal/gpminput.h>
@@ -10,6 +11,7 @@ using std::unordered_map;
 
 #ifdef HAVE_GPM
 
+#include <algorithm>
 #include <gpm.h>
 
 GpmInput::GpmInput() : cursor(ScreenCursor::Reverse), buttonState(0)
@@ -43,13 +45,20 @@ int GpmInput::getButtonCount()
     return gpm_fd < 0 ? 0 : 2;
 }
 
+void GpmInput::fitEvent(Gpm_Event &gpmEvent)
+{
+    short &x = gpmEvent.x, &y = gpmEvent.y;
+    x = std::clamp<short>(x, 0, TScreen::screenWidth - 1);
+    y = std::clamp<short>(y, 0, TScreen::screenHeight - 1);
+}
+
 
 bool GpmInput::getEvent(TEvent &ev)
 {
     Gpm_Event gpmEvent;
     if (Gpm_GetEvent(&gpmEvent) == 1)
     {
-        Gpm_FitEvent(&gpmEvent);
+        fitEvent(gpmEvent);
         cursor.setPos({gpmEvent.x, gpmEvent.y});
         cursor.show();
         if (gpmEvent.type != GPM_MOVE || gpmEvent.dx || gpmEvent.dy || gpmEvent.wdy)
