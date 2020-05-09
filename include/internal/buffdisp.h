@@ -6,7 +6,13 @@
 #include <set>
 #include <chrono>
 
+class ScreenCursor;
+
 class BufferedDisplay : public DisplayStrategy {
+
+    friend class ScreenCursor;
+
+    static BufferedDisplay *instance;
 
     struct CellPos {
         int y, x;  // row, col
@@ -24,6 +30,10 @@ class BufferedDisplay : public DisplayStrategy {
     bool caretMoved;
     CellPos caretPosition;
 
+    static std::set<ScreenCursor*> cursors;
+    void drawCursors();
+    void undrawCursors();
+
     bool limitFPS;
     static const int defaultFPS = 60;
     std::chrono::microseconds flushDelay;
@@ -31,6 +41,9 @@ class BufferedDisplay : public DisplayStrategy {
     bool timeToFlush();
 
 protected:
+
+    BufferedDisplay();
+    ~BufferedDisplay();
 
     void initBuffer();
 

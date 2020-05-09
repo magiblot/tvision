@@ -1,9 +1,23 @@
 #include <internal/buffdisp.h>
 #include <internal/getenv.h>
+#include <internal/cursor.h>
 #include <chrono>
 using std::chrono::microseconds;
 using std::chrono::steady_clock;
 using std::chrono::time_point;
+
+BufferedDisplay *BufferedDisplay::instance = 0;
+std::set<ScreenCursor*> BufferedDisplay::cursors;
+
+BufferedDisplay::BufferedDisplay()
+{
+    instance = this;
+}
+
+BufferedDisplay::~BufferedDisplay()
+{
+    instance = 0;
+}
 
 void BufferedDisplay::initBuffer()
 {
@@ -58,10 +72,31 @@ bool BufferedDisplay::timeToFlush()
     return b;
 }
 
+void BufferedDisplay::drawCursors()
+{
+    for (auto* cursor : cursors)
+        if (cursor->isVisible()) {
+            const auto& [x, y] = cursor->getPos();
+            cursor->apply(attrBuffer[y][x]);
+            changedCells.insert({y, x});
+        }
+}
+
+void BufferedDisplay::undrawCursors()
+{
+    for (const auto* cursor : cursors)
+        if (cursor->isVisible()) {
+            const auto& [x, y] = cursor->getPos();
+            cursor->restore(attrBuffer[y][x]);
+            changedCells.insert({y, x});
+        }
+}
+
 void BufferedDisplay::flushScreen()
 {
     if ((screenChanged || caretMoved) && timeToFlush())
     {
+        drawCursors();
         CellPos last = {-1, -1};
         for (auto [y, x] : changedCells)
         {
@@ -76,6 +111,7 @@ void BufferedDisplay::flushScreen()
         screenChanged = false;
         caretMoved = false;
         changedCells.clear();
+        undrawCursors();
     }
 }
 
