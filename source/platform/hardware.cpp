@@ -19,9 +19,12 @@ using std::chrono::steady_clock;
 
 TEvent THardwareInfo::pendingMouseEvent;
 
+static bool alwaysFlush;
+
 THardwareInfo::THardwareInfo()
 {
     pendingEvent = 0;
+    alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
     static TSignalHandler h;
 }
 
@@ -57,6 +60,8 @@ void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
     platf->screenWrite(x, y, buf, len);
+    if (alwaysFlush)
+        flushScreen();
 }
 void THardwareInfo::resizeScreenBuffer( ushort *&buffer )
 {
