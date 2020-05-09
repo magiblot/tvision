@@ -12,7 +12,13 @@ template<>
 int getEnv<int>(const char* name, int def)
 {
     const char* body = std::getenv(name);
-    return body ? atoi(body) : def;
+    if (body) {
+        char* end;
+        auto i = strtol(body, &end, 0);
+        if (body != end)
+            return i;
+    }
+    return def;
 }
 
 template<>
