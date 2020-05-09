@@ -23,11 +23,6 @@ public:
     int getButtonCount();
     void flushScreen();
 
-    static bool ttyActive();
-    static int getStartupTTY();
-    static int getActiveTTY();
-    static int getTTY(int fd);
-
 };
 
 #endif

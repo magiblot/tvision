@@ -6,10 +6,11 @@
 #include <tvision/tv.h>
 
 #include <internal/platform.h>
+#include <internal/cursor.h>
 
 class GpmInput : public FdInputStrategy {
 
-    TPoint mousePos;
+    ScreenCursor cursor;
     uchar buttonState;
     int buttonCount;
 
@@ -19,7 +20,6 @@ public:
     ~GpmInput();
     bool getEvent(TEvent &ev);
     int getButtonCount();
-    void drawPointer();
 
 };
 

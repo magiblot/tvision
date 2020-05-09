@@ -12,14 +12,13 @@ using std::unordered_map;
 
 #include <gpm.h>
 
-GpmInput::GpmInput() : mousePos({-1, -1}), buttonState(0)
+GpmInput::GpmInput() : cursor(ScreenCursor::Reverse), buttonState(0)
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
     Gpm_Connect conn = {
         .eventMask = GPM_DOWN | GPM_UP | GPM_DRAG | GPM_MOVE,
-        // I do not fully understand the point of this, but it works.
-        .defaultMask = GPM_MOVE | GPM_HARD,
+        .defaultMask = 0, // Disable cursor drawing by the server.
         /* Disable mouse event reporting when keyboard modifiers are active.
          * In such case, GPM text selection and copy/paste will be active. */
         .minMod = 0,
@@ -44,18 +43,6 @@ int GpmInput::getButtonCount()
     return gpm_fd < 0 ? 0 : 2;
 }
 
-void GpmInput::drawPointer()
-{
-    // Do not draw the pointer if our tty is not active.
-    if (LinuxConsoleStrategy::ttyActive())
-    {
-        // Do not draw the pointer unless we captured its position at least once.
-        if (mousePos.x >= 0)
-            Gpm_DrawPointer(mousePos.x, mousePos.y, 0);
-    }
-    else
-        mousePos = {-1, -1};
-}
 
 bool GpmInput::getEvent(TEvent &ev)
 {
@@ -63,8 +50,8 @@ bool GpmInput::getEvent(TEvent &ev)
     if (Gpm_GetEvent(&gpmEvent) == 1)
     {
         Gpm_FitEvent(&gpmEvent);
-        mousePos = { gpmEvent.x, gpmEvent.y };
-        drawPointer();
+        cursor.setPos({gpmEvent.x, gpmEvent.y});
+        cursor.show();
         if (gpmEvent.type != GPM_MOVE || gpmEvent.dx || gpmEvent.dy || gpmEvent.wdy)
         {
             ev.what = evMouse;
