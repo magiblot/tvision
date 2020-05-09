@@ -89,12 +89,9 @@ bool GpmInput::getEvent(TEvent &ev)
 
 #else
 
-#include <unistd.h>
-
 GpmInput::GpmInput() {}
 GpmInput::~GpmInput() {}
 int GpmInput::getButtonCount() { return 0; }
-void GpmInput::drawPointer() {}
-bool GpmInput::getEvent(TEvent &ev) { while (true) pause(); }
+bool GpmInput::getEvent(TEvent &ev) { return false; }
 
 #endif
