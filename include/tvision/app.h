@@ -32,8 +32,6 @@ public:
     virtual void draw();
     virtual TPalette& getPalette() const;
 
-protected:
-
     char pattern;
 
 private:
@@ -101,9 +99,10 @@ public:
     virtual void tileError();
     virtual void shutDown();
 
+    TBackground *background;
+
 protected:
 
-    TBackground *background;
     Boolean tileColumnsFirst;
 
 private:
