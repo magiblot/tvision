@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef __DPMI32__
+#ifdef __FLAT__
 #define HELP_FILENAME "DEMOHELP.H32"
 #else
 #define HELP_FILENAME "DEMOHELP.H16"
