@@ -8,7 +8,7 @@ include/override
 
 set(CXX_WARNINGS "-Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder")
 set(CXX_DEFINITIONS "-Dregister=")
-set(CMAKE_CXX_FLAGS "-O0 -g --std=c++17 -fpermissive ${CXX_WARNINGS} ${CXX_DEFINITIONS}")
+set(CMAKE_CXX_FLAGS "-O2 -flto --std=c++17 -fpermissive ${CXX_WARNINGS} ${CXX_DEFINITIONS}")
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvision/geninc.cpp")
