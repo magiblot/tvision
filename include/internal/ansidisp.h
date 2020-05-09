@@ -8,12 +8,14 @@
 #include <sys/ioctl.h>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
+#include <ncurses.h> // For COLORS
 
 #define CSI "\x1B["
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
  * escape codes directly to stderr (stdout doesn't work, for some reason).
- * Character attributes are not supported.
+ * Character attributes are supported but assume Ncurses is being used.
  *
  * AnsiDisplay implements only a subset of DisplayStrategy's pure virtual
  * functions, so it depends on another implementation from which it inherits,
@@ -30,6 +32,72 @@ class BufferedDisplay;
 template<class DisplayBase>
 class AnsiDisplay : public DisplayBase {
 
+    std::stringstream buf;
+
+    struct AnsiColor {
+        union {
+            uchar asChar;
+            uchar
+                value   : 3,
+                bright  : 1;
+        };
+        AnsiColor(uchar c) : asChar(c) {}
+    };
+
+    struct charAttr {
+        union {
+            uchar asChar;
+            uchar fg    : 4,
+                  bg    : 4;
+        };
+        charAttr(uchar c) : asChar(c) {}
+    } /*lastAttr = '\x07'*/;
+
+    uchar lastAttr = '\x07';
+
+    int cvtColor(uchar c, bool b=false) {
+        return (bright(c) ? (b ? 100 : 90) : (b ? 40 : 30)) + value(c);
+    }
+
+    static uchar fg (uchar attr) {
+        return attr & 0x0F;
+    }
+
+    static uchar bg (uchar attr) {
+        return uchar(attr & 0xF0) >> 4;
+    }
+
+    static uchar value (uchar color) {
+        return swapRedBlue(color & 0x07);
+    }
+
+    static uchar bright (uchar color) {
+        return color & (COLORS < 16 ? 0 : 0x08);
+    }
+
+    void writeAttributes(uchar attr) {
+        if (attr != lastAttr)
+        {
+            buf << CSI
+                << cvtColor(fg(attr) == fg(lastAttr) ? fg(lastAttr) : fg(attr))
+                << ';'
+                << cvtColor(bg(attr) == bg(lastAttr) ? bg(lastAttr) : bg(attr), true)
+                << 'm';
+            if (COLORS < 16)
+            {
+                if ((attr & 0x08) && !(lastAttr & 0x08))
+                    buf << CSI "1m";
+                else if (!(attr & 0x08) && (lastAttr & 0x08))
+                    buf << CSI "22m";
+            }
+        }
+        lastAttr = attr;
+    }
+
+    static uchar swapRedBlue (uchar c) {
+        return (c & ~0x5) | ((c & 0x4) >> 2) | ((c & 0x1) << 2);
+    }
+
 public:
 
     AnsiDisplay()
@@ -41,6 +109,7 @@ public:
 
     void getCaretPosition(int &x, int &y)
     {
+        lowlevelFlush();
         struct termios saved, temporary;
         tcgetattr(0, &saved);
         temporary = saved;
@@ -55,11 +124,12 @@ public:
 
     void clearScreen()
     {
-        fprintf(stderr, CSI"2J");
+        buf << CSI"2J";
     }
 
     void getScreenSize(int &rows, int &cols)
     {
+        lowlevelFlush();
         struct winsize w;
         ioctl(0, TIOCGWINSZ, &w);
         rows = w.ws_row;
@@ -82,22 +152,33 @@ public:
 
     ushort getScreenMode()
     {
-        return TDisplay::smMono;
+        return TDisplay::smCO80;
     }
 
 protected:
 
     void lowlevelWriteChar(uchar character, ushort attr)
     {
-        fprintf(stderr, "%s", CpTranslator::toUtf8(character));
+        writeAttributes(attr);
+        buf << CpTranslator::toUtf8(character);
     }
 
     void lowlevelMoveCursor(int x, int y)
     {
-        fprintf(stderr, CSI"%d;%dH", y + 1, x + 1);
+        buf << CSI << y+1 << ";" << x+1 << "H";
     }
 
-    void lowlevelFlush() {}
+    void lowlevelFlush() {
+        fputs(buf.str().c_str(), stdout);
+        fflush(stdout);
+        std::stringstream().swap(buf);
+    }
+
+    void onScreenResize() {
+        BufferedDisplay::onScreenResize();
+        DisplayBase::lowlevelFlush();
+        lastAttr = '\x07';
+    }
 
 };
 
