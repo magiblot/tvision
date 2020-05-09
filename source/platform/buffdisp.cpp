@@ -100,6 +100,9 @@ void BufferedDisplay::flushScreen()
         CellPos last = {-1, -1};
         for (auto [y, x] : changedCells)
         {
+//             Workaround for Ncurses bug
+//             if (y != last.y)
+//                 lowlevelFlush();
             if (y != last.y || x != last.x + 1)
                 lowlevelMoveCursor(x, y);
             lowlevelWriteChar(charBuffer[y][x], attrBuffer[y][x]);
