@@ -115,16 +115,16 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Horizontal and vertical mouse wheel support (`evMouseWheel`), even on DOS.
 * Arbitrary screen size support (with up to 65535 rows or columns).
 * Graceful handling of screen resize events.
-* Support for LF line endings in TVDEMO and TVEDIT. TVEDIT preserves the line ending on file save but all newly created files use CRLF by default.
 * Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
 * Improved usability of menus: they can be closed by clicking twice on them, even submenus.
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
 * Views don't lose their sizes when extremely resized.
-* TVEDIT: drag scroll with middle mouse button.
-* TVEDIT: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to linux users: they might not work on terminal emulators, but they do work on the console).
-* TVEDIT: smart Home key (toggles between beggining of line and beggining of indentation).
-* TVDEMO: event viewer applet useful for event debugging.
-* TVDEMO: option to change the background pattern.
+* Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
+* `tvedit`: drag scroll with middle mouse button.
+* `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to linux users: they might not work on terminal emulators, but they do work on the console).
+* `tvedit`: smart Home key (toggles between beginning of line and beginning of indented text).
+* `tvdemo`: event viewer applet useful for event debugging.
+* `tvdemo`: option to change the background pattern.
 
 ## Not implemented
 
@@ -138,3 +138,11 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
 * Several constructors and methods now receive or return `const char*` instead of `char*`.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
+
+## Screenshots
+
+You will find some screenshots [here](https://github.com/magiblot/tvision/issues/7). Feel free to add your own!
+
+## Contributing
+
+If you know of any Turbo Vision applications whose source code has not been lost and that could benefit from this, let me know.
