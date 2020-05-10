@@ -2,6 +2,8 @@
 
 An independent, backwards-compatible port of Turbo Vision 2.0 for modern Linux systems.
 
+![tvedit on Konsole](https://user-images.githubusercontent.com/20713561/81506401-4fffdd80-92f6-11ea-8826-ee42612eb82a.png)
+
 I started this as a personal project at the very end of 2018. It is now very close to feature parity with the original, and I am not spending much time on it anymore, so I'm making it open in case it may be useful to someone.
 
 Even if the linux port cannot compete against other widespread solutions (such as SET's port, which has tons of additional features), I still consider the improvements made to the Windows implementation to be useful. For example, the TVEDIT application included here can be a good replacement for the missing `EDIT.COM` on 64-bit Windows.
@@ -130,3 +132,9 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 
 * `evMouseAuto`.
 * Help files.
+
+## API changes
+
+* `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
+* Several constructors and methods now receive or return `const char*` instead of `char*`.
+* `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
