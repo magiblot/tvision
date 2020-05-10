@@ -142,7 +142,7 @@ OBJDIR     = objs32$(DEBUGSUFFIX)
 OBJS = ASCII.OBJ    CALC.OBJ     CALENDAR.OBJ \
        FILEVIEW.OBJ GADGETS.OBJ  MOUSEDLG.OBJ \
        PUZZLE.OBJ   TVDEMO1.OBJ  TVDEMO2.OBJ  \
-       TVDEMO3.OBJ EVNTVIEW.OBJ
+       TVDEMO3.OBJ  EVNTVIEW.OBJ BACKGRND.OBJ
 
 #
 # link the exe
@@ -162,7 +162,8 @@ $(OBJDIR)\puzzle.obj +
 $(OBJDIR)\tvdemo1.obj +
 $(OBJDIR)\tvdemo2.obj +
 $(OBJDIR)\tvdemo3.obj +
-$(OBJDIR)\evntview.obj
+$(OBJDIR)\evntview.obj +
+$(OBJDIR)\backgrnd.obj
 $(SOURCE)                       # exe name
 $(SOURCE)                       # mapfile
 $(LINKOVY_ON) $(USERLIBS) +     # overlayable libraries
@@ -198,6 +199,8 @@ $(OBJDIR)\tvdemo2.obj: $(CFGFILE) tvdemo2.cpp
 $(OBJDIR)\tvdemo3.obj: $(CFGFILE) tvdemo3.cpp
 
 $(OBJDIR)\evntview.obj: $(CFGFILE) evntview.cpp
+
+$(OBJDIR)\backgrnd.obj: $(CFGFILE) backgrnd.cpp
 
 #
 # create a new configuration file whenever the makefile
