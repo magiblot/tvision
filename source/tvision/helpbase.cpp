@@ -128,7 +128,7 @@ void THelpTopic::readCrossRefs( ipstream& s )
     for (i = 0; i < numRefs; ++i)
         {
         crossRefPtr = (TCrossRef *)crossRefs + i;
-        s.readBytes(crossRefPtr, sizeof(TCrossRef));
+        s >> crossRefPtr->ref >> crossRefPtr->offset >> crossRefPtr->length;
         }
 }
 
