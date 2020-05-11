@@ -14,7 +14,13 @@
  *
  */
 
-const long magicHeader = 0x46484246L; //"FBHF"
+#ifdef __LP64__
+typedef int help_t;
+#else
+typedef long help_t;
+#endif
+
+const help_t magicHeader = 0x46484246L; //"FBHF"
 
 #define cHelpViewer "\x06\x07\x08"
 #define cHelpWindow "\x80\x81\x82\x83\x84\x85\x86\x87"
@@ -124,11 +130,11 @@ public:
     THelpIndex( StreamableInit ) {};
     virtual ~THelpIndex();
 
-    long position( int );
-    void add( int, long );
+    help_t position( int );
+    void add( int, help_t );
 
     ushort size;
-    long *index;
+    help_t *index;
 
 private:
 
@@ -179,7 +185,7 @@ public:
     Boolean modified;
 
     THelpIndex *index;
-    long indexPos;
+    help_t indexPos;
 };
 
 extern void notAssigned( opstream& s, int value );

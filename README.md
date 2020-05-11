@@ -93,6 +93,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelenght`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
+* Compatibility with 32-bit help files.
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
@@ -132,7 +133,6 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 ### Linux
 
 * `evMouseAuto`.
-* Help files.
 
 ## API changes
 

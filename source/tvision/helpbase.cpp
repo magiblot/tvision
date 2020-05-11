@@ -466,7 +466,7 @@ const char * const _NEAR THelpIndex::name = "THelpIndex";
 
 void THelpIndex::write( opstream& os )
 {
-    long *indexArrayPtr;
+    help_t *indexArrayPtr;
 
     os << size;
     for (int i = 0; i < size; ++i)
@@ -478,14 +478,14 @@ void THelpIndex::write( opstream& os )
 
 void *THelpIndex::read( ipstream& is )
 {
-    long *indexArrayPtr;
+    help_t *indexArrayPtr;
 
     is >> size;
     if (size == 0)
         index = 0;
     else
         {
-        index =  new long[size];
+        index =  new help_t[size];
         for(int i = 0; i < size; ++i)
             {
             indexArrayPtr = index + i;
@@ -517,9 +517,9 @@ THelpIndex::THelpIndex(void): TObject ()
     index = 0;
 }
 
-long THelpIndex::position(int i)
+help_t THelpIndex::position(int i)
 {
-    long *indexArrayPtr;
+    help_t *indexArrayPtr;
 
     if (i < size)
         {
@@ -530,21 +530,21 @@ long THelpIndex::position(int i)
         return -1;
 }
 
-void THelpIndex::add( int i, long val )
+void THelpIndex::add( int i, help_t val )
 {
     int delta = 10;
-    long *p;
+    help_t *p;
     int newSize;
-    long *indexArrayPtr;
+    help_t *indexArrayPtr;
 
     if (i >= size)
         {
         newSize = (i + delta) / delta * delta;
-        p = new long[newSize];
+        p = new help_t[newSize];
         if (p != 0)
             {
-            memmove(p, index, size * sizeof(long));
-            memset(p+size, 0xFF, (newSize - size) * sizeof(long));
+            memmove(p, index, size * sizeof(help_t));
+            memset(p+size, 0xFF, (newSize - size) * sizeof(help_t));
             }
         if (size > 0)
             {
@@ -561,8 +561,8 @@ void THelpIndex::add( int i, long val )
 
 THelpFile::THelpFile( fpstream&  s )
 {
-    long magic;
-    long size;
+    help_t magic;
+    help_t size;
 
     magic = 0;
     s.seekg(0, ios::end);
@@ -590,7 +590,7 @@ THelpFile::THelpFile( fpstream&  s )
 
 THelpFile::~THelpFile(void)
 {
-    long magic, size;
+    help_t magic, size;
 
     if (modified == True)
         {
@@ -612,7 +612,7 @@ THelpFile::~THelpFile(void)
 
 THelpTopic *THelpFile::getTopic( int i )
 {
-    long pos;
+    help_t pos;
     THelpTopic *topic = 0;
 
     pos = index->position(i);
