@@ -116,12 +116,19 @@ Boolean TEditor::insertBuffer( const char *p,
     long newSize = long(bufLen + delCount - selLen + delLen) + length;
 
     if( newSize > bufLen + delCount )
+        {
+        Boolean bufferText = Boolean( p > buffer && p < &buffer[bufLen] );
+        if( bufferText )
+            p -= ptrdiff_t(buffer);
         if( newSize > UINT_MAX-0x1Fl || setBufSize(uint(newSize)) == False )
             {
             editorDialog( edOutOfMemory );
             selEnd = selStart;
             return False;
             }
+        if( bufferText )
+            p += ptrdiff_t(buffer);
+        }
 
     uint selLines = countLines( &buffer[bufPtr(selStart)], selLen );
     if( curPtr == selEnd )
