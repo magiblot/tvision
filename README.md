@@ -43,7 +43,7 @@ The build requirements are:
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is (notice the shell expansion for the include directories):
 
 ```sh
-g++ -o hello hello.cpp libtvision.a -Iinclude/{,tvision,override} -lncurses -lgpm
+g++ -o hello hello.cpp libtvision.a -Iinclude/{,tvision,override} -lncursesw -lgpm
 ```
 
 `-Iinclude/tvision` is only necessary if your application uses Turbo Vision 1.x includes (e.g. `#include <tv.h>` instead of `#include <tvision/tv.h>`). `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
@@ -123,6 +123,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * `tvedit`: drag scroll with middle mouse button.
 * `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to linux users: they might not work on terminal emulators, but they do work on the console).
 * `tvedit`: smart Home key (toggles between beginning of line and beginning of indented text).
+* `tvedit`: support for files bigger than 64 KiB on 32-bit or 64-bit builds.
 * `tvdemo`: event viewer applet useful for event debugging.
 * `tvdemo`: option to change the background pattern.
 
