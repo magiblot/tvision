@@ -117,7 +117,7 @@ Boolean TEditor::insertBuffer( const char *p,
 
     if( newSize > bufLen + delCount )
         {
-        Boolean bufferText = Boolean( p > buffer && p < &buffer[bufLen] );
+        Boolean bufferText = Boolean( p >= buffer && p < buffer + bufLen );
         if( bufferText )
             p -= ptrdiff_t(buffer);
         if( newSize > UINT_MAX-0x1Fl || setBufSize(uint(newSize)) == False )
