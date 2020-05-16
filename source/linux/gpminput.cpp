@@ -74,6 +74,10 @@ bool GpmInput::getEvent(TEvent &ev)
                 buttonState |= mbRightButton;
             if ((gpmEvent.buttons & GPM_B_RIGHT) && (gpmEvent.type & GPM_UP))
                 buttonState &= ~mbRightButton;
+            if ((gpmEvent.buttons & GPM_B_MIDDLE) && (gpmEvent.type & GPM_DOWN))
+                buttonState |= mbMiddleButton;
+            if ((gpmEvent.buttons & GPM_B_MIDDLE) && (gpmEvent.type & GPM_UP))
+                buttonState &= ~mbMiddleButton;
             ev.mouse.buttons = buttonState;
             if ( gpmEvent.wdy )
                 ev.mouse.wheel = gpmEvent.wdy > 0 ? mwUp : mwDown;
