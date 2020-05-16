@@ -14,7 +14,7 @@ using std::unordered_map;
 #include <algorithm>
 #include <gpm.h>
 
-GpmInput::GpmInput() : cursor(ScreenCursor::Reverse), buttonState(0)
+GpmInput::GpmInput() : cursor(ScreenCursor::Negative), buttonState(0)
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
