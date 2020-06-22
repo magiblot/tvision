@@ -26,36 +26,45 @@
 extern TPoint shadowSize;
 extern uchar shadowAttr;
 
-static short X, Y, Count, wOffset;
-static const void _FAR *Buffer;
-static TView *Target;
+struct TVWrite {
 
-static int edx, esi;
+    short X, Y, Count, wOffset;
+    const void _FAR *Buffer;
+    TView *Target;
+    int edx, esi;
 
-static void L10( TView * );
-static void L20( TView * );
-static void L30( TView * );
-static void L40( TView * );
-static void L50( TGroup * );
+    void L0( TView *, short, short, short, const void _FAR* );
+    void L10( TView * );
+    void L20( TView * );
+    void L30( TView * );
+    void L40( TView * );
+    void L50( TGroup * );
+
+};
 
 void TView::writeView( short x, short y, short count, const void _FAR* b )
+{
+    TVWrite().L0(this, x, y, count, b);
+}
+
+void TVWrite::L0( TView *dest, short x, short y, short count, const void _FAR* b )
 {
     X = x; Y = y; Count = count; Buffer = b;
     wOffset = X;
     Count += X;
     edx = 0;
-    if (0 <= Y && Y < size.y)
+    if (0 <= Y && Y < dest->size.y)
     {
         if (X < 0)
             X = 0;
-        if (Count > size.x)
-            Count = size.x;
+        if (Count > dest->size.x)
+            Count = dest->size.x;
         if (X < Count)
-            L10(this);
+            L10(dest);
     }
 }
 
-void L10( TView *dest )
+void TVWrite::L10( TView *dest )
 {
     TGroup *owner = dest->owner;
     if ((dest->state & sfVisible) && owner)
@@ -77,7 +86,7 @@ void L10( TView *dest )
     }
 }
 
-void L20( TView *dest )
+void TVWrite::L20( TView *dest )
 {
     TView *next = dest->next;
     if (next == Target)
@@ -134,7 +143,7 @@ L20next:
     }
 }
 
-void L30( TView *dest )
+void TVWrite::L30( TView *dest )
 {
     TView *_Target = Target;
     int _wOffset = wOffset, _esi = esi, _edx = edx,
@@ -148,7 +157,7 @@ void L30( TView *dest )
     X = esi;
 }
 
-void L40( TView *dest )
+void TVWrite::L40( TView *dest )
 {
     TGroup *owner = dest->owner;
     if (owner->buffer)
@@ -166,10 +175,7 @@ void L40( TView *dest )
         L10(owner);
 }
 
-#define loByte(w)    (((uchar *)&w)[0])
-#define hiByte(w)    (((uchar *)&w)[1])
-
-void L50( TGroup *owner )
+void TVWrite::L50( TGroup *owner )
 {
     int i;
     ushort *dst = &owner->buffer[Y*owner->size.x + X];
@@ -180,6 +186,8 @@ void L50( TGroup *owner )
             memmove(dst, src, 2*(Count - X));
         else
         {
+#define loByte(w)    (((uchar *)&w)[0])
+#define hiByte(w)    (((uchar *)&w)[1])
             ushort ColorChar;
             hiByte(ColorChar) = shadowAttr;
             for (i = 0; i < Count - X; ++i)
@@ -187,6 +195,8 @@ void L50( TGroup *owner )
                 loByte(ColorChar) = src[i];
                 dst[i] = ColorChar;
             }
+#undef loByte
+#undef hiByte
         }
     }
     else
