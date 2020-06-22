@@ -35,11 +35,6 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-inline int isWordChar( int ch )
-{
-    return isalnum(ch) || ch == '_';
-}
-
 const ushort firstKeys[] =
 {
     39,
