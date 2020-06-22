@@ -94,7 +94,7 @@ void TVWrite::L20( TView *dest )
     else
     {
         if ((next->state & sfVisible) && next->origin.y <= Y)
-        {
+        do {
             esi = next->origin.y + next->size.y;
             if (Y < esi)
             {
@@ -103,7 +103,7 @@ void TVWrite::L20( TView *dest )
                 {
                     if (Count > esi)
                         L30(next);
-                    else goto L20next;
+                    else break;
                 }
                 esi += next->size.x;
                 if (X < esi)
@@ -114,7 +114,7 @@ void TVWrite::L20( TView *dest )
                 }
                 if ((next->state & sfShadow) && next->origin.y + shadowSize.y <= Y)
                     esi += shadowSize.x;
-                else goto L20next;
+                else break;
             }
             else if ((next->state & sfShadow) && Y < esi + shadowSize.y)
             {
@@ -123,11 +123,11 @@ void TVWrite::L20( TView *dest )
                 {
                     if (Count > esi)
                         L30(next);
-                    else goto L20next;
+                    else break;
                 }
                 esi += next->size.x;
             }
-            else goto L20next;
+            else break;
             if (X < esi)
             {
                 edx++;
@@ -137,8 +137,7 @@ void TVWrite::L20( TView *dest )
                     edx--;
                 }
             }
-        }
-L20next:
+        } while (0);
         L20(next);
     }
 }
