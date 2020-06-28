@@ -9,7 +9,9 @@
 #include <internal/gpminput.h>
 #include <internal/linuxcon.h>
 #include <algorithm>
+#include <tuple>
 #include <gpm.h>
+using std::tuple;
 
 GpmInput::GpmInput() : cursor(ScreenCursor::Negative), buttonState(0)
 {
@@ -49,6 +51,14 @@ void GpmInput::fitEvent(Gpm_Event &gpmEvent)
     y = std::clamp<short>(y, 0, TScreen::screenHeight - 1);
 }
 
+using gpm_flag_t = decltype(GPM_B_LEFT);
+using mb_flag_t = decltype(mbLeftButton);
+
+static constexpr tuple<gpm_flag_t, mb_flag_t> gpmButtonFlags[] = {
+    {GPM_B_LEFT, mbLeftButton},
+    {GPM_B_RIGHT, mbRightButton},
+    {GPM_B_MIDDLE, mbMiddleButton}
+};
 
 bool GpmInput::getEvent(TEvent &ev)
 {
@@ -63,18 +73,13 @@ bool GpmInput::getEvent(TEvent &ev)
             ev.what = evMouse;
             ev.mouse.where.x = gpmEvent.x;
             ev.mouse.where.y = gpmEvent.y;
-            if ((gpmEvent.buttons & GPM_B_LEFT) && (gpmEvent.type & GPM_DOWN))
-                buttonState |= mbLeftButton;
-            if ((gpmEvent.buttons & GPM_B_LEFT) && (gpmEvent.type & GPM_UP))
-                buttonState &= ~mbLeftButton;
-            if ((gpmEvent.buttons & GPM_B_RIGHT) && (gpmEvent.type & GPM_DOWN))
-                buttonState |= mbRightButton;
-            if ((gpmEvent.buttons & GPM_B_RIGHT) && (gpmEvent.type & GPM_UP))
-                buttonState &= ~mbRightButton;
-            if ((gpmEvent.buttons & GPM_B_MIDDLE) && (gpmEvent.type & GPM_DOWN))
-                buttonState |= mbMiddleButton;
-            if ((gpmEvent.buttons & GPM_B_MIDDLE) && (gpmEvent.type & GPM_UP))
-                buttonState &= ~mbMiddleButton;
+            for (const auto& [gpmFlag, mbFlag] : gpmButtonFlags)
+                if (gpmEvent.buttons & gpmFlag) {
+                    if (gpmEvent.type & GPM_DOWN)
+                        buttonState |= mbFlag;
+                    if (gpmEvent.type & GPM_UP)
+                        buttonState &= ~mbFlag;
+                }
             ev.mouse.buttons = buttonState;
             if ( gpmEvent.wdy )
                 ev.mouse.wheel = gpmEvent.wdy > 0 ? mwUp : mwDown;
