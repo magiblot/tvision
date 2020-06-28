@@ -93,7 +93,7 @@ bool GpmInput::getEvent(TEvent &ev)
 
 #else
 
-GpmInput::GpmInput() {}
+GpmInput::GpmInput(): cursor(ScreenCursor::DrawStyle::Negative) {}
 GpmInput::~GpmInput() {}
 int GpmInput::getButtonCount() { return 0; }
 bool GpmInput::getEvent(TEvent &ev) { return false; }
