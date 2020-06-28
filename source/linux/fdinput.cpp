@@ -30,6 +30,16 @@ FdInputStrategy::~FdInputStrategy()
     deleteListener(this);
 }
 
+bool FdInputStrategy::getEvent(TEvent &)
+{
+    return false;
+}
+
+int FdInputStrategy::getButtonCount()
+{
+    return 0; // Treated as "no mouse" by Turbo Vision.
+}
+
 bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
 {
     if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)

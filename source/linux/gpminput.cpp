@@ -1,3 +1,5 @@
+#ifdef HAVE_GPM
+
 #define Uses_TPoint
 #define Uses_TEvent
 #define Uses_TKeys
@@ -6,11 +8,6 @@
 
 #include <internal/gpminput.h>
 #include <internal/linuxcon.h>
-#include <unordered_map>
-using std::unordered_map;
-
-#ifdef HAVE_GPM
-
 #include <algorithm>
 #include <gpm.h>
 
@@ -91,11 +88,4 @@ bool GpmInput::getEvent(TEvent &ev)
     return false;
 }
 
-#else
-
-GpmInput::GpmInput() {}
-GpmInput::~GpmInput() {}
-int GpmInput::getButtonCount() { return 0; }
-bool GpmInput::getEvent(TEvent &ev) { return false; }
-
-#endif
+#endif // HAVE_GPM

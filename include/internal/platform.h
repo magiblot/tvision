@@ -43,8 +43,8 @@ public:
     FdInputStrategy();
     virtual ~FdInputStrategy();
 
-    virtual bool getEvent(TEvent &ev) = 0;
-    virtual int getButtonCount() = 0;
+    virtual bool getEvent(TEvent &ev);
+    virtual int getButtonCount();
 
     static void addListener(FdInputStrategy*, int);
     static void deleteListener(FdInputStrategy*);
