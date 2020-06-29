@@ -7,7 +7,7 @@
 #include <internal/ncursinp.h>
 #include <ncurses.h>
 using std::unordered_map;
-using std::string;
+using std::string_view;
 
 /* The Turbo Vision library has all its characters encoded in code page 437.
  * While Unicode support is not added, it's better to just translate them
@@ -15,7 +15,7 @@ using std::string;
  * stored by Turbo Vision into the corresponding UTF-8 mulibyte characters.
  * Taken from https://en.wikipedia.org/wiki/Code_page_437 */
 
-static const char* cp437toUtf8[256] = {
+static constexpr const char* cp437toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -34,7 +34,7 @@ static const char* cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
-static const char* cp850toUtf8[256] = {
+static constexpr const char* cp850toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -55,9 +55,9 @@ static const char* cp850toUtf8[256] = {
     // it is often represented as a regular hyphen.
 };
 
-CpTranslator::CpTable CpTranslator::tables[2] = {
-    { 437, cp437toUtf8, {} },
-    { 850, cp850toUtf8, {} }
+const CpTranslator::CpTable CpTranslator::tables[] = {
+    { "437", cp437toUtf8 },
+    { "850", cp850toUtf8 }
 };
 
 const CpTranslator::CpTable *CpTranslator::activeTable;
@@ -65,11 +65,7 @@ CpTranslator CpTranslator::instance;
 
 CpTranslator::CpTranslator() {
     // Set the active codepage. 437 is the default.
-    use(getEnv<int>("TVISION_CODEPAGE", 437));
-    // Initialize UTF-8 conversion tables.
-    for (int i = 0; i < 256; ++i)
-        for (auto &t : tables)
-            t.toCp[t.toUtf8[i]] = i;
+    use(getEnv<std::string>("TVISION_CODEPAGE", "437"));
 }
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Until this is not changed, it is
@@ -229,7 +225,7 @@ unordered_map<int, KeyDownEvent> NcursesInput::fromCursesKeyCode = {
     { KEY_F0 + 60,      {{kbAltF12},    kbAltShift} }
 };
 
-unordered_map<string, KeyDownEvent> NcursesInput::fromCursesHighKey = {
+unordered_map<string_view, KeyDownEvent> NcursesInput::fromCursesHighKey = {
     /* These keys are identified by name. The int value is not known
      * at compilation time.
      * ncurses supports all sorts of Shift/Ctrl/Alt combinations for these

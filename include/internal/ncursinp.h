@@ -9,13 +9,13 @@
 #include <internal/platform.h>
 #include <internal/sigwinch.h>
 #include <unordered_map>
-#include <string>
+#include <string_view>
 #include <functional>
 
 class NcursesInput : public FdInputStrategy, SigwinchAware {
 
     static std::unordered_map<int, KeyDownEvent> fromCursesKeyCode;
-    static std::unordered_map<std::string, KeyDownEvent> fromCursesHighKey;
+    static std::unordered_map<std::string_view, KeyDownEvent> fromCursesHighKey;
 
     TPoint lastMousePos;
     uchar buttonState;
