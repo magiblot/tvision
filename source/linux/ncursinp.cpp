@@ -15,7 +15,8 @@ using std::unordered_map;
 extern unordered_map<char, KeyDownEvent> fromNonPrintableAscii;
 extern unordered_map<char, ushort> AltKeyCode;
 
-NcursesInput::NcursesInput(bool mouse)
+NcursesInput::NcursesInput(bool mouse) :
+    mouseForced(false)
 {
     // Capture all keyboard input.
     raw();
@@ -43,12 +44,12 @@ NcursesInput::NcursesInput(bool mouse)
         mouseinterval(0);
         // This will do the trick for now.
         buttonCount = 2;
-        // Enable mouse drag support.
-        std::string TERM = getEnv<std::string>("TERM");
+        // Force enable mouse drag support.
+        auto &&TERM = getEnv<std::string>("TERM");
         if (TERM.find("xterm") == 0 || TERM.find("rxvt") == 0)
         {
-            fprintf(stdout, "\x1B[?1002h");
-            fflush(stdout);
+            mouseForced = true;
+            printEscapeSeq("\x1B[?1002h");
         }
     }
     else buttonCount = 0;
@@ -59,8 +60,16 @@ NcursesInput::NcursesInput(bool mouse)
 
 NcursesInput::~NcursesInput()
 {
+    if (mouseForced)
+        printEscapeSeq("\x1B[?1002l");
     // Disable mouse mode.
     mousemask(0, 0);
+}
+
+void NcursesInput::printEscapeSeq(const char* seq)
+{
+    fprintf(stdout, seq);
+    fflush(stdout);
 }
 
 int NcursesInput::getButtonCount()

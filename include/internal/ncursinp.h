@@ -20,12 +20,15 @@ class NcursesInput : public FdInputStrategy, SigwinchAware {
     TPoint lastMousePos;
     uchar buttonState;
     int buttonCount;
+    bool mouseForced;
 
     void detectAlt(int keys[4], bool &Alt);
     void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
     void setAltModifier(TEvent &ev);
     void readUtf8Char(int keys[4], int &num_keys);
     bool parseMouseEvent(TEvent&);
+
+    static void printEscapeSeq(const char *);
 
 public:
 
