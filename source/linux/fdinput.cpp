@@ -42,23 +42,27 @@ int FdInputStrategy::getButtonCount()
 
 bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
 {
-    if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
-        for (size_t i = 0; i < fds.size(); ++i)
+    bool result {false};
+    auto &&end = steady_clock::now() + milliseconds(ms);
+    do {
+        if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
+            for (size_t i = 0; i < fds.size(); ++i)
+            {
+                if (fds[i].revents & POLLHUP)
+                    // Broken pipe will cause poll to return immediately, so
+                    // remove it from the list.
+                    deleteListener(listeners[i]);
+                else if (fds[i].revents & POLLIN)
+                    ready.push(i);
+            }
+        if (!ready.empty())
         {
-            if (fds[i].revents & POLLHUP)
-                // Broken pipe will cause poll to return immediately, so
-                // remove it from the list.
-                deleteListener(listeners[i]);
-            else if (fds[i].revents & POLLIN)
-                ready.push(i);
+            ev = {};
+            size_t i = ready.front(); ready.pop();
+            result = listeners[i]->eventGetter(ev);
         }
-    if (!ready.empty())
-    {
-        ev = {};
-        size_t i = ready.front(); ready.pop();
-        return listeners[i]->eventGetter(ev);
-    }
-    return false;
+    } while (!result && steady_clock::now() <= end);
+    return result;
 }
 
 void FdInputStrategy::addListener(FdInputStrategy* a, int fd)
