@@ -15,6 +15,8 @@
 #define Uses_TEditor
 #include <tvision/tv.h>
 
+#include <ctype.h>
+
 char TEditor::bufChar( uint P )
 {
     return buffer[bufPtr(P)];
