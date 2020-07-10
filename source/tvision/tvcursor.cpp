@@ -37,7 +37,7 @@ void TView::resetCursor()
     TVCursor().resetCursor(this);
 }
 
-inline void TVCursor::resetCursor(TView *p)
+void TVCursor::resetCursor(TView *p)
 {
     self = p;
     x = self->cursor.x;
@@ -48,7 +48,7 @@ inline void TVCursor::resetCursor(TView *p)
     THardwareInfo::setCaretSize(caretSize);
 }
 
-inline int TVCursor::computeCaretSize()
+int TVCursor::computeCaretSize()
 {
     if (!(~self->state & (sfVisible | sfCursorVis | sfFocused)))
     {
@@ -73,7 +73,7 @@ inline int TVCursor::computeCaretSize()
     return 0;
 }
 
-inline Boolean TVCursor::caretCovered(TView *v) const
+Boolean TVCursor::caretCovered(TView *v) const
 {
     TView *u = v->owner->last->next;
     for (; u != v; u = u->next)
@@ -86,7 +86,7 @@ inline Boolean TVCursor::caretCovered(TView *v) const
     return False;
 }
 
-inline int TVCursor::decideCaretSize() const
+int TVCursor::decideCaretSize() const
 {
     if (self->state & sfCursorIns)
         return 100;
