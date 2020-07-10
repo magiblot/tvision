@@ -232,7 +232,7 @@ void TFileInfoPane::draw()
     if( *(file_block.name) != EOS )
         {
 
-        char buf[10];
+        char buf[32];
         ltoa( file_block.size, buf, 10 );
         b.moveStr( 14, buf, color );
 

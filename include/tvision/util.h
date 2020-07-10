@@ -63,4 +63,14 @@ Boolean isWild( const char *f );
 
 char *strnzcpy( char *dest, const char *src, size_t n ); // misc.cpp
 
+#ifndef __BORLANDC__
+
+int strnicmp( const char *s1, const char *s2, size_t maxlen );
+char *strupr(char *s);
+char *itoa( int value, char *buffer, int radix );
+char *ltoa( long value, char *buffer, int radix );
+char *ultoa( ulong value, char *buffer, int radix );
+
+#endif
+
 #endif  // __UTIL_H
