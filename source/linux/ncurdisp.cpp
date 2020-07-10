@@ -8,7 +8,10 @@
 #include <unordered_map>
 using std::unordered_map;
 
-NcursesDisplay::NcursesDisplay() : definedPairs(0)
+NcursesDisplay::NcursesDisplay() :
+    caretSize(1),
+    caretVisible(true),
+    definedPairs(0)
 {
     // Allow printing UTF-8 text.
     setlocale(LC_ALL, "");
@@ -30,14 +33,8 @@ NcursesDisplay::~NcursesDisplay()
     endwin();
 }
 
-int NcursesDisplay::getCaretSize()
-{
-    int visibility = curs_set(0);
-    curs_set(visibility);
-    return visibility > 0 ? visibility == 2 ? 100 : 1 : 0;
-}
-
-bool NcursesDisplay::isCaretVisible() { return getCaretSize() > 0; }
+int NcursesDisplay::getCaretSize() { return caretSize; }
+bool NcursesDisplay::isCaretVisible() { return caretVisible; }
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
@@ -66,7 +63,12 @@ void NcursesDisplay::setCaretSize(int size)
  *
  * ncurses supports only three levels: invisible (0), normal (1) and
  * very visible (2). They don't make a difference in all terminals, but
- * we can try mapping them to the values requested by Turbo Vision. */
+ * we can try mapping them to the values requested by Turbo Vision.
+ *
+ * Regarding the 'caretSize' and 'caretVisible' variables, they are here
+ * just to replicate the behaviour of THardwareInfo on Windows. */
+    caretSize = size ? size : 1;
+    caretVisible = size != 0;
     curs_set(size > 0 ? size == 100 ? 2 : 1 : 0);
 }
 

@@ -6,6 +6,9 @@
 
 class NcursesDisplay : public BufferedDisplay {
 
+    int caretSize;
+    bool caretVisible;
+
     bool hasColors;
     std::unordered_map<ushort, int> pairIdentifiers;
     ushort definedPairs;
