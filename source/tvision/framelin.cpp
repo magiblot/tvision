@@ -19,9 +19,10 @@
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
     uchar *FrameMask = new uchar[size.x];
+    int x; // For Borland C++ compatibility
 
     FrameMask[0] = initFrame[n];
-    for (int x = 1; x < size.x - 1; ++x)
+    for (x = 1; x < size.x - 1; ++x)
         FrameMask[x] = initFrame[n + 1];
     FrameMask[size.x - 1] = initFrame[n + 2];
 
@@ -52,14 +53,14 @@ void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
                     FrameMask[start - 1] |= maskLow;
                     FrameMask[end] |= maskLow ^ maskHigh;
                     if (maskLow)
-                        for (int x = start; x < end; ++x)
+                        for (x = start; x < end; ++x)
                             FrameMask[x] |= maskHigh;
                 }
             }
         }
     }
 
-    for (int x = 0; x < size.x; ++x)
+    for (x = 0; x < size.x; ++x)
     {
         frameBuf.putChar(x, frameChars[FrameMask[x]]);
         frameBuf.putAttribute(x, color);
