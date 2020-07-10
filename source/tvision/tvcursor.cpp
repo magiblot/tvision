@@ -20,51 +20,77 @@
 
 #ifdef __FLAT__
 
+struct TVCursor {
+
+    TView *self;
+    int x, y;
+
+    void resetCursor(TView *);
+    int computeCaretSize();
+    Boolean caretCovered(TView *) const;
+    int decideCaretSize() const;
+
+};
+
 void TView::resetCursor()
 {
-    TView *v = this, *c;
-    int caretSize;
-    int x = cursor.x, y = cursor.y;
-    if (~state & (sfVisible | sfCursorVis | sfFocused))
-        goto L4;
-L1:
-    if (y < 0 || y >= v->size.y || x < 0 || x >= v->size.x)
-        goto L4;
-    y += v->origin.y;
-    x += v->origin.x;
-    c = v;
-    if (v->owner == 0)
-        goto L5;
-    if (!(v->owner->state & sfVisible))
-        goto L4;
-    v = v->owner->last;
-L2:
-    v = v->next;
-    if (v != c)
-        goto L3;
-    v = v->owner;
-    goto L1;
-L3:
-    if (!(v->state & sfVisible))
-        goto L2;
-    if (y < v->origin.y || y >= v->origin.y + v->size.y)
-        goto L2;
-    if (x < v->origin.x || x >= v->origin.x + v->size.x)
-        goto L2;
-L4:
-    // Cursor is not visible if we get here.
-    caretSize = 0;
-    goto L6;
-L5:
-    // Cursor is visible, so let's set its position.
-    THardwareInfo::setCaretPosition(x, y);
-    // Determine cursor size.
-    caretSize = TScreen::cursorLines & 0x0F;
-    if (!(state & sfCursorIns))
-        goto L6;
-    caretSize = 100;
-L6:
+    TVCursor().resetCursor(this);
+}
+
+inline void TVCursor::resetCursor(TView *p)
+{
+    self = p;
+    x = self->cursor.x;
+    y = self->cursor.y;
+    int caretSize = computeCaretSize();
+    if (caretSize)
+        THardwareInfo::setCaretPosition(x, y);
     THardwareInfo::setCaretSize(caretSize);
+}
+
+inline int TVCursor::computeCaretSize()
+{
+    if (!(~self->state & (sfVisible | sfCursorVis | sfFocused)))
+    {
+        TView *v = self;
+        while (0 <= y && y < v->size.y && 0 <= x && x < v->size.x)
+        {
+            y += v->origin.y;
+            x += v->origin.x;
+            if (v->owner)
+            {
+                if (v->owner->state & sfVisible)
+                {
+                    if (caretCovered(v))
+                        break;
+                    v = v->owner;
+                }
+                else break;
+            }
+            else return decideCaretSize();
+        }
+    }
+    return 0;
+}
+
+inline Boolean TVCursor::caretCovered(TView *v) const
+{
+    TView *u = v->owner->last->next;
+    for (; u != v; u = u->next)
+    {
+        if ( (u->state & sfVisible)
+             && (u->origin.y <= y && y < u->origin.y + u->size.y)
+             && (u->origin.x <= x && x < u->origin.x + u->size.x) )
+            return True;
+    }
+    return False;
+}
+
+inline int TVCursor::decideCaretSize() const
+{
+    if (self->state & sfCursorIns)
+        return 100;
+    return TScreen::cursorLines & 0x0F;
 }
 
 #endif
