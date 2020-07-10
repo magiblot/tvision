@@ -35,6 +35,10 @@
 #include <dos.h>
 #endif  // __DOS_H
 
+#if !defined( __MALLOC_H )
+#include <malloc.h>
+#endif  // __MALLOC_H
+
 const ushort firstKeys[] =
 {
     39,
@@ -401,7 +405,7 @@ void TEditor::drawLines( int y, int count, uint linePtr )
 #ifndef __FLAT__
     ushort b[maxLineLength];
 #else
-    ushort *b = new ushort[delta.x+size.x];
+    ushort *b = (ushort*) alloca(sizeof(ushort)*(delta.x+size.x));
 #endif
     while( count-- > 0 )
         {
@@ -410,9 +414,6 @@ void TEditor::drawLines( int y, int count, uint linePtr )
         linePtr = nextLine(linePtr);
         y++;
         }
-#ifdef __FLAT__
-    delete[] b;
-#endif
 }
 
 void TEditor::find()

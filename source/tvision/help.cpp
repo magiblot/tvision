@@ -55,6 +55,10 @@
 #include <ctype.h>
 #endif  // __CTYPE_H
 
+#if !defined( __MALLOC_H )
+#include <malloc.h>
+#endif  // __MALLOC_H
+
 #pragma warn -dsz
 
 // THelpViewer
@@ -89,8 +93,8 @@ void THelpViewer::draw()
 {
     TDrawBuffer b;
     size_t bufLength = b.length();
-    char *line = new char[bufLength];
-    char *buffer = new char[bufLength];
+    char *line = (char*) alloca(bufLength);
+    char *buffer = (char*) alloca(bufLength);
     char *bufPtr;
     int i, j, l;
     int keyCount;
@@ -152,8 +156,6 @@ void THelpViewer::draw()
             }
         writeLine(0, i-1, size.x, 1, b);
         }
-    delete[] line;
-    delete[] buffer;
 }
 
 TPalette& THelpViewer::getPalette() const

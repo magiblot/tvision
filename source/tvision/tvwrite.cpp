@@ -22,6 +22,7 @@
 #ifdef __FLAT__
 
 #include <string.h>
+#include <malloc.h>
 
 extern TPoint shadowSize;
 extern uchar shadowAttr;
@@ -231,13 +232,12 @@ void TView::writeChar( short x, short y, char c, uchar color, short count )
     if (count > 0)
     {
         ushort attrcolor = (mapColor(color) << 8) | (uchar) c;
-        ushort* attributed = new ushort[count];
+        ushort* attributed = (ushort*) alloca(sizeof(ushort)*count);
         for (int i = 0; i < count; ++i)
         {
             attributed[i] = attrcolor;
         }
         writeView(x, y, count, attributed);
-        delete[] attributed;
     }
 }
 
@@ -257,14 +257,13 @@ void TView::writeStr( short x, short y, const char *str, uchar color )
         if (length > 0)
         {
             uchar attr = mapColor(color);
-            ushort *attributed = new ushort[length];
+            ushort *attributed = (ushort*) alloca(sizeof(ushort)*length);
             for (int i = 0; i < length; ++i)
             {
         // The lower byte must be unsigned for concatenation to always work.
                 attributed[i] = (attr << 8) | (uchar) str[i];
             }
             writeView(x, y, length, attributed);
-            delete[] attributed;
         }
     }
 }

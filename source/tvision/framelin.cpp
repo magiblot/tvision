@@ -16,9 +16,11 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
+#include <malloc.h>
+
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
-    uchar *FrameMask = new uchar[size.x];
+    uchar *FrameMask = (uchar*) alloca(size.x);
     int x; // For Borland C++ compatibility
 
     FrameMask[0] = initFrame[n];
@@ -65,6 +67,4 @@ void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
         frameBuf.putChar(x, frameChars[FrameMask[x]]);
         frameBuf.putAttribute(x, color);
     }
-
-    delete[] FrameMask;
 }
