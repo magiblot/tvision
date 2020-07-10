@@ -18,63 +18,52 @@
 
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
-    int i;
     uchar *FrameMask = new uchar[size.x];
+
     FrameMask[0] = initFrame[n];
-    for (i = 1; i < size.x - 1; ++i)
-        FrameMask[i] = initFrame[n + 1];
+    for (int x = 1; x < size.x - 1; ++x)
+        FrameMask[x] = initFrame[n + 1];
     FrameMask[size.x - 1] = initFrame[n + 2];
-    TView* v = owner->last;
-    int eax, esi, edi;
-    uchar al, ah;
-L1:
-    v = v->next;
-    if (v == (TView *) this)
-        goto L10;
-L2:
-    if (!(v->options & ofFramed) || !(v->state & sfVisible))
-        goto L1;
-    eax = y - v->origin.y;
-    if (eax < 0)
-        goto L3;
-    if (eax > v->size.y)
-        goto L1;
-    else if (eax < v->size.y)
-        eax = 0x0005;
-    else
-        eax = 0x0A03;
-    goto L4;
-L3:
-    if (eax + 1 != 0)
-        goto L1;
-    eax = 0x0A06;
-L4:
-    esi = v->origin.x;
-    edi = v->origin.x + v->size.x;
-    if (esi > 1)
-        goto L5;
-    esi = 1;
-L5:
-    if (edi < size.x - 1)
-        goto L6;
-    edi = size.x - 1;
-L6:
-    if (esi >= edi)
-        goto L1;
-    al = eax & 0x00FF;
-    ah = (eax & 0xFF00) >> 8;
-    FrameMask[esi - 1] |= al;
-    FrameMask[edi] |= al ^ ah;
-    if (ah == 0)
-        goto L1;
-L8:
-    for (i = esi; i < edi; ++i)
-        FrameMask[i] |= ah;
-    goto L1;
-L10:
-    for (i = 0; i < size.x; ++i) {
-        frameBuf.putChar(i, frameChars[FrameMask[i]]);
-        frameBuf.putAttribute(i, color);
+
+    TView* v = owner->last->next;
+    for(; v != (TView *) this; v = v->next)
+    {
+        if ((v->options & ofFramed) && (v->state & sfVisible))
+        {
+            ushort mask = 0;
+            if (y < v->origin.y)
+            {
+                if (y == v->origin.y - 1)
+                    mask = 0x0A06;
+            }
+            else if (y < v->origin.y + v->size.y)
+                mask = 0x0005;
+            else if (y == v->origin.y + v->size.y)
+                mask = 0x0A03;
+
+            if (mask)
+            {
+                int start = max(v->origin.x, 1);
+                int end = min(v->origin.x + v->size.x, size.x - 1);
+                if (start < end)
+                {
+                    uchar maskLow = mask & 0x00FF;
+                    uchar maskHigh = (mask & 0xFF00) >> 8;
+                    FrameMask[start - 1] |= maskLow;
+                    FrameMask[end] |= maskLow ^ maskHigh;
+                    if (maskLow)
+                        for (int x = start; x < end; ++x)
+                            FrameMask[x] |= maskHigh;
+                }
+            }
+        }
     }
+
+    for (int x = 0; x < size.x; ++x)
+    {
+        frameBuf.putChar(x, frameChars[FrameMask[x]]);
+        frameBuf.putAttribute(x, color);
+    }
+
     delete[] FrameMask;
 }
