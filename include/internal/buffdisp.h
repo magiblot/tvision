@@ -57,7 +57,7 @@ protected:
     void onScreenResize();
 
     virtual void lowlevelWriteChar(uchar character, ushort attr) = 0;
-    virtual void lowlevelMoveCursor(int x, int y) = 0;
+    virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelFlush() = 0;
 
 };

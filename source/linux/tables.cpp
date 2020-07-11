@@ -15,7 +15,7 @@ using std::string_view;
  * stored by Turbo Vision into the corresponding UTF-8 mulibyte characters.
  * Taken from https://en.wikipedia.org/wiki/Code_page_437 */
 
-static constexpr const char* cp437toUtf8[256] = {
+static constexpr std::string_view cp437toUtf8[256] = {
     " ", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -34,7 +34,7 @@ static constexpr const char* cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
-static constexpr const char* cp850toUtf8[256] = {
+static constexpr std::string_view cp850toUtf8[256] = {
     " ", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",

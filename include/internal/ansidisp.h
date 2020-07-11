@@ -2,7 +2,8 @@
 #define ANSIDISP_H
 
 #include <internal/buffdisp.h>
-#include <sstream>
+#include <vector>
+#include <string_view>
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
  * escape codes directly to stdout.
@@ -20,9 +21,11 @@
 
 class AnsiDisplayBase {
 
-    std::stringstream buf;
+    std::vector<char> buf;
     uchar lastAttr;
 
+    void bufWrite(std::string_view s);
+    void bufWriteSeq(uint a, uint b, char F);
     void writeAttributes(uchar attr);
 
 protected:
@@ -40,7 +43,7 @@ protected:
     int getScreenCols();
 
     void lowlevelWriteChar(uchar character, ushort attr);
-    void lowlevelMoveCursor(int x, int y);
+    void lowlevelMoveCursor(uint x, uint y);
     void lowlevelFlush();
 
 };
@@ -62,7 +65,7 @@ public:
     int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
 
     void lowlevelWriteChar(uchar character, ushort attr) { AnsiDisplayBase::lowlevelWriteChar(character, attr); }
-    void lowlevelMoveCursor(int x, int y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
+    void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }
 
     void onScreenResize() {

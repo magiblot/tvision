@@ -12,10 +12,10 @@ class CpTranslator {
 
     struct CpTable {
         std::string_view cp;
-        const char* const* toUtf8;
+        const std::string_view* const toUtf8;
         std::unordered_map<std::string_view, char> toCp;
 
-        CpTable(std::string_view cp, const char* const* toUtf8) :
+        CpTable(std::string_view cp, const std::string_view* const toUtf8) :
             cp(cp),
             toUtf8(toUtf8)
         {
@@ -37,7 +37,8 @@ public:
         activeTable = &tables[0];
     }
 
-    static const char* toUtf8(unsigned char c) {
+    static std::string_view toUtf8(unsigned char c) {
+        // Null-terminated
         return activeTable->toUtf8[c];
     }
 

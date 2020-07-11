@@ -63,6 +63,8 @@ Boolean isWild( const char *f );
 
 char *strnzcpy( char *dest, const char *src, size_t n ); // misc.cpp
 
+unsigned int fast_utoa( uint value, char *buffer );
+
 #ifndef __BORLANDC__
 
 int strnicmp( const char *s1, const char *s2, size_t maxlen );

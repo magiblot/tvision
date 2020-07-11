@@ -39,7 +39,7 @@ bool NcursesDisplay::isCaretVisible() { return caretVisible; }
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
 int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
-void NcursesDisplay::lowlevelMoveCursor(int x, int y) { wmove(stdscr, y, x); }
+void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
 
 ushort NcursesDisplay::getScreenMode()
@@ -111,7 +111,7 @@ void NcursesDisplay::lowlevelWriteChar(uchar character, ushort attr)
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);
     // Print a single character, which might be multi-byte in UTF-8.
-    wprintw(stdscr, "%s", CpTranslator::toUtf8(character));
+    wprintw(stdscr, "%s", CpTranslator::toUtf8(character).data());
     wattroff(stdscr, curses_attr);
 }
 
