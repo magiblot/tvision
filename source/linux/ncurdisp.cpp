@@ -3,6 +3,7 @@
 
 #include <internal/ncurdisp.h>
 #include <internal/codepage.h>
+#include <internal/textattr.h>
 #include <ncurses.h>
 #include <clocale>
 #include <unordered_map>
@@ -139,17 +140,10 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
     if (id == 0)
     {
         // Foreground color in the lower half, background in the upper half.
-        uchar fgColor = swapRedBlue(0x0F & pairKey),
-              bgColor = swapRedBlue(pairKey >> 4);
-        init_pair(++definedPairs, fgColor, bgColor);
+        BIOSColor c {pairKey};
+        c.swapRedBlue();
+        init_pair(++definedPairs, c.layers.fg, c.layers.bg);
         id = pairIdentifiers[pairKey] = definedPairs;
     }
     return COLOR_PAIR(id);
-}
-
-uchar NcursesDisplay::swapRedBlue (uchar c)
-{
-    /* Swap the Red and Blue bits of a color encoded in the Microsoft way,
-     * so that ncurses can easily understand it. */
-    return (c & ~0x5) | ((c & 0x4) >> 2) | ((c & 0x1) << 2);
 }

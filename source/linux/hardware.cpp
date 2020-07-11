@@ -1,5 +1,6 @@
 #define Uses_TKeys
 #define Uses_TEvent
+#define Uses_TScreen
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
