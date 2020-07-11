@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 #include <chrono>
+#include <string_view>
 
 class ScreenCursor;
 
@@ -41,6 +42,7 @@ class BufferedDisplay : public DisplayStrategy {
 
     void drawCursors();
     void undrawCursors();
+    std::string_view translateChar(char c);
 
     bool timeToFlush();
 
@@ -56,7 +58,7 @@ protected:
     void flushScreen();
     void onScreenResize();
 
-    virtual void lowlevelWriteChar(uchar character, ushort attr) = 0;
+    virtual void lowlevelWriteChars(std::string_view chars, uchar attr) = 0; // 'chars' is null-terminated
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelFlush() = 0;
 

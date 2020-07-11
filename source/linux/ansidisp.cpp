@@ -98,10 +98,10 @@ int AnsiDisplayBase::getScreenCols()
     return cols;
 }
 
-void AnsiDisplayBase::lowlevelWriteChar(uchar character, ushort attr)
+void AnsiDisplayBase::lowlevelWriteChars(std::string_view chars, uchar attr)
 {
     writeAttributes(attr);
-    bufWrite(CpTranslator::toUtf8(character));
+    bufWrite(chars);
 }
 
 void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)

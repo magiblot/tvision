@@ -105,17 +105,17 @@ void NcursesDisplay::setCaretSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChar(uchar character, ushort attr)
+void NcursesDisplay::lowlevelWriteChars(std::string_view chars, uchar attr)
 {
     // Translate and apply text attributes.
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);
     // Print a single character, which might be multi-byte in UTF-8.
-    wprintw(stdscr, "%s", CpTranslator::toUtf8(character).data());
+    wprintw(stdscr, "%s", chars.data());
     wattroff(stdscr, curses_attr);
 }
 
-uint NcursesDisplay::translateAttributes(ushort attr)
+uint NcursesDisplay::translateAttributes(uchar attr)
 {
     /* To understand the bit masks, please read:
      * https://docs.microsoft.com/en-us/windows/console/char-info-str
@@ -124,11 +124,8 @@ uint NcursesDisplay::translateAttributes(ushort attr)
      * the terminal with 3-bit colors and use Bold to represent a bright
      * foreground. Otherwise, we provide 4-bit colors directly to the terminal. */
     uchar pairKey = attr & (COLORS < 16 ? 0x77 : 0xFF);
-    bool fgIntense = attr & (COLORS < 16 ? 0x08 : 0x00),
-         reverse = attr & 0x4000,
-         underscore = attr & 0x8000;
-    return fgIntense*A_BOLD | reverse*A_REVERSE | underscore*A_UNDERLINE |
-           (hasColors ? getColorPair(pairKey) : 0);
+    bool fgIntense = attr & (COLORS < 16 ? 0x08 : 0x00);
+    return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
 }
 
 uint NcursesDisplay::getColorPair(uchar pairKey)

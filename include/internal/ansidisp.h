@@ -42,7 +42,7 @@ protected:
     int getScreenRows();
     int getScreenCols();
 
-    void lowlevelWriteChar(uchar character, ushort attr);
+    void lowlevelWriteChars(std::string_view chars, uchar attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelFlush();
 
@@ -64,7 +64,7 @@ public:
     int getScreenRows() { return AnsiDisplayBase::getScreenRows(); }
     int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
 
-    void lowlevelWriteChar(uchar character, ushort attr) { AnsiDisplayBase::lowlevelWriteChar(character, attr); }
+    void lowlevelWriteChars(std::string_view chars, uchar attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }
 

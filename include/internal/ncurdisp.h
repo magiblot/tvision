@@ -14,7 +14,7 @@ class NcursesDisplay : public BufferedDisplay {
     ushort definedPairs;
 
     void getCaretPosition(int &x, int &y);
-    uint translateAttributes(ushort attr);
+    uint translateAttributes(uchar attr);
     uint getColorPair(uchar pairKey);
     static uchar swapRedBlue (uchar c);
 
@@ -33,7 +33,7 @@ public:
 
 protected:
 
-    void lowlevelWriteChar(uchar character, ushort attr);
+    void lowlevelWriteChars(std::string_view chars, uchar attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelFlush();
 

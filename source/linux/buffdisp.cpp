@@ -1,4 +1,5 @@
 #include <internal/buffdisp.h>
+#include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/cursor.h>
 #include <chrono>
@@ -54,8 +55,10 @@ void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
     auto &damage = rowDamage[y];
     for (int i = 0; i < len; i++, x++)
     {
-        auto &winfo = reinterpret_cast<WinCharInfo*>(buf)[i];
+        auto winfo = reinterpret_cast<WinCharInfo*>(buf)[i];
         auto &cinfo = buffer[y][x];
+        if (winfo.Char.AsciiChar == '\0')
+            winfo.Char.AsciiChar = ' '; // Treat null character as a space.
         if (cinfo != winfo)
         {
             screenChanged = true;
@@ -111,6 +114,11 @@ void BufferedDisplay::undrawCursors()
         }
 }
 
+std::string_view BufferedDisplay::translateChar(char c)
+{
+    return CpTranslator::toUtf8(c);
+}
+
 void BufferedDisplay::flushScreen()
 {
     if ((screenChanged || caretMoved) && timeToFlush())
@@ -130,7 +138,7 @@ void BufferedDisplay::flushScreen()
 //                         lowlevelFlush();
                     if (y != last.y || x != last.x + 1)
                         lowlevelMoveCursor(x, y);
-                    lowlevelWriteChar(cinfo.character, cinfo.attr);
+                    lowlevelWriteChars(translateChar(cinfo.character), cinfo.attr);
                     last = {x, y};
                     cinfo.dirty = 0;
                 }
