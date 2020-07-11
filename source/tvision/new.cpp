@@ -143,6 +143,7 @@ void * allocBlock( size_t sz )
     while( temp == 0 && TBufListEntry::freeHead() == True )
         temp = malloc( sz );
     if( temp == 0 )
+        {
         if( TVMemMgr::safetyPoolExhausted() )
             abort();
         else
@@ -152,6 +153,7 @@ void * allocBlock( size_t sz )
             if( temp == 0 )
                 abort();
             }
+        }
 #if !defined( NDEBUG )
     memset( temp, BLK_DATA, BLK_SIZE );
 #endif

@@ -258,6 +258,7 @@ TStatusLine *TProgram::initStatusLine( TRect r )
 TWindow* TProgram::insertWindow(TWindow* pWin)
 {
     if (validView(pWin))
+        {
         if (canMoveFocus())
             {
             deskTop->insert(pWin);
@@ -265,6 +266,7 @@ TWindow* TProgram::insertWindow(TWindow* pWin)
             }
         else
             destroy(pWin);
+        }
 
    return NULL;
 }

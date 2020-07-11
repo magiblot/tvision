@@ -439,10 +439,12 @@ TPicResult TPXPictureValidator::scan(char* input, int termCh)
           if (pic[index] == ';')
           index++;
           if (toupper(pic[index]) != toupper(ch))
+          {
             if (ch == ' ')
              ch = pic[index];
             else 
             return rScan;
+          }
 
           consume(pic[index], input);
     }

@@ -292,6 +292,7 @@ void TEditor::convertEvent( TEvent& event )
         key = scanKeyMap(keyMap[keyState], key);
         keyState = 0;
         if( key != 0 )
+            {
             if( (key & 0xFF00) == 0xFF00 )
                 {
                 keyState = (key & 0xFF);
@@ -302,6 +303,7 @@ void TEditor::convertEvent( TEvent& event )
                 event.what = evCommand;
                 event.message.command = key;
                 }
+            }
         }
 }
 

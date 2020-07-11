@@ -425,12 +425,14 @@ Boolean TView::focus()
             {
             result = owner->focus();
             if (result)
+                {
                 if ((owner->current->valid(cmReleasedFocus)) &&
                     ((owner->current == 0) ||
                      ((owner->current->options & ofValidate) == 0)))
                     select();
                 else
                     return False;
+                }
             }
         }
     return result;
@@ -647,6 +649,7 @@ void TView::putInFrontOf( TView *Target )
     if( owner != 0 && Target != this && Target != nextView() &&
          ( Target == 0 || Target->owner == owner)
       )
+        {
         if( (state & sfVisible) == 0 )
             {
             owner->removeView(this);
@@ -671,6 +674,7 @@ void TView::putInFrontOf( TView *Target )
             if( (options & ofSelectable) != 0 )
                 owner->resetCurrent();
             }
+        }
 }
 
 void TView::select()

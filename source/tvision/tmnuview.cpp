@@ -356,6 +356,7 @@ ushort TMenuView::execute()
         if( (action == doSelect || (action == doNothing && autoSelect)) &&
             current != 0 &&
             current->name != 0 )
+                {
                 if( current->command == 0 )
                     {
                     if( (e.what & (evMouseDown | evMouseMove)) != 0 )
@@ -374,6 +375,7 @@ ushort TMenuView::execute()
                     }
                 else if( action == doSelect )
                     result = current->command;
+                }
 
         if( result != 0 && commandEnabled(result) )
             {
@@ -449,6 +451,7 @@ Boolean TMenuView::updateMenu( TMenu *menu )
         for( TMenuItem *p = menu->items; p != 0; p = p->next )
             {
             if( p->name != 0 )
+                {
                 if( p->command == 0 )
                     {
                     if( p->subMenu && updateMenu(p->subMenu) == True )
@@ -463,6 +466,7 @@ Boolean TMenuView::updateMenu( TMenu *menu )
                         res = True;
                         }
                     }
+                }
             }
         }
     return res;
@@ -526,6 +530,7 @@ TMenuItem *TMenuView::findHotKey( TMenuItem *p, ushort keyCode )
     while( p != 0 )
         {
         if( p->name != 0 )
+            {
             if( p->command == 0 )
                 {
                 TMenuItem *T;
@@ -537,6 +542,7 @@ TMenuItem *TMenuView::findHotKey( TMenuItem *p, ushort keyCode )
                      p->keyCode == keyCode
                    )
                 return p;
+            }
         p =  p->next;
         }
     return 0;

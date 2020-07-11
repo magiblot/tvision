@@ -110,10 +110,12 @@ void TButton::drawState(Boolean down)
         {
         cButton = getColor(0x0501);
         if( (state & sfActive) != 0 )
+            {
             if( (state & sfSelected) != 0 )
                 cButton = getColor(0x0703);
             else if( amDefault )
                 cButton = getColor(0x0602);
+            }
         }
     cShadow = getColor(8);
     int s = size.x-1;

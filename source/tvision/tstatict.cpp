@@ -73,10 +73,12 @@ void TStaticText::draw()
                    ++p;
                } while ((p < l) && (p < i + size.x) && (s[p] != '\n'));
             if (p > i + size.x)
+                {
                 if (j > i)
                     p = j;
                 else
                     p = i + size.x;
+                }
             if (center == True)
                j = (size.x - p + i) / 2 ;
             else

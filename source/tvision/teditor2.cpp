@@ -107,11 +107,13 @@ Boolean TEditor::insertBuffer( const char *p,
 
     uint delLen = 0;
     if( allowUndo == True )
+        {
         if( curPtr == selStart )
             delLen = selLen;
         else
             if( selLen > insCount )
                 delLen = selLen - insCount;
+        }
 
     long newSize = long(bufLen + delCount - selLen + delLen) + length;
 
