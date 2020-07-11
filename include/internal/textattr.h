@@ -45,19 +45,6 @@ constexpr inline int getANSIColorCode(uchar c, bool bg=false) {
     return ((c & 0x08) ? (bg ? 100 : 90) : (bg ? 40 : 30)) + (c & 0x07);
 }
 
-struct WinCharInfo {
-    union {
-        struct {
-            union {
-                ushort Unicode;
-                uchar AsciiChar;
-            } Char;
-            ushort Attributes;
-        };
-        uint asInt;
-    };
-};
-
 struct BufferCharInfo {
 
     union {
@@ -77,14 +64,9 @@ struct BufferCharInfo {
     {
     }
 
-    BufferCharInfo(WinCharInfo info) :
-        asInt(info.asInt)
+    bool operator!=(BufferCharInfo other)
     {
-    }
-
-    bool operator!=(WinCharInfo info)
-    {
-        return (asInt & 0x00FFFFFF) != (info.asInt & 0x00FFFFFF);
+        return (asInt & 0x00FFFFFF) != (other.asInt & 0x00FFFFFF);
     }
 
 };

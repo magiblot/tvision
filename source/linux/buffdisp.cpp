@@ -52,20 +52,21 @@ void BufferedDisplay::setCaretPosition(int x, int y)
 
 void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
 {
-    auto &damage = rowDamage[y];
+    auto damage = rowDamage[y];
     for (int i = 0; i < len; i++, x++)
     {
-        auto winfo = reinterpret_cast<WinCharInfo*>(buf)[i];
+        auto binfo = reinterpret_cast<BufferCharInfo*>(buf)[i];
         auto &cinfo = buffer[y][x];
-        if (winfo.Char.AsciiChar == '\0')
-            winfo.Char.AsciiChar = ' '; // Treat null character as a space.
-        if (cinfo != winfo)
+        if (binfo.character == '\0')
+            binfo.character = ' '; // Treat null character as a space.
+        if (cinfo != binfo)
         {
             screenChanged = true;
-            cinfo = winfo;
-            setDirty(x, cinfo, damage);
+            setDirty(x, binfo, damage);
+            cinfo = binfo;
         }
     }
+    rowDamage[y] = damage;
 }
 
 void BufferedDisplay::setDirty(int x, BufferCharInfo &cinfo, Range &damage)
