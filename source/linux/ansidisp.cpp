@@ -20,7 +20,6 @@ AnsiDisplayBase::AnsiDisplayBase() :
 AnsiDisplayBase::~AnsiDisplayBase()
 {
     clearAttributes();
-    clearScreen();
     lowlevelFlush();
 }
 
