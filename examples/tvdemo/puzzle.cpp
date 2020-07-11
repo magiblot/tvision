@@ -126,9 +126,9 @@ void TPuzzleView::draw()
             strcpy(tmp, "   ");
             tmp[1] = board[i][j];
             if(board[i][j] == ' ')
-                buf.moveStr( (short)(j*3), tmp, color[0]);
+                buf.moveStr( short(j*3), tmp, color[0]);
             else
-                buf.moveStr( (short)(j*3), tmp, color[map[board[i][j]-'A']]);
+                buf.moveStr( short(j*3), tmp, color[uchar(map[uchar(board[i][j]-'A')])]);
             }
         writeLine(0, i, 18, 1, buf);
         }

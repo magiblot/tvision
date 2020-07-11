@@ -101,13 +101,11 @@ Boolean TValidator::validate(const char* s)
 TPXPictureValidator::TPXPictureValidator(const char* aPic, Boolean autoFill)
     : TValidator()
 {
-
-  char *s;
-
   pic = newStr(aPic);
   if ( autoFill )
        options |= voFill;
-  s = "";
+
+  char s[] = "";
   if (picture(s, False) != prEmpty)
     status = vsSyntax;
 }

@@ -63,7 +63,7 @@ ushort getAltCode(char c)
 
     c = toupper(c);
 
-    if( (unsigned char) c == '\xF0' )
+    if( c == '\xF0' )
         return 0x200;       // special case to handle alt-Space
 
     int i;

@@ -34,6 +34,8 @@ CONSOLE_SCREEN_BUFFER_INFO THardwareInfo::sbInfo;
 // Timeout after a 'tick', I guess. See getTickCount().
 int THardwareInfo::eventTimeoutMs = 55;
 
+#ifdef __BORLANDC__
+
 static ushort ShiftCvt[89] = {
          0,      0,      0,      0,      0,      0,      0,      0,
          0,      0,      0,      0,      0,      0,      0, 0x0F00,
@@ -78,6 +80,8 @@ static ushort AltCvt[89] = {
          0,      0,      0,      0,      0,      0,      0, 0x8B00,
     0x8C00
 };
+
+#endif // __BORLANDC__
 
 #else
 

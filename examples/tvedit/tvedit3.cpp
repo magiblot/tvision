@@ -188,6 +188,7 @@ ushort doEditDialog( int dialog, ... )
                                    mfYesNoCancel | mfInformation );
 
         }
+    return cmCancel;
 }
 
 #pragma warn .rvl

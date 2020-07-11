@@ -36,7 +36,7 @@ TParamText::TParamText( const TRect& bounds ) :
 
 TParamText::~TParamText()
 {
-    delete str;
+    delete[] (char*) str;
 }
 
 void TParamText::getText( char *s )

@@ -141,7 +141,6 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
 }
 
 class TFilePane: public TScroller {
-  char *currentPath;
   char **files;
   short fileCount;
 
@@ -198,10 +197,10 @@ void TFilePane::newDir( const char *path ) {
                     ((searchRec.wr_date >> 9)+1980)%100,
                     ((searchRec.wr_time & 0xF800) >> 11)%13,
                     ((searchRec.wr_time & 0x07E0) >> 5),
-                    searchRec.attrib & FA_ARCH   ? 'a' : 'ú',
-                    searchRec.attrib & FA_RDONLY ? 'r' : 'ú',
-                    searchRec.attrib & FA_SYSTEM ? 's' : 'ú',
-                    searchRec.attrib & FA_HIDDEN ? 'h' : 'ú' );
+                    searchRec.attrib & FA_ARCH   ? 'a' : '\xFA',
+                    searchRec.attrib & FA_RDONLY ? 'r' : '\xFA',
+                    searchRec.attrib & FA_SYSTEM ? 's' : '\xFA',
+                    searchRec.attrib & FA_HIDDEN ? 'h' : '\xFA' );
         files[i++] = newStr(searchPath);
       }
       result=_dos_findnext( &searchRec );
@@ -336,7 +335,7 @@ TMenuBar *TDirApp::initMenuBar( TRect r )
     r.b.y = r.a.y+1;
 
     return new TMenuBar( r,
-      *new TSubMenu( "~ð~", kbAltSpace ) +
+      *new TSubMenu( "~\xF0~", kbAltSpace ) +
         *new TMenuItem( "~A~bout...", cmAbout, kbAltA ) +
       *new TSubMenu( "~F~ile", kbAltF ) +
         *new TMenuItem( "~N~ew Window...", cmDirTree, kbAltN ) +

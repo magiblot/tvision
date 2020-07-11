@@ -199,7 +199,7 @@ void copyStream( fpstream* dest, fpstream* src, long n)
 		n -= thisMove;
 	}
 
-	delete xferBuf;
+	delete[] xferBuf;
 }
 
 struct SwitchInfo

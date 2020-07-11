@@ -2,7 +2,7 @@
 /* filename - tmemo.cpp                                       */
 /*                                                            */
 /* function(s)                                                */
-/*            TMemo member functions
+/*            TMemo member functions                          */
 /*------------------------------------------------------------*/
 /*
  *      Turbo Vision - Version 2.0

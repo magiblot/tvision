@@ -194,7 +194,7 @@ void TNSCollection::pack()
         {
         if( *curSrc != 0 )
             *curDst++ = *curSrc;
-        *curSrc++;
+        curSrc++;
         }
 }
 

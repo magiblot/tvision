@@ -15,7 +15,6 @@ class GpmInput : public FdInputStrategy {
 
     ScreenCursor cursor;
     uchar buttonState;
-    int buttonCount;
 
     static void fitEvent(Gpm_Event&);
 

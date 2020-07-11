@@ -139,7 +139,7 @@ void TSortedListBox::handleEvent(TEvent& event)
                     shiftState = (ushort) event.keyDown.controlKeyState;
                 curString[searchPos+1] = EOS;
                 }
-            else if( (event.keyDown.charScan.charCode == '.') )
+            else if( event.keyDown.charScan.charCode == '.' )
                 {
                 char *loc = strchr( curString, '.' );
                 if( loc == 0 )

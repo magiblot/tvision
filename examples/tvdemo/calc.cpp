@@ -206,7 +206,7 @@ void TCalcDisplay::calcKey(unsigned char key)
             checkFirst();
             if (strlen(number) < 15) 
                 {                       // 15 is max visible display length
-                if (strcmp(number, "0") == NULL)
+                if (strcmp(number, "0") == 0)
                     number[0] = '\0';
                 stub[0] = key;
                 strcat(number, stub);

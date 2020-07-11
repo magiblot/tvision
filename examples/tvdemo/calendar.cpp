@@ -175,9 +175,9 @@ void TCalendarView::handleEvent(TEvent& event)
     TPoint point;
 
     TView::handleEvent(event);
-    if (state && sfSelected)
+    if (state & sfSelected)
         {
-        if ( (event.what & evMouse) && (evMouseDown || evMouseAuto) )
+        if ( event.what & (evMouseDown | evMouseAuto) )
             {
             point = makeLocal(event.mouse.where);
             if (point.x == 15 && point.y == 0)

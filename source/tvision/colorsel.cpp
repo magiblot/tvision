@@ -524,7 +524,7 @@ uchar TColorGroupList::getGroupIndex(uchar groupNum)
     if (g)
         return g->index;
     else
-        return NULL;
+        return 0;
 }
 
 TColorGroup* TColorGroupList::getGroup(uchar groupNum)
