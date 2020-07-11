@@ -97,7 +97,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
-* `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ncurses` and `ansi`. Default is `ncurses`, which lets Ncurses do the dirty job. `ansi` is a custom strategy that avoids redundant buffering and offers better performance, but also has some issues, such as not clearing the text attributes when exiting the application.
+* `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ncurses` and `ansi`. Default is `ncurses`, which lets Ncurses do the dirty job. `ansi` is a custom strategy that avoids redundant buffering and UTF-8 to wide char conversions.
 * `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keep the drawing performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
 * `TVISION_ESCDELAY`: the delay of time, in milliseconds, that should be waited after receiving an ESC key press. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination.
 * `TVISION_CODEPAGE`: the character set used internally by Turbo Vision. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/linux/tables.cpp`.

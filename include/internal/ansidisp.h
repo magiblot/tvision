@@ -106,6 +106,13 @@ public:
             "The base class of AnsiDisplay must be a derived of BufferedDisplay."
         );
     }
+    
+    ~AnsiDisplay()
+    {
+        clearAttributes();
+        clearScreen();
+        lowlevelFlush();
+    }
 
     void getCaretPosition(int &x, int &y)
     {
@@ -120,6 +127,11 @@ public:
         fprintf(stderr, CSI"6n");
         fscanf(stdin, CSI"%d;%dR", &y, &x);
         tcsetattr(0, TCSANOW, &saved);
+    }
+
+    void clearAttributes()
+    {
+        buf << CSI"0m";
     }
 
     void clearScreen()
