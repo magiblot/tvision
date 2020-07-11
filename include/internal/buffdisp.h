@@ -1,8 +1,13 @@
 #ifndef BUFFDISP_H
 #define BUFFDISP_H
 
+#define Uses_TPoint
+#include <tvision/tv.h>
+
 #include <internal/platform.h>
+#include <internal/textattr.h>
 #include <internal/array2d.h>
+#include <vector>
 #include <set>
 #include <chrono>
 
@@ -12,32 +17,31 @@ class BufferedDisplay : public DisplayStrategy {
 
     friend class ScreenCursor;
 
-    static BufferedDisplay *instance;
-
-    struct CellPos {
-        int y, x;  // row, col
-        bool operator<(const CellPos& other) const { // Required by std::set
-            return y == other.y ? x < other.x : y < other.y;
-        }
+    struct Range {
+        int begin, end;
     };
 
-    Array2D<uchar> charBuffer;
-    Array2D<ushort> attrBuffer;
-
+    Array2D<BufferCharInfo> buffer;
+    std::vector<Range> rowDamage;
     bool screenChanged;
-    std::set<CellPos> changedCells;
 
     bool caretMoved;
-    CellPos caretPosition;
+    TPoint caretPosition;
 
+    bool limitFPS;
+    std::chrono::microseconds flushDelay;
+    std::chrono::time_point<std::chrono::steady_clock> lastFlush;
+
+    static BufferedDisplay *instance;
     static std::set<ScreenCursor*> cursors;
+    static constexpr int defaultFPS = 60;
+
+    void resetBuffer();
+    void setDirty(int x, BufferCharInfo &cinfo, Range &damage);
+
     void drawCursors();
     void undrawCursors();
 
-    bool limitFPS;
-    static const int defaultFPS = 60;
-    std::chrono::microseconds flushDelay;
-    std::chrono::time_point<std::chrono::steady_clock> lastFlush;
     bool timeToFlush();
 
 protected:
@@ -45,7 +49,7 @@ protected:
     BufferedDisplay();
     ~BufferedDisplay();
 
-    void initBuffer();
+    void init();
 
     void setCaretPosition(int x, int y);
     void screenWrite(int x, int y, ushort *buf, int len);

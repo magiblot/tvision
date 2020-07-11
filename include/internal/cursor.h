@@ -17,17 +17,17 @@ public:
     bool isVisible() const;
     void setPos(const TPoint &p);
     const TPoint& getPos() const;
-    void apply(ushort &attr);
-    void restore(ushort &attr) const;
+    void apply(uchar &attr);
+    void restore(uchar &attr) const;
 
 protected:
 
     const DrawStyle style;
     TPoint pos;
     bool visible;
-    ushort backup;
+    uchar backup;
 
-    virtual void draw(ushort &attr) const;
+    virtual void draw(uchar &attr) const;
 
 };
 
@@ -74,13 +74,13 @@ inline const TPoint& ScreenCursor::getPos() const
     return pos;
 }
 
-inline void ScreenCursor::apply(ushort &attr)
+inline void ScreenCursor::apply(uchar &attr)
 {
     backup = attr;
     draw(attr);
 }
 
-inline void ScreenCursor::restore(ushort &attr) const
+inline void ScreenCursor::restore(uchar &attr) const
 {
     attr = backup;
 }

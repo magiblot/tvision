@@ -45,4 +45,48 @@ constexpr inline int getANSIColorCode(uchar c, bool bg=false) {
     return ((c & 0x08) ? (bg ? 100 : 90) : (bg ? 40 : 30)) + (c & 0x07);
 }
 
+struct WinCharInfo {
+    union {
+        struct {
+            union {
+                ushort Unicode;
+                uchar AsciiChar;
+            } Char;
+            ushort Attributes;
+        };
+        uint asInt;
+    };
+};
+
+struct BufferCharInfo {
+
+    union {
+        struct {
+            union {
+                uchar character;
+                ushort unicode;
+            };
+            uchar attr;
+            uchar dirty : 1;
+        };
+        uint asInt;
+    };
+
+    BufferCharInfo(uint i=0) :
+        asInt(i)
+    {
+    }
+
+    BufferCharInfo(WinCharInfo info) :
+        asInt(info.asInt)
+    {
+    }
+
+    bool operator!=(WinCharInfo info)
+    {
+        return (asInt & 0x00FFFFFF) != (info.asInt & 0x00FFFFFF);
+    }
+
+};
+
 #endif

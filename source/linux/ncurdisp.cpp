@@ -22,7 +22,7 @@ NcursesDisplay::NcursesDisplay() :
     hasColors = getScreenMode() & TDisplay::smCO80;
     if (hasColors)
         start_color();
-    initBuffer();
+    BufferedDisplay::init();
     /* Refresh now so that a possible first getch() doesn't make any relevant
      * changes to the screen due to its implicit refresh(). */
     wrefresh(stdscr);

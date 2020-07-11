@@ -1,11 +1,11 @@
 #include <internal/cursor.h>
 
-void ScreenCursor::draw(ushort &attr) const {
+void ScreenCursor::draw(uchar &attr) const {
     switch(style) {
         case Reverse: {
             uchar fg = attr & 0x0F;
             uchar bg = attr & 0xF0;
-            attr = (attr & 0xFF00) | (fg << 4) | (bg >> 4);
+            attr = (fg << 4) | (bg >> 4);
             break;
         }
         case Negative:

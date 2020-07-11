@@ -4,7 +4,6 @@
 #include <chrono>
 using std::chrono::microseconds;
 using std::chrono::steady_clock;
-using std::chrono::time_point;
 
 BufferedDisplay *BufferedDisplay::instance = 0;
 std::set<ScreenCursor*> BufferedDisplay::cursors;
@@ -19,7 +18,7 @@ BufferedDisplay::~BufferedDisplay()
     instance = 0;
 }
 
-void BufferedDisplay::initBuffer()
+void BufferedDisplay::init()
 {
     // Check if FPS shall be limited.
     int fps = getEnv<int>("TVISION_MAX_FPS", defaultFPS);
@@ -30,33 +29,51 @@ void BufferedDisplay::initBuffer()
     screenChanged = true;
     caretMoved = false;
     caretPosition = {-1, -1};
-    // Allocate buffer.
+    resetBuffer();
+}
+
+void BufferedDisplay::resetBuffer()
+{
     int rows = getScreenRows(), cols = getScreenCols();
-    charBuffer = Array2D<uchar>(rows, cols, 0);
-    attrBuffer = Array2D<ushort>(rows, cols, 0);
+
+    buffer.~Array2D();
+    new (&buffer) Array2D<BufferCharInfo>(rows, cols, 0);
+
+    rowDamage.~vector();
+    new (&rowDamage) std::vector<Range>(rows, {INT_MAX, INT_MIN});
 }
 
 void BufferedDisplay::setCaretPosition(int x, int y)
 {
-    caretPosition = {y, x};
+    caretPosition = {x, y};
     caretMoved = true;
 }
 
 void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
 {
+    auto &damage = rowDamage[y];
     for (int i = 0; i < len; i++, x++)
     {
-        uchar character = buf[i*2];
-        ushort attr = buf[i*2 + 1];
-        if (character == '\0') character = ' ';
-        if (character != charBuffer[y][x] || attr != attrBuffer[y][x])
+        auto &winfo = reinterpret_cast<WinCharInfo*>(buf)[i];
+        auto &cinfo = buffer[y][x];
+        if (cinfo != winfo)
         {
             screenChanged = true;
-            changedCells.insert({y, x});
-            charBuffer[y][x] = character;
-            attrBuffer[y][x] = attr;
+            cinfo = winfo;
+            setDirty(x, cinfo, damage);
         }
     }
+}
+
+void BufferedDisplay::setDirty(int x, BufferCharInfo &cinfo, Range &damage)
+{
+    cinfo.dirty = 1;
+    Range dam = damage;
+    if (x < dam.begin)
+        dam.begin = x;
+    if (x > dam.end)
+        dam.end = x;
+    damage = dam;
 }
 
 bool BufferedDisplay::timeToFlush()
@@ -76,9 +93,10 @@ void BufferedDisplay::drawCursors()
 {
     for (auto* cursor : cursors)
         if (cursor->isVisible()) {
-            const auto& [x, y] = cursor->getPos();
-            cursor->apply(attrBuffer[y][x]);
-            changedCells.insert({y, x});
+            const auto [x, y] = cursor->getPos();
+            auto &cinfo = buffer[y][x];
+            cursor->apply(cinfo.attr);
+            setDirty(x, cinfo, rowDamage[y]);
         }
 }
 
@@ -86,9 +104,10 @@ void BufferedDisplay::undrawCursors()
 {
     for (const auto* cursor : cursors)
         if (cursor->isVisible()) {
-            const auto& [x, y] = cursor->getPos();
-            cursor->restore(attrBuffer[y][x]);
-            changedCells.insert({y, x});
+            const auto [x, y] = cursor->getPos();
+            auto &cinfo = buffer[y][x];
+            cursor->restore(cinfo.attr);
+            setDirty(x, cinfo, rowDamage[y]);
         }
 }
 
@@ -97,32 +116,38 @@ void BufferedDisplay::flushScreen()
     if ((screenChanged || caretMoved) && timeToFlush())
     {
         drawCursors();
-        CellPos last = {-1, -1};
-        for (auto [y, x] : changedCells)
+        TPoint last = {-1, -1};
+        for (int y = 0; y < int(rowDamage.size()); ++y)
         {
-//             Workaround for Ncurses bug
-//             if (y != last.y)
-//                 lowlevelFlush();
-            if (y != last.y || x != last.x + 1)
-                lowlevelMoveCursor(x, y);
-            lowlevelWriteChar(charBuffer[y][x], attrBuffer[y][x]);
-            last = {y, x};
+            auto &damage = rowDamage[y];
+            for (int x = damage.begin; x <= damage.end; ++x)
+            {
+                auto &cinfo = buffer[y][x];
+                if (cinfo.dirty)
+                {
+//                     Workaround for Ncurses bug
+//                     if (y != last.y)
+//                         lowlevelFlush();
+                    if (y != last.y || x != last.x + 1)
+                        lowlevelMoveCursor(x, y);
+                    lowlevelWriteChar(cinfo.character, cinfo.attr);
+                    last = {x, y};
+                    cinfo.dirty = 0;
+                }
+            }
+            damage = {INT_MAX, INT_MIN};
         }
         if (caretPosition.x != -1)
             lowlevelMoveCursor(caretPosition.x, caretPosition.y);
         lowlevelFlush();
         screenChanged = false;
         caretMoved = false;
-        changedCells.clear();
         undrawCursors();
     }
 }
 
 void BufferedDisplay::onScreenResize()
 {
-    int rows = getScreenRows(), cols = getScreenCols();
-    charBuffer = Array2D<uchar>(rows, cols, 0);
-    attrBuffer = Array2D<ushort>(rows, cols, 0);
-    changedCells.clear();
+    resetBuffer();
 }
 
