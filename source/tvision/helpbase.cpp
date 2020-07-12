@@ -103,15 +103,16 @@ void THelpTopic::readParagraphs( ipstream& s )
 
     s >> i;
     pp = &paragraphs;
-    while ( i > 0)
+    while (i > 0)
     {
         s >> size;
         *pp = new TParagraph;
-        (*pp)->text = new char[size];
+        (*pp)->text = new char[size + 1];
         (*pp)->size = (ushort) size;
-    s >> temp;
+        s >> temp;
         (*pp)->wrap = Boolean(temp);
         s.readBytes((*pp)->text, (*pp)->size);
+        (*pp)->text[(*pp)->size] = '\0';
         pp = &((*pp)->next);
         --i;
     }
