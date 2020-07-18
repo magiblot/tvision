@@ -328,9 +328,9 @@ public:
     ~TView();
 
     virtual void sizeLimits( TPoint& min, TPoint& max );
-    TRect getBounds();
-    TRect getExtent();
-    TRect getClipRect();
+    TRect getBounds() const;
+    TRect getExtent() const;
+    TRect getClipRect() const;
     Boolean mouseInView( TPoint mouse );
     Boolean containsMouse( TEvent& event );
 

@@ -405,7 +405,7 @@ Boolean  TView::eventAvail()
     return Boolean( event.what != evNothing );
 }
 
-TRect TView::getBounds()
+TRect TView::getBounds() const
 {
     return TRect( origin, origin+size );
 }
@@ -438,7 +438,7 @@ Boolean TView::focus()
     return result;
 }
 
-TRect TView::getClipRect()
+TRect TView::getClipRect() const
 {
     TRect clip = getBounds();
     if( owner != 0 )
@@ -474,7 +474,7 @@ void TView::getEvent( TEvent& event )
         owner->getEvent(event);
 }
 
-TRect TView::getExtent()
+TRect TView::getExtent() const
 {
     return TRect( 0, 0, size.x, size.y );
 }
