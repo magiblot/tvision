@@ -234,7 +234,7 @@ void TFileInfoPane::draw()
 
         char buf[32];
         ltoa( file_block.size, buf, 10 );
-        b.moveStr( size.x - 33, buf, color );
+        b.moveStr( size.x - 38, buf, color );
 
         time = (ftime *) &file_block.time;
         b.moveStr( size.x - 22, months[time->ft_month], color );
