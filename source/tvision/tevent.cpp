@@ -110,7 +110,9 @@ void TEventQueue::getMouseEvent( TEvent & ev)
         if( ev.mouse.buttons == 0 && lastMouse.buttons != 0 )
             {
             ev.what = evMouseUp;
+            uchar buttons = lastMouse.buttons;
             lastMouse = ev.mouse;
+            ev.mouse.buttons = buttons;
             return;
             }
 
