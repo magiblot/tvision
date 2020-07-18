@@ -61,8 +61,8 @@ void TGroup::shutDown()
 void doCalcChange( TView *p, void *d )
 {
     TRect  r;
-    ((TGroup *)p)->calcBounds(r, *(TPoint*)d);
-    ((TGroup *)p)->changeBounds(r);
+    p->calcBounds(r, *(TPoint*)d);
+    p->changeBounds(r);
 }
 
 #pragma warn -par
@@ -101,7 +101,7 @@ void TGroup::changeBounds( const TRect& bounds )
 
 void addSubviewDataSize( TView *p, void *T )
 {
-   *((ushort *)T) += ((TGroup *)p)->dataSize();
+   *((ushort *)T) += p->dataSize();
 }
 
 ushort TGroup::dataSize()
