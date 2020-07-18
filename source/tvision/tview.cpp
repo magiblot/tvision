@@ -244,13 +244,34 @@ void TView::dragView( TEvent& event,
                         );
                 } while( mouseEvent(event,evMouseMove) );
             }
-        else
+        else if( mode & dmDragGrow )
             {
             p = size - event.mouse.where;
             do  {
                 event.mouse.where += p;
                 moveGrow( origin,
                           event.mouse.where,
+                          limits,
+                          minSize,
+                          maxSize,
+                          mode
+                        );
+                } while( mouseEvent(event,evMouseMove) );
+            }
+        else // dmDragGrowLeft
+            {
+            TRect bounds = getBounds();
+            s = origin;
+            s.y += size.y;
+            p = s - event.mouse.where;
+            do  {
+                event.mouse.where += p;
+                bounds.a.x = event.mouse.where.x;
+                bounds.b.y = event.mouse.where.y;
+                if ( bounds.b.x - bounds.a.x < minSize.x )
+                    bounds.a.x = bounds.b.x - minSize.x;
+                moveGrow( bounds.a,
+                          bounds.b - bounds.a,
                           limits,
                           minSize,
                           maxSize,

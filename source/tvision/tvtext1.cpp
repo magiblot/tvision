@@ -78,6 +78,7 @@ const char * _NEAR TFrame::closeIcon = "[~\xFE~]";
 const char * _NEAR TFrame::zoomIcon = "[~\x18~]";
 const char * _NEAR TFrame::unZoomIcon = "[~\x12~]";
 const char * _NEAR TFrame::dragIcon = "~\xC4\xD9~";
+const char * _NEAR TFrame::dragLeftIcon = "~\xC0\xC4~";
 
 const char _NEAR TIndicator::dragFrame = '\xCD';
 const char _NEAR TIndicator::normalFrame = '\xC4';

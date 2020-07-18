@@ -100,6 +100,7 @@ const ushort
 
     dmDragMove      = 0x01,
     dmDragGrow      = 0x02,
+    dmDragGrowLeft  = 0x04,
     dmLimitLoX      = 0x10,
     dmLimitLoY      = 0x20,
     dmLimitHiX      = 0x40,
@@ -543,6 +544,7 @@ private:
     static const char * _NEAR zoomIcon;
     static const char * _NEAR unZoomIcon;
     static const char * _NEAR dragIcon;
+    static const char * _NEAR dragLeftIcon;
 
     virtual const char *streamableName() const
         { return name; }

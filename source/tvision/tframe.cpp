@@ -116,7 +116,10 @@ void TFrame::draw()
     frameLine( b, size.y - 1, f +  6, cFrame );
     if( (state & sfActive) != 0 )
         if( ( ((TWindow *)owner)->flags & wfGrow ) != 0 )
+            {
+            b.moveCStr( 0, dragLeftIcon, cFrame );
             b.moveCStr( width-2, dragIcon, cFrame );
+            }
     writeLine( 0, size.y - 1, size.x, 1, b );
 }
 
@@ -181,11 +184,14 @@ void TFrame::handleEvent( TEvent& event )
                     if( ( ((TWindow *)owner)->flags & wfMove ) != 0 )
                         dragWindow( event, dmDragMove );
             }
-        else
-            if( (mouse.x >= size.x - 2 && mouse.y >= size.y - 1 ) &&
-            (state & sfActive))
-                if( ( ((TWindow *)owner)->flags & wfGrow ) != 0 )
+        else if( (state & sfActive) && (mouse.y >= size.y - 1) &&
+                 (((TWindow *)owner)->flags & wfGrow) )
+            {
+                if( mouse.x >= size.x - 2 )
                     dragWindow( event, dmDragGrow );
+                else if( mouse.x <= 1 )
+                    dragWindow( event, dmDragGrowLeft );
+            }
         }
 }
 
