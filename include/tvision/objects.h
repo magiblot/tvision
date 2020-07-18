@@ -75,10 +75,10 @@ public:
     TRect( TPoint p1, TPoint p2 );
     TRect();
 
-    void move( int aDX, int aDY );
-    void grow( int aDX, int aDY );
-    void intersect( const TRect& r );
-    void Union( const TRect& r );
+    TRect& move( int aDX, int aDY );
+    TRect& grow( int aDX, int aDY );
+    TRect& intersect( const TRect& r );
+    TRect& Union( const TRect& r );
     Boolean contains( const TPoint& p ) const;
     Boolean operator == ( const TRect& r ) const;
     Boolean operator != ( const TRect& r ) const;
@@ -106,36 +106,40 @@ inline TRect::TRect()
 {
 }
 
-inline void TRect::move( int aDX, int aDY )
+inline TRect& TRect::move( int aDX, int aDY )
 {
     a.x += aDX;
     a.y += aDY;
     b.x += aDX;
     b.y += aDY;
+    return *this;
 }
 
-inline void TRect::grow( int aDX, int aDY )
+inline TRect& TRect::grow( int aDX, int aDY )
 {
     a.x -= aDX;
     a.y -= aDY;
     b.x += aDX;
     b.y += aDY;
+    return *this;
 }
 
-inline void TRect::intersect( const TRect& r )
+inline TRect& TRect::intersect( const TRect& r )
 {
     a.x = max( a.x, r.a.x );
     a.y = max( a.y, r.a.y );
     b.x = min( b.x, r.b.x );
     b.y = min( b.y, r.b.y );
+    return *this;
 }
 
-inline void TRect::Union( const TRect& r )
+inline TRect& TRect::Union( const TRect& r )
 {
     a.x = min( a.x, r.a.x );
     a.y = min( a.y, r.a.y );
     b.x = max( b.x, r.b.x );
     b.y = max( b.y, r.b.y );
+    return *this;
 }
 
 inline Boolean TRect::contains( const TPoint& p ) const
