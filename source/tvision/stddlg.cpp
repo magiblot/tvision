@@ -234,10 +234,10 @@ void TFileInfoPane::draw()
 
         char buf[32];
         ltoa( file_block.size, buf, 10 );
-        b.moveStr( 14, buf, color );
+        b.moveStr( size.x - 33, buf, color );
 
         time = (ftime *) &file_block.time;
-        b.moveStr( 25, months[time->ft_month], color );
+        b.moveStr( size.x - 22, months[time->ft_month], color );
 
         if( time->ft_day >= 10 )
             itoa( time->ft_day, buf, 10 );
@@ -246,12 +246,12 @@ void TFileInfoPane::draw()
             buf[0] = '0';
             itoa( time->ft_day, buf+1, 10 );
             }
-        b.moveStr( 29, buf, color );
+        b.moveStr( size.x - 18, buf, color );
 
-        b.putChar( 31, ',' );
+        b.putChar( size.x - 16, ',' );
 
         itoa( time->ft_year+1980, buf, 10 );
-        b.moveStr( 32, buf, color );
+        b.moveStr( size.x - 15, buf, color );
 
         PM = Boolean(time->ft_hour >= 12 );
         time->ft_hour %= 12;
@@ -266,8 +266,8 @@ void TFileInfoPane::draw()
             buf[0] = '0';
             itoa( time->ft_hour, buf+1, 10 );
             }
-        b.moveStr( 38, buf, color );
-        b.putChar( 40, ':' );
+        b.moveStr( size.x - 9, buf, color );
+        b.putChar( size.x - 7, ':' );
 
         if( time->ft_min >= 10 )
             itoa( time->ft_min, buf, 10 );
@@ -276,12 +276,12 @@ void TFileInfoPane::draw()
             buf[0] = '0';
             itoa( time->ft_min, buf+1, 10 );
             }
-        b.moveStr( 41, buf, color );
+        b.moveStr( size.x - 6, buf, color );
 
         if( PM )
-            b.moveStr( 43, pmText, color );
+            b.moveStr( size.x - 4, pmText, color );
         else
-            b.moveStr( 43, amText, color );
+            b.moveStr( size.x - 4, amText, color );
         }
 
     writeLine(0, 1, (ushort) size.x, 1, b );

@@ -409,6 +409,7 @@ public:
     virtual void setData( void *rec );
     virtual Boolean valid( ushort command );
     virtual void shutDown();
+    virtual void sizeLimits( TPoint& min, TPoint& max );
 
     TFileInputLine *fileName;
     TFileList *fileList;

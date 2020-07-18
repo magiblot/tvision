@@ -23,6 +23,7 @@
 #define Uses_TScrollBar
 #define Uses_TEvent
 #define Uses_TFileInfoPane
+#define Uses_TProgram
 #define Uses_opstream
 #define Uses_ipstream
 #include <tvision/tv.h>
@@ -148,6 +149,36 @@ TFileDialog::TFileDialog( const char *aWildCard,
     insert( new TFileInfoPane( TRect( 1, 16, 48, 18 ) ) );
     first()->growMode = gfGrowAll & ~gfGrowLoX;
     selectNext( False );
+
+    // I feel too lazy to update all the sizes above. The new default size
+    // is set by resizing the dialog.
+    {
+        // In the 21st century we should be using percentages, not absolute
+        // units. :/
+        TRect bounds = getBounds();
+        TPoint screenSize = TProgram::application->size;
+        TRect screenBounds = TProgram::application->getBounds();
+        if (screenSize.x > 90)
+            bounds.grow(15, 0); // New size 79
+        else if (screenSize.x > 63)
+            {
+            screenBounds.grow(-7, 0);
+            bounds.a.x = screenBounds.a.x;
+            bounds.b.x = screenBounds.b.x;
+            }
+        if (screenSize.y > 34)
+            bounds.grow(0, 5); // New height 29
+        else if (screenSize.y > 25)
+            {
+            screenBounds.grow(0, -3);
+            bounds.a.y = screenBounds.a.y;
+            bounds.b.y = screenBounds.b.y;
+            }
+        // Making the dialog greater than this does not make much sense
+        // as it would be too sparse.
+        locate(bounds);
+    }
+
     if( (aOptions & fdNoLoadDir) == 0 )
         readDirectory();
 }
@@ -162,6 +193,13 @@ void TFileDialog::shutDown()
     fileName = 0;
     fileList = 0;
     TDialog::shutDown();
+}
+
+void TFileDialog::sizeLimits( TPoint& min, TPoint& max )
+{
+    TDialog::sizeLimits( min, max );
+    min.x = 49;
+    min.y = 19;
 }
 
 static Boolean relativePath( const char *path )
