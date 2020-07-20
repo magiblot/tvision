@@ -22,7 +22,9 @@
 
 #include <_defs.h>
 
+#ifdef __BORLANDC__
 #define I   asm
+#endif
 
 enum Boolean { False, True };
 
