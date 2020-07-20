@@ -30,7 +30,8 @@ class BufferedDisplay : public DisplayStrategy {
     TPoint caretPosition;
 
     bool limitFPS;
-    bool lastFrameDropped; // At most one dropped frame.
+    int frameDrops;
+    static constexpr int maxFrameDrops = 4;
     std::chrono::microseconds flushDelay;
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 

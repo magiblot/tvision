@@ -86,14 +86,14 @@ bool BufferedDisplay::timeToFlush()
     if (limitFPS)
     {
         auto now = steady_clock::now();
-        if (lastFrameDropped || ((now - lastFlush) >= flushDelay))
+        if (frameDrops == maxFrameDrops || ((now - lastFlush) >= flushDelay))
         {
             lastFlush = now;
-            lastFrameDropped = false;
+            frameDrops = 0;
         }
         else
         {
-            lastFrameDropped = true;
+            ++frameDrops;
             return false;
         }
     }
