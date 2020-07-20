@@ -30,6 +30,7 @@ class BufferedDisplay : public DisplayStrategy {
     TPoint caretPosition;
 
     bool limitFPS;
+    bool lastFrameDropped; // At most one dropped frame.
     std::chrono::microseconds flushDelay;
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 
@@ -60,6 +61,7 @@ protected:
 
     virtual void lowlevelWriteChars(std::string_view chars, uchar attr) = 0; // 'chars' is null-terminated
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
+    virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelFlush() = 0;
 
 };

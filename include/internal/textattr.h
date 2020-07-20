@@ -11,7 +11,7 @@ struct BIOSColor {
             uchar
                 fg  : 4,
                 bg  : 4;
-        } layers;
+        } colors;
         struct {
             uchar
                 fgBlue      : 1,
@@ -30,7 +30,7 @@ struct BIOSColor {
 
     constexpr void swapRedBlue() {
         // Swap the Red and Blue bits so that each color can be
-        // straightforwardly converted to an ANSI color code.
+        // straightforwardly converted to an SGR color code.
         uchar fgAux = bits.fgBlue,
               bgAux = bits.bgBlue;
         bits.fgBlue = bits.fgRed;
@@ -41,9 +41,60 @@ struct BIOSColor {
 
 };
 
-constexpr inline int getANSIColorCode(uchar c, bool bg=false) {
-    return ((c & 0x08) ? (bg ? 100 : 90) : (bg ? 40 : 30)) + (c & 0x07);
-}
+// SGRAttribs conversion flags.
+
+const uint
+    sgrBrightIsBold   = 0x0001,
+    sgrBrightIsBlink  = 0x0002;
+
+struct SGRAttribs {
+
+    union {
+        struct {
+            uchar fg;
+            uchar bg;
+            uchar bold;
+            uchar blink;
+        } attr;
+        uint asInt;
+    };
+
+    SGRAttribs()
+    {
+        attr.fg = 30;       // Black
+        attr.bg = 40;       // Black
+        attr.bold = 22;     // Bold Off
+        attr.blink = 25;    // Blink Off
+    }
+
+    SGRAttribs(BIOSColor bios, uint flags) :
+        SGRAttribs()
+    {
+        bios.swapRedBlue();
+        attr.fg += (bios.colors.fg & 0x07);
+        attr.bg += (bios.colors.bg & 0x07);
+        if (bios.bits.fgBright)
+        {
+            if (flags & sgrBrightIsBold)
+                attr.bold = 1; // Bold On
+            else
+                attr.fg += 60;
+        }
+        if (bios.bits.bgBright)
+        {
+            if (flags & sgrBrightIsBlink)
+                attr.blink = 5; // Blink On
+            else
+                attr.bg += 60;
+        }
+    }
+
+    bool operator!=(SGRAttribs other)
+    {
+        return asInt != other.asInt;
+    }
+
+};
 
 struct BufferCharInfo {
 

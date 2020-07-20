@@ -1,4 +1,5 @@
 #define Uses_TScreen
+#define Uses_THardwareInfo
 #include <tvision/tv.h>
 #include <internal/ansidisp.h>
 #include <internal/codepage.h>
@@ -17,8 +18,13 @@ using namespace std::literals;
 #define CSI "\x1B["
 
 AnsiDisplayBase::AnsiDisplayBase() :
-    lastAttr('\x07')
+    lastAttr(),
+    sgrFlags(0)
 {
+    if (THardwareInfo::isLinuxConsole(0) || THardwareInfo::isLinuxConsole(1))
+        sgrFlags |= sgrBrightIsBlink;
+    if (COLORS < 16)
+        sgrFlags |= sgrBrightIsBold;
 }
 
 AnsiDisplayBase::~AnsiDisplayBase()
@@ -32,7 +38,17 @@ void AnsiDisplayBase::bufWrite(std::string_view s)
     buf.insert(buf.end(), s.data(), s.data()+s.size());
 }
 
-void AnsiDisplayBase::bufWriteSeq(uint a, uint b, char F)
+void AnsiDisplayBase::bufWriteCSI1(uint a, char F)
+{
+    // CSI a F
+    char s[32] = CSI;
+    char *p = s + sizeof(CSI) - 1;
+    p += fast_utoa(a, p);
+    *p++ = F;
+    bufWrite({s, size_t(p - s)});
+}
+
+void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F)
 {
     // CSI a ; b F
     char s[32] = CSI;
@@ -47,7 +63,7 @@ void AnsiDisplayBase::bufWriteSeq(uint a, uint b, char F)
 void AnsiDisplayBase::clearAttributes()
 {
     bufWrite(CSI "0m"sv);
-    lastAttr = '\x07';
+    lastAttr = {};
 }
 
 void AnsiDisplayBase::clearScreen()
@@ -104,9 +120,15 @@ void AnsiDisplayBase::lowlevelWriteChars(std::string_view chars, uchar attr)
     bufWrite(chars);
 }
 
+void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)
+{
+    // Optimized case where the cursor only moves horizontally.
+    bufWriteCSI1(x + 1, 'G');
+}
+
 void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)
 {
-    bufWriteSeq(y + 1, x + 1, 'H');
+    bufWriteCSI2(y + 1, x + 1, 'H');
 }
 
 void AnsiDisplayBase::lowlevelFlush() {
@@ -115,21 +137,35 @@ void AnsiDisplayBase::lowlevelFlush() {
     buf.resize(0);
 }
 
-void AnsiDisplayBase::writeAttributes(uchar attr) {
-    if (attr != lastAttr)
+void AnsiDisplayBase::writeAttributes(BIOSColor c) {
+    SGRAttribs sgr {c, sgrFlags};
+    SGRAttribs last = lastAttr;
+    if (sgr != lastAttr)
     {
-        BIOSColor c = attr & (COLORS < 16 ? 0x77 : 0xFF);
-        c.swapRedBlue();
-        uint fg = getANSIColorCode(c.layers.fg),
-             bg = getANSIColorCode(c.layers.bg, true);
-        bufWriteSeq(fg, bg, 'm');
-        if (COLORS < 16)
+        char s[32] = CSI;
+        char *p = s + sizeof(CSI) - 1;
+        if (sgr.attr.fg != last.attr.fg)
         {
-            if ((attr & 0x08) && !(lastAttr & 0x08))
-                bufWrite(CSI "1m"sv);
-            else if (!(attr & 0x08) && (lastAttr & 0x08))
-                bufWrite(CSI "22m"sv);
+            p += fast_utoa(sgr.attr.fg, p);
+            *p++ = ';';
         }
-        lastAttr = attr;
+        if (sgr.attr.bg != last.attr.bg)
+        {
+            p += fast_utoa(sgr.attr.bg, p);
+            *p++ = ';';
+        }
+        if (sgr.attr.bold != last.attr.bold)
+        {
+            p += fast_utoa(sgr.attr.bold, p);
+            *p++ = ';';
+        }
+        if (sgr.attr.blink != last.attr.blink)
+        {
+            p += fast_utoa(sgr.attr.blink, p);
+            *p++ = ';';
+        }
+        *(p - 1) = 'm';
+        lastAttr = sgr;
+        bufWrite({s, size_t(p - s)});
     }
 }

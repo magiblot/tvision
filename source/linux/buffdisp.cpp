@@ -83,14 +83,21 @@ void BufferedDisplay::setDirty(int x, BufferCharInfo &cinfo, Range &damage)
 bool BufferedDisplay::timeToFlush()
 {
     // Avoid flushing faster than the maximum FPS.
-    bool b = true;
     if (limitFPS)
     {
         auto now = steady_clock::now();
-        if ((b = ((now - lastFlush) >= flushDelay)))
+        if (lastFrameDropped || ((now - lastFlush) >= flushDelay))
+        {
             lastFlush = now;
+            lastFrameDropped = false;
+        }
+        else
+        {
+            lastFrameDropped = true;
+            return false;
+        }
     }
-    return b;
+    return true;
 }
 
 void BufferedDisplay::drawCursors()
@@ -137,8 +144,10 @@ void BufferedDisplay::flushScreen()
 //                     Workaround for Ncurses bug
 //                     if (y != last.y)
 //                         lowlevelFlush();
-                    if (y != last.y || x != last.x + 1)
+                    if (y != last.y)
                         lowlevelMoveCursor(x, y);
+                    else if (x != last.x + 1)
+                        lowlevelMoveCursorX(x, y);
                     lowlevelWriteChars(translateChar(cinfo.character), cinfo.attr);
                     last = {x, y};
                     cinfo.dirty = 0;

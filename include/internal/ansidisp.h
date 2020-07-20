@@ -2,6 +2,7 @@
 #define ANSIDISP_H
 
 #include <internal/buffdisp.h>
+#include <internal/textattr.h>
 #include <vector>
 #include <string_view>
 
@@ -22,11 +23,13 @@
 class AnsiDisplayBase {
 
     std::vector<char> buf;
-    uchar lastAttr;
+    SGRAttribs lastAttr;
+    uint sgrFlags;
 
     void bufWrite(std::string_view s);
-    void bufWriteSeq(uint a, uint b, char F);
-    void writeAttributes(uchar attr);
+    void bufWriteCSI1(uint a, char F);
+    void bufWriteCSI2(uint a, uint b, char F);
+    void writeAttributes(BIOSColor attr);
 
 protected:
 
@@ -44,12 +47,13 @@ protected:
 
     void lowlevelWriteChars(std::string_view chars, uchar attr);
     void lowlevelMoveCursor(uint x, uint y);
+    void lowlevelMoveCursorX(uint x, uint y);
     void lowlevelFlush();
 
 };
 
 template<class DisplayBase>
-class AnsiDisplay : public AnsiDisplayBase, public DisplayBase {
+class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
 
     void assertBaseClassBuffered()
     {
@@ -66,6 +70,7 @@ public:
 
     void lowlevelWriteChars(std::string_view chars, uchar attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
+    void lowlevelMoveCursorX(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
     void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }
 
     void onScreenResize() {

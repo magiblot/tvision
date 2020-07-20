@@ -139,7 +139,7 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
         // Foreground color in the lower half, background in the upper half.
         BIOSColor c {pairKey};
         c.swapRedBlue();
-        init_pair(++definedPairs, c.layers.fg, c.layers.bg);
+        init_pair(++definedPairs, c.colors.fg, c.colors.bg);
         id = pairIdentifiers[pairKey] = definedPairs;
     }
     return COLOR_PAIR(id);

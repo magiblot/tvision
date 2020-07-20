@@ -6,7 +6,11 @@
 #include <string>
 
 template<typename T>
-static inline T getEnv(const char* name, T def = T{});
+static inline T getEnv(const char* name, T def = T{})
+{
+    const char* body = std::getenv(name);
+    return body ? body : def;
+}
 
 template<>
 int getEnv<int>(const char* name, int def)
@@ -19,13 +23,6 @@ int getEnv<int>(const char* name, int def)
             return i;
     }
     return def;
-}
-
-template<>
-std::string getEnv<std::string>(const char* name, std::string def)
-{
-    const char* body = std::getenv(name);
-    return body ? body : def;
 }
 
 #endif

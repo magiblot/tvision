@@ -29,12 +29,12 @@ THardwareInfo::THardwareInfo()
     static TSignalHandler h;
 }
 
-bool THardwareInfo::isLinuxConsole()
+bool THardwareInfo::isLinuxConsole(int fd)
 {
     /* This is the same function used to get the Shift/Ctrl/Alt modifiers
      * on the console. It fails if stdin is not a console file descriptor. */
-    char subcode = 6;
-    return ioctl(0, TIOCLINUX, &subcode) != -1;
+    char subcode[] = {6, 0}; // Null-terminate so that valgrind doesn't complain.
+    return ioctl(fd, TIOCLINUX, subcode) != -1;
 }
 
 /* We don't include these in hardware.h as done originally to prevent it to
@@ -85,7 +85,7 @@ void THardwareInfo::setUpConsole()
             disp = new AnsiDisplay<NcursesDisplay>();
         else
             disp = new NcursesDisplay();
-        if (isLinuxConsole())
+        if (isLinuxConsole(0))
             platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
         else
             platf.reset(new PlatformStrategy(disp, new NcursesInput()));

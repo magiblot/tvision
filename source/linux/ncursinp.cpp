@@ -45,7 +45,7 @@ NcursesInput::NcursesInput(bool mouse) :
         // This will do the trick for now.
         buttonCount = 2;
         // Force enable mouse drag support.
-        auto &&TERM = getEnv<std::string>("TERM");
+        auto TERM = getEnv<std::string_view>("TERM");
         if (TERM.find("xterm") == 0 || TERM.find("rxvt") == 0)
         {
             mouseForced = true;
@@ -68,7 +68,7 @@ NcursesInput::~NcursesInput()
 
 void NcursesInput::printEscapeSeq(const char* seq)
 {
-    fprintf(stdout, seq);
+    fputs(seq, stdout);
     fflush(stdout);
 }
 

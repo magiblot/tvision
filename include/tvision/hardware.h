@@ -58,7 +58,7 @@ public:
 #ifndef __BORLANDC__
     static TEvent pendingMouseEvent;
     static void flushScreen();
-    static bool isLinuxConsole();
+    static bool isLinuxConsole(int fd);
 #endif
 
     static ulong getTickCount();
