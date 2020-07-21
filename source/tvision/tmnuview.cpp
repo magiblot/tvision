@@ -183,7 +183,11 @@ ushort TMenuView::execute()
     TEvent e;
     Boolean mouseActive;
 
-    current = menu->deflt;
+    if (menu)
+        current = menu->deflt;
+    else
+        return result;
+
     mouseActive = False;
     do  {
         action = doNothing;
