@@ -39,6 +39,10 @@
 #include <malloc.h>
 #endif  // __MALLOC_H
 
+#ifndef __BORLANDC__
+#define register
+#endif
+
 const ushort firstKeys[] =
 {
     39,

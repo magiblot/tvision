@@ -23,6 +23,10 @@
 #include <dos.h>
 #endif  // __DOS_H
 
+#ifndef __BORLANDC__
+#define register
+#endif
+
 #pragma warn -asc
 
 /*------------------------------------------------------------------------*/

@@ -1,14 +1,18 @@
 cmake_minimum_required (VERSION 3.5)
 project (tvision)
 
+add_compile_options(
+    -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
+    --std=c++17 -O2 -fpermissive
+#     -g
+    # Enable the following if your system supports it:
+#     -flto
+)
+
 include_directories(
 include
 include/override
 )
-
-set(CXX_WARNINGS "-Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder -Wno-overloaded-virtual")
-set(CXX_DEFINITIONS "-Dregister=")
-set(CMAKE_CXX_FLAGS "-O2 -flto --std=c++17 -fpermissive ${CXX_WARNINGS} ${CXX_DEFINITIONS}")
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvision/geninc.cpp")
@@ -17,6 +21,14 @@ file(GLOB_RECURSE TVEDITSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvedit/*.cpp")
 file(GLOB_RECURSE TVDEMOSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdemo/*.cpp")
 file(GLOB_RECURSE TVDIRSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/tvdir/*.cpp")
 
+add_library(tvision STATIC ${TVSOURCE})
+add_executable(hello ${HELLOSRC})
+add_executable(tvedit ${TVEDITSRC})
+add_executable(tvdemo ${TVDEMOSRC})
+add_executable(tvdir ${TVDIRSRC})
+
+# Libraries
+
 find_library(NCURSESW ncursesw)
 set(LIBS tvision ${NCURSESW})
 
@@ -24,14 +36,8 @@ set(LIBS tvision ${NCURSESW})
 find_library(GPM gpm)
 if (GPM)
     list(APPEND LIBS ${GPM})
-    string(APPEND CMAKE_CXX_FLAGS " -DHAVE_GPM")
+    target_compile_definitions(tvision PRIVATE HAVE_GPM)
 endif()
-
-add_library(tvision STATIC ${TVSOURCE})
-add_executable(hello ${HELLOSRC})
-add_executable(tvedit ${TVEDITSRC})
-add_executable(tvdemo ${TVDEMOSRC})
-add_executable(tvdir ${TVDIRSRC})
 
 target_link_libraries(hello ${LIBS})
 target_link_libraries(tvedit ${LIBS})
