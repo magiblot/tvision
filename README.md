@@ -134,11 +134,17 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 
 * `evMouseAuto`.
 
+## API reference
+
+See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423). There also exists a [Turbo Vision For C++ User's Guide](https://archive.org/details/BorlandTurboVisionForCUserSGuide/mode/1up), but in my opinion the former is more intuitive and easier to understand.
+
 ## API changes
 
 * `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
 * Several constructors and methods now receive or return `const char*` instead of `char*`.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
+* The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
+* `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 
 ## Screenshots
 
