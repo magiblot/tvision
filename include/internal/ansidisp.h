@@ -29,7 +29,7 @@ class AnsiDisplayBase {
     void bufWrite(std::string_view s);
     void bufWriteCSI1(uint a, char F);
     void bufWriteCSI2(uint a, uint b, char F);
-    void writeAttributes(BIOSColor attr);
+    void writeAttributes(TCellAttribs attr);
 
 protected:
 
@@ -45,7 +45,7 @@ protected:
     int getScreenRows();
     int getScreenCols();
 
-    void lowlevelWriteChars(std::string_view chars, uchar attr);
+    void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
     void lowlevelFlush();
@@ -68,7 +68,7 @@ public:
     int getScreenRows() { return AnsiDisplayBase::getScreenRows(); }
     int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
 
-    void lowlevelWriteChars(std::string_view chars, uchar attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
+    void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
     void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }

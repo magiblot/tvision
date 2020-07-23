@@ -60,7 +60,7 @@ void THardwareInfo::setScreenMode( ushort mode ) {}
 void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
 void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
-    platf->screenWrite(x, y, buf, len);
+    platf->screenWrite(x, y, (TScreenCell*) buf, len);
     if (alwaysFlush)
         flushScreen();
 }

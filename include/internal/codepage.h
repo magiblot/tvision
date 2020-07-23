@@ -12,16 +12,18 @@ class CpTranslator {
 
     struct CpTable {
         std::string_view cp;
-        const std::string_view* const toUtf8;
-        std::unordered_map<std::string_view, char> toCp;
+        const uint32_t *toUtf8Int;
+        std::unordered_map<std::string_view, char> fromUtf8;
 
-        CpTable(std::string_view cp, const std::string_view* const toUtf8) :
+        CpTable( std::string_view cp,
+                 const std::string_view toUtf8[256],
+                 const std::array<uint32_t, 256> &toUtf8Int ) :
             cp(cp),
-            toUtf8(toUtf8)
+            toUtf8Int(toUtf8Int.data())
         {
             for (int i = 0; i < 256; ++i)
-                toCp.emplace(toUtf8[i], char(i));
-        };
+                fromUtf8.emplace(toUtf8[i], char(i));
+        }
     } static const tables[2];
 
     static const CpTable *activeTable;
@@ -37,15 +39,14 @@ public:
         activeTable = &tables[0];
     }
 
-    static std::string_view toUtf8(unsigned char c) {
-        // Null-terminated
-        return activeTable->toUtf8[c];
+    static uint32_t toUtf8Int(unsigned char c) {
+        return activeTable->toUtf8Int[c];
     }
 
-    static char toCp(std::string_view s) {
+    static char fromUtf8(std::string_view s) {
         char c = 0;
-        auto it = activeTable->toCp.find(s);
-        if (it != activeTable->toCp.end())
+        auto it = activeTable->fromUtf8.find(s);
+        if (it != activeTable->fromUtf8.end())
             c = it->second;
         return c;
     }

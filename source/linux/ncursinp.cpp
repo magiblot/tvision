@@ -145,7 +145,7 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
     Utf8str[num_keys] = '\0';
     // If we are lucky enough, the character will be representable in
     // the active codepage.
-    ev.keyDown.charScan.charCode = CpTranslator::toCp({Utf8str, size_t(num_keys)});
+    ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({Utf8str, size_t(num_keys)});
 }
 
 void NcursesInput::setAltModifier(TEvent &ev)

@@ -44,6 +44,7 @@
 
 #ifndef __BORLANDC__
 class PlatformStrategy;
+#include <tvision/tv.h> // for TScreenCell
 #endif
 
 struct TEvent;
@@ -207,12 +208,7 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
 #ifdef __BORLANDC__
     return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
-/* Allocate memory for the screen buffer. Two shorts per character cell.
- * This pointer is stored in TScreen's attribute screenBuffer, which is
- * often assigned to TGroup's attribute buffer.
- * https://docs.microsoft.com/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc */
-
-    return new ushort[x * y * 2];
+    return (ushort *) new TScreenCell[x * y];
 #endif
 }
 
@@ -221,7 +217,7 @@ inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
 #ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
 #else
-    delete[] buffer;
+    delete[] (TScreenCell*) buffer;
 #endif
 }
 

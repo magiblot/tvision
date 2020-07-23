@@ -140,7 +140,11 @@ void TGroup::draw()
             }
         }
     if( buffer != 0 )
+#ifdef __BORLANDC__
         writeBuf( 0, 0, size.x, size.y, buffer );
+#else
+        writeBuf( 0, 0, size.x, size.y, (TScreenCell *) buffer );
+#endif
     else
         {
         clip = getClipRect();
@@ -279,7 +283,11 @@ void TGroup::freeBuffer()
 {
     if( (options & ofBuffered) != 0 && buffer != 0 )
         {
+#ifdef __BORLANDC__
         TVMemMgr::freeDiscardable( buffer );
+#else
+        delete[] (TScreenCell *) buffer;
+#endif
         buffer = 0;
         }
 }
@@ -288,7 +296,11 @@ void TGroup::getBuffer()
 {
     if( (state & sfExposed) != 0 )
         if( (options & ofBuffered) != 0 && (buffer == 0 ))
+#ifdef __BORLANDC__
             TVMemMgr::allocateDiscardable( (void *&)buffer, size.x * size.y * sizeof(ushort) );
+#else
+            buffer = (ushort *) new TScreenCell[size.x * size.y];
+#endif
 }
 
 void TGroup::getData(void *rec)

@@ -10,6 +10,8 @@
 #include <vector>
 #include <cstddef>
 
+class TScreenCell;
+
 class DisplayStrategy {
 
 public:
@@ -23,7 +25,7 @@ public:
     virtual void setCaretPosition(int x, int y) = 0;
     virtual ushort getScreenMode() = 0;
     virtual void setCaretSize(int size) = 0;
-    virtual void screenWrite(int x, int y, ushort *buf, int len) = 0;
+    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) = 0;
     virtual void flushScreen() = 0;
     virtual void onScreenResize() {}
 
@@ -78,7 +80,7 @@ public:
     inline void setCaretPosition(int x, int y) { display->setCaretPosition(x, y); }
     inline ushort getScreenMode() { return display->getScreenMode(); }
     inline void setCaretSize(int size) { display->setCaretSize(size); }
-    inline void screenWrite(int x, int y, ushort *buf, int len) { display->screenWrite(x, y, buf, len); }
+    inline void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() { display->flushScreen(); }
     void onScreenResize() { display->onScreenResize(); }
 

@@ -19,6 +19,10 @@
 #define Uses_TEventQueue
 #include <tvision/tv.h>
 
+#ifndef __BORLANDC__
+#include <internal/codepage.h>
+#endif
+
 #ifdef __FLAT__
 
 #include <string.h>
@@ -40,6 +44,20 @@ struct TVWrite {
     void L30( TView * );
     void L40( TView * );
     void L50( TGroup * );
+#ifdef __BORLANDC__
+    void copyShort( ushort *, const ushort * );
+    void copyShort2CharInfo( ushort *, const ushort * );
+#else
+    void copyCell( TScreenCell *, const TScreenCell * );
+    void copyShort2Cell( TScreenCell *, const ushort * );
+
+    bool bufIsShort;
+
+    TVWrite(bool b=true) :
+        bufIsShort(b)
+    {
+    }
+#endif
 
 };
 
@@ -47,6 +65,13 @@ void TView::writeView( short x, short y, short count, const void _FAR* b )
 {
     TVWrite().L0(this, x, y, count, b);
 }
+
+#ifndef __BORLANDC__
+void TView::writeView( short x, short y, short count, const TScreenCell* b )
+{
+    TVWrite(false).L0(this, x, y, count, b);
+}
+#endif
 
 void TVWrite::L0( TView *dest, short x, short y, short count, const void _FAR* b )
 {
@@ -177,46 +202,125 @@ void TVWrite::L40( TView *dest )
 
 void TVWrite::L50( TGroup *owner )
 {
-    int i;
+#ifdef __BORLANDC__
     ushort *dst = &owner->buffer[Y*owner->size.x + X];
     const ushort *src = &((const ushort *) Buffer)[X - wOffset];
     if (owner->buffer != TScreen::screenBuffer)
+        copyShort(dst, src);
+    else
     {
-        if (edx == 0)
-            memmove(dst, src, 2*(Count - X));
-        else
-        {
-#define loByte(w)    (((uchar *)&w)[0])
-#define hiByte(w)    (((uchar *)&w)[1])
-            ushort ColorChar;
-            hiByte(ColorChar) = shadowAttr;
-            for (i = 0; i < Count - X; ++i)
-            {
-                loByte(ColorChar) = src[i];
-                dst[i] = ColorChar;
-            }
-#undef loByte
-#undef hiByte
-        }
+        copyShort2CharInfo(dst, src);
+        THardwareInfo::screenWrite(X, Y, dst, Count - X);
+    }
+#else
+    auto *dst = &((TScreenCell *) owner->buffer)[Y*owner->size.x + X];
+    if (bufIsShort)
+    {
+        auto *src = &((const ushort *) Buffer)[X - wOffset];
+        copyShort2Cell(dst, src);
     }
     else
     {
-        if (edx == 0)
-            // Expand character/attribute pair
-            for (i = 0; i < 2*(Count - X); ++i)
-            {
-                dst[i] = ((const uchar *) src)[i];
-            }
-        else
-            // Mix in shadow attribute
-            for (i = 0; i < 2*(Count - X); i += 2)
-            {
-                dst[i] = ((const uchar *) src)[i];
-                dst[i + 1] = shadowAttr;
-            }
-        THardwareInfo::screenWrite(X, Y, dst, Count - X);
+        auto *src = &((const TScreenCell *) Buffer)[X - wOffset];
+        copyCell(dst, src);
+    }
+    if (owner->buffer == TScreen::screenBuffer)
+        THardwareInfo::screenWrite(X, Y, (ushort *) dst, Count - X);
+#endif // __BORLANDC__
+}
+
+#ifdef __BORLANDC__
+// On Windows and DOS, Turbo Vision stores a byte of text and a byte of
+// attributes for every cell. On Windows, all TGroup buffers follow this schema
+// except the topmost one, which interfaces with the Win32 Console API.
+
+void TVWrite::copyShort( ushort *dst, const ushort *src )
+{
+    int i;
+    if (edx == 0)
+        memcpy(dst, src, 2*(Count - X));
+    else
+    {
+#define loByte(w)    (((uchar *)&w)[0])
+#define hiByte(w)    (((uchar *)&w)[1])
+        ushort ColorChar;
+        hiByte(ColorChar) = shadowAttr;
+        for (i = 0; i < Count - X; ++i)
+        {
+            loByte(ColorChar) = src[i];
+            dst[i] = ColorChar;
+        }
+#undef loByte
+#undef hiByte
     }
 }
+
+void TVWrite::copyShort2CharInfo( ushort *dst, const ushort *src )
+{
+    int i;
+    if (edx == 0)
+        // Expand character/attribute pair
+        for (i = 0; i < 2*(Count - X); ++i)
+        {
+            dst[i] = ((const uchar *) src)[i];
+        }
+    else
+        // Mix in shadow attribute
+        for (i = 0; i < 2*(Count - X); i += 2)
+        {
+            dst[i] = ((const uchar *) src)[i];
+            dst[i + 1] = shadowAttr;
+        }
+}
+
+#else
+void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
+{
+    int i;
+    if (edx == 0)
+        memcpy(dst, src, sizeof(TScreenCell)*(Count - X));
+    else
+        for (i = 0; i < Count - X; ++i)
+        {
+            auto c = src[i];
+            c.Cell.Attr.asChar = shadowAttr;
+            dst[i] = c;
+        }
+}
+
+void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
+{
+    int i;
+    if (edx == 0)
+        // Expand character/attribute pair
+        for (i = 0; i < Count - X; ++i)
+        {
+            TScreenCell c {0};
+            c.Cell.Char.asInt = CpTranslator::toUtf8Int(src[i]);
+            c.Cell.Attr.asChar = src[i] >> 8;
+            dst[i] = c;
+        }
+    else
+        // Mix in shadow attribute
+        for (i = 0; i < Count - X; ++i)
+        {
+            TScreenCell c {0};
+            c.Cell.Char.asInt = CpTranslator::toUtf8Int(src[i]);
+            c.Cell.Attr.asChar = shadowAttr;
+            dst[i] = c;
+        }
+}
+
+void TView::writeBuf( short x, short y, short w, short h, const TScreenCell* b )
+{
+    while (h-- > 0)
+    {
+        writeView(x, y++, w, b);
+        b += w;
+    }
+}
+
+#endif // __BORLANDC__
 
 void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b )
 {

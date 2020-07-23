@@ -114,10 +114,12 @@ int AnsiDisplayBase::getScreenCols()
     return cols;
 }
 
-void AnsiDisplayBase::lowlevelWriteChars(std::string_view chars, uchar attr)
+void AnsiDisplayBase::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
 {
     writeAttributes(attr);
-    bufWrite(chars);
+    uint i = 0;
+    while (++i < 4 && chars[i]);
+    bufWrite({(const char *) chars, i});
 }
 
 void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)
@@ -137,7 +139,7 @@ void AnsiDisplayBase::lowlevelFlush() {
     buf.resize(0);
 }
 
-void AnsiDisplayBase::writeAttributes(BIOSColor c) {
+void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
     SGRAttribs sgr {c, sgrFlags};
     SGRAttribs last = lastAttr;
     if (sgr != lastAttr)

@@ -5,9 +5,12 @@
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/ncursinp.h>
+#include <internal/utf8.h>
 #include <ncurses.h>
+#include <array>
 using std::unordered_map;
 using std::string_view;
+using std::array;
 
 /* The Turbo Vision library has all its characters encoded in code page 437.
  * While Unicode support is not added, it's better to just translate them
@@ -34,6 +37,8 @@ static constexpr std::string_view cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
+static constexpr std::array<uint32_t, 256> cp437toUtf8Int = make_utf8int<256>(cp437toUtf8);
+
 static constexpr std::string_view cp850toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
@@ -55,9 +60,11 @@ static constexpr std::string_view cp850toUtf8[256] = {
     // it is often represented as a regular hyphen.
 };
 
+static constexpr std::array<uint32_t, 256> cp850toUtf8Int = make_utf8int<256>(cp850toUtf8);
+
 const CpTranslator::CpTable CpTranslator::tables[] = {
-    { "437", cp437toUtf8 },
-    { "850", cp850toUtf8 }
+    { "437", cp437toUtf8, cp437toUtf8Int },
+    { "850", cp850toUtf8, cp850toUtf8Int }
 };
 
 const CpTranslator::CpTable *CpTranslator::activeTable;
@@ -65,7 +72,7 @@ CpTranslator CpTranslator::instance;
 
 CpTranslator::CpTranslator() {
     // Set the active codepage. 437 is the default.
-    use(getEnv<std::string>("TVISION_CODEPAGE", "437"));
+    use(getEnv<std::string_view>("TVISION_CODEPAGE", "437"));
 }
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Until this is not changed, it is

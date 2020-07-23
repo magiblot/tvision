@@ -1,3 +1,6 @@
+#define Uses_THardwareInfo
+#include <tvision/tv.h>
+
 #include <internal/buffdisp.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
@@ -9,7 +12,8 @@ using std::chrono::steady_clock;
 BufferedDisplay *BufferedDisplay::instance = 0;
 std::set<ScreenCursor*> BufferedDisplay::cursors;
 
-BufferedDisplay::BufferedDisplay()
+BufferedDisplay::BufferedDisplay() :
+    widePlaceholder(THardwareInfo::isLinuxConsole(1) ? ' ' : '\0')
 {
     instance = this;
 }
@@ -37,11 +41,16 @@ void BufferedDisplay::resetBuffer()
 {
     int rows = getScreenRows(), cols = getScreenCols();
 
-    buffer.~Array2D();
-    new (&buffer) Array2D<BufferCharInfo>(rows, cols, 0);
+    size = {cols, rows};
+    buffer.resize(rows*cols);
+    rowDamage.resize(rows);
 
-    rowDamage.~vector();
-    new (&rowDamage) std::vector<Range>(rows, {INT_MAX, INT_MIN});
+    for (int i = 0; i < rows; ++i) {
+        rowDamage[i] = {INT_MAX, INT_MIN};
+        for (int j = 0; j < cols; ++j) {
+            buffer[i*size.x + j] = {};
+        }
+    }
 }
 
 void BufferedDisplay::setCaretPosition(int x, int y)
@@ -50,28 +59,28 @@ void BufferedDisplay::setCaretPosition(int x, int y)
     caretMoved = true;
 }
 
-void BufferedDisplay::screenWrite( int x, int y, ushort *buf, int len )
+void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 {
     auto damage = rowDamage[y];
+    const auto [cols, rows] = size;
     for (int i = 0; i < len; i++, x++)
     {
-        auto binfo = reinterpret_cast<BufferCharInfo*>(buf)[i];
-        auto &cinfo = buffer[y][x];
-        if (binfo.character == '\0')
-            binfo.character = ' '; // Treat null character as a space.
-        if (cinfo != binfo)
+        BufferCell newCell {buf[i]};
+        ensurePrintable(newCell);
+        auto bufCell = buffer[y*cols + x];
+        if (newCell != bufCell)
         {
             screenChanged = true;
-            setDirty(x, binfo, damage);
-            cinfo = binfo;
+            setDirty(x, newCell, damage);
+            buffer[y*cols + x] = newCell;
         }
     }
     rowDamage[y] = damage;
 }
 
-void BufferedDisplay::setDirty(int x, BufferCharInfo &cinfo, Range &damage)
+void BufferedDisplay::setDirty(int x, BufferCell &cell, Range &damage)
 {
-    cinfo.dirty = 1;
+    cell.Cell.dirty = 1;
     Range dam = damage;
     if (x < dam.begin)
         dam.begin = x;
@@ -102,29 +111,26 @@ bool BufferedDisplay::timeToFlush()
 
 void BufferedDisplay::drawCursors()
 {
+    const auto [cols, rows] = size;
     for (auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cinfo = buffer[y][x];
-            cursor->apply(cinfo.attr);
-            setDirty(x, cinfo, rowDamage[y]);
+            auto &cell = buffer[y*cols + x];
+            cursor->apply(cell.Cell.Attr);
+            setDirty(x, cell, rowDamage[y]);
         }
 }
 
 void BufferedDisplay::undrawCursors()
 {
+    const auto [cols, rows] = size;
     for (const auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cinfo = buffer[y][x];
-            cursor->restore(cinfo.attr);
-            setDirty(x, cinfo, rowDamage[y]);
+            auto &cell = buffer[y*cols + x];
+            cursor->restore(cell.Cell.Attr);
+            setDirty(x, cell, rowDamage[y]);
         }
-}
-
-std::string_view BufferedDisplay::translateChar(char c)
-{
-    return CpTranslator::toUtf8(c);
 }
 
 void BufferedDisplay::flushScreen()
@@ -132,40 +138,161 @@ void BufferedDisplay::flushScreen()
     if ((screenChanged || caretMoved) && timeToFlush())
     {
         drawCursors();
-        TPoint last = {-1, -1};
-        for (int y = 0; y < int(rowDamage.size()); ++y)
-        {
-            auto &damage = rowDamage[y];
-            for (int x = damage.begin; x <= damage.end; ++x)
-            {
-                auto &cinfo = buffer[y][x];
-                if (cinfo.dirty)
-                {
-//                     Workaround for Ncurses bug
-//                     if (y != last.y)
-//                         lowlevelFlush();
-                    if (y != last.y)
-                        lowlevelMoveCursor(x, y);
-                    else if (x != last.x + 1)
-                        lowlevelMoveCursorX(x, y);
-                    lowlevelWriteChars(translateChar(cinfo.character), cinfo.attr);
-                    last = {x, y};
-                    cinfo.dirty = 0;
-                }
-            }
-            damage = {INT_MAX, INT_MIN};
-        }
+        FlushScreenAlgorithm(*this).run();
         if (caretPosition.x != -1)
             lowlevelMoveCursor(caretPosition.x, caretPosition.y);
-        lowlevelFlush();
+        undrawCursors();
         screenChanged = false;
         caretMoved = false;
-        undrawCursors();
+        lowlevelFlush();
     }
 }
 
 void BufferedDisplay::onScreenResize()
 {
     resetBuffer();
+}
+
+
+void BufferedDisplay::ensurePrintable(BufferCell &cell) const
+{
+    uint &ch = cell.Cell.Char.asInt;
+    if (ch == '\0')
+        ch = ' ';
+    else if (ch < ' ' || (0x7F <= ch && ch < 0x100)) {
+        // Translate from codepage as fallback.
+        ch = CpTranslator::toUtf8Int(ch);
+    } else if (ch == TScreenCell::wideCharTrail) {
+        ch = widePlaceholder;
+        cell.Cell.extraWidth = 0;
+    }
+}
+
+void FlushScreenAlgorithm::run()
+{
+    size = disp.size;
+    last = {-1, -1};
+    for (y = 0; y < size.y; ++y)
+    {
+        damage = disp.rowDamage[y];
+        newDamage = {INT_MAX, INT_MIN};
+        for (x = damage.begin; x <= damage.end; ++x)
+        {
+            getCell();
+            if (cell.dirty) {
+                pCell->dirty = 0;
+                if (wideCanSpill()) {
+                    if (__builtin_expect(cell.extraWidth, 0)) {
+                        handleWideCharSpill();
+                        continue;
+                    } else if (__builtin_expect(cell.Char.asInt == '\0', 0)) {
+                        handleNull();
+                        continue;
+                    }
+                }
+                writeCell();
+            }
+        }
+        if (wideCanSpill() && x < size.x) {
+            getCell();
+            if (__builtin_expect(cell.Char.asInt == '\0', 0))
+                handleNull();
+        }
+        disp.rowDamage[y] = newDamage;
+    }
+}
+
+void FlushScreenAlgorithm::writeCell()
+{
+//     Workaround for Ncurses bug
+//     if (y != last.y)
+//         lowlevelFlush();
+    if (y != last.y)
+        disp.lowlevelMoveCursor(x, y);
+    else if (x != last.x + 1)
+        disp.lowlevelMoveCursorX(x, y);
+
+    disp.lowlevelWriteChars(cell.Char.bytes, cell.Attr);
+    last = {x, y};
+}
+
+void FlushScreenAlgorithm::handleWideCharSpill()
+{
+    uchar width = cell.extraWidth;
+    if (x + width < size.x)
+        writeCell();
+    else {
+        // Replace with spaces if it would otherwise be printed on the next line.
+        cell.Char.asInt = ' ';
+        writeCell();
+        while (width-- && ++x < size.x) {
+            getCell();
+            if (cell.Char.asInt != '\0') {
+                --x;
+                return;
+            }
+            cell.Char.asInt = ' ';
+            writeCell();
+        }
+    }
+    // Check character does not spill on next cells.
+    while (width-- && ++x < size.x) {
+        getCell();
+        pCell->dirty = 0;
+        if (cell.Char.asInt != '\0') {
+            disp.lowlevelMoveCursorX(x, y);
+            writeCell();
+            return;
+        }
+    }
+    // Otherwise, skip placeholders. x now points to the last column occupied
+    // by the wide character in the screen.
+    last = {x, y};
+    if (x + 1 < size.x) {
+        // Anyway, print the next character just in case it is not dirty
+        // to avoid attribute spill.
+        ++x;
+        getCell();
+        pCell->dirty = 0;
+        writeCell();
+    }
+}
+
+void FlushScreenAlgorithm::handleNull()
+{
+    // Having '\0' in a cell implies wide characters can spill, as '\0'
+    // is otherwise discarded in ensurePrintable().
+    const auto Attr = cell.Attr;
+    if (x > 0) {
+        --x;
+        getCell();
+        // Check the character behind the placeholder.
+        if (cell.extraWidth) {
+            handleWideCharSpill();
+            return;
+        }
+        ++x;
+        getCell();
+    }
+    // Print successive placeholders as spaces.
+    do {
+        cell.Char.asInt = ' ';
+        writeCell();
+        ++x;
+        if (x < size.x) {
+            getCell();
+            pCell->dirty = 0;
+        } else
+            return;
+    } while (cell.Char.asInt == '\0');
+    // We now got a normal character.
+    if (x < damage.end) {
+        // Decrease for next iteration
+        --x;
+    } else if (Attr != cell.Attr) {
+        // Redraw a character that would otherwise not be printed,
+        // to prevent attribute spill.
+        writeCell();
+    }
 }
 

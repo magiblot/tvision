@@ -33,6 +33,17 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+#ifndef __BORLANDC__
+#include <cstdint>
+#else
+typedef char int8_t;
+typedef short int16_t;
+typedef long int32_t;
+typedef uchar uint8_t;
+typedef ushort uint16_t;
+typedef ulong uint32_t;
+#endif
+
 const char EOS = '\0';
 
 enum StreamableInit { streamableInit };

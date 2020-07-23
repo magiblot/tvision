@@ -105,13 +105,13 @@ void NcursesDisplay::setCaretSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChars(std::string_view chars, uchar attr)
+void NcursesDisplay::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
 {
     // Translate and apply text attributes.
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);
     // Print a single character, which might be multi-byte in UTF-8.
-    wprintw(stdscr, "%s", chars.data());
+    waddnstr(stdscr, (const char *) chars, 4);
     wattroff(stdscr, curses_attr);
 }
 
@@ -137,8 +137,8 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
     if (id == 0)
     {
         // Foreground color in the lower half, background in the upper half.
-        BIOSColor c {pairKey};
-        c.swapRedBlue();
+        TCellAttribs c {pairKey};
+        swapRedBlue(c);
         init_pair(++definedPairs, c.colors.fg, c.colors.bg);
         id = pairIdentifiers[pairKey] = definedPairs;
     }

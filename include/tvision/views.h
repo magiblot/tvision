@@ -315,6 +315,10 @@ class _FAR TRect;
 struct _FAR TEvent;
 class _FAR TGroup;
 
+#ifndef __BORLANDC__
+struct TScreenCell;
+#endif
+
 class TView : public TObject, public TStreamable
 {
 
@@ -353,9 +357,6 @@ public:
     virtual void draw();
     void drawView();
     Boolean exposed();
-#ifdef DEBUG_TVEXPOSD
-    Boolean exposedAsm( void *, int * );
-#endif
     Boolean focus();
     void hideCursor();
     void drawHide( TView *lastView );
@@ -423,6 +424,9 @@ public:
     void writeLine( short x, short y, short w, short h, const TDrawBuffer& b );
     void writeLine( short x, short y, short w, short h, const void _FAR *b );
     void writeStr( short x, short y, const char *str, uchar color );
+#ifndef __BORLANDC__
+    void writeBuf(  short x, short y, short w, short h, const TScreenCell* b );
+#endif
 
     TPoint size;
     ushort options;
@@ -456,6 +460,9 @@ private:
     void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState );
     static void writeView( write_args );
     void writeView( short x, short y, short count, const void _FAR* b );
+#ifndef __BORLANDC__
+    void writeView( short x, short y, short count, const TScreenCell* b );
+#endif
 
     TPoint resizeBalance;
 

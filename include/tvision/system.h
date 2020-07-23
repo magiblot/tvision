@@ -297,6 +297,54 @@ inline void TEvent::getMouseEvent()
 
 #endif  // Uses_TEventQueue
 
+#if !defined( __BORLANDC__ ) && !defined( __TScreenCell )
+#define __TScreenCell
+
+struct TCellAttribs
+{
+    union {
+        uchar asChar;
+        struct {
+            uchar
+                fg : 4,
+                bg : 4;
+        } colors;
+        struct {
+            uchar
+                fgBlue      : 1,
+                fgGreen     : 1,
+                fgRed       : 1,
+                fgBright    : 1,
+                bgBlue      : 1,
+                bgGreen     : 1,
+                bgRed       : 1,
+                bgBright    : 1;
+        } bits;
+    };
+    // We should use std::bit_cast instead of unions when upgrading to C++20.
+    operator uchar&() { return asChar; }
+    operator const uchar&() const { return asChar; }
+};
+
+struct TScreenCell
+{
+    union {
+        uint64_t asLong;
+        struct {
+            union {
+                uint8_t bytes[4]; // UTF-8
+                uint32_t asInt;
+            } Char;
+            TCellAttribs Attr;
+            uchar
+                extraWidth : 3;
+        } Cell;
+    };
+    static constexpr uint32_t wideCharTrail = -2U;
+};
+
+#endif // TScreenCell
+
 #if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen
 
@@ -366,7 +414,7 @@ public:
     static ushort _NEAR screenHeight;
     static Boolean _NEAR hiResScreen;
     static Boolean _NEAR checkSnow;
-    static ushort * _NEAR screenBuffer;
+    static ushort * _NEAR screenBuffer; // This is actually a TScreenCell* on Linux.
     static ushort _NEAR cursorLines;
     static Boolean _NEAR clearOnSuspend;
 

@@ -6,9 +6,8 @@
 
 #include <internal/platform.h>
 #include <internal/textattr.h>
-#include <internal/array2d.h>
-#include <vector>
 #include <set>
+#include <vector>
 #include <chrono>
 #include <string_view>
 
@@ -17,15 +16,18 @@ class ScreenCursor;
 class BufferedDisplay : public DisplayStrategy {
 
     friend class ScreenCursor;
+    friend struct FlushScreenAlgorithm;
 
     struct Range {
         int begin, end;
     };
 
-    Array2D<BufferCharInfo> buffer;
+    TPoint size;
+    std::vector<BufferCell> buffer;
     std::vector<Range> rowDamage;
     bool screenChanged;
 
+    const uint widePlaceholder;
     bool caretMoved;
     TPoint caretPosition;
 
@@ -40,11 +42,11 @@ class BufferedDisplay : public DisplayStrategy {
     static constexpr int defaultFPS = 60;
 
     void resetBuffer();
-    void setDirty(int x, BufferCharInfo &cinfo, Range &damage);
+    void setDirty(int x, BufferCell &cell, Range &damage);
+    void ensurePrintable(BufferCell &cell) const;
 
     void drawCursors();
     void undrawCursors();
-    std::string_view translateChar(char c);
 
     bool timeToFlush();
 
@@ -56,15 +58,50 @@ protected:
     void init();
 
     void setCaretPosition(int x, int y);
-    void screenWrite(int x, int y, ushort *buf, int len);
+    void screenWrite(int x, int y, TScreenCell *buf, int len);
     void flushScreen();
     void onScreenResize();
 
-    virtual void lowlevelWriteChars(std::string_view chars, uchar attr) = 0; // 'chars' is null-terminated
+    virtual void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) = 0; // 'chars' is null-terminated
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelFlush() = 0;
 
 };
+
+struct FlushScreenAlgorithm {
+
+    BufferedDisplay &disp;
+    TPoint size;
+    TPoint last;
+    int x, y;
+    decltype(BufferCell::Cell) cell, *pCell;
+    BufferedDisplay::Range damage, newDamage;
+
+    FlushScreenAlgorithm(BufferedDisplay &disp_) :
+        disp(disp_)
+    {
+    }
+
+    void getCell();
+    bool wideCanSpill() const;
+
+    void run();
+    void writeCell();
+    void handleWideCharSpill();
+    void handleNull();
+
+};
+
+inline void FlushScreenAlgorithm::getCell()
+{
+    pCell = &disp.buffer[y*size.x + x].Cell;
+    cell = *pCell;
+}
+
+inline bool FlushScreenAlgorithm::wideCanSpill() const
+{
+    return disp.widePlaceholder == '\0';
+}
 
 #endif
