@@ -196,6 +196,7 @@ struct KeyDownEvent
         CharScanType charScan;
         };
     ulong controlKeyState;
+    char text[4];
 };
 
 struct MessageEvent

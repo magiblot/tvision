@@ -115,7 +115,7 @@ bool NcursesInput::getEvent(TEvent &ev)
         if (Alt)
             setAltModifier(ev);
 
-        return ev.keyDown.keyCode != kbNoKey;
+        return ev.keyDown.keyCode != kbNoKey || *(uint32_t *) ev.keyDown.text;
     }
     return false;
 }
@@ -138,14 +138,11 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
 {
     // Read any possible remaining bytes.
     readUtf8Char(keys, num_keys);
-    // Reserve enough space for a zero-terminated char array.
-    char Utf8str[5];
     for (int i = 0; i < num_keys; ++i)
-        Utf8str[i] = (char) keys[i];
-    Utf8str[num_keys] = '\0';
+        ev.keyDown.text[i] = (char) keys[i];
     // If we are lucky enough, the character will be representable in
     // the active codepage.
-    ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({Utf8str, size_t(num_keys)});
+    ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({ev.keyDown.text, size_t(num_keys)});
 }
 
 void NcursesInput::setAltModifier(TEvent &ev)
