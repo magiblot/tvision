@@ -42,6 +42,10 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
         ushort keyCode = keyCodeWithModifiers[ev.keyDown.controlKeyState][ev.keyDown.keyCode];
         if (keyCode)
             ev.keyDown.keyCode = keyCode;
+        // Do not set the Ctrl flag on these, as that would alter their meaning.
+        // Note that there already exist kbCtrlBack and kbCtrlEnter.
+        else if (ev.keyDown.keyCode == kbBack || ev.keyDown.keyCode == kbTab || ev.keyDown.keyCode == kbEnter)
+            ev.keyDown.controlKeyState &= ~kbCtrlShift;
         return true;
     }
     return false;
