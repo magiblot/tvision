@@ -43,3 +43,7 @@ target_link_libraries(hello ${LIBS})
 target_link_libraries(tvedit ${LIBS})
 target_link_libraries(tvdemo ${LIBS})
 target_link_libraries(tvdir ${LIBS})
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    target_precompile_headers(tvision PRIVATE "include/tvision/tv.h")
+endif()
