@@ -59,7 +59,7 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
     path_dos2unix(path);
 }
 
-static bool CpComponent(char* dstP, const char* startP, const char* endP, size_t MAX)
+static bool CopyComponent(char* dstP, const char* startP, const char* endP, size_t MAX)
 {
     // Copies a path component of length endP-startP into dstP.
     // If the component is empty, returns false and does nothing.
@@ -76,10 +76,14 @@ static bool CpComponent(char* dstP, const char* startP, const char* endP, size_t
 int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP)
 {
     int flags = 0;
-    driveP && (*driveP = 0);
-    dirP && (*dirP = 0);
-    nameP && (*nameP = 0);
-    extP && (*extP = 0);
+    if (driveP)
+        memset(driveP, 0, MAXDRIVE);
+    if (dirP)
+        memset(dirP, 0, MAXDIR);
+    if (nameP)
+        memset(nameP, 0, MAXFILE);
+    if (extP)
+        memset(extP, 0, MAXEXT);
     if (pathP && *pathP)
     {
         size_t len = strlen(pathP);
@@ -127,10 +131,10 @@ int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP
         if (lastDotP == pathEnd-1 && lastDotP - firstDotP < 2 && firstDotP == dirEnd)
             dirEnd = nameEnd = pathEnd;
         // Copy components and set flags.
-        CpComponent(driveP, pathP, driveEnd, MAXDRIVE) && (flags |= DRIVE);
-        CpComponent(dirP, driveEnd, dirEnd, MAXDIR) && (flags |= DIRECTORY);
-        CpComponent(nameP, dirEnd, nameEnd, MAXFILE) && (flags |= FILENAME);
-        CpComponent(extP, nameEnd, pathEnd, MAXEXT) && (flags |= EXTENSION);
+        CopyComponent(driveP, pathP, driveEnd, MAXDRIVE) && (flags |= DRIVE);
+        CopyComponent(dirP, driveEnd, dirEnd, MAXDIR) && (flags |= DIRECTORY);
+        CopyComponent(nameP, dirEnd, nameEnd, MAXFILE) && (flags |= FILENAME);
+        CopyComponent(extP, nameEnd, pathEnd, MAXEXT) && (flags |= EXTENSION);
     }
     return flags;
 }
