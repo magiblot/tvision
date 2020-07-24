@@ -181,16 +181,7 @@ void FlushScreenAlgorithm::run()
             getCell();
             if (cell.dirty) {
                 pCell->dirty = 0;
-                if (wideCanSpill()) {
-                    if (__builtin_expect(cell.extraWidth, 0)) {
-                        handleWideCharSpill();
-                        continue;
-                    } else if (__builtin_expect(cell.Char.asInt == '\0', 0)) {
-                        handleNull();
-                        continue;
-                    }
-                }
-                writeCell();
+                processCell();
             }
         }
         if (wideCanSpill() && x < size.x) {
@@ -200,6 +191,20 @@ void FlushScreenAlgorithm::run()
         }
         disp.rowDamage[y] = newDamage;
     }
+}
+
+void FlushScreenAlgorithm::processCell()
+{
+    if (wideCanSpill()) {
+        if (__builtin_expect(cell.extraWidth, 0)) {
+            handleWideCharSpill();
+            return;
+        } else if (__builtin_expect(cell.Char.asInt == '\0', 0)) {
+            handleNull();
+            return;
+        }
+    }
+    writeCell();
 }
 
 void FlushScreenAlgorithm::writeCell()
@@ -219,13 +224,14 @@ void FlushScreenAlgorithm::writeCell()
 void FlushScreenAlgorithm::handleWideCharSpill()
 {
     uchar width = cell.extraWidth;
+    const auto Attr = cell.Attr;
     if (x + width < size.x)
         writeCell();
     else {
         // Replace with spaces if it would otherwise be printed on the next line.
         cell.Char.asInt = ' ';
         writeCell();
-        while (width-- && ++x < size.x) {
+        while (--width && ++x < size.x) {
             getCell();
             if (cell.Char.asInt != '\0') {
                 --x;
@@ -253,8 +259,11 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         // to avoid attribute spill.
         ++x;
         getCell();
-        pCell->dirty = 0;
-        writeCell();
+        if (Attr != cell.Attr) {
+            pCell->dirty = 0;
+            processCell();
+        } else
+            --x;
     }
 }
 
@@ -292,7 +301,7 @@ void FlushScreenAlgorithm::handleNull()
     } else if (Attr != cell.Attr) {
         // Redraw a character that would otherwise not be printed,
         // to prevent attribute spill.
-        writeCell();
+        processCell();
     }
 }
 

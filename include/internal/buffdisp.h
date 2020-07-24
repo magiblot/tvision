@@ -87,6 +87,7 @@ struct FlushScreenAlgorithm {
     bool wideCanSpill() const;
 
     void run();
+    void processCell();
     void writeCell();
     void handleWideCharSpill();
     void handleNull();
