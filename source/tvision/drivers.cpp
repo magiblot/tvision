@@ -45,6 +45,10 @@
 /*                                                                        */
 /*      count   - number of character/attribute pairs to move             */
 /*                                                                        */
+/*  Comments:                                                             */
+/*                                                                        */
+/*      'source' is actually treated like a string...                     */
+/*                                                                        */
 /*------------------------------------------------------------------------*/
 
 void TDrawBuffer::moveBuf( ushort indent, const void _FAR *source,
@@ -91,7 +95,7 @@ I   POP     DS
 
 __5:
         ;
-#else
+#elif defined(__BORLANDC__)
 
     register ushort *dest = &data[indent];
     ushort *limit = &data[dataLength];
@@ -107,8 +111,44 @@ __5:
         while (dest < limit && count--)
             *(uchar *)dest++ = *s++;
 
+#else
+    return moveStrEx(indent, std::string_view {(const char*) source, count}, attr);
+#if 0
+    TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
+    uchar *s = (uchar *) source;
+    if (attr)
+        for (; dest < limit && count; --count, ++s, ++dest)
+        {
+            TScreenCell c {};
+            c.Cell.Char.asInt = (uchar) *s;
+            c.Cell.Attr.asChar = (uchar) attr;
+            *dest = c;
+        }
+    else
+        while (dest < limit && count--)
+            *dest++ = TScreenCell::fromPair(*s++);
+#endif
 #endif
 }
+
+#ifndef __BORLANDC__
+void TDrawBuffer::moveBufEx(ushort indent, TScreenCell *source, ushort attr, ushort count)
+{
+    TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
+
+    if (attr)
+        for (; dest < limit && count; --count, ++source, ++dest)
+        {
+            TScreenCell c = *source;
+            c.Cell.Attr.asChar = (uchar) attr;
+            *dest = c;
+        }
+    else
+        memcpy(dest, source, (limit - dest)*sizeof(TScreenCell));
+}
+#endif
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
@@ -163,7 +203,7 @@ I   LOOP    __2
 __4:
     ;
 
-#else
+#elif defined(__BORLANDC__)
     register ushort *dest = &data[indent];
     ushort *limit = &data[dataLength];
 
@@ -177,6 +217,30 @@ __4:
         while (count--)
             *(uchar *)dest++ = c;
 
+#else
+    TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
+
+    if (attr)
+        for (; dest < limit && count; --count, ++dest)
+        {
+            auto cell = dest->Cell;
+            if (c)
+            {
+                cell.Char.asInt = (uchar) c;
+                cell.extraWidth = 0;
+            }
+            cell.Attr.asChar = (uchar) attr;
+            dest->Cell = cell;
+        }
+    else
+        while (dest < limit && count--)
+        {
+            auto cell = dest->Cell;
+            cell.Char.asInt = (uchar) c;
+            cell.extraWidth = 0;
+            (*dest++).Cell = cell;
+        }
 #endif
 }
 
@@ -231,7 +295,7 @@ __3:
 
 I   POP     DS
 
-#else
+#elif defined(__BORLANDC__)
     register ushort *dest = &data[indent];
     ushort *limit = &data[dataLength];
     int toggle;
@@ -251,8 +315,55 @@ I   POP     DS
             dest++;
             }
         }
+#else
+    return moveCStrEx(indent, str, attrs);
+#if 0
+    TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
+    uchar c;
+    int toggle = 1;
+    uchar curAttr = ((uchar *)&attrs)[0];
+
+    for (; dest < limit && (c = *str); ++str)
+    {
+        if (c == '~')
+        {
+            curAttr = ((uchar *) &attrs)[toggle];
+            toggle = 1 - toggle;
+        }
+        else
+        {
+            TScreenCell cell {};
+            cell.Cell.Char.asInt = (uchar) c;
+            cell.Cell.Attr.asChar = (uchar) curAttr;
+            *dest++ = cell;
+        }
+    }
+#endif
 #endif
 }
+
+#ifndef __BORLANDC__
+void TDrawBuffer::moveCStrEx( ushort indent, std::string_view str, ushort attrs )
+{
+    size_t i = indent, j = 0;
+    int toggle = 1;
+    uchar curAttr = ((uchar *)&attrs)[0];
+
+    while (i < dataLength && j < str.size())
+        if (str[j] == '~')
+        {
+            curAttr = ((uchar *) &attrs)[toggle];
+            toggle = 1 - toggle;
+            ++j;
+        }
+        else
+        {
+            data[i].Cell.Attr.asChar = curAttr;
+            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+        }
+}
+#endif
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
@@ -306,7 +417,7 @@ __3:
 
 I   POP     DS
 
-#else
+#elif defined(__BORLANDC__)
 
     register ushort *dest = &data[indent];
     ushort *limit = &data[dataLength];
@@ -321,15 +432,56 @@ I   POP     DS
         else
             while (dest < limit && *str)
                 *(uchar *)dest++ = *str++;
+#else
+    return moveStrEx(indent, str, attr);
+#if 0
+    TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
+    uchar c;
+
+    if (attr)
+        for (; dest < limit && (c = *str); ++str, ++dest)
+        {
+            TScreenCell cell {};
+            cell.Cell.Char.asInt = (uchar) c;
+            cell.Cell.Attr.asChar = (uchar) attr;
+            *dest = cell;
+        }
+    else
+        while (dest < limit && *str)
+        {
+            auto cell = dest->Cell;
+            cell.Char.asInt = (uchar) *str++;
+            cell.extraWidth = 0;
+            (*dest++).Cell = cell;;
+        }
+#endif
 #endif
 }
+
+#ifndef __BORLANDC__
+void TDrawBuffer::moveStrEx( ushort indent, std::string_view str, ushort attr )
+{
+    size_t i = indent, j = 0;
+
+    if (attr)
+        while (i < dataLength && j < str.size())
+        {
+            data[i].Cell.Attr.asChar = (uchar) attr;
+            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+        }
+    else
+        while (i < dataLength && j < str.size())
+            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+}
+#endif
 
 #ifdef __FLAT__
 TDrawBuffer::TDrawBuffer() {
     /* This makes it possible to create TDrawBuffers for big screen widths.
      * This does not work nor is necessary in non-Flat builds. */
     dataLength = TScreen::screenWidth;
-    data = new ushort[dataLength];
+    data = new data_t[dataLength]();
 }
 
 TDrawBuffer::~TDrawBuffer() {

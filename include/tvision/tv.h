@@ -705,6 +705,10 @@
 #include <tvision/app.h>
 #endif
 
+#ifndef __BORLANDC__
+#include <tvision/unstable/unicode.h>
+#endif
+
 #pragma option -Vo.
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.

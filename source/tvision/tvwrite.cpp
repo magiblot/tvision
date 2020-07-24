@@ -353,6 +353,16 @@ void TView::writeLine( short x, short y, short w, short h, const void _FAR *b )
     }
 }
 
+#ifndef __BORLANDC__
+void TView::writeLine( short x, short y, short w, short h, const TScreenCell *b )
+{
+    while (h-- > 0)
+    {
+        writeView(x, y++, w, b);
+    }
+}
+#endif
+
 void TView::writeStr( short x, short y, const char *str, uchar color )
 {
     if (str != 0)

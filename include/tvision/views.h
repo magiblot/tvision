@@ -425,7 +425,8 @@ public:
     void writeLine( short x, short y, short w, short h, const void _FAR *b );
     void writeStr( short x, short y, const char *str, uchar color );
 #ifndef __BORLANDC__
-    void writeBuf(  short x, short y, short w, short h, const TScreenCell* b );
+    void writeBuf(  short x, short y, short w, short h, const TScreenCell *b );
+    void writeLine( short x, short y, short w, short h, const TScreenCell *b );
 #endif
 
     TPoint size;

@@ -74,6 +74,9 @@ const ushort arrowCodes[] =
 
 int cstrlen( const char *s )
 {
+#ifndef __BORLANDC__
+    return cstrlen(std::string_view {s});
+#else
     int len = 0;
     while( *s != EOS )
         {
@@ -81,5 +84,20 @@ int cstrlen( const char *s )
             len++;
         }
     return len;
+#endif
 }
 
+#ifndef __BORLANDC__
+int cstrlen( std::string_view s )
+{
+    std::mbstate_t state = {};
+    size_t i = 0, width = 0;
+    while (i < s.size()) {
+        if (s[i] != '~')
+            utf8next(s.substr(i, s.size() - i), i, width, state);
+        else
+            ++i;
+    }
+    return width;
+}
+#endif

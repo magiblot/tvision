@@ -17,6 +17,9 @@
 #define __UTIL_H
 
 #include <stddef.h>
+#ifndef __BORLANDC__
+#include <string_view>
+#endif
 
 inline int min( int a, int b )
 {
@@ -42,6 +45,9 @@ const char *historyStr( uchar id, int index );
 void historyAdd( uchar id, const char * );
 
 int cstrlen( const char * );
+#ifndef __BORLANDC__
+int cstrlen(std::string_view s);
+#endif
 
 class _FAR TView;
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr );

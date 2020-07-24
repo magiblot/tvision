@@ -22,12 +22,21 @@
 #if defined( Uses_TDrawBuffer ) && !defined( __TDrawBuffer )
 #define __TDrawBuffer
 
+#ifndef __BORLANDC__
+#include <string_view>
+#endif
+
 class TDrawBuffer
 {
 
     friend class TSystemError;
     friend class TView;
     friend void genRefs();
+#ifdef __BORLANDC__
+    typedef ushort data_t;
+#else
+    typedef TScreenCell data_t;
+#endif
 
 public:
 
@@ -41,6 +50,14 @@ public:
     void putChar( ushort indent, ushort c );
     size_t length();
 
+#ifndef __BORLANDC__
+    // Multibyte compatible operations
+
+    void moveStrEx( ushort indent, std::string_view str, ushort attrs );
+    void moveCStrEx( ushort indent, std::string_view str, ushort attrs );
+    void moveBufEx( ushort indent, TScreenCell *source, ushort attr, ushort count );
+#endif
+
 #ifdef __FLAT__
     TDrawBuffer();
     ~TDrawBuffer();
@@ -49,10 +66,10 @@ public:
 protected:
 
 #ifdef __FLAT__
-    ushort *data;
     size_t dataLength;
+    data_t *data;
 #else
-    ushort data[maxViewWidth];
+    data_t data[maxViewWidth];
 #endif
 
 };
@@ -65,7 +82,11 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 #ifdef __FLAT__
     if (indent < dataLength)
 #endif
+#ifdef __BORLANDC__
     hiByte(data[indent]) = uchar(attr);
+#else
+    data[indent].Cell.Attr.asChar = uchar(attr);
+#endif
 }
 
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
@@ -73,7 +94,12 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 #ifdef __FLAT__
     if (indent < dataLength)
 #endif
+#ifdef __BORLANDC__
     loByte(data[indent]) = uchar(c);
+#else
+    data[indent].Cell.Char.asInt = uchar(c);
+    data[indent].Cell.extraWidth = 0;
+#endif
 }
 
 inline size_t TDrawBuffer::length()
