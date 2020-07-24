@@ -103,29 +103,31 @@ inline void utf8next(std::string_view src, size_t &bytes, size_t &width)
     return utf8next(src, bytes, width, state);
 }
 
-inline void utf8wseek(std::string_view text, size_t &index, int count, std::mbstate_t &state)
-// Seeks a string by an amount of display columns.
+inline void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count, std::mbstate_t &state)
+// Seeks a string by an amount of display columns. If that amount overlaps a multi-column
+// character, 'index' is left pointing to the next character and 'remainder' is set to
+// the number of extra seeked columns.
 //
 // * index (input and output parameter): start position.
-// * count: number of columns.
+// * remainder (output parameter): number of columns in the middle of a wide character.
+//   ATTENTION: 'remainder' must be initialized by the caller.
+// * count: number of columns to seek.
 // * state: check the overload below as you probably don't need this.
 {
-    while (count > 0 && index < text.size()) {
-        size_t width = 0;
-        utf8next(text.substr(index, text.size() - index), index, width, state);
-        count -= width;
+    if (count > 0) {
+        while (count > 0 && index < text.size()) {
+            size_t width = 0;
+            utf8next(text.substr(index, text.size() - index), index, width, state);
+            count -= width;
+        }
+        remainder = -count;
     }
 }
 
-inline void utf8wseek(std::string_view text, size_t &index, int count)
-// Seeks a string by a positive amount of display columns.
-//
-// * index (input and output parameter): start position.
-// * count: number of columns.
-// * state: check the overload below as you probably don't need this.
+inline void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count)
 {
     std::mbstate_t state {};
-    utf8wseek(text, index, count, state);
+    utf8wseek(text, index, remainder, count, state);
 }
 
 #endif
