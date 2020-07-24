@@ -44,7 +44,6 @@
 
 #ifndef __BORLANDC__
 class PlatformStrategy;
-#include <tvision/tv.h> // for TScreenCell
 #endif
 
 struct TEvent;
