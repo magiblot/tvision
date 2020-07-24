@@ -13,7 +13,7 @@ BufferedDisplay *BufferedDisplay::instance = 0;
 std::set<ScreenCursor*> BufferedDisplay::cursors;
 
 BufferedDisplay::BufferedDisplay() :
-    widePlaceholder(THardwareInfo::isLinuxConsole(1) ? ' ' : '\0')
+    widePlaceholder('\0')
 {
     instance = this;
 }
