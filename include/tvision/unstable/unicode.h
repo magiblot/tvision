@@ -31,6 +31,7 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
     if (n) {
         auto &dst = cell->Cell.Char.asInt;
         auto &attr = cell->Cell.Attr;
+        cell->Cell.extraWidth = 0;
         wchar_t wc;
         int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
         if (len <= 1) {
