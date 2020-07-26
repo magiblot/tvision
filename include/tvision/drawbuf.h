@@ -82,11 +82,13 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 #ifdef __FLAT__
     if (indent < dataLength)
 #endif
+    {
 #ifdef __BORLANDC__
-    hiByte(data[indent]) = uchar(attr);
+        hiByte(data[indent]) = uchar(attr);
 #else
-    data[indent].Cell.Attr.asChar = uchar(attr);
+        data[indent].Cell.Attr.asChar = uchar(attr);
 #endif
+    }
 }
 
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
@@ -94,12 +96,14 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 #ifdef __FLAT__
     if (indent < dataLength)
 #endif
+    {
 #ifdef __BORLANDC__
-    loByte(data[indent]) = uchar(c);
+        loByte(data[indent]) = uchar(c);
 #else
-    data[indent].Cell.Char.asInt = uchar(c);
-    data[indent].Cell.extraWidth = 0;
+        data[indent].Cell.Char.asInt = uchar(c);
+        data[indent].Cell.extraWidth = 0;
 #endif
+    }
 }
 
 inline size_t TDrawBuffer::length()

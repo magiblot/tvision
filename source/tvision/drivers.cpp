@@ -478,9 +478,10 @@ void TDrawBuffer::moveStrEx( ushort indent, std::string_view str, ushort attr )
 
 #ifdef __FLAT__
 TDrawBuffer::TDrawBuffer() {
-    /* This makes it possible to create TDrawBuffers for big screen widths.
-     * This does not work nor is necessary in non-Flat builds. */
-    dataLength = TScreen::screenWidth;
+    // This makes it possible to create TDrawBuffers for big screen widths.
+    // This does not work nor is necessary in non-Flat builds.
+    // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
+    dataLength = max(TScreen::screenWidth, TScreen::screenHeight);
     data = new data_t[dataLength]();
 }
 
