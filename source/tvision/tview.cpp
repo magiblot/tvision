@@ -97,6 +97,8 @@ static int balancedRange( int val, int min, int max, int &balance)
     // Fit val into the range, but keep track of the remainders,
     // and apply them back when possible. This allows views to recover
     // their original sizes.
+    if( min > max )
+        min = max;
     if( val < min )
         {
         balance += val - min;
