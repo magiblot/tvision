@@ -48,7 +48,7 @@ public:
 
     void putAttribute( ushort indent, ushort attr );
     void putChar( ushort indent, ushort c );
-    size_t length();
+    size_t length() const;
 
 #ifndef __BORLANDC__
     // Multibyte compatible operations
@@ -106,7 +106,7 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
     }
 }
 
-inline size_t TDrawBuffer::length()
+inline size_t TDrawBuffer::length() const
 {
 #ifdef __FLAT__
     return dataLength;
