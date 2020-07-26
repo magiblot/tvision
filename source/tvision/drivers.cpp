@@ -24,6 +24,7 @@
 #endif  // __DOS_H
 
 #ifndef __BORLANDC__
+#include <cstring>
 #define register
 #endif
 
@@ -482,7 +483,11 @@ TDrawBuffer::TDrawBuffer() {
     // This does not work nor is necessary in non-Flat builds.
     // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
     dataLength = max(TScreen::screenWidth, TScreen::screenHeight);
-    data = new data_t[dataLength]();
+    data = new data_t[dataLength];
+#ifndef __BORLANDC__
+    // We need this as the TScreenCell struct has unused bits.
+    memset(data, 0, dataLength*sizeof(data_t));
+#endif
 }
 
 TDrawBuffer::~TDrawBuffer() {
