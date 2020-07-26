@@ -84,6 +84,8 @@ void TView::blockCursor()
 
 inline int range( int val, int min, int max )
 {
+    if( min > max )
+        min = max;
     if( val < min )
         return min;
     else if( val > max )
@@ -554,8 +556,6 @@ void TView::keyEvent( TEvent& event )
        getEvent(event);
        } while( event.what != evKeyDown );
 }
-
-#define range(Val, Min, Max)    (((Val < Min) ? Min : ((Val > Max) ? Max : Val)))
 
 void TView::locate( TRect& bounds )
 {
