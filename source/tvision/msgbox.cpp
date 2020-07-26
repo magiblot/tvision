@@ -118,9 +118,14 @@ ushort messageBoxRect( const TRect &r,
     return messageBoxRect( r, msg, aOptions );
 }
 
-static TRect makeRect()
+static TRect makeRect(const char *text)
 {
     TRect r( 0, 0, 40, 9 );
+
+    int len = strlen(text);
+    while (len > (r.b.x - 7)*(r.b.y - 6))
+        ++r.b.y;
+
     r.move((TProgram::deskTop->size.x - r.b.x) / 2,
            (TProgram::deskTop->size.y - r.b.y) / 2);
     return r;
@@ -128,7 +133,7 @@ static TRect makeRect()
 
 ushort messageBox( const char *msg, ushort aOptions )
 {
-    return messageBoxRect( makeRect(), msg, aOptions );
+    return messageBoxRect( makeRect(msg), msg, aOptions );
 }
 
 ushort messageBox( unsigned aOptions, const char *fmt, ... )
@@ -141,7 +146,7 @@ ushort messageBox( unsigned aOptions, const char *fmt, ... )
 
     va_end( argptr );
 
-    return messageBoxRect( makeRect(), msg, aOptions );
+    return messageBoxRect( makeRect(msg), msg, aOptions );
 }
 
 ushort inputBox( const char *Title, const char *aLabel, char *s, uchar limit )
