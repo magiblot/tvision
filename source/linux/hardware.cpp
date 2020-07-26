@@ -11,7 +11,7 @@
 #include <internal/linuxcon.h>
 #include <internal/sighandl.h>
 #include <internal/getenv.h>
-#include <string>
+#include <string_view>
 #include <sys/ioctl.h>
 #include <chrono>
 using std::chrono::duration_cast;
@@ -81,10 +81,10 @@ void THardwareInfo::setUpConsole()
     if (!platf)
     {
         DisplayStrategy *disp;
-        if (getEnv<std::string>("TVISION_DISPLAY") == "ansi")
-            disp = new AnsiDisplay<NcursesDisplay>();
-        else
+        if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();
+        else
+            disp = new AnsiDisplay<NcursesDisplay>();
         if (isLinuxConsole(0))
             platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
         else
