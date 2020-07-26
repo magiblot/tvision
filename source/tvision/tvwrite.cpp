@@ -30,6 +30,7 @@
 
 extern TPoint shadowSize;
 extern uchar shadowAttr;
+extern uchar shadowAttrInv;
 
 struct TVWrite {
 
@@ -248,6 +249,7 @@ void TVWrite::copyShort( ushort *dst, const ushort *src )
         for (i = 0; i < Count - X; ++i)
         {
             loByte(ColorChar) = src[i];
+            hiByte(ColorChar) = src[i + 1] & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = ColorChar;
         }
 #undef loByte
@@ -269,7 +271,7 @@ void TVWrite::copyShort2CharInfo( ushort *dst, const ushort *src )
         for (i = 0; i < 2*(Count - X); i += 2)
         {
             dst[i] = ((const uchar *) src)[i];
-            dst[i + 1] = shadowAttr;
+            dst[i + 1] = ((const uchar *) src)[i + 1] & 0xF0 ? shadowAttr : shadowAttrInv;
         }
 }
 
@@ -283,7 +285,7 @@ void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
         for (i = 0; i < Count - X; ++i)
         {
             auto c = src[i];
-            c.Cell.Attr.asChar = shadowAttr;
+            c.Cell.Attr.asChar = c.Cell.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = c;
         }
 }
@@ -306,7 +308,7 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         {
             TScreenCell c {0};
             c.Cell.Char.asInt = CpTranslator::toUtf8Int(src[i]);
-            c.Cell.Attr.asChar = shadowAttr;
+            c.Cell.Attr.asChar = c.Cell.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = c;
         }
 }
