@@ -499,13 +499,13 @@ inline opstream& operator << ( opstream& os, TView* cl )
 inline void TView::writeBuf( short x, short y, short w, short h,
                              const TDrawBuffer& b )
 {
-    writeBuf( x, y, w, h, b.data );
+    writeBuf( x, y, min(w, b.length() - x), h, b.data );
 }
 
 inline void TView::writeLine( short x, short y, short w, short h,
                               const TDrawBuffer& b )
 {
-    writeLine( x, y, w, h, b.data );
+    writeLine( x, y, min(w, b.length() - x), h, b.data );
 }
 
 #endif  // Uses_TView
