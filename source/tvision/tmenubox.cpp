@@ -37,7 +37,7 @@ static TRect getRect( const TRect& bounds, TMenu *aMenu )
                     l += 3;
                 else
                     if( p->param != 0 )
-                        l += cstrlen(p->param) + 2;
+                        l += strwidth(p->param) + 2;
                 w = max( l, w );
                 }
             h++;
@@ -110,7 +110,7 @@ void TMenuBox::draw()
                 if( p->command == 0 )
                     b.putChar( size.x-4, 16 );
                 else if( p->param != 0 )
-                    b.moveStr( size.x-3-strlen(p->param),
+                    b.moveStr( size.x-3-strwidth(p->param),
                                p->param,
                                color);
                 }

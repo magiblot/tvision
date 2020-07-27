@@ -87,7 +87,7 @@ void TFrame::draw()
             l = max( l, 0 );
             i = (width - l) >> 1;
             b.putChar( i-1, ' ' );
-            b.moveBuf( i, title, cTitle, l );
+            b.moveStr( i, title, cTitle, l );
             b.putChar( i+l, ' ' );
             }
         }

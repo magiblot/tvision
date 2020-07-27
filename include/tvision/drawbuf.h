@@ -42,6 +42,7 @@ public:
 
     void moveChar( ushort indent, char c, ushort attr, ushort count );
     void moveStr( ushort indent, const char _FAR *str, ushort attrs );
+    void moveStr( ushort indent, const char _FAR *str, ushort attr, ushort width, ushort begin=0 );
     void moveCStr( ushort indent, const char _FAR *str, ushort attrs );
     void moveBuf( ushort indent, const void _FAR *source,
                   ushort attr, ushort count );
@@ -52,10 +53,10 @@ public:
 
 #ifndef __BORLANDC__
     // Multibyte compatible operations
-
-    void moveStrEx( ushort indent, std::string_view str, ushort attrs );
-    void moveCStrEx( ushort indent, std::string_view str, ushort attrs );
-    void moveBufEx( ushort indent, TScreenCell *source, ushort attr, ushort count );
+    void moveStr( ushort indent, std::string_view str, ushort attrs );
+    void moveStr( ushort indent, std::string_view str, ushort attr, ushort width, ushort begin=0 );
+    void moveCStr( ushort indent, std::string_view str, ushort attrs );
+    void moveBuf( ushort indent, TScreenCell *source, ushort attr, ushort count );
 #endif
 
 #ifdef __FLAT__

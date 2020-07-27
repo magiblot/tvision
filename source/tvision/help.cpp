@@ -94,8 +94,6 @@ void THelpViewer::draw()
     TDrawBuffer b;
     size_t bufLength = b.length();
     char *line = (char*) alloca(bufLength);
-    char *buffer = (char*) alloca(bufLength);
-    char *bufPtr;
     int i, j, l;
     int keyCount;
     ushort normal, keyword, selKeyword, c;
@@ -122,13 +120,11 @@ void THelpViewer::draw()
     for (i = 1; i <= size.y; ++i)
         {
         b.moveChar(0, ' ', normal, size.x);
-        strcpy(line, topic->getLine(i + delta.y, buffer, bufLength));
-        if (strlen(line) > delta.x)
+        memset(line, 0, bufLength);
+        topic->getLine(i + delta.y, line, bufLength-1);
+        if (strwidth(line) > delta.x)
             {
-            bufPtr = line + delta.x;
-            strncpy(buffer, bufPtr, size.x);
-            buffer[size.x] = 0;
-            b.moveStr(0, buffer, normal);
+            b.moveStr(0, line, normal, size.x, delta.x);
             }
         else
             b.moveStr(0, "", normal);

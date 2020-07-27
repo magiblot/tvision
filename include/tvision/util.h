@@ -45,8 +45,10 @@ const char *historyStr( uchar id, int index );
 void historyAdd( uchar id, const char * );
 
 int cstrlen( const char * );
+int strwidth( const char * );
 #ifndef __BORLANDC__
-int cstrlen(std::string_view s);
+int cstrlen( std::string_view s );
+int strwidth( std::string_view s );
 #endif
 
 class _FAR TView;
@@ -67,7 +69,7 @@ void getCurDir( char *dir );
 
 Boolean isWild( const char *f );
 
-char *strnzcpy( char *dest, const char *src, size_t n ); // misc.cpp
+char *strnzcpy( char *dest, const char *src, size_t n );
 
 unsigned int fast_utoa( uint value, char *buffer );
 

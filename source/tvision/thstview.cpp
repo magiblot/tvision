@@ -90,7 +90,7 @@ int THistoryViewer::historyWidth()
     int count = historyCount( historyId );
     for( int i = 0; i < count; i++ )
         {
-        int T = strlen( historyStr( historyId, i ) );
+        int T = strwidth( historyStr( historyId, i ) );
         width = max( width, T );
         }
     return width;

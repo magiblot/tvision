@@ -74,9 +74,7 @@ const ushort arrowCodes[] =
 
 int cstrlen( const char *s )
 {
-#ifndef __BORLANDC__
-    return cstrlen(std::string_view {s});
-#else
+#ifdef __BORLANDC__
     int len = 0;
     while( *s != EOS )
         {
@@ -84,6 +82,8 @@ int cstrlen( const char *s )
             len++;
         }
     return len;
+#else
+    return cstrlen(std::string_view {s});
 #endif
 }
 
@@ -98,6 +98,40 @@ int cstrlen( std::string_view s )
         else
             ++i;
     }
+    return width;
+}
+#endif
+
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  strwidth                                                              */
+/*                                                                        */
+/*  argument:                                                             */
+/*                                                                        */
+/*      s       - pointer to 0-terminated string                          */
+/*                                                                        */
+/*  returns                                                               */
+/*                                                                        */
+/*      displayed length of string.                                       */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+int strwidth( const char *s )
+{
+#ifdef __BORLANDC__
+    return strlen(s);
+#else
+    return strwidth(std::string_view {s});
+#endif
+}
+
+#ifndef __BORLANDC__
+int strwidth( std::string_view s )
+{
+    std::mbstate_t state = {};
+    size_t i = 0, width = 0;
+    while (i < s.size())
+        utf8next(s.substr(i, s.size() - i), i, width, state);
     return width;
 }
 #endif

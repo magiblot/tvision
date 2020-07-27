@@ -77,7 +77,7 @@ Boolean TInputLine::canScroll( int delta )
         return Boolean( firstPos > 0 );
     else
         if( delta > 0 )
-            return Boolean( strlen(data) - firstPos + 2 > size.x );
+            return Boolean( strwidth(data) - firstPos + 2 > size.x );
         else
             return False;
 }
@@ -103,10 +103,7 @@ void TInputLine::draw()
     b.moveChar( 0, ' ', color, size.x );
     if( size.x > 1 )
         {
-        char buf[256];
-        strncpy( buf, data+firstPos, size.x - 2 );
-        buf[size.x - 2 ] = EOS;
-        b.moveStr( 1, buf, color );
+        b.moveStr( 1, data, color, size.x - 1, firstPos);
         }
     if( canScroll(1) )
         b.moveChar( size.x-1, rightArrow, getColor(4), 1 );
@@ -317,8 +314,6 @@ void TInputLine::handleEvent( TEvent& event )
                             {
                             strcpy( data+curPos-1, data+curPos );
                             curPos--;
-                            if( firstPos > 0 )
-                                firstPos--;
                             checkValid(True);
                             }
                         break;

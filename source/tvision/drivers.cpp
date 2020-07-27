@@ -113,28 +113,12 @@ __5:
             *(uchar *)dest++ = *s++;
 
 #else
-    return moveStrEx(indent, std::string_view {(const char*) source, count}, attr);
-#if 0
-    TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
-    uchar *s = (uchar *) source;
-    if (attr)
-        for (; dest < limit && count; --count, ++s, ++dest)
-        {
-            TScreenCell c {};
-            c.Char = (uchar) *s;
-            c.Attr = (uchar) attr;
-            *dest = c;
-        }
-    else
-        while (dest < limit && count--)
-            *dest++ = TScreenCell::fromPair(*s++);
-#endif
+    return moveStr(indent, std::string_view {(const char*) source, count}, attr);
 #endif
 }
 
 #ifndef __BORLANDC__
-void TDrawBuffer::moveBufEx(ushort indent, TScreenCell *source, ushort attr, ushort count)
+void TDrawBuffer::moveBuf(ushort indent, TScreenCell *source, ushort attr, ushort count)
 {
     TScreenCell *dest = &data[indent];
     TScreenCell *limit = &data[dataLength];
@@ -317,35 +301,12 @@ I   POP     DS
             }
         }
 #else
-    return moveCStrEx(indent, str, attrs);
-#if 0
-    TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
-    uchar c;
-    int toggle = 1;
-    uchar curAttr = ((uchar *)&attrs)[0];
-
-    for (; dest < limit && (c = *str); ++str)
-    {
-        if (c == '~')
-        {
-            curAttr = ((uchar *) &attrs)[toggle];
-            toggle = 1 - toggle;
-        }
-        else
-        {
-            TScreenCell cell {};
-            cell.Char = (uchar) c;
-            cell.Attr = (uchar) curAttr;
-            *dest++ = cell;
-        }
-    }
-#endif
+    return moveCStr(indent, std::string_view {str}, attrs);
 #endif
 }
 
 #ifndef __BORLANDC__
-void TDrawBuffer::moveCStrEx( ushort indent, std::string_view str, ushort attrs )
+void TDrawBuffer::moveCStr( ushort indent, std::string_view str, ushort attrs )
 {
     size_t i = indent, j = 0;
     int toggle = 1;
@@ -434,34 +395,12 @@ I   POP     DS
             while (dest < limit && *str)
                 *(uchar *)dest++ = *str++;
 #else
-    return moveStrEx(indent, str, attr);
-#if 0
-    TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
-    uchar c;
-
-    if (attr)
-        for (; dest < limit && (c = *str); ++str, ++dest)
-        {
-            TScreenCell cell {};
-            cell.Char = (uchar) c;
-            cell.Attr = (uchar) attr;
-            *dest = cell;
-        }
-    else
-        while (dest < limit && *str)
-        {
-            auto cell = dest->Cell;
-            cell.Char = (uchar) *str++;
-            cell.extraWidth = 0;
-            *dest++ = cell;;
-        }
-#endif
+    return moveStr(indent, std::string_view {str}, attr);
 #endif
 }
 
 #ifndef __BORLANDC__
-void TDrawBuffer::moveStrEx( ushort indent, std::string_view str, ushort attr )
+void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr )
 {
     size_t i = indent, j = 0;
 
@@ -474,6 +413,59 @@ void TDrawBuffer::moveStrEx( ushort indent, std::string_view str, ushort attr )
     else
         while (i < dataLength && j < str.size())
             utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+}
+#endif
+
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  TDrawBuffer::moveStr (2)                                              */
+/*                                                                        */
+/*  arguments:                                                            */
+/*                                                                        */
+/*      indent  - character position within the buffer where the data     */
+/*                is to go                                                */
+/*                                                                        */
+/*      str     - pointer to a 0-terminated string of characters to       */
+/*                be moved into the buffer                                */
+/*                                                                        */
+/*      attr    - text attribute to be put into the buffer with each      */
+/*                character in the string.                                */
+/*                                                                        */
+/*      width   - number of display columns to be copied from str.        */
+/*                                                                        */
+/*      begin   - initial display column in str where to start counting.  */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+void TDrawBuffer::moveStr( ushort indent, const char _FAR *str, ushort attr, ushort width, ushort begin )
+{
+#ifdef __BORLANDC__
+    int len = 0;
+    while (str[len] && len < int(begin + width))
+        ++len;
+    len -= begin;
+    if (len > 0)
+        moveBuf(indent, str + begin, attr, min(width, len));
+#else
+    moveStr(indent, std::string {str}, attr, width, begin);
+#endif
+}
+
+#ifndef __BORLANDC__
+void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr, ushort width, ushort begin )
+{
+    size_t s = 0, remainder = 0;
+    utf8wseek(str, s, remainder, begin);
+    if (remainder)
+        moveChar(indent, ' ', attr, remainder);
+    size_t d = indent + remainder;
+    size_t limit = std::min(dataLength, d + width);
+    while (d < limit && s < str.size())
+    {
+        if (attr)
+            data[d].Attr = (uchar) attr;
+        utf8read(&data[d], dataLength - d, d, {&str[s], str.size() - s}, s);
+    }
 }
 #endif
 
