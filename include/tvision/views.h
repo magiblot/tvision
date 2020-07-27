@@ -315,10 +315,6 @@ class _FAR TRect;
 struct _FAR TEvent;
 class _FAR TGroup;
 
-#ifndef __BORLANDC__
-struct TScreenCell;
-#endif
-
 class TView : public TObject, public TStreamable
 {
 
@@ -882,7 +878,7 @@ public:
     TRect clip;
     phaseType phase;
 
-    ushort *buffer;
+    TScreenCell *buffer;
     uchar lockFlag;
     ushort endState;
 

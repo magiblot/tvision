@@ -367,7 +367,7 @@ public:
     static ushort _NEAR screenHeight;
     static Boolean _NEAR hiResScreen;
     static Boolean _NEAR checkSnow;
-    static ushort * _NEAR screenBuffer; // This is actually a TScreenCell* on Linux.
+    static TScreenCell * _NEAR screenBuffer;
     static ushort _NEAR cursorLines;
     static Boolean _NEAR clearOnSuspend;
 

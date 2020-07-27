@@ -139,7 +139,7 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
         // Foreground color in the lower half, background in the upper half.
         TCellAttribs c {pairKey};
         swapRedBlue(c);
-        init_pair(++definedPairs, c.colors.fg, c.colors.bg);
+        init_pair(++definedPairs, c.fgGet(), c.bgGet());
         id = pairIdentifiers[pairKey] = definedPairs;
     }
     return COLOR_PAIR(id);

@@ -84,10 +84,10 @@ public:
     static ushort getScreenMode();
     static void setScreenMode( ushort mode );
     static void clearScreen( ushort w, ushort h );
-    static void screenWrite( ushort x, ushort y, ushort *buf, DWORD len );
-    static ushort *allocateScreenBuffer();
-    static void freeScreenBuffer( ushort *buffer );
-    static void resizeScreenBuffer( ushort *&buffer );
+    static void screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len );
+    static TScreenCell *allocateScreenBuffer();
+    static void freeScreenBuffer( TScreenCell *buffer );
+    static void resizeScreenBuffer( TScreenCell *&buffer );
 #ifdef __BORLANDC__
     static void reloadScreenBufferInfo();
 #endif
@@ -196,7 +196,7 @@ inline void THardwareInfo::clearScreen( ushort w, ushort h )
 #pragma option -w+inl
 #endif // __BORLANDC__
 
-inline ushort *THardwareInfo::allocateScreenBuffer()
+inline TScreenCell *THardwareInfo::allocateScreenBuffer()
 {
     short x = getScreenCols(), y = getScreenRows();
 
@@ -205,23 +205,23 @@ inline ushort *THardwareInfo::allocateScreenBuffer()
     if( y < 50 )
         y = 50;
 #ifdef __BORLANDC__
-    return (ushort *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
+    return (TScreenCell *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
 #else
-    return (ushort *) new TScreenCell[x * y];
+    return new TScreenCell[x * y];
 #endif
 }
 
-inline void THardwareInfo::freeScreenBuffer( ushort *buffer )
+inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer )
 {
 #ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
 #else
-    delete[] (TScreenCell*) buffer;
+    delete[] buffer;
 #endif
 }
 
 #ifdef __BORLANDC__ // In hardwrvr.cpp otherwise
-inline void THardwareInfo::resizeScreenBuffer( ushort *&buffer )
+inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
 {
     freeScreenBuffer(buffer);
     buffer = allocateScreenBuffer();

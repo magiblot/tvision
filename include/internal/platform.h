@@ -10,8 +10,6 @@
 #include <vector>
 #include <cstddef>
 
-class TScreenCell;
-
 class DisplayStrategy {
 
 public:

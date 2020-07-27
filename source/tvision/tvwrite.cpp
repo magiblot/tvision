@@ -203,8 +203,8 @@ void TVWrite::L40( TView *dest )
 
 void TVWrite::L50( TGroup *owner )
 {
+    TScreenCell *dst = &owner->buffer[Y*owner->size.x + X];
 #ifdef __BORLANDC__
-    ushort *dst = &owner->buffer[Y*owner->size.x + X];
     const ushort *src = &((const ushort *) Buffer)[X - wOffset];
     if (owner->buffer != TScreen::screenBuffer)
         copyShort(dst, src);
@@ -214,7 +214,6 @@ void TVWrite::L50( TGroup *owner )
         THardwareInfo::screenWrite(X, Y, dst, Count - X);
     }
 #else
-    auto *dst = &((TScreenCell *) owner->buffer)[Y*owner->size.x + X];
     if (bufIsShort)
     {
         auto *src = &((const ushort *) Buffer)[X - wOffset];
@@ -226,7 +225,7 @@ void TVWrite::L50( TGroup *owner )
         copyCell(dst, src);
     }
     if (owner->buffer == TScreen::screenBuffer)
-        THardwareInfo::screenWrite(X, Y, (ushort *) dst, Count - X);
+        THardwareInfo::screenWrite(X, Y, dst, Count - X);
 #endif // __BORLANDC__
 }
 
@@ -285,7 +284,7 @@ void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
         for (i = 0; i < Count - X; ++i)
         {
             auto c = src[i];
-            c.Cell.Attr.asChar = c.Cell.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
+            c.Attr = c.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = c;
         }
 }
@@ -297,18 +296,17 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         // Expand character/attribute pair
         for (i = 0; i < Count - X; ++i)
         {
-            TScreenCell c {0};
-            c.Cell.Char.asInt = CpTranslator::toUtf8Int(src[i]);
-            c.Cell.Attr.asChar = src[i] >> 8;
+            TScreenCell c {TScreenCellA(src[i])};
+            c.Char = CpTranslator::toUtf8Int(c.Char);
             dst[i] = c;
         }
     else
         // Mix in shadow attribute
         for (i = 0; i < Count - X; ++i)
         {
-            TScreenCell c {0};
-            c.Cell.Char.asInt = CpTranslator::toUtf8Int(src[i]);
-            c.Cell.Attr.asChar = c.Cell.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
+            TScreenCell c {TScreenCellA(src[i])};
+            c.Char = CpTranslator::toUtf8Int(c.Char);
+            c.Attr = c.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = c;
         }
 }

@@ -122,8 +122,8 @@ __5:
         for (; dest < limit && count; --count, ++s, ++dest)
         {
             TScreenCell c {};
-            c.Cell.Char.asInt = (uchar) *s;
-            c.Cell.Attr.asChar = (uchar) attr;
+            c.Char = (uchar) *s;
+            c.Attr = (uchar) attr;
             *dest = c;
         }
     else
@@ -143,7 +143,7 @@ void TDrawBuffer::moveBufEx(ushort indent, TScreenCell *source, ushort attr, ush
         for (; dest < limit && count; --count, ++source, ++dest)
         {
             TScreenCell c = *source;
-            c.Cell.Attr.asChar = (uchar) attr;
+            c.Attr = (uchar) attr;
             *dest = c;
         }
     else
@@ -225,22 +225,22 @@ __4:
     if (attr)
         for (; dest < limit && count; --count, ++dest)
         {
-            auto cell = dest->Cell;
+            auto cell = *dest;
             if (c)
             {
-                cell.Char.asInt = (uchar) c;
+                cell.Char = (uchar) c;
                 cell.extraWidth = 0;
             }
-            cell.Attr.asChar = (uchar) attr;
-            dest->Cell = cell;
+            cell.Attr = (uchar) attr;
+            *dest = cell;
         }
     else
         while (dest < limit && count--)
         {
-            auto cell = dest->Cell;
-            cell.Char.asInt = (uchar) c;
+            auto cell = *dest;
+            cell.Char = (uchar) c;
             cell.extraWidth = 0;
-            (*dest++).Cell = cell;
+            *dest++ = cell;
         }
 #endif
 }
@@ -335,8 +335,8 @@ I   POP     DS
         else
         {
             TScreenCell cell {};
-            cell.Cell.Char.asInt = (uchar) c;
-            cell.Cell.Attr.asChar = (uchar) curAttr;
+            cell.Char = (uchar) c;
+            cell.Attr = (uchar) curAttr;
             *dest++ = cell;
         }
     }
@@ -360,7 +360,7 @@ void TDrawBuffer::moveCStrEx( ushort indent, std::string_view str, ushort attrs 
         }
         else
         {
-            data[i].Cell.Attr.asChar = curAttr;
+            data[i].Attr = curAttr;
             utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
         }
 }
@@ -444,17 +444,17 @@ I   POP     DS
         for (; dest < limit && (c = *str); ++str, ++dest)
         {
             TScreenCell cell {};
-            cell.Cell.Char.asInt = (uchar) c;
-            cell.Cell.Attr.asChar = (uchar) attr;
+            cell.Char = (uchar) c;
+            cell.Attr = (uchar) attr;
             *dest = cell;
         }
     else
         while (dest < limit && *str)
         {
             auto cell = dest->Cell;
-            cell.Char.asInt = (uchar) *str++;
+            cell.Char = (uchar) *str++;
             cell.extraWidth = 0;
-            (*dest++).Cell = cell;;
+            *dest++ = cell;;
         }
 #endif
 #endif
@@ -468,7 +468,7 @@ void TDrawBuffer::moveStrEx( ushort indent, std::string_view str, ushort attr )
     if (attr)
         while (i < dataLength && j < str.size())
         {
-            data[i].Cell.Attr.asChar = (uchar) attr;
+            data[i].Attr = (uchar) attr;
             utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
         }
     else
@@ -483,10 +483,10 @@ TDrawBuffer::TDrawBuffer() {
     // This does not work nor is necessary in non-Flat builds.
     // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
     dataLength = max(TScreen::screenWidth, TScreen::screenHeight);
-    data = new data_t[dataLength];
+    data = new TScreenCell[dataLength];
 #ifndef __BORLANDC__
     // We need this as the TScreenCell struct has unused bits.
-    memset(data, 0, dataLength*sizeof(data_t));
+    memset(data, 0, dataLength*sizeof(TScreenCell));
 #endif
 }
 

@@ -86,7 +86,7 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 #ifdef __BORLANDC__
         hiByte(data[indent]) = uchar(attr);
 #else
-        data[indent].Cell.Attr.asChar = uchar(attr);
+        data[indent].Attr = uchar(attr);
 #endif
     }
 }
@@ -100,8 +100,8 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 #ifdef __BORLANDC__
         loByte(data[indent]) = uchar(c);
 #else
-        data[indent].Cell.Char.asInt = uchar(c);
-        data[indent].Cell.extraWidth = 0;
+        data[indent].Char = uchar(c);
+        data[indent].extraWidth = 0;
 #endif
     }
 }

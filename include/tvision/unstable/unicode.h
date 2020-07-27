@@ -29,9 +29,9 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
 // * state: check the overload below as you probably don't need this.
 {
     if (n) {
-        auto &dst = cell->Cell.Char.asInt;
-        auto &attr = cell->Cell.Attr;
-        cell->Cell.extraWidth = 0;
+        auto &dst = cell->Char;
+        auto &attr = cell->Attr;
+        cell->extraWidth = 0;
         wchar_t wc;
         int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
         if (len <= 1) {
@@ -43,7 +43,7 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
                 dst = ' ';
             else {
                 dst = 0;
-                memcpy(&dst, src.data(), 1);
+                memcpy(&dst.bytes, src.data(), 1);
             }
         } else {
             int cWidth = wcwidth(wc);
@@ -54,15 +54,15 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
             } else {
                 width += cWidth;
                 dst = 0;
-                memcpy(&dst, src.data(), len);
+                memcpy(&dst.bytes, src.data(), len);
                 // Set extraWidth attribute and fill trailing cells.
-                cell->Cell.extraWidth = std::min<size_t>(cWidth - 1, 7);
+                cell->extraWidth = std::min<size_t>(cWidth - 1, 7);
                 while (--cWidth && --n) {
                     ++cell;
-                    auto trailCell = cell->Cell;
-                    trailCell.Char.asInt = TScreenCell::wideCharTrail;
+                    auto trailCell = *cell;
+                    trailCell.Char = TScreenCell::wideCharTrail;
                     trailCell.Attr = attr;
-                    cell->Cell = trailCell;
+                    *cell = trailCell;
                 }
             }
         }

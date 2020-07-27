@@ -6,12 +6,12 @@
 inline void swapRedBlue(TCellAttribs &c) {
     // Swap the Red and Blue bits so that each color can be
     // straightforwardly converted to an SGR color code.
-    uchar fgAux = c.bits.fgBlue;
-    c.bits.fgBlue = c.bits.fgRed;
-    c.bits.fgRed = fgAux;
-    uchar bgAux = c.bits.bgBlue;
-    c.bits.bgBlue = c.bits.bgRed;
-    c.bits.bgRed = bgAux;
+    uchar fgAux = c.fgBlue;
+    c.fgBlue = c.fgRed;
+    c.fgRed = fgAux;
+    uchar bgAux = c.bgBlue;
+    c.bgBlue = c.bgRed;
+    c.bgRed = bgAux;
 }
 
 // SGRAttribs conversion flags.
@@ -50,16 +50,16 @@ inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
     SGRAttribs()
 {
     swapRedBlue(c);
-    attr.fg += (c.colors.fg & 0x07);
-    attr.bg += (c.colors.bg & 0x07);
-    if (c.bits.fgBright)
+    attr.fg += (c.fgGet() & 0x07);
+    attr.bg += (c.bgGet() & 0x07);
+    if (c.fgBright)
     {
         if (flags & sgrBrightIsBold)
             attr.bold = 1; // Bold On
         else
             attr.fg += 60;
     }
-    if (c.bits.bgBright)
+    if (c.bgBright)
     {
         if (flags & sgrBrightIsBlink)
             attr.blink = 5; // Blink On
@@ -102,7 +102,7 @@ inline BufferCell::BufferCell() :
 }
 
 inline BufferCell::BufferCell(TScreenCell cell) :
-    asLong(cell.asLong)
+    asLong(cell)
 {
     Cell.dirty = 0;
 }

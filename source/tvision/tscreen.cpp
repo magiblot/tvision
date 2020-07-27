@@ -32,7 +32,7 @@ ushort _NEAR TScreen::screenWidth = 0;
 ushort _NEAR TScreen::screenHeight = 0;
 Boolean _NEAR TScreen::hiResScreen = False;
 Boolean _NEAR TScreen::checkSnow = True;
-ushort * _NEAR TScreen::screenBuffer;
+TScreenCell * _NEAR TScreen::screenBuffer;
 ushort _NEAR TScreen::cursorLines = 0;
 Boolean _NEAR TScreen::clearOnSuspend = True;
 
