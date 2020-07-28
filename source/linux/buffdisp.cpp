@@ -80,7 +80,7 @@ void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 
 void BufferedDisplay::setDirty(int x, BufferCell &cell, Range &damage)
 {
-    cell.Cell.dirty = 1;
+    cell.dirty = 1;
     Range dam = damage;
     if (x < dam.begin)
         dam.begin = x;
@@ -116,7 +116,7 @@ void BufferedDisplay::drawCursors()
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
             auto &cell = buffer[y*cols + x];
-            cursor->apply(cell.Cell.Attr);
+            cursor->apply(cell.Attr);
             setDirty(x, cell, rowDamage[y]);
         }
 }
@@ -128,7 +128,7 @@ void BufferedDisplay::undrawCursors()
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
             auto &cell = buffer[y*cols + x];
-            cursor->restore(cell.Cell.Attr);
+            cursor->restore(cell.Attr);
             setDirty(x, cell, rowDamage[y]);
         }
 }
@@ -156,7 +156,7 @@ void BufferedDisplay::onScreenResize()
 
 void BufferedDisplay::ensurePrintable(BufferCell &cell) const
 {
-    uint &ch = cell.Cell.Char.asInt;
+    auto &ch = cell.Char;
     if (ch == '\0')
         ch = ' ';
     else if (ch < ' ' || (0x7F <= ch && ch < 0x100)) {
@@ -164,7 +164,7 @@ void BufferedDisplay::ensurePrintable(BufferCell &cell) const
         ch = CpTranslator::toUtf8Int(ch);
     } else if (ch == TScreenCell::wideCharTrail) {
         ch = widePlaceholder;
-        cell.Cell.extraWidth = 0;
+        cell.extraWidth = 0;
     }
 }
 
@@ -186,7 +186,7 @@ void FlushScreenAlgorithm::run()
         }
         if (wideCanSpill() && x < size.x) {
             getCell();
-            if (__builtin_expect(cell.Char.asInt == '\0', 0))
+            if (__builtin_expect(cell.Char == '\0', 0))
                 handleNull();
         }
         disp.rowDamage[y] = newDamage;
@@ -199,7 +199,7 @@ void FlushScreenAlgorithm::processCell()
         if (__builtin_expect(cell.extraWidth, 0)) {
             handleWideCharSpill();
             return;
-        } else if (__builtin_expect(cell.Char.asInt == '\0', 0)) {
+        } else if (__builtin_expect(cell.Char == '\0', 0)) {
             handleNull();
             return;
         }
@@ -229,15 +229,15 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         writeCell();
     else {
         // Replace with spaces if it would otherwise be printed on the next line.
-        cell.Char.asInt = ' ';
+        cell.Char = ' ';
         writeCell();
         while (--width && ++x < size.x) {
             getCell();
-            if (cell.Char.asInt != '\0') {
+            if (cell.Char != '\0') {
                 --x;
                 return;
             }
-            cell.Char.asInt = ' ';
+            cell.Char = ' ';
             writeCell();
         }
     }
@@ -245,7 +245,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
     while (width-- && ++x < size.x) {
         getCell();
         pCell->dirty = 0;
-        if (cell.Char.asInt != '\0') {
+        if (cell.Char != '\0') {
             disp.lowlevelMoveCursorX(x, y);
             writeCell();
             return;
@@ -285,7 +285,7 @@ void FlushScreenAlgorithm::handleNull()
     }
     // Print successive placeholders as spaces.
     do {
-        cell.Char.asInt = ' ';
+        cell.Char = ' ';
         writeCell();
         ++x;
         if (x < size.x) {
@@ -293,7 +293,7 @@ void FlushScreenAlgorithm::handleNull()
             pCell->dirty = 0;
         } else
             return;
-    } while (cell.Char.asInt == '\0');
+    } while (cell.Char == '\0');
     // We now got a normal character.
     if (x < damage.end) {
         // Decrease for next iteration

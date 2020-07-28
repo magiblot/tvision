@@ -18,99 +18,103 @@ inline void swapRedBlue(TCellAttribs &c) {
 
 const uint
     sgrBrightIsBold   = 0x0001,
-    sgrBrightIsBlink  = 0x0002;
+    sgrBrightIsBlink  = 0x0002,
+    sgrNoItalic       = 0x0004,
+    sgrNoUnderline    = 0x0008;
 
-struct SGRAttribs {
+struct SGRAttribs : trivially_convertible<uint64_t> {
 
-    union {
-        uint asInt;
-        struct {
-            uchar fg;
-            uchar bg;
-            uchar bold;
-            uchar blink;
-        } attr;
-    };
+    uchar fg;
+    uchar bg;
+    uchar bold;
+    uchar italic;
+    uchar underline;
+    uchar blink;
 
-    SGRAttribs();
+    using trivially_convertible::trivially_convertible;
+
+    enum {defaultInit};
+    SGRAttribs(decltype(defaultInit));
     SGRAttribs(TCellAttribs bios, uint flags);
-    bool operator!=(SGRAttribs other) const;
+
+    static constexpr void check_assumptions()
+    {
+        check_trivial<SGRAttribs>();
+    }
 
 };
 
-inline SGRAttribs::SGRAttribs()
+inline SGRAttribs::SGRAttribs(decltype(defaultInit))
 {
-    attr.fg = 30;       // Black
-    attr.bg = 40;       // Black
-    attr.bold = 22;     // Bold Off
-    attr.blink = 25;    // Blink Off
+    *this = 0;
+    fg = 30;        // Black
+    bg = 40;        // Black
+    bold = 22;      // Bold Off
+    italic = 23;    // Italic Off
+    underline = 24; // Underline Off
+    blink = 25;     // Blink Off
 }
 
 inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
-    SGRAttribs()
+    SGRAttribs(defaultInit)
 {
     swapRedBlue(c);
-    attr.fg += (c.fgGet() & 0x07);
-    attr.bg += (c.bgGet() & 0x07);
+    if (c.fgDefault)
+        fg = 39; // Default foreground color
+    else
+        fg += (c.fgGet() & 0x07);
+    if (c.bgDefault)
+        bg = 49; // Default background color
+    else
+        bg += (c.bgGet() & 0x07);
     if (c.fgBright)
     {
         if (flags & sgrBrightIsBold)
-            attr.bold = 1; // Bold On
+            bold = 1; // Bold On
         else
-            attr.fg += 60;
+            fg += 60;
     }
     if (c.bgBright)
     {
         if (flags & sgrBrightIsBlink)
-            attr.blink = 5; // Blink On
+            blink = 5; // Blink On
         else
-            attr.bg += 60;
+            bg += 60;
     }
+    if (c.bold)
+        bold = 1; // Bold On
+    if (!(flags & sgrNoItalic) && c.italic)
+        italic = 3; // Italic On
+    if (!(flags & sgrNoUnderline) && c.underline)
+        underline = 4; // Underline On
 }
 
-inline bool SGRAttribs::operator!=(SGRAttribs other) const
-{
-    return asInt != other.asInt;
-}
+struct BufferCell : trivially_convertible<uint64_t> {
 
-struct BufferCell {
+    TCellChar Char;
+    TCellAttribs Attr;
+    uint8_t
+        extraWidth  : 3,
+        dirty       : 1;
 
-    union {
-        uint64_t asLong;
-        struct {
-            union {
-                uint8_t bytes[4];
-                uint32_t asInt;
-            } Char;
-            TCellAttribs Attr;
-            uchar
-                extraWidth  : 3,
-                dirty       : 1;
-        } Cell;
-    };
+    using trivially_convertible::trivially_convertible;
 
-    BufferCell();
     BufferCell(TScreenCell cell);
     bool operator!=(BufferCell other) const;
     void ensurePrintable(bool wideChars);
 
 };
 
-inline BufferCell::BufferCell() :
-    asLong(0)
+inline BufferCell::BufferCell(TScreenCell cell)
 {
-}
-
-inline BufferCell::BufferCell(TScreenCell cell) :
-    asLong(cell)
-{
-    Cell.dirty = 0;
+    *this = (uint64_t) cell;
+    dirty = 0;
 }
 
 inline bool BufferCell::operator!=(BufferCell other) const
 {
-    // Discard dirty bit and redundant/unused bits.
-    return (asLong ^ other.asLong) & 0x0000'00FF'FFFF'FFFF;
+    // Discard dirty bit and unused bits. extraWidth is redundant.
+    return (*this ^ other) & 0x0000'FFFF'FFFF'FFFF;
 }
 
 #endif

@@ -75,7 +75,7 @@ struct FlushScreenAlgorithm {
     TPoint size;
     TPoint last;
     int x, y;
-    decltype(BufferCell::Cell) cell, *pCell;
+    BufferCell cell, *pCell;
     BufferedDisplay::Range damage, newDamage;
 
     FlushScreenAlgorithm(BufferedDisplay &disp_) :
@@ -96,7 +96,7 @@ struct FlushScreenAlgorithm {
 
 inline void FlushScreenAlgorithm::getCell()
 {
-    pCell = &disp.buffer[y*size.x + x].Cell;
+    pCell = &disp.buffer[y*size.x + x];
     cell = *pCell;
 }
 

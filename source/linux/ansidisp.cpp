@@ -18,11 +18,11 @@ using namespace std::literals;
 #define CSI "\x1B["
 
 AnsiDisplayBase::AnsiDisplayBase() :
-    lastAttr(),
+    lastAttr(SGRAttribs::defaultInit),
     sgrFlags(0)
 {
     if (THardwareInfo::isLinuxConsole(0) || THardwareInfo::isLinuxConsole(1))
-        sgrFlags |= sgrBrightIsBlink;
+        sgrFlags |= sgrBrightIsBlink | sgrNoItalic | sgrNoUnderline;
     if (COLORS < 16)
         sgrFlags |= sgrBrightIsBold;
 }
@@ -146,24 +146,24 @@ void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
     {
         char s[32] = CSI;
         char *p = s + sizeof(CSI) - 1;
-        if (sgr.attr.fg != last.attr.fg)
+        if (sgr.fg != last.fg)
         {
-            p += fast_utoa(sgr.attr.fg, p);
+            p += fast_utoa(sgr.fg, p);
             *p++ = ';';
         }
-        if (sgr.attr.bg != last.attr.bg)
+        if (sgr.bg != last.bg)
         {
-            p += fast_utoa(sgr.attr.bg, p);
+            p += fast_utoa(sgr.bg, p);
             *p++ = ';';
         }
-        if (sgr.attr.bold != last.attr.bold)
+        if (sgr.bold != last.bold)
         {
-            p += fast_utoa(sgr.attr.bold, p);
+            p += fast_utoa(sgr.bold, p);
             *p++ = ';';
         }
-        if (sgr.attr.blink != last.attr.blink)
+        if (sgr.blink != last.blink)
         {
-            p += fast_utoa(sgr.attr.blink, p);
+            p += fast_utoa(sgr.blink, p);
             *p++ = ';';
         }
         *(p - 1) = 'm';
