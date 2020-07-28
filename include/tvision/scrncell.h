@@ -19,7 +19,44 @@ typedef ushort TScreenCell;
 #include <cstring>
 #include <type_traits>
 
-struct alignas(uint8_t) TCellAttribs
+template<typename T>
+struct alignas(T) trivially_convertible {
+
+    trivially_convertible() = default;
+
+    trivially_convertible(T asT)
+    {
+        *this = asT;
+    }
+
+    T operator=(T asT)
+    {
+        memcpy(this, &asT, sizeof(T));
+        return asT;
+    }
+
+    operator T() const
+    {
+        T asT;
+        memcpy(&asT, this, sizeof(T));
+        return asT;
+    }
+
+protected:
+
+    template<class C>
+    static constexpr bool check_trivial()
+    {
+        static_assert(std::is_trivial<C>());
+        static_assert(std::is_standard_layout<C>());
+        static_assert(sizeof(C) == sizeof(T));
+        static_assert(alignof(C) == alignof(T));
+        return true;
+    }
+
+};
+
+struct TCellAttribs : trivially_convertible<uint16_t>
 {
 
     uint8_t
@@ -31,25 +68,14 @@ struct alignas(uint8_t) TCellAttribs
         bgGreen     : 1,
         bgRed       : 1,
         bgBright    : 1;
+    uint8_t
+        fgDefault   : 1,
+        bgDefault   : 1,
+        bold        : 1,
+        italic      : 1,
+        underline   : 1;
 
-    TCellAttribs() = default;
-
-    TCellAttribs(uint8_t asChar)
-    {
-        *this = asChar;
-    }
-
-    uint8_t operator=(uint8_t asChar)
-    {
-        // Aliasing through uchar pointers is allowed.
-        *(uint8_t *) this = asChar;
-        return asChar;
-    }
-
-    operator uint8_t() const
-    {
-        return *(uint8_t *) this;
-    }
+    using trivially_convertible::trivially_convertible;
 
     operator uint8_t&()
     {
@@ -76,94 +102,43 @@ struct alignas(uint8_t) TCellAttribs
         *this = (bg << 4) | fgGet();
     }
 
-private:
-
-    static void check_assumptions()
+    static constexpr void check_assumptions()
     {
-        static_assert(std::is_trivial<TCellAttribs>());
-        static_assert(std::is_standard_layout<TCellAttribs>());
-        static_assert(sizeof(TCellAttribs) == sizeof(uint8_t));
+        check_trivial<TCellAttribs>();
     }
 
 };
 
-struct alignas(uint16_t) TScreenCellA
+struct TScreenCellA : trivially_convertible<uint16_t>
 {
-    // This struct has the same layout as TScreenCell on Borland C++ platforms.
-    // However, TScreenCell is defined as ushort in Borland C++ as that is what
-    // existing code relies on.
 
     uint8_t Char;
-    TCellAttribs Attr;
+    uint8_t Attr;
 
-    TScreenCellA() = default;
+    using trivially_convertible::trivially_convertible;
 
-    TScreenCellA(uint16_t asShort)
+    static constexpr void check_assumptions()
     {
-        *this = asShort;
-    }
-
-    uint16_t operator=(uint16_t asShort)
-    {
-        memcpy(this, &asShort, sizeof(*this));
-        return asShort;
-    }
-
-    operator uint16_t() const
-    {
-        uint16_t asShort;
-        memcpy(&asShort, this, sizeof(*this));
-        return asShort;
-    }
-
-private:
-
-    static void check_assumptions()
-    {
-        static_assert(std::is_trivial<TScreenCellA>());
-        static_assert(std::is_standard_layout<TScreenCellA>());
-        static_assert(sizeof(TScreenCellA) == sizeof(uint16_t));
+        check_trivial<TScreenCellA>();
     }
 
 };
 
-struct alignas(uint32_t) TCellChar
+struct TCellChar : trivially_convertible<uint32_t>
 {
 
     uint8_t bytes[4];
 
-    TCellChar() = default;
+    using trivially_convertible::trivially_convertible;
 
-    TCellChar(uint32_t asInt)
+    static constexpr void check_assumptions()
     {
-        *this = asInt;
-    }
-
-    uint32_t operator=(uint32_t asInt)
-    {
-        memcpy(this, &asInt, sizeof(*this));
-        return asInt;
-    }
-
-    operator uint32_t() const
-    {
-        uint32_t asInt {0};
-        memcpy(&asInt, this, sizeof(*this));
-        return asInt;
-    }
-
-private:
-
-    static void check_assumptions()
-    {
-        static_assert(std::is_trivial<TCellChar>());
-        static_assert(std::is_standard_layout<TCellChar>());
-        static_assert(sizeof(TCellChar) == sizeof(uint32_t));
+        check_trivial<TCellChar>();
     }
 
 };
 
-struct alignas(uint64_t) TScreenCell
+struct TScreenCell : trivially_convertible<uint64_t>
 {
 
     TCellChar Char;
@@ -171,12 +146,7 @@ struct alignas(uint64_t) TScreenCell
     uint8_t
         extraWidth : 3;
 
-    TScreenCell() = default;
-
-    TScreenCell(uint64_t asLong)
-    {
-        *this = asLong;
-    }
+    using trivially_convertible::trivially_convertible;
 
     TScreenCell(TScreenCellA pair)
     {
@@ -185,28 +155,11 @@ struct alignas(uint64_t) TScreenCell
         Attr = pair.Attr;
     }
 
-    uint64_t operator=(uint64_t asLong)
-    {
-        memcpy(this, &asLong, sizeof(*this));
-        return asLong;
-    }
-
-    operator uint64_t() const
-    {
-        uint64_t asLong;
-        memcpy(&asLong, this, sizeof(*this));
-        return asLong;
-    }
-
     static constexpr uint32_t wideCharTrail = -2U;
 
-private:
-
-    static void check_assumptions()
+    static constexpr void check_assumptions()
     {
-        static_assert(std::is_trivial<TScreenCell>());
-        static_assert(std::is_standard_layout<TScreenCell>());
-        static_assert(sizeof(TScreenCell) == sizeof(uint64_t));
+        check_trivial<TScreenCell>();
     }
 
 };
