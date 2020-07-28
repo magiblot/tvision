@@ -166,6 +166,16 @@ void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
             p += fast_utoa(sgr.blink, p);
             *p++ = ';';
         }
+        if (sgr.italic != last.italic)
+        {
+            p += fast_utoa(sgr.italic, p);
+            *p++ = ';';
+        }
+        if (sgr.underline != last.underline)
+        {
+            p += fast_utoa(sgr.underline, p);
+            *p++ = ';';
+        }
         *(p - 1) = 'm';
         lastAttr = sgr;
         bufWrite({s, size_t(p - s)});
