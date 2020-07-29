@@ -235,9 +235,27 @@ unordered_map<int, KeyDownEvent> NcursesInput::fromCursesKeyCode = {
 
 unordered_map<string_view, KeyDownEvent> NcursesInput::fromCursesHighKey = {
     /* These keys are identified by name. The int value is not known
-     * at compilation time.
-     * ncurses supports all sorts of Shift/Ctrl/Alt combinations for these
-     * but Turbo Vision doesn't support them. */
+     * at compilation time. */
+    { "kDC3",       {{kbDel},           kbAltShift}},
+    { "kEND3",      {{kbEnd},           kbAltShift}},
+    { "kHOM3",      {{kbHome},          kbAltShift}},
+    { "kIC3",       {{kbIns},           kbAltShift}},
+    { "kLFT3",      {{kbLeft},          kbAltShift}},
+    { "kNXT3",      {{kbPgDn},          kbAltShift}},
+    { "kPRV3",      {{kbPgUp},          kbAltShift}},
+    { "kRIT3",      {{kbRight},         kbAltShift}},
+    { "kUP3",       {{kbUp},            kbAltShift}},
+    { "kDN3",       {{kbDown},          kbAltShift}},
+    { "kDC4",       {{kbShiftDel},      kbShift | kbAltShift}},
+    { "kEND4",      {{kbEnd},           kbShift | kbAltShift}},
+    { "kHOM4",      {{kbHome},          kbShift | kbAltShift}},
+    { "kIC4",       {{kbShiftIns},      kbShift | kbAltShift}},
+    { "kLFT4",      {{kbLeft},          kbShift | kbAltShift}},
+    { "kNXT4",      {{kbPgDn},          kbShift | kbAltShift}},
+    { "kPRV4",      {{kbPgUp},          kbShift | kbAltShift}},
+    { "kRIT4",      {{kbRight},         kbShift | kbAltShift}},
+    { "kUP4",       {{kbUp},            kbShift | kbAltShift}},
+    { "kDN4",       {{kbDown},          kbShift | kbAltShift}},
     { "kDC5",       {{kbCtrlDel},       kbCtrlShift}},
     { "kEND5",      {{kbCtrlEnd},       kbCtrlShift}},
     { "kHOM5",      {{kbCtrlHome},      kbCtrlShift}},
@@ -247,7 +265,27 @@ unordered_map<string_view, KeyDownEvent> NcursesInput::fromCursesHighKey = {
     { "kPRV5",      {{kbCtrlPgUp},      kbCtrlShift}},
     { "kRIT5",      {{kbCtrlRight},     kbCtrlShift}},
     { "kUP5",       {{kbCtrlUp},        kbCtrlShift}},
-    { "kDN5",       {{kbCtrlDown},      kbCtrlShift}}
+    { "kDN5",       {{kbCtrlDown},      kbCtrlShift}},
+    { "kDC6",       {{kbCtrlDel},       kbCtrlShift | kbShift}},
+    { "kEND6",      {{kbCtrlEnd},       kbCtrlShift | kbShift}},
+    { "kHOM6",      {{kbCtrlHome},      kbCtrlShift | kbShift}},
+    { "kIC6",       {{kbCtrlIns},       kbCtrlShift | kbShift}},
+    { "kLFT6",      {{kbCtrlLeft},      kbCtrlShift | kbShift}},
+    { "kNXT6",      {{kbCtrlPgDn},      kbCtrlShift | kbShift}},
+    { "kPRV6",      {{kbCtrlPgUp},      kbCtrlShift | kbShift}},
+    { "kRIT6",      {{kbCtrlRight},     kbCtrlShift | kbShift}},
+    { "kUP6",       {{kbCtrlUp},        kbCtrlShift | kbShift}},
+    { "kDN6",       {{kbCtrlDown},      kbCtrlShift | kbShift}},
+    { "kDC7",       {{kbDel},           kbCtrlShift | kbAltShift}}, // Please do not attempt this one
+    { "kEND7",      {{kbEnd},           kbCtrlShift | kbAltShift}},
+    { "kHOM7",      {{kbHome},          kbCtrlShift | kbAltShift}},
+    { "kIC7",       {{kbIns},           kbCtrlShift | kbAltShift}},
+    { "kLFT7",      {{kbLeft},          kbCtrlShift | kbAltShift}},
+    { "kNXT7",      {{kbPgDn},          kbCtrlShift | kbAltShift}},
+    { "kPRV7",      {{kbPgUp},          kbCtrlShift | kbAltShift}},
+    { "kRIT7",      {{kbRight},         kbCtrlShift | kbAltShift}},
+    { "kUP7",       {{kbUp},            kbCtrlShift | kbAltShift}},
+    { "kDN7",       {{kbDown},          kbCtrlShift | kbAltShift}},
 };
 
 unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
