@@ -176,6 +176,11 @@ void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
             p += fast_utoa(sgr.underline, p);
             *p++ = ';';
         }
+        if (sgr.reverse != last.reverse)
+        {
+            p += fast_utoa(sgr.reverse, p);
+            *p++ = ';';
+        }
         *(p - 1) = 'm';
         lastAttr = sgr;
         bufWrite({s, size_t(p - s)});

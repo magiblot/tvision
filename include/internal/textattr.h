@@ -30,6 +30,7 @@ struct SGRAttribs : trivially_convertible<uint64_t> {
     uchar italic;
     uchar underline;
     uchar blink;
+    uchar reverse;
 
     using trivially_convertible::trivially_convertible;
 
@@ -53,6 +54,7 @@ inline SGRAttribs::SGRAttribs(decltype(defaultInit))
     italic = 23;    // Italic Off
     underline = 24; // Underline Off
     blink = 25;     // Blink Off
+    reverse = 27;   // Reverse Off
 }
 
 inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
@@ -87,6 +89,8 @@ inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
         italic = 3; // Italic On
     if (!(flags & sgrNoUnderline) && c.underline)
         underline = 4; // Underline On
+    if (c.reverse)
+        reverse = 7; // Reverse On
 }
 
 struct BufferCell : trivially_convertible<uint64_t> {

@@ -73,7 +73,8 @@ struct TCellAttribs : trivially_convertible<uint16_t>
         bgDefault   : 1,
         bold        : 1,
         italic      : 1,
-        underline   : 1;
+        underline   : 1,
+        reverse     : 1;
 
     using trivially_convertible::trivially_convertible;
 
