@@ -77,9 +77,12 @@ struct TCellAttribs : trivially_convertible<uint16_t>
 
     using trivially_convertible::trivially_convertible;
 
-    operator uint8_t&()
+    TCellAttribs(uint8_t color, bool bold_, bool italic_=false, bool underline_=false)
     {
-        return *(uint8_t *) this;
+        *this = color;
+        bold = bold_;
+        italic = italic_;
+        underline = underline_;
     }
 
     uint8_t fgGet() const
@@ -94,12 +97,17 @@ struct TCellAttribs : trivially_convertible<uint16_t>
 
     void fgSet(uint8_t fg)
     {
-        *this = (bgGet() << 4) | (fg & 0x0F);
+        *this = (*this & ~0x0F) | (fg & 0x0F);
     }
 
     void bgSet(uint8_t bg)
     {
-        *this = (bg << 4) | fgGet();
+        *this = (*this & ~0xF0) | ((bg & 0x0F) << 4);
+    }
+
+    void attrSet(TCellAttribs other)
+    {
+        *this = (*this & ~0xFF00) | (other & 0xFF00);
     }
 
     static constexpr void check_assumptions()
