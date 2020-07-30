@@ -1,7 +1,8 @@
 #include <internal/cursor.h>
 
 void ScreenCursor::draw(TCellAttribs &attr) const {
-    switch(style) {
+    attr.fgDefault = attr.bgDefault = 0;
+    switch (style) {
         case Reverse: {
             auto fg = attr & 0x0F;
             uchar bg = attr & 0xF0;
