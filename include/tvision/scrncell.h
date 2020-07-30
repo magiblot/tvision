@@ -56,6 +56,16 @@ protected:
 
 };
 
+// TCellAttribs Attribute masks
+
+const ushort
+    afFgDefault = 0x0001,
+    afBgDefault = 0x0002,
+    afBold      = 0x0004,
+    afItalic    = 0x0008,
+    afUnderline = 0x0010,
+    afReverse   = 0x0020;
+
 struct TCellAttribs : trivially_convertible<uint16_t>
 {
 
@@ -78,12 +88,9 @@ struct TCellAttribs : trivially_convertible<uint16_t>
 
     using trivially_convertible::trivially_convertible;
 
-    TCellAttribs(uint8_t color, bool bold_, bool italic_=false, bool underline_=false)
+    TCellAttribs(uint8_t color, ushort flags)
     {
-        *this = color;
-        bold = bold_;
-        italic = italic_;
-        underline = underline_;
+        *this = color | (flags << 8);
     }
 
     uint8_t fgGet() const
