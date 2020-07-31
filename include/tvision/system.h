@@ -359,6 +359,7 @@ public:
 
     static void setVideoMode( ushort mode );
     static void clearScreen();
+    static void flushScreen();
 
     static ushort _NEAR startupMode;
     static ushort _NEAR startupCursor;
@@ -378,6 +379,12 @@ public:
     static void resume();
 
 };
+
+#ifdef __BORLANDC__
+inline void TScreen::flushScreen()
+{
+}
+#endif
 
 #endif  // Uses_TScreen
 

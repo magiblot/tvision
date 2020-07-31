@@ -322,6 +322,13 @@ void TScreen::clearScreen()
     TDisplay::clearScreen( screenWidth, screenHeight );
 }
 
+#ifndef __BORLANDC__ // Otherwise in system.h
+void TScreen::flushScreen()
+{
+    THardwareInfo::flushScreen();
+}
+#endif
+
 void TScreen::setVideoMode( ushort mode )
 {
     if ( mode != smChanged )
