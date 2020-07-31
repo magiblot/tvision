@@ -72,6 +72,8 @@ bool FindFirstRec::next()
     struct dirent *e;
     bool found = false;
     while ((e = readdir(dirStream)) && !(found = matchEntry(e)));
+    if (!e)
+        close();
     return found;
 }
 
