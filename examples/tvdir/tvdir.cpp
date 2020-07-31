@@ -26,6 +26,7 @@
 #define Uses_TOutline
 #define Uses_TScrollBar
 #define Uses_TParamText
+#define Uses_TScreen
 #include <tvision/tv.h>
 #include <dos.h>
 #include <string.h>
@@ -41,17 +42,17 @@ class QuickMessage: public TWindow
     TParamText *currentDir;
 public:
     QuickMessage( const char *drive ):
-        TWindow( TRect( 25,10,55,16 ), "Please Wait...", 0 ),
+        TWindow( TRect( 15,8,65,19 ), "Please Wait...", 0 ),
         TWindowInit( TWindow::initFrame ) {
 
     flags = 0; // no move, close, grow or zoom
     options |= ofCentered;
     palette = wpGrayWindow;
-    char temp[30];
+    char temp[64];
     ostrstream os( temp, sizeof( temp ) );
     os << "Scanning Drive '" << drive << "'\n" << ends;
-    insert( new TStaticText( TRect( 2,2,28,3 ), temp ) );
-    currentDir = new TParamText( TRect( 2,3,28,4 ) );
+    insert( new TStaticText( TRect( 2,2,48,3 ), temp ) );
+    currentDir = new TParamText( TRect( 2,3,48,9 ) );
     insert( currentDir );
   }
   virtual void handleEvent( TEvent &event ) {
@@ -59,6 +60,7 @@ public:
   }
   void setCurrentDir( char *newDir ) {
     currentDir->setText( newDir );
+    TScreen::flushScreen();
   }
 };
 
@@ -112,12 +114,12 @@ TNode *TDirOutline::parentSearch;
 TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
   TNode  *dirList = 0,
          *current = 0;
-  char   searchPath[128];
+  char   searchPath[128] = {0};
   find_t searchRec;
   int    result;
   TNode  *temp;
 
-  ostrstream os( searchPath, sizeof( searchPath ) );
+  ostrstream os( searchPath, sizeof( searchPath )-1 );
   os << path << "\\*.*" << ends;
   result = _dos_findfirst( searchPath, 0xff, &searchRec );
 
@@ -126,6 +128,9 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
       if (searchRec.attrib & FA_DIREC) {
         os.seekp(0);
         os << path << '\\' << searchRec.name << ends;
+        // Strings may become equal when searchPath is full.
+        if (strcmp(path, searchPath) == 0)
+          break;
         qm->setCurrentDir(searchPath);
         temp = new TNode( searchRec.name, getDirList(searchPath,qm), 0, False );
         if (current) {
