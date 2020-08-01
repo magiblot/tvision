@@ -310,5 +310,15 @@ unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
         { kbRight,      kbCtrlRight     },
         { kbUp,         kbCtrlUp        },
         { kbDown,       kbCtrlDown      }
-    }}
+    }},
+    { kbAltShift, {
+        { kbDel,        kbAltDel        },
+        { kbEnd,        kbAltEnd        },
+        { kbHome,       kbAltHome       },
+        { kbIns,        kbAltIns        },
+        { kbPgDn,       kbAltPgDn       },
+        { kbPgUp,       kbAltPgUp       },
+        { kbUp,         kbAltUp         },
+        { kbDown,       kbAltDown       },
+    }},
 };
