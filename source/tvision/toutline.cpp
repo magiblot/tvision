@@ -417,7 +417,10 @@ void TOutlineViewer::handleEvent(TEvent& event)
                 dragged++;
           mouse = makeLocal(event.mouse.where);
           if (mouseInView(event.mouse.where))
-            newFocus = delta.y + mouse.y;
+          {
+            int i = delta.y + mouse.y;
+            newFocus = i < limit.y ? i : foc;
+          }
           else
           {
             if (event.what == evMouseAuto)
