@@ -166,10 +166,6 @@ void BufferedDisplay::ensurePrintable(BufferCell &cell) const
     } else if (ch == TScreenCell::wideCharTrail) {
         ch = widePlaceholder;
         cell.extraWidth = 0;
-        // This kind of characters is automatically skipped when
-        // behind a multi-column character. Otherwise, it should
-        // be handled in a special way, so make sure it is not ignored.
-        cell.dirty = 1;
     }
 }
 
@@ -180,7 +176,6 @@ void FlushScreenAlgorithm::run()
     for (y = 0; y < size.y; ++y)
     {
         damage = disp.rowDamage[y];
-        newDamage = {INT_MAX, INT_MIN};
         for (x = damage.begin; x <= damage.end; ++x)
         {
             getCell();
@@ -194,7 +189,7 @@ void FlushScreenAlgorithm::run()
             if (__builtin_expect(cell.Char == '\0', 0))
                 handleNull();
         }
-        disp.rowDamage[y] = newDamage;
+        disp.rowDamage[y] = {INT_MAX, INT_MIN};
     }
 }
 
