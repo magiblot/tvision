@@ -165,6 +165,10 @@ void BufferedDisplay::ensurePrintable(BufferCell &cell) const
     } else if (ch == TScreenCell::wideCharTrail) {
         ch = widePlaceholder;
         cell.extraWidth = 0;
+        // This kind of characters is automatically skipped when
+        // behind a multi-column character. Otherwise, it should
+        // be handled in a special way, so make sure it is not ignored.
+        cell.dirty = 1;
     }
 }
 
@@ -285,23 +289,23 @@ void FlushScreenAlgorithm::handleNull()
     }
     // Print successive placeholders as spaces.
     do {
+        pCell->dirty = 0;
         cell.Char = ' ';
         writeCell();
         ++x;
-        if (x < size.x) {
+        if (x < size.x)
             getCell();
-            pCell->dirty = 0;
-        } else
+        else
             return;
     } while (cell.Char == '\0');
     // We now got a normal character.
-    if (x < damage.end) {
-        // Decrease for next iteration
-        --x;
-    } else if (Attr != cell.Attr) {
+    if (x > damage.end && Attr != cell.Attr) {
         // Redraw a character that would otherwise not be printed,
         // to prevent attribute spill.
         processCell();
+    } else {
+        // Decrease for next iteration
+        --x;
     }
 }
 
