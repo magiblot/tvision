@@ -99,7 +99,7 @@ void TOutlineViewer::draw()
   ushort nrmColor = getColor(0x0401);
   TDrawBuffer dBuf;
   pdBuf = &dBuf;
-
+  auxPos = -1;
   firstThat(drawTree);
   dBuf.moveChar(0, ' ', nrmColor, size.x);
   writeLine(0, auxPos + 1, size.x, size.y - (auxPos - delta.y), dBuf);
@@ -259,7 +259,6 @@ TNode* traverseTree(TOutlineViewer* outLine,
 {
 
   Boolean result;
-  int j, childCount;
   TNode* ret;
   ushort flags;
   Boolean children;
@@ -287,17 +286,28 @@ TNode* traverseTree(TOutlineViewer* outLine,
 
   if (children && outLine->isExpanded(cur))
   {
-    childCount = outLine->getNumChildren(cur);
-
+    int lines_ = lines;
     if (! lastChild)
-        lines |=  1 << level;
-
-    for (j = 0; j < childCount; j++)
+        lines_ |=  1 << level;
+    TNode *child = outLine->getChild(cur, 0);
+    do
     {
-       ret = traverseTree(outLine, action, position, checkResult,
-               outLine->getChild(cur, j), level + 1, lines,
-                       Boolean(j == (childCount - 1)));
-       if (ret)
+      TNode *next = outLine->getNext(child);
+      ret = traverseTree(outLine, action, position, checkResult,
+                         child, level + 1, lines_, Boolean(!next));
+      child = next;
+      if (ret)
+        return ret;
+    } while (child);
+  }
+  if (cur == outLine->getRoot())
+  {
+    TNode *next = cur;
+    while ((next = outLine->getNext(next)))
+    {
+      ret = traverseTree(outLine, action, position, checkResult,
+                          next, level, lines, Boolean(!outLine->getNext(next)));
+      if (ret)
         return ret;
     }
   }
@@ -310,8 +320,11 @@ TNode* TOutlineViewer::iterate(
         Boolean checkResult)
 {
   int position = -1;
-  return traverseTree(this, action, position, checkResult,
-                                                  getRoot(), 0, 0, True);
+  TNode *root = getRoot();
+  if (root)
+    return traverseTree(this, action, position, checkResult,
+                        root, 0, 0, Boolean(getNext(root) == 0));
+  return 0;
 }
 
 
@@ -445,9 +458,8 @@ void TOutlineViewer::handleEvent(TEvent& event)
                 selected(foc);
         else
         {
-          if (dragged < 2)
+          if (dragged < 2 && (cur = firstThat(isFocused)))
           {
-            cur = firstThat(isFocused);
             graph = getGraph(focLevel,focLines,focFlags);
             if (mouse.x < strlen(graph) )
             {
@@ -666,6 +678,11 @@ int TOutline::getNumChildren(TNode* node)
     p = p->next;
   }
   return i;
+}
+
+TNode* TOutline::getNext(TNode* node)
+{
+  return node->next;
 }
 
 TNode* TOutline::getChild(TNode* node, int i)

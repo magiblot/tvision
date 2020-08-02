@@ -81,6 +81,7 @@ public:
     virtual void adjust(TNode* node, Boolean expand)=0;
     virtual void draw();
     virtual void focused(int i);
+    virtual TNode* getNext(TNode* node)=0;
     virtual TNode* getChild(TNode* node, int i)=0;
     virtual char* getGraph(int level, long lines, ushort flags);
     virtual int getNumChildren(TNode* node)=0;
@@ -156,6 +157,7 @@ public:
     virtual void adjust(TNode* node, Boolean expand);
     virtual TNode* getRoot();
     virtual int getNumChildren(TNode* node);
+    virtual TNode* getNext(TNode *node);
     virtual TNode* getChild(TNode* node, int i);
     virtual const char* getText(TNode* node);
     virtual Boolean isExpanded(TNode* node);
