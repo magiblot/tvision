@@ -33,12 +33,13 @@ class BufferedDisplay : public DisplayStrategy {
 
     bool limitFPS;
     int frameDrops;
-    static constexpr int maxFrameDrops = 4;
+    int maxFrameDrops;
     std::chrono::microseconds flushDelay;
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 
     static BufferedDisplay *instance;
     static std::set<ScreenCursor*> cursors;
+    static constexpr int defaultMaxFrameDrops = 4;
     static constexpr int defaultFPS = 60;
 
     void resetBuffer();

@@ -30,6 +30,7 @@ void BufferedDisplay::init()
     limitFPS = (fps > 0);
     if (limitFPS)
         flushDelay = microseconds((int) 1e6/fps);
+    maxFrameDrops = max(0, getEnv<int>("TVISION_MAX_FRAMEDROPS", defaultMaxFrameDrops));
     // Initialize variables.
     screenChanged = true;
     caretMoved = false;
