@@ -452,9 +452,9 @@ Boolean TView::focus()
             result = owner->focus();
             if (result)
                 {
-                if ((owner->current->valid(cmReleasedFocus)) &&
-                    ((owner->current == 0) ||
-                     ((owner->current->options & ofValidate) == 0)))
+                if (!owner->current ||
+                    (!(owner->current->options & ofValidate) &&
+                       owner->current->valid(cmReleasedFocus)))
                     select();
                 else
                     return False;
