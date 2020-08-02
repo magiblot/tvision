@@ -105,11 +105,15 @@ struct TCellAttribs : trivially_convertible<uint16_t>
 
     void fgSet(uint8_t fg)
     {
+        if (fg != fgGet())
+            fgDefault = 0;
         *this = (*this & ~0x0F) | (fg & 0x0F);
     }
 
     void bgSet(uint8_t bg)
     {
+        if (bg != bgGet())
+            bgDefault = 0;
         *this = (*this & ~0xF0) | ((bg & 0x0F) << 4);
     }
 
