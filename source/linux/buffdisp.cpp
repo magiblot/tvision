@@ -169,6 +169,16 @@ void BufferedDisplay::ensurePrintable(BufferCell &cell) const
     }
 }
 
+static inline bool isNull(BufferCell cell)
+{
+    return __builtin_expect(cell.Char == '\0', 0);
+}
+
+static inline bool isWide(BufferCell cell)
+{
+    return __builtin_expect(cell.extraWidth, 0);
+}
+
 void FlushScreenAlgorithm::run()
 {
     size = disp.size;
@@ -179,14 +189,14 @@ void FlushScreenAlgorithm::run()
         for (x = damage.begin; x <= damage.end; ++x)
         {
             getCell();
-            if (cell.dirty) {
+            if (cell.dirty || isNull(cell)) {
                 pCell->dirty = 0;
                 processCell();
             }
         }
-        if (wideCanSpill() && x < size.x) {
+        if (x < size.x) {
             getCell();
-            if (__builtin_expect(cell.Char == '\0', 0))
+            if (isNull(cell))
                 handleNull();
         }
         disp.rowDamage[y] = {INT_MAX, INT_MIN};
@@ -196,10 +206,10 @@ void FlushScreenAlgorithm::run()
 void FlushScreenAlgorithm::processCell()
 {
     if (wideCanSpill()) {
-        if (__builtin_expect(cell.extraWidth, 0)) {
+        if (isWide(cell)) {
             handleWideCharSpill();
             return;
-        } else if (__builtin_expect(cell.Char == '\0', 0)) {
+        } else if (isNull(cell)) {
             handleNull();
             return;
         }
