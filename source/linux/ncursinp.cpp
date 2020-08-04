@@ -140,6 +140,7 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
     readUtf8Char(keys, num_keys);
     for (int i = 0; i < num_keys; ++i)
         ev.keyDown.text[i] = (char) keys[i];
+    ev.keyDown.textLength = (uchar) num_keys;
     // If we are lucky enough, the character will be representable in
     // the active codepage.
     ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({ev.keyDown.text, size_t(num_keys)});

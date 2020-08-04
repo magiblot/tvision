@@ -197,6 +197,7 @@ struct KeyDownEvent
         };
     ulong controlKeyState;
     char text[4];
+    uchar textLength;
 };
 
 struct MessageEvent
