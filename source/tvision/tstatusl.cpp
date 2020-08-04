@@ -17,6 +17,7 @@
 #define Uses_TStatusDef
 #define Uses_TDrawBuffer
 #define Uses_TEvent
+#define Uses_TKeys
 #define Uses_opstream
 #define Uses_ipstream
 #include <tvision/tv.h>
@@ -182,20 +183,21 @@ void TStatusLine::handleEvent( TEvent& event )
             break;
             }
         case evKeyDown:
-            {
-            for( TStatusItem *T = items; T != 0; T = T->next )
+            if( event.keyDown.keyCode != kbNoKey )
                 {
-                if( event.keyDown.keyCode ==  T->keyCode &&
-                    commandEnabled(T->command))
+                for( TStatusItem *T = items; T != 0; T = T->next )
                     {
-                    event.what = evCommand;
-                    event.message.command = T->command;
-                    event.message.infoPtr = 0;
-                    return;
+                    if( event.keyDown.keyCode == T->keyCode &&
+                        commandEnabled(T->command) )
+                        {
+                        event.what = evCommand;
+                        event.message.command = T->command;
+                        event.message.infoPtr = 0;
+                        return;
+                        }
                     }
-            }
+                }
             break;
-            }
         case evBroadcast:
             if( event.message.command == cmCommandSetChanged )
                 drawView();
