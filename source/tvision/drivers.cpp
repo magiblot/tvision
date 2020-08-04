@@ -117,24 +117,6 @@ __5:
 #endif
 }
 
-#ifndef __BORLANDC__
-void TDrawBuffer::moveBuf(ushort indent, TScreenCell *source, ushort attr, ushort count)
-{
-    TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
-
-    if (attr)
-        for (; dest < limit && count; --count, ++source, ++dest)
-        {
-            TScreenCell c = *source;
-            c.Attr = (uchar) attr;
-            *dest = c;
-        }
-    else
-        memcpy(dest, source, (limit - dest)*sizeof(TScreenCell));
-}
-#endif
-
 /*------------------------------------------------------------------------*/
 /*                                                                        */
 /*  TDrawBuffer::moveChar                                                 */
