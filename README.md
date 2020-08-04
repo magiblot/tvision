@@ -16,6 +16,8 @@ The main goals of this project are:
 
 Initially, I planned to add features like full-fledged Unicode support into Turbo Vision. However, I realized that doing so would require either extending the API or breaking backwards compatibility, and that a major rewrite would be most likely necessary.
 
+**Update:** The API has been extended to support Unicode input and output. See <a href='#unicode'> Unicode Support</a> for more information.
+
 As a GUI toolkit, Turbo Vision is pretty much outdated. Modern technologies tend to separate appearance specification from behaviour specification, and Turbo Vision is especially bad at that. Considering all its other limitations, it seems that Turbo Vision cannot fulfill the necessities of modern users and programmers. If some TUI library is to revolutionize our terminal applications in the future, that library won't be Turbo Vision, although it may be inspired by it.
 
 ## Build environment
@@ -76,7 +78,7 @@ Where `<options>` can be:
 * `-DWIN32` for 32-bit native Win32 applications (not possible for TVDEMO, which relies on `farcoreleft()` and other antiquities).
 * `-DDEBUG` to build debug versions of the application and the library.
 * `-DTVDEBUG` to link the applications with the debug version of the library.
-* `-DOVERLAY`, `-DALIGNMENT={2,4}`, `-DEXCEPTION`, `-DNO_STREAMABLE`, `-DNOTAMS` for things I have nave never used but appeared in the original makefiles.
+* `-DOVERLAY`, `-DALIGNMENT={2,4}`, `-DEXCEPTION`, `-DNO_STREAMABLE`, `-DNOTASM` for things I have nave never used but appeared in the original makefiles.
 
 This will compile the library into a `LIB` directory next to `project`, and will compile executables for the demo applications in their respective `examples/*` directories.
 
@@ -116,6 +118,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Horizontal and vertical mouse wheel support (`evMouseWheel`), even on DOS.
 * Arbitrary screen size support (with up to 65535 rows or columns).
 * Graceful handling of screen resize events.
+* Windows can be resized also from their bottom left corner.
 * Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
 * Improved usability of menus: they can be closed by clicking twice on them, even submenus.
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
@@ -140,11 +143,14 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 
 ## API changes
 
+* On Linux, screen writes are buffered and are usually sent to the terminal once for every iteration of the active event loop (see also `TVISION_MAX_FPS`). If you need to update the screen during a busy loop, you may use `TScreen::flushScreen()`.
 * `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
-* Several constructors and methods now receive or return `const char*` instead of `char*`.
+* Several constructors and methods now receive or return `const char*` instead of `char*` or have been the `const` qualifier.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
+* `TOutlineViewer` now allows the root node to have siblings.
+* Unicode support, see below.
 
 ## Screenshots
 
@@ -153,3 +159,228 @@ You will find some screenshots [here](https://github.com/magiblot/tvision/issues
 ## Contributing
 
 If you know of any Turbo Vision applications whose source code has not been lost and that could benefit from this, let me know.
+
+<div id="unicode"></div>
+
+# Unicode Support
+
+On Linux, the Turbo Vision API has been extended to allow receiving Unicode input and displaying Unicode text. The supported encoding is UTF-8, for a number of reasons:
+
+* It is compatible with already present data types (`char *`), so it does not require intrusive modifications to existing code.
+* It is the same encoding used for terminal I/O, so redundant conversions are avoided.
+* Conformance to the [UTF-8 Everywhere Manifesto](http://utf8everywhere.org/), which exposes many other advantages.
+
+## Reading Unicode input
+
+The traditional way to get text from a key press event is as follows:
+
+```c++
+// 'ev' is a TEvent, and 'ev.what' equals 'evKeyDown'.
+switch (ev.keyDown.keyCode) {
+    // Key shortcuts are usually checked first.
+    // ...
+    default: {
+        // The character is encoded in the current codepage
+        // (usually CP437).
+        char c = ev.keyDown.charScan.charCode;
+        // ...
+    }
+}
+```
+
+Already existing Turbo Vision classes that deal with text input (most notably `TEditor` and `TInputLine`) depend on this methodology, which has not changed. Single-byte characters, when representable in the current codepage, continue to be available in `ev.keyDown.charScan.charCode`.
+
+Unicode support consists in two new fields in `ev.keyDown` (which is a `struct KeyDownEvent`):
+
+* `char text[4]`, which may contain whatever was read from the terminal: usually a UTF-8 sequence, but possibly any kind of raw data.
+* `uchar textLength`, which is the number of bytes of data available in `text`, from 0 to 4.
+
+So a Unicode character can be retrieved from `TEvent` in the following way:
+
+```c++
+switch (ev.keyDown.keyCode) {
+    // ...
+    default: {
+        std::string_view s {ev.keyDown.text, ev.keyDown.textLength};
+        processText(s);
+    }
+}
+```
+
+Let's see it from another perspective. If the user types `ñ`, a `TEvent` is generated with the following `keyDown` struct:
+
+```c++
+KeyDownEvent {
+    union {
+        .keyCode = 0xA4,
+        .charScan = CharScanType {
+            .charCode = 164 ('ñ'), // In CP437
+            .scanCode = 0
+        }
+    },
+    .controlKeyState = 0x200 (kbInsState),
+    .text = {'\xC3', '\xB1', '\x00', '\x00'}, // In UTF-8
+    .textLength = 2
+}
+```
+However, if they type `€` the following will happen:
+```c++
+KeyDownEvent {
+    union {
+        .keyCode = 0x0 (kbNoKey), // '€' not part of CP437
+        .charScan = CharScanType {
+            .charCode = 0,
+            .scanCode = 0
+        }
+    },
+    .controlKeyState = 0x200 (kbInsState),
+    .text = {'\xE2', '\x82', '\xAC', '\x00'}, // In UTF-8
+    .textLength = 3
+}
+```
+If a key shortcut is pressed instead, `text` is empty:
+```c++
+KeyDownEvent {
+    union {
+        .keyCode = 0xB (kbCtrlK),
+        .charScan = CharScanType {
+            .charCode = 11 ('♂'),
+            .scanCode = 0
+        }
+    },
+    .controlKeyState = 0x20C (kbCtrlShift | kbInsState),
+    .text = {'\x00', '\x00', '\x00', '\x00'},
+    .textLength = 0
+}
+```
+So, in short: views designed without Unicode input in mind will continue to work exactly as they did before, and views which want to be Unicode-aware will have no issues in being so.
+
+For the time being, none of the builtin views have been modified to support Unicode input.
+
+## Displaying Unicode text
+
+The original design of Turbo Vision uses 16 bits to represent a *screen cell*—8 bit for a character and 8 bit for [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes).
+
+On Linux, a new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable of holding a UTF-8 sequence in addition to extended attributes (bold, underline, italic...). However, you should not write text into a `TScreenCell` directly but make use of unicode-aware API functions instead.
+
+### Text display rules
+
+A character provided as argument to any of the Turbo Vision API functions that deal with displaying text is interpreted as follows:
+
+* Non-printable characters in the range `0x00` to `0xFF` are interpreted as characters in the active codepage. For instance, `0x7F` is displayed as `⌂` and `0xF0` as `≡` if using CP437. As an exception, `0x00` is always displayed as a regular space. These characters are all one column wide.
+* Character sequences which are not valid UTF-8 are interpreted as sequences of characters in the current codepage, as in the case above.
+* Valid UTF-8 sequences with a display width other than one are taken care of in a special way, see below.
+
+For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This means that box-drawing characters can be mixed with UTF-8 in general, which is useful for backwards compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
+
+One of the issues of Unicode support is the existence of [ｗｉｄｅ](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
+
+* *Wide* characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
+* Zero-width characters are always drawn as `�`, so they become one column wide.
+* No notable graphical glitches will occur as long as your terminal emulator respects character widths as measured by `wcwidth`.
+
+Here is an example of such characters:
+![Wide character display](https://user-images.githubusercontent.com/20713561/89314567-18e16400-d67a-11ea-950f-d4c35d40e5f7.png)
+
+### Unicode-aware API functions
+
+The usual way of writing to the screen is by using `TDrawBuffer`. A few methods have been added and others have changed their meaning:
+
+```c++
+void TDrawBuffer::moveChar(ushort indent, char c, ushort attr, ushort count);
+void TDrawBuffer::putChar(ushort indent, ushort c);
+```
+`c` is always interpreted as a character in the active codepage.
+
+```c++
+void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr);
+void TDrawBuffer::moveStr(ushort indent, std::string_view str, ushort attr); // New
+void TDrawBuffer::moveCStr(ushort indent, const char *str, ushort attrs);
+void TDrawBuffer::moveCStr(ushort indent, std::string_view str, ushort attrs); // New
+```
+`str` is interpreted according to the rules exposed previously.
+
+```c++
+void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr, ushort width, ushort begin=0); // New
+void TDrawBuffer::moveStr(ushort indent, std::string_view str, ushort attr, ushort width, ushort begin=0); // New
+```
+`str` is interpreted according to the rules exposed previously. However:
+* `width` specifies the maximum number of display columns that should be read from `str`.
+* `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a *wide* character, the remaining positions in that character are filled with spaces.
+
+```c++
+void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);
+```
+This function's name is misleading. Even in its original implementation, `source` is treated as a string. So, on Linux, this is equivalent to `moveStr(indent, std::string_view {(const char*) source, count}, attr)`.
+
+There are other useful unicode-aware functions:
+
+```c++
+int cstrlen(const char *s);
+int cstrlen(std::string_view s); // New
+```
+Returns the displayed length of `s` according to the aforementioned rules, discarding `~` characters.
+
+```c++
+int strwidth(const char *s); // New
+int strwidth(std::string_view s); // New
+```
+Returns the displayed length of `s`.
+
+The overloads taking a `const char *` string are also available on Borland C++, but obviously they are not unicode-aware there. This makes it possible to write encoding-agnostic `draw()` methods that work on both platforms without a single `#ifdef`.
+
+The functions above depend on the following lower-level functions defined in `<tvision/unstable/unicode.h>`. You will need them if you want to fill `TScreenCell` objects with text manually. You may find complete descriptions in that header file.
+
+```c++
+void utf8read(TScreenCell *cell, size_t n, size_t &width, std::string_view text, size_t &bytes);
+void utf8next(std::string_view text, size_t &bytes, size_t &width);
+void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+```
+
+For drawing `TScreenCell` buffers directly, the following methods are available:
+
+```c++
+void TView::writeBuf(short x, short y, short w, short h, const TScreenCell *b); // New
+void TView::writeLine(short x, short y, short w, short h, const TScreenCell *b); // New
+```
+
+### Example: Unicode text in menus and status bars
+
+It's as simple as it can be. Let's modify `hello.cpp` as follows:
+
+```c++
+TMenuBar *THelloApp::initMenuBar( TRect r )
+{
+    r.b.y = r.a.y+1;
+    return new TMenuBar( r,
+      *new TSubMenu( "~Ñ~ello", kbAltH ) +
+        *new TMenuItem( "階~毎~料入報最...", GreetThemCmd, kbAltG ) +
+        *new TMenuItem( "五劫~の~擦り切れ", cmYes, kbNoKey, hcNoContext ) +
+        *new TMenuItem( "העברית ~א~ינטרנט", cmNo, kbNoKey, hcNoContext ) +
+         newLine() +
+        *new TMenuItem( "E~x~it", cmQuit, cmQuit, hcNoContext, "Alt-X" )
+        );
+}
+
+TStatusLine *THelloApp::initStatusLine( TRect r )
+{
+    r.a.y = r.b.y-1;
+    return new TStatusLine( r,
+        *new TStatusDef( 0, 0xFFFF ) +
+            *new TStatusItem( "~Alt-Ç~ Exit", kbAltX, cmQuit ) +
+            *new TStatusItem( 0, kbF10, cmMenu )
+            );
+}
+```
+Here is what it looks like:
+
+![Unicode Hello](https://user-images.githubusercontent.com/20713561/89353910-bd35cb80-d6b7-11ea-9ad6-0f608e5ae01c.png)
+
+## Unicode support across standard views
+
+Support for creating Unicode-aware views is in place, but most of the views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
+
+* At least `TFrame`, `THistoryViewer`, `TListViewer`, `TInputLine` and `TMenuBox` are able to display Unicode text properly.
+* Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
+* `TInputLine` can display but not process Unicode text, as it still believes that every byte is one column wide. This can lead to inconsistencies, because some non-ASCII characters can be represented in the active codepage. For instance, if using CP437, it is possible to type `ç` into a `TInputLine`, but it will be a narrow character instead of a UTF-8 sequence. If you manage to place UTF-8 text in a `TInputLine` (e.g. by selecting a file in a `TFileDialog`), the caret will appear to be out of sync as its position is measured assuming a single-byte encoding.
+* `TEditor` assumes a single-byte encoding both when handling input events and when displaying text. So it won't display UTF-8 but at least it has a consistent behaviour.
