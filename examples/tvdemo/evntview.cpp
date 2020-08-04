@@ -248,9 +248,15 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
         out << ",\n"
             << "      .scanCode = " << (int) (uchar) ev.keyDown.charScan.scanCode << "\n"
             << "    },\n"
-            << "  .controlKeyState = ";
+            << "    .controlKeyState = ";
         decomposeFlag(out, ev.keyDown.controlKeyState, controlKeyFlags);
         out << ",\n"
+            << hex
+            << "    .text = {0x"
+            << (int) (uchar) ev.keyDown.text[0] << ", 0x" << (int) (uchar) ev.keyDown.text[1] << ", 0x"
+            << (int) (uchar) ev.keyDown.text[2] << ", 0x" << (int) (uchar) ev.keyDown.text[3] << "},\n"
+            << dec
+            << "    .textLength = " << (int) ev.keyDown.textLength << "\n"
             << "  }\n";
     }
     if (ev.what & evCommand)
