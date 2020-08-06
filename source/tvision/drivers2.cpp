@@ -74,32 +74,32 @@ const ushort arrowCodes[] =
 
 int cstrlen( const char *s )
 {
+    return cstrlen( TStringView(s) );
+}
+
+int cstrlen( TStringView text )
+{
 #ifdef __BORLANDC__
+    const char _FAR *limit = &text[text.size()];
+    const char _FAR *s = &text[0];
     int len = 0;
-    while( *s != EOS )
+    while( s < limit )
         {
         if( *s++ != '~' )
             len++;
         }
     return len;
 #else
-    return cstrlen(std::string_view {s});
-#endif
-}
-
-#ifndef __BORLANDC__
-int cstrlen( std::string_view s )
-{
     size_t i = 0, width = 0;
-    while (i < s.size()) {
-        if (s[i] != '~')
-            TText::next(s.substr(i, s.size() - i), i, width);
+    while (i < text.size()) {
+        if (text[i] != '~')
+            TText::next(text.substr(i), i, width);
         else
             ++i;
     }
     return width;
-}
 #endif
+}
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
@@ -117,19 +117,17 @@ int cstrlen( std::string_view s )
 
 int strwidth( const char *s )
 {
-#ifdef __BORLANDC__
-    return strlen(s);
-#else
-    return strwidth(std::string_view {s});
-#endif
+    return strwidth( TStringView(s) );
 }
 
-#ifndef __BORLANDC__
-int strwidth( std::string_view s )
+int strwidth( TStringView text )
 {
+#ifdef __BORLANDC__
+    return text.size();
+#else
     size_t i = 0, width = 0;
-    while (i < s.size())
-        TText::next(s.substr(i, s.size() - i), i, width);
+    while (i < text.size())
+        TText::next(text.substr(i), i, width);
     return width;
-}
 #endif
+}

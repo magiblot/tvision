@@ -619,6 +619,7 @@
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
 #include <tvision/scrncell.h>
+#include <tvision/ttext.h>
 
 #if defined( __INC_HARDWARE_H )
 #include <tvision/hardware.h>
@@ -700,10 +701,6 @@
 
 #if defined( __INC_APP_H )
 #include <tvision/app.h>
-#endif
-
-#ifndef __BORLANDC__
-#include <tvision/ttext.h>
 #endif
 
 #pragma option -Vo.

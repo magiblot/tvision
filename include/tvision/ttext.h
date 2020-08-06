@@ -9,13 +9,104 @@
 #ifndef TVISION_TTEXT_H
 #define TVISION_TTEXT_H
 
-#ifndef __BORLANDC__
-
+#ifdef __BORLANDC__
+#define constexpr
+#else
 #include <internal/codepage.h>
 #include <algorithm>
 #include <string_view>
 #include <cstring>
 #include <cwchar>
+#endif
+
+class TStringView {
+
+    const char _FAR *str;
+    size_t len;
+
+public:
+
+    constexpr TStringView();
+    TStringView(const char _FAR *str);
+    constexpr TStringView(const char _FAR *str, size_t len);
+#ifndef __BORLANDC__
+    constexpr TStringView(std::string_view text);
+    constexpr operator std::string_view() const;
+#endif
+
+    constexpr const char* data() const;
+    constexpr size_t size() const;
+    constexpr Boolean empty() const;
+    constexpr const char& operator[](size_t pos) const;
+
+    constexpr TStringView substr(size_t pos) const;
+    constexpr TStringView substr(size_t pos, size_t n) const;
+
+};
+
+inline constexpr TStringView::TStringView() :
+    str(0),
+    len(0)
+{
+}
+
+inline TStringView::TStringView(const char _FAR *str) :
+    str(str),
+    len(strlen(str))
+{
+}
+
+inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
+    str(str),
+    len(len)
+{
+}
+
+#ifndef __BORLANDC__
+inline constexpr TStringView::TStringView(std::string_view text) :
+    str(text.data()),
+    len(text.size())
+{
+}
+
+inline constexpr TStringView::operator std::string_view() const
+{
+    return {str, len};
+}
+#endif
+
+inline constexpr const char* TStringView::data() const
+{
+    return str;
+}
+
+inline constexpr size_t TStringView::size() const
+{
+    return len;
+}
+
+inline constexpr Boolean TStringView::empty() const
+{
+    return Boolean(size() == 0);
+}
+
+inline constexpr const char& TStringView::operator[](size_t pos) const
+{
+    return str[pos];
+}
+
+inline constexpr TStringView TStringView::substr(size_t pos) const
+{
+    return TStringView(str + pos, len - pos);
+}
+
+inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
+{
+    size_t tail = len - pos;
+    if (n > tail)
+        n = tail;
+    return TStringView(str + pos, n);
+}
 
 class TText {
 
@@ -23,11 +114,15 @@ class TText {
 
 public:
 
+#ifndef __BORLANDC__
     static void eat(TScreenCell *cell, size_t n, size_t &width, std::string_view src, size_t &bytes);
     static void next(std::string_view src, size_t &bytes, size_t &width);
     static void wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+#endif
 
 };
+
+#ifndef __BORLANDC__
 
 inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
                         std::string_view src, size_t &bytes )
@@ -125,4 +220,7 @@ inline void TText::wseek(std::string_view text, size_t &index, size_t &remainder
 }
 
 #endif // __BORLANDC__
+#ifdef __BORLANDC__
+#undef constexpr
+#endif
 #endif

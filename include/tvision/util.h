@@ -45,11 +45,9 @@ const char *historyStr( uchar id, int index );
 void historyAdd( uchar id, const char * );
 
 int cstrlen( const char * );
+int cstrlen( TStringView );
 int strwidth( const char * );
-#ifndef __BORLANDC__
-int cstrlen( std::string_view s );
-int strwidth( std::string_view s );
-#endif
+int strwidth( TStringView );
 
 class _FAR TView;
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr );
