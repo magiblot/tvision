@@ -304,6 +304,14 @@ I   INT 16h;
 
     keyDown.keyCode = _AX;
     keyDown.controlKeyState = THardwareInfo::getShiftState();
-    return;
+#endif
+#if defined( __BORLANDC__ )
+    if (' ' <= keyDown.charScan.charCode && keyDown.charScan.charCode < '\x7F')
+        {
+        keyDown.text[0] = (char) keyDown.charScan.charCode;
+        keyDown.textLength = 1;
+        }
+    else
+        keyDown.textLength = 0;
 #endif
 }
