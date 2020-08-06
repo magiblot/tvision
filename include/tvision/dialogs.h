@@ -185,7 +185,9 @@ private:
     Boolean canScroll( int delta );
     int mouseDelta( TEvent& event );
     int mousePos( TEvent& event );
+    int displayedPos( int pos );
     void deleteSelect();
+    void deleteCurrent();
     void adjustSelectBlock();
     void saveState();
     void restoreState();

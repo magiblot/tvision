@@ -114,6 +114,10 @@ class TText {
 
 public:
 
+    static size_t next(TStringView text);
+    static size_t prev(TStringView text, size_t index);
+    static size_t wseek(TStringView text, int count);
+
 #ifndef __BORLANDC__
     static void eat(TScreenCell *cell, size_t n, size_t &width, std::string_view src, size_t &bytes);
     static void next(std::string_view src, size_t &bytes, size_t &width);
@@ -121,6 +125,61 @@ public:
 #endif
 
 };
+
+#ifdef __BORLANDC__
+
+inline size_t TText::next(TStringView text)
+{
+    return text.size() ? 1 : 0;
+}
+
+inline size_t TText::prev(TStringView text, size_t index)
+{
+    return index ? 1 : 0;
+}
+
+inline size_t TText::wseek(TStringView text, int count)
+{
+    return count > 0 ? count : 0;
+}
+
+#else
+
+inline size_t TText::next(TStringView text)
+{
+    if (text.size()) {
+        std::mbstate_t state {};
+        int64_t len = std::mbrtowc(nullptr, text.data(), text.size(), &state);
+        return len <= 1 ? 1 : len;
+    }
+    return 0;
+}
+
+inline size_t TText::prev(TStringView text, size_t index)
+{
+    if (index) {
+        // Try reading backwards character by character, until a valid
+        // character is found. This tolerates invalid characters.
+        size_t lead = std::min<size_t>(index, 4);
+        for (size_t i = 1; i <= lead; ++i) {
+            std::mbstate_t state {};
+            int64_t size = std::mbrtowc(nullptr, &text[index - i], i, &state);
+            if (size > 0)
+                return size == i ? i : 1;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+inline size_t TText::wseek(TStringView text, int count)
+{
+    size_t index = 0, remainder = 0;
+    wseek(text, index, remainder, count);
+    return index;
+}
+
+#endif
 
 #ifndef __BORLANDC__
 

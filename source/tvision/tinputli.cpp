@@ -111,15 +111,15 @@ void TInputLine::draw()
         {
         if( canScroll(-1) )
             b.moveChar( 0, leftArrow, getColor(4), 1 );
-        l = selStart - firstPos;
-        r = selEnd - firstPos;
+        l = displayedPos(selStart) - firstPos;
+        r = displayedPos(selEnd) - firstPos;
         l = max( 0, l );
         r = min( size.x - 2, r );
         if (l <  r)
             b.moveChar( l+1, 0, getColor(3), r - l );
         }
     writeLine( 0, 0, size.x, size.y, b );
-    setCursor( curPos-firstPos+1, 0);
+    setCursor( displayedPos(curPos)-firstPos+1, 0);
 }
 
 void TInputLine::getData( void *rec )
@@ -153,8 +153,14 @@ int TInputLine::mousePos( TEvent& event )
     mouse.x = max( mouse.x, 1 );
     int pos = mouse.x + firstPos - 1;
     pos = max( pos, 0 );
-    pos = min( pos, strlen(data) );
-    return pos;
+    TStringView text = data;
+    pos = min( pos, strwidth(text) );
+    return TText::wseek(text, pos);
+}
+
+int TInputLine::displayedPos( int pos )
+{
+    return strwidth( TStringView(data, pos) );
 }
 
 void  TInputLine::deleteSelect()
@@ -163,6 +169,17 @@ void  TInputLine::deleteSelect()
         {
         strcpy( data+selStart, data+selEnd );
         curPos = selStart;
+        }
+}
+
+void TInputLine::deleteCurrent()
+{
+    TStringView text = data;
+    if( curPos < text.size() )
+        {
+        selStart = curPos;
+        selEnd = curPos + TText::next(text.substr(curPos));
+        deleteSelect();
         }
 }
 
@@ -243,7 +260,7 @@ void TInputLine::handleEvent( TEvent& event )
     static char padKeys[] = {0x47,0x4b,0x4d,0x4f,0x73,0x74, 0};
     TView::handleEvent(event);
 
-    int delta, i;
+    int delta, i, len, curWidth;
     if( (state & sfSelected) != 0 )
         switch( event.what )
             {
@@ -296,12 +313,10 @@ void TInputLine::handleEvent( TEvent& event )
                 switch( event.keyDown.keyCode )
                     {
                     case kbLeft:
-                        if( curPos > 0 )
-                            curPos--;
+                        curPos -= TText::prev(TStringView(data), curPos);
                         break;
                     case kbRight:
-                        if( curPos < strlen(data) )
-                            curPos++;
+                        curPos += TText::next(TStringView(data+curPos));
                         break;
                     case kbHome:
                         curPos =  0;
@@ -312,41 +327,39 @@ void TInputLine::handleEvent( TEvent& event )
                     case kbBack:
                         if( curPos > 0 )
                             {
-                            strcpy( data+curPos-1, data+curPos );
-                            curPos--;
+                            TStringView text = data;
+                            int len = TText::prev(text, curPos);
+                            memmove( data+curPos-len, data+curPos, text.size()-curPos+1 );
+                            curPos -= len;
                             checkValid(True);
                             }
                         break;
                     case kbDel:
                         if( selStart == selEnd )
-                            if( curPos < strlen(data) )
-                                {
-                                selStart = curPos;
-                                selEnd = curPos + 1;
-                                }
-                        deleteSelect();
+                            deleteCurrent();
+                        else
+                            deleteSelect();
                         checkValid(True);
                         break;
                     case kbIns:
                         setState(sfCursorIns, Boolean(!(state & sfCursorIns)));
                         break;
                     default:
-                        if( event.keyDown.charScan.charCode >= ' ' )
+                        if( (len = event.keyDown.textLength) )
                             {
                             deleteSelect();
                             if( (state & sfCursorIns) != 0 )
-                                /* The following must be a signed comparison! */
-                                if( curPos < (int) strlen(data) )
-                                    strcpy( data + curPos, data + curPos + 1 );
+                                deleteCurrent();
 
                             if( checkValid(True) )
                                 {
-                                if( strlen(data) < maxLen )
+                                if( strlen(data) + len <= maxLen )
                                     {
                                     if( firstPos > curPos )
                                         firstPos = curPos;
-                                    memmove( data+curPos+1, data+curPos, strlen(data+curPos)+1 );
-                                    data[curPos++] = event.keyDown.charScan.charCode;
+                                    memmove( data+curPos+len, data+curPos, strlen(data+curPos)+1 );
+                                    memcpy( data+curPos, event.keyDown.text, len );
+                                    curPos += len;
                                     }
                                 checkValid(False);
                                 }
@@ -366,9 +379,10 @@ void TInputLine::handleEvent( TEvent& event )
                     selStart = 0;
                     selEnd = 0;
                     }
-                if( firstPos > curPos )
-                    firstPos = curPos;
-                i = curPos - size.x + 2;
+                curWidth = displayedPos(curPos);
+                if( firstPos > curWidth )
+                    firstPos = curWidth;
+                i = curWidth - size.x + 2;
                 if( firstPos < i )
                     firstPos = i;
                 drawView();
@@ -384,7 +398,7 @@ void TInputLine::selectAll( Boolean enable )
         curPos = selEnd = strlen(data);
     else
         curPos = selEnd = 0;
-    firstPos = max( 0, curPos-size.x+2 );
+    firstPos = max( 0, displayedPos(curPos)-size.x+2 );
     drawView();
 }
 

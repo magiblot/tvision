@@ -255,8 +255,6 @@ KeyDownEvent {
 ```
 So, in short: views designed without Unicode input in mind will continue to work exactly as they did before, and views which want to be Unicode-aware will have no issues in being so.
 
-For the time being, none of the builtin views have been modified to support Unicode input.
-
 ## Displaying Unicode text
 
 The original design of Turbo Vision uses 16 bits to represent a *screen cell*—8 bit for a character and 8 bit for [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes).
@@ -380,7 +378,7 @@ Here is what it looks like:
 
 Support for creating Unicode-aware views is in place, but most of the views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
 
-* At least `TFrame`, `THistoryViewer`, `TListViewer`, `TInputLine` and `TMenuBox` are able to display Unicode text properly.
+* At least `TFrame`, `THistoryViewer`, `TListViewer` and `TMenuBox` are able to display Unicode text properly.
 * Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
-* `TInputLine` can display but not process Unicode text, as it still believes that every byte is one column wide. This can lead to inconsistencies, because some non-ASCII characters can be represented in the active codepage. For instance, if using CP437, it is possible to type `ç` into a `TInputLine`, but it will be a narrow character instead of a UTF-8 sequence. If you manage to place UTF-8 text in a `TInputLine` (e.g. by selecting a file in a `TFileDialog`), the caret will appear to be out of sync as its position is measured assuming a single-byte encoding.
+* `TInputLine` can display and process Unicode text.
 * `TEditor` assumes a single-byte encoding both when handling input events and when displaying text. So it won't display UTF-8 but at least it has a consistent behaviour.
