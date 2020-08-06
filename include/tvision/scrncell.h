@@ -47,7 +47,9 @@ protected:
     template<class C>
     static constexpr bool check_trivial()
     {
+#ifndef __clang__
         static_assert(std::is_trivial<C>());
+#endif
         static_assert(std::is_standard_layout<C>());
         static_assert(sizeof(C) == sizeof(T));
         static_assert(alignof(C) == alignof(T));
