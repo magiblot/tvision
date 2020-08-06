@@ -703,7 +703,7 @@
 #endif
 
 #ifndef __BORLANDC__
-#include <tvision/unstable/unicode.h>
+#include <tvision/ttext.h>
 #endif
 
 #pragma option -Vo.

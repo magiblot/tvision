@@ -329,12 +329,12 @@ Returns the displayed length of `s`.
 
 The overloads taking a `const char *` string are also available on Borland C++, but obviously they are not unicode-aware there. This makes it possible to write encoding-agnostic `draw()` methods that work on both platforms without a single `#ifdef`.
 
-The functions above depend on the following lower-level functions defined in `<tvision/unstable/unicode.h>`. You will need them if you want to fill `TScreenCell` objects with text manually. You may find complete descriptions in that header file.
+The functions above depend on the following lower-level functions. You will need them if you want to fill `TScreenCell` objects with text manually. You may find complete descriptions in `<tvision/ttext.h>`.
 
 ```c++
-void utf8read(TScreenCell *cell, size_t n, size_t &width, std::string_view text, size_t &bytes);
-void utf8next(std::string_view text, size_t &bytes, size_t &width);
-void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+void TText::eat(TScreenCell *cell, size_t n, size_t &width, std::string_view text, size_t &bytes);
+void TText::next(std::string_view text, size_t &bytes, size_t &width);
+void TText::wseek(std::string_view text, size_t &index, size_t &remainder, int count);
 ```
 
 For drawing `TScreenCell` buffers directly, the following methods are available:

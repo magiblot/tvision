@@ -304,7 +304,7 @@ void TDrawBuffer::moveCStr( ushort indent, std::string_view str, ushort attrs )
         else
         {
             data[i].Attr = curAttr;
-            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
         }
 }
 #endif
@@ -390,11 +390,11 @@ void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr )
         while (i < dataLength && j < str.size())
         {
             data[i].Attr = (uchar) attr;
-            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
         }
     else
         while (i < dataLength && j < str.size())
-            utf8read(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
 }
 #endif
 
@@ -437,7 +437,7 @@ void TDrawBuffer::moveStr( ushort indent, const char _FAR *str, ushort attr, ush
 void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr, ushort width, ushort begin )
 {
     size_t s = 0, remainder = 0;
-    utf8wseek(str, s, remainder, begin);
+    TText::wseek(str, s, remainder, begin);
     if (remainder)
         moveChar(indent, ' ', attr, remainder);
     size_t d = indent + remainder;
@@ -446,7 +446,7 @@ void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr, ush
     {
         if (attr)
             data[d].Attr = (uchar) attr;
-        utf8read(&data[d], dataLength - d, d, {&str[s], str.size() - s}, s);
+        TText::eat(&data[d], dataLength - d, d, {&str[s], str.size() - s}, s);
     }
 }
 #endif

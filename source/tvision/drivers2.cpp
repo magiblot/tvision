@@ -90,11 +90,10 @@ int cstrlen( const char *s )
 #ifndef __BORLANDC__
 int cstrlen( std::string_view s )
 {
-    std::mbstate_t state = {};
     size_t i = 0, width = 0;
     while (i < s.size()) {
         if (s[i] != '~')
-            utf8next(s.substr(i, s.size() - i), i, width, state);
+            TText::next(s.substr(i, s.size() - i), i, width);
         else
             ++i;
     }
@@ -128,10 +127,9 @@ int strwidth( const char *s )
 #ifndef __BORLANDC__
 int strwidth( std::string_view s )
 {
-    std::mbstate_t state = {};
     size_t i = 0, width = 0;
     while (i < s.size())
-        utf8next(s.substr(i, s.size() - i), i, width, state);
+        TText::next(s.substr(i, s.size() - i), i, width);
     return width;
 }
 #endif

@@ -1,13 +1,15 @@
 /* ------------------------------------------------------------------------*/
 /*                                                                         */
-/*   UNICODE.H                                                             */
+/*   TTEXT.H                                                               */
 /*                                                                         */
 /*   Defines functions related to multibyte string manipulation.           */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
-#ifndef TVISION_UNICODE_H
-#define TVISION_UNICODE_H
+#ifndef TVISION_TTEXT_H
+#define TVISION_TTEXT_H
+
+#ifndef __BORLANDC__
 
 #include <internal/codepage.h>
 #include <algorithm>
@@ -15,8 +17,20 @@
 #include <cstring>
 #include <cwchar>
 
-inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
-                      std::string_view src, size_t &bytes, std::mbstate_t &state )
+class TText {
+
+// Note: this class is actually a namespace.
+
+public:
+
+    static void eat(TScreenCell *cell, size_t n, size_t &width, std::string_view src, size_t &bytes);
+    static void next(std::string_view src, size_t &bytes, size_t &width);
+    static void wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+
+};
+
+inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
+                        std::string_view src, size_t &bytes )
 // Reads a single character from a multibyte-encoded string. The display width of
 // a character may be 1 or more cells. All such cells (at most 'n') get updated
 // accordingly.
@@ -26,13 +40,13 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
 // * width (output parameter): gets increased by the display width of the text in cell.
 // * src: input text.
 // * bytes (output parameter): gets increased by the number of bytes read from 'src'.
-// * state: check the overload below as you probably don't need this.
 {
     if (n) {
         auto &dst = cell->Char;
         auto &attr = cell->Attr;
         cell->extraWidth = 0;
         wchar_t wc;
+        std::mbstate_t state {};
         int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
         if (len <= 1) {
             bytes += 1;
@@ -69,23 +83,16 @@ inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
     }
 }
 
-inline void utf8read( TScreenCell *cell, size_t n, size_t &width,
-                      std::string_view src, size_t &bytes )
-{
-    std::mbstate_t state {};
-    return utf8read(cell, n, width, src, bytes, state);
-}
-
-inline void utf8next(std::string_view src, size_t &bytes, size_t &width, std::mbstate_t &state)
+inline void TText::next(std::string_view src, size_t &bytes, size_t &width)
 // Measures the length and width of the first character in 'src'.
 //
 // * src: input text.
 // * bytes (output parameter): gets increased by the length of the first character in 'src'.
 // * width (output parameter): gets increased by the display width of the first character in 'src'.
-// * state: check the overload below as you probably don't need this.
 {
     if (src.size()) {
         wchar_t wc;
+        std::mbstate_t state {};
         int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
         if (len <= 1) {
             bytes += 1;
@@ -97,37 +104,25 @@ inline void utf8next(std::string_view src, size_t &bytes, size_t &width, std::mb
     }
 }
 
-inline void utf8next(std::string_view src, size_t &bytes, size_t &width)
-{
-    std::mbstate_t state {};
-    return utf8next(src, bytes, width, state);
-}
-
-inline void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count, std::mbstate_t &state)
+inline void TText::wseek(std::string_view text, size_t &index, size_t &remainder, int count)
 // Seeks a string by an amount of display columns. If that amount overlaps a multi-column
 // character, 'index' is left pointing to the next character and 'remainder' is set to
 // the number of extra seeked columns.
 //
 // * index (input and output parameter): start position.
 // * remainder (output parameter): number of columns in the middle of a wide character.
-//   ATTENTION: 'remainder' must be initialized by the caller.
 // * count: number of columns to seek.
-// * state: check the overload below as you probably don't need this.
 {
     if (count > 0) {
         while (count > 0 && index < text.size()) {
             size_t width = 0;
-            utf8next(text.substr(index, text.size() - index), index, width, state);
+            TText::next({&text[index], text.size() - index}, index, width);
             count -= width;
         }
         remainder = -count;
-    }
+    } else
+        remainder = 0;
 }
 
-inline void utf8wseek(std::string_view text, size_t &index, size_t &remainder, int count)
-{
-    std::mbstate_t state {};
-    utf8wseek(text, index, remainder, count, state);
-}
-
+#endif // __BORLANDC__
 #endif
