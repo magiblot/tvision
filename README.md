@@ -150,6 +150,7 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
+* New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
 * Unicode support, see below.
 
 ## Screenshots
@@ -292,15 +293,15 @@ void TDrawBuffer::putChar(ushort indent, ushort c);
 
 ```c++
 void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr);
-void TDrawBuffer::moveStr(ushort indent, std::string_view str, ushort attr); // New
+void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr); // New
 void TDrawBuffer::moveCStr(ushort indent, const char *str, ushort attrs);
-void TDrawBuffer::moveCStr(ushort indent, std::string_view str, ushort attrs); // New
+void TDrawBuffer::moveCStr(ushort indent, TStringView str, ushort attrs); // New
 ```
 `str` is interpreted according to the rules exposed previously.
 
 ```c++
 void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr, ushort width, ushort begin=0); // New
-void TDrawBuffer::moveStr(ushort indent, std::string_view str, ushort attr, ushort width, ushort begin=0); // New
+void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0); // New
 ```
 `str` is interpreted according to the rules exposed previously. However:
 * `width` specifies the maximum number of display columns that should be read from `str`.
@@ -309,30 +310,35 @@ void TDrawBuffer::moveStr(ushort indent, std::string_view str, ushort attr, usho
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);
 ```
-This function's name is misleading. Even in its original implementation, `source` is treated as a string. So, on Linux, this is equivalent to `moveStr(indent, std::string_view {(const char*) source, count}, attr)`.
+This function's name is misleading. Even in its original implementation, `source` is treated as a string. So, on Linux, this is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
 
 There are other useful unicode-aware functions:
 
 ```c++
 int cstrlen(const char *s);
-int cstrlen(std::string_view s); // New
+int cstrlen(TStringView s); // New
 ```
 Returns the displayed length of `s` according to the aforementioned rules, discarding `~` characters.
 
 ```c++
 int strwidth(const char *s); // New
-int strwidth(std::string_view s); // New
+int strwidth(TStringView s); // New
 ```
 Returns the displayed length of `s`.
 
-The overloads taking a `const char *` string are also available on Borland C++, but obviously they are not unicode-aware there. This makes it possible to write encoding-agnostic `draw()` methods that work on both platforms without a single `#ifdef`.
+On Borland C++, these methods assume a single-byte encoding and all characters being one column wide. This makes it possible to write encoding-agnostic `draw()` and `handleEvent()` methods that work on both platforms without a single `#ifdef`.
 
 The functions above depend on the following lower-level functions. You will need them if you want to fill `TScreenCell` objects with text manually. You may find complete descriptions in `<tvision/ttext.h>`.
 
 ```c++
-void TText::eat(TScreenCell *cell, size_t n, size_t &width, std::string_view text, size_t &bytes);
-void TText::next(std::string_view text, size_t &bytes, size_t &width);
-void TText::wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+size_t TText::next(TStringView text);
+size_t TText::prev(TStringView text, size_t index);
+size_t TText::wseek(TStringView text, int count);
+#ifndef __BORLANDC__
+void TText::eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
+void TText::next(TStringView text, size_t &bytes, size_t &width);
+void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
+#endif
 ```
 
 For drawing `TScreenCell` buffers directly, the following methods are available:

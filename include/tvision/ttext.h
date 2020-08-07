@@ -2,7 +2,7 @@
 /*                                                                         */
 /*   TTEXT.H                                                               */
 /*                                                                         */
-/*   Defines functions related to multibyte string manipulation.           */
+/*   Defines classes and functions related to string manipulation.         */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
@@ -20,6 +20,10 @@
 #endif
 
 class TStringView {
+
+    // This class exists only to compensate for the lack of std::string_view
+    // in Borland C++. Unless you are programming for that compiler, you should
+    // always use std::string_view.
 
     const char _FAR *str;
     size_t len;
@@ -112,7 +116,7 @@ inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
 
 class TText {
 
-// Note: this class is actually a namespace.
+    // This class is actually a namespace.
 
 public:
 
@@ -121,8 +125,8 @@ public:
     static size_t wseek(TStringView text, int count);
 
 #ifndef __BORLANDC__
-    static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView src, size_t &bytes);
-    static void next(TStringView src, size_t &bytes, size_t &width);
+    static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
+    static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 #endif
 
@@ -148,6 +152,8 @@ inline size_t TText::wseek(TStringView text, int count)
 #else
 
 inline size_t TText::next(TStringView text)
+// Measures the length in bytes of the first multibyte character in 'text'.
+// If the sequence is not valid UTF-8, length is 1.
 {
     if (text.size()) {
         std::mbstate_t state {};
@@ -158,6 +164,8 @@ inline size_t TText::next(TStringView text)
 }
 
 inline size_t TText::prev(TStringView text, size_t index)
+// Measures the length in bytes of the character in 'text' right before position 'index'.
+// If 'index' > 0 and that position is not preceded by a valid UTF-8 sequence, length is 1.
 {
     if (index) {
         // Try reading backwards character by character, until a valid
@@ -175,6 +183,9 @@ inline size_t TText::prev(TStringView text, size_t index)
 }
 
 inline size_t TText::wseek(TStringView text, int count)
+// Seeks a string by an amount of display columns ('count'). If that amount
+// partially overlaps a multi-column character, the whole character is included.
+// Returns the number of bytes seeked.
 {
     size_t index = 0, remainder = 0;
     wseek(text, index, remainder, count);
@@ -182,16 +193,16 @@ inline size_t TText::wseek(TStringView text, int count)
 }
 
 inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
-                        TStringView src, size_t &bytes )
+                        TStringView text, size_t &bytes )
 // Reads a single character from a multibyte-encoded string. The display width of
-// a character may be 1 or more cells. All such cells (at most 'n') get updated
-// accordingly.
+// a character may be 1 or more cells, and all such cells (from cell[0] to, at most,
+// cell[n-1]) are updated accordingly.
 //
-// * cell: TScreenCell to write to.
+// * cell: TScreenCell to write to. If you want it to have attributes, you should set them first.
 // * n: maximum number of cells that can be written to.
 // * width (output parameter): gets increased by the display width of the text in cell.
-// * src: input text.
-// * bytes (output parameter): gets increased by the number of bytes read from 'src'.
+// * text: input text.
+// * bytes (output parameter): gets increased by the number of bytes read from 'text'.
 {
     if (n) {
         auto &dst = cell->Char;
@@ -199,17 +210,17 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
         cell->extraWidth = 0;
         wchar_t wc;
         std::mbstate_t state {};
-        int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
+        int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
         if (len <= 1) {
             bytes += 1;
             width += 1;
             if (len < 0)
-                dst = CpTranslator::toUtf8Int(src[0]);
+                dst = CpTranslator::toUtf8Int(text[0]);
             else if (len == 0) // '\0'
                 dst = ' ';
             else {
                 dst = 0;
-                memcpy(&dst.bytes, src.data(), 1);
+                memcpy(&dst.bytes, text.data(), 1);
             }
         } else {
             int cWidth = wcwidth(wc);
@@ -220,7 +231,7 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
             } else {
                 width += cWidth;
                 dst = 0;
-                memcpy(&dst.bytes, src.data(), len);
+                memcpy(&dst.bytes, text.data(), len);
                 // Set extraWidth attribute and fill trailing cells.
                 cell->extraWidth = std::min<size_t>(cWidth - 1, 7);
                 while (--cWidth && --n) {
@@ -235,17 +246,17 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
     }
 }
 
-inline void TText::next(TStringView src, size_t &bytes, size_t &width)
-// Measures the length and width of the first character in 'src'.
+inline void TText::next(TStringView text, size_t &bytes, size_t &width)
+// Measures the length and width of the first character in 'text'.
 //
-// * src: input text.
-// * bytes (output parameter): gets increased by the length of the first character in 'src'.
-// * width (output parameter): gets increased by the display width of the first character in 'src'.
+// * text: input text.
+// * bytes (output parameter): gets increased by the length of the first character in 'text'.
+// * width (output parameter): gets increased by the display width of the first character in 'text'.
 {
-    if (src.size()) {
+    if (text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
-        int64_t len = std::mbrtowc(&wc, src.data(), src.size(), &state);
+        int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
         if (len <= 1) {
             bytes += 1;
             width += 1;
