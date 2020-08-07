@@ -95,7 +95,7 @@ void TFileViewer::readFile( const char *fName )
     ifstream fileToView( fName );
     if( !fileToView )
         {
-        char buf[256] = {};
+        char buf[256] = {0};
         ostrstream os( buf, sizeof( buf )-1 );
         os << "Failed to open file '" << fName << "'." << ends;
         messageBox( buf, mfError | mfOKButton );

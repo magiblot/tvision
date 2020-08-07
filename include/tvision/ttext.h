@@ -50,6 +50,8 @@ inline constexpr TStringView::TStringView() :
 {
 }
 
+extern "C" size_t strlen(const char _FAR *);
+
 inline TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(strlen(str))

@@ -619,7 +619,6 @@
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
 #include <tvision/scrncell.h>
-#include <tvision/ttext.h>
 
 #if defined( __INC_HARDWARE_H )
 #include <tvision/hardware.h>
@@ -629,6 +628,7 @@
 #include <tvision/tkeys.h>
 #endif
 
+#include <tvision/ttext.h>
 #include <tvision/util.h>
 
 #if defined( __INC_TVOBJS_H )

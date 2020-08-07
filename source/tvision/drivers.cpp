@@ -425,7 +425,7 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
     int len = min(begin + width, str.size());
     len -= begin;
     if (len > 0)
-        moveBuf(indent, str + begin, attr, min(width, len));
+        moveBuf(indent, &str[begin], attr, min(width, len));
 #else
     size_t s = 0, remainder = 0;
     TText::wseek(str, s, remainder, begin);
@@ -439,8 +439,8 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
             data[d].Attr = (uchar) attr;
         TText::eat(&data[d], dataLength - d, d, {&str[s], str.size() - s}, s);
     }
-}
 #endif
+}
 
 #ifdef __FLAT__
 TDrawBuffer::TDrawBuffer() {

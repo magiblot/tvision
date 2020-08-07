@@ -34,8 +34,10 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 
 #ifndef __BORLANDC__
+#include <cstddef>
 #include <cstdint>
 #else
+#include <stddef.h>
 typedef char int8_t;
 typedef short int16_t;
 typedef long int32_t;
