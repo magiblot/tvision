@@ -96,7 +96,7 @@ I   POP     DS
 __5:
         ;
 #else
-    return moveStr(indent, TStringView((const char*) source, count), attr);
+    moveStr(indent, TStringView((const char*) source, count), attr);
 #endif
 }
 
@@ -246,7 +246,7 @@ __3:
 I   POP     DS
 
 #else
-    return moveCStr(indent, TStringView(str), attrs);
+    moveCStr(indent, TStringView(str), attrs);
 #endif
 }
 
@@ -347,7 +347,7 @@ __3:
 
 I   POP     DS
 #else
-    return moveStr(indent, TStringView(str), attr);
+    moveStr(indent, TStringView(str), attr);
 #endif
 }
 
