@@ -1,6 +1,6 @@
 # Turbo Vision
 
-An independent, backwards-compatible port of Turbo Vision 2.0 for modern Linux systems.
+An independent, backward-compatible port of Turbo Vision 2.0 for modern Linux systems.
 
 ![tvedit on Konsole](https://user-images.githubusercontent.com/20713561/81506401-4fffdd80-92f6-11ea-8826-ee42612eb82a.png)
 
@@ -14,7 +14,7 @@ The main goals of this project are:
 * Keeping it functional on DOS/Windows.
 * Being as compatible as possible at the source code level with old Turbo Vision applications. This has led me to implement some of the Borland C++ RTL functions, as explained below.
 
-Initially, I planned to add features like full-fledged Unicode support into Turbo Vision. However, I realized that doing so would require either extending the API or breaking backwards compatibility, and that a major rewrite would be most likely necessary.
+Initially, I planned to add features like full-fledged Unicode support into Turbo Vision. However, I realized that doing so would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
 
 **Update:** The API has been extended to support Unicode input and output. See <a href='#unicode'> Unicode Support</a> for more information.
 
@@ -270,7 +270,7 @@ A character provided as argument to any of the Turbo Vision API functions that d
 * Character sequences which are not valid UTF-8 are interpreted as sequences of characters in the current codepage, as in the case above.
 * Valid UTF-8 sequences with a display width other than one are taken care of in a special way, see below.
 
-For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This means that box-drawing characters can be mixed with UTF-8 in general, which is useful for backwards compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
+For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This means that box-drawing characters can be mixed with UTF-8 in general, which is useful for backward compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
 
 One of the issues of Unicode support is the existence of [ｗｉｄｅ](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
 
