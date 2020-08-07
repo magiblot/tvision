@@ -119,9 +119,9 @@ public:
     static size_t wseek(TStringView text, int count);
 
 #ifndef __BORLANDC__
-    static void eat(TScreenCell *cell, size_t n, size_t &width, std::string_view src, size_t &bytes);
-    static void next(std::string_view src, size_t &bytes, size_t &width);
-    static void wseek(std::string_view text, size_t &index, size_t &remainder, int count);
+    static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView src, size_t &bytes);
+    static void next(TStringView src, size_t &bytes, size_t &width);
+    static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 #endif
 
 };
@@ -179,12 +179,8 @@ inline size_t TText::wseek(TStringView text, int count)
     return index;
 }
 
-#endif
-
-#ifndef __BORLANDC__
-
 inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
-                        std::string_view src, size_t &bytes )
+                        TStringView src, size_t &bytes )
 // Reads a single character from a multibyte-encoded string. The display width of
 // a character may be 1 or more cells. All such cells (at most 'n') get updated
 // accordingly.
@@ -237,7 +233,7 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
     }
 }
 
-inline void TText::next(std::string_view src, size_t &bytes, size_t &width)
+inline void TText::next(TStringView src, size_t &bytes, size_t &width)
 // Measures the length and width of the first character in 'src'.
 //
 // * src: input text.
@@ -258,7 +254,7 @@ inline void TText::next(std::string_view src, size_t &bytes, size_t &width)
     }
 }
 
-inline void TText::wseek(std::string_view text, size_t &index, size_t &remainder, int count)
+inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)
 // Seeks a string by an amount of display columns. If that amount overlaps a multi-column
 // character, 'index' is left pointing to the next character and 'remainder' is set to
 // the number of extra seeked columns.

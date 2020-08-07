@@ -113,7 +113,7 @@ __5:
             *(uchar *)dest++ = *s++;
 
 #else
-    return moveStr(indent, std::string_view {(const char*) source, count}, attr);
+    return moveStr(indent, TStringView {(const char*) source, count}, attr);
 #endif
 }
 
@@ -283,12 +283,12 @@ I   POP     DS
             }
         }
 #else
-    return moveCStr(indent, std::string_view {str}, attrs);
+    return moveCStr(indent, TStringView {str}, attrs);
 #endif
 }
 
 #ifndef __BORLANDC__
-void TDrawBuffer::moveCStr( ushort indent, std::string_view str, ushort attrs )
+void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 {
     size_t i = indent, j = 0;
     int toggle = 1;
@@ -377,12 +377,12 @@ I   POP     DS
             while (dest < limit && *str)
                 *(uchar *)dest++ = *str++;
 #else
-    return moveStr(indent, std::string_view {str}, attr);
+    return moveStr(indent, TStringView {str}, attr);
 #endif
 }
 
 #ifndef __BORLANDC__
-void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr )
+void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 {
     size_t i = indent, j = 0;
 
@@ -419,23 +419,14 @@ void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr )
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveStr( ushort indent, const char _FAR *str, ushort attr, ushort width, ushort begin )
+void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin )
 {
 #ifdef __BORLANDC__
-    int len = 0;
-    while (str[len] && len < int(begin + width))
-        ++len;
+    int len = min(begin + width, str.size());
     len -= begin;
     if (len > 0)
         moveBuf(indent, str + begin, attr, min(width, len));
 #else
-    moveStr(indent, std::string {str}, attr, width, begin);
-#endif
-}
-
-#ifndef __BORLANDC__
-void TDrawBuffer::moveStr( ushort indent, std::string_view str, ushort attr, ushort width, ushort begin )
-{
     size_t s = 0, remainder = 0;
     TText::wseek(str, s, remainder, begin);
     if (remainder)
