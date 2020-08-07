@@ -329,7 +329,12 @@ void TInputLine::handleEvent( TEvent& event )
                         curPos = strlen(data);
                         break;
                     case kbBack:
-                        if( curPos > 0 )
+                        if ( selStart != selEnd )
+                            {
+                            deleteSelect();
+                            checkValid(True);
+                            }
+                        else if( curPos > 0 )
                             {
                             TStringView text = data;
                             int len = TText::prev(text, curPos);
