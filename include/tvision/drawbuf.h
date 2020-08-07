@@ -32,29 +32,21 @@ class TDrawBuffer
     friend class TSystemError;
     friend class TView;
     friend void genRefs();
-#ifdef __BORLANDC__
-    typedef ushort data_t;
-#else
-    typedef TScreenCell data_t;
-#endif
 
 public:
 
     void moveChar( ushort indent, char c, ushort attr, ushort count );
     void moveStr( ushort indent, const char _FAR *str, ushort attrs );
+    void moveStr( ushort indent, TStringView str, ushort attrs );
     void moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0 );
     void moveCStr( ushort indent, const char _FAR *str, ushort attrs );
+    void moveCStr( ushort indent, TStringView str, ushort attrs );
     void moveBuf( ushort indent, const void _FAR *source,
                   ushort attr, ushort count );
 
     void putAttribute( ushort indent, ushort attr );
     void putChar( ushort indent, ushort c );
     size_t length() const;
-
-#ifndef __BORLANDC__
-    void moveStr( ushort indent, TStringView str, ushort attrs );
-    void moveCStr( ushort indent, TStringView str, ushort attrs );
-#endif
 
 #ifdef __FLAT__
     TDrawBuffer();
@@ -65,9 +57,9 @@ protected:
 
 #ifdef __FLAT__
     size_t dataLength;
-    data_t *data;
+    TScreenCell *data;
 #else
-    data_t data[maxViewWidth];
+    TScreenCell data[maxViewWidth];
 #endif
 
 };

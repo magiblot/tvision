@@ -25,7 +25,6 @@
 
 #ifndef __BORLANDC__
 #include <cstring>
-#define register
 #endif
 
 #pragma warn -asc
@@ -96,24 +95,8 @@ I   POP     DS
 
 __5:
         ;
-#elif defined(__BORLANDC__)
-
-    register ushort *dest = &data[indent];
-    ushort *limit = &data[dataLength];
-    register uchar _FAR *s = (uchar _FAR *)source;
-
-    if (attr != 0)
-        for (; dest < limit && count; --count, ++s, ++dest)
-        {
-            ((uchar*)dest)[0] = *s;
-            ((uchar*)dest)[1] = (uchar)attr;
-        }
-    else
-        while (dest < limit && count--)
-            *(uchar *)dest++ = *s++;
-
 #else
-    return moveStr(indent, TStringView {(const char*) source, count}, attr);
+    return moveStr(indent, TStringView((const char*) source, count), attr);
 #endif
 }
 
@@ -262,14 +245,24 @@ __3:
 
 I   POP     DS
 
-#elif defined(__BORLANDC__)
+#else
+    return moveCStr(indent, TStringView(str), attrs);
+#endif
+}
+
+void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
+{
+#ifdef __BORLANDC__
     register ushort *dest = &data[indent];
     ushort *limit = &data[dataLength];
+    register uchar _FAR *s = (uchar _FAR *) str.data();
+    ushort count = (ushort) str.size();
     int toggle;
     uchar c, curAttr;
 
-    for (curAttr=((uchar *)&attrs)[0], toggle=1; dest < limit && (c=*str) != 0; str++)
+    for (curAttr=((uchar *)&attrs)[0], toggle=1; dest < limit && count--; s++)
         {
+        c = *s;
         if (c == '~')
             {
             curAttr = ((uchar *)&attrs)[toggle];
@@ -283,13 +276,6 @@ I   POP     DS
             }
         }
 #else
-    return moveCStr(indent, TStringView {str}, attrs);
-#endif
-}
-
-#ifndef __BORLANDC__
-void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
-{
     size_t i = indent, j = 0;
     int toggle = 1;
     uchar curAttr = ((uchar *)&attrs)[0];
@@ -306,8 +292,8 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
             data[i].Attr = curAttr;
             TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
         }
-}
 #endif
+}
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
@@ -360,30 +346,29 @@ I   JMP     __2
 __3:
 
 I   POP     DS
-
-#elif defined(__BORLANDC__)
-
-    register ushort *dest = &data[indent];
-    ushort *limit = &data[dataLength];
-    uchar c;
-
-    if (attr != 0)
-        for (;dest < limit && (c=*str) != 0; ++str, ++dest)
-            {
-            ((uchar*)dest)[0] = c;
-            ((uchar*)dest)[1] = (uchar)attr;
-            }
-        else
-            while (dest < limit && *str)
-                *(uchar *)dest++ = *str++;
 #else
-    return moveStr(indent, TStringView {str}, attr);
+    return moveStr(indent, TStringView(str), attr);
 #endif
 }
 
-#ifndef __BORLANDC__
 void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 {
+#ifdef __BORLANDC__
+    register ushort *dest = &data[indent];
+    ushort *limit = &data[dataLength];
+    register uchar _FAR *s = (uchar _FAR *) str.data();
+    ushort count = (ushort) str.size();
+
+    if (attr != 0)
+        for (; dest < limit && count; --count, ++s, ++dest)
+            {
+            ((uchar*)dest)[0] = *s;
+            ((uchar*)dest)[1] = (uchar)attr;
+            }
+    else
+        while (dest < limit && count--)
+            *(uchar *)dest++ = *s++;
+#else
     size_t i = indent, j = 0;
 
     if (attr)
@@ -395,8 +380,8 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
     else
         while (i < dataLength && j < str.size())
             TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
-}
 #endif
+}
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
