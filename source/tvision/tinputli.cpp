@@ -305,6 +305,8 @@ void TInputLine::handleEvent( TEvent& event )
                     event.keyDown.charScan.charCode = 0;
                     if (curPos == selEnd)
                         anchor = selStart;
+                    else if (selStart == selEnd)
+                        anchor = curPos;
                     else
                         anchor = selEnd;
                     extendBlock = True;
