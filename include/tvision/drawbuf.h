@@ -22,10 +22,6 @@
 #if defined( Uses_TDrawBuffer ) && !defined( __TDrawBuffer )
 #define __TDrawBuffer
 
-#ifndef __BORLANDC__
-#include <string_view>
-#endif
-
 class TDrawBuffer
 {
 

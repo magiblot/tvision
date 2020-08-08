@@ -67,13 +67,9 @@ void TFileViewer::draw()
 
         if( delta.y + i < fileLines->getCount() )
             {
-            char s[maxLineLength+1];
             p = (char *)( fileLines->at(delta.y+i) );
-            if( p == 0 || strlen(p) < delta.x )
-                s[0] = EOS;
-            else
-                strnzcpy( s, p+delta.x, maxLineLength+1 );
-            b.moveStr( 0, s, c );
+            if( p )
+                b.moveStr( 0, p, c, (short)size.x, delta.x );
             }
         writeBuf( 0, i, (short)size.x, 1, b );
         }
@@ -103,7 +99,8 @@ void TFileViewer::readFile( const char *fName )
         }
     else
         {
-        char line[maxLineLength+1];
+        char *line = (char *) malloc(maxLineLength);
+        size_t lineSize = maxLineLength;
         char c;
         while( !lowMemory() &&
                !fileToView.eof() && 
@@ -113,17 +110,19 @@ void TFileViewer::readFile( const char *fName )
             int i = 0;
             while ( !fileToView.eof() && c != '\n' && c != '\r' ) // read a whole line
                 {
-                if ( i < maxLineLength )
-                    line[i++] = c;
+                if (i == lineSize)
+                    line = (char *) realloc(line, (lineSize *= 2));
+                line[i++] = c;
                 fileToView.get( c );
                 }
             line[i] = '\0';
             if ( c == '\r' && fileToView.peek() == '\n')
                 fileToView.get( c ); // grab trailing newline on CRLF
-            limit.x = max( limit.x, strlen( line ) );
+            limit.x = max( limit.x, strwidth( line ) );
             fileLines->insert( newStr( line ) );
             }
         isValid = True;
+        ::free(line);
         }
     limit.y = fileLines->getCount();
 }
