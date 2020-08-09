@@ -380,6 +380,44 @@ Here is what it looks like:
 
 ![Unicode Hello](https://user-images.githubusercontent.com/20713561/89353910-bd35cb80-d6b7-11ea-9ad6-0f608e5ae01c.png)
 
+### Example: writing Unicode-aware `draw()` methods
+
+The following is an excerpt from an old implementation of `TFileViewer::draw()` (part of the `tvdemo` application), which does not draw Unicode text properly:
+
+```c++
+if (delta.y + i < fileLines->getCount()) {
+    char s[maxLineLength+1];
+    p = (char *)(fileLines->at(delta.y+i));
+    if (p == 0 || strlen(p) < delta.x)
+        s[0] = EOS;
+    else
+        strnzcpy(s, p+delta.x, maxLineLength+1);
+    b.moveStr(0, s, c);
+}
+writeBuf( 0, i, size.x, 1, b );
+```
+All it does is move part of a string in `fileLines` into `b`, which is a `TDrawBuffer`. `delta` is a `TPoint` representing the scroll offset in the text view, and `i` is the index of the visible line being processed. `c` is the text color. A few issues are present:
+
+* `TDrawBuffer::moveStr(ushort, const char *, ushort)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a buffer overrun. The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
+* `delta.x` is the first visible column. With multibyte-encoded text, it is no longer true that such column begins at position `delta.x` in the string.
+
+Below is a corrected version of the code above that handles Unicode properly:
+
+```c++
+if (delta.y + i < fileLines->getCount()) {
+    p = (char *)(fileLines->at(delta.y+i));
+    if (p)
+        b.moveStr(0, p, c, size.x, delta.x);
+}
+writeBuf( 0, i, size.x, 1, b );
+```
+The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
+
+* The intermediary copy is avoided, so the displayed text is not limited to `maxLineLength` bytes.
+* `moveStr` takes care of printing the string starting at column `delta.x`. We do not even need to worry about how many bytes correspond to `delta.x` columns.
+* Similarly, `moveStr` is instructed to copy at most `size.x` columns of text without us having to care about how many bytes that is nor dealing with edge cases. The code is written in an encoding-agnostic way and will work whether multibyte characters are being considered or not.
+* In case you hadn't realized yet, the intermediary copy in the previous version was completely unnecessary. It would have been necessary only if we had needed to trim the end of the line, but that was not the case: text occupies all of the view's width, and `TView::writeBuf` already takes care of not writing beyond it. Yet it is interesting to see how an unnecessary step not only was limiting functionality but also was prone to bugs.
+
 ## Unicode support across standard views
 
 Support for creating Unicode-aware views is in place, but most of the views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
