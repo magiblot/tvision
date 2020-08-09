@@ -764,7 +764,7 @@ public:
     ~TParamText();
 
     virtual void getText( char *str );
-    virtual void setText( char *fmt, ... );
+    virtual void setText( const char *fmt, ... );
     virtual int getTextLen();
 
 protected:

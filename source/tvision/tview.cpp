@@ -519,7 +519,7 @@ TPalette& TView::getPalette() const
     return palette;
 }
 
-Boolean TView::getState( ushort aState )
+Boolean TView::getState( ushort aState ) const
 {
     return Boolean( (state & aState) == aState );
 }

@@ -394,7 +394,7 @@ public:
     virtual TPalette& getPalette() const;
     uchar mapColor( uchar );
 
-    Boolean getState( ushort aState );
+    Boolean getState( ushort aState ) const;
     void select();
     virtual void setState( ushort aState, Boolean enable );
 
