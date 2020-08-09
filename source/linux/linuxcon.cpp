@@ -57,9 +57,7 @@ void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
     ulong actualModifiers = 0;
     if (ioctl(0, TIOCLINUX, &res) != -1)
     {
-        /* Turbo Vision uses the Shift flag only on special key combinations,
-         * not on printable characters, where scanCode is 0. */
-        if ((res & (1 << KG_SHIFT)) && key.charScan.scanCode)
+        if ((res & (1 << KG_SHIFT)))
             actualModifiers |= kbShift;
         if (res & (1 << KG_CTRL))
             actualModifiers |= kbCtrlShift;
