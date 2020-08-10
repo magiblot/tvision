@@ -112,7 +112,7 @@ void TFileViewer::readFile( const char *fName )
                 {
                 if (i == lineSize)
                     line = (char *) realloc(line, (lineSize *= 2));
-                line[i++] = c;
+                line[i++] = c ? c : ' ';
                 fileToView.get( c );
                 }
             line[i] = '\0';
