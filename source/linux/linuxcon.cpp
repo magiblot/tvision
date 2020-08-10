@@ -57,7 +57,7 @@ void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
     ulong actualModifiers = 0;
     if (ioctl(0, TIOCLINUX, &res) != -1)
     {
-        if ((res & (1 << KG_SHIFT)))
+        if ((res & (1 << KG_SHIFT)) && !key.textLength)
             actualModifiers |= kbShift;
         if (res & (1 << KG_CTRL))
             actualModifiers |= kbCtrlShift;
