@@ -33,6 +33,7 @@ struct SGRAttribs : trivially_convertible<uint64_t> {
     uchar reverse;
 
     using trivially_convertible::trivially_convertible;
+    SGRAttribs() = default;
 
     enum {defaultInit};
     SGRAttribs(decltype(defaultInit));

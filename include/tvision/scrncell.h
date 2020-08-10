@@ -22,6 +22,8 @@ typedef ushort TScreenCell;
 template<typename T>
 struct alignas(T) trivially_convertible {
 
+    // If you want the derived classes to be trivial, make sure you also
+    // define a trivial default constructor in them.
     trivially_convertible() = default;
 
     trivially_convertible(T asT)
@@ -47,9 +49,7 @@ protected:
     template<class C>
     static constexpr bool check_trivial()
     {
-#ifndef __clang__
         static_assert(std::is_trivial<C>());
-#endif
         static_assert(std::is_standard_layout<C>());
         static_assert(sizeof(C) == sizeof(T));
         static_assert(alignof(C) == alignof(T));
@@ -89,6 +89,7 @@ struct TCellAttribs : trivially_convertible<uint16_t>
         reverse     : 1;
 
     using trivially_convertible::trivially_convertible;
+    TCellAttribs() = default;
 
     TCellAttribs(uint8_t color, ushort flags)
     {
@@ -138,6 +139,7 @@ struct TScreenCellA : trivially_convertible<uint16_t>
     uint8_t Attr;
 
     using trivially_convertible::trivially_convertible;
+    TScreenCellA() = default;
 
     static constexpr void check_assumptions()
     {
@@ -169,6 +171,7 @@ struct TScreenCell : trivially_convertible<uint64_t>
         extraWidth : 3;
 
     using trivially_convertible::trivially_convertible;
+    TScreenCell() = default;
 
     TScreenCell(TScreenCellA pair)
     {
