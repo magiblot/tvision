@@ -25,6 +25,7 @@
 
 #ifndef __BORLANDC__
 #include <cstring>
+#define register
 #endif
 
 #pragma warn -asc
@@ -153,44 +154,21 @@ I   LOOP    __2
 __4:
     ;
 
-#elif defined(__BORLANDC__)
-    register ushort *dest = &data[indent];
-    ushort *limit = &data[dataLength];
+#else
+    register TScreenCell *dest = &data[indent];
+    TScreenCell *limit = &data[dataLength];
 
     if (attr != 0)
         for (; dest < limit && count; --count, ++dest)
             {
-            if (c) ((uchar*)dest)[0] = c;
-            ((uchar*)dest)[1] = (uchar)attr;
+            TScreenCell cell = *dest;
+            if (c) ::setChar(cell, (uchar) c);
+            ::setAttr(cell, (uchar) attr);
+            *dest = cell;
             }
     else
         while (count--)
-            *(uchar *)dest++ = c;
-
-#else
-    TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
-
-    if (attr)
-        for (; dest < limit && count; --count, ++dest)
-        {
-            auto cell = *dest;
-            if (c)
-            {
-                cell.Char = (uchar) c;
-                cell.extraWidth = 0;
-            }
-            cell.Attr = (uchar) attr;
-            *dest = cell;
-        }
-    else
-        while (dest < limit && count--)
-        {
-            auto cell = *dest;
-            cell.Char = (uchar) c;
-            cell.extraWidth = 0;
-            *dest++ = cell;
-        }
+            ::setChar(*dest++, (uchar) c);
 #endif
 }
 

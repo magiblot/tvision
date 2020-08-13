@@ -69,11 +69,7 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
     if (indent < dataLength)
 #endif
     {
-#ifdef __BORLANDC__
-        hiByte(data[indent]) = uchar(attr);
-#else
-        data[indent].Attr = uchar(attr);
-#endif
+        ::setAttr(data[indent], (uchar) attr);
     }
 }
 
@@ -83,12 +79,7 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
     if (indent < dataLength)
 #endif
     {
-#ifdef __BORLANDC__
-        loByte(data[indent]) = uchar(c);
-#else
-        data[indent].Char = uchar(c);
-        data[indent].extraWidth = 0;
-#endif
+        ::setChar(data[indent], (uchar) c);
     }
 }
 

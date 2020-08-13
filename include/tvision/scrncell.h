@@ -13,6 +13,28 @@
 #ifdef __BORLANDC__
 
 typedef ushort TScreenCell;
+typedef uchar TCellAttribs;
+typedef uchar TCellChar;
+
+inline TCellAttribs getAttr(TScreenCell cell)
+{
+    return ((uchar *) &cell)[1];
+}
+
+inline void setAttr(TScreenCell &cell, TCellAttribs attr)
+{
+    ((uchar *) &cell)[1] = attr;
+}
+
+inline TCellChar getChar(TScreenCell cell)
+{
+    return ((uchar *) &cell)[0];
+}
+
+inline void setChar(TScreenCell &cell, TCellChar ch)
+{
+    ((uchar *) &cell)[0] = ch;
+}
 
 #else
 
@@ -188,6 +210,33 @@ struct TScreenCell : trivially_convertible<uint64_t>
     }
 
 };
+
+inline TCellAttribs getAttr(TScreenCell cell)
+{
+    return cell.Attr;
+}
+
+inline void setAttr(TScreenCell &cell, TCellAttribs attr)
+{
+    cell.Attr = attr;
+}
+
+inline TCellChar getChar(TScreenCell cell)
+{
+    return cell.Char;
+}
+
+inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
+{
+    cell.Char = ch;
+    cell.extraWidth = extraWidth;
+}
+
+inline void setChar(TScreenCell &cell, uchar ch)
+{
+    cell.Char = ch;
+    cell.extraWidth = 0;
+}
 
 #endif // __BORLANDC__
 

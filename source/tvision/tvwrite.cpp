@@ -296,16 +296,13 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         // Expand character/attribute pair
         for (i = 0; i < Count - X; ++i)
         {
-            TScreenCell c {TScreenCellA(src[i])};
-            c.Char = CpTranslator::toUtf8Int(c.Char);
-            dst[i] = c;
+            dst[i] = TScreenCell(TScreenCellA(src[i]));
         }
     else
         // Mix in shadow attribute
         for (i = 0; i < Count - X; ++i)
         {
             TScreenCell c {TScreenCellA(src[i])};
-            c.Char = CpTranslator::toUtf8Int(c.Char);
             c.Attr = c.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
             dst[i] = c;
         }
