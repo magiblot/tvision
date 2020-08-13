@@ -123,6 +123,7 @@ void TVMemMgr::freeDiscardable( void *block )
     delete (TBufListEntry *)((char *)block - sizeof(TBufListEntry));
 }
 
+#if defined( __BORLANDC__ )
 
 #if !defined( NDEBUG )
 const int BLK_SIZE = 16;
@@ -201,3 +202,5 @@ void operator delete[] ( void *blk )
 {
    deleteBlock(blk);
 }
+
+#endif
