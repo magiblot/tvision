@@ -125,6 +125,15 @@
 #define __INC_OUTLINE_H
 #endif
 
+#if defined( Uses_TSurfaceView )
+#define Uses_TSurface
+#endif
+
+#if defined( Uses_TSurface )
+#define Uses_TView
+#define __INC_SURFACE_H
+#endif
+
 #if defined( Uses_TTextDevice )
 #define Uses_TScroller
 #define __INC_TEXTVIEW_H
@@ -697,6 +706,10 @@
 
 #if defined( __INC_OUTLINE_H )
 #include <tvision/outline.h>
+#endif
+
+#if defined( __INC_SURFACE_H )
+#include <tvision/surface.h>
 #endif
 
 #if defined( __INC_APP_H )
