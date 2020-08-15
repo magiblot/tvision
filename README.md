@@ -313,6 +313,11 @@ void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort
 ```
 This function's name is misleading. Even in its original implementation, `source` is treated as a string. So, on Linux, this is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
 
+```c++
+void TDrawBuffer::moveBuf(ushort indent, const TScreenCell *source, ushort count); // New
+```
+In case you happen to have an array of `TScreenCell`, this method allows you to copy them into a `TDrawBuffer`.
+
 There are other useful unicode-aware functions:
 
 ```c++

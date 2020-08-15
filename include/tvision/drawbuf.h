@@ -39,6 +39,7 @@ public:
     void moveCStr( ushort indent, TStringView str, ushort attrs );
     void moveBuf( ushort indent, const void _FAR *source,
                   ushort attr, ushort count );
+    void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count );
 
     void putAttribute( ushort indent, ushort attr );
     void putChar( ushort indent, ushort c );

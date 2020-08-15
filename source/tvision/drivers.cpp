@@ -23,7 +23,8 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#include <cstring>
+#include <string.h>
+
 #if !defined( __BORLANDC__ )
 #define register
 #endif
@@ -99,6 +100,27 @@ __5:
 #else
     moveStr(indent, TStringView((const char*) source, count), attr);
 #endif
+}
+
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  TDrawBuffer::moveBuf (2)                                              */
+/*                                                                        */
+/*  arguments:                                                            */
+/*                                                                        */
+/*      indent - character position within the buffer where the data      */
+/*               is to go                                                 */
+/*                                                                        */
+/*      source - far pointer to an array of character/attribute pairs     */
+/*                                                                        */
+/*      count   - number of character/attribute pairs to move             */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count )
+{
+    if (indent < dataLength)
+        memcpy(&data[indent], source, min(count, dataLength - indent));
 }
 
 /*------------------------------------------------------------------------*/
