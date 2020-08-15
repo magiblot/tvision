@@ -51,6 +51,32 @@ inline TPoint& TPoint::operator -= ( const TPoint& subber )
     return *this;
 }
 
+inline TPoint operator - ( const TPoint& one, const TPoint& two )
+{
+    TPoint result;
+    result.x = one.x - two.x;
+    result.y = one.y - two.y;
+    return result;
+}
+
+inline TPoint operator + ( const TPoint& one, const TPoint& two )
+{
+    TPoint result;
+    result.x = one.x + two.x;
+    result.y = one.y + two.y;
+    return result;
+}
+
+inline int operator == ( const TPoint& one, const TPoint& two )
+{
+    return one.x == two.x && one.y == two.y;
+}
+
+inline int operator!= ( const TPoint& one, const TPoint& two )
+{
+    return one.x != two.x || one.y != two.y;
+}
+
 inline ipstream& operator >> ( ipstream& is, TPoint& p )
     { return is >> p.x >> p.y; }
 inline ipstream& operator >> ( ipstream& is, TPoint*& p )
