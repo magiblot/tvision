@@ -175,7 +175,7 @@ inline size_t TText::prev(TStringView text, size_t index)
             std::mbstate_t state {};
             int64_t size = std::mbrtowc(nullptr, &text[index - i], i, &state);
             if (size > 0)
-                return size == i ? i : 1;
+                return (size_t) size == i ? i : 1;
         }
         return 1;
     }
