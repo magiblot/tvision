@@ -23,9 +23,13 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#ifndef __BORLANDC__
 #include <cstring>
+#if !defined( __BORLANDC__ )
 #define register
+#endif
+
+#if !defined( __FLAT__ )
+const size_t TDrawBuffer::dataLength = maxViewWidth;
 #endif
 
 #pragma warn -asc

@@ -58,6 +58,12 @@ protected:
     TScreenCell data[maxViewWidth];
 #endif
 
+private:
+
+#ifndef __FLAT__
+    static const size_t dataLength;
+#endif
+
 };
 
 #define loByte(w)    (((uchar *)&w)[0])
