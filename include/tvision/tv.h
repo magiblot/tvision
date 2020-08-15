@@ -126,11 +126,12 @@
 #endif
 
 #if defined( Uses_TSurfaceView )
-#define Uses_TSurface
+#define Uses_TView
+#define Uses_TDrawSurface
 #endif
 
-#if defined( Uses_TSurface )
-#define Uses_TView
+#if defined( Uses_TDrawSurface )
+#define Uses_TPoint
 #define __INC_SURFACE_H
 #endif
 

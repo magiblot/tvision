@@ -2,66 +2,60 @@
 /*                                                                         */
 /*   SURFACE.H                                                             */
 /*                                                                         */
-/*   Defines the classes TSurface and TSurfaceView.                        */
+/*   Defines the classes TDrawSurface and TSurfaceView.                    */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
-#if defined( Uses_TSurface ) && !defined( __TSurface )
-#define __TSurface
+#if defined( Uses_TDrawSurface ) && !defined( __TDrawSurface )
+#define __TDrawSurface
 
-// A TSurface holds a buffer of TScreenCells that can be freely written to.
-// When the view draws itself, it simply displays the contents of the buffer.
-// The buffer dimensions are always the same as the view's size.
+// A TDrawSurface holds a two-dimensional buffer of TScreenCells
+// that can be freely written to.
 
-class TSurface : public TView {
+class TDrawSurface {
 
-    friend class TSurfaceView;
-
-    size_t areaSize;
-    TScreenCell _FAR *drawArea;
+    size_t dataLength;
+    TScreenCell _FAR *data;
     TScreenCell fill;
-
-protected:
-
-    void updateSize();
 
 public:
 
-    TSurface(const TRect &bounds);
-    ~TSurface();
+    TPoint size;
 
-    virtual void draw();
-    virtual void changeBounds(const TRect &bounds);
+    TDrawSurface();
+    TDrawSurface(TPoint aSize);
+    ~TDrawSurface();
+
+    void resize(TPoint aSize);
+    void clear();
 
     TCellAttribs getFillColor() const;
     void setFillColor(TCellAttribs fillColor);
 
-    void clear();
-
+    // Warning: no bounds checking.
     TScreenCell _FAR &at(int y, int x);
     const TScreenCell _FAR &at(int y, int x) const;
 
 };
 
-inline TCellAttribs TSurface::getFillColor() const
+inline TCellAttribs TDrawSurface::getFillColor() const
 {
     return ::getAttr(fill);
 }
 
-inline void TSurface::setFillColor(TCellAttribs fillColor)
+inline void TDrawSurface::setFillColor(TCellAttribs fillColor)
 {
     ::setAttr(fill, fillColor);
-    clear();
 }
 
-inline TScreenCell _FAR &TSurface::at(int y, int x)
+inline TScreenCell _FAR &TDrawSurface::at(int y, int x)
 {
-    return drawArea[y*size.x + x];
+    return data[y*size.x + x];
 }
 
-inline const TScreenCell _FAR &TSurface::at(int y, int x) const
+inline const TScreenCell _FAR &TDrawSurface::at(int y, int x) const
 {
-    return drawArea[y*size.x + x];
+    return data[y*size.x + x];
 }
 
 #endif
@@ -69,50 +63,22 @@ inline const TScreenCell _FAR &TSurface::at(int y, int x) const
 #if defined( Uses_TSurfaceView ) && !defined( __TSurfaceView )
 #define __TSurfaceView
 
-// A TSurfaceView displays a region of a TSurface. The region's coordinates
-// are (delta.x, delta.y), (delta.x+size.x, delta.y+size.y). Any parts of
-// the region which exceed the TSurface's bounds are displayed as whitespaces.
+// A TSurfaceView displays a region of a TDrawSurface with coordinates
+// (delta.x, delta.y), (delta.x+size.x, delta.y+size.y). Any parts of the region
+// which exceed the TDrawSurface's bounds are displayed as whitespaces.
 
 class TSurfaceView : public TView {
 
-protected:
-
-    const TSurface _FAR *sface;
-    TPoint delta;
-
 public:
 
+    const TDrawSurface _FAR *sface;
+    TPoint delta;
+
     TSurfaceView( const TRect &bounds,
-                  const TSurface _FAR *aSface );
+                  const TDrawSurface _FAR *aSface=0 );
 
     virtual void draw();
 
-    void setSurface(const TSurface _FAR *aSface);
-    void setDelta(TPoint aDelta);
-
 };
-
-inline TSurfaceView::TSurfaceView( const TRect &bounds,
-                                   const TSurface _FAR *aSface ) :
-    TView(bounds),
-    sface(aSface),
-    delta()
-{
-}
-
-inline void TSurfaceView::setSurface(const TSurface _FAR *aSface)
-{
-    sface = aSface;
-}
-
-inline void TSurfaceView::setDelta(TPoint aDelta)
-{
-    // Negative delta not supported.
-    if (aDelta.x < 0)
-        aDelta.x = 0;
-    if (aDelta.y < 0)
-        aDelta.y = 0;
-    delta = aDelta;
-}
 
 #endif

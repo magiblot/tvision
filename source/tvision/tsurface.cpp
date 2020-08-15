@@ -3,71 +3,106 @@
 /*                                                            */
 /* function(s)                                                */
 /*                  Member function(s) of following classes   */
-/*                      TSurface                              */
+/*                      TDrawSurface                          */
 /*                      TSurfaceView                          */
 /*------------------------------------------------------------*/
 
-#define Uses_TSurface
+#define Uses_TDrawSurface
 #define Uses_TSurfaceView
+#define Uses_TDrawBuffer
+#define Uses_TRect
 #include <tvision/tv.h>
 
 #include <stdlib.h>
 
-TSurface::TSurface(const TRect &bounds) :
-    TView(bounds),
-    areaSize(0),
-    drawArea(0),
+TDrawSurface::TDrawSurface() :
+    dataLength(0),
+    data(0),
     fill(0)
 {
-    updateSize();
+    size.x = size.y = 0;
 }
 
-TSurface::~TSurface()
+TDrawSurface::TDrawSurface(TPoint aSize) :
+    TDrawSurface()
 {
-    free(drawArea);
+    resize(aSize);
 }
 
-void TSurface::draw()
+TDrawSurface::~TDrawSurface()
 {
-    writeBuf(0, 0, size.x, size.y, drawArea);
+    ::free(data);
 }
 
-void TSurface::changeBounds(const TRect &bounds)
+void TDrawSurface::resize(TPoint aSize)
 {
-    setBounds(bounds);
-    updateSize();
-    drawView();
+    size_t newLength = max(aSize.x*aSize.y, 0);
+    if ((data = (TScreenCell _FAR *) ::realloc(data, newLength*sizeof(TScreenCell))))
+        for (size_t i = dataLength; i < newLength; ++i)
+            data[i] = fill;
+    dataLength = newLength;
+    size = aSize;
 }
 
-void TSurface::updateSize()
+void TDrawSurface::clear()
 {
-    size_t newSize = max(size.x*size.y, 0);
-    if ((drawArea = (TScreenCell _FAR *) realloc(drawArea, newSize*sizeof(TScreenCell))))
-        for (size_t i = areaSize; i < newSize; ++i)
-            drawArea[i] = fill;
-    areaSize = newSize;
+    for (size_t i = 0; i < dataLength; ++i)
+        data[i] = fill;
 }
 
-void TSurface::clear()
+TSurfaceView::TSurfaceView( const TRect &bounds,
+                            const TDrawSurface _FAR *aSface ) :
+    TView(bounds),
+    sface(aSface)
 {
-    for (size_t i = 0; i < areaSize; ++i)
-        drawArea[i] = fill;
+    delta.x = delta.y = 0;
 }
 
 void TSurfaceView::draw()
 {
-    if (sface) {
-        int countX = min(size.x, sface->size.x - delta.x);
-        int countY = min(size.y, sface->size.y - delta.y);
-        if (countX == size.x)
-            for (int y = 0; y < countY; ++y)
-                writeBuf(0, y, countX, 1, &sface->at(y + delta.y, delta.x));
-        else { // countX < size.x
-            TCellAttribs color = sface->getFillColor();
-            for (int y = 0; y < countY; ++y) {
-                writeBuf(0, y, countX, 1, &sface->at(y + delta.y, delta.x));
-                writeChar(countX, y, '\0', color, size.x - countX);
+    if (sface && size.x > 0) {
+        // Cache these in local variables.
+        const TPoint d = delta;
+        const TPoint ssize = sface->size;
+        const TPoint size = this->size;
+        const TScreenCell *data = &sface->at(max(d.y, 0), max(d.x, 0));
+        const TRect extent = TRect(0, 0, size.x, size.y);
+        // This is the rectangle within the current view's extent where the
+        // surface is to be drawn.
+        const TRect clip = TRect(0, 0, ssize.x, ssize.y)
+                            .move(-d.x, -d.y)
+                            .intersect(extent);
+        int y;
+        if (clip == extent) {
+            // Surface fills all of the view's extent. Can perform direct copy.
+            for (y = 0; y < size.y; ++y, data += ssize.x)
+                writeBuf(0, y, size.x, 1, data);
+        } else {
+            // Prepare a buffer filled with whitespaces.
+            TScreenCell *b = new TScreenCell[size.x];
+            {
+                TScreenCell cell = 0;
+                ::setChar(cell, ' ');
+                ::setAttr(cell, sface->getFillColor());
+                for (int i = 0; i < size.x; ++i)
+                    b[i] = cell;
             }
+            // Write the empty area at the top and the bottom.
+            for (y = 0; y < clip.a.y; ++y)
+                writeBuf(0, y, size.x, 1, b);
+            for (y = clip.b.y; y < size.y; ++y)
+                writeBuf(0, y, size.x, 1, b);
+            // Write the surface's contents.
+            if (clip.a.x == 0 && clip.b.x == size.x)
+                // Direct copy also possible.
+                for (y = clip.a.y; y < clip.b.y; ++y, data += ssize.x)
+                    writeBuf(0, y, size.x, 1, data);
+            else
+                for (y = clip.a.y; y < clip.b.y; ++y, data += ssize.x) {
+                    memcpy(&b[clip.a.x], data, (clip.b.x - clip.a.x)*sizeof(TScreenCell));
+                    writeBuf(0, y, size.x, 1, b);
+                }
+            delete[] b;
         }
     }
 }
