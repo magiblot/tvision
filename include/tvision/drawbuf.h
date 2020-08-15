@@ -52,8 +52,8 @@ public:
 protected:
 
 #ifdef __FLAT__
-    size_t dataLength;
-    TScreenCell *data;
+    const size_t dataLength;
+    TScreenCell * const data;
 #else
     TScreenCell data[maxViewWidth];
 #endif

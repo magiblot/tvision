@@ -43,16 +43,12 @@ const size_t TDrawBuffer::dataLength = maxViewWidth;
 /*      indent - character position within the buffer where the data      */
 /*               is to go                                                 */
 /*                                                                        */
-/*      source - far pointer to an array of character/attribute pairs     */
+/*      source - far pointer to an array of characters                    */
 /*                                                                        */
 /*      attr   - attribute to be used for all characters (0 to retain     */
 /*               the attribute from 'source')                             */
 /*                                                                        */
-/*      count   - number of character/attribute pairs to move             */
-/*                                                                        */
-/*  Comments:                                                             */
-/*                                                                        */
-/*      'source' is actually treated like a string...                     */
+/*      count   - number of characters to move                            */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
@@ -114,12 +110,19 @@ __5:
 /*      indent  - character position within the buffer where the data     */
 /*                is to go                                                */
 /*                                                                        */
-/*      c       - character to be put into the buffer                     */
+/*      c       - character to be put into the buffer (0 to retain the    */
+/*                already present characters)                             */
 /*                                                                        */
-/*      attr    - attribute to be put into the buffer                     */
+/*      attr    - attribute to be put into the buffer (0 to retain the    */
+/*                already present attributes)                             */
 /*                                                                        */
 /*      count   - number of character/attribute pairs to put into the     */
 /*                buffer                                                  */
+/*                                                                        */
+/*  Comments:                                                             */
+/*                                                                        */
+/*      If both 'c' and 'attr' are 0, the attributes are retained         */
+/*      but the characters are not.                                       */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
@@ -160,16 +163,20 @@ __4:
 
 #else
     register TScreenCell *dest = &data[indent];
-    TScreenCell *limit = &data[dataLength];
+    count = min(count, max(dataLength - indent, 0));
 
     if (attr != 0)
-        for (; dest < limit && count; --count, ++dest)
-            {
-            TScreenCell cell = *dest;
-            if (c) ::setChar(cell, (uchar) c);
-            ::setAttr(cell, (uchar) attr);
-            *dest = cell;
-            }
+        if (c != 0)
+            while (count--)
+                {
+                TScreenCell cell = *dest;
+                ::setChar(cell, (uchar) c);
+                ::setAttr(cell, (uchar) attr);
+                *dest++ = cell;
+                }
+        else
+            while(count--)
+                ::setAttr(*dest++, (uchar) attr);
     else
         while (count--)
             ::setChar(*dest++, (uchar) c);
@@ -410,12 +417,13 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
 }
 
 #ifdef __FLAT__
-TDrawBuffer::TDrawBuffer() {
+TDrawBuffer::TDrawBuffer() :
     // This makes it possible to create TDrawBuffers for big screen widths.
     // This does not work nor is necessary in non-Flat builds.
     // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
-    dataLength = max(TScreen::screenWidth, TScreen::screenHeight);
-    data = new TScreenCell[dataLength];
+    dataLength(max(TScreen::screenWidth, TScreen::screenHeight)),
+    data(new TScreenCell[dataLength])
+{
 #ifndef __BORLANDC__
     // We need this as the TScreenCell struct has unused bits.
     memset(data, 0, dataLength*sizeof(TScreenCell));
