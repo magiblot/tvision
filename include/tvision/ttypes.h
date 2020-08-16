@@ -26,7 +26,13 @@
 #define I   asm
 #endif
 
-enum Boolean { False, True };
+enum { False, True };
+
+#ifdef __BORLANDC__
+typedef int Boolean;
+#else
+typedef bool Boolean;
+#endif
 
 typedef unsigned short ushort;
 typedef unsigned char uchar;
