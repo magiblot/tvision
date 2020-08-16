@@ -27,13 +27,19 @@ TTextDevice::TTextDevice( const TRect& bounds,
                           ushort aBufSize ) :
     TScroller(bounds,aHScrollBar,aVScrollBar)
 {
+    // Borland's streambuf::sputn is wrong and never invokes overflow().
+    // So leave the device unbuffered when compiling with Borland C++.
+#ifndef __BORLANDC__
     if( aBufSize )
         {
         char *buffer = new char[aBufSize];
         setp( buffer, buffer + aBufSize );
         }
     else
+#endif
+        {
         setp( 0, 0 );
+        }
 }
 
 TTextDevice::~TTextDevice()
