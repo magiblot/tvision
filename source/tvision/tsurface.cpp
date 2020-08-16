@@ -24,7 +24,9 @@ TDrawSurface::TDrawSurface() :
 }
 
 TDrawSurface::TDrawSurface(TPoint aSize) :
-    TDrawSurface()
+    dataLength(0),
+    data(0),
+    fill(0)
 {
     resize(aSize);
 }
