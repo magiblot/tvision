@@ -271,10 +271,8 @@ void TView::dragView( TEvent& event,
             p = s - event.mouse.where;
             do  {
                 event.mouse.where += p;
-                bounds.a.x = event.mouse.where.x;
+                bounds.a.x = min(max(event.mouse.where.x, bounds.b.x - maxSize.x), bounds.b.x - minSize.x);
                 bounds.b.y = event.mouse.where.y;
-                if ( bounds.b.x - bounds.a.x < minSize.x )
-                    bounds.a.x = bounds.b.x - minSize.x;
                 moveGrow( bounds.a,
                           bounds.b - bounds.a,
                           limits,
