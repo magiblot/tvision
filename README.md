@@ -16,7 +16,7 @@ The main goals of this project are:
 
 Initially, I planned to add features like full-fledged Unicode support into Turbo Vision. However, I realized that doing so would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
 
-**Update:** The API has been extended to support Unicode input and output. See <a href='#unicode'> Unicode Support</a> for more information.
+**Update:** The API has been extended to support Unicode input and output. See <a href='#unicode'> Unicode Support</a> for more information. Also see the [Turbo](https://github.com/magiblot/turbo) text editor as a good example of Unicode support in Turbo Vision.
 
 As a GUI toolkit, Turbo Vision is pretty much outdated. Modern technologies tend to separate appearance specification from behaviour specification, and Turbo Vision is especially bad at that. Considering all its other limitations, it seems that Turbo Vision cannot fulfill the necessities of modern users and programmers. If some TUI library is to revolutionize our terminal applications in the future, that library won't be Turbo Vision, although it may be inspired by it.
 
@@ -426,7 +426,7 @@ The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStr
 
 ## Unicode support across standard views
 
-Support for creating Unicode-aware views is in place, but most of the views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
+Support for creating Unicode-aware views is in place, but some views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
 
 * At least `TFrame`, `THistoryViewer`, `TListViewer` and `TMenuBox` are able to display Unicode text properly.
 * Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
