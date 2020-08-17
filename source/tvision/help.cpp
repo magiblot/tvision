@@ -92,8 +92,6 @@ void THelpViewer::changeBounds( const TRect& bounds )
 void THelpViewer::draw()
 {
     TDrawBuffer b;
-    size_t bufLength = b.length();
-    char *line = (char*) alloca(bufLength);
     int i, j, l;
     int keyCount;
     ushort normal, keyword, selKeyword, c;
@@ -119,9 +117,9 @@ void THelpViewer::draw()
         }
     for (i = 1; i <= size.y; ++i)
         {
+        char line[256] = {0};
         b.moveChar(0, ' ', normal, size.x);
-        memset(line, 0, bufLength);
-        topic->getLine(i + delta.y, line, bufLength-1);
+        topic->getLine(i + delta.y, line, sizeof(line)-1);
         if (strwidth(line) > delta.x)
             {
             b.moveStr(0, line, normal, size.x, delta.x);
