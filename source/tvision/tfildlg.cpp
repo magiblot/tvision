@@ -308,8 +308,8 @@ Boolean TFileDialog::checkDirectory( const char *str )
         return True;
     else
         {
-        char buf[100];
-        ostrstream os( buf, sizeof( buf ) );
+        char buf[256] = {0};
+        ostrstream os( buf, sizeof( buf )-1 );
         os << invalidDriveText << ": '" << str << "'" << ends;
         messageBox( buf, mfError | mfOKButton );
         fileName->select();
@@ -367,8 +367,8 @@ char ext[MAXEXT];
                 return True;
             else
                 {
-                char buf[100];
-                ostrstream os( buf, sizeof( buf ) );
+                char buf[256] = {0};
+                ostrstream os( buf, sizeof( buf )-1 );
                 os << invalidFileText << ": '" << fName << "'" << ends;
                 messageBox( buf, mfError | mfOKButton );
                 return False;

@@ -181,8 +181,8 @@ Boolean TChDirDialog::valid( ushort command )
 
     if( changeDir( path ) != 0 )
         {
-        char buf[100];
-        ostrstream os( buf, sizeof( buf ) );
+        char buf[256] = {0};
+        ostrstream os( buf, sizeof( buf )-1 );
         os << invalidText << ": '" << path << "'." << ends;
         messageBox( buf, mfError | mfOKButton );
         return False;
