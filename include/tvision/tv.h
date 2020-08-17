@@ -638,8 +638,8 @@
 #include <tvision/tkeys.h>
 #endif
 
-#include <tvision/ttext.h>
 #include <tvision/util.h>
+#include <tvision/ttext.h>
 
 #if defined( __INC_TVOBJS_H )
 #include <tvision/tvobjs.h>

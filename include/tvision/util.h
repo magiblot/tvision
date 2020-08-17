@@ -17,9 +17,6 @@
 #define __UTIL_H
 
 #include <stddef.h>
-#ifndef __BORLANDC__
-#include <string_view>
-#endif
 
 inline int min( int a, int b )
 {
@@ -44,6 +41,7 @@ ushort historyCount( uchar id );
 const char *historyStr( uchar id, int index );
 void historyAdd( uchar id, const char * );
 
+class TStringView;
 int cstrlen( const char * );
 int cstrlen( TStringView );
 int strwidth( const char * );
