@@ -318,7 +318,7 @@ void TDrawBuffer::moveBuf(ushort indent, const TScreenCell *source, ushort count
 ```
 In case you happen to have an array of `TScreenCell`, this method allows you to copy them into a `TDrawBuffer`.
 
-There are other useful unicode-aware functions:
+There are other useful Unicode-aware functions:
 
 ```c++
 int cstrlen(const char *s);
@@ -339,7 +339,7 @@ The functions above depend on the following lower-level functions. You will need
 ```c++
 size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
-size_t TText::wseek(TStringView text, int count);
+size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
 #ifndef __BORLANDC__
 void TText::eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
 void TText::next(TStringView text, size_t &bytes, size_t &width);
@@ -429,6 +429,7 @@ The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStr
 Support for creating Unicode-aware views is in place, but some views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
 
 * At least `TFrame`, `THistoryViewer`, `TListViewer` and `TMenuBox` are able to display Unicode text properly.
-* Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
 * `TInputLine` can display and process Unicode text.
+* Word wrapping in `TStaticText` is Unicode-aware.
+* Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
 * `TEditor` assumes a single-byte encoding both when handling input events and when displaying text. So it won't display UTF-8 but at least it has a consistent behaviour.

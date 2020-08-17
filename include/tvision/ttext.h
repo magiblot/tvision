@@ -122,7 +122,7 @@ public:
 
     static size_t next(TStringView text);
     static size_t prev(TStringView text, size_t index);
-    static size_t wseek(TStringView text, int count);
+    static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
 #ifndef __BORLANDC__
     static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
@@ -139,14 +139,14 @@ inline size_t TText::next(TStringView text)
     return text.size() ? 1 : 0;
 }
 
-inline size_t TText::prev(TStringView text, size_t index)
+inline size_t TText::prev(TStringView, size_t index)
 {
     return index ? 1 : 0;
 }
 
-inline size_t TText::wseek(TStringView text, int count)
+inline size_t TText::wseek(TStringView text, int count, Boolean)
 {
-    return count > 0 ? count : 0;
+    return count > 0 ? min(count, text.size()) : 0;
 }
 
 #else
@@ -182,13 +182,16 @@ inline size_t TText::prev(TStringView text, size_t index)
     return 0;
 }
 
-inline size_t TText::wseek(TStringView text, int count)
+inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder)
 // Seeks a string by an amount of display columns ('count'). If that amount
-// partially overlaps a multi-column character, the whole character is included.
+// partially overlaps a multi-column character, the whole character is included,
+// unless 'incRemainder' is False.
 // Returns the number of bytes seeked.
 {
     size_t index = 0, remainder = 0;
     wseek(text, index, remainder, count);
+    if (!incRemainder && remainder)
+        index -= TText::prev(text, index);
     return index;
 }
 
@@ -277,14 +280,19 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
 // * count: number of columns to seek.
 {
     if (count > 0) {
-        while (count > 0 && index < text.size()) {
+        while (index < text.size()) {
             size_t width = 0;
             TText::next({&text[index], text.size() - index}, index, width);
             count -= width;
+            if (count <= 0) {
+                // Immediately return when the requested width is exceeded.
+                remainder = -count;
+                return;
+            }
         }
-        remainder = -count;
-    } else
-        remainder = 0;
+    }
+    // No remainder when the end of string was reached.
+    remainder = 0;
 }
 
 #endif // __BORLANDC__
