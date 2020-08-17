@@ -122,8 +122,8 @@ static TRect makeRect(const char *text)
 {
     TRect r( 0, 0, 40, 9 );
 
-    int len = strlen(text);
-    while (len > (r.b.x - 7)*(r.b.y - 6))
+    int width = strwidth(text);
+    while (width > (r.b.x - 7)*(r.b.y - 6))
         ++r.b.y;
 
     r.move((TProgram::deskTop->size.x - r.b.x) / 2,
