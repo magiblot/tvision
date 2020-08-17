@@ -467,7 +467,7 @@ const char * const _NEAR THelpIndex::name = "THelpIndex";
 
 void THelpIndex::write( opstream& os )
 {
-    help_t *indexArrayPtr;
+    int32_t *indexArrayPtr;
 
     os << size;
     for (int i = 0; i < size; ++i)
@@ -479,14 +479,14 @@ void THelpIndex::write( opstream& os )
 
 void *THelpIndex::read( ipstream& is )
 {
-    help_t *indexArrayPtr;
+    int32_t *indexArrayPtr;
 
     is >> size;
     if (size == 0)
         index = 0;
     else
         {
-        index =  new help_t[size];
+        index =  new int32_t[size];
         for(int i = 0; i < size; ++i)
             {
             indexArrayPtr = index + i;
@@ -518,9 +518,9 @@ THelpIndex::THelpIndex(void): TObject ()
     index = 0;
 }
 
-help_t THelpIndex::position(int i)
+int32_t THelpIndex::position(int i)
 {
-    help_t *indexArrayPtr;
+    int32_t *indexArrayPtr;
 
     if (i < size)
         {
@@ -531,21 +531,21 @@ help_t THelpIndex::position(int i)
         return -1;
 }
 
-void THelpIndex::add( int i, help_t val )
+void THelpIndex::add( int i, int32_t val )
 {
     int delta = 10;
-    help_t *p;
+    int32_t *p;
     int newSize;
-    help_t *indexArrayPtr;
+    int32_t *indexArrayPtr;
 
     if (i >= size)
         {
         newSize = (i + delta) / delta * delta;
-        p = new help_t[newSize];
+        p = new int32_t[newSize];
         if (p != 0)
             {
-            memmove(p, index, size * sizeof(help_t));
-            memset(p+size, 0xFF, (newSize - size) * sizeof(help_t));
+            memmove(p, index, size * sizeof(int32_t));
+            memset(p+size, 0xFF, (newSize - size) * sizeof(int32_t));
             }
         if (size > 0)
             {
@@ -562,14 +562,14 @@ void THelpIndex::add( int i, help_t val )
 
 THelpFile::THelpFile( fpstream&  s )
 {
-    help_t magic;
-    help_t size;
+    int32_t magic;
+    int32_t size;
 
     magic = 0;
     s.seekg(0, ios::end);
     size = s.tellg();
     s.seekg(0);
-    if (size > sizeof(magic))
+    if ((size_t) size > sizeof(magic))
         s >> magic;
     if (magic != magicHeader)
         {
@@ -591,7 +591,7 @@ THelpFile::THelpFile( fpstream&  s )
 
 THelpFile::~THelpFile(void)
 {
-    help_t magic, size;
+    int32_t magic, size;
 
     if (modified == True)
         {
@@ -613,7 +613,7 @@ THelpFile::~THelpFile(void)
 
 THelpTopic *THelpFile::getTopic( int i )
 {
-    help_t pos;
+    int32_t pos;
     THelpTopic *topic = 0;
 
     pos = index->position(i);

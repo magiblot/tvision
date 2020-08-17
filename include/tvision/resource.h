@@ -68,8 +68,8 @@ inline opstream& operator << ( opstream& os, TStringCollection* cl )
 struct TResourceItem
 {
 
-    long pos;
-    long size;
+    int32_t pos;
+    int32_t size;
     char *key;
 };
 
@@ -141,8 +141,8 @@ protected:
 
     fpstream *stream;
     Boolean modified;
-    long basePos;
-    long indexPos;
+    int32_t basePos;
+    int32_t indexPos;
     TResourceCollection *index;
 };
 
@@ -183,7 +183,7 @@ public:
 private:
 
     ipstream *ip;
-    long basePos;
+    int32_t basePos;
     short indexSize;
     TStrIndexRec *index;
 
