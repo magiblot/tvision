@@ -179,8 +179,8 @@ const char *replaceExt( const char *fileName, const char *nExt, Boolean force )
     char name[MAXFILE];
     char ext[MAXEXT];
     char drive[MAXDRIVE];
-    char buffer[MAXPATH];
-    ostrstream os(buffer, MAXPATH);
+    static char buffer[MAXPATH] = {0};
+    ostrstream os(buffer, MAXPATH-1);
 
     fnsplit(fileName, drive, dir, name, ext);
     if (force || (strlen(ext) == 0))
@@ -402,14 +402,13 @@ void doFixUps( TFixUp *p, uint value, fpstream& s )
 void resolveReference( const char *topic, uint value, fpstream& s )
 {
     TReference *ref;
-    char bufStr[MAXSIZE];
 
     initRefTable();
     ref = refTable->getReference(topic);
     if (ref->resolved)
         {
-        strcpy(bufStr,"Redefinition of ");
-        strcat(bufStr,ref->topic);
+        char bufStr[MAXSTRSIZE] = "Redefinition of ";
+        strncat(bufStr, ref->topic, MAXSTRSIZE-1);
         error(bufStr);
         }
     else
@@ -451,12 +450,12 @@ const char *getWord( const char *line, int &i )
 {
     int j;
     const char *strptr;
-    static char getword[MAXSIZE];
+    static char getword[MAXSTRSIZE] = {0};
 
     skipWhite(line,i);
     j = i;
     if (j > (int) strlen(line))
-        strcpy(getword,"");
+        strncpy(getword, "", MAXSTRSIZE-1);
     else
         {
         ++i;
@@ -482,7 +481,7 @@ TTopicDefinition::TTopicDefinition( const char *aTopic, uint aValue )
 
 TTopicDefinition::~TTopicDefinition()
 {
-    delete topic;
+    delete[] topic;
     if (next != 0)
         delete next;
 }
@@ -527,8 +526,8 @@ TTopicDefinition *topicDefinition( const char *line, int& i )
 
         if (helpCounter > MAXHELPTOPICID)
             {
-            char buf[MAXSTRSIZE];
-            ostrstream os( buf, sizeof(buf));
+            char buf[MAXSTRSIZE] = {0};
+            ostrstream os( buf, sizeof(buf)-1 );
 
             os << "Topic id for topic '" << topic
                << "' exceeds limit of " << MAXHELPTOPICID << ends;
@@ -808,7 +807,7 @@ void _FAR handleCrossRefs( opstream& s, int xRefValue )
 
 void skipBlankLines( fstream& s )
 {
-    char line[256];
+    char line[MAXSTRSIZE];
 
     line[0] = 0;
     while (line[0] == 0)
@@ -835,7 +834,7 @@ void disposeXRefs( TCrossRefNode  *p )
         {
         q = p;
         p = p->next;
-        delete q->topic;
+        delete[] q->topic;
         delete q;
         }
 }
@@ -998,8 +997,6 @@ int main(int argc, char **argv)
        "     Help file   = Compiled help file\n"
        "     Symbol file = An include file containing all the screen names as const's\n";
 
-    char bufStr[MAXSTRSIZE];
-
     cout << initialText;
     if (argc < 2)
         {
@@ -1011,10 +1008,8 @@ int main(int argc, char **argv)
     strcpy(textName,replaceExt(argv[1], ".txt", False));
     if (!fExists(textName))
         {
-        strcpy(bufStr,"File ");
-        strcat(bufStr,textName);
-        strcat(bufStr," not found.");
-        error(bufStr);
+        cout << "Error: File '" << textName << "' not found." << endl;
+        exit(1);
         }
 
     if (argc >= 3)
