@@ -404,6 +404,11 @@ static int scan( char *p, int offset, int size, char c)
         }
 }
 
+static int widthToPos(const char *text, int offset, int size, int width)
+{
+    return offset + TText::wseek(TStringView(&text[offset], size), width, False);
+}
+
 TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap )
 {
     int i;
@@ -412,24 +417,18 @@ TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wra
     i = scan(text, offset, size, '\n');
     if (i + offset > size )
         i = size - offset;
-    if ((i >= width) && (wrap == True))
+    if (wrap && strwidth(TStringView(&text[offset], i)) >= width)
         {
-        i = offset + width;
+        i = widthToPos(text, offset, i, width);
         if (i > size)
             i = size;
         else
             {
             while((i > offset) && !(isBlank(text[i])))
                 --i;
-/*
-            if (i == offset)
-                i = offset + width;
-            else
-                ++i;
-*/
             if( i == offset )
                 {
-                i = offset + width;
+                i = widthToPos(text, offset, i - offset, width);
                 while( (i < size) && !isBlank(text[i]) )
                     ++i;
                 if( i < size )
@@ -439,7 +438,7 @@ TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wra
                 ++i;
             }
         if (i == offset)
-            i = offset + width;
+            i = widthToPos(text, offset, i - offset, width);
         i -= offset;
         }
     str = TStringView(&text[offset], i);

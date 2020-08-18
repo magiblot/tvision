@@ -430,6 +430,6 @@ Support for creating Unicode-aware views is in place, but some views that are pa
 
 * At least `TFrame`, `THistoryViewer`, `TListViewer` and `TMenuBox` are able to display Unicode text properly.
 * `TInputLine` can display and process Unicode text.
-* Word wrapping in `TStaticText` is Unicode-aware.
+* Word wrapping in `TStaticText` and `THelpViewer` is Unicode-aware.
 * Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
 * `TEditor` assumes a single-byte encoding both when handling input events and when displaying text. So it won't display UTF-8 but at least it has a consistent behaviour.
