@@ -219,7 +219,13 @@ char *getLine( fstream& s)
         return line;
         }
     if (!lineInBuffer)
+        {
         s.getline(line, MAXSTRSIZE, '\n');
+        // Remove carriage return at the end of line.
+        int len = strlen(line);
+        if (len && line[len - 1] == '\r')
+            line[len - 1] = '\0';
+        }
     lineInBuffer = False;
     ++lineCount;
     return line;
