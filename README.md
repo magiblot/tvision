@@ -35,6 +35,7 @@ The above produces the following files:
 
 * `libtvision.a`, which is the Turbo Vision library.
 * The demo applications `hello`, `tvdemo`, `tvedit` and `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
+* `tvhc`, the Turbo Vision Help Compiler.
 
 The build requirements are:
 
