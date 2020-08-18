@@ -979,8 +979,8 @@ void checkOverwrite( const char *fName )
     if (fExists(fName))
         {
         cerr << "File already exists: " << fName << ".  Overwrite? (y/n) ";
-        char ch = getchar();
-        if( toupper(ch) != 'Y' )
+        char ch;
+        if( scanf(" %c", &ch) != 1 || toupper(ch) != 'Y' )
             exit(1);
         }
 }
