@@ -41,9 +41,9 @@
 #include <string.h>
 
 #ifdef __FLAT__
-#define HELP_FILENAME "DEMOHELP.H32"
+#define HELP_FILENAME "demohelp.h32"
 #else
-#define HELP_FILENAME "DEMOHELP.H16"
+#define HELP_FILENAME "demohelp.h16"
 #endif
 
 //
