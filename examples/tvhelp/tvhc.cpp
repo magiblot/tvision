@@ -936,7 +936,7 @@ void _FAR doWriteSymbol(void *p, void *p1)
 
 void writeSymbFile( TProtectedStream *symbFile )
 {
-    char header1[] = "const\n";
+    char header1[] = "const int\n";
 
     *symbFile << header1;
     refTable->forEach(doWriteSymbol, symbFile);
