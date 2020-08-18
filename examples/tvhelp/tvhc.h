@@ -39,7 +39,7 @@ public:
     typedef ios::openmode openmode;
 #endif
 
-    TProtectedStream( char *aFileName, openmode aMode );
+    TProtectedStream( const char *aFileName, openmode aMode );
 
 private:
 
@@ -84,7 +84,7 @@ public:
 
     virtual int compare( void *key1,void *key2 );
     virtual void freeItem( void *item );
-    TReference *getReference( char *topic );
+    TReference *getReference( const char *topic );
     virtual void *keyOf( void *item );
 
 private:
@@ -108,7 +108,7 @@ class TTopicDefinition : public TObject
 
 public:
 
-    TTopicDefinition(char *aTopic, uint aValue);
+    TTopicDefinition(const char *aTopic, uint aValue);
     ~TTopicDefinition(void);
 
     char *topic;

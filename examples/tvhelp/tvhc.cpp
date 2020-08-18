@@ -158,14 +158,14 @@ int           lineCount = 0;
 
 //======================= File Management ===============================//
 
-TProtectedStream::TProtectedStream( char *aFileName, openmode aMode ) :
+TProtectedStream::TProtectedStream( const char *aFileName, openmode aMode ) :
     fstream( aFileName, aMode )
 {
     strcpy(fileName, aFileName);
     mode = aMode;
 }
 
-void error(char *text);
+void error(const char *text);
 
 //----- replaceExt(fileName, nExt, force) -------------------------------//
 //  Replace the extension of the given file with the given extension.    //
@@ -173,7 +173,7 @@ void error(char *text);
 //  replaced anyway.                                                     //
 //-----------------------------------------------------------------------//
 
-char *replaceExt( char *fileName, char *nExt, Boolean force )
+const char *replaceExt( const char *fileName, const char *nExt, Boolean force )
 {
     char dir[MAXPATH];
     char name[MAXFILE];
@@ -196,7 +196,7 @@ char *replaceExt( char *fileName, char *nExt, Boolean force )
 //  Returns true if the file exists false otherwise.                     /
 //-----------------------------------------------------------------------/
 
-Boolean fExists(char *fileName)
+Boolean fExists(const char *fileName)
 {
     struct ffblk ffblk;
 
@@ -229,7 +229,7 @@ char *getLine( fstream& s)
 //  Return given line into the stream.                                   //
 //-----------------------------------------------------------------------//
 
-void unGetLine( char *s )
+void unGetLine( const char *s )
 {
     strcpy(line,s);
     lineInBuffer = True;
@@ -242,7 +242,7 @@ void unGetLine( char *s )
 //  Used by Error and Warning to print the message.                      //
 //-----------------------------------------------------------------------//
 
-void prntMsg( char *pref, char *text )
+void prntMsg( const char *pref, const char *text )
 {
     if (lineCount > 0)
         cout << pref << ": " << textName << "("
@@ -256,7 +256,7 @@ void prntMsg( char *pref, char *text )
 //  Used to indicate an error.  Terminates the program                   //
 //-----------------------------------------------------------------------//
 
-void error( char *text )
+void error( const char *text )
 {
     prntMsg("Error", text);
     exit(1);
@@ -266,7 +266,7 @@ void error( char *text )
 //  Used to indicate an warning.                                         //
 //-----------------------------------------------------------------------//
 
-void warning( char *text )
+void warning( const char *text )
 {
     prntMsg("Warning", text);
 }
@@ -303,7 +303,7 @@ int TRefTable::compare( void *key1, void *key2 )
     int compValue;
 
 
-    compValue = strcmp( (char *)key1, (char *)key2 );
+    compValue = strcmp( (const char *)key1, (const char *)key2 );
     if (compValue > 0)
         return 1;
     else if (compValue < 0)
@@ -323,12 +323,12 @@ void TRefTable::freeItem( void *item )
     delete ref;
 }
 
-TReference *TRefTable::getReference( char *topic )
+TReference *TRefTable::getReference( const char *topic )
 {
     TReference *ref;
     int i;
 
-    if (search(topic, i))
+    if (search((void *) topic, i))
         ref = (TReference *) at(i);
     else
         {
@@ -361,7 +361,7 @@ void initRefTable()
 //  handles forward references.                                         //
 //----------------------------------------------------------------------//
 
-void recordReference( char *topic, opstream& s )
+void recordReference( const char *topic, opstream& s )
 {
     int i;
     TReference *ref;
@@ -399,7 +399,7 @@ void doFixUps( TFixUp *p, uint value, fpstream& s )
 //  handles forward references.                                         //
 //----------------------------------------------------------------------//
 
-void resolveReference( char *topic, uint value, fpstream& s )
+void resolveReference( const char *topic, uint value, fpstream& s )
 {
     TReference *ref;
     char bufStr[MAXSIZE];
@@ -423,7 +423,7 @@ void resolveReference( char *topic, uint value, fpstream& s )
 
 //======================= Help file parser =============================//
 
-void skipWhite( char *line,int& i )
+void skipWhite( const char *line,int& i )
 {
     while (i <= strlen(line) && (line[i] == ' ') || (line[i] == 8))
         ++i;
@@ -437,7 +437,7 @@ int checkForValidChar( char ch )
 }
 
 
-void skipToNonWord( char *line, int& i )
+void skipToNonWord( const char *line, int& i )
 {
     while (i <= strlen(line) && (!checkForValidChar(line[i])))
         ++i;
@@ -447,10 +447,10 @@ void skipToNonWord( char *line, int& i )
 //   Extract the next word from the given line at offset i.             //
 //----------------------------------------------------------------------//
 
-char *getWord( char *line, int &i )
+const char *getWord( const char *line, int &i )
 {
     int j;
-    char *strptr;
+    const char *strptr;
     static char getword[MAXSIZE];
 
     skipWhite(line,i);
@@ -473,7 +473,7 @@ char *getWord( char *line, int &i )
 //  Extracts the next topic definition from the given line at i.        //
 //----------------------------------------------------------------------//
 
-TTopicDefinition::TTopicDefinition( char *aTopic, uint aValue )
+TTopicDefinition::TTopicDefinition( const char *aTopic, uint aValue )
 {
     topic = newStr(aTopic);
     value = aValue;
@@ -487,7 +487,7 @@ TTopicDefinition::~TTopicDefinition()
         delete next;
 }
 
-int is_numeric(char *str)
+int is_numeric(const char *str)
 {
     int i;
 
@@ -497,7 +497,7 @@ int is_numeric(char *str)
     return 1;
 }
 
-TTopicDefinition *topicDefinition( char *line, int& i )
+TTopicDefinition *topicDefinition( const char *line, int& i )
 {
     int j;
     char topic[MAXSTRSIZE], w[MAXSTRSIZE], *endptr;
@@ -545,7 +545,7 @@ TTopicDefinition *topicDefinition( char *line, int& i )
 //  Extracts a list of topic definitions from the given line at i.      //
 //----------------------------------------------------------------------//
 
-TTopicDefinition *topicDefinitionList( char *line, int &i )
+TTopicDefinition *topicDefinitionList( const char *line, int &i )
 {
     int j;
     char w[MAXSTRSIZE];
@@ -574,7 +574,7 @@ TTopicDefinition *topicDefinitionList( char *line, int &i )
 //  Parse a Topic header                                                //
 //----------------------------------------------------------------------//
 
-TTopicDefinition *topicHeader( char *line )
+TTopicDefinition *topicHeader( const char *line )
 {
     int i;
     char w[75];
@@ -594,7 +594,7 @@ TTopicDefinition *topicHeader( char *line )
         }
 }
 
-void addToBuffer( char *line, Boolean wrapping )
+void addToBuffer( const char *line, Boolean wrapping )
 {
     uchar *bufptr;
 
@@ -612,7 +612,7 @@ void addToBuffer( char *line, Boolean wrapping )
 }
 
 
-void addXRef( char *xRef, int offset, uchar length, TCrossRefNode *&xRefs )
+void addXRef( const char *xRef, int offset, uchar length, TCrossRefNode *&xRefs )
 {
     TCrossRefNode *p, *pp, *prev;
 
@@ -967,7 +967,7 @@ void processText( TProtectedStream& textFile,
 // it's ok to overwrite it.                                             //
 //----------------------------------------------------------------------//
 
-void checkOverwrite( char *fName )
+void checkOverwrite( const char *fName )
 {
     if (fExists(fName))
         {
