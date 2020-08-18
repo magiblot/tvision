@@ -384,7 +384,7 @@ void recordReference( const char *topic, opstream& s )
 
 void doFixUps( TFixUp *p, uint value, fpstream& s )
 {
-    long pos;
+    streampos pos;
 
     for(pos = s.tellp(); (p != 0); p = p->next)
         {
@@ -406,7 +406,7 @@ void resolveReference( const char *topic, uint value, fpstream& s )
 
     initRefTable();
     ref = refTable->getReference(topic);
-    if (ref->resolved )
+    if (ref->resolved)
         {
         strcpy(bufStr,"Redefinition of ");
         strcat(bufStr,ref->topic);
@@ -423,15 +423,15 @@ void resolveReference( const char *topic, uint value, fpstream& s )
 
 //======================= Help file parser =============================//
 
-void skipWhite( const char *line,int& i )
+void skipWhite( const char *line, int& i )
 {
-    while (i <= strlen(line) && (line[i] == ' ') || (line[i] == 8))
+    while ((i <= (int) strlen(line) && line[i] == ' ') || (line[i] == 8))
         ++i;
 }
 
 int checkForValidChar( char ch )
 {
-    if (isalnum(ch) || (ch  == '_'))
+    if (isalnum(ch) || ch  == '_')
         return(0);
     return(-1);
 }
@@ -439,7 +439,7 @@ int checkForValidChar( char ch )
 
 void skipToNonWord( const char *line, int& i )
 {
-    while (i <= strlen(line) && (!checkForValidChar(line[i])))
+    while (i <= (int) strlen(line) && !checkForValidChar(line[i]))
         ++i;
 }
 
@@ -455,7 +455,7 @@ const char *getWord( const char *line, int &i )
 
     skipWhite(line,i);
     j = i;
-    if (j > strlen(line))
+    if (j > (int) strlen(line))
         strcpy(getword,"");
     else
         {
@@ -489,9 +489,9 @@ TTopicDefinition::~TTopicDefinition()
 
 int is_numeric(const char *str)
 {
-    int i;
+    int len = strlen(str);
 
-    for(i = 0; i < strlen(str); ++i)
+    for(int i = 0; i < len; ++i)
         if (!isdigit(str[i]))
             return 0;
     return 1;
@@ -525,7 +525,7 @@ TTopicDefinition *topicDefinition( const char *line, int& i )
         else
             ++helpCounter;
 
-        if (helpCounter > MAXHELPTOPICID )
+        if (helpCounter > MAXHELPTOPICID)
             {
             char buf[MAXSTRSIZE];
             ostrstream os( buf, sizeof(buf));
@@ -770,11 +770,13 @@ TParagraph *readParagraph( fstream& textFile, int& offset, TCrossRefNode *&xRefs
         }
     while (isEndParagraph(state) == False)
         {
-        if (state == undefined )
+        if (state == undefined)
+            {
             if (line[0] == ' ')
                 state = notWrapping;
             else
                 state = wrapping;
+            }
         scanForCrossRefs(line, offset, xRefs);
         flag = (state == wrapping)? True: False;
         addToBuffer(line, flag);
@@ -912,7 +914,7 @@ void _FAR doWriteSymbol(void *p, void *p1)
     ostrstream os(line, MAXSTRSIZE);
 
     TProtectedStream *symbFile = (TProtectedStream *)p1;
-    if (((TReference *)p)->resolved )
+    if (((TReference *)p)->resolved)
         {
         os << "  hc" << (char *)((TReference *)p)->topic;
         numBlanks = 20 - strlen((char *)((TReference *)p)->topic);

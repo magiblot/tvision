@@ -53,7 +53,7 @@ private:
 struct TFixUp
 {
 
-    long pos;
+    streampos pos;
     TFixUp *next;
 
 };
