@@ -148,10 +148,10 @@ Boolean       lineInBuffer = False;
 int           lineCount = 0;
 
 #ifdef __DPMI32__
-#define HELPFILE_EXT ".H32"
+#define HELPFILE_EXT ".h32"
 #define TARGET "(32 bit)"
 #else
-#define HELPFILE_EXT ".H16"
+#define HELPFILE_EXT ".h16"
 #define TARGET "(16 bit)"
 #endif
 
@@ -990,7 +990,7 @@ int main(int argc, char **argv)
     char initialText[] = "Help Compiler " TARGET "  Version 2.0  Copyright (c) 1994"
                          " Borland International.\n";
     char helpText[] =
-       "\n  Syntax  TVHC <Help text>[.TXT] [<Help file>[" HELPFILE_EXT "] [<Symbol file>[.H]]\n"
+       "\n  Syntax  TVHC <Help text>[.txt] [<Help file>[" HELPFILE_EXT "] [<Symbol file>[.h]]\n"
        "\n"
        "     Help text   = Help file source\n"
        "     Help file   = Compiled help file\n"
@@ -1006,8 +1006,7 @@ int main(int argc, char **argv)
         }
 
     //  Calculate file names
-    strcpy(textName,replaceExt(argv[1], ".TXT", False));
-    strupr(textName);
+    strcpy(textName,replaceExt(argv[1], ".txt", False));
     if (!fExists(textName))
         {
         strcpy(bufStr,"File ");
@@ -1024,9 +1023,9 @@ int main(int argc, char **argv)
     checkOverwrite( helpName );
 
     if (argc >= 4)
-        strcpy(symbName, replaceExt(argv[3], ".H", False));
+        strcpy(symbName, replaceExt(argv[3], ".h", False));
     else
-        strcpy(symbName, replaceExt(helpName, ".H", True));
+        strcpy(symbName, replaceExt(helpName, ".h", True));
 
     checkOverwrite( symbName );
 
