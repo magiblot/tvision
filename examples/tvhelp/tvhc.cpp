@@ -921,12 +921,12 @@ void _FAR doWriteSymbol(void *p, void *p1)
     TProtectedStream *symbFile = (TProtectedStream *)p1;
     if (((TReference *)p)->resolved)
         {
-        os << "  hc" << (char *)((TReference *)p)->topic;
+        os << "\n  hc" << (char *)((TReference *)p)->topic;
         numBlanks = 20 - strlen((char *)((TReference *)p)->topic);
         for (i = 0; i < numBlanks; ++i)
             os << ' ';
         os << " = " << ((TReference *)p)->val.value << ","<< ends;
-        *symbFile << os.str() << "\n";
+        *symbFile << os.str();
         }
     else
         {
@@ -942,11 +942,11 @@ void _FAR doWriteSymbol(void *p, void *p1)
 
 void writeSymbFile( TProtectedStream *symbFile )
 {
-    char header1[] = "const int\n";
+    char header1[] = "const int";
 
     *symbFile << header1;
     refTable->forEach(doWriteSymbol, symbFile);
-    symbFile->seekp(-3L, ios::end);
+    symbFile->seekp(-1L, ios::end);
     *symbFile << ";\n";
 
 }
