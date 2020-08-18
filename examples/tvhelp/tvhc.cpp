@@ -147,7 +147,7 @@ char          line[MAXSTRSIZE] = "";
 Boolean       lineInBuffer = False;
 int           lineCount = 0;
 
-#ifdef __DPMI32__
+#ifdef __FLAT__
 #define HELPFILE_EXT ".h32"
 #define TARGET "(32 bit)"
 #else
