@@ -216,10 +216,8 @@ void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
     p = paragraphs;
     while (paraOffset + curOffset < offset)
         {
-        char lbuf[256];
-
         oldOffset = paraOffset + curOffset;
-        wrapText(p->text, p->size, curOffset, p->wrap, lbuf, sizeof(lbuf));
+        wrapText(p->text, p->size, curOffset, p->wrap);
         ++line;
         if (curOffset >= p->size)
             {
@@ -234,10 +232,11 @@ void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
     ref = crossRefPtr->ref;
 }
 
-char *THelpTopic::getLine( int line, char *buffer, int buflen )
+TStringView THelpTopic::getLine( int line )
 {
     int offset, i;
     TParagraph *p;
+    TStringView lineText;
 
     if (lastLine < line)
         {
@@ -253,27 +252,23 @@ char *THelpTopic::getLine( int line, char *buffer, int buflen )
         offset = 0;
         lastLine = line;
         }
-    buffer[0] = 0;
     while (p != 0)
     {
         while (offset < p->size)
         {
-            char lbuf[256];
-
             --line;
-            strncpy(buffer, wrapText(p->text, p->size, offset, p->wrap, lbuf, sizeof(lbuf)), buflen);
+            lineText = wrapText(p->text, p->size, offset, p->wrap);
             if (line == 0)
                 {
                 lastOffset = offset;
                 lastParagraph = p;
-                return buffer;
+                return lineText;
                 }
         }
         p = p->next;
         offset = 0;
     }
-    buffer[0] = 0;
-    return buffer;
+    return lineText;
 }
 
 int THelpTopic::getNumCrossRefs()
@@ -294,9 +289,8 @@ int THelpTopic::numLines()
         offset = 0;
         while (offset < p->size)
             {
-            char lbuf[256];
             ++lines;
-            wrapText(p->text, p->size, offset, p->wrap, lbuf, sizeof(lbuf));
+            wrapText(p->text, p->size, offset, p->wrap);
             }
         p = p->next;
         }
@@ -393,35 +387,29 @@ Boolean isBlank( char ch )
         return False;
 }
 
-int scan( char *p, int offset, char c)
+static int scan( char *p, int offset, int size, char c)
 {
     char *temp1, *temp2;
 
     temp1 = p + offset;
     temp2 = strchr(temp1, c);
     if (temp2 == 0)
-       return 256;
+        return size;
     else
-       {
-       if ((int)(temp2 - temp1) <= 256 )
-         return (int) (temp2 - temp1) + 1;
-       else
-         return 256;
-       }
+        {
+        if ((int)(temp2 - temp1) <= size )
+            return (int) (temp2 - temp1) + 1;
+        else
+            return size;
+        }
 }
 
-void textToLine( void *text, int offset, int length, char *line )
-{
-    strncpy(line, (char *)text+offset, length);
-    line[length] = 0;
-}
-
-char *THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap,
-                            char *lineBuf, int lineBufLen )
+TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap )
 {
     int i;
+    TStringView str;
 
-    i = scan(text, offset, '\n');
+    i = scan(text, offset, size, '\n');
     if (i + offset > size )
         i = size - offset;
     if ((i >= width) && (wrap == True))
@@ -454,11 +442,11 @@ char *THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap,
             i = offset + width;
         i -= offset;
         }
-    textToLine(text, offset, min(i,lineBufLen), lineBuf);
-    if (lineBuf[min(strlen(lineBuf) - 1, lineBufLen)] == '\n')
-        lineBuf[min(strlen(lineBuf) - 1, lineBufLen)] = 0;
-    offset += min(i,lineBufLen);
-    return lineBuf;
+    str = TStringView(&text[offset], i);
+    if (str.size() && str.back() == '\n')
+        str = str.substr(0, str.size() - 1);
+    offset += i;
+    return str;
 }
 
 // THelpIndex

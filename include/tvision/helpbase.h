@@ -63,7 +63,7 @@ public:
     void addCrossRef( TCrossRef ref );
     void addParagraph( TParagraph *p );
     void getCrossRef( int i, TPoint& loc, uchar& length, int& ref );
-    char *getLine( int line, char *buffer, int buflen );
+    TStringView getLine( int line );
     int getNumCrossRefs();
     int numLines();
     void setCrossRef( int i, TCrossRef& ref );
@@ -77,7 +77,7 @@ public:
 
 private:
 
-    char *wrapText( char *text, int size, int& offset, Boolean wrap, char *lineBuf, int lineBufLen );
+    TStringView wrapText( char *text, int size, int& offset, Boolean wrap );
     void readParagraphs( ipstream& s );
     void readCrossRefs( ipstream& s );
     void writeParagraphs( opstream& s );

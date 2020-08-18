@@ -117,13 +117,10 @@ void THelpViewer::draw()
         }
     for (i = 1; i <= size.y; ++i)
         {
-        char line[256] = {0};
         b.moveChar(0, ' ', normal, size.x);
-        topic->getLine(i + delta.y, line, sizeof(line)-1);
+        TStringView line = topic->getLine(i + delta.y);
         if (strwidth(line) > delta.x)
-            {
             b.moveStr(0, line, normal, size.x, delta.x);
-            }
         else
             b.moveStr(0, "", normal);
         while (i + delta.y == keyPoint.y)

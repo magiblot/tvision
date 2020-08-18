@@ -42,6 +42,8 @@ public:
     constexpr size_t size() const;
     constexpr Boolean empty() const;
     constexpr const char& operator[](size_t pos) const;
+    constexpr const char& front() const;
+    constexpr const char& back() const;
 
     constexpr TStringView substr(size_t pos) const;
     constexpr TStringView substr(size_t pos, size_t n) const;
@@ -99,6 +101,16 @@ inline constexpr Boolean TStringView::empty() const
 inline constexpr const char& TStringView::operator[](size_t pos) const
 {
     return str[pos];
+}
+
+inline constexpr const char& TStringView::front() const
+{
+    return str[0];
+}
+
+inline constexpr const char& TStringView::back() const
+{
+    return str[len - 1];
 }
 
 inline constexpr TStringView TStringView::substr(size_t pos) const
