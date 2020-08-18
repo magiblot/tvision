@@ -85,10 +85,10 @@
 
 #define Uses_fpstream
 #define Uses_TSortedCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __TVHC_H )
-#include "Tvhc.h"
+#include "tvhc.h"
 #endif  // __TVHC_H
 
 #if !defined( __STRING_H )
@@ -131,9 +131,9 @@
 #include <errno.h>
 #endif  // __ERRNO_H
 
-#if !defined( __CONIO_H )
-#include <conio.h>
-#endif  // __CONIO_H
+#if !defined( __STDIO_H )
+#include <stdio.h>
+#endif // __STDIO_H
 
 /*
  * Help compiler global variables.
@@ -158,7 +158,7 @@ int           lineCount = 0;
 
 //======================= File Management ===============================//
 
-TProtectedStream::TProtectedStream( char *aFileName, ushort aMode ) :
+TProtectedStream::TProtectedStream( char *aFileName, openmode aMode ) :
     fstream( aFileName, aMode )
 {
     strcpy(fileName, aFileName);
@@ -791,7 +791,7 @@ TParagraph *readParagraph( fstream& textFile, int& offset, TCrossRefNode *&xRefs
     return(p);
 }
 
-void far handleCrossRefs( opstream& s, int xRefValue )
+void _FAR handleCrossRefs( opstream& s, int xRefValue )
 {
     TCrossRefNode *p;
 
@@ -906,7 +906,7 @@ void readTopic( fstream& textFile, THelpFile& helpFile )
     skipBlankLines(textFile);
 }
 
-void far doWriteSymbol(void *p, void *p1)
+void _FAR doWriteSymbol(void *p, void *p1)
 {
     int numBlanks, i;
     ostrstream os(line, MAXSTRSIZE);
@@ -972,8 +972,7 @@ void checkOverwrite( char *fName )
     if (fExists(fName))
         {
         cerr << "File already exists: " << fName << ".  Overwrite? (y/n) ";
-        char ch = getch();
-        cerr << ch << endl;
+        char ch = getchar();
         if( toupper(ch) != 'Y' )
             exit(1);
         }

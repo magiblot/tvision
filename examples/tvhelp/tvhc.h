@@ -13,32 +13,38 @@
 #define Uses_TSortedCollection
 #define Uses_TObject
 #define Uses_TPoint
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __HELPBASE_H )
-#include "tvision\helpbase.h"
+#include "tvision/helpbase.h"
 #endif  // __HELPBASE_H
 
 
-const MAXSIZE = 80;
-const MAXSTRSIZE=256;
-const MAXHELPTOPICID=16379;
+const int MAXSIZE = 80;
+const int MAXSTRSIZE=256;
+const int MAXHELPTOPICID=16379;
 const char commandChar[] = ".";
-const bufferSize = 4096;
+const int bufferSize = 4096;
 
-typedef enum State { undefined, wrapping, notWrapping };
+enum State { undefined, wrapping, notWrapping };
 
 class TProtectedStream : public fstream
 {
 
 public:
 
-    TProtectedStream( char *aFileName, ushort  aMode );
+#ifdef __BORLANDC__
+    typedef ios::open_mode openmode;
+#else
+    typedef ios::openmode openmode;
+#endif
+
+    TProtectedStream( char *aFileName, openmode aMode );
 
 private:
 
-    char  fileName[MAXSIZE];
-    ushort mode;
+    char fileName[MAXSIZE];
+    openmode mode;
 
 };
 
