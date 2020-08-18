@@ -190,11 +190,11 @@ void clearHistory()
 
 void initHistory()
 {
-    historyBlock = (HistRec *) new char[historySize];
+    historyBlock = (HistRec *) ::calloc(historySize, 1);
     clearHistory();
 }
 
 void doneHistory()
 {
-    delete[] historyBlock;
+    ::free(historyBlock);
 }
