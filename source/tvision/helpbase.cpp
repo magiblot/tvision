@@ -236,7 +236,6 @@ TStringView THelpTopic::getLine( int line )
 {
     int offset, i;
     TParagraph *p;
-    TStringView lineText;
 
     if (lastLine < line)
         {
@@ -257,7 +256,7 @@ TStringView THelpTopic::getLine( int line )
         while (offset < p->size)
         {
             --line;
-            lineText = wrapText(p->text, p->size, offset, p->wrap);
+            TStringView lineText = wrapText(p->text, p->size, offset, p->wrap);
             if (line == 0)
                 {
                 lastOffset = offset;
@@ -268,7 +267,7 @@ TStringView THelpTopic::getLine( int line )
         p = p->next;
         offset = 0;
     }
-    return lineText;
+    return TStringView();
 }
 
 int THelpTopic::getNumCrossRefs()
