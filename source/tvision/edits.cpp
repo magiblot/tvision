@@ -43,7 +43,7 @@ void TEditor::formatLine( ushort *DrawBuf,
     };
 
     uchar Color = uchar(Colors);
-    uint X = 0;
+    int X = 0;
 
     for (int r = 0; r < 3; ++r)
     {
@@ -69,26 +69,31 @@ fill:
 
 uint TEditor::lineEnd( uint P )
 {
-    char c;
     for (uint i = P; i < bufLen; ++i)
-        if ((c = bufChar(i)) == '\r' || c == '\n')
+    {
+        char c = bufChar(i);
+        if (c == '\r' || c == '\n')
             return i;
+    }
     return bufLen;
 }
 
 uint TEditor::lineStart( uint P )
 {
-    char c;
-    for (int i = P - 1; i >= 0; --i)
-        if ((c = bufChar(i)) == '\r')
+    uint i = P;
+    while (i--)
+    {
+        char c = bufChar(i);
+        if (c == '\r')
         {
-            if ( i + 1 != curPtr && i + 1 != bufLen
-                 && bufChar(i + 1) == '\n' )
+            if ( i + 1 != curPtr && i + 1 != bufLen &&
+                 bufChar(i + 1) == '\n' )
                 return i + 2;
             return i + 1;
         }
         else if (c == '\n')
             return i + 1;
+    }
     return 0;
 }
 
