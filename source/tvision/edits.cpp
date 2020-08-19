@@ -142,10 +142,11 @@ uint scan( const char *block, uint size, const char *str )
     if (len > 0)
         while (i < size)
         {
-            uint begin = i, j = 0;
-            while (i < size && block[i++] == str[j])
-                if (++j == len)
-                    return begin;
+            uint j = i, k = 0;
+            while (j < size && block[j++] == str[k])
+                if (++k == len)
+                    return i;
+            ++i;
         }
     return sfSearchFailed;
 }
@@ -156,10 +157,11 @@ uint iScan( const char *block, uint size, const char *str )
     if (len > 0)
         while (i < size)
         {
-            uint begin = i, j = 0;
-            while (i < size && toupper(block[i++]) == toupper(str[j]))
-                if (++j == len)
-                    return begin;
+            uint j = i, k = 0;
+            while (j < size && toupper(block[j++]) == toupper(str[k]))
+                if (++k == len)
+                    return i;
+            ++i;
         }
     return sfSearchFailed;
 }
