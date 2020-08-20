@@ -68,7 +68,6 @@ void TStatusLine::drawSelect( TStatusItem *selected )
 {
     TDrawBuffer b;
     ushort color;
-    char hintBuf[256];
 
     ushort cNormal = getColor(0x0301);
     ushort cSelect = getColor(0x0604);
@@ -106,15 +105,13 @@ void TStatusLine::drawSelect( TStatusItem *selected )
         }
     if( i < size.x - 2 )
         {
-        strcpy( hintBuf, hint( helpCtx ) );
-        if( *hintBuf != EOS )
+        TStringView hintText = hint( helpCtx );
+        if( hintText.size() )
             {
             b.moveStr( i, hintSeparator, cNormal );
             i += 2;
-            if( strlen(hintBuf) + i > size.x )
-                hintBuf[size.x-i] = EOS;
-            b.moveStr( i, hintBuf, cNormal );
-            i += strlen(hintBuf);
+            b.moveStr( i, hintText, cNormal, size.x-i );
+            i += strwidth(hintText);
             }
         }
     writeLine( 0, 0, size.x, 1, b );
