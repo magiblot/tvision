@@ -177,12 +177,26 @@ void TFilePane::draw() {
     for (i=0;i<size.y;i++) {
       dBuf.moveChar(0, ' ', getColor(0x0101), (short)size.x );
       if ((fileCount==0)&&(i==0))
-        dBuf.moveCStr( 2, "<no files>", getColor(0x0101) );
+        dBuf.moveStr( 2, "<no files>", getColor(0x0101) );
       if ((i+delta.y)<fileCount)
-        dBuf.moveCStr( 2, &files[i+delta.y][delta.x], getColor(0x0101) );
+        dBuf.moveStr( 2, files[i+delta.y], getColor(0x0101), (ushort) -1U, delta.x );
       writeLine( 0, i, (short)size.x, 1, dBuf );
     }
   }
+
+static void insertTextWidth(char *dst, TStringView src, int width, size_t dstSize)
+// Inserts 'width' columns of text from 'src' into 'dst'. If not enough characters
+// can be extracted from 'src', remaining columns are filled with spaces.
+{
+    size_t srcLen = TText::wseek(src, 18, False);
+    size_t emptyLen = 18 - strwidth(TStringView(&src[0], srcLen));
+    size_t moveLen = srcLen + emptyLen;
+    size_t textLen = min(strlen(dst), dstSize-1-moveLen);
+    memmove(&dst[moveLen] , dst, textLen);
+    memcpy(dst, &src[0], srcLen);
+    for (size_t j = 0; j < emptyLen; ++j)
+      dst[srcLen + j] = ' ';
+}
 
 void TFilePane::newDir( const char *path ) {
     char searchPath[128] = {0};
@@ -208,7 +222,8 @@ void TFilePane::newDir( const char *path ) {
     i=0;
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC)) {
-          sprintf(searchPath,"%-18.18s  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",searchRec.name,searchRec.size,
+          sprintf(searchPath,"  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",
+                    searchRec.size,
                     ((searchRec.wr_date & 0x01E0) >> 5),
                     (searchRec.wr_date & 0x001F),
                     ((searchRec.wr_date >> 9)+1980)%100,
@@ -218,6 +233,7 @@ void TFilePane::newDir( const char *path ) {
                     searchRec.attrib & FA_RDONLY ? 'r' : '\xFA',
                     searchRec.attrib & FA_SYSTEM ? 's' : '\xFA',
                     searchRec.attrib & FA_HIDDEN ? 'h' : '\xFA' );
+          insertTextWidth(searchPath, searchRec.name, 18, sizeof(searchPath));
         files[i++] = newStr(searchPath);
       }
       result=_dos_findnext( &searchRec );
@@ -225,7 +241,7 @@ void TFilePane::newDir( const char *path ) {
     if (fileCount==0)
       setLimit( 1, 1 );
     else
-      setLimit( strlen(files[0]), fileCount );
+      setLimit( strwidth(files[0]), fileCount );
     drawView();
   }
 
