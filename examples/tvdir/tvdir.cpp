@@ -92,21 +92,24 @@ Boolean TDirOutline::isParent( TOutlineViewer *, TNode *cur, int, int, long, ush
 }
 
 void TDirOutline::getCurrentPath( char *buffer, short bufferSize ) {
-    char temp1[128],temp2[128];
+    char temp1[128], temp2[128];
     TNode *current = getNode( foc );
     TNode *root = getRoot();
 
-    temp1[0]=0;
+    temp1[0] = 0;
+    temp1[sizeof(temp1) - 1] = 0;
+    temp2[sizeof(temp2) - 1] = 0;
+    buffer[bufferSize - 1] = 0;
     while (current!=root) {
-      strcpy(temp2,temp1);
-      strcpy(temp1,current->text);
-      strcat(temp1,"\\");
-      strcat(temp1,temp2);
+      strncpy(temp2, temp1, sizeof(temp2) - 1);
+      strncpy(temp1, current->text, sizeof(temp1) - 1);
+      strncat(temp1, sep, sizeof(temp1) - 1);
+      strncat(temp1, temp2, sizeof(temp1) - 1);
       current = getParent( current );
     }
-    strncpy(buffer,root->text,bufferSize);
-    strncat(buffer,"\\",bufferSize);
-    strncat(buffer,temp1,bufferSize);
+    strncpy(buffer, root->text, bufferSize - 1);
+    strncat(buffer, "\\", bufferSize - 1);
+    strncat(buffer, temp1, bufferSize - 1);
 }
 
 TNode *TDirOutline::parentSearch;
@@ -173,7 +176,7 @@ void TFilePane::draw() {
   }
 
 void TFilePane::newDir( const char *path ) {
-    char searchPath[128];
+    char searchPath[128] = {0};
     find_t searchRec;
     int result;
     short i;
@@ -182,7 +185,7 @@ void TFilePane::newDir( const char *path ) {
       delete files[i];
     delete [] files;
 
-    ostrstream os( searchPath, sizeof( searchPath ) );
+    ostrstream os( searchPath, sizeof( searchPath )-1 );
     os << path << "*.*" << ends;
     fileCount=0;
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
@@ -228,8 +231,6 @@ public:
     TWindow( TRect( 1,1,76,21 ), driveInit, 0 ),
     TWindowInit( TWindow::initFrame ) {
 
-    char temp[12];
-
     drive = newStr( driveInit );
 
     vsb = new TScrollBar( TRect( 74,1,75,15 ) );
@@ -264,8 +265,9 @@ public:
     insert( vsb );
     insert( ol );
 
-    ol->getCurrentPath( temp, 10 );
-    fp->newDir( temp );
+    char path[128];
+    ol->getCurrentPath( path, 128 );
+    fp->newDir( path );
 
   }
   virtual void handleEvent( TEvent &event ) {
@@ -383,16 +385,7 @@ void TDirApp::aboutBox( void ) {
 
 int main( int argc, char *argv[] )
 {
-    char drive[20];
-
-    if (argc==2)
-      strcpy(drive,argv[1]);
-    else
-      // strcpy(drive,"C:");
-      // Traversing the whole drive is insane.
-      strcpy(drive,".");
-
-    TDirApp *dirApp = new TDirApp( drive );
+    TDirApp *dirApp = new TDirApp( argc == 2 ? argv[1] : ".");
     dirApp->run();
     TObject::destroy(dirApp);
     return 0;
