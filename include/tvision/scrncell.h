@@ -38,7 +38,7 @@ inline void setChar(TScreenCell &cell, TCellChar ch)
 
 inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr)
 {
-    cell = (attr << 8) | ch;
+    cell = ushort((attr << 8) | ch);
 }
 
 #else

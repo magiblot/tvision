@@ -163,7 +163,7 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
                         TStringView text, size_t &bytes )
 {
     if (n) {
-        ::setChar(*cell, text[0];
+        ::setChar(*cell, text[0]);
         ++width;
         ++bytes;
     }
