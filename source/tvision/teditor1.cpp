@@ -234,39 +234,37 @@ TStringView TEditor::bufChars( uint P )
 {
     if (!encSingleByte)
         {
-        int len = min(4, max(bufLen - P, 0));
+        int len = min(4, max(max(curPtr, bufLen) - P, 1));
         for (int i = 0; i < len; ++i)
             charsBuf[i] = bufChar(P + i);
         return TStringView(charsBuf, len);
         }
-    else if (P < bufLen)
+    else
         {
         charsBuf[0] = bufChar(P);
         return TStringView(charsBuf, 1);
         }
-    return TStringView();
 }
 
 TStringView TEditor::bufPrevChars( uint P )
 {
     if (!encSingleByte)
         {
-        int len = min(4, P);
+        int len = min(4, max(P, 1));
         for (int i = 0; i < len; ++i)
             charsBuf[i] = bufChar(P - len + i);
         return TStringView(charsBuf, len);
         }
-    else if (P)
+    else
         {
         charsBuf[0] = bufChar(P - 1);
         return TStringView(charsBuf, 1);
         }
-    return TStringView();
 }
 
 void TEditor::nextChar( TStringView s, uint &p, uint &width )
 {
-    if (encSingleByte)
+    if (encSingleByte || !s.size())
         {
         ++p;
         ++width;
