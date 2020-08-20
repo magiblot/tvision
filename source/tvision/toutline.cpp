@@ -54,8 +54,7 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
 {
   TDrawBuffer &dBuf = *pdBuf;
   ushort  color;
-  char s[256];
-  char* graph;
+  int x;
 
   if (position >= beingDrawn->delta.y)
   {
@@ -69,23 +68,18 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
       else
         color = beingDrawn->getColor(0x0401);
       dBuf.moveChar(0, ' ', color, beingDrawn->size.x);
-
-      graph = beingDrawn->getGraph(level, lines, flags);
-      strcpy(s, graph);
-      delete graph;
-
-      if ( (flags & ovExpanded) == 0)
       {
-        strcat(s, "~");
-        strcat(s, beingDrawn->getText(cur));
-        strcat(s, "~");
+        TStringView graph = beingDrawn->getGraph(level, lines, flags);
+        x = strwidth(graph) - beingDrawn->delta.x;
+        if (x > 0)
+          dBuf.moveStr(0, graph, color, (ushort) -1U, beingDrawn->delta.x);
+        delete graph.data();
       }
-      else
-        strcat(s, beingDrawn->getText(cur));
-      if (beingDrawn->delta.x<=strlen(s))
-        dBuf.moveCStr(0, &s[beingDrawn->delta.x], color);
-      else
-        dBuf.moveCStr(0, "", color );
+      {
+        TStringView text = beingDrawn->getText(cur);
+        uchar c = (flags & ovExpanded) ? color : (color >> 8);
+        dBuf.moveStr(max(0, x), text, c, (ushort) -1U, max(0, -x));
+      }
       beingDrawn->writeLine(0, position-beingDrawn->delta.y,
                                beingDrawn->size.x, 1, dBuf);
       auxPos = position;
@@ -461,13 +455,13 @@ void TOutlineViewer::handleEvent(TEvent& event)
           if (dragged < 2 && (cur = firstThat(isFocused)))
           {
             graph = getGraph(focLevel,focLines,focFlags);
-            if (mouse.x < strlen(graph) )
+            if (mouse.x < strwidth(graph) )
             {
-              adjust(cur, ! isExpanded(cur) ? True:False);
+              adjust(cur, !isExpanded(cur));
               update();
               drawView();
             }
-            delete graph;
+            delete[] graph;
           }
         }
 
@@ -560,7 +554,7 @@ static Boolean countNode(TOutlineViewer* beingCounted, TNode* p, int level,
 
     updateCount++;
     graph = beingCounted->getGraph(level, lines, flags);
-    len = strlen(beingCounted->getText(p)) + strlen(graph);
+    len = strwidth(beingCounted->getText(p)) + strwidth(graph);
     if (updateMaxX < len)
       updateMaxX = len;
     delete graph;
