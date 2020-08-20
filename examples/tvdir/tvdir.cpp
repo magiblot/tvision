@@ -37,6 +37,13 @@ const int cmDirTree       = 100;
 const int cmAbout         = 101;
 const int cmNewDirFocused = 102;
 
+#ifdef __BORLANDC__
+// This is merely for aesthetic purposes.
+#define sep "\\"
+#else
+#define sep "/"
+#endif
+
 class QuickMessage: public TWindow
 {
     TParamText *currentDir;
@@ -108,7 +115,9 @@ void TDirOutline::getCurrentPath( char *buffer, short bufferSize ) {
       current = getParent( current );
     }
     strncpy(buffer, root->text, bufferSize - 1);
-    strncat(buffer, "\\", bufferSize - 1);
+    char last = buffer[strlen(buffer) - 1];
+    if (last != '/' && last != '\\')
+      strncat(buffer, sep, bufferSize - 1);
     strncat(buffer, temp1, bufferSize - 1);
 }
 
@@ -123,14 +132,14 @@ TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
   TNode  *temp;
 
   ostrstream os( searchPath, sizeof( searchPath )-1 );
-  os << path << "\\*.*" << ends;
+  os << path << sep "*.*" << ends;
   result = _dos_findfirst( searchPath, 0xff, &searchRec );
 
   while (result==0) {
     if (searchRec.name[0]!='.') {
       if (searchRec.attrib & FA_DIREC) {
         os.seekp(0);
-        os << path << '\\' << searchRec.name << ends;
+        os << path << *sep << searchRec.name << ends;
         // Strings may become equal when searchPath is full.
         if (strcmp(path, searchPath) == 0)
           break;
