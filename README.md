@@ -51,7 +51,7 @@ g++ -o hello hello.cpp libtvision.a -Iinclude/{,tvision,override} -lncursesw -lg
 
 `-Iinclude/tvision` is only necessary if your application uses Turbo Vision 1.x includes (e.g. `#include <tv.h>` instead of `#include <tvision/tv.h>`). `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
-The `include/override` directory contains headers emulating the Borland C++ RTL (some come straight from Borland). Turbo Vision won't compile without them. This also means that including `tvision/tv.h` will bring several std names to the global namespace.
+The `include/override` directory contains headers emulating the Borland C++ RTL (some come straight from Borland). Turbo Vision won't compile without them. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
 ### Windows/DOS
 
@@ -75,7 +75,7 @@ make.exe <options>
 
 Where `<options>` can be:
 
-* `-DDOS32` for 32-bit DPMI applications (which still works in 64-bit Windows).
+* `-DDOS32` for 32-bit DPMI applications (which still work in 64-bit Windows).
 * `-DWIN32` for 32-bit native Win32 applications (not possible for TVDEMO, which relies on `farcoreleft()` and other antiquities).
 * `-DDEBUG` to build debug versions of the application and the library.
 * `-DTVDEBUG` to link the applications with the debug version of the library.
@@ -92,7 +92,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Ncurses-based terminal support.
 * Mouse and key modifiers support on the linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
-* UTF-8 support both in terminal I/O and the API.
+* UTF-8 support both in terminal I/O and the API. For instance, the `tvedit` and `tvdemo` applications support Unicode.
 * Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelenght`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
@@ -101,7 +101,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
 * `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ncurses` and `ansi`. Default is `ansi`, which is a custom strategy that avoids redundant buffering and UTF-8 to wide char conversions. If you have issues, you may try `ncurses` instead.
-* `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keep the drawing performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
+* `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keeping the draw performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
 * `TVISION_ESCDELAY`: the delay of time, in milliseconds, that should be waited after receiving an ESC key press. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination.
 * `TVISION_CODEPAGE`: the character set used internally by Turbo Vision. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/linux/tables.cpp`.
 
@@ -111,7 +111,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Applications fit the console window size instead of the buffer size.
 * The console buffer is restored when exiting or suspending Turbo Vision.
 * `kbCtrlC`, Shift+Arrow, `kbShiftTab` and AltGr key combinations work properly.
-* No busy polling for events.
+* No busy polling for events (i.e. no 100% CPU consumption on idle).
 
 ### All platforms
 
@@ -146,7 +146,7 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 
 * On Linux, screen writes are buffered and are usually sent to the terminal once for every iteration of the active event loop (see also `TVISION_MAX_FPS`). If you need to update the screen during a busy loop, you may use `TScreen::flushScreen()`.
 * `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
-* Several constructors and methods now receive or return `const char*` instead of `char*` or have been the `const` qualifier.
+* Several constructors and methods now receive or return `const char*` instead of `char*` or have been added the `const` qualifier.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
@@ -191,12 +191,14 @@ switch (ev.keyDown.keyCode) {
 }
 ```
 
-Already existing Turbo Vision classes that deal with text input (most notably `TEditor` and `TInputLine`) depend on this methodology, which has not changed. Single-byte characters, when representable in the current codepage, continue to be available in `ev.keyDown.charScan.charCode`.
+Some of the existing Turbo Vision classes that deal with text input still depend on this methodology, which has not changed. Single-byte characters, when representable in the current codepage, continue to be available in `ev.keyDown.charScan.charCode`.
 
 Unicode support consists in two new fields in `ev.keyDown` (which is a `struct KeyDownEvent`):
 
 * `char text[4]`, which may contain whatever was read from the terminal: usually a UTF-8 sequence, but possibly any kind of raw data.
 * `uchar textLength`, which is the number of bytes of data available in `text`, from 0 to 4.
+
+Note that the `text` field may contain garbage or uninitialized data from position `textLength` on.
 
 So a Unicode character can be retrieved from `TEvent` in the following way:
 
@@ -403,7 +405,7 @@ writeBuf( 0, i, size.x, 1, b );
 ```
 All it does is move part of a string in `fileLines` into `b`, which is a `TDrawBuffer`. `delta` is a `TPoint` representing the scroll offset in the text view, and `i` is the index of the visible line being processed. `c` is the text color. A few issues are present:
 
-* `TDrawBuffer::moveStr(ushort, const char *, ushort)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a buffer overrun. The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
+* `TDrawBuffer::moveStr(ushort, const char *, ushort)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
 * `delta.x` is the first visible column. With multibyte-encoded text, it is no longer true that such column begins at position `delta.x` in the string.
 
 Below is a corrected version of the code above that handles Unicode properly:
