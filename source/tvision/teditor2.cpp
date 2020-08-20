@@ -41,9 +41,9 @@ uint scan( const char *block, uint size, const char *str );
 uint iScan( const char *block, uint size, const char *str );
 };
 
-inline int isWordChar( int ch )
+static inline int isWordChar( int ch )
 {
-    return isalnum(ch) || ch == '_';
+    return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) == 0;
 }
 
 #pragma warn -asc
