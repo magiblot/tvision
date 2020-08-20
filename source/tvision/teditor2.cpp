@@ -444,13 +444,13 @@ void TEditor::setSelect( uint newStart, uint newEnd, Boolean curStart )
             curPos.y -= countLines(&buffer[curPtr], l);
             memmove( &buffer[curPtr + gapLen], &buffer[curPtr], l);
             }
-        drawLine = curPos.y;
-        drawPtr = lineStart(p);
-        curPos.x = charPos(drawPtr, p);
         delCount = 0;
         insCount = 0;
         setBufSize(bufLen);
-    }
+        }
+    drawLine = curPos.y;
+    drawPtr = lineStart(p);
+    curPos.x = charPos(drawPtr, p);
     selStart = newStart;
     selEnd = newEnd;
     update(flags);
@@ -481,6 +481,13 @@ void TEditor::startSelect()
 {
     hideSelect();
     selecting = True;
+}
+
+void TEditor::toggleEncoding()
+{
+    encSingleByte = !encSingleByte;
+    updateFlags |= ufView;
+    setSelect(selStart, selEnd, curPtr < selEnd);
 }
 
 void TEditor::toggleInsMode()

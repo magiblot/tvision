@@ -92,7 +92,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Ncurses-based terminal support.
 * Mouse and key modifiers support on the linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
-* Reads UTF-8 input from the terminal and displays UTF-8 text, but still works with 8-bit ASCII characters internally.
+* UTF-8 support both in terminal I/O and the API.
 * Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelenght`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
@@ -341,11 +341,9 @@ The functions above depend on the following lower-level functions. You will need
 size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
-#ifndef __BORLANDC__
 void TText::eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
 void TText::next(TStringView text, size_t &bytes, size_t &width);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
-#endif
 ```
 
 For drawing `TScreenCell` buffers directly, the following methods are available:
@@ -433,4 +431,4 @@ Support for creating Unicode-aware views is in place, but some views that are pa
 * `TInputLine` can display and process Unicode text.
 * Word wrapping in `TStaticText` and `THelpViewer` is Unicode-aware.
 * Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
-* `TEditor` assumes a single-byte encoding both when handling input events and when displaying text. So it won't display UTF-8 but at least it has a consistent behaviour.
+* `TEditor` instances (as in the `tvedit` application) are in UTF-8 mode by default. Press `Ctrl+P` to switch back to single-byte mode. This only changes how the document is displayed and the encoding of user input; it does not alter the document.

@@ -77,7 +77,8 @@ const int
   cmIndentMode  = 522,
   cmUpdateTitle = 523,
   cmSelectAll   = 524,
-  cmDelWordLeft = 525;
+  cmDelWordLeft = 525,
+  cmEncoding    = 526;
 
 const int
   edOutOfMemory   = 0,
@@ -216,7 +217,7 @@ public:
     void doUpdate();
     void doSearchReplace();
     void drawLines( int, int, uint );
-    void formatLine(ushort *, uint, int, ushort );
+    void formatLine(TScreenCell *, uint, int, ushort );
     void find();
     uint getMousePtr( TPoint );
     Boolean hasSelection();
@@ -238,6 +239,7 @@ public:
     void setBufLen( uint );
     void setCurPtr( uint, uchar );
     void startSelect();
+    void toggleEncoding();
     void toggleInsMode();
     void unlock();
     void update( uchar );
@@ -271,6 +273,13 @@ public:
 
     const char* eolBytes;
     uint eolSize;
+
+    Boolean encSingleByte;
+    char charsBuf[4];
+    void nextChar( TStringView, uint &P, uint &width );
+    void formatCell( TScreenCell*, uint, uint&, TStringView, uint& , TCellAttribs );
+    TStringView bufChars( uint );
+    TStringView bufPrevChars( uint );
 
     static TEditorDialog _NEAR editorDialog;
     static ushort _NEAR editorFlags;

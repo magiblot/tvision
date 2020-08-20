@@ -27,7 +27,7 @@ uint TEditor::bufPtr( uint P )
     return P < curPtr ? P : P + gapLen;
 }
 
-void TEditor::formatLine( ushort *DrawBuf,
+void TEditor::formatLine( TScreenCell *DrawBuf,
                           uint P,
                           int Width,
                           ushort Colors
@@ -42,29 +42,28 @@ void TEditor::formatLine( ushort *DrawBuf,
         { uchar(Colors), bufLen }
     };
 
-    uchar Color = uchar(Colors);
     int X = 0;
-
     for (int r = 0; r < 3; ++r)
     {
-        Color = ranges[r].color;
+        uchar Color = ranges[r].color;
         while (P < ranges[r].end && X < Width)
         {
-            uchar Char = bufChar(P++);
+            TStringView chars = bufChars(P);
+            uchar Char = chars[0];
             if (Char == '\r' || Char == '\n')
                 goto fill;
             if (Char == '\t') {
                 do {
-                    DrawBuf[X++] = (Color << 8) | ' ';
+                    ::setCell(DrawBuf[X++], ' ', Color);
                 } while (X%8 != 0 && X < Width);
-            } else {
-                DrawBuf[X++] = (Color << 8) | Char;
-            }
+                ++P;
+            } else
+                formatCell(&DrawBuf[X], Width - X, (uint&) X, chars, P, Color);
         }
     }
 fill:
     while (X < Width)
-        DrawBuf[X++] = (Color << 8) | ' ';
+        ::setCell(DrawBuf[X++], ' ', uchar(Colors));
 }
 
 uint TEditor::lineEnd( uint P )
@@ -103,7 +102,10 @@ uint TEditor::nextChar( uint P )
     {
         if (bufChar(P) == '\r' && bufChar(P + 1) == '\n')
             return P + 2;
-        return P + 1;
+        if (encSingleByte)
+            return P + 1;
+        else
+            return P + TText::next(bufChars(P));
     }
     return bufLen;
 }
@@ -114,7 +116,13 @@ uint TEditor::prevChar( uint P )
     {
         if (bufChar(P - 2) == '\r' && bufChar(P - 1) == '\n')
             return P - 2;
-        return P - 1;
+        if (encSingleByte)
+            return P - 1;
+        else
+        {
+            TStringView t = bufPrevChars(P);
+            return P - TText::prev(t, t.size());
+        }
     }
     return 0;
 }

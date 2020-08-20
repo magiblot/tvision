@@ -45,7 +45,7 @@
 
 const ushort firstKeys[] =
 {
-    39,
+    40,
     kbCtrlA, cmSelectAll,
     kbCtrlC, cmPageDown,
     kbCtrlD, cmCharRight,
@@ -57,6 +57,7 @@ const ushort firstKeys[] =
     kbCtrlL, cmSearchAgain,
     kbCtrlM, cmNewLine,
     kbCtrlO, cmIndentMode,
+    kbCtrlP, cmEncoding,
     kbCtrlQ, 0xFF01,
     kbCtrlR, cmPageUp,
     kbCtrlS, cmCharLeft,
@@ -170,6 +171,12 @@ asm POP DS
 
 #define cpEditor    "\x06\x07"
 
+#ifdef __BORLANDC__
+#define _encSB True
+#else
+#define _encSB False
+#endif
+
 TEditor::TEditor( const TRect& bounds,
                   TScrollBar *aHScrollBar,
                   TScrollBar *aVScrollBar,
@@ -184,6 +191,7 @@ TEditor::TEditor( const TRect& bounds,
     selecting( False ),
     overwrite( False ),
     autoIndent( True ) ,
+    encSingleByte( _encSB ),
     lockCount( 0 ),
     updateFlags( 0 ),
     keyState( 0 )
@@ -222,33 +230,94 @@ void TEditor::changeBounds( const TRect& bounds )
     update(ufView);
 }
 
+TStringView TEditor::bufChars( uint P )
+{
+    if (!encSingleByte)
+        {
+        int len = min(4, max(bufLen - P, 0));
+        for (int i = 0; i < len; ++i)
+            charsBuf[i] = bufChar(P + i);
+        return TStringView(charsBuf, len);
+        }
+    else if (P < bufLen)
+        {
+        charsBuf[0] = bufChar(P);
+        return TStringView(charsBuf, 1);
+        }
+    return TStringView();
+}
+
+TStringView TEditor::bufPrevChars( uint P )
+{
+    if (!encSingleByte)
+        {
+        int len = min(4, P);
+        for (int i = 0; i < len; ++i)
+            charsBuf[i] = bufChar(P - len + i);
+        return TStringView(charsBuf, len);
+        }
+    else if (P)
+        {
+        charsBuf[0] = bufChar(P - 1);
+        return TStringView(charsBuf, 1);
+        }
+    return TStringView();
+}
+
+void TEditor::nextChar( TStringView s, uint &p, uint &width )
+{
+    if (encSingleByte)
+        {
+        ++p;
+        ++width;
+        }
+    else
+        {
+        size_t p_ = 0, w_ = 0;
+        TText::next(s, p_, w_);
+        p += p_; width += w_;
+        }
+}
+
+void TEditor::formatCell( TScreenCell* cell, uint n, uint &width,
+                          TStringView text, uint &p, TCellAttribs color )
+{
+    ::setAttr(*cell, color);
+    size_t p_ = 0, w_ = 0;
+    TText::eat(cell, n, w_, text, p_);
+    p += p_; width += w_;
+}
+
 int TEditor::charPos( uint p, uint target )
 {
-    int pos = 0;
+    uint pos = 0;
     while( p < target )
     {
-        if( bufChar(p) == '\x9' )
+        TStringView chars = bufChars(p);
+        if( chars[0] == '\x9' )
             pos |= 7;
-        pos++;
-        p++;
+        nextChar(chars, p, pos);
     }
     return pos;
 }
 
 uint TEditor::charPtr( uint p, int target )
 {
-  int pos = 0;
-  char c;
-  while( (pos < target) && (p < bufLen) && (c = bufChar(p)) != '\r' && c != '\n' )
-    {
-    if( c == '\x09' )
-        pos |= 7;
-    pos++;
-    p++;
-    }
-  if( pos > target )
-    p--;
-  return p;
+    uint pos = 0;
+    uint lastP = p;
+    char c;
+    TStringView chars;
+    while( (int) pos < target && p < bufLen &&
+           (c = (chars = bufChars(p))[0]) != '\r' && c != '\n' )
+        {
+        lastP = p;
+        if( c == '\x09' )
+            pos |= 7;
+        nextChar(chars, p, pos);
+        }
+    if( (int) pos > target)
+        p = lastP;
+    return p;
 }
 
 Boolean TEditor::clipCopy()
@@ -409,9 +478,9 @@ void TEditor::drawLines( int y, int count, uint linePtr )
 {
     ushort color = getColor(0x0201);
 #ifndef __FLAT__
-    ushort b[maxLineLength];
+    TScreenCell b[maxLineLength];
 #else
-    ushort *b = (ushort*) alloca(sizeof(ushort)*(delta.x+size.x));
+    TScreenCell *b = (TScreenCell*) alloca(sizeof(TScreenCell)*(delta.x+size.x));
 #endif
     while( count-- > 0 )
         {
@@ -524,17 +593,22 @@ void TEditor::handleEvent( TEvent& event )
             break;
 
         case evKeyDown:
-            if( event.keyDown.charScan.charCode == 9 ||
-                ( event.keyDown.charScan.charCode >= 32 && event.keyDown.charScan.charCode < 255 ) )
-                    {
-                    lock();
-                    if( overwrite == True && hasSelection() == False )
-                        if( curPtr != lineEnd(curPtr) )
-                            selEnd = nextChar(curPtr);
+            if( ( !encSingleByte && event.keyDown.textLength ) ||
+                event.keyDown.charScan.charCode == 9 ||
+                ( event.keyDown.charScan.charCode >= 32 && event.keyDown.charScan.charCode < 255 )
+              )
+                {
+                lock();
+                if( overwrite == True && hasSelection() == False )
+                    if( curPtr != lineEnd(curPtr) )
+                        selEnd = nextChar(curPtr);
+                if ( !encSingleByte && event.keyDown.textLength )
+                    insertText( event.keyDown.text, event.keyDown.textLength, False);
+                else
                     insertText( &event.keyDown.charScan.charCode, 1, False);
-                    trackCursor(centerCursor);
-                    unlock();
-                    }
+                trackCursor(centerCursor);
+                unlock();
+                }
             else
                 return;
             break;
@@ -646,6 +720,9 @@ void TEditor::handleEvent( TEvent& event )
                             setCurPtr(0, selectMode);
                             selectMode |= smExtend;
                             setCurPtr(bufLen, selectMode);
+                            break;
+                        case cmEncoding:
+                            toggleEncoding();
                             break;
                         default:
                             unlock();

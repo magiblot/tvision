@@ -36,6 +36,11 @@ inline void setChar(TScreenCell &cell, TCellChar ch)
     ((uchar *) &cell)[0] = ch;
 }
 
+inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr)
+{
+    cell = (attr << 8) | ch;
+}
+
 #else
 
 #include <cstring>
@@ -236,6 +241,14 @@ inline void setChar(TScreenCell &cell, uchar ch)
 {
     cell.Char = ch;
     cell.extraWidth = 0;
+}
+
+inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
+{
+    TScreenCell c = 0;
+    ::setChar(c, ch, extraWidth);
+    ::setAttr(c, attr);
+    cell = c;
 }
 
 #endif // __BORLANDC__

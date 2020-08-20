@@ -136,11 +136,9 @@ public:
     static size_t prev(TStringView text, size_t index);
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
-#ifndef __BORLANDC__
     static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
-#endif
 
 };
 
@@ -159,6 +157,31 @@ inline size_t TText::prev(TStringView, size_t index)
 inline size_t TText::wseek(TStringView text, int count, Boolean)
 {
     return count > 0 ? min(count, text.size()) : 0;
+}
+
+inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
+                        TStringView text, size_t &bytes )
+{
+    if (n) {
+        ::setChar(*cell, text[0];
+        ++width;
+        ++bytes;
+    }
+}
+
+inline void TText::next(TStringView text, size_t &bytes, size_t &width)
+{
+    if (text.size()) {
+        ++bytes;
+        ++width;
+    }
+}
+
+inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)
+{
+    if (count > 0)
+        index += count;
+    remainder = 0;
 }
 
 #else
