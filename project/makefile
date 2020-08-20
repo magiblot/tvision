@@ -39,15 +39,15 @@ PRJDIR = $(TVDIR)\PROJECT
 !if !$d(EXCLUDE)  # To avoid conflicts in files with both a CPP and ASM version.
 !if $d(DOS32)
 # This is done in several variables to work around the 'Command arguments too long' bug.
-EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
+EXCLUDE2 = TVEXPOSD.CPP TVWRITE.ASM
 EXCLUDE1 = EDITS.ASM FRAMELIN.ASM TVCURSOR.ASM TGRMV.ASM TTPRVLNS.ASM
 !else
-EXCLUDE1 = EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
+EXCLUDE1 = EDITS.CPP FRAMELIN.ASM TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
 EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
 !endif
 !endif
 
-all: source\tvision examples\tvdemo examples\tvdir examples\tvedit
+all: source\tvision examples\tvdemo examples\tvdir examples\tvedit examples\tvhelp
 
 source\tvision:
     CD ..\$@
@@ -73,6 +73,12 @@ examples\tvdir: source\tvision
     CD $(PRJDIR)
 
 examples\tvedit: source\tvision
+    CD ..\$@
+    IF EXIST *.CFG DEL *.CFG
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
+    CD $(PRJDIR)
+    
+examples\tvhelp: source\tvision
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
