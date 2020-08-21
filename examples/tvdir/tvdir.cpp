@@ -197,6 +197,7 @@ static void insertTextWidth(char *dst, TStringView src, int width, size_t dstSiz
     memcpy(dst, &src[0], srcLen);
     for (size_t j = 0; j < emptyLen; ++j)
       dst[srcLen + j] = ' ';
+    dst[moveLen+textLen] = '\0';
 }
 
 void TFilePane::newDir( const char *path ) {
