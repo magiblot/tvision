@@ -28,6 +28,10 @@ public:
 
     static size_t fill(TSpan<TScreenCell> cells, TStringView text);
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
+#ifndef __BORLANDC__
+    template<class Func>
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
+#endif
     static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
@@ -163,6 +167,21 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttri
     size_t w = 0, b = 0;
     while (w < cells.size() && b < text.size()) {
         ::setAttr(cells[w], attr);
+        TText::eat(cells.subspan(w), w, text.substr(b), b);
+    }
+    return std::min<size_t>(w, cells.size());
+}
+
+template<class Func>
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func)
+// Similar to the above, but gives total control over every iterated cell through
+// the 'func' callback. Usually 'func' would take a TScreenCell& by parameter.
+// A possible use case for this is if you need to modify the cell attributes
+// in a way other than simply replacing them.
+{
+    size_t w = 0, b = 0;
+    while (w < cells.size() && b < text.size()) {
+        func(cells[w]);
         TText::eat(cells.subspan(w), w, text.substr(b), b);
     }
     return std::min<size_t>(w, cells.size());

@@ -153,7 +153,7 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 * `TOutlineViewer` now allows the root node to have siblings.
 * New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
 * New class `TSpan<T>`, a generic (and non-const) version of `TStringView`, inspired by `std::span`.
-* New classes `TDrawSurface` and `TSurfaceView`, see `<include/surface.h>`.
+* New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
 * Unicode support, see below.
 
 ## Screenshots
@@ -346,6 +346,10 @@ size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
 void TText::fill(TSpan<TScreenCell> cells, TStringView text);
 void TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
+#ifndef __BORLANDC__
+template <class Func>
+void TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
+#endif
 void TText::eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
 void TText::next(TStringView text, size_t &bytes, size_t &width);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
