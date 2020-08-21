@@ -152,6 +152,7 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
 * New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
+* New class `TSpan<T>`, a generic (and non-const) version of `TStringView`, inspired by `std::span`.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<include/surface.h>`.
 * Unicode support, see below.
 
