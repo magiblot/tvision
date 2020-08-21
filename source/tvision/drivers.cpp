@@ -454,7 +454,7 @@ TDrawBuffer::TDrawBuffer() :
 }
 
 TDrawBuffer::~TDrawBuffer() {
-    delete[] data;
+    delete[] (TScreenCell *) data;
 }
 #endif
 

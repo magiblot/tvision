@@ -31,9 +31,9 @@ public:
     constexpr TStringView();
     TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
+#ifndef __BORLANDC__
     constexpr TStringView(TSpan<const char> span);
     constexpr operator TSpan<const char>() const;
-#ifndef __BORLANDC__
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
@@ -74,6 +74,7 @@ inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
 {
 }
 
+#ifndef __BORLANDC__
 inline constexpr TStringView::TStringView(TSpan<const char> span) :
     str(span.data()),
     len(span.size())
@@ -85,7 +86,6 @@ inline constexpr TStringView::operator TSpan<const char>() const
     return TSpan<const char>(str, len);
 }
 
-#ifndef __BORLANDC__
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
     len(text.size())
@@ -175,11 +175,11 @@ inline size_t TText::wseek(TStringView text, int count, Boolean)
     return count > 0 ? min(count, text.size()) : 0;
 }
 
-inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
+inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
                         TStringView text, size_t &bytes )
 {
-    if (n) {
-        ::setChar(*cell, text[0]);
+    if (cells.size()) {
+        ::setChar(cells[0], text[0]);
         ++width;
         ++bytes;
     }

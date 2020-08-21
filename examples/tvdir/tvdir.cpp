@@ -188,8 +188,8 @@ static void insertTextWidth(char *dst, TStringView src, int width, size_t dstSiz
 // Inserts 'width' columns of text from 'src' into 'dst'. If not enough characters
 // can be extracted from 'src', remaining columns are filled with spaces.
 {
-    size_t srcLen = TText::wseek(src, 18, False);
-    size_t emptyLen = 18 - strwidth(TStringView(&src[0], srcLen));
+    size_t srcLen = TText::wseek(src, width, False);
+    size_t emptyLen = width - strwidth(TStringView(&src[0], srcLen));
     size_t moveLen = srcLen + emptyLen;
     size_t textLen = min(strlen(dst), dstSize-1-moveLen);
     memmove(&dst[moveLen] , dst, textLen);

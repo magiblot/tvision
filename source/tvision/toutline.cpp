@@ -73,7 +73,7 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
         x = strwidth(graph) - beingDrawn->delta.x;
         if (x > 0)
           dBuf.moveStr(0, graph, color, (ushort) -1U, beingDrawn->delta.x);
-        delete graph.data();
+        delete[] (char *) graph.data();
       }
       {
         TStringView text = beingDrawn->getText(cur);
