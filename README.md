@@ -344,8 +344,9 @@ The functions above depend on the following lower-level functions. You will need
 size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
+void TText::fill(TSpan<TScreenCell> cells, TStringView text);
+void TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
 void TText::eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
-void TText::fill(TSpan<TScreenCell> cells, size_t width, TStringView text, TCellAttribs attr);
 void TText::next(TStringView text, size_t &bytes, size_t &width);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
 ```

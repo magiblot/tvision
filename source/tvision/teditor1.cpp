@@ -283,7 +283,7 @@ void TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
     ::setAttr(cells[0], color);
     size_t p_ = 0, w_ = 0;
     TText::eat(cells, w_, text, p_);
-    p += p_; width += w_;
+    p += p_; width += min(w_, cells.size());
 }
 
 int TEditor::charPos( uint p, uint target )

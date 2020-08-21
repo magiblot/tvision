@@ -376,17 +376,13 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
         while (dest < limit && count--)
             *(uchar *)dest++ = *s++;
 #else
-    size_t i = indent, j = 0;
-
-    if (attr)
-        while (i < length() && j < str.size())
-        {
-            data[i].Attr = (uchar) attr;
-            TText::eat(data.subspan(i), i, str.substr(j), j);
-        }
-    else
-        while (i < length() && j < str.size())
-            TText::eat(data.subspan(i), i, str.substr(j), j);
+    if (indent < length())
+    {
+        if (attr)
+            TText::fill(data.subspan(indent), str, (uchar) attr);
+        else
+            TText::fill(data.subspan(indent), str);
+    }
 #endif
 }
 
@@ -424,12 +420,12 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
     if (remainder)
         moveChar(indent, ' ', attr, remainder);
     size_t d = indent + remainder;
-    size_t limit = std::min(length(), d + width);
-    while (d < limit && s < str.size())
+    if (d < length())
     {
         if (attr)
-            data[d].Attr = (uchar) attr;
-        TText::eat(data.subspan(d), d, str.substr(s), s);
+            TText::fill(data.subspan(d, width), str.substr(s), (uchar) attr);
+        else
+            TText::fill(data.subspan(d, width), str.substr(s));
     }
 #endif
 }

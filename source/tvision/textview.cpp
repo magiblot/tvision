@@ -190,7 +190,7 @@ void TTerminal::draw()
             }
 
             {
-            int x = TText::fill(b, size.x, TStringView(s, slen), color);
+            int x = TText::fill(b, TStringView(s, slen), color);
             while (x < size.x)
                 ::setCell(b[x++], ' ', color);
             }

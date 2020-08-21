@@ -151,8 +151,9 @@ public:
     static size_t prev(TStringView text, size_t index);
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text);
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
     static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
-    static size_t fill(TSpan<TScreenCell> cells, size_t width, TStringView text, TCellAttribs attr);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 
@@ -187,16 +188,20 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
 
 #pragma warn -inl
 
-inline size_t TText::fill( TSpan<TScreenCell> cells, size_t width,
-                           TStringView text, TCellAttribs attr )
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
 {
-    if (cells.size()) {
-        size_t count = min(min(cells.size(), width), text.size());
-        for (size_t i = 0; i < count; ++i)
-            ::setCell(cells[i], text[i], attr);
-        return count;
-    }
-    return 0;
+    size_t count = min(cells.size(), text.size());
+    for (size_t i = 0; i < count; ++i)
+        ::setChar(cells[i], text[i]);
+    return count;
+}
+
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
+{
+    size_t count = min(cells.size(), text.size());
+    for (size_t i = 0; i < count; ++i)
+        ::setCell(cells[i], text[i], attr);
+    return count;
 }
 
 #pragma warn .inl
@@ -262,6 +267,32 @@ inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder)
     return index;
 }
 
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
+// Tries to fill all the cells in the 'cells' span with characters from 'text'.
+// Preserves the attributes of filled cells.
+// Returns the number of cells filled, which will be smaller than cells.size()
+// if not enough characters can be extracted from 'text'.
+// Note that one cell is always one column wide.
+{
+    size_t w = 0, b = 0;
+    while (w < cells.size() && b < text.size())
+        TText::eat(cells.subspan(w), w, text.substr(b), b);
+    // TText::eat always increases 'w' by the width of the processed
+    // text, but it never fills more cells than there are available.
+    return std::min<size_t>(w, cells.size());
+}
+
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
+// Same as above, but sets the attributes of filled cells to 'attr'.
+{
+    size_t w = 0, b = 0;
+    while (w < cells.size() && b < text.size()) {
+        ::setAttr(cells[w], attr);
+        TText::eat(cells.subspan(w), w, text.substr(b), b);
+    }
+    return std::min<size_t>(w, cells.size());
+}
+
 inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
                         TStringView text, size_t &bytes )
 // Reads a single character from a multibyte-encoded string. The display width of
@@ -313,26 +344,6 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
             }
         }
     }
-}
-
-inline size_t TText::fill( TSpan<TScreenCell> cells, size_t width,
-                           TStringView text, TCellAttribs attr )
-// Fills at most 'width' 'cells' with characters from 'text'.
-// Returns the number of cells filled. Note that one cell is always one display column.
-{
-    if (cells.size()) {
-        if (cells.size() < width)
-            width = cells.size();
-        size_t w = 0, b = 0;
-        while (w < width && b < text.size()) {
-            ::setAttr(cells[w], attr);
-            TText::eat(cells.subspan(w), w, text.substr(b), b);
-        }
-        // TText::eat always increases 'w' by the width of the processed
-        // text, but it never fills more cells than there are available.
-        return std::min(w, cells.size());
-    }
-    return 0;
 }
 
 inline void TText::next(TStringView text, size_t &bytes, size_t &width)
