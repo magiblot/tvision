@@ -99,6 +99,7 @@ public:
     constexpr size_t size_bytes() const;
     constexpr Boolean empty() const;
     constexpr T _FAR & operator[](size_t pos) const;
+    constexpr operator T _FAR *() const;
     constexpr T _FAR & front() const;
     constexpr T _FAR & back() const;
 
@@ -149,6 +150,12 @@ template <class T>
 inline constexpr T _FAR & TSpan<T>::operator[](size_t pos) const
 {
     return ptr[pos];
+}
+
+template <class T>
+inline constexpr TSpan<T>::operator T _FAR *() const
+{
+    return ptr;
 }
 
 template <class T>

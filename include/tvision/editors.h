@@ -277,7 +277,7 @@ public:
     Boolean encSingleByte;
     char charsBuf[4];
     void nextChar( TStringView, uint &P, uint &width );
-    void formatCell( TScreenCell*, uint, uint&, TStringView, uint& , TCellAttribs );
+    void formatCell( TSpan<TScreenCell>, uint&, TStringView, uint& , TCellAttribs );
     TStringView bufChars( uint );
     TStringView bufPrevChars( uint );
 

@@ -46,6 +46,7 @@ public:
     size_t length() const;
 
 #ifdef __FLAT__
+    static TSpan<TScreenCell> allocData();
     TDrawBuffer();
     ~TDrawBuffer();
 #endif
@@ -53,16 +54,9 @@ public:
 protected:
 
 #ifdef __FLAT__
-    const size_t dataLength;
-    TScreenCell * const data;
+    const TSpan<TScreenCell> data;
 #else
     TScreenCell data[maxViewWidth];
-#endif
-
-private:
-
-#ifndef __FLAT__
-    static const size_t dataLength;
 #endif
 
 };
@@ -72,9 +66,7 @@ private:
 
 inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 {
-#ifdef __FLAT__
-    if (indent < dataLength)
-#endif
+    if (indent < length())
     {
         ::setAttr(data[indent], (uchar) attr);
     }
@@ -82,9 +74,7 @@ inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
 {
-#ifdef __FLAT__
-    if (indent < dataLength)
-#endif
+    if (indent < length())
     {
         ::setChar(data[indent], (uchar) c);
     }
@@ -93,7 +83,7 @@ inline void TDrawBuffer::putChar( ushort indent, ushort c )
 inline size_t TDrawBuffer::length() const
 {
 #ifdef __FLAT__
-    return dataLength;
+    return data.size();
 #else
     return maxViewWidth;
 #endif

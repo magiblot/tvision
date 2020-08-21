@@ -29,10 +29,6 @@
 #define register
 #endif
 
-#if !defined( __FLAT__ )
-const size_t TDrawBuffer::dataLength = maxViewWidth;
-#endif
-
 #pragma warn -asc
 
 /*------------------------------------------------------------------------*/
@@ -119,8 +115,8 @@ __5:
 
 void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count )
 {
-    if (indent < dataLength)
-        memcpy(&data[indent], source, min(count, dataLength - indent));
+    if (indent < length())
+        memcpy(&data[indent], source, min(count, length() - indent)*sizeof(TScreenCell));
 }
 
 /*------------------------------------------------------------------------*/
@@ -185,7 +181,7 @@ __4:
 
 #else
     register TScreenCell *dest = &data[indent];
-    count = min(count, max(dataLength - indent, 0));
+    count = min(count, max(length() - indent, 0));
 
     if (attr != 0)
         if (c != 0)
@@ -265,7 +261,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 {
 #ifdef __BORLANDC__
     register ushort *dest = &data[indent];
-    ushort *limit = &data[dataLength];
+    ushort *limit = &data[length()];
     register uchar _FAR *s = (uchar _FAR *) str.data();
     ushort count = (ushort) str.size();
     int toggle;
@@ -291,7 +287,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
     int toggle = 1;
     uchar curAttr = ((uchar *)&attrs)[0];
 
-    while (i < dataLength && j < str.size())
+    while (i < length() && j < str.size())
         if (str[j] == '~')
         {
             curAttr = ((uchar *) &attrs)[toggle];
@@ -301,7 +297,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
         else
         {
             data[i].Attr = curAttr;
-            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+            TText::eat(data.subspan(i), i, str.substr(j), j);
         }
 #endif
 }
@@ -366,7 +362,7 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 {
 #ifdef __BORLANDC__
     register ushort *dest = &data[indent];
-    ushort *limit = &data[dataLength];
+    ushort *limit = &data[length()];
     register uchar _FAR *s = (uchar _FAR *) str.data();
     ushort count = (ushort) str.size();
 
@@ -383,14 +379,14 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
     size_t i = indent, j = 0;
 
     if (attr)
-        while (i < dataLength && j < str.size())
+        while (i < length() && j < str.size())
         {
             data[i].Attr = (uchar) attr;
-            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+            TText::eat(data.subspan(i), i, str.substr(j), j);
         }
     else
-        while (i < dataLength && j < str.size())
-            TText::eat(&data[i], dataLength - i, i, str.substr(j, str.size() - j), j);
+        while (i < length() && j < str.size())
+            TText::eat(data.subspan(i), i, str.substr(j), j);
 #endif
 }
 
@@ -428,27 +424,32 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
     if (remainder)
         moveChar(indent, ' ', attr, remainder);
     size_t d = indent + remainder;
-    size_t limit = std::min(dataLength, d + width);
+    size_t limit = std::min(length(), d + width);
     while (d < limit && s < str.size())
     {
         if (attr)
             data[d].Attr = (uchar) attr;
-        TText::eat(&data[d], dataLength - d, d, {&str[s], str.size() - s}, s);
+        TText::eat(data.subspan(d), d, str.substr(s), s);
     }
 #endif
 }
 
 #ifdef __FLAT__
+TSpan<TScreenCell> TDrawBuffer::allocData()
+{
+    size_t len = max(TScreen::screenWidth, TScreen::screenHeight);
+    return TSpan<TScreenCell>(new TScreenCell[len], len);
+}
+
 TDrawBuffer::TDrawBuffer() :
     // This makes it possible to create TDrawBuffers for big screen widths.
     // This does not work nor is necessary in non-Flat builds.
     // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
-    dataLength(max(TScreen::screenWidth, TScreen::screenHeight)),
-    data(new TScreenCell[dataLength])
+    data(allocData())
 {
 #ifndef __BORLANDC__
     // We need this as the TScreenCell struct has unused bits.
-    memset(data, 0, dataLength*sizeof(TScreenCell));
+    memset(data, 0, data.size_bytes());
 #endif
 }
 

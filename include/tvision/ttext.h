@@ -31,6 +31,8 @@ public:
     constexpr TStringView();
     TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
+    constexpr TStringView(TSpan<const char> span);
+    constexpr operator TSpan<const char>() const;
 #ifndef __BORLANDC__
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
@@ -70,6 +72,17 @@ inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
     str(str),
     len(len)
 {
+}
+
+inline constexpr TStringView::TStringView(TSpan<const char> span) :
+    str(span.data()),
+    len(span.size())
+{
+}
+
+inline constexpr TStringView::operator TSpan<const char>() const
+{
+    return TSpan<const char>(str, len);
 }
 
 #ifndef __BORLANDC__
@@ -138,7 +151,7 @@ public:
     static size_t prev(TStringView text, size_t index);
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
-    static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
+    static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
     static size_t fill(TSpan<TScreenCell> cells, size_t width, TStringView text, TCellAttribs attr);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
@@ -249,22 +262,22 @@ inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder)
     return index;
 }
 
-inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
+inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
                         TStringView text, size_t &bytes )
 // Reads a single character from a multibyte-encoded string. The display width of
-// a character may be 1 or more cells, and all such cells (from cell[0] to, at most,
-// cell[n-1]) are updated accordingly.
+// a character may be 1 or more cells, and all such cells (from cells[0] to, at most,
+// cells[cells.size() - 1]) are updated accordingly.
 //
-// * cell: TScreenCell to write to. If you want it to have attributes, you should set them first.
-// * n: maximum number of cells that can be written to.
+// * cells: range of TScreenCells to write to. If you want the text to have attributes,
+//   you should set them on cells[0] before invoking this function.
 // * width (output parameter): gets increased by the display width of the text in cell.
 // * text: input text.
 // * bytes (output parameter): gets increased by the number of bytes read from 'text'.
 {
-    if (n) {
-        auto &dst = cell->Char;
-        auto &attr = cell->Attr;
-        cell->extraWidth = 0;
+    if (cells.size()) {
+        auto &dst = cells[0].Char;
+        auto &attr = cells[0].Attr;
+        cells[0].extraWidth = 0;
         wchar_t wc;
         std::mbstate_t state {};
         int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
@@ -290,13 +303,12 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
                 dst = 0;
                 memcpy(&dst.bytes, text.data(), len);
                 // Set extraWidth attribute and fill trailing cells.
-                cell->extraWidth = std::min<size_t>(cWidth - 1, 7);
-                while (--cWidth && --n) {
-                    ++cell;
-                    auto trailCell = *cell;
+                cells[0].extraWidth = std::min<size_t>(cWidth - 1, 7);
+                for (size_t i = 1; i < std::min<size_t>(cWidth, cells.size()); ++i) {
+                    auto trailCell = cells[i];
                     trailCell.Char = TScreenCell::wideCharTrail;
                     trailCell.Attr = attr;
-                    *cell = trailCell;
+                    cells[i] = trailCell;
                 }
             }
         }
@@ -314,7 +326,7 @@ inline size_t TText::fill( TSpan<TScreenCell> cells, size_t width,
         size_t w = 0, b = 0;
         while (w < width && b < text.size()) {
             ::setAttr(cells[w], attr);
-            TText::eat(&cells[w], width - w, w, text.substr(b), b);
+            TText::eat(cells.subspan(w), w, text.substr(b), b);
         }
         // TText::eat always increases 'w' by the width of the processed
         // text, but it never fills more cells than there are available.

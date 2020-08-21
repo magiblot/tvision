@@ -42,6 +42,7 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
         { uchar(Colors), bufLen }
     };
 
+    TSpan<TScreenCell> Cells(DrawBuf, Width);
     int X = 0;
     for (int r = 0; r < 3; ++r)
     {
@@ -54,16 +55,16 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
                 goto fill;
             if (Char == '\t') {
                 do {
-                    ::setCell(DrawBuf[X++], ' ', Color);
+                    ::setCell(Cells[X++], ' ', Color);
                 } while (X%8 != 0 && X < Width);
                 ++P;
             } else
-                formatCell(&DrawBuf[X], Width - X, (uint&) X, chars, P, Color);
+                formatCell(Cells.subspan(X), (uint&) X, chars, P, Color);
         }
     }
 fill:
     while (X < Width)
-        ::setCell(DrawBuf[X++], ' ', uchar(Colors));
+        ::setCell(Cells[X++], ' ', uchar(Colors));
 }
 
 uint TEditor::lineEnd( uint P )
