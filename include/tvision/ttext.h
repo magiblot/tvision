@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cstring>
 #include <cwchar>
+#include <type_traits>
 #endif
 
 class TText {
@@ -27,10 +28,11 @@ public:
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
     static size_t fill(TSpan<TScreenCell> cells, TStringView text);
+#ifdef __BORLANDC__
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
-#ifndef __BORLANDC__
-    template<class Func>
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
+#else
+    template<class Attr>
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
     static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
     static void next(TStringView text, size_t &bytes, size_t &width);
@@ -161,27 +163,26 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
     return std::min<size_t>(w, cells.size());
 }
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
-// Same as above, but sets the attributes of filled cells to 'attr'.
+template<class Attr>
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr)
+// Same as above, but gives total control over every iterated cell:
+//
+// * If 'Attr' is a callable type, it is invoked with the cell as parameter.
+//   The most common use case for this is if you need to modify the cell attributes
+//   in a way other than simply replacing them.
+//
+//   Examples:
+//     TText::fill(cells, text, [] (auto &cell) { cell.Attr.fgSet(0x00); }); // OK.
+//     TText::fill(cells, text, [] (void) {}); // Error: callback cannot take a TScreenCell&.
+//
+// * Otherwise, 'attr' is directly assigned to the cell's attributes.
 {
     size_t w = 0, b = 0;
     while (w < cells.size() && b < text.size()) {
-        ::setAttr(cells[w], attr);
-        TText::eat(cells.subspan(w), w, text.substr(b), b);
-    }
-    return std::min<size_t>(w, cells.size());
-}
-
-template<class Func>
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func)
-// Similar to the above, but gives total control over every iterated cell through
-// the 'func' callback. Usually 'func' would take a TScreenCell& by parameter.
-// A possible use case for this is if you need to modify the cell attributes
-// in a way other than simply replacing them.
-{
-    size_t w = 0, b = 0;
-    while (w < cells.size() && b < text.size()) {
-        func(cells[w]);
+        if constexpr (std::is_invocable<Attr, TScreenCell&>())
+            attr(cells[w]);
+        else
+            ::setAttr(cells[w], attr);
         TText::eat(cells.subspan(w), w, text.substr(b), b);
     }
     return std::min<size_t>(w, cells.size());

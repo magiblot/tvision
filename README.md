@@ -345,10 +345,11 @@ size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
 void TText::fill(TSpan<TScreenCell> cells, TStringView text);
+#ifdef __BORLANDC__
 void TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
-#ifndef __BORLANDC__
-template <class Func>
-void TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
+#else
+template <class Attr>
+void TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
 void TText::eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
 void TText::next(TStringView text, size_t &bytes, size_t &width);
