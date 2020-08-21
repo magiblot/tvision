@@ -27,6 +27,7 @@ public:
     ~TDrawSurface();
 
     void resize(TPoint aSize);
+    void grow(TPoint aDelta);
     void clear();
 
     TCellAttribs getFillColor() const;
@@ -37,6 +38,11 @@ public:
     const TScreenCell _FAR &at(int y, int x) const;
 
 };
+
+inline void TDrawSurface::grow(TPoint aDelta)
+{
+    resize(size + aDelta);
+}
 
 inline TCellAttribs TDrawSurface::getFillColor() const
 {
