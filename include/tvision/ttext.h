@@ -137,6 +137,7 @@ public:
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
     static void eat(TScreenCell *cell, size_t n, size_t &width, TStringView text, size_t &bytes);
+    static size_t fill(TSpan<TScreenCell> cells, size_t width, TStringView text, TCellAttribs attr);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 
@@ -168,6 +169,22 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
         ++bytes;
     }
 }
+
+#pragma warn -inl
+
+inline size_t TText::fill( TSpan<TScreenCell> cells, size_t width,
+                           TStringView text, TCellAttribs attr )
+{
+    if (cells.size()) {
+        size_t count = min(min(cells.size(), width), text.size());
+        for (size_t i = 0; i < count; ++i)
+            ::setCell(cells[i], text[i], attr);
+        return count;
+    }
+    return 0;
+}
+
+#pragma warn .inl
 
 inline void TText::next(TStringView text, size_t &bytes, size_t &width)
 {
@@ -282,6 +299,26 @@ inline void TText::eat( TScreenCell *cell, size_t n, size_t &width,
             }
         }
     }
+}
+
+inline size_t TText::fill( TSpan<TScreenCell> cells, size_t width,
+                           TStringView text, TCellAttribs attr )
+// Fills at most 'width' 'cells' with characters from 'text'.
+// Returns the number of cells filled. Note that one cell is always one display column.
+{
+    if (cells.size()) {
+        if (cells.size() < width)
+            width = cells.size();
+        size_t w = 0, b = 0;
+        while (w < width && b < text.size()) {
+            ::setAttr(cells[w], attr);
+            TText::eat(&cells[w], width - w, w, text.substr(b), b);
+        }
+        // TText::eat always increases 'w' by the width of the processed
+        // text, but it never fills more cells than there are available.
+        return std::min(w, cells.size());
+    }
+    return 0;
 }
 
 inline void TText::next(TStringView text, size_t &bytes, size_t &width)
