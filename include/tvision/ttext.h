@@ -9,9 +9,7 @@
 #ifndef TVISION_TTEXT_H
 #define TVISION_TTEXT_H
 
-#ifdef __BORLANDC__
-#define constexpr
-#else
+#ifndef __BORLANDC__
 #include <internal/codepage.h>
 #include <algorithm>
 #include <string_view>
@@ -368,7 +366,5 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
 }
 
 #endif // __BORLANDC__
-#ifdef __BORLANDC__
-#undef constexpr
-#endif
-#endif
+
+#endif // TVISION_TTEXT_H

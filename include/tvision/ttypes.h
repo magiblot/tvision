@@ -74,6 +74,7 @@ extern const uchar specialChars[];
 #endif
 
 #ifdef __BORLANDC__
+// Reserve future keywords
 #define constexpr
 #endif
 
@@ -176,9 +177,5 @@ inline constexpr TSpan<T> TSpan<T>::subspan(size_t pos, size_t n) const
         n = tail;
     return TSpan<T>(ptr + pos, n);
 }
-
-#ifdef __BORLANDC__
-#undef constexpr
-#endif
 
 #endif  // __TTYPES_H
