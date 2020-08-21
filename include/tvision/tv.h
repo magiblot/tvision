@@ -639,6 +639,9 @@
 #endif
 
 #include <tvision/util.h>
+#include <tvision/tspan.h>
+#include <tvision/tstrview.h>
+
 #include <tvision/ttext.h>
 
 #if defined( __INC_TVOBJS_H )

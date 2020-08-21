@@ -2,7 +2,7 @@
 /*                                                                         */
 /*   TTEXT.H                                                               */
 /*                                                                         */
-/*   Defines classes and functions related to string manipulation.         */
+/*   Defines functions related to multibyte string manipulation.           */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
@@ -12,134 +12,9 @@
 #ifndef __BORLANDC__
 #include <internal/codepage.h>
 #include <algorithm>
-#include <string_view>
 #include <cstring>
 #include <cwchar>
 #endif
-
-class TStringView {
-
-    // This class exists only to compensate for the lack of std::string_view
-    // in Borland C++. Unless you are programming for that compiler, you should
-    // always use std::string_view.
-
-    const char _FAR *str;
-    size_t len;
-
-public:
-
-    constexpr TStringView();
-    TStringView(const char _FAR *str);
-    constexpr TStringView(const char _FAR *str, size_t len);
-#ifndef __BORLANDC__
-    constexpr TStringView(TSpan<const char> span);
-    constexpr operator TSpan<const char>() const;
-    constexpr TStringView(std::string_view text);
-    constexpr operator std::string_view() const;
-#endif
-
-    constexpr const char* data() const;
-    constexpr size_t size() const;
-    constexpr Boolean empty() const;
-    constexpr const char& operator[](size_t pos) const;
-    constexpr const char& front() const;
-    constexpr const char& back() const;
-
-    constexpr TStringView substr(size_t pos) const;
-    constexpr TStringView substr(size_t pos, size_t n) const;
-
-};
-
-inline constexpr TStringView::TStringView() :
-    str(0),
-    len(0)
-{
-}
-
-#pragma warn -inl
-
-inline TStringView::TStringView(const char _FAR *str) :
-    str(str),
-    len(0)
-{
-    while (*str++)
-        ++len;
-}
-
-#pragma warn .inl
-
-inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
-    str(str),
-    len(len)
-{
-}
-
-#ifndef __BORLANDC__
-inline constexpr TStringView::TStringView(TSpan<const char> span) :
-    str(span.data()),
-    len(span.size())
-{
-}
-
-inline constexpr TStringView::operator TSpan<const char>() const
-{
-    return TSpan<const char>(str, len);
-}
-
-inline constexpr TStringView::TStringView(std::string_view text) :
-    str(text.data()),
-    len(text.size())
-{
-}
-
-inline constexpr TStringView::operator std::string_view() const
-{
-    return {str, len};
-}
-#endif
-
-inline constexpr const char* TStringView::data() const
-{
-    return str;
-}
-
-inline constexpr size_t TStringView::size() const
-{
-    return len;
-}
-
-inline constexpr Boolean TStringView::empty() const
-{
-    return Boolean(size() == 0);
-}
-
-inline constexpr const char& TStringView::operator[](size_t pos) const
-{
-    return str[pos];
-}
-
-inline constexpr const char& TStringView::front() const
-{
-    return str[0];
-}
-
-inline constexpr const char& TStringView::back() const
-{
-    return str[len - 1];
-}
-
-inline constexpr TStringView TStringView::substr(size_t pos) const
-{
-    return TStringView(str + pos, len - pos);
-}
-
-inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
-{
-    size_t tail = len - pos;
-    if (n > tail)
-        n = tail;
-    return TStringView(str + pos, n);
-}
 
 class TText {
 
