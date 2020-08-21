@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 3.5)
 project (tvision)
 
 add_compile_options(
-    -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
     --std=c++17 -O2 -fpermissive
 #     -g
+    -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder -Wno-deprecated
     # Enable the following if your system supports it:
 #     -flto
 )
@@ -46,6 +46,8 @@ target_link_libraries(tvedit ${LIBS})
 target_link_libraries(tvdemo ${LIBS})
 target_link_libraries(tvdir ${LIBS})
 target_link_libraries(tvhc ${LIBS})
+
+target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     target_precompile_headers(tvision PRIVATE "include/tvision/tv.h")
