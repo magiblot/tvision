@@ -21,6 +21,8 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#include <malloc.h>
+
 TTextDevice::TTextDevice( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,
@@ -120,12 +122,37 @@ Boolean TTerminal::canInsert( ushort amount )
     return Boolean( queBack > T );
 }
 
+#ifdef __FLAT__
+
+#define DRAW_DYNAMIC_STR 1
+#define resizeStr(_len) \
+    slen = _len; \
+    if (slen > scap) \
+        s = (char *) ::realloc(s, (scap = max(slen, 2*scap)));
+
+#else
+
+#define DRAW_DYNAMIC_STR 0
+#define resizeStr(_len) \
+    slen = _len;
+
+#endif // __FLAT__
+
 void TTerminal::draw()
 {
+#if DRAW_DYNAMIC_STR
+    size_t scap = 256;
+    char *s = (char*) ::malloc(scap);
+#else
+    char s[256];
+#endif
+    size_t slen = 0;
+    TScreenCell *_b = (TScreenCell*) alloca(size.x*sizeof(TScreenCell));
+    TSpan<TScreenCell> b(_b, size.x);
     short  i;
     ushort begLine, endLine;
-    char s[256];
     ushort bottomLine;
+    uchar color = mapColor(1);
 
     bottomLine = size.y + delta.y;
     if( limit.y > bottomLine )
@@ -151,28 +178,33 @@ void TTerminal::draw()
         if (endLine >= begLine)
             {
             int T = int( endLine - begLine );
+            resizeStr(T);
             memcpy( s, &buffer[begLine], T );
-            s[T] = EOS;
             }
         else
             {
             int T = int( bufSize - begLine);
+            resizeStr(T + endLine);
             memcpy( s, &buffer[begLine], T );
             memcpy( s+T, buffer, endLine );
-            s[T+endLine] = EOS;
             }
-        int l = strlen(s);
-        if( delta.x >= l )
-            *s = EOS;
-        else
-            memmove( s, &s[delta.x], l );
 
-        writeStr( 0, i, s, 1 );
-        writeChar( strlen(s), i, ' ', 1, size.x );
+            {
+            int x = TText::fill(b, size.x, TStringView(s, slen), color);
+            while (x < size.x)
+                ::setCell(b[x++], ' ', color);
+            }
+        writeBuf( 0, i, size.x, 1, b.data() );
         endLine = begLine;
         bufDec( endLine );
         }
+#if DRAW_DYNAMIC_STR
+    ::free(s);
+#endif
 }
+
+#undef DRAW_DYNAMIC_STR
+#undef resizeStr
 
 ushort TTerminal::nextLine( ushort pos )
 {
