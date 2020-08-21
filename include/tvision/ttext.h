@@ -54,13 +54,17 @@ inline constexpr TStringView::TStringView() :
 {
 }
 
-extern "C" size_t strlen(const char _FAR *);
+#pragma warn -inl
 
 inline TStringView::TStringView(const char _FAR *str) :
     str(str),
-    len(strlen(str))
+    len(0)
 {
+    while (*str++)
+        ++len;
 }
+
+#pragma warn .inl
 
 inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
     str(str),
