@@ -93,7 +93,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Mouse and key modifiers support on the linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
 * UTF-8 support both in terminal I/O and the API. For instance, the `tvedit` and `tvdemo` applications support Unicode.
-* Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelenght`.
+* Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
 * Compatibility with 32-bit help files.
@@ -277,9 +277,9 @@ A character provided as argument to any of the Turbo Vision API functions that d
 
 For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This means that box-drawing characters can be mixed with UTF-8 in general, which is useful for backward compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
 
-One of the issues of Unicode support is the existence of [ｗｉｄｅ](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
+One of the issues of Unicode support is the existence of [multi-width](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
 
-* *Wide* characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
+* Multi-width characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
 * Zero-width characters are always drawn as `�`, so they become one column wide.
 * No notable graphical glitches will occur as long as your terminal emulator respects character widths as measured by `wcwidth`.
 
@@ -310,7 +310,7 @@ void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort wi
 ```
 `str` is interpreted according to the rules exposed previously. However:
 * `width` specifies the maximum number of display columns that should be read from `str`.
-* `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a *wide* character, the remaining positions in that character are filled with spaces.
+* `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a multi-width character, the remaining positions in that character are filled with spaces.
 
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);
@@ -429,10 +429,29 @@ The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStr
 
 ## Unicode support across standard views
 
-Support for creating Unicode-aware views is in place, but some views that are part of the original Turbo Vision library have not been adapted to handle Unicode.
+Support for creating Unicode-aware views is in place, and most views in the original Turbo Vision library have been adapted to handle Unicode.
 
-* At least `TFrame`, `THistoryViewer`, `TListViewer` and `TMenuBox` are able to display Unicode text properly.
-* `TInputLine` can display and process Unicode text.
-* Word wrapping in `TStaticText` and `THelpViewer` is Unicode-aware.
-* Automatic shortcuts in `TMenuBox` won't work with Unicode text, as shortcuts are still compared against `event.keyDown.charScan.charCode`.
-* `TEditor` instances (as in the `tvedit` application) are in UTF-8 mode by default. Press `Ctrl+P` to switch back to single-byte mode. This only changes how the document is displayed and the encoding of user input; it does not alter the document.
+The following views can display Unicode text properly. Some of them also do horizontal scrolling or word wrapping; all of that should work fine.
+
+- [x] `TStaticText` ([`7b15d45d`](https://github.com/magiblot/tvision/commit/7b15d45da231f75f2677454021c2e34ad1149ca8)).
+- [x] `TFrame` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
+- [x] `TStatusLine` ([`477b3ae9`](https://github.com/magiblot/tvision/commit/477b3ae91fd84eb1487dca18a87b3f7b8699c576)).
+- [x] `THistoryViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
+- [x] `THelpViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679), [`8c7dac2a`](https://github.com/magiblot/tvision/commit/8c7dac2a61000f17e09cc31ebbb58b030f95c0e5)).
+- [x] `TListViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
+- [x] `TMenuBox` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
+- [x] `TTerminal` ([`ee821b69`](https://github.com/magiblot/tvision/commit/ee821b69c5dd81c565fe1add1ac6f0a2f8a96a01)).
+- [x] `TOutlineViewer` ([`6cc8cd38`](https://github.com/magiblot/tvision/commit/6cc8cd38da5841201544d6ba103f9662d7675213)).
+- [x] `TFileViewer` (from the `tvdemo` application) ([`068bbf7a`](https://github.com/magiblot/tvision/commit/068bbf7a0a13482bda91f9f3411ec614f9a1e6ff)).
+- [x] `TFilePane` (from the `tvdir` application) ([`9bcd897c`](https://github.com/magiblot/tvision/commit/9bcd897cb7cf010ef34d0281d42e9ea58345ce53)).
+
+The following views can, in addition, process Unicode text or user input:
+
+- [x] `TInputLine` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679), [`cb489d42`](https://github.com/magiblot/tvision/commit/cb489d42d522f7515c870942bcaa8f0f3dea3f35)).
+- [x] `TEditor` ([`702114dc`](https://github.com/magiblot/tvision/commit/702114dc03a13ebce2b52504eb122c97f9892de9)). Instances are in UTF-8 mode by default. You may switch back to single-byte mode by pressing `Ctrl+P`. This only changes how the document is displayed and the encoding of user input; it does not alter the document. This class is used in the `tvedit` application; you may test it there.
+
+Views not in this list may not have needed any corrections or I simply forgot to fix them. Please submit an issue if you notice anything not working as expected.
+
+Use cases where Unicode is not supported (not an exhaustive list):
+
+- [ ] Highlighted key shortcuts, in general (e.g. `TMenuBox`, `TStatusLine`, `TButton`...).
