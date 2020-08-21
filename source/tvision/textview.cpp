@@ -15,6 +15,7 @@
 #define Uses_TTextDevice
 #define Uses_TTerminal
 #define Uses_otstream
+#define Uses_TText
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )

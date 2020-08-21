@@ -6,8 +6,8 @@
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
-#ifndef TVISION_TTEXT_H
-#define TVISION_TTEXT_H
+#if defined( Uses_TText ) && !defined( __TText )
+#define __TText
 
 #ifndef __BORLANDC__
 #include <internal/codepage.h>
@@ -269,4 +269,4 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
 
 #endif // __BORLANDC__
 
-#endif // TVISION_TTEXT_H
+#endif // Uses_TText

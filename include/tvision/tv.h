@@ -626,6 +626,10 @@
 #define __INC_TKEYS_H
 #endif
 
+#if defined( Uses_TText )
+#define __INC_TTEXT_H
+#endif
+
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
 #include <tvision/scrncell.h>
@@ -642,7 +646,9 @@
 #include <tvision/tspan.h>
 #include <tvision/tstrview.h>
 
+#if defined( __INC_TTEXT_H )
 #include <tvision/ttext.h>
+#endif
 
 #if defined( __INC_TVOBJS_H )
 #include <tvision/tvobjs.h>

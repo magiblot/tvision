@@ -17,6 +17,7 @@
 
 #define Uses_TDrawBuffer
 #define Uses_TScreen
+#define Uses_TText
 #include <tvision/tv.h>
 
 #if !defined( __DOS_H )

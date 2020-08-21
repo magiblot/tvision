@@ -20,6 +20,7 @@
 #define Uses_TValidator
 #define Uses_opstream
 #define Uses_ipstream
+#define Uses_TText
 #include <tvision/tv.h>
 
 #if !defined( __CTYPE_H )

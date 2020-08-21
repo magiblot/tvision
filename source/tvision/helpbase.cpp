@@ -22,6 +22,7 @@
 #define Uses_opstream
 #define Uses_fpstream
 #define Uses_TRect
+#define Uses_TText
 #include <tvision/tv.h>
 
 #if !defined( __HELP_H )

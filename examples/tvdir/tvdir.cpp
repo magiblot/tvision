@@ -27,6 +27,7 @@
 #define Uses_TScrollBar
 #define Uses_TParamText
 #define Uses_TScreen
+#define Uses_TText
 #include <tvision/tv.h>
 #include <dos.h>
 #include <string.h>

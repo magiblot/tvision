@@ -13,6 +13,7 @@
  */
 
 #define Uses_TEditor
+#define Uses_TText
 #include <tvision/tv.h>
 
 #include <ctype.h>
