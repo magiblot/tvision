@@ -1,3 +1,7 @@
+#ifdef __BORLANDC__
+#include <fstream.h>
+#else
+
 #ifndef FSTREAM_H
 #define FSTREAM_H
 
@@ -9,4 +13,6 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 
-#endif
+#endif // FSTREAM_H
+
+#endif // __BORLANDC__

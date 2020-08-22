@@ -9,7 +9,7 @@
 #ifndef TVISION_TSTRVIEW_H
 #define TVISION_TSTRVIEW_H
 
-#ifndef __BORLANDC__
+#if __cplusplus >= 201703L
 #include <string_view>
 #endif
 
@@ -27,7 +27,7 @@ public:
     constexpr TStringView();
     TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
-#ifndef __BORLANDC__
+#if __cplusplus >= 201703L
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
@@ -68,7 +68,7 @@ inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
 {
 }
 
-#ifndef __BORLANDC__
+#if __cplusplus >= 201703L
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
     len(text.size())

@@ -13,6 +13,10 @@
  *
  */
 
+#ifdef __BORLANDC__
+#include <dir.h>
+#else
+
 #if !defined(__DIR_H)
 #define __DIR_H
 
@@ -102,4 +106,4 @@ int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );
 
 #endif  /* __DIR_H */
 
-
+#endif // __BORLANDC__

@@ -6,6 +6,10 @@
  *
  */
 
+#ifdef __BORLANDC__
+#include <windows.h>
+#else
+
 #ifndef __WINDOWS_H
 #define __WINDOWS_H
 
@@ -166,4 +170,6 @@ extern "C" {
 
 }
 
-#endif
+#endif // __WINDOWS_H
+
+#endif // __BORLANDC__

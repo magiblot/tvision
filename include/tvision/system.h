@@ -60,7 +60,7 @@ const int meMouseMoved = 0x01;
 const int meDoubleClick = 0x02;
 #else
 #if !defined( __WINDOWS_H )
-#include <windows.h>
+#include <tvision/borland/windows.h>
 #endif
 const int meMouseMoved = MOUSE_MOVED;       // NT values from WINDOWS.H
 const int meDoubleClick = DOUBLE_CLICK;

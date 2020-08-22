@@ -11,7 +11,8 @@ add_compile_options(
 
 include_directories(
 include
-include/override
+include/tvision
+include/tvision/borland
 )
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")

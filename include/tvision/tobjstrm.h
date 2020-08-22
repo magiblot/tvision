@@ -86,7 +86,7 @@ protected:
 #if defined( Uses_TStreamableClass ) && !defined( __TStreamableClass )
 #define __TStreamableClass
 
-#include <dos.h>
+#include <tvision/borland/dos.h>
 #include <limits.h>
 #include <stddef.h>
 
@@ -270,7 +270,7 @@ private:
 #define __pstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -351,7 +351,7 @@ protected:
 #define __ipstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -427,7 +427,7 @@ private:
 #define __opstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -503,7 +503,7 @@ private:
 #define __iopstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -539,7 +539,7 @@ protected:
 #define __fpbase
 
 #if !defined( __FSTREAM_H )
-#include <fstream.h>
+#include <tvision/borland/fstream.h>
 #endif  // __FSTREAM_H
 
 #pragma option -Vo-
@@ -580,7 +580,7 @@ private:
 #define __ifpstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -620,7 +620,7 @@ public:
 #define __ofpstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-
@@ -662,7 +662,7 @@ public:
 #define __fpstream
 
 #if !defined( __IOSTREAM_H )
-#include <iostream.h>
+#include <tvision/borland/iostream.h>
 #endif  // __IOSTREAM_H
 
 #pragma option -Vo-

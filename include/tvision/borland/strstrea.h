@@ -1,3 +1,7 @@
+#ifdef __BORLANDC__
+#include <strstrea.h>
+#else
+
 #ifndef STRSTREA_H
 #define STRSTREA_H
 
@@ -10,4 +14,6 @@ using std::ostrstream;
 using std::strstream;
 using std::strstreambuf;
 
-#endif
+#endif // STRSTREA_H
+
+#endif // __BORLANDC__

@@ -16,7 +16,9 @@
  *
  */
 
-
+#ifdef __BORLANDC__
+#include <excpt.h>
+#else
 
 #ifndef __EXCPT_H
 #define __EXCPT_H
@@ -401,3 +403,5 @@ extern int           __abnormal_termination;
 #endif
 
 #endif  /* __EXCPT_H */
+
+#endif // __BORLANDC__

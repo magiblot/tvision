@@ -20,7 +20,7 @@
 #define _NEAR near
 #endif
 
-#include <_defs.h>
+#include <tvision/borland/_defs.h>
 
 #ifdef __BORLANDC__
 #define I   asm

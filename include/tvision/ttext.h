@@ -10,7 +10,7 @@
 #define __TText
 
 #ifndef __BORLANDC__
-#include <internal/codepage.h>
+#include <tvision/internal/codepage.h>
 #include <algorithm>
 #include <cstring>
 #include <cwchar>

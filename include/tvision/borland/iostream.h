@@ -1,3 +1,7 @@
+#ifdef __BORLANDC__
+#include <iostream.h>
+#else
+
 #ifndef IOSTREAM_H
 #define IOSTREAM_H
 
@@ -20,4 +24,6 @@ using std::streambuf;
 using std::streamoff;
 using std::streampos;
 
-#endif
+#endif // IOSTREAM_H
+
+#endif // __BORLANDC__

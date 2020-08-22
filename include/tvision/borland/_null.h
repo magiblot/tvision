@@ -12,6 +12,10 @@
  *
  */
 
+#ifdef __BORLANDC__
+#include <_null.h>
+#else
+
 #ifndef NULL
 #  if !defined(__FLAT__)
 #    if defined(__TINY__) || defined(__SMALL__) || defined(__MEDIUM__)
@@ -28,3 +32,4 @@
 #  endif
 #endif
 
+#endif // __BORLANDC__

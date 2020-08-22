@@ -24,7 +24,7 @@
 #if defined( __FLAT__ )
 
 #if !defined( __WINDOWS_H )
-#include <windows.h>
+#include <tvision/borland/windows.h>
 #endif
 
 #ifdef __BORLANDC__

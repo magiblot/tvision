@@ -6,6 +6,10 @@
     All Rights Reserved.
 */
 
+#ifdef __BORLANDC__
+#include <mem.h>
+#else
+
 #if !defined(__MEM_H)
 #define __MEM_H
 
@@ -78,3 +82,4 @@ void _FAR * _CType _FARFUNC __memset__(void _FAR *__s, int __c, size_t __n);
 
 #endif  /* __MEM_H */
 
+#endif // __BORLANDC__

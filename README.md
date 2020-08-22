@@ -43,15 +43,15 @@ The build requirements are:
 * `libncursesw` (note the 'w').
 * `libgpm` (for mouse support in the linux console) (optional).
 
-The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is (notice the shell expansion for the include directories):
+The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
 ```sh
-g++ -o hello hello.cpp libtvision.a -Iinclude/{,tvision,override} -lncursesw -lgpm
+g++ -std=c++17 -o hello hello.cpp libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
-`-Iinclude/tvision` is only necessary if your application uses Turbo Vision 1.x includes (e.g. `#include <tv.h>` instead of `#include <tvision/tv.h>`). `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
+You may also need `-Iinclude/tvision` if your application uses Turbo Vision 1.x includes (`#include <tv.h>` instead of `#include <tvision/tv.h>`), or `-Iinclude/tvision/borland` if your application includes Borland headers (`dir.h`, `iostream.h`, etc.). `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
-The `include/override` directory contains headers emulating the Borland C++ RTL (some come straight from Borland). Turbo Vision won't compile without them. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
+The backward-compatibility headers in `include/tvision/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
 ### Windows/DOS
 

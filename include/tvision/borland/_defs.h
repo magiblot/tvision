@@ -29,6 +29,10 @@
     All Rights Reserved.
 */
 
+#ifdef __BORLANDC__
+#include <_defs.h>
+#else
+
 #if !defined(___DEFS_H)
 #define ___DEFS_H
 
@@ -169,3 +173,5 @@
 #endif
 
 #endif  /* ___DEFS_H */
+
+#endif // __BORLANDC__

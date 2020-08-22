@@ -12,6 +12,10 @@
  *
  */
 
+#ifdef __BORLANDC__
+#include <dos.h>
+#else
+
 #ifndef __DOS_H
 #define __DOS_H
 
@@ -741,3 +745,5 @@ void                 __int__( int __interruptnum );
 
 
 #endif  /* __DOS_H */
+
+#endif // __BORLANDC__

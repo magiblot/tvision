@@ -1,3 +1,7 @@
+#ifdef __BORLANDC__
+#include <io.h>
+#else
+
 #ifndef IO_H
 #define IO_H
 
@@ -21,4 +25,6 @@ inline off_t filelength( int fd )
     return s.st_size;
 }
 
-#endif
+#endif // IO_H
+
+#endif // __BORLANDC__
