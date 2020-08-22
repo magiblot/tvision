@@ -128,6 +128,12 @@ void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)
     bufWriteCSI1(x + 1, 'G');
 }
 
+void AnsiDisplayBase::lowlevelMoveCursorYby1(uint, uint)
+{
+    // Optimized case where the cursor only moves vertically to the line below.
+    bufWrite("\n"sv);
+}
+
 void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)
 {
     bufWriteCSI2(y + 1, x + 1, 'H');

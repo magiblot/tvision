@@ -66,6 +66,7 @@ protected:
     virtual void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) = 0; // 'chars' is null-terminated
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
+    virtual void lowlevelMoveCursorYby1(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelFlush() = 0;
 
 };

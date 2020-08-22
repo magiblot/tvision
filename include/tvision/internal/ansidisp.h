@@ -48,6 +48,7 @@ protected:
     void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
+    void lowlevelMoveCursorYby1(uint x, uint y);
     void lowlevelFlush();
 
 };
@@ -71,6 +72,7 @@ public:
     void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
+    void lowlevelMoveCursorYby1(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorYby1(x, y); }
     void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }
 
     void onScreenResize() {
