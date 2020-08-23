@@ -10,7 +10,6 @@ using std::chrono::microseconds;
 using std::chrono::steady_clock;
 
 BufferedDisplay *BufferedDisplay::instance = 0;
-std::set<ScreenCursor*> BufferedDisplay::cursors;
 
 BufferedDisplay::BufferedDisplay() :
     widePlaceholder('\0')

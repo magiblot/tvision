@@ -37,18 +37,18 @@ inline ScreenCursor::ScreenCursor(DrawStyle style) :
     visible(false),
     backup(0)
 {
-    BufferedDisplay::cursors.insert(this);
+    BufferedDisplay::addCursor(this);
 }
 
 inline ScreenCursor::~ScreenCursor()
 {
-    BufferedDisplay::cursors.erase(this);
+    BufferedDisplay::removeCursor(this);
 }
 
 inline void ScreenCursor::show()
 {
     if (!visible)
-        BufferedDisplay::instance->caretMoved = true;
+        BufferedDisplay::changeCursor();
     visible = true;
 }
 
@@ -65,7 +65,7 @@ inline bool ScreenCursor::isVisible() const
 inline void ScreenCursor::setPos(const TPoint &p)
 {
     if (visible && p != pos)
-        BufferedDisplay::instance->caretMoved = true;
+        BufferedDisplay::changeCursor();
     pos = p;
 }
 

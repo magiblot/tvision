@@ -6,7 +6,7 @@
 
 #include <internal/platform.h>
 #include <internal/textattr.h>
-#include <set>
+#include <algorithm>
 #include <vector>
 #include <chrono>
 #include <string_view>
@@ -15,7 +15,6 @@ class ScreenCursor;
 
 class BufferedDisplay : public DisplayStrategy {
 
-    friend class ScreenCursor;
     friend struct FlushScreenAlgorithm;
 
     struct Range {
@@ -38,7 +37,6 @@ class BufferedDisplay : public DisplayStrategy {
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 
     static BufferedDisplay *instance;
-    static std::set<ScreenCursor*> cursors;
     static constexpr int defaultMaxFrameDrops = 4;
     static constexpr int defaultFPS = 60;
 
@@ -46,10 +44,17 @@ class BufferedDisplay : public DisplayStrategy {
     void setDirty(int x, BufferCell &cell, Range &damage);
     void ensurePrintable(BufferCell &cell) const;
 
+    std::vector<ScreenCursor*> cursors;
     void drawCursors();
     void undrawCursors();
 
     bool timeToFlush();
+
+public:
+
+    static void addCursor(ScreenCursor *cursor);
+    static void removeCursor(ScreenCursor *cursor);
+    static void changeCursor();
 
 protected:
 
@@ -70,6 +75,27 @@ protected:
     virtual void lowlevelFlush() = 0;
 
 };
+
+inline void BufferedDisplay::addCursor(ScreenCursor *cursor)
+{
+    auto &cursors = instance->cursors;
+    if (std::find(cursors.begin(), cursors.end(), cursor) == cursors.end())
+        cursors.push_back(cursor);
+}
+
+inline void BufferedDisplay::removeCursor(ScreenCursor *cursor)
+{
+    changeCursor();
+    auto &cursors = instance->cursors;
+    auto &&it = std::find(cursors.begin(), cursors.end(), cursor);
+    if (it != cursors.end())
+        cursors.erase(it);
+}
+
+inline void BufferedDisplay::changeCursor()
+{
+    instance->caretMoved = true;
+}
 
 struct FlushScreenAlgorithm {
 
