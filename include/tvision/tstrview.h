@@ -9,9 +9,15 @@
 #ifndef TVISION_TSTRVIEW_H
 #define TVISION_TSTRVIEW_H
 
+#ifndef __BORLANDC__
+
 #if __cplusplus >= 201703L
 #include <string_view>
 #endif
+
+#include <string>
+
+#endif // __BORLANDC__
 
 class TStringView {
 
@@ -25,7 +31,7 @@ class TStringView {
 public:
 
     constexpr TStringView();
-    TStringView(const char _FAR *str);
+    constexpr TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
 #if __cplusplus >= 201703L
     constexpr TStringView(std::string_view text);
@@ -52,12 +58,16 @@ inline constexpr TStringView::TStringView() :
 
 #pragma warn -inl
 
-inline TStringView::TStringView(const char _FAR *str) :
+inline constexpr TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(0)
 {
-    while (*str++)
+#ifdef __BORLANDC__
+    while (str[len])
         ++len;
+#else
+    len = std::char_traits<char>::length(str);
+#endif
 }
 
 #pragma warn .inl
