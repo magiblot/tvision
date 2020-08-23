@@ -66,7 +66,7 @@ TEventViewer::~TEventViewer()
 }
 
 struct flagName {
-    uint flag;
+    ulong flag;
     const char* name;
 };
 
@@ -173,10 +173,10 @@ static const flagName keyCodeFlags[] = {
     FNEND
 };
 
-static void decomposeFlag(ostream &out, uint mask, const flagName *flags, Boolean overlap = True)
+static void decomposeFlag(ostream &out, ulong mask, const flagName *flags, Boolean overlap = True)
 {
     Boolean first = True;
-    uint found = 0;
+    ulong found = 0;
     out << hex << "0x" << mask;
     for (; flags && flags->name; ++flags)
     {

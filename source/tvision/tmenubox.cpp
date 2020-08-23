@@ -119,7 +119,7 @@ void TMenuBox::draw()
         }
     color = cNormal;
     frameLine( b, 5 );
-    writeBuf( 0, y++, size.x, 1, b );
+    writeBuf( 0, y, size.x, 1, b );
 }
 
 TRect TMenuBox::getItemRect( TMenuItem *item )

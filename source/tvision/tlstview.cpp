@@ -92,6 +92,7 @@ void TListViewer::draw()
         {
         normalColor = getColor(2);
         selectedColor = getColor(4);
+        focusedColor = 0; // Unused, but silence warning.
         }
 
     if( hScrollBar != 0 )
@@ -202,7 +203,7 @@ void TListViewer::handleEvent( TEvent& event )
 {
     TPoint mouse;
     ushort colWidth;
-    short  oldItem, newItem;
+    short  oldItem, newItem = 0;
     ushort count;
     int mouseAutosToSkip = 4;
 

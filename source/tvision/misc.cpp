@@ -52,18 +52,18 @@ char *strnzcpy( char *dest, const char *src, size_t n )
     return dest;
 }
 
-unsigned int fast_utoa ( unsigned int value, char *buffer ) {
+uint32_t fast_utoa ( uint32_t value, char *buffer ) {
     // Copyright(c) 2014-2016 Milo Yip (https://github.com/miloyip/itoa-benchmark)
     unsigned int digits =
         value < 10          ? 1
       : value < 100         ? 2
       : value < 1000        ? 3
       : value < 10000       ? 4
-      : value < 100000      ? 5
-      : value < 1000000     ? 6
-      : value < 10000000    ? 7
-      : value < 100000000   ? 8
-      : value < 1000000000  ? 9
+      : value < 100000UL    ? 5
+      : value < 1000000UL   ? 6
+      : value < 10000000UL  ? 7
+      : value < 100000000UL ? 8
+      : value < 1000000000UL? 9
                             : 10;
     buffer += digits;
     *buffer = '\0';

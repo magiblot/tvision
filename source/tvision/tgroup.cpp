@@ -335,6 +335,8 @@ static void doHandleEvent( TView *p, void *s )
 
     switch( ptr->grp.phase )
         {
+        case TView::phFocused:
+            break;
         case TView::phPreProcess:
             if( (p->options & ofPreProcess) == 0 )
                 return;

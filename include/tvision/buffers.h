@@ -32,8 +32,8 @@ private:
     TBufListEntry( void*& );
     ~TBufListEntry();
 
-    void *operator new( size_t, size_t );
-    void *operator new( size_t );
+    void *operator new( size_t, size_t ) noexcept;
+    void *operator new( size_t ) noexcept;
     void operator delete( void * );
 
     TBufListEntry *next;

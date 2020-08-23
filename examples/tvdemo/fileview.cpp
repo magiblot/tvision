@@ -69,7 +69,7 @@ void TFileViewer::draw()
             {
             p = (char *)( fileLines->at(delta.y+i) );
             if( p )
-                b.moveStr( 0, p, c, (short)size.x, delta.x );
+                b.moveStr( 0, p, c, (short)size.x, (short)delta.x );
             }
         writeBuf( 0, i, (short)size.x, 1, b );
         }
@@ -107,7 +107,7 @@ void TFileViewer::readFile( const char *fName )
                fileToView.get( c )
              )
             {
-            int i = 0;
+            size_t i = 0;
             while ( !fileToView.eof() && c != '\n' && c != '\r' ) // read a whole line
                 {
                 if (i == lineSize)

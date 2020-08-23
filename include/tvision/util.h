@@ -67,7 +67,7 @@ Boolean isWild( const char *f );
 
 char *strnzcpy( char *dest, const char *src, size_t n );
 
-unsigned int fast_utoa( uint value, char *buffer );
+uint32_t fast_utoa( uint32_t value, char *buffer );
 
 #ifndef __BORLANDC__
 

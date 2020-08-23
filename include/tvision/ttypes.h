@@ -76,6 +76,7 @@ extern const uchar specialChars[];
 #ifdef __BORLANDC__
 // Reserve future keywords
 #define constexpr
+#define noexcept
 #endif
 
 #endif  // __TTYPES_H

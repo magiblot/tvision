@@ -43,7 +43,7 @@ public:
 
     HistRec( uchar nId, const char *nStr );
 
-    void *operator new( size_t );
+    void *operator new( size_t ) noexcept;
     void *operator new( size_t, HistRec * );
 
     uchar id;
@@ -57,7 +57,7 @@ void *HistRec::operator new( size_t, HistRec *hr )
     return hr;
 }
 
-void *HistRec::operator new( size_t )
+void *HistRec::operator new( size_t ) noexcept
 {
     abort();
     return 0;

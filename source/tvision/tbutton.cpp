@@ -100,8 +100,6 @@ void TButton::drawTitle( TDrawBuffer &b,
 void TButton::drawState(Boolean down)
 {
     ushort cButton, cShadow;
-    char   ch;
-    int    i;
     TDrawBuffer b;
 
     if( (state & sfDisabled) != 0 )
@@ -120,9 +118,10 @@ void TButton::drawState(Boolean down)
     cShadow = getColor(8);
     int s = size.x-1;
     int T = size.y / 2 - 1;
-
+    char ch = ' ';
     for( int y = 0; y <= size.y-2; y++ )
         {
+        int i;
         b.moveChar( 0, ' ', cButton, size.x );
         b.putAttribute( 0, cShadow );
         if( down )

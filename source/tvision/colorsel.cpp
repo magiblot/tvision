@@ -148,7 +148,7 @@ void TColorSelector::colorChanged()
         msg = cmColorForegroundChanged;
     else
         msg = cmColorBackgroundChanged;
-    message( owner, evBroadcast, msg, (void *)color );
+    message( owner, evBroadcast, msg, (void *)(size_t)color );
 }
 
 void TColorSelector::handleEvent( TEvent& event )
@@ -374,7 +374,7 @@ void TColorDisplay::handleEvent( TEvent& event )
 void TColorDisplay::setColor( uchar *aColor )
 {
     color = aColor;
-    message( owner, evBroadcast, cmColorSet, (void *)(*color) );
+    message( owner, evBroadcast, cmColorSet, (void *)(size_t)(*color) );
     drawView();
 }
 
@@ -632,12 +632,12 @@ TColorItemList::TColorItemList( const TRect& bounds,
 void TColorItemList::focusItem( short item )
 {
     TListViewer::focusItem( item );
-    message(owner,evBroadcast, cmSaveColorIndex, (void*)item);
+    message(owner,evBroadcast, cmSaveColorIndex, (void*)(size_t)item);
 
     TColorItem *curItem = items;
     while( item-- > 0 )
         curItem = curItem->next;
-    message( owner, evBroadcast, cmNewColorIndex, (void *)(curItem->index));
+    message( owner, evBroadcast, cmNewColorIndex, (void *)(size_t)(curItem->index));
 }
 
 void TColorItemList::getText( char *dest, short item, short maxChars )

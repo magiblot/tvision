@@ -91,7 +91,7 @@ TPuzzleView::TPuzzleView(TRect& r) : TView(r)
 {
     /* Initialize random number generator so that rand(), later used in
      * scramble(), works properly. */
-    srand(time(0));
+    srand((uint)time(0));
 
     options |= ofSelectable;
     memset( board, ' ', sizeof(board) );

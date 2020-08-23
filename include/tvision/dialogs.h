@@ -174,7 +174,7 @@ public:
     void setValidator( TValidator* aValid );
 
     char* data;
-    int maxLen;
+    size_t maxLen;
     int curPos;
     int firstPos;
     int selStart;

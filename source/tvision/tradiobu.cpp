@@ -22,7 +22,7 @@ void TRadioButtons::draw()
 
 Boolean TRadioButtons::mark( int item )
 {
-    return Boolean( item == value );
+    return Boolean( item == (int) value );
 }
 
 void TRadioButtons::press( int item )

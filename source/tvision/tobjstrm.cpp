@@ -178,9 +178,9 @@ TPReadObjects::~TPReadObjects()
 void TPReadObjects::registerObject( const void *adr )
 {
     ccIndex loc = insert( (void *)adr );
-    assert( loc == curId++ );   // to be sure that TNSCollection
-                                // continues to work the way
-                                // it does now...
+    assert( (uint) loc == curId++ );    // to be sure that TNSCollection
+                                        // continues to work the way
+                                        // it does now...
 }
 
 #pragma warn .aus

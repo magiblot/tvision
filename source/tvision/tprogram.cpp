@@ -178,7 +178,7 @@ void TProgram::handleEvent( TEvent& event )
             if( message( deskTop,
                          evBroadcast,
                          cmSelectWindowNum,
-                         (void *)(c - '0')
+                         (void *)(size_t)(c - '0')
                        ) != 0 )
                 clearEvent( event );
             }

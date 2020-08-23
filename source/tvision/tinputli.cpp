@@ -178,7 +178,7 @@ void  TInputLine::deleteSelect()
 void TInputLine::deleteCurrent()
 {
     TStringView text = data;
-    if( curPos < text.size() )
+    if( curPos < (int) text.size() )
         {
         selStart = curPos;
         selEnd = curPos + TText::next(text.substr(curPos));
@@ -226,7 +226,7 @@ void TInputLine::restoreState()
 
 Boolean TInputLine::checkValid(Boolean noAutoFill)
 {
-    int oldLen;
+    int oldLen, newLen;
     char *newData;
 
     if (validator)
@@ -245,8 +245,9 @@ Boolean TInputLine::checkValid(Boolean noAutoFill)
             if (strlen(newData) > maxLen)
                 newData[maxLen] = 0;
             strcpy(data,newData);
-            if ((curPos >= oldLen) && (strlen(data) > oldLen))
-                curPos = strlen(data);
+            newLen = strlen(data);
+            if ((curPos >= oldLen) && (newLen > oldLen))
+                curPos = newLen;
             delete newData;
             return True;
             }
@@ -355,7 +356,7 @@ void TInputLine::handleEvent( TEvent& event )
                         setState(sfCursorIns, Boolean(!(state & sfCursorIns)));
                         break;
                     default:
-                        if( (len = event.keyDown.textLength) )
+                        if ((len = event.keyDown.textLength))
                             {
                             deleteSelect();
                             if( (state & sfCursorIns) != 0 )

@@ -48,7 +48,7 @@ const ushort arrowCodes[] =
     kbEnd,  kbDel,   kbIns,kbPgUp, kbPgDn, kbBack
     };
 
-    for( int i = 0; i < sizeof(ctrlCodes); i++ )
+    for( size_t i = 0; i < sizeof(ctrlCodes); i++ )
         if( (keyCode & 0x00ff) == ctrlCodes[i] )
             return arrowCodes[i];
     return keyCode;

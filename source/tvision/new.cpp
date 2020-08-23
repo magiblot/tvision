@@ -50,12 +50,12 @@ TBufListEntry::~TBufListEntry()
         next->prev = prev;
 }
 
-void *TBufListEntry::operator new( size_t sz, size_t extra )
+void *TBufListEntry::operator new( size_t sz, size_t extra ) noexcept
 {
     return malloc( sz + extra*sizeof( unsigned ) );
 }
 
-void *TBufListEntry::operator new( size_t )
+void *TBufListEntry::operator new( size_t ) noexcept
 {
     return 0;
 }

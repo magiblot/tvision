@@ -180,7 +180,7 @@ void TFilePane::draw() {
       if ((fileCount==0)&&(i==0))
         dBuf.moveStr( 2, "<no files>", getColor(0x0101) );
       if ((i+delta.y)<fileCount)
-        dBuf.moveStr( 2, files[i+delta.y], getColor(0x0101), (ushort) -1U, delta.x );
+        dBuf.moveStr( 2, files[i+delta.y], getColor(0x0101), (ushort) -1U, (short)delta.x );
       writeLine( 0, i, (short)size.x, 1, dBuf );
     }
   }

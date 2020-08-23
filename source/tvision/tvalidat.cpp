@@ -375,7 +375,7 @@ TPicResult TPXPictureValidator::scan(char* input, int termCh)
 
     while ( (index != termCh) && (pic[index] != ','))
     {
-        if (jndex >= strlen(input))
+        if (jndex >= (int) strlen(input))
         return checkComplete(rslt, termCh);
 
         ch = input[jndex];
@@ -464,7 +464,7 @@ TPicResult TPXPictureValidator::process(char* input, int termCh)
 
    TPicResult rslt, rProcess;
    Boolean incomp;
-   int oldI, oldJ, incompJ=0, incompI;
+   int oldI, oldJ, incompJ=0, incompI=0;
 
    incomp = False;
    oldI = index;
@@ -563,14 +563,14 @@ TPicResult TPXPictureValidator::picture(char* input, Boolean autoFill)
 
   rslt = process(input, strlen(pic));
 
-  if ((rslt != prError) && (jndex < strlen(input)))
+  if ((rslt != prError) && (jndex < (int) strlen(input)))
     rslt = prError;
 
   if ((rslt == prIncomplete) && autoFill)
   {
     reprocess = False;
 
-    while ((index < strlen(pic)) && !isSpecial(pic[index], "#?&!@*{}[]"))
+    while ((index < (int) strlen(pic)) && !isSpecial(pic[index], "#?&!@*{}[]"))
     {
       if (pic[index] == ';')
           index++;
@@ -708,14 +708,15 @@ ushort TRangeValidator::transfer(char* s, void* buffer, TVTransfer flag)
   {
     switch ( flag )
     {
+    case vtDataSize:
+      break;
     case vtGetData:
-         sscanf(s,"%ld",&value);
-         *(long*)buffer = value;
-         break;
-
+      sscanf(s,"%ld",&value);
+      *(long*)buffer = value;
+      break;
     case vtSetData:
-       sprintf(s, "%ld", *(long*)buffer);
-       break;
+      sprintf(s, "%ld", *(long*)buffer);
+      break;
     }
     return sizeof(long);
   }

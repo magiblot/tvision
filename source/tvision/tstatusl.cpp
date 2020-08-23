@@ -111,7 +111,6 @@ void TStatusLine::drawSelect( TStatusItem *selected )
             b.moveStr( i, hintSeparator, cNormal );
             i += 2;
             b.moveStr( i, hintText, cNormal, size.x-i );
-            i += strwidth(hintText);
             }
         }
     writeLine( 0, 0, size.x, 1, b );
@@ -255,7 +254,7 @@ void TStatusLine::write( opstream& os )
 
 TStatusItem *TStatusLine::readItems( ipstream& is )
 {
-    TStatusItem *cur = 0;
+    TStatusItem *cur;
     TStatusItem *first;
     TStatusItem **last = &first;
     int count;
@@ -276,7 +275,7 @@ TStatusItem *TStatusLine::readItems( ipstream& is )
 
 TStatusDef *TStatusLine::readDefs( ipstream& is )
 {
-    TStatusDef *cur = 0;
+    TStatusDef *cur;
     TStatusDef *first;
     TStatusDef **last = &first;
     int count;

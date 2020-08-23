@@ -167,7 +167,6 @@ void TNSCollection::freeItem( void *item )
     delete item;
 }
 
-#pragma warn -rvl
 ccIndex TNSCollection::indexOf(void *item)
 {
     for( ccIndex i = 0; i < count; i++ )
@@ -175,8 +174,8 @@ ccIndex TNSCollection::indexOf(void *item)
             return i;
 
     error(1,0);
+    return 0;
 }
-#pragma warn .rvl
 
 ccIndex TNSCollection::insert( void *item )
 {

@@ -408,7 +408,7 @@ void TOutlineViewer::handleEvent(TEvent& event)
 
   TPoint mouse;
   TNode* cur;
-  int newFocus;
+  int newFocus = 0;
   int count;
   char* graph;
   uchar dragged;

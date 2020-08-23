@@ -140,11 +140,13 @@ struct DirSearchRec : public TSearchRec
 void *DirSearchRec::operator new( size_t sz )
 {
     void *temp = ::operator new( sz );
+#ifdef __BORLANDC__ // Would work anyway, but it's unnecessary.
     if( TVMemMgr::safetyPoolExhausted() )
         {
         delete temp;
         temp = 0;
         }
+#endif
     return temp;
 }
 
@@ -242,11 +244,15 @@ void TFileList::readDirectory( const char *aWildCard )
 
 */
 
+#pragma warn -inl
+
 inline static void skip( char *&src, char k )
 {
     while( *src == k )
         src++;
 }
+
+#pragma warn .inl
 
 void squeeze( char *path )
 {

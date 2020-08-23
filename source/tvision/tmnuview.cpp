@@ -602,7 +602,7 @@ TMenu *TMenuView::readMenu( ipstream& is )
 {
     TMenu *menu = new TMenu;
     TMenuItem **last = &(menu->items);
-    TMenuItem *item = 0;
+    TMenuItem *item;
 
     uchar tok;
     is >> tok;

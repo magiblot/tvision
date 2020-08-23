@@ -158,7 +158,7 @@ void TCalendarView::draw()
                 {
                 ostrstream( str, sizeof str )
                   << setw(2) << (int) current << ends;
-                if(year == curYear && month == curMonth && current == curDay)
+                if(year == curYear && month == curMonth && (uint) current == curDay)
                     buf.moveStr((short)(j*3), str, boldColor);
                 else
                     buf.moveStr((short)(j*3), str, color);
