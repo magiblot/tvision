@@ -214,7 +214,7 @@ class TColorDisplay : public TView
 
 public:
 
-    TColorDisplay( const TRect& bounds, const char *aText );
+    TColorDisplay( const TRect& bounds, TStringView aText );
     virtual ~TColorDisplay();
     virtual void draw();
     virtual void handleEvent( TEvent& event );

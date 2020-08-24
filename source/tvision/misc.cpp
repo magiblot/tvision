@@ -41,15 +41,22 @@ Boolean lowMemory()
     return Boolean(TVMemMgr::safetyPoolExhausted());
 }
 
-char *strnzcpy( char *dest, const char *src, size_t n )
+size_t strnzcpy( char *dest, TStringView src, size_t size )
 {
-    // Same as strncpy, but always adds a terminator.
-    if (n)
+    // Same as strlcpy. 'size' is the size of the 'dest' buffer,
+    // which is always made null-terminated unless 'size' is zero.
+    // Returns the number of bytes copied into 'dest'.
+    // 'dest' and 'src' must not overlap.
+    if (size)
     {
-        strncpy( dest, src, n-1 );
-        dest[n-1] = '\0';
+        size_t copy_bytes = src.size();
+        if (copy_bytes > size - 1)
+            copy_bytes = size - 1;
+        memcpy(dest, src.data(), copy_bytes);
+        dest[copy_bytes] = '\0';
+        return copy_bytes;
     }
-    return dest;
+    return 0;
 }
 
 uint32_t fast_utoa ( uint32_t value, char *buffer ) {

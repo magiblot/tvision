@@ -103,7 +103,7 @@ class TDialog : public TWindow
 
 public:
 
-    TDialog( const TRect& bounds, const char *aTitle );
+    TDialog( const TRect& bounds, TStringView aTitle );
 
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
@@ -260,7 +260,7 @@ class TButton : public TView
 public:
 
     TButton( const TRect& bounds,
-             const char *aTitle,
+             TStringView aTitle,
              ushort aCommand,
              ushort aFlags
            );
@@ -328,7 +328,7 @@ class TSItem
 
 public:
 
-    TSItem( const char *aValue, TSItem *aNext )
+    TSItem( TStringView aValue, TSItem *aNext )
         { value = newStr(aValue); next = aNext; }
     ~TSItem() { delete[] (char *) value; }
 
@@ -702,7 +702,7 @@ class TStaticText : public TView
 
 public:
 
-    TStaticText( const TRect& bounds, const char *aText );
+    TStaticText( const TRect& bounds, TStringView aText );
     ~TStaticText();
 
     virtual void draw();
@@ -822,7 +822,7 @@ class TLabel : public TStaticText
 
 public:
 
-    TLabel( const TRect& bounds, const char *aText, TView *aLink );
+    TLabel( const TRect& bounds, TStringView aText, TView *aLink );
 
     virtual void draw();
     virtual TPalette& getPalette() const;

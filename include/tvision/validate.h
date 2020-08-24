@@ -83,7 +83,7 @@ class TPXPictureValidator : public TValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TPXPictureValidator(const char* aPic, Boolean autoFill);
+    TPXPictureValidator(TStringView aPic, Boolean autoFill);
     ~TPXPictureValidator();
     virtual void error();
     virtual Boolean isValidInput(char* s, Boolean suppressFill);
@@ -142,7 +142,7 @@ class TFilterValidator : public TValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TFilterValidator(const char* aValidChars);
+    TFilterValidator(TStringView aValidChars);
     ~TFilterValidator();
     virtual void error();
     virtual Boolean isValidInput(char* s, Boolean suppressFill);

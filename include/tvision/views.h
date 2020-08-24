@@ -964,7 +964,7 @@ class TWindow: public TGroup, public virtual TWindowInit
 public:
 
     TWindow( const TRect& bounds,
-             const char *aTitle,
+             TStringView aTitle,
              short aNumber
            );
     ~TWindow();

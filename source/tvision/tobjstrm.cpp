@@ -607,9 +607,13 @@ void opstream::writeString( const char *str )
         writeByte( nullStringLen );
         return;
         }
-    int len = strlen( str );
-    writeByte( (uchar)len );
-    writeBytes( str, len );
+    writeString( TStringView(str) );
+}
+
+void opstream::writeString( TStringView str )
+{
+    writeByte( (uchar)str.size() );
+    writeBytes( str.data(), str.size() );
 }
 
 opstream& operator << ( opstream& ps, char ch )

@@ -61,9 +61,9 @@ const int
     cmOpenDialogOpen    = 100,
     cmOpenDialogReplace = 101;
 
-TFileDialog::TFileDialog( const char *aWildCard,
-                          const char *aTitle,
-                          const char *inputName,
+TFileDialog::TFileDialog( TStringView aWildCard,
+                          TStringView aTitle,
+                          TStringView inputName,
                           ushort aOptions,
                           uchar histId
                         ) :

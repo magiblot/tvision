@@ -98,7 +98,7 @@ Boolean TValidator::validate(const char* s)
 
 // TPXPictureValidator
 
-TPXPictureValidator::TPXPictureValidator(const char* aPic, Boolean autoFill)
+TPXPictureValidator::TPXPictureValidator(TStringView aPic, Boolean autoFill)
     : TValidator()
 {
   pic = newStr(aPic);
@@ -598,7 +598,7 @@ TPicResult TPXPictureValidator::picture(char* input, Boolean autoFill)
 
 // TFilterValidator
 
-TFilterValidator::TFilterValidator(const char* aValidChars)
+TFilterValidator::TFilterValidator(TStringView aValidChars)
 {
   validChars = newStr(aValidChars);
 }

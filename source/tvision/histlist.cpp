@@ -41,7 +41,7 @@ class HistRec
 
 public:
 
-    HistRec( uchar nId, const char *nStr );
+    HistRec( uchar nId, TStringView nStr );
 
     void *operator new( size_t ) noexcept;
     void *operator new( size_t, HistRec * );
@@ -63,11 +63,12 @@ void *HistRec::operator new( size_t ) noexcept
     return 0;
 }
 
-inline HistRec::HistRec( uchar nId, const char *nStr ) :
+inline HistRec::HistRec( uchar nId, TStringView nStr ) :
     id( nId ),
-    len( strlen( nStr ) + 3 )
+    len( nStr.size() + 3 )
 {
-    strcpy( str, nStr );
+    memcpy( str, nStr.data(), nStr.size() );
+    str[nStr.size()] = EOS;
 }
 
 
@@ -118,9 +119,9 @@ void deleteString()
     lastRec = backup( lastRec, len );
 }
 
-void insertString( uchar id, const char *str )
+void insertString( uchar id, TStringView str )
 {
-    ushort len = strlen( str ) + 3;
+    ushort len = str.size() + 3;
     while( len > historySize - ( (char *)lastRec - (char *)historyBlock ) )
         {
         ushort firstLen = historyBlock->len;
@@ -156,15 +157,15 @@ ushort historyCount( uchar id )
     return count;
 }
 
-void historyAdd( uchar id, const char *str )
+void historyAdd( uchar id, TStringView str )
 {
-    if( str[0] == EOS )
+    if( str.empty() )
         return;
     startId( id );
     advanceStringPointer();
     while( curRec != 0 )
         {
-        if( strcmp( str, curRec->str ) == 0 )
+        if( str == curRec->str )
             deleteString();
         advanceStringPointer();
         }

@@ -18,6 +18,8 @@
 
 #include <stddef.h>
 
+class TStringView;
+
 inline int min( int a, int b )
 {
     return (a>b) ? b : a;
@@ -39,9 +41,8 @@ ushort getCtrlCode(uchar);
 
 ushort historyCount( uchar id );
 const char *historyStr( uchar id, int index );
-void historyAdd( uchar id, const char * );
+void historyAdd( uchar id, TStringView );
 
-class TStringView;
 int cstrlen( const char * );
 int cstrlen( TStringView );
 int strwidth( const char * );
@@ -52,6 +53,7 @@ void *message( TView *receiver, ushort what, ushort command, void *infoPtr );
 Boolean lowMemory();
 
 char *newStr( const char * );
+char *newStr( TStringView );
 
 Boolean driveValid( char drive );
 
@@ -65,7 +67,7 @@ void getCurDir( char *dir );
 
 Boolean isWild( const char *f );
 
-char *strnzcpy( char *dest, const char *src, size_t n );
+size_t strnzcpy( char *dest, TStringView src, size_t n );
 
 uint32_t fast_utoa( uint32_t value, char *buffer );
 

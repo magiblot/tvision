@@ -29,7 +29,7 @@
 const TPoint minEditWinSize = {24, 6};
 
 TEditWindow::TEditWindow( const TRect& bounds,
-                          const char *fileName,
+                          TStringView fileName,
                           int aNumber
                         ) :
     TWindow( bounds, 0, aNumber ),

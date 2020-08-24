@@ -35,7 +35,7 @@ TWindowInit::TWindowInit( TFrame *(*cFrame)( TRect ) ) :
 }
 
 TWindow::TWindow( const TRect& bounds,
-                  const char *aTitle,
+                  TStringView aTitle,
                   short aNumber
                 ) :
     TGroup( bounds ),

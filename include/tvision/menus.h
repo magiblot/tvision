@@ -39,14 +39,14 @@ class TMenuItem
 
 public:
 
-    TMenuItem( const char *aName,
+    TMenuItem( TStringView aName,
                ushort aCommand,
                ushort aKeyCode,
                ushort aHelpCtx = hcNoContext,
-               const char *p = 0,
+               TStringView p = 0,
                TMenuItem *aNext = 0
              );
-    TMenuItem( const char *aName,
+    TMenuItem( TStringView aName,
                ushort aKeyCode,
                TMenu *aSubMenu,
                ushort aHelpCtx = hcNoContext,
@@ -90,7 +90,7 @@ class TSubMenu : public TMenuItem
 
 public:
 
-    TSubMenu( const char *nm, ushort key, ushort helpCtx = hcNoContext );
+    TSubMenu( TStringView nm, ushort key, ushort helpCtx = hcNoContext );
 
 };
 
@@ -393,7 +393,7 @@ class TStatusItem
 
 public:
 
-    TStatusItem( const char *aText,
+    TStatusItem( TStringView aText,
                  ushort key,
                  ushort cmd,
                  TStatusItem *aNext = 0
@@ -407,7 +407,7 @@ public:
 
 };
 
-inline TStatusItem::TStatusItem( const char *aText,
+inline TStatusItem::TStatusItem( TStringView aText,
                                  ushort key,
                                  ushort cmd,
                                  TStatusItem *aNext

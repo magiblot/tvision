@@ -455,6 +455,7 @@ public:
     void _Cdecl writeBytes( const void _FAR *, size_t );
     void _Cdecl writeWord( ushort );
     void _Cdecl writeString( const char _FAR * );
+    void _Cdecl writeString( TStringView );
 
     friend opstream& _Cdecl operator << ( opstream&, char );
     friend opstream& _Cdecl operator << ( opstream&, signed char );

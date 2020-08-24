@@ -32,8 +32,8 @@ const int
 class TNode
 {
 public:
-    TNode(const char* aText);
-    TNode(const char* aText, TNode* aChildren, TNode* aNext, Boolean initialState = True);
+    TNode(TStringView aText);
+    TNode(TStringView aText, TNode* aChildren, TNode* aNext, Boolean initialState = True);
     virtual ~TNode();
 
     TNode* next;
@@ -42,12 +42,12 @@ public:
     Boolean expanded;
 };
 
-inline TNode::TNode(const char* aText) :
+inline TNode::TNode(TStringView aText) :
     next(0), text(newStr(aText)), childList(0), expanded(True)
 {
 }
 
-inline TNode::TNode( const char* aText, TNode* aChildren,
+inline TNode::TNode( TStringView aText, TNode* aChildren,
                      TNode* aNext, Boolean initialState ) :
     next(aNext), text(newStr(aText)),
     childList(aChildren), expanded(initialState)

@@ -23,7 +23,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TSubMenu::TSubMenu( const char *nm, ushort key, ushort helpCtx ) :
+TSubMenu::TSubMenu( TStringView nm, ushort key, ushort helpCtx ) :
     TMenuItem( nm, 0, key, helpCtx )
 {
 }

@@ -27,7 +27,7 @@
 
 #define cpLabel "\x07\x08\x09\x09"
 
-TLabel::TLabel( const TRect& bounds, const char *aText, TView* aLink) :
+TLabel::TLabel( const TRect& bounds, TStringView aText, TView* aLink) :
     TStaticText( bounds, aText ),
     link( aLink ),
     light( False )

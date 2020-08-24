@@ -54,15 +54,15 @@ TFileEditor::TFileEditor( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,
                           TIndicator *aIndicator,
-                          const char *aFileName
+                          TStringView aFileName
                         ) :
     TEditor( bounds, aHScrollBar, aVScrollBar, aIndicator, 0 )
 {
-    if( aFileName == 0 )
+    if( aFileName.empty() )
         fileName[0] = EOS;
     else
         {
-        strcpy( fileName, aFileName );
+        strnzcpy( fileName, aFileName, sizeof(fileName) );
         fexpand( fileName );
         if( isValid )
             isValid = loadFile();

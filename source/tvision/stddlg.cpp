@@ -217,8 +217,8 @@ void TFileInfoPane::draw()
     ftime *time;
     char path[MAXPATH];
 
-    strcpy( path, ((TFileDialog *)owner)->directory );
-    strcat( path, ((TFileDialog *)owner)->wildCard );
+    size_t n = strnzcpy( path, ((TFileDialog *)owner)->directory, MAXPATH );
+    strnzcpy( &path[n], ((TFileDialog *)owner)->wildCard, MAXPATH - n );
     fexpand( path );
 
     color = getColor(0x01);

@@ -9,6 +9,10 @@
 #ifndef TVISION_TSTRVIEW_H
 #define TVISION_TSTRVIEW_H
 
+#if !defined( __STRING_H )
+#include <string.h>
+#endif  // __STRING_H
+
 #ifndef __BORLANDC__
 
 #if __cplusplus >= 201703L
@@ -24,6 +28,8 @@ class TStringView {
     // This class exists only to compensate for the lack of std::string_view
     // in Borland C++. Unless you are programming for that compiler, you should
     // always use std::string_view.
+    // Unlike std::string_view, TStringView can be constructed from a null pointer,
+    // for backward compatibility.
 
     const char _FAR *str;
     size_t len;
@@ -48,6 +54,9 @@ public:
     constexpr TStringView substr(size_t pos) const;
     constexpr TStringView substr(size_t pos, size_t n) const;
 
+    friend constexpr Boolean operator==(TStringView a, TStringView b);
+    friend constexpr Boolean operator!=(TStringView a, TStringView b);
+
 };
 
 inline constexpr TStringView::TStringView() :
@@ -58,17 +67,23 @@ inline constexpr TStringView::TStringView() :
 
 #pragma warn -inl
 
+#if __cplusplus >= 201703L
+inline constexpr TStringView::TStringView(const char _FAR *str) :
+    TStringView()
+{
+    if (str)
+        *this = std::string_view {str};
+}
+#else
 inline constexpr TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(0)
 {
-#ifdef __BORLANDC__
-    while (str[len])
-        ++len;
-#else
-    len = std::char_traits<char>::length(str);
-#endif
+    if (str)
+        while (str[len])
+            ++len;
 }
+#endif
 
 #pragma warn .inl
 
@@ -133,5 +148,22 @@ inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
         n = tail;
     return TStringView(str + pos, n);
 }
+
+inline constexpr Boolean operator==(TStringView a, TStringView b)
+{
+#if __cplusplus >= 201703L
+    return std::string_view {a} == std::string_view {b};
+#else
+    if (a.size() == b.size())
+        return memcmp(a.data(), b.data(), b.size()) == 0;
+    return False;
+#endif
+}
+
+inline constexpr Boolean operator!=(TStringView a, TStringView b)
+{
+    return !(a == b);
+}
+
 
 #endif // TVISION_TSTRVIEW_H

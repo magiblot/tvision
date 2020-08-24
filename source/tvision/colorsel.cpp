@@ -329,7 +329,7 @@ TMonoSelector::TMonoSelector( StreamableInit ) : TCluster( streamableInit )
 #endif
 
 
-TColorDisplay::TColorDisplay( const TRect& bounds, const char *aText ) :
+TColorDisplay::TColorDisplay( const TRect& bounds, TStringView aText ) :
     TView( bounds ),
     text( newStr( aText ) ),
     color( 0 )

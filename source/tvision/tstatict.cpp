@@ -29,7 +29,7 @@
 
 #define cpStaticText "\x06"
 
-TStaticText::TStaticText( const TRect& bounds, const char *aText ) :
+TStaticText::TStaticText( const TRect& bounds, TStringView aText ) :
     TView( bounds ),
     text( newStr( aText ) )
 {

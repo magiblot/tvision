@@ -41,7 +41,7 @@ const int
 #define cpButton "\x0A\x0B\x0C\x0D\x0E\x0E\x0E\x0F"
 
 TButton::TButton( const TRect& bounds,
-                  const char *aTitle,
+                  TStringView aTitle,
                   ushort aCommand,
                   ushort aFlags) :
     TView( bounds ),

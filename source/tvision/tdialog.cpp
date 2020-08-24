@@ -22,7 +22,7 @@
 //   lobyte = bit mask
 
 
-TDialog::TDialog( const TRect& bounds, const char *aTitle ) :
+TDialog::TDialog( const TRect& bounds, TStringView aTitle ) :
     TWindow( bounds, aTitle, wnNoNumber ),
     TWindowInit( &TDialog::initFrame )
 {

@@ -396,7 +396,7 @@ public:
                  TScrollBar *,
                  TScrollBar *,
                  TIndicator *,
-                 const char *
+                 TStringView
                );
     virtual void doneBuffer();
     virtual void handleEvent( TEvent& );
@@ -453,7 +453,7 @@ class TEditWindow : public TWindow
 
 public:
 
-    TEditWindow( const TRect&, const char *, int );
+    TEditWindow( const TRect&, TStringView, int );
     virtual void close();
     virtual const char *getTitle( short );
     virtual void handleEvent( TEvent& );

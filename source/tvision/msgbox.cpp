@@ -61,7 +61,7 @@ static const char *Titles[] =
     MsgBoxText::confirmText
 };
 
-ushort messageBoxRect( const TRect &r, const char *msg, ushort aOptions )
+ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions )
 {
     TDialog *dialog;
     short i, x, buttonCount;
@@ -118,7 +118,7 @@ ushort messageBoxRect( const TRect &r,
     return messageBoxRect( r, msg, aOptions );
 }
 
-static TRect makeRect(const char *text)
+static TRect makeRect(TStringView text)
 {
     TRect r( 0, 0, 40, 9 );
 
@@ -131,7 +131,7 @@ static TRect makeRect(const char *text)
     return r;
 }
 
-ushort messageBox( const char *msg, ushort aOptions )
+ushort messageBox( TStringView msg, ushort aOptions )
 {
     return messageBoxRect( makeRect(msg), msg, aOptions );
 }
@@ -149,7 +149,7 @@ ushort messageBox( unsigned aOptions, const char *fmt, ... )
     return messageBoxRect( makeRect(msg), msg, aOptions );
 }
 
-ushort inputBox( const char *Title, const char *aLabel, char *s, uchar limit )
+ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit )
 {
     TRect r(0, 0, 60, 8);
     r.move((TProgram::deskTop->size.x - r.b.x) / 2,
@@ -158,8 +158,8 @@ ushort inputBox( const char *Title, const char *aLabel, char *s, uchar limit )
 }
 
 ushort inputBoxRect( const TRect &bounds,
-                     const char *Title,
-                     const char *aLabel,
+                     TStringView Title,
+                     TStringView aLabel,
                      char *s,
                      uchar limit )
 {
@@ -170,11 +170,11 @@ ushort inputBoxRect( const TRect &bounds,
 
     dialog = new TDialog(bounds, Title);
 
-    r = TRect( 4 + strlen(aLabel), 2, dialog->size.x - 3, 3 );
+    r = TRect( 4 + aLabel.size(), 2, dialog->size.x - 3, 3 );
     control = new TInputLine( r, limit );
     dialog->insert( control );
 
-    r = TRect(2, 2, 3 + strlen(aLabel), 3);
+    r = TRect(2, 2, 3 + aLabel.size(), 3);
     dialog->insert( new TLabel( r, aLabel, control ) );
 
     r = TRect( dialog->size.x - 24, dialog->size.y - 4,

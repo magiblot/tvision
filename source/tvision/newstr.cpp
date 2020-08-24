@@ -22,9 +22,15 @@
 
 char *newStr( const char *s )
 {
-    if( s == 0 )
+    return newStr( TStringView(s) );
+}
+
+char *newStr( TStringView s )
+{
+    if( s.data() == 0 )
         return 0;
-    char *temp = new char[ strlen(s)+1 ];
-    strcpy( temp, s );
+    char *temp = new char[ s.size()+1 ];
+    memcpy( temp, s.data(), s.size() );
+    temp[s.size()] = EOS;
     return temp;
 }

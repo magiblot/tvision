@@ -38,11 +38,11 @@
 
 #define cpMenuView "\x02\x03\x04\x05\x06\x07"
 
-TMenuItem::TMenuItem(   const char *aName,
+TMenuItem::TMenuItem(   TStringView aName,
                         ushort aCommand,
                         ushort aKeyCode,
                         ushort aHelpCtx,
-                        const char *p,
+                        TStringView p,
                         TMenuItem *aNext
              )
 {
@@ -51,14 +51,14 @@ TMenuItem::TMenuItem(   const char *aName,
     disabled = Boolean(!TView::commandEnabled(command));
     keyCode = aKeyCode;
     helpCtx = aHelpCtx;
-    if( p == 0 )
+    if( p.empty() )
         param = 0;
     else
         param = newStr( p );
     next = aNext;
 }
 
-TMenuItem::TMenuItem( const char *aName,
+TMenuItem::TMenuItem( TStringView aName,
                       ushort aKeyCode,
                       TMenu *aSubMenu,
                       ushort aHelpCtx,

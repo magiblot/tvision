@@ -115,11 +115,11 @@ void TFileList::getText( char *dest, short item, short maxChars )
 }
 
 
-void TFileList::readDirectory( const char *dir, const char *wildCard )
+void TFileList::readDirectory( TStringView dir, TStringView wildCard )
 {
     char path[MAXPATH];
-    strcpy( path, dir );
-    strcat( path, wildCard );
+    size_t n = strnzcpy( path, dir, MAXPATH );
+    strnzcpy( &path[n], wildCard, MAXPATH - n );
     readDirectory( path );
 }
 
@@ -150,7 +150,7 @@ void *DirSearchRec::operator new( size_t sz )
     return temp;
 }
 
-void TFileList::readDirectory( const char *aWildCard )
+void TFileList::readDirectory( TStringView aWildCard )
 {
     ffblk s;
     char path[MAXPATH];
@@ -160,13 +160,11 @@ void TFileList::readDirectory( const char *aWildCard )
     char ext[MAXEXT];
     const unsigned findAttr = FA_RDONLY | FA_ARCH;
     memset(&s, 0, sizeof(s));
-    strcpy( path, aWildCard );
-    fexpand( path );
-    fnsplit( path, drive, dir, file, ext );
+    strnzcpy( path, aWildCard, MAXPATH );
 
     TFileCollection *fileList = new TFileCollection( 5, 5 );
 
-    int res = findfirst( aWildCard, &s, findAttr );
+    int res = findfirst( path, &s, findAttr );
     DirSearchRec *p = (DirSearchRec *)&p;
     while( p != 0 && res == 0 )
         {
@@ -182,6 +180,8 @@ void TFileList::readDirectory( const char *aWildCard )
         res = findnext( &s );
         }
 
+    fexpand( path );
+    fnsplit( path, drive, dir, file, ext );
     fnmerge( path, drive, dir, "*", ".*" );
 
     res = findfirst( path, &s, FA_DIREC );

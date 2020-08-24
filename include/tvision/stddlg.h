@@ -268,8 +268,8 @@ public:
     virtual void selectItem( short item );
     virtual void getText( char *dest, short item, short maxLen );
     void newList( TFileCollection *aList );
-    void readDirectory( const char *dir, const char *wildCard );
-    void readDirectory( const char *wildCard );
+    void readDirectory( TStringView dir, TStringView wildCard );
+    void readDirectory( TStringView wildCard );
 
     virtual ushort dataSize();
     virtual void getData( void *rec );
@@ -399,8 +399,8 @@ class TFileDialog : public TDialog
 
 public:
 
-    TFileDialog( const char *aWildCard, const char *aTitle,
-                 const char *inputName, ushort aOptions, uchar histId );
+    TFileDialog( TStringView aWildCard, TStringView aTitle,
+                 TStringView inputName, ushort aOptions, uchar histId );
     ~TFileDialog();
 
     virtual void getData( void *rec );
@@ -470,7 +470,7 @@ class TDirEntry
 
 public:
 
-    TDirEntry( const char *, const char * );
+    TDirEntry( TStringView, TStringView );
     ~TDirEntry();
     char *dir() { return directory; }
     char *text() { return displayText; }
@@ -482,7 +482,7 @@ private:
 
 };
 
-inline TDirEntry::TDirEntry( const char *txt, const char *dir ) :
+inline TDirEntry::TDirEntry( TStringView txt, TStringView dir ) :
     displayText( newStr( txt ) ), directory( newStr( dir ) )
 {
 }
@@ -595,7 +595,7 @@ public:
 //    virtual void handleEvent( TEvent& );
     virtual Boolean isSelected( short );
     virtual void selectItem( short item );
-    void newDirectory( const char * );
+    void newDirectory( TStringView );
     virtual void setState( ushort aState, Boolean enable );
 
     TDirCollection *list();

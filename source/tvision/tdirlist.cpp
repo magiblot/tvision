@@ -194,12 +194,12 @@ void TDirListBox::showDirs( TDirCollection *dirs )
         }
 }
 
-void TDirListBox::newDirectory( const char *str )
+void TDirListBox::newDirectory( TStringView str )
 {
-    strcpy( dir, str );
+    strnzcpy( dir, str, sizeof(dir) );
     TDirCollection *dirs = new TDirCollection( 5, 5 );
     dirs->insert( new TDirEntry( drives, drives ) );
-    if( strcmp( dir, drives ) == 0 )
+    if( str == drives )
         showDrives( dirs );
     else
         showDirs( dirs );
