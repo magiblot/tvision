@@ -23,98 +23,79 @@ class TSpan {
 
 public:
 
-    constexpr TSpan();
-    constexpr TSpan(T _FAR *first, size_t n);
+    // These are defined inline because otherwise they trigger
+    // a bug in Borland C++ when T is const.
 
-    constexpr T _FAR * data() const;
-    constexpr size_t size() const;
-    constexpr size_t size_bytes() const;
-    constexpr Boolean empty() const;
-    constexpr T _FAR & operator[](size_t pos) const;
-    constexpr operator T _FAR *() const;
-    constexpr T _FAR & front() const;
-    constexpr T _FAR & back() const;
+    constexpr TSpan() :
+        ptr(0),
+        len(0)
+    {
+    }
 
-    constexpr TSpan subspan(size_t pos) const;
-    constexpr TSpan subspan(size_t pos, size_t n) const;
+    constexpr TSpan(T _FAR *first, size_t n) :
+        ptr(first),
+        len(n)
+    {
+    }
+
+    constexpr operator T _FAR *() const
+    {
+        return ptr;
+    }
+
+    constexpr operator TSpan<const T>() const
+    {
+        return TSpan<const T>(ptr, len);
+    }
+
+    constexpr T _FAR * data() const
+    {
+        return ptr;
+    }
+
+    constexpr size_t size() const
+    {
+        return len;
+    }
+
+    constexpr size_t size_bytes() const
+    {
+        return size()*sizeof(T);
+    }
+
+    constexpr Boolean empty() const
+    {
+        return size() == 0;
+    }
+
+    constexpr T _FAR & operator[](size_t pos) const
+    {
+        return ptr[pos];
+    }
+
+    constexpr T _FAR & front() const
+    {
+        return ptr[0];
+    }
+
+    constexpr T _FAR & back() const
+    {
+        return ptr[len - 1];
+    }
+
+    constexpr TSpan subspan(size_t pos) const
+    {
+        return TSpan<T>(ptr + pos, len - pos);
+    }
+
+    constexpr TSpan subspan(size_t pos, size_t n) const
+    {
+        size_t tail = len - pos;
+        if (n > tail)
+            n = tail;
+        return TSpan<T>(ptr + pos, n);
+    }
 
 };
-
-template <class T>
-inline constexpr TSpan<T>::TSpan() :
-    ptr(0),
-    len(0)
-{
-}
-
-template <class T>
-inline constexpr TSpan<T>::TSpan(T _FAR *first, size_t n) :
-    ptr(first),
-    len(n)
-{
-}
-
-template <class T>
-inline constexpr T _FAR * TSpan<T>::data() const
-{
-    return ptr;
-}
-
-template <class T>
-inline constexpr size_t TSpan<T>::size() const
-{
-    return len;
-}
-
-template <class T>
-inline constexpr size_t TSpan<T>::size_bytes() const
-{
-    return size()*sizeof(T);
-}
-
-template <class T>
-inline constexpr Boolean TSpan<T>::empty() const
-{
-    return size() == 0;
-}
-
-template <class T>
-inline constexpr T _FAR & TSpan<T>::operator[](size_t pos) const
-{
-    return ptr[pos];
-}
-
-template <class T>
-inline constexpr TSpan<T>::operator T _FAR *() const
-{
-    return ptr;
-}
-
-template <class T>
-inline constexpr T _FAR & TSpan<T>::front() const
-{
-    return ptr[0];
-}
-
-template <class T>
-inline constexpr T _FAR & TSpan<T>::back() const
-{
-    return ptr[len - 1];
-}
-
-template <class T>
-inline constexpr TSpan<T> TSpan<T>::subspan(size_t pos) const
-{
-    return TSpan<T>(ptr + pos, len - pos);
-}
-
-template <class T>
-inline constexpr TSpan<T> TSpan<T>::subspan(size_t pos, size_t n) const
-{
-    size_t tail = len - pos;
-    if (n > tail)
-        n = tail;
-    return TSpan<T>(ptr + pos, n);
-}
 
 #endif // TVISION_TSPAN_H
