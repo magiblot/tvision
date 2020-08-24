@@ -19,8 +19,6 @@
 #include <string_view>
 #endif
 
-#include <string>
-
 #endif // __BORLANDC__
 
 class TStringView {
@@ -30,6 +28,8 @@ class TStringView {
     // always use std::string_view.
     // Unlike std::string_view, TStringView can be constructed from a null pointer,
     // for backward compatibility.
+    // TStringView is intercompatible with std::string_view, std::string and
+    // TSpan<const char>.
 
     const char _FAR *str;
     size_t len;
@@ -39,10 +39,13 @@ public:
     constexpr TStringView();
     constexpr TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
+    constexpr TStringView(TSpan<char> span);
+    constexpr TStringView(TSpan<const char> span);
 #if __cplusplus >= 201703L
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
+    constexpr operator TSpan<const char>() const;
 
     constexpr const char _FAR * data() const;
     constexpr size_t size() const;
@@ -93,6 +96,18 @@ inline constexpr TStringView::TStringView(const char _FAR *str, size_t len) :
 {
 }
 
+inline constexpr TStringView::TStringView(TSpan<char> span) :
+    str(span.data()),
+    len(span.size())
+{
+}
+
+inline constexpr TStringView::TStringView(TSpan<const char> span) :
+    str(span.data()),
+    len(span.size())
+{
+}
+
 #if __cplusplus >= 201703L
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
@@ -105,6 +120,11 @@ inline constexpr TStringView::operator std::string_view() const
     return {str, len};
 }
 #endif
+
+inline constexpr TStringView::operator TSpan<const char>() const
+{
+    return TSpan<const char>(str, len);
+}
 
 inline constexpr const char _FAR * TStringView::data() const
 {
