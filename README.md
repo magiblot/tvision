@@ -64,7 +64,7 @@ I can confirm the build process works with:
 
 You may face different problems depending on your build environment. For instance, Turbo Assembler needs a patch to work under Windows 95. On Windows XP everything seems to work fine. On Windows 10, MAKE may emit the error 'Fatal: Command arguments too long', which can be fixed by upgrading MAKE to the one bundled with Borland C++ 5.x.
 
-Yes, this works in 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit applications. You will have to run it on another environment or try your luck with winevdm.
+Yes, this works in 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit application. You will have to run it on another environment or try your luck with winevdm.
 
 A Borland Makefile can be found in the `project` directory. Build can be done by doing:
 
@@ -118,6 +118,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Middle mouse button support (`mbMiddleButton`), even on DOS.
 * Horizontal and vertical mouse wheel support (`evMouseWheel`), even on DOS.
 * Arbitrary screen size support (with up to 65535 rows or columns).
+* Notably improved memory safety.
 * Graceful handling of screen resize events.
 * Windows can be resized also from their bottom left corner.
 * Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
@@ -145,13 +146,13 @@ See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsave
 ## API changes
 
 * On Linux, screen writes are buffered and are usually sent to the terminal once for every iteration of the active event loop (see also `TVISION_MAX_FPS`). If you need to update the screen during a busy loop, you may use `TScreen::flushScreen()`.
-* `TDrawBuffer` is no longer an static array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
-* Several constructors and methods now receive or return `const char*` instead of `char*` or have been added the `const` qualifier.
+* `TDrawBuffer` is no longer a fixed-length array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
 * New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
+* Many methods which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
 * New class `TSpan<T>`, a generic (and non-const) version of `TStringView`, inspired by `std::span`.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
 * Unicode support, see below.
