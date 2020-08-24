@@ -19,6 +19,8 @@
 #include <string_view>
 #endif
 
+#include <string>
+
 #endif // __BORLANDC__
 
 class TStringView {
@@ -44,6 +46,9 @@ public:
 #if __cplusplus >= 201703L
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
+#endif
+#ifndef __BORLANDC__
+    TStringView(const std::string &text);
 #endif
     constexpr operator TSpan<const char>() const;
 
@@ -118,6 +123,14 @@ inline constexpr TStringView::TStringView(std::string_view text) :
 inline constexpr TStringView::operator std::string_view() const
 {
     return {str, len};
+}
+#endif
+
+#ifndef __BORLANDC__
+inline TStringView::TStringView(const std::string &text) :
+    str(text.data()),
+    len(text.size())
+{
 }
 #endif
 
