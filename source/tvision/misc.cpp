@@ -59,6 +59,25 @@ size_t strnzcpy( char *dest, TStringView src, size_t size )
     return 0;
 }
 
+size_t strnzcat( char *dest, TStringView src, size_t size )
+{
+    // Similar to strlcpy, except that 'dest' is always left null-terminated,
+    // and the return value is the length of 'dest'.
+    if (size)
+    {
+        size_t dstLen = 0;
+        while (dstLen < size - 1 && dest[dstLen])
+            ++dstLen;
+        size_t copy_bytes = src.size();
+        if (copy_bytes > size - 1 - dstLen)
+            copy_bytes = size - 1 - dstLen;
+        memcpy(&dest[dstLen], src.data(), copy_bytes);
+        dest[dstLen + copy_bytes] = '\0';
+        return dstLen + copy_bytes;
+    }
+    return 0;
+}
+
 uint32_t fast_utoa ( uint32_t value, char *buffer ) {
     // Copyright(c) 2014-2016 Milo Yip (https://github.com/miloyip/itoa-benchmark)
     unsigned int digits =

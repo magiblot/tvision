@@ -39,24 +39,24 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
 {
     // fnmerge is often used before accessing files, so producing a
     // UNIX-formatted path fixes most cases of filesystem access.
-    char *path = pathP;
+    memset(pathP, 0, MAXPATH);
+    size_t n = 0;
     // Drive letter ignored.
     if (dirP && *dirP)
     {
-        pathP = stpcpy(pathP, dirP);
-        if (pathP[-1] != '\\' && pathP[-1] != '/')
-            *(pathP++) = '\\';
+        n += strnzcpy(&pathP[n], dirP, MAXPATH - n);
+        if (pathP[n-1] != '\\' && pathP[n-1] != '/')
+            n += strnzcpy(&pathP[n], "\\", MAXPATH - n);
     }
     if (nameP && *nameP)
-        pathP = stpcpy(pathP, nameP);
+        n += strnzcpy(&pathP[n], nameP, MAXPATH - n);
     if (extP && *extP)
     {
         if (*extP != '.')
-            *(pathP++) = '.';
-        pathP = stpcpy(pathP, extP);
+            n += strnzcpy(&pathP[n], ".", MAXPATH - n);
+        n += strnzcpy(&pathP[n], extP, MAXPATH - n);
     }
-    *pathP = '\0';
-    path_dos2unix(path);
+    path_dos2unix(pathP);
 }
 
 static bool CopyComponent(char* dstP, const char* startP, const char* endP, size_t MAX)
@@ -67,7 +67,7 @@ static bool CopyComponent(char* dstP, const char* startP, const char* endP, size
     {
         if (dstP)
             // This always adds a trailing '\0', thus the +1.
-            strnzcpy(dstP, startP, std::min(MAX, size_t(endP-startP+1)));
+            strnzcpy(dstP, startP, std::min<size_t>(MAX, endP-startP+1));
         return true;
     }
     return false;

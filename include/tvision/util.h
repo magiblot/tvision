@@ -68,6 +68,7 @@ void getCurDir( char *dir );
 Boolean isWild( const char *f );
 
 size_t strnzcpy( char *dest, TStringView src, size_t n );
+size_t strnzcat( char *dest, TStringView src, size_t n );
 
 uint32_t fast_utoa( uint32_t value, char *buffer );
 

@@ -307,15 +307,15 @@ void fexpand( char *rpath )
         char curdir[MAXDIR+1];
         if ( getcurdir( drive[0] - 'A' + 1, curdir ) != 0 )
             *curdir = '\0';
-        strcat( curdir, "\\" );
-        strcat( curdir, dir );
+        strnzcat( curdir, "\\", MAXDIR+1 );
+        strnzcat( curdir, dir, MAXDIR+1 );
         if( *curdir != '\\' && *curdir != '/' )
             {
             *dir = '\\';
-            strcpy( dir+1, curdir );
+            strnzcpy( dir+1, curdir, MAXDIR-1 );
             }
         else
-            strcpy( dir, curdir );
+            strnzcpy( dir, curdir, MAXDIR );
         }
 
     char *p = dir;
@@ -326,7 +326,7 @@ void fexpand( char *rpath )
 #ifndef __FLAT__
     strupr( path );
 #endif
-    strcpy( rpath, path );
+    strnzcpy( rpath, path, MAXPATH );
 }
 
 #if !defined(NO_STREAMABLE)
