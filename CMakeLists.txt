@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 3.5)
 project (tvision)
 
 add_compile_options(
-    --std=c++17 -O2 -fpermissive
 #     -g
-    -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder -Wno-deprecated
+    --std=c++17 -O2
+    -Wall -Wno-unknown-pragmas -Wno-pragmas -Wno-reorder -Wno-deprecated
     # Enable the following if your system supports it:
 #     -flto
 )
