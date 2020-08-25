@@ -56,7 +56,9 @@ public:
 
     THardwareInfo();
 #ifndef __BORLANDC__
-    static TEvent pendingMouseEvent;
+    enum { eventQSize = 24 };
+    static TEvent eventQ[eventQSize];
+    static size_t eventCount;
     static void flushScreen();
     static bool isLinuxConsole(int fd);
 #endif
@@ -105,6 +107,10 @@ public:
     static BOOL getMouseEvent( MouseEventType& event );
     static BOOL getKeyEvent( TEvent& event );
     static void clearPendingEvent();
+#ifndef __BORLANDC__
+    static BOOL getPendingEvent( TEvent &event, ushort mask );
+    static void readEvents();
+#endif
 
 // System functions.
 

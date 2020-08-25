@@ -18,7 +18,8 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
-TEvent THardwareInfo::pendingMouseEvent;
+TEvent THardwareInfo::eventQ[];
+size_t THardwareInfo::eventCount = 0;
 
 static bool alwaysFlush;
 
@@ -98,12 +99,26 @@ void THardwareInfo::restoreConsole()
     platf.reset();
 }
 
+BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask)
+{
+    for (size_t i = 0; i < eventCount; ++i)
+        if (eventQ[i].what & mask)
+        {
+            event = eventQ[i];
+            for (; i + 1 < eventCount; ++i)
+                eventQ[i] = eventQ[i + 1];
+            --eventCount;
+            return True;
+        }
+    return False;
+}
 
 BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 {
-    if (pendingEvent) {
-        event = pendingMouseEvent.mouse;
-        pendingEvent = 0;
+    TEvent ev;
+    if (getPendingEvent(ev, evMouse))
+    {
+        event = ev.mouse;
         return True;
     }
     return False;
@@ -111,35 +126,39 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
-    /* This is a good place to refresh the display, since it guarantees a
-     * a refresh each time an event is processed or there's a wait timeout,
-     * and avoids unnecessary screen refreshes. */
-    THardwareInfo::flushScreen();
-    if (!pendingEvent)
+    readEvents();
+    if (getPendingEvent(event, ~evMouse))
     {
-        if (platf->waitForEvent(eventTimeoutMs, event))
+        if (event.what & evKeyboard)
         {
-            if (event.what & evKeyboard)
-            {
-                // Set/Reset insert flag.
-                if( event.keyDown.keyCode == kbIns )
-                    insertState = !insertState;
-                if( insertState )
-                    event.keyDown.controlKeyState |= kbInsState;
-                return True;
-            }
-            else if (event.what & evMouse)
-            {
-                /* Like in the original implementation, let mouse events
-                 * to be treated on the following polling loop. */
-                pendingMouseEvent = event;
-                pendingEvent = 1;
-                return False;
-            }
-            return (Boolean) event.what != evNothing;
+            // Set/Reset insert flag.
+            if( event.keyDown.keyCode == kbIns )
+                insertState = !insertState;
+            if( insertState )
+                event.keyDown.controlKeyState |= kbInsState;
+            return True;
         }
+        return event.what != evNothing;
     }
     return False;
+}
+
+void THardwareInfo::readEvents()
+{
+    // Do not read any more events until the queue is empty.
+    if (!eventCount)
+    {
+        // Flush the screen once for every time all events have been processed.
+        THardwareInfo::flushScreen();
+        TEvent event;
+        // Non-blocking read.
+        while ( eventCount < eventQSize &&
+                platf->waitForEvent(0, event) )
+            eventQ[eventCount++] = event;
+        // Blocking read.
+        if (!eventCount && platf->waitForEvent(eventTimeoutMs, event))
+            eventQ[eventCount++] = event;
+    }
 }
 
 ulong THardwareInfo::getTickCount()
