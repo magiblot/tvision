@@ -192,6 +192,10 @@ void TFrame::handleEvent( TEvent& event )
                 else if( mouse.x <= 1 )
                     dragWindow( event, dmDragGrowLeft );
             }
+        else if( event.what == evMouseDown && event.mouse.buttons == mbMiddleButton &&
+                 0 < mouse.x && mouse.x < size.x - 1 && 0 < mouse.y && mouse.y < size.y - 1 &&
+                 (((TWindow *)owner)->flags & wfMove) )
+            dragWindow( event, dmDragMove );
         }
 }
 

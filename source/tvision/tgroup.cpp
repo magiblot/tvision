@@ -372,7 +372,7 @@ void TGroup::handleEvent( TEvent& event )
         phase = phPostProcess;
         forEach( doHandleEvent, &hs );
         }
-    else
+    else if( event.what )
         {
         phase = phFocused;
         if( (event.what & positionalEvents) != 0 )

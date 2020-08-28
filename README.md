@@ -121,6 +121,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Notably improved memory safety.
 * Graceful handling of screen resize events.
 * Windows can be resized also from their bottom left corner.
+* Windows can be dragged from empty areas with the middle mouse button.
 * Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
 * Improved usability of menus: they can be closed by clicking twice on them, even submenus.
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.

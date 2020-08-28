@@ -164,7 +164,7 @@ void TVDemo::getEvent(TEvent &event)
             }
             break;
         case evMouseDown:
-            if (event.mouse.buttons != 1)
+            if (event.mouse.buttons == mbRightButton)
                 event.what = evNothing;
             break;
         }
