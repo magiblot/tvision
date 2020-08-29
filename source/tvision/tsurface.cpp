@@ -39,11 +39,14 @@ TDrawSurface::~TDrawSurface()
 void TDrawSurface::resize(TPoint aSize)
 {
     size_t newLength = max(aSize.x*aSize.y, 0);
-    if ((data = (TScreenCell _FAR *) ::realloc(data, newLength*sizeof(TScreenCell))))
+    void _FAR *newData = ::realloc(data, newLength*sizeof(TScreenCell));
+    if (newData) {
+        data = (TScreenCell _FAR *) newData;
         for (size_t i = dataLength; i < newLength; ++i)
             data[i] = fill;
-    dataLength = newLength;
-    size = aSize;
+        dataLength = newLength;
+        size = aSize;
+    }
 }
 
 void TDrawSurface::clear()
