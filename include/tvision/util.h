@@ -43,16 +43,13 @@ ushort historyCount( uchar id );
 const char *historyStr( uchar id, int index );
 void historyAdd( uchar id, TStringView );
 
-int cstrlen( const char * );
 int cstrlen( TStringView );
-int strwidth( const char * );
 int strwidth( TStringView );
 
 class _FAR TView;
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr );
 Boolean lowMemory();
 
-char *newStr( const char * );
 char *newStr( TStringView );
 
 Boolean driveValid( char drive );

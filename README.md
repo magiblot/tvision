@@ -327,13 +327,11 @@ In case you happen to have an array of `TScreenCell`, this method allows you to 
 There are other useful Unicode-aware functions:
 
 ```c++
-int cstrlen(const char *s);
-int cstrlen(TStringView s); // New
+int cstrlen(TStringView s);
 ```
 Returns the displayed length of `s` according to the aforementioned rules, discarding `~` characters.
 
 ```c++
-int strwidth(const char *s); // New
 int strwidth(TStringView s); // New
 ```
 Returns the displayed length of `s`.

@@ -60,7 +60,7 @@ const ushort arrowCodes[] =
 /*                                                                        */
 /*  argument:                                                             */
 /*                                                                        */
-/*      s       - pointer to 0-terminated string                          */
+/*      text    - input string                                            */
 /*                                                                        */
 /*  returns                                                               */
 /*                                                                        */
@@ -72,11 +72,6 @@ const ushort arrowCodes[] =
 /*      which use '~' to toggle between display attributes                */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
-
-int cstrlen( const char *s )
-{
-    return cstrlen( TStringView(s) );
-}
 
 int cstrlen( TStringView text )
 {
@@ -108,18 +103,13 @@ int cstrlen( TStringView text )
 /*                                                                        */
 /*  argument:                                                             */
 /*                                                                        */
-/*      s       - pointer to 0-terminated string                          */
+/*      text    - input string                                            */
 /*                                                                        */
 /*  returns                                                               */
 /*                                                                        */
 /*      displayed length of string.                                       */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
-
-int strwidth( const char *s )
-{
-    return strwidth( TStringView(s) );
-}
 
 int strwidth( TStringView text )
 {

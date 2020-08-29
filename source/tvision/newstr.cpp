@@ -19,12 +19,6 @@
 #include <string.h>
 #endif  // __STRING_H
 
-
-char *newStr( const char *s )
-{
-    return newStr( TStringView(s) );
-}
-
 char *newStr( TStringView s )
 {
     if( s.data() == 0 )
