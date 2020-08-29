@@ -50,8 +50,10 @@ class _FAR TView;
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr );
 
 class _FAR TPoint;
+class _FAR TGroup;
+class _FAR TMenu;
 class _FAR TMenuItem;
-ushort popupMenu(TPoint where, TMenuItem &aMenu);
+ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup * = 0);
 
 Boolean lowMemory();
 
