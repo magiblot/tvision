@@ -17,10 +17,19 @@
 #define Uses_TMenu
 #define Uses_TMenuItem
 #define Uses_TMenuPopup
+#define Uses_TProgram
+#define Uses_TDeskTop
 #include <tvision/tv.h>
 
 TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) :
     TMenuBox( bounds, aMenu, aParentMenu )
+{
+    putClickEventOnExit = False;
+    closeOnBorderClick = True;
+}
+
+TMenuPopup::TMenuPopup(const TRect& bounds, TMenuItem &aMenu, TMenuView *aParentMenu) :
+    TMenuBox( bounds, new TMenu(aMenu), aParentMenu )
 {
     putClickEventOnExit = False;
     closeOnBorderClick = True;
@@ -78,3 +87,44 @@ TMenuPopup::TMenuPopup( StreamableInit ) : TMenuBox( streamableInit )
 }
 
 #endif
+
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  popupMenu                                                             */
+/*                                                                        */
+/*  Spawns and executes a TMenuPopup on the desktop.                      */
+/*                                                                        */
+/*  arguments:                                                            */
+/*                                                                        */
+/*      where   - The top left corner (in absolute coordinates)           */
+/*                of the popup.                                           */
+/*                                                                        */
+/*      aMenu   - Chain of menu items.                                    */
+/*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      The selected command, if any. But keep in mind that TMenuPopup    */
+/*      already generates an evCommand event with putEvent.               */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+ushort popupMenu(TPoint where, TMenuItem &aMenu)
+{
+    ushort res = 0;
+    TGroup *deskTop = TProgram::deskTop;
+    if (deskTop)
+    {
+        TPoint p = deskTop->makeLocal(where);
+        TMenuPopup *m = new TMenuPopup(TRect(p, p), aMenu);
+        // Initially, the menu is placed above 'p'. So we need to move it.
+        TRect r = m->getBounds();
+        // But we must ensure that the popup does not go beyond the desktop's
+        // bottom right corner, for usability.
+        TPoint d = deskTop->size - p;
+        r.move(min(m->size.x, d.x), min(m->size.y, d.y));
+        m->setBounds(r);
+        res = deskTop->execView(m);
+        TObject::destroy(m);
+    }
+    return res;
+}
