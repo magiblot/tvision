@@ -170,6 +170,7 @@ class _FAR TRect;
 class _FAR TScrollBar;
 class _FAR TIndicator;
 struct _FAR TEvent;
+class _FAR TMenuItem;
 
 class TEditor : public TView
 {
@@ -186,6 +187,7 @@ public:
     char bufChar( uint );
     uint bufPtr( uint );
     virtual void changeBounds( const TRect& );
+    TMenuItem& contextMenuEntries();
     virtual void convertEvent( TEvent& );
     Boolean cursorVisible();
     void deleteSelect();

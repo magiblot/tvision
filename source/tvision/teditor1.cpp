@@ -344,6 +344,15 @@ void TEditor::clipPaste()
         insertFrom(clipboard);
 }
 
+TMenuItem& TEditor::contextMenuEntries()
+{
+    return
+        *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
+        *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
+        *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
+        *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
+}
+
 void TEditor::convertEvent( TEvent& event )
 {
     if( event.what == evKeyDown )
@@ -550,12 +559,7 @@ void TEditor::handleEvent( TEvent& event )
         case evMouseDown:
             if( event.mouse.buttons & mbRightButton )
                 {
-                TMenuItem &i =
-                    *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
-                    *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
-                    *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
-                    *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
-                popupMenu( event.mouse.where, i );
+                popupMenu( event.mouse.where, contextMenuEntries(), owner );
                 break;
                 }
 
