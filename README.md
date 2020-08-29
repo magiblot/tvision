@@ -127,6 +127,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
 * Views don't lose their sizes when extremely resized.
 * Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
+* `tvedit`: contextual menu on right click.
 * `tvedit`: drag scroll with middle mouse button.
 * `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to linux users: they might not work on terminal emulators, but they do work on the console).
 * `tvedit`: smart Home key (toggles between beginning of line and beginning of indented text).

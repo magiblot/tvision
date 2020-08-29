@@ -22,6 +22,7 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TText
+#define Uses_TMenuItem
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
@@ -547,8 +548,16 @@ void TEditor::handleEvent( TEvent& event )
         {
 
         case evMouseDown:
-            if( event.mouse.eventFlags & meDoubleClick )
-                selectMode |= smDouble;
+            if( event.mouse.buttons & mbRightButton )
+                {
+                TMenuItem &i =
+                    *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
+                    *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
+                    *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
+                    *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
+                popupMenu( event.mouse.where, i );
+                break;
+                }
 
             if( event.mouse.buttons & mbMiddleButton )
                 {
@@ -562,6 +571,9 @@ void TEditor::handleEvent( TEvent& event )
                     }
                 break;
                 }
+
+            if( event.mouse.eventFlags & meDoubleClick )
+                selectMode |= smDouble;
 
             do  {
                 lock();
