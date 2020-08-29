@@ -26,6 +26,7 @@ class _FAR TStatusItem;
 
 TSubMenu& operator + ( TSubMenu& s, TMenuItem& i );
 TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 );
+TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 );
 TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 );
 TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 );
 
@@ -163,6 +164,9 @@ protected:
     TMenu *menu;
     TMenuItem *current;
 
+    Boolean putClickEventOnExit;
+    Boolean closeOnBorderClick;
+
 private:
 
     void nextItem();
@@ -210,13 +214,15 @@ inline TMenuView::TMenuView( const TRect& bounds,
                              TMenu *aMenu,
                              TMenuView *aParent
                            ) :
-    TView(bounds), current( 0 ), menu( aMenu ), parentMenu( aParent )
+    TView(bounds), current( 0 ), menu( aMenu ), parentMenu( aParent ),
+    putClickEventOnExit( True ), closeOnBorderClick( False )
 {
      eventMask |= evBroadcast;
 }
 
 inline TMenuView::TMenuView( const TRect& bounds ) :
-    TView(bounds), parentMenu(0), menu(0), current(0)
+    TView(bounds), parentMenu(0), menu(0), current(0),
+    putClickEventOnExit( True ), closeOnBorderClick( False )
 {
      eventMask |= evBroadcast;
 }
@@ -365,7 +371,8 @@ class TMenuPopup : public TMenuBox
 
 public:
 
-    TMenuPopup(TRect&, TMenu*, TMenuView*);
+    TMenuPopup(const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0);
+    virtual ushort execute();
     virtual void handleEvent(TEvent&);
 
 protected:

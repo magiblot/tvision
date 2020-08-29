@@ -55,6 +55,15 @@ TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 )
     return s1;
 }
 
+TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 )
+{
+    TMenuItem *cur = &i1;
+    while( cur->next != 0 )
+        cur = cur->next;
+    cur->next = &i2;
+    return i1;
+}
+
 TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 )
 {
     TStatusDef *def = &s1;

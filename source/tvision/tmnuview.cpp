@@ -104,7 +104,7 @@ void TMenuView::trackMouse( TEvent& e, Boolean& mouseActive )
             mouseActive = True;
             return;
             }
-        }        
+        }
 }
 
 void TMenuView::nextItem()
@@ -207,14 +207,15 @@ ushort TMenuView::execute()
                     // A submenu will close if the MouseDown event takes place on the
                     // parent menu, except when this submenu has just been opened and
                     // still doesn't have a highlighted entry.
-                    else if ( itemShown && mouseInOwner(e) )
+                    else if ( (itemShown && mouseInOwner(e)) || (!current && closeOnBorderClick) )
                         action = doReturn;
                     }
                 else
                     {
                     // Menu gets closed by a click outside its bounds.
                     // Let the event reach the view recovering focus.
-                    putEvent(e);
+                    if( putClickEventOnExit )
+                        putEvent(e);
                     action =  doReturn;
                     }
                 break;
@@ -222,24 +223,27 @@ ushort TMenuView::execute()
                 trackMouse(e, mouseActive);
                 if( mouseInOwner(e) )
                     current = menu->deflt;
-                else if( current != 0 && current->name != 0 )
+                else if( current != 0 )
                     {
-                    if ( current != lastTargetItem )
-                        action = doSelect;
-                    else if ( !parentMenu )
-                    // If a main menu entry was closed, exit and stop listening
-                    // for events.
-                        action = doReturn;
-                    else
-                    // MouseUp won't open up a submenu that was just closed by clicking
-                    // on its name.
+                    if( current->name != 0 )
                         {
-                        action = doNothing;
-                        // But the next one will.
-                        lastTargetItem = 0;
+                        if ( current != lastTargetItem )
+                            action = doSelect;
+                        else if ( !parentMenu )
+                        // If a main menu entry was closed, exit and stop listening
+                        // for events.
+                            action = doReturn;
+                        else
+                        // MouseUp won't open up a submenu that was just closed by clicking
+                        // on its name.
+                            {
+                            action = doNothing;
+                            // But the next one will.
+                            lastTargetItem = 0;
+                            }
                         }
                     }
-                else if ( !mouseInView(e.mouse.where) )
+                else if ( mouseActive && (!mouseInView(e.mouse.where) || closeOnBorderClick) )
                     action = doReturn;
                 else if ( parentMenu )
                 // When MouseUp happens inside the Box but not on a highlightable entry

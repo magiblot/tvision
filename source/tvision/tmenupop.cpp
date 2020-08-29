@@ -19,9 +19,27 @@
 #define Uses_TMenuPopup
 #include <tvision/tv.h>
 
-TMenuPopup::TMenuPopup(TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) :
+TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) :
     TMenuBox( bounds, aMenu, aParentMenu )
 {
+    putClickEventOnExit = False;
+    closeOnBorderClick = True;
+}
+
+ushort TMenuPopup::execute()
+{
+    // Do not highlight the default entry, because it would look ugly.
+    menu->deflt = 0;
+    ushort res = TMenuBox::execute();
+    if (res)
+    {
+        TEvent event = {};
+        event.what = evCommand;
+        event.message.command = res;
+        event.message.infoPtr = 0;
+        putEvent(event);
+    }
+    return res;
 }
 
 void TMenuPopup::handleEvent(TEvent& event)
