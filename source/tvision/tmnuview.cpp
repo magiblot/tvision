@@ -207,7 +207,7 @@ ushort TMenuView::execute()
                     // A submenu will close if the MouseDown event takes place on the
                     // parent menu, except when this submenu has just been opened and
                     // still doesn't have a highlighted entry.
-                    else if ( (itemShown && mouseInOwner(e)) || (!current && closeOnBorderClick) )
+                    else if ( (itemShown && mouseInOwner(e)) )
                         action = doReturn;
                     }
                 else
@@ -243,7 +243,7 @@ ushort TMenuView::execute()
                             }
                         }
                     }
-                else if ( mouseActive && (!mouseInView(e.mouse.where) || closeOnBorderClick) )
+                else if ( mouseActive && !mouseInView(e.mouse.where) )
                     action = doReturn;
                 else if ( parentMenu )
                 // When MouseUp happens inside the Box but not on a highlightable entry

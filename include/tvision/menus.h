@@ -165,7 +165,6 @@ protected:
     TMenuItem *current;
 
     Boolean putClickEventOnExit;
-    Boolean closeOnBorderClick;
 
 private:
 
@@ -215,14 +214,14 @@ inline TMenuView::TMenuView( const TRect& bounds,
                              TMenuView *aParent
                            ) :
     TView(bounds), current( 0 ), menu( aMenu ), parentMenu( aParent ),
-    putClickEventOnExit( True ), closeOnBorderClick( False )
+    putClickEventOnExit( True )
 {
      eventMask |= evBroadcast;
 }
 
 inline TMenuView::TMenuView( const TRect& bounds ) :
     TView(bounds), parentMenu(0), menu(0), current(0),
-    putClickEventOnExit( True ), closeOnBorderClick( False )
+    putClickEventOnExit( True )
 {
      eventMask |= evBroadcast;
 }

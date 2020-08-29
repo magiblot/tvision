@@ -25,14 +25,12 @@ TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu
     TMenuBox( bounds, aMenu, aParentMenu )
 {
     putClickEventOnExit = False;
-    closeOnBorderClick = True;
 }
 
 TMenuPopup::TMenuPopup(const TRect& bounds, TMenuItem &aMenu, TMenuView *aParentMenu) :
     TMenuBox( bounds, new TMenu(aMenu), aParentMenu )
 {
     putClickEventOnExit = False;
-    closeOnBorderClick = True;
 }
 
 ushort TMenuPopup::execute()
@@ -96,8 +94,9 @@ TMenuPopup::TMenuPopup( StreamableInit ) : TMenuBox( streamableInit )
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      where   - The top left corner (in absolute coordinates)           */
-/*                of the popup.                                           */
+/*      where   - Reference position, in absolute coordinates.            */
+/*                The top left corner of the popup will be placed         */
+/*                at (where.x, where.y+1).                                */
 /*                                                                        */
 /*      aMenu   - Chain of menu items.                                    */
 /*                                                                        */
@@ -121,7 +120,7 @@ ushort popupMenu(TPoint where, TMenuItem &aMenu)
         // But we must ensure that the popup does not go beyond the desktop's
         // bottom right corner, for usability.
         TPoint d = deskTop->size - p;
-        r.move(min(m->size.x, d.x), min(m->size.y, d.y));
+        r.move(min(m->size.x, d.x), min(m->size.y + 1, d.y));
         m->setBounds(r);
         res = deskTop->execView(m);
         TObject::destroy(m);
