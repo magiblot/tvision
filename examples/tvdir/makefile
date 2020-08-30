@@ -79,8 +79,8 @@ BGILIB = bgi32.lib
 #
 
 CFGFILE    = $(SOURCE).CFG
-CC         = bcc +$(CFGFILE)
-TLINK      = tlink
+CC         = $(BCROOT)\BIN\bcc +$(CFGFILE)
+TLINK      = $(BCROOT)\BIN\tlink
 STARTUP    = c0l.obj
 USERLIBS   = tv$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) emu.lib mathl.lib cl.lib
@@ -103,8 +103,8 @@ STDLIBS    = tvno$(TVSUFFIX).lib overlay.lib emu.lib mathl.lib cl.lib
 
 !ifdef DOS16
 CFGFILE    = $(SOURCE).C16
-CC         = bcc +$(CFGFILE)
-TLINK      = tlink
+CC         = $(BCROOT)\BIN\bcc +$(CFGFILE)
+TLINK      = $(BCROOT)\BIN\tlink
 STARTUP    = c0x.obj
 USERLIBS   = tv$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) dpmi16.lib emux.lib mathwl.lib cwl.lib
@@ -119,8 +119,8 @@ OBJDIR     = objs16$(DEBUGSUFFIX)
 
 !ifdef DOS32
 CFGFILE    = $(SOURCE).C32
-CC         = bcc32 +$(CFGFILE)
-TLINK      = tlink32
+CC         = $(BCROOT)\BIN\bcc32 +$(CFGFILE)
+TLINK      = $(BCROOT)\BIN\tlink32
 STARTUP    = c0x32.obj
 USERLIBS   = tv32$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) dpmi32.lib cw32.lib import32.lib
