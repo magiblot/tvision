@@ -1,12 +1,15 @@
 #ifndef NCURSINP_H
 #define NCURSINP_H
 
+#include <internal/platform.h>
+
+#ifdef HAVE_NCURSES
+
 #define Uses_TKeys
 #define Uses_TPoint
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/platform.h>
 #include <internal/sigwinch.h>
 #include <unordered_map>
 #include <string_view>
@@ -39,5 +42,11 @@ public:
     int getButtonCount();
 
 };
+
+#else
+
+class NcursesInput : public InputStrategy {};
+
+#endif // HAVE_NCURSES
 
 #endif

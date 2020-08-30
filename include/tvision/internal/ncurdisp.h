@@ -2,6 +2,9 @@
 #define NCURDISP_H
 
 #include <internal/buffdisp.h>
+
+#ifdef HAVE_NCURSES
+
 #include <unordered_map>
 
 class NcursesDisplay : public BufferedDisplay {
@@ -37,5 +40,11 @@ protected:
     void lowlevelFlush();
 
 };
+
+#else
+
+class NcursesDisplay : public DisplayStrategy {};
+
+#endif // HAVE_NCURSES
 
 #endif

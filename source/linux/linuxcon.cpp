@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include <internal/linuxcon.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
@@ -14,7 +16,7 @@ LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, FdInputStrategy *
      * the 'input' attribute of PlatformStrategy, while the GpmInput instance
      * is stored in the 'gpm' attribute of this class. */
     if (input)
-        input->overrideEventGetter([&] (TEvent &ev) {
+        ((FdInputStrategy &) *input).overrideEventGetter([&] (TEvent &ev) {
             return patchKeyEvent(ev);
         });
 }
@@ -69,3 +71,5 @@ void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
         key.controlKeyState = actualModifiers;
     }
 }
+
+#endif // __linux__

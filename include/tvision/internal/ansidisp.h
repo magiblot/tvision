@@ -38,12 +38,14 @@ protected:
 
     void clearAttributes();
     void clearScreen();
+#ifdef _TV_UNIX
     void getCaretPosition(int &x, int &y);
     void getScreenSize(int &rows, int &cols);
-
-    ushort getScreenMode();
     int getScreenRows();
     int getScreenCols();
+#endif
+
+    ushort getScreenMode();
 
     void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
@@ -66,8 +68,10 @@ class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
 public:
 
     ushort getScreenMode() { return AnsiDisplayBase::getScreenMode(); }
+#ifdef _TV_UNIX
     int getScreenRows() { return AnsiDisplayBase::getScreenRows(); }
     int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
+#endif
 
     void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
@@ -83,4 +87,4 @@ public:
 
 };
 
-#endif
+#endif // ANSIDISP_H

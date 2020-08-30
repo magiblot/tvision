@@ -12,8 +12,12 @@
 #include <internal/sighandl.h>
 #include <internal/getenv.h>
 #include <string_view>
-#include <sys/ioctl.h>
 #include <chrono>
+#ifdef _TV_UNIX
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <cstdio>
+#endif
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;
@@ -27,15 +31,29 @@ THardwareInfo::THardwareInfo()
 {
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
+#ifdef _TV_UNIX
     static TSignalHandler h;
+#endif
 }
 
 bool THardwareInfo::isLinuxConsole(int fd)
 {
+#ifdef __linux__
     /* This is the same function used to get the Shift/Ctrl/Alt modifiers
      * on the console. It fails if stdin is not a console file descriptor. */
     char subcode[] = {6, 0}; // Null-terminate so that valgrind doesn't complain.
     return ioctl(fd, TIOCLINUX, subcode) != -1;
+#else
+    return false;
+#endif
+}
+
+void THardwareInfo::consoleWrite(const void *data, size_t bytes)
+{
+#ifdef _TV_UNIX
+    fflush(stdout);
+    ::write(1, data, bytes);
+#endif
 }
 
 /* We don't include these in hardware.h as done originally to prevent it to
@@ -81,6 +99,7 @@ void THardwareInfo::setUpConsole()
     // before input.
     if (!platf)
     {
+#ifdef _TV_UNIX
         DisplayStrategy *disp;
         if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();
@@ -90,6 +109,7 @@ void THardwareInfo::setUpConsole()
             platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
         else
             platf.reset(new PlatformStrategy(disp, new NcursesInput()));
+#endif
     }
 }
 

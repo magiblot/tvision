@@ -1,3 +1,5 @@
+#ifdef HAVE_NCURSES
+
 #define Uses_TScreen
 #include <tvision/tv.h>
 
@@ -144,3 +146,5 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
     }
     return COLOR_PAIR(id);
 }
+
+#endif // HAVE_NCURSES

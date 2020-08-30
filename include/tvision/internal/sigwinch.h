@@ -1,10 +1,11 @@
 #ifndef SIGWINCH_H
 #define SIGWINCH_H
 
-#define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/platform.h>
+#ifdef _TV_UNIX
+
+struct TEvent;
 
 class SigwinchAware {
 
@@ -23,4 +24,6 @@ protected:
 
 };
 
-#endif
+#endif // _TV_UNIX
+
+#endif // SIGWINCH_H

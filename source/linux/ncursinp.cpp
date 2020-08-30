@@ -1,3 +1,5 @@
+#ifdef HAVE_NCURSES
+
 #define Uses_THardwareInfo
 #define Uses_TKeys
 #define Uses_TEvent
@@ -214,3 +216,5 @@ bool NcursesInput::parseMouseEvent(TEvent &ev)
     }
     return false;
 }
+
+#endif // HAVE_NCURSES

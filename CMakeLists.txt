@@ -1,18 +1,28 @@
 cmake_minimum_required (VERSION 3.5)
-project (tvision)
+project(tvision)
 
-add_compile_options(
-#     -g
-    --std=c++17 -O2
-    -Wall -Wno-unknown-pragmas -Wno-pragmas -Wno-reorder -Wno-deprecated
-    # Enable the following if your system supports it:
-#     -flto
-)
+# Platform disambiguation and global compilation options
+
+set(TV_PLATF_UNIX 1)
+set(TV_PLATF_WIN32 2)
+
+if (MSVC)
+    set(TV_PLATF ${TV_PLATF_WIN32})
+else()
+    set(TV_PLATF ${TV_PLATF_UNIX})
+    add_compile_options(
+    #     -g
+        --std=c++17 -O2
+        -Wall -Wno-unknown-pragmas -Wno-pragmas -Wno-reorder -Wno-deprecated
+        # You may enable the following if your system supports it:
+    #     -flto
+    )
+endif()
 
 include_directories(
-include
-include/tvision
-include/tvision/borland
+    include
+    include/tvision
+    include/tvision/borland
 )
 
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*/*.cpp")
@@ -32,14 +42,20 @@ add_executable(tvhc ${TVHELPSRC})
 
 # Libraries
 
-find_library(NCURSESW ncursesw)
-set(LIBS tvision ${NCURSESW})
+set(LIBS tvision)
 
-# Optional dependencies
-find_library(GPM gpm)
-if (GPM)
-    list(APPEND LIBS ${GPM})
-    target_compile_definitions(tvision PRIVATE HAVE_GPM)
+if (TV_PLATF EQUAL TV_PLATF_UNIX)
+    find_library(NCURSESW ncursesw REQUIRED)
+    if (NCURSESW)
+        list(APPEND LIBS ${NCURSESW})
+        target_compile_definitions(tvision PRIVATE HAVE_NCURSES)
+    endif()
+    # Optional dependencies
+    find_library(GPM gpm)
+    if (GPM)
+        list(APPEND LIBS ${GPM})
+        target_compile_definitions(tvision PRIVATE HAVE_GPM)
+    endif()
 endif()
 
 target_link_libraries(hello ${LIBS})
@@ -48,7 +64,9 @@ target_link_libraries(tvdemo ${LIBS})
 target_link_libraries(tvdir ${LIBS})
 target_link_libraries(tvhc ${LIBS})
 
-target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
+endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     target_precompile_headers(tvision PRIVATE "include/tvision/tv.h")

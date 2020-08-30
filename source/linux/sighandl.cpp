@@ -1,10 +1,12 @@
+#define Uses_TProgram
+#include <tvision/tv.h>
+
+#ifdef _TV_UNIX
+
 #include <internal/sighandl.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cctype>
-
-#define Uses_TProgram
-#include <tvision/tv.h>
 
 TSignalHandler::TSignalHandler()
 {
@@ -78,3 +80,5 @@ void TSignalHandler::clearStdin()
     while (read(0, &i, sizeof(i)) > 0);
     fcntl(0, F_SETFL, flags);
 }
+
+#endif // _TV_UNIX

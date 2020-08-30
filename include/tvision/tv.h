@@ -20,6 +20,7 @@
 #if !defined( _WIN32 )
 #define __cdecl
 #define __stdcall
+#define _TV_UNIX
 #endif
 
 #endif

@@ -1,11 +1,14 @@
 #ifndef LINUXCON_H
 #define LINUXCON_H
 
+#include <internal/platform.h>
+
+#ifdef __linux__
+
 #define Uses_TKeys
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/platform.h>
 #include <internal/gpminput.h>
 #include <memory>
 
@@ -24,5 +27,11 @@ public:
     void flushScreen();
 
 };
+
+#else
+
+class LinuxConsoleStrategy : public PlatformStrategy {};
+
+#endif // __linux__
 
 #endif

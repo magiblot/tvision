@@ -61,6 +61,7 @@ public:
     static size_t eventCount;
     static void flushScreen();
     static bool isLinuxConsole(int fd);
+    static void consoleWrite(const void*, size_t);
 #endif
 
     static ulong getTickCount();

@@ -1,6 +1,10 @@
 #ifndef SIGHANDL_H
 #define SIGHANDL_H
 
+#include <tvision/tv.h>
+
+#ifdef _TV_UNIX
+
 #include <signal.h>
 
 class TSignalHandler {
@@ -17,4 +21,6 @@ public:
 
 };
 
-#endif
+#endif // _TV_UNIX
+
+#endif // SIGHANDL_H

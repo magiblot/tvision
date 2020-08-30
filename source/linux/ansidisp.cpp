@@ -4,14 +4,20 @@
 #include <internal/ansidisp.h>
 #include <internal/codepage.h>
 #include <internal/textattr.h>
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#ifdef _TV_UNIX
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+#ifdef HAVE_NCURSES
 #include <ncurses.h> // For COLORS
+#else
+#define COLORS 16
+#endif
 
 using namespace std::literals;
 
@@ -75,7 +81,7 @@ ushort AnsiDisplayBase::getScreenMode()
 {
     return TDisplay::smCO80;
 }
-
+#ifdef _TV_UNIX
 void AnsiDisplayBase::getCaretPosition(int &x, int &y)
 {
     lowlevelFlush();
@@ -113,7 +119,7 @@ int AnsiDisplayBase::getScreenCols()
     getScreenSize(_, cols);
     return cols;
 }
-
+#endif
 void AnsiDisplayBase::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
 {
     writeAttributes(attr);
@@ -140,8 +146,7 @@ void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)
 }
 
 void AnsiDisplayBase::lowlevelFlush() {
-    ::write(1, buf.data(), buf.size());
-    fflush(stdout);
+    THardwareInfo::consoleWrite(buf.data(), buf.size());
     buf.resize(0);
 }
 

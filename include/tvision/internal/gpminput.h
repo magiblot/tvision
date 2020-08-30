@@ -1,13 +1,14 @@
 #ifndef GPMINPUT_H
 #define GPMINPUT_H
 
+#include <internal/platform.h>
+
 #ifdef HAVE_GPM
 
 #define Uses_TPoint
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/platform.h>
 #include <internal/cursor.h>
 #include <gpm.h>
 

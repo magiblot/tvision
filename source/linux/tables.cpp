@@ -4,9 +4,7 @@
 
 #include <internal/codepage.h>
 #include <internal/getenv.h>
-#include <internal/ncursinp.h>
 #include <internal/utf8.h>
-#include <ncurses.h>
 #include <array>
 using std::unordered_map;
 using std::string_view;
@@ -74,6 +72,12 @@ CpTranslator::CpTranslator() {
     // Set the active codepage. 437 is the default.
     use(getEnv<std::string_view>("TVISION_CODEPAGE", "437"));
 }
+
+#ifdef HAVE_NCURSES
+
+#include <internal/ncursinp.h>
+#include <ncurses.h>
+
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Until this is not changed, it is
  * necessary to translate ncurses keys to key codes. */
@@ -322,3 +326,5 @@ unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers = {
         { kbDown,       kbAltDown       },
     }},
 };
+
+#endif // HAVE_NCURSES
