@@ -6,6 +6,10 @@
 #include <internal/pathconv.h>
 #include <dir.h>
 
+#ifdef _WIN32
+#include <bitset>
+#endif
+
 unsigned _dos_findfirst( const char *pathname, unsigned attrib,
                          struct find_t *fileinfo )
 {
@@ -149,13 +153,22 @@ int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP
 }
 
 int getdisk() {
+#ifdef _WIN32
+    return _getdrive() - 1;
+#else
     // Emulate drive C.
     return 'C' - 'A';
+#endif
 }
 
 int setdisk(int drive)
 {
+#ifdef _WIN32
+    _chdrive(drive - 1);
+    return std::bitset<8*sizeof(ulong)>(_getdrives()).count();
+#else
     return drive == getdisk() ? 0 : -1;
+#endif
 }
 
 int getcurdir(int drive, char *direc)
