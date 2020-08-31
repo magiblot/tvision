@@ -16,7 +16,13 @@ using std::chrono::steady_clock;
 BufferedDisplay *BufferedDisplay::instance = 0;
 
 BufferedDisplay::BufferedDisplay() :
-    widePlaceholder('\0')
+    // This could be checked at runtime, but for now this is as much as I know.
+    widePlaceholder('\0') // Replace with space if terminal treats all characters one column wide.
+#ifdef _WIN32
+    , wideOverlapping(false)
+#else
+    , wideOverlapping(true)
+#endif
 {
     instance = this;
 }
@@ -188,18 +194,33 @@ void FlushScreenAlgorithm::run()
     for (y = 0; y < size.y; ++y)
     {
         damage = disp.rowDamage[y];
-        for (x = damage.begin; x <= damage.end; ++x)
+        if (damage.begin <= damage.end)
         {
-            getCell();
-            if (cell.dirty || isNull(cell)) {
-                pCell->dirty = 0;
-                processCell();
+            x = damage.begin;
+            // Check for a wide character before the first draw position
+            // if overlapping is not allowed.
+            bool wideSpillBefore = wideCanSpill() && !wideCanOverlap() && 0 < x && isWide(cellAt(y, x-1));
+            for (; x <= damage.end; ++x)
+            {
+                getCell();
+                if (cell.dirty || isNull(cell)) {
+                    if (wideSpillBefore) {
+                        --x;
+                        getCell();
+                        wideSpillBefore = false;
+                    }
+                    pCell->dirty = 0;
+                    processCell();
+                } else
+                    wideSpillBefore = wideCanSpill() && !wideCanOverlap() && isWide(cell);
             }
-        }
-        if (x < size.x) {
-            getCell();
-            if (isNull(cell))
-                handleNull();
+            if (x < size.x) {
+                getCell();
+                if (isNull(cell))
+                    // The beginning of a wide character has been overwritten
+                    // and attribute spill may happen in the remaining trails.
+                    handleNull();
+            }
         }
         disp.rowDamage[y] = {INT_MAX, INT_MIN};
     }
@@ -259,13 +280,29 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         }
     }
     // Check character does not spill on next cells.
+    int wbegin = x;
     while (width-- && ++x < size.x) {
         getCell();
         pCell->dirty = 0;
         if (cell.Char != '\0') {
-            disp.lowlevelMoveCursorX(x, y);
-            writeCell();
-            return;
+            if (wideCanOverlap()) {
+                // Write over the wide character.
+                disp.lowlevelMoveCursorX(x, y);
+                writeCell();
+                return;
+            } else {
+                // Replace the whole wide character with spaces.
+                int wend = x;
+                x = wbegin;
+                do {
+                    getCell();
+                    cell.Char = ' ';
+                    writeCell();
+                } while (++x < wend);
+                getCell();
+                writeCell();
+                return;
+            }
         }
     }
     // Otherwise, skip placeholders. x now points to the last column occupied

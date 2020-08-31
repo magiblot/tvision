@@ -26,6 +26,7 @@ class BufferedDisplay : public DisplayStrategy {
     std::vector<Range> rowDamage;
     bool screenChanged;
 
+    bool wideOverlapping = true;
     const uint widePlaceholder;
     bool caretMoved;
     TPoint caretPosition;
@@ -111,8 +112,10 @@ struct FlushScreenAlgorithm {
     {
     }
 
+    BufferCell &cellAt(int y, int x);
     void getCell();
     bool wideCanSpill() const;
+    bool wideCanOverlap() const;
 
     void run();
     void processCell();
@@ -122,15 +125,25 @@ struct FlushScreenAlgorithm {
 
 };
 
+inline BufferCell& FlushScreenAlgorithm::cellAt(int y, int x)
+{
+    return disp.buffer[y*size.x + x];
+}
+
 inline void FlushScreenAlgorithm::getCell()
 {
-    pCell = &disp.buffer[y*size.x + x];
+    pCell = &cellAt(y, x);
     cell = *pCell;
 }
 
 inline bool FlushScreenAlgorithm::wideCanSpill() const
 {
     return disp.widePlaceholder == '\0';
+}
+
+inline bool FlushScreenAlgorithm::wideCanOverlap() const
+{
+    return disp.wideOverlapping;
 }
 
 #endif
