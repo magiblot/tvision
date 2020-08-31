@@ -34,7 +34,7 @@
 
 Boolean driveValid( char drive )
 {
-#ifdef __BORLANDC__
+#ifdef _WIN32
 #if !defined( __FLAT__ )
 I       MOV     AH, 19H     // Save the current drive in BL
 I       INT     21H
@@ -81,10 +81,10 @@ Boolean isDir( const char *str )
 Boolean pathValid( const char *path )
 {
     char expPath[MAXPATH];
-    strcpy( expPath, path );
+    strnzcpy( expPath, path, MAXPATH );
     fexpand( expPath );
     int len = strlen(expPath);
-#ifdef __BORLANDC__
+#ifdef _WIN32
     if( len <= 3 )
         return driveValid(expPath[0]);
 #else

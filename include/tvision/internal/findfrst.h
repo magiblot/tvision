@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/stat.h>
+#include <filesystem>
 
 #include <tvision/tv.h>
 #include <dos.h>
@@ -19,8 +17,12 @@
 
 class FindFirstRec
 {
+    using directory_iterator = std::filesystem::directory_iterator;
+    using directory_entry = std::filesystem::directory_entry;
+    using path = std::filesystem::path;
+
     struct find_t     *finfo;
-    DIR               *dirStream;
+    directory_iterator dirStream;
     unsigned           searchAttr;
     std::string        searchDir;
     std::string        wildcard;
@@ -34,11 +36,12 @@ public:
 
 private:
 
+    bool streamValid();
     bool open();
     void close();
     bool setParameters(unsigned int, const char *);
     bool setPath(const char*);
-    bool matchEntry(struct dirent*);
+    bool matchEntry(const char *);
 
     bool attrMatch(unsigned int attrib);
     static bool wildcardMatch(char const *wildcard, char const *filename);

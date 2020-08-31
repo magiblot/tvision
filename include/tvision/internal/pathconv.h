@@ -8,17 +8,17 @@
 
 // path_dos2unix: replaces '\' with '/' and removes drive letter.
 
-inline void path_dos2unix(std::string &s) {
+inline void path_dos2unix(std::string &s, bool drive=true) {
     std::replace(s.begin(), s.end(), '\\', '/');
-    if (s.size() > 1 && s[1] == ':' && isalpha(s[0]))
+    if (drive && s.size() > 1 && s[1] == ':' && isalpha(s[0]))
         s = s.substr(2);
 }
 
-inline void path_dos2unix(char *c) {
+inline void path_dos2unix(char *c, bool drive=true) {
     char *d = c;
     while ((d = strchr(d, '\\')))
         *d = '/';
-    if (*c && c[1] == ':' && isalpha(*c))
+    if (drive && *c && c[1] == ':' && isalpha(*c))
         memmove(c, c+2, strlen(c)-1); // Copies null terminator as well.
 }
 

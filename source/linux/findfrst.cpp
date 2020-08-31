@@ -1,5 +1,11 @@
 #include <internal/findfrst.h>
 #include <internal/pathconv.h>
+#include <system_error>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define SPECIAL_BITS (_A_SUBDIR|_A_HIDDEN|_A_SYSTEM)
 
@@ -56,9 +62,14 @@ FindFirstRec* FindFirstRec::get(struct find_t *fileinfo)
     return 0;
 }
 
+bool FindFirstRec::streamValid()
+{
+    return dirStream != directory_iterator();
+}
+
 bool FindFirstRec::setParameters(unsigned int attrib, const char *pathname)
 {
-    if (!dirStream)
+    if (!streamValid())
     {
         searchAttr = attrib;
         if (setPath(pathname))
@@ -69,25 +80,40 @@ bool FindFirstRec::setParameters(unsigned int attrib, const char *pathname)
 
 bool FindFirstRec::next()
 {
-    struct dirent *e;
-    bool found = false;
-    while ((e = readdir(dirStream)) && !(found = matchEntry(e)));
-    if (!e)
-        close();
-    return found;
+    while (streamValid())
+    {
+        const auto &&pathName = dirStream->path().filename();
+        const auto &nameNative = pathName.native();
+        ++dirStream;
+#ifdef _WIN32
+        char fileName[sizeof(find_t::name)] = {0};
+        WideCharToMultiByte(CP_UTF8, 0,
+                            nameNative.data(), nameNative.size(),
+                            fileName, sizeof(fileName),
+                            nullptr, nullptr);
+#else
+        const char *fileName = nameNative.c_str();
+#endif
+        if (matchEntry(fileName))
+            return true;
+    }
+    return false;
 }
 
 bool FindFirstRec::open()
 {
-    if (!dirStream)
-        return (dirStream = opendir(searchDir.c_str()));
+    if (!streamValid())
+    {
+        std::error_code ec;
+        dirStream = {searchDir, ec};
+        return !ec && streamValid();
+    }
     return false;
 }
 
 void FindFirstRec::close()
 {
-    if (dirStream)
-        closedir(dirStream), dirStream = 0;
+    dirStream = {};
 }
 
 bool FindFirstRec::setPath(const char* pathname)
@@ -96,7 +122,12 @@ bool FindFirstRec::setPath(const char* pathname)
     if (pathname && *pathname)
     {
         searchDir = pathname;
+#ifdef _WIN32
+        // Convert directory separators temporary, but keep the drive letter.
+        path_dos2unix(searchDir, false);
+#else
         path_dos2unix(searchDir);
+#endif
         // Win32's FindFirst is designed to reject paths ending with a
         // separator. But legacy code unaware of Unix separators may be unable
         // to remove it and call findfirst with such a pathname. Therefore,
@@ -121,25 +152,28 @@ bool FindFirstRec::setPath(const char* pathname)
                 wildcard = '*';
         }
         // At this point, searchDir always ends with a '/'.
+#ifdef _WIN32
+        path_unix2dos(searchDir);
+#endif
         return true;
     }
     return false;
 }
 
-bool FindFirstRec::matchEntry(struct dirent* e)
+bool FindFirstRec::matchEntry(const char *name)
 {
     struct stat st;
-    if (wildcardMatch(wildcard.c_str(), e->d_name) &&
-        stat((searchDir + e->d_name).c_str(), &st) == 0)
+    if (wildcardMatch(wildcard.c_str(), name) &&
+        stat((searchDir + name).c_str(), &st) == 0)
     {
-        unsigned int fileAttr = cvtAttr(&st, e->d_name);
+        unsigned int fileAttr = cvtAttr(&st, name);
         if (attrMatch(fileAttr))
         {
             // Match found, fill finfo.
             finfo->size = st.st_size;
             finfo->attrib = fileAttr;
             cvtTime(&st, finfo);
-            strnzcpy(finfo->name, e->d_name, sizeof(find_t::name));
+            strnzcpy(finfo->name, name, sizeof(find_t::name));
             return true;
         }
     }
@@ -190,8 +224,10 @@ unsigned int FindFirstRec::cvtAttr(struct stat *st, const char* filename)
         attr |= _A_SUBDIR;
     else if (!(st->st_mode & S_IFREG)) // If not a regular file
         attr |= _A_SYSTEM;
+#ifdef __unix__
     else if (!(st->st_mode & S_IWUSR)) // If no write access, innacurate.
         attr |= _A_RDONLY;
+#endif
     return attr;
 }
 
@@ -210,10 +246,10 @@ void FindFirstRec::cvtTime(struct stat *st, struct find_t *fileinfo)
     } *wr_time = (FatTime *) &fileinfo->wr_time;
 
     struct tm *lt = localtime(&st->st_mtime);
-    *wr_date = { .day   = ushort (lt->tm_mday),
-                 .month = ushort (lt->tm_mon + 1),
-                 .year  = ushort (lt->tm_year - 80) };
-    *wr_time = { .sec   = ushort (lt->tm_sec/2),
-                 .min   = ushort (lt->tm_min),
-                 .hour  = ushort (lt->tm_hour) };
+    *wr_date = { ushort (lt->tm_mday),
+                 ushort (lt->tm_mon + 1),
+                 ushort (lt->tm_year - 80) };
+    *wr_time = { ushort (lt->tm_sec/2),
+                 ushort (lt->tm_min),
+                 ushort (lt->tm_hour) };
 }

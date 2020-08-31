@@ -41,7 +41,14 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
     // UNIX-formatted path fixes most cases of filesystem access.
     memset(pathP, 0, MAXPATH);
     size_t n = 0;
-    // Drive letter ignored.
+#ifdef _WIN32
+    if (driveP && *driveP)
+    {
+        n += strnzcpy(&pathP[n], driveP, MAXPATH - n);
+        if (pathP[n-1] != ':')
+            n += strnzcpy(&pathP[n], ":", MAXPATH - n);
+    }
+#endif
     if (dirP && *dirP)
     {
         n += strnzcpy(&pathP[n], dirP, MAXPATH - n);
@@ -56,7 +63,9 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
             n += strnzcpy(&pathP[n], ".", MAXPATH - n);
         n += strnzcpy(&pathP[n], extP, MAXPATH - n);
     }
+#ifdef _TV_UNIX
     path_dos2unix(pathP);
+#endif
 }
 
 static bool CopyComponent(char* dstP, const char* startP, const char* endP, size_t MAX)
@@ -156,11 +165,16 @@ int getcurdir(int drive, char *direc)
     // Note that drive 0 is the 'default' drive, 1 is drive A, etc.
     if (drive == 0 || drive-1 == getdisk())
     {
-        char buf[MAXDIR+1];
-        if (getcwd(buf, MAXDIR+1))
+#ifdef _WIN32
+        constexpr int lead = 3;
+#else
+        constexpr int lead = 1;
+#endif
+        char buf[MAXDIR+lead];
+        if (getcwd(buf, MAXDIR+lead))
         {
             path_unix2dos(buf);
-            strnzcpy(direc, buf+1, MAXDIR);
+            strnzcpy(direc, buf+lead, MAXDIR);
             return 0;
         }
     }
