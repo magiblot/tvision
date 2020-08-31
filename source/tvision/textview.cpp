@@ -128,8 +128,15 @@ Boolean TTerminal::canInsert( ushort amount )
 #define DRAW_DYNAMIC_STR 1
 #define resizeStr(_len) \
     slen = _len; \
-    if (slen > scap) \
-        s = (char *) ::realloc(s, (scap = max(slen, 2*scap)));
+    if (slen > scap) { \
+        char *ss = (char *) ::realloc(s, (scap = max(slen, 2*scap))); \
+        if (ss) \
+            s = ss; \
+        else { \
+            ::free(s); \
+            return; \
+        } \
+    }
 
 #else
 
