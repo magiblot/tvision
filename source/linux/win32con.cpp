@@ -176,8 +176,15 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
     if (getUnicodeEvent(KeyEventW, ev)) {
         ev.what = evKeyDown;
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
-        ev.keyDown.charScan.charCode = ev.keyDown.textLength ? CpTranslator::fromUtf8(ev.keyDown)
-                                                             : KeyEventW.uChar.AsciiChar;
+        if (ev.keyDown.textLength) {
+            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown);
+            if (!ev.keyDown.charScan.charCode)
+                // If the character cannot be represented in the current codepage,
+                // make the whole keyCode zero, or else we may trigger an unexpected
+                // special key.
+                ev.keyDown.keyCode = kbNoKey;
+        } else
+            ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
         ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
         // Convert NT style virtual scan codes to PC BIOS codes.
         if (ev.keyDown.controlKeyState & (kbShift | kbAltShift | kbCtrlShift)) {
