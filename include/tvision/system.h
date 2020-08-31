@@ -198,6 +198,12 @@ struct KeyDownEvent
     ulong controlKeyState;
     char text[4];
     uchar textLength;
+
+    operator TStringView() const
+    {
+        return TStringView(text, textLength);
+    }
+
 };
 
 struct MessageEvent

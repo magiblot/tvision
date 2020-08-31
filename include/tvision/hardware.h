@@ -61,6 +61,7 @@ public:
     static size_t eventCount;
     static void flushScreen();
     static bool isLinuxConsole(int fd);
+    static bool isWin32Console();
     static void consoleWrite(const void*, size_t);
 #endif
 
@@ -118,6 +119,10 @@ public:
     static BOOL setCtrlBrkHandler( BOOL install );
     static BOOL setCritErrorHandler( BOOL install );
 
+    static const ushort ShiftCvt[89];
+    static const ushort CtrlCvt[89];
+    static const ushort AltCvt[89];
+
 private:
 
     static BOOL __stdcall ctrlBreakHandler( DWORD dwCtrlType );
@@ -165,7 +170,7 @@ inline THardwareInfo::PlatformType THardwareInfo::getPlatform()
     return platform;
 }
 
-#ifdef __BORLANDC__ // Defined in hardwrvr.cpp otherwise
+#ifdef __BORLANDC__
 // Caret functions.
 
 inline ushort THardwareInfo::getCaretSize()
@@ -227,7 +232,7 @@ inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer )
 #endif
 }
 
-#ifdef __BORLANDC__ // In hardwrvr.cpp otherwise
+#ifdef __BORLANDC__
 inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
 {
     freeScreenBuffer(buffer);
@@ -244,30 +249,17 @@ inline DWORD THardwareInfo::getButtonCount()
     GetNumberOfConsoleMouseButtons(&num);
     return num;
 }
-#endif
 
 inline void THardwareInfo::cursorOn()
 {
-#ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode | ENABLE_MOUSE_INPUT );
-#else
-/* By cursor we mean mouse pointer. Enables mouse input.
- * The following will be useful:
- * http://tldp.org/HOWTO/NCURSES-Programming-HOWTO/mouse.html
- * https://stackoverflow.com/a/13887057
- */
-    // Stub, do nothing.
-#endif
 }
 
 inline void THardwareInfo::cursorOff()
 {
-#ifdef __BORLANDC__
     SetConsoleMode( consoleHandle[cnInput], consoleMode & ~ENABLE_MOUSE_INPUT );
-#else
-    // Stub, do nothing.
-#endif
 }
+#endif
 
 
 // Event functions.
@@ -282,7 +274,7 @@ inline void THardwareInfo::clearPendingEvent()
 
 inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
 {
-#ifdef __BORLANDC__
+#ifdef _WIN32
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
 #else
 /* Sets THardwareInfo::ctrlBreakHandle as the handler of control signals

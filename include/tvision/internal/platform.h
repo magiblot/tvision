@@ -35,6 +35,8 @@ public:
     virtual ~InputStrategy() {}
     virtual bool getEvent(TEvent &ev) { return false; }
     virtual int getButtonCount() { return 0; }
+    virtual void cursorOn() {}
+    virtual void cursorOff() {}
 
 };
 
@@ -83,6 +85,8 @@ public:
     { return false; }
 #endif
     virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
+    virtual void cursorOn() { if (input) input->cursorOn(); }
+    virtual void cursorOff() { if (input) input->cursorOff(); }
 
     virtual int getCaretSize() { return display->getCaretSize(); }
     virtual bool isCaretVisible() { return display->isCaretVisible(); }

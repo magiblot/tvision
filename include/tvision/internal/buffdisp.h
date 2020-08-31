@@ -72,7 +72,7 @@ protected:
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelMoveCursorYby1(uint x, uint y) { lowlevelMoveCursor(x, y); }
-    virtual void lowlevelFlush() = 0;
+    virtual void lowlevelFlush() {};
 
 };
 

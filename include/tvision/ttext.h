@@ -15,6 +15,9 @@
 #include <cstring>
 #include <cwchar>
 #include <type_traits>
+#ifdef _WIN32
+#include <tvision/internal/winwidth.h>
+#endif
 #endif
 
 class TText {
@@ -34,9 +37,18 @@ public:
     template<class Attr>
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
+
     static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
+
+private:
+
+#ifdef _WIN32
+    static int width(TStringView mbc);
+#else
+    static int width(wchar_t wc);
+#endif
 
 };
 
@@ -215,7 +227,11 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
                 ::setChar(cells[0], {&text[0], 1});
             }
         } else {
-            int cWidth = wcwidth(wc);
+#ifdef _WIN32
+            int cWidth = TText::width({&text[0], (size_t) len});
+#else
+            int cWidth = TText::width(wc);
+#endif
             bytes += len;
             if (cWidth <= 0) {
                 width += 1;
@@ -252,7 +268,11 @@ inline void TText::next(TStringView text, size_t &bytes, size_t &width)
             width += 1;
         } else {
             bytes += len;
-            width += std::clamp(wcwidth(wc), 1, 8);
+#ifdef _WIN32
+            width += std::clamp<int>(TText::width({&text[0], (size_t) len}), 1, 8);
+#else
+            width += std::clamp<int>(TText::width(wc), 1, 8);
+#endif
         }
     }
 }
@@ -281,6 +301,18 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
     // No remainder when the end of string was reached.
     remainder = 0;
 }
+
+#ifdef _WIN32
+inline int TText::width(TStringView mbc)
+{
+    return WinWidth::mbcwidth(mbc);
+}
+#else
+inline int TText::width(wchar_t wc)
+{
+    return wcwidth(wc);
+}
+#endif // _WIN32
 
 #endif // __BORLANDC__
 

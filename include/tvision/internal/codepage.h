@@ -46,7 +46,7 @@ public:
         return activeTable->toUtf8Int[c];
     }
 
-    static char fromUtf8(std::string_view s) {
+    static char fromUtf8(TStringView s) {
         char c = 0;
         auto it = activeTable->fromUtf8.find(s);
         if (it != activeTable->fromUtf8.end())

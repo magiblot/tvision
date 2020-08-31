@@ -5,6 +5,7 @@
 #include <tvision/tv.h>
 
 #include <internal/platform.h>
+#include <internal/win32con.h>
 #include <internal/ncurdisp.h>
 #include <internal/ncursinp.h>
 #include <internal/ansidisp.h>
@@ -48,9 +49,21 @@ bool THardwareInfo::isLinuxConsole(int fd)
 #endif
 }
 
+bool THardwareInfo::isWin32Console()
+{
+#ifdef _WIN32
+    DWORD consoleMode;
+    return GetConsoleMode( GetStdHandle(STD_INPUT_HANDLE), &consoleMode ) != 0;
+#else
+    return false;
+#endif
+}
+
 void THardwareInfo::consoleWrite(const void *data, size_t bytes)
 {
-#ifdef _TV_UNIX
+#ifdef _WIN32
+    Win32ConsoleStrategy::write(data, bytes);
+#else
     fflush(stdout);
     ::write(1, data, bytes);
 #endif
@@ -90,6 +103,8 @@ void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
     platf->onScreenResize();
 }
 DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
+void THardwareInfo::cursorOn() { platf->cursorOn(); }
+void THardwareInfo::cursorOff() { platf->cursorOff(); }
 void THardwareInfo::flushScreen() { platf->flushScreen(); }
 
 void THardwareInfo::setUpConsole()
@@ -99,7 +114,16 @@ void THardwareInfo::setUpConsole()
     // before input.
     if (!platf)
     {
-#ifdef _TV_UNIX
+#ifdef _WIN32
+        if (isWin32Console())
+            platf = std::make_unique<Win32ConsoleStrategy>();
+        else
+        {
+            cerr << "Error: standard input is being redirected or is not a "
+                    "Win32 console." << endl;
+            ExitProcess(1);
+        }
+#else
         DisplayStrategy *disp;
         if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();

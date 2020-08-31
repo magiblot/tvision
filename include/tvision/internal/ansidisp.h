@@ -67,6 +67,12 @@ class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
 
 public:
 
+    template <typename ...Args>
+    AnsiDisplay(Args&& ...args) :
+        DisplayBase(args...)
+    {
+    }
+
     ushort getScreenMode() { return AnsiDisplayBase::getScreenMode(); }
 #ifdef _TV_UNIX
     int getScreenRows() { return AnsiDisplayBase::getScreenRows(); }
