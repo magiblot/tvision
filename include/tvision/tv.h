@@ -633,6 +633,8 @@
 
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
+#include <tvision/tspan.h>
+#include <tvision/tstrview.h>
 #include <tvision/scrncell.h>
 
 #if defined( __INC_HARDWARE_H )
@@ -644,8 +646,6 @@
 #endif
 
 #include <tvision/util.h>
-#include <tvision/tspan.h>
-#include <tvision/tstrview.h>
 
 #if defined( __INC_TTEXT_H )
 #include <tvision/ttext.h>

@@ -280,7 +280,7 @@ void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
         for (i = 0; i < Count - X; ++i)
         {
             auto c = src[i];
-            c.Attr = c.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
+            ::setAttr(c, ::getAttr(c) & 0xF0 ? shadowAttr : shadowAttrInv);
             dst[i] = c;
         }
 }
@@ -299,7 +299,7 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         for (i = 0; i < Count - X; ++i)
         {
             TScreenCell c {TScreenCellA(src[i])};
-            c.Attr = c.Attr & 0xF0 ? shadowAttr : shadowAttrInv;
+            ::setAttr(c, ::getAttr(c) & 0xF0 ? shadowAttr : shadowAttrInv);
             dst[i] = c;
         }
 }

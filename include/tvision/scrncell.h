@@ -237,6 +237,13 @@ inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
     cell.extraWidth = extraWidth;
 }
 
+inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
+{
+    TCellChar ch = 0;
+    memcpy(&ch, text.data(), std::min(text.size(), sizeof(ch)));
+    ::setChar(cell, ch, extraWidth);
+}
+
 inline void setChar(TScreenCell &cell, uchar ch)
 {
     cell.Char = ch;

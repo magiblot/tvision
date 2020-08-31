@@ -200,10 +200,7 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
 // * text: input text.
 // * bytes (output parameter): gets increased by the number of bytes read from 'text'.
 {
-    if (cells.size()) {
-        auto &dst = cells[0].Char;
-        auto &attr = cells[0].Attr;
-        cells[0].extraWidth = 0;
+    if (cells.size() && text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
         int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
@@ -211,29 +208,27 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
             bytes += 1;
             width += 1;
             if (len < 0)
-                dst = CpTranslator::toUtf8Int(text[0]);
+                ::setChar(cells[0], CpTranslator::toUtf8Int(text[0]));
             else if (len == 0) // '\0'
-                dst = ' ';
+                ::setChar(cells[0], ' ');
             else {
-                dst = 0;
-                memcpy(&dst.bytes, text.data(), 1);
+                ::setChar(cells[0], {&text[0], 1});
             }
         } else {
             int cWidth = wcwidth(wc);
             bytes += len;
             if (cWidth <= 0) {
                 width += 1;
-                dst = *(uint32_t *) "�";
+                ::setChar(cells[0], "�");
             } else {
                 width += cWidth;
-                dst = 0;
-                memcpy(&dst.bytes, text.data(), len);
-                // Set extraWidth attribute and fill trailing cells.
-                cells[0].extraWidth = std::min<size_t>(cWidth - 1, 7);
+                uchar extraWidth = std::min<size_t>(cWidth - 1, 7);
+                ::setChar(cells[0], {&text[0], (size_t) len}, extraWidth);
+                // Fill trailing cells.
+                auto attr = ::getAttr(cells[0]);
                 for (size_t i = 1; i < std::min<size_t>(cWidth, cells.size()); ++i) {
                     auto trailCell = cells[i];
-                    trailCell.Char = TScreenCell::wideCharTrail;
-                    trailCell.Attr = attr;
+                    ::setCell(trailCell, TScreenCell::wideCharTrail, attr);
                     cells[i] = trailCell;
                 }
             }

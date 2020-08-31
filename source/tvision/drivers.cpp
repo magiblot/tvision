@@ -297,7 +297,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
         }
         else
         {
-            data[i].Attr = curAttr;
+            ::setAttr(data[i], curAttr);
             TText::eat(data.subspan(i), i, str.substr(j), j);
         }
 #endif
