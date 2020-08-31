@@ -47,7 +47,7 @@
 void TVDemo::shell()
 {
     suspend();
-#ifdef __BORLANDC__
+#ifndef __unix__
     cout << "Type EXIT to return..." << endl;
     system( getenv( "COMSPEC"));
 #else

@@ -14,6 +14,10 @@ struct  ftime   {
   unsigned    ft_year  : 7;   /* Year */
 };
 
+#ifdef _MSC_VER
+#include <corecrt_io.h>
+#else
+
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -24,6 +28,8 @@ inline off_t filelength( int fd )
         return -1;
     return s.st_size;
 }
+
+#endif // _MSC_VER
 
 #endif // IO_H
 

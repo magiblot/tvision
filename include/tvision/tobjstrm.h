@@ -97,7 +97,7 @@ typedef TStreamable *(*BUILDER)();
 #ifndef __FLAT__
 #define __DELTA( d ) (FP_OFF((TStreamable *)(d *)1)-1)
 #else
-#define __DELTA( d ) ((ptrdiff_t)(TStreamable*)(d*)1-1 )
+#define __DELTA( d ) ((int)(ptrdiff_t)(TStreamable*)(d*)1-1 )
 #endif
 
 class TStreamableClass

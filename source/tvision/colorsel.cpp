@@ -298,9 +298,9 @@ Boolean TMonoSelector::mark( int item )
 void TMonoSelector::newColor()
 {
     message( owner, evBroadcast, cmColorForegroundChanged,
-        (void *)(value & 0x0F) );
+        (void *)(size_t)(value & 0x0F) );
     message( owner, evBroadcast, cmColorBackgroundChanged,
-        (void *)((value >> 4) & 0x0F));
+        (void *)(size_t)((value >> 4) & 0x0F));
 }
 
 void TMonoSelector::press( int item )

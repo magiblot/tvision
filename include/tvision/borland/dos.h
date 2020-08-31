@@ -16,6 +16,10 @@
 #include <dos.h>
 #else
 
+#ifdef _MSC_VER
+#include <corecrt.h>
+#endif
+
 #ifndef __DOS_H
 #define __DOS_H
 
@@ -517,6 +521,8 @@ void        _RTLENTRYF setvect( int __interruptno,
 
 #else  /* defined __FLAT__ */
 
+#ifndef _MSC_VER
+
 #pragma option -a-
 
 #ifdef _MT
@@ -554,6 +560,7 @@ extern  unsigned char _RTLENTRY _EXPDATA _osminor;
 extern  unsigned      _RTLENTRY _EXPDATA _osversion;
 extern  unsigned      _RTLENTRY _EXPDATA _version;
 
+#endif
 
 #define FA_NORMAL   0x00        /* Normal file, no attributes */
 #define FA_RDONLY   0x01        /* Read only attribute */
@@ -594,14 +601,14 @@ struct  dfree   {
     unsigned df_bsec;
     unsigned df_sclus;
 };
-
+#ifndef _MSC_VER
 struct  diskfree_t {
     unsigned total_clusters;
     unsigned avail_clusters;
     unsigned sectors_per_cluster;
     unsigned bytes_per_sector;
 };
-
+#endif
 struct  time    {
     unsigned char   ti_min;     /* Minutes */
     unsigned char   ti_hour;    /* Hours */
@@ -708,7 +715,7 @@ unsigned    _RTLENTRY _EXPFUNC _dos_write( int __fd, void * __buf, unsigned __le
 // void        _RTLENTRYF _EXPFUNC getdate( struct date *__datep );
 void        _RTLENTRY _EXPFUNC getdfree( unsigned char __drive,
                  struct dfree*__dtable );
-int         _RTLENTRY _EXPFUNC _getdrive( void );
+// int         _RTLENTRY _EXPFUNC _getdrive( void );
 void        _RTLENTRYF _EXPFUNC gettime( struct time *__timep );
 int         _RTLENTRY _EXPFUNC getverify( void );
 

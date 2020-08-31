@@ -76,7 +76,7 @@ size_t strnzcat( char *dest, TStringView src, size_t n );
 
 uint32_t fast_utoa( uint32_t value, char *buffer );
 
-#ifndef __BORLANDC__
+#if !defined( __BORLANDC__ ) && !defined( _MSC_VER )
 
 int strnicmp( const char *s1, const char *s2, size_t maxlen );
 char *strupr(char *s);

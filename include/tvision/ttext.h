@@ -98,7 +98,7 @@ inline void TText::next(TStringView text, size_t &bytes, size_t &width)
 inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)
 {
     if (count > 0)
-        index += count;
+        index += min(count, text.size());
     remainder = 0;
 }
 

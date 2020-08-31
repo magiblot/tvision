@@ -267,7 +267,7 @@ Boolean TTerminal::queEmpty()
     return Boolean( queBack == queFront );
 }
 
-otstream::otstream( TTerminal *tt )
+otstream::otstream( TTerminal *tt ) :
+    ostream(tt)
 {
-    ios::init( tt );
 }

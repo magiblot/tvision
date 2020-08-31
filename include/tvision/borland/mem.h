@@ -6,8 +6,10 @@
     All Rights Reserved.
 */
 
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__)
 #include <mem.h>
+#elif defined(_MSC_VER)
+#include <corecrt.h>
 #else
 
 #if !defined(__MEM_H)

@@ -19,10 +19,6 @@
 #define Uses_TEventQueue
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-#include <internal/codepage.h>
-#endif
-
 #ifdef __FLAT__
 
 #include <string.h>

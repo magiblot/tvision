@@ -107,12 +107,15 @@ long THeapView::heapSize()
             break;
         }
     return(total);
-#else
+#elif defined(__unix__)
     // mallinfo is defined in malloc.h but doesn't exist in Borlandc.
     // It doesn't exactly measure the heap size, but it kinda does the trick.
     int allocatedBytes = mallinfo().uordblks;
     totalStr << setw(12) << allocatedBytes << ends;
     return allocatedBytes;
+#else
+    totalStr << ends;
+    return 0;
 #endif
 }
 

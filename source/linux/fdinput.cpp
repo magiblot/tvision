@@ -1,6 +1,8 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+#ifdef _TV_UNIX
+
 #include <internal/platform.h>
 #include <cstddef>
 #include <vector>
@@ -28,16 +30,6 @@ FdInputStrategy::FdInputStrategy() :
 FdInputStrategy::~FdInputStrategy()
 {
     deleteListener(this);
-}
-
-bool FdInputStrategy::getEvent(TEvent &)
-{
-    return false;
-}
-
-int FdInputStrategy::getButtonCount()
-{
-    return 0; // Treated as "no mouse" by Turbo Vision.
 }
 
 bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
@@ -108,3 +100,5 @@ void FdInputStrategy::overrideEventGetter(std::function<bool (TEvent&)> &&func)
 {
     eventGetter = func;
 }
+
+#endif // _TV_UNIX

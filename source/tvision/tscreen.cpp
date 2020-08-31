@@ -17,10 +17,6 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
-#include <assert.h>
-#endif
-
 #if !defined( __FLAT__ ) && !defined( __DOS_H )
 #include <dos.h>
 #endif  // __DOS_H
@@ -283,10 +279,8 @@ ushort TScreen::fixCrtMode( ushort mode )
     if( (mode & 0xFF) == smMono )       // Strip smFont8x8 if necessary.
         return smMono;
 
-    _AX = mode;
-    if( _AL != smCO80 && _AL != smBW80 )
-        _AL = smCO80;
-    return _AX;
+    if( (mode & 0xFF) != smCO80 && (mode & 0xFF) != smBW80 )
+        mode = (mode & 0xFF00) | smCO80;
 #else
     return mode;
 #endif

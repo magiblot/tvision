@@ -20,9 +20,14 @@
 #if !defined(__DIR_H)
 #define __DIR_H
 
+#ifdef _MSC_VER
+#include <corecrt.h>
+#include <direct.h>
+#else
 // For the functions commented out below, which have slightly different
 // specifiers in modern POSIX.
 #include <unistd.h>
+#endif
 
 #if !defined(___DEFS_H)
 #include <_defs.h>
@@ -98,8 +103,8 @@ int         _RTLENTRYF _EXPFUNC     fnsplit(const char _FAR *__path,
 int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
 // char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
 int         _RTLENTRY  _EXPFUNC32   getdisk( void );
-int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
-char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
+// int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
+// char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
 // int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );
 char _FAR * _RTLENTRYF _EXPFUNC32   searchpath( const char _FAR *__file );
 int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );

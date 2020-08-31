@@ -207,7 +207,7 @@ struct TScreenCell : trivially_convertible<uint64_t>
         Attr = pair.Attr;
     }
 
-    static constexpr uint32_t wideCharTrail = -2U;
+    static constexpr uint32_t wideCharTrail = (uint32_t) -2;
 
     static constexpr void check_assumptions()
     {

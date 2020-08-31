@@ -49,7 +49,7 @@ char hotKey( const char *s )
 
 #define cpInputLine "\x13\x13\x14\x15"
 
-TInputLine::TInputLine( const TRect& bounds, int aMaxLen, TValidator *aValid ) :
+TInputLine::TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid ) :
     TView(bounds),
     data( new char[aMaxLen] ),
     maxLen( aMaxLen-1 ),

@@ -8,6 +8,14 @@ set(TV_PLATF_WIN32 2)
 
 if (MSVC)
     set(TV_PLATF ${TV_PLATF_WIN32})
+    add_compile_options(
+        /std:c++17 /wd4068 /wd4996 /wd4250 /wd4267 /permissive- /Zc:__cplusplus
+    )
+    add_definitions(
+        -D_CRT_SECURE_NO_WARNINGS
+        # Why do I get a syntax error unless I set this?
+        -D_HAS_EXCEPTIONS=0
+    )
 else()
     set(TV_PLATF ${TV_PLATF_UNIX})
     add_compile_options(

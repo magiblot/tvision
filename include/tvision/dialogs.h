@@ -159,7 +159,7 @@ class TInputLine : public TView
 
 public:
 
-    TInputLine( const TRect& bounds, int aMaxLen, TValidator *aValid = 0 );
+    TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid = 0 );
     ~TInputLine();
 
     virtual ushort dataSize();
@@ -174,7 +174,7 @@ public:
     void setValidator( TValidator* aValid );
 
     char* data;
-    size_t maxLen;
+    uint maxLen;
     int curPos;
     int firstPos;
     int selStart;

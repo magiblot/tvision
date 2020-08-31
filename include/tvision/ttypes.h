@@ -73,8 +73,8 @@ extern const uchar specialChars[];
 #define _genInt(i) __int__(i)
 #endif
 
-#ifdef __BORLANDC__
 // Reserve future keywords
+#if __cplusplus < 201103L
 #define constexpr
 #define noexcept
 #endif

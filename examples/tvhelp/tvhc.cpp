@@ -647,7 +647,7 @@ void replaceSpacesWithFF( char *line, int start, uchar length )
 
     for(i = start; i <= (start + length); ++i)
         if (line[i] == ' ')
-            line[i] = 0xFF;
+            line[i] = -1;
 }
 
 void strdel(char *string, int pos, int len)

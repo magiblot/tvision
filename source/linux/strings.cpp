@@ -1,3 +1,5 @@
+#ifndef _MSC_VER
+
 #include <strings.h>
 
 int strnicmp( const char *s1, const char *s2, size_t maxlen ) {
@@ -47,3 +49,5 @@ char *ultoa( unsigned long value, char *buffer, int radix ) {
     }
     return ltoa(value, buffer, radix);
 }
+
+#endif // _MSC_VER

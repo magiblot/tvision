@@ -131,10 +131,6 @@
 #define _FARFUNC    _EXPFUNC
 #define _FARCALL    _EXPFUNC __far
 
-#if defined(__FLAT__)
-#  define _M_IX86 300
-#endif
-
 #if !defined(__FLAT__) && defined(__MSC)
 #   define __emit db
 #   ifdef __SMALL__

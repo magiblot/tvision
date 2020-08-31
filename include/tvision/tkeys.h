@@ -17,7 +17,7 @@
 #define __TKEYS_H
 
 #if defined( __FLAT__ ) && !defined( __WINDOWS_H )
-#include <tvision/borland/windows.h>
+#include <tvision/borland/win.h>
 #endif
 
 const ushort

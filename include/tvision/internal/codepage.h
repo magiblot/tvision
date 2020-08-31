@@ -1,7 +1,9 @@
 #ifndef CODEPAGE_H
 #define CODEPAGE_H
+#include <tvision/tv.h>
 #include <string_view>
 #include <unordered_map>
+#include <array>
 
 // tables.cpp
 
@@ -24,8 +26,9 @@ class CpTranslator {
             for (int i = 0; i < 256; ++i)
                 fromUtf8.emplace(toUtf8[i], char(i));
         }
-    } static const tables[2];
-
+    };
+    
+    static const CpTable tables[2];
     static const CpTable *activeTable;
 
 public:

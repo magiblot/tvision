@@ -9,6 +9,10 @@
 using std::chrono::microseconds;
 using std::chrono::steady_clock;
 
+#ifdef _MSC_VER
+#define __builtin_expect(x, y) x
+#endif
+
 BufferedDisplay *BufferedDisplay::instance = 0;
 
 BufferedDisplay::BufferedDisplay() :
