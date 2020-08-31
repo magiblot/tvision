@@ -23,6 +23,8 @@ BufferedDisplay::BufferedDisplay() :
 #else
     , wideOverlapping(true)
 #endif
+    , flushDelay()
+    , lastFlush()
 {
     instance = this;
 }

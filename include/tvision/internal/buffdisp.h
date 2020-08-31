@@ -26,7 +26,7 @@ class BufferedDisplay : public DisplayStrategy {
     std::vector<Range> rowDamage;
     bool screenChanged;
 
-    bool wideOverlapping = true;
+    const bool wideOverlapping;
     const uint widePlaceholder;
     bool caretMoved;
     TPoint caretPosition;
