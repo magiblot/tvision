@@ -3,10 +3,6 @@
 #include <system_error>
 #include <sys/stat.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #define SPECIAL_BITS (_A_SUBDIR|_A_HIDDEN|_A_SYSTEM)
 
 FindFirstRec::RecList FindFirstRec::recList;
@@ -83,18 +79,8 @@ bool FindFirstRec::next()
     while (streamValid())
     {
         const auto &&pathName = dirStream->path().filename();
-        const auto &nameNative = pathName.native();
         ++dirStream;
-#ifdef _WIN32
-        char fileName[sizeof(find_t::name)] = {0};
-        WideCharToMultiByte(CP_UTF8, 0,
-                            nameNative.data(), nameNative.size(),
-                            fileName, sizeof(fileName),
-                            nullptr, nullptr);
-#else
-        const char *fileName = nameNative.c_str();
-#endif
-        if (matchEntry(fileName))
+        if (matchEntry((const char *) pathName.u8string().c_str()))
             return true;
     }
     return false;
