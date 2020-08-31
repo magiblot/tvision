@@ -3,28 +3,30 @@ cmake_policy(SET CMP0091 NEW)
 
 project(tvision)
 
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
-    # Static RTL linkage for MSVC.
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
 # Platform disambiguation and global compilation options
 
 set(TV_PLATF_UNIX 1)
 set(TV_PLATF_WIN32 2)
 
-if (MSVC)
+if (WIN32)
     set(TV_PLATF ${TV_PLATF_WIN32})
+else()
+    set(TV_PLATF ${TV_PLATF_UNIX})
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    # Static RTL linkage for MSVC.
+#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
     add_compile_options(
         /std:c++17 /wd4068 /wd4996 /wd4250 /wd4267 /permissive- /Zc:__cplusplus
     )
     add_definitions(
         -D_CRT_SECURE_NO_WARNINGS
-        # Why do I get a syntax error unless I set this?
+        # Why do I get syntax errors unless I set this?
         -D_HAS_EXCEPTIONS=0
     )
 else()
-    set(TV_PLATF ${TV_PLATF_UNIX})
     add_compile_options(
     #     -g
         --std=c++17 -O2
@@ -79,7 +81,7 @@ target_link_libraries(tvdemo ${LIBS})
 target_link_libraries(tvdir ${LIBS})
 target_link_libraries(tvhc ${LIBS})
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
 endif()
 
