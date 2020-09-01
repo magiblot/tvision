@@ -122,7 +122,7 @@ inline size_t TText::next(TStringView text)
 {
     if (text.size()) {
         std::mbstate_t state {};
-        int64_t len = std::mbrtowc(nullptr, text.data(), text.size(), &state);
+        int len = std::mbrtowc(nullptr, text.data(), text.size(), &state);
         return len <= 1 ? 1 : len;
     }
     return 0;
@@ -215,7 +215,7 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &width,
     if (cells.size() && text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
-        int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
+        int len = std::mbrtowc(&wc, text.data(), text.size(), &state);
         if (len <= 1) {
             bytes += 1;
             width += 1;
@@ -262,7 +262,7 @@ inline void TText::next(TStringView text, size_t &bytes, size_t &width)
     if (text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
-        int64_t len = std::mbrtowc(&wc, text.data(), text.size(), &state);
+        int len = std::mbrtowc(&wc, text.data(), text.size(), &state);
         if (len <= 1) {
             bytes += 1;
             width += 1;

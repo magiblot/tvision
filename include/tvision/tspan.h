@@ -16,7 +16,6 @@ class TSpan {
     // type (and without enforcing the 'const' qualifier).
     // It exists for compatibility with Borland C++ and because std::span (C++ 20)
     // may not be widely available yet.
-    // Unlike std::span, TSpan<T> can cast implicitly to T* (pointer to T).
 
     T _FAR *ptr;
     size_t len;
@@ -36,11 +35,6 @@ public:
         ptr(first),
         len(n)
     {
-    }
-
-    constexpr operator T _FAR *() const
-    {
-        return ptr;
     }
 
     constexpr operator TSpan<const T>() const

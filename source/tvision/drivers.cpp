@@ -446,12 +446,12 @@ TDrawBuffer::TDrawBuffer() :
 {
 #ifndef __BORLANDC__
     // We need this as the TScreenCell struct has unused bits.
-    memset(data, 0, data.size_bytes());
+    memset(data.data(), 0, data.size_bytes());
 #endif
 }
 
 TDrawBuffer::~TDrawBuffer() {
-    delete[] (TScreenCell *) data;
+    delete[] data.data();
 }
 #endif
 
