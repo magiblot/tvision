@@ -53,9 +53,11 @@ void Win32ConsoleStrategy::initConsole()
     consoleMode[cnInput] |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
     consoleMode[cnInput] &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
     SetConsoleMode(consoleHandle[cnInput], consoleMode[cnInput]);
-    // Enable VT sequences in the output mode.
+    // Set the output mode.
     GetConsoleMode(consoleHandle[cnOutput], &consoleMode[cnOutput]);
     consoleMode[cnOutput] &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
+    SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
+    // Try enabling VT sequences.
     consoleMode[cnOutput] |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
     consoleMode[cnOutput] |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
     bool supportsVT = SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
