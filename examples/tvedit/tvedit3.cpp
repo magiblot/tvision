@@ -106,8 +106,8 @@ ushort doEditDialog( int dialog, ... )
 {
     va_list arg;
 
-    char buf[100];
-    ostrstream os( buf, sizeof( buf ) );
+    char buf[256] = {0};
+    ostrstream os( buf, sizeof( buf )-1 );
     switch( dialog )
         {
         case edOutOfMemory:
