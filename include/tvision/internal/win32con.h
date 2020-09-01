@@ -46,7 +46,7 @@ public:
 inline void Win32ConsoleStrategy::write(const void *data, size_t bytes)
 {
     if (instance)
-        WriteConsole(instance->consoleHandle[cnOutput], data, bytes, 0, 0);
+        WriteConsole(instance->consoleHandle[cnOutput], data, bytes, nullptr, nullptr);
 }
 
 class Win32Input : public InputStrategy
@@ -83,6 +83,9 @@ class Win32Display : public BufferedDisplay
 
     Win32ConsoleStrategy &cnState;
 
+    uchar lastAttr;
+    std::vector<char> buf;
+
     HANDLE cnHandle() const;
 
 public:
@@ -96,6 +99,12 @@ public:
     int getScreenRows() override;
     int getScreenCols() override;
     ushort getScreenMode() override;
+
+protected:
+
+    void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) override;
+    void lowlevelMoveCursor(uint x, uint y) override;
+    void lowlevelFlush() override;
 
 };
 

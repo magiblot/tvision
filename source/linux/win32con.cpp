@@ -53,12 +53,12 @@ void Win32ConsoleStrategy::initConsole()
     consoleMode[cnInput] |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
     consoleMode[cnInput] &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
     SetConsoleMode(consoleHandle[cnInput], consoleMode[cnInput]);
-    // Set the output mode.
+    // Enable VT sequences in the output mode.
     GetConsoleMode(consoleHandle[cnOutput], &consoleMode[cnOutput]);
     consoleMode[cnOutput] &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
-    consoleMode[cnOutput] |= DISABLE_NEWLINE_AUTO_RETURN; // Same.
+    consoleMode[cnOutput] |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
     consoleMode[cnOutput] |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-    SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
+    bool supportsVT = SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
     // Set the console and the environment in UTF-8 mode.
     consoleCp[cnInput] = GetConsoleCP();
     consoleCp[cnOutput] = GetConsoleOutputCP();
@@ -68,7 +68,8 @@ void Win32ConsoleStrategy::initConsole()
     // Initialize the character width meter, which depends on the console.
     WinWidth::resetState();
     // Initialize the input and display strategies.
-    display = std::make_unique<AnsiDisplay<Win32Display>>(*this);
+    display = supportsVT ? std::make_unique<AnsiDisplay<Win32Display>>(*this)
+                         : std::make_unique<Win32Display>(*this);
     input = std::make_unique<Win32Input>(*this);
 }
 
@@ -270,7 +271,8 @@ bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev)
 // Win32Display
 
 Win32Display::Win32Display(Win32ConsoleStrategy &cnState) :
-    cnState(cnState)
+    cnState(cnState),
+    lastAttr('\x00')
 {
     BufferedDisplay::init();
 }
@@ -321,4 +323,29 @@ ushort Win32Display::getScreenMode()
     return TDisplay::smCO80;
 }
 
+// Fallback display support with rudimentary buffering.
+
+void Win32Display::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
+{
+    if (attr != lastAttr) {
+        lowlevelFlush();
+        SetConsoleTextAttribute(cnHandle(), (uchar) attr);
+        lastAttr = attr;
+    }
+    uint i = 0;
+    while (++i < 4 && chars[i]);
+    buf.insert(buf.end(), &chars[0], &chars[i]);
+}
+
+void Win32Display::lowlevelMoveCursor(uint x, uint y)
+{
+    lowlevelFlush();
+    SetConsoleCursorPosition(cnHandle(), {(short) x, (short) y});
+}
+
+void Win32Display::lowlevelFlush()
+{
+    WriteConsole(cnHandle(), buf.data(), buf.size(), nullptr, nullptr);
+    buf.resize(0);
+}
 #endif // _WIN32
