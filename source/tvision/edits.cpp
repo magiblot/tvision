@@ -43,11 +43,12 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
         { uchar(Colors), bufLen }
     };
 
+    uchar Color;
     TSpan<TScreenCell> Cells(DrawBuf, Width);
     int X = 0;
     for (int r = 0; r < 3; ++r)
     {
-        uchar Color = ranges[r].color;
+        Color = ranges[r].color;
         while (P < ranges[r].end && X < Width)
         {
             TStringView chars = bufChars(P);
@@ -65,7 +66,7 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
     }
 fill:
     while (X < Width)
-        ::setCell(Cells[X++], ' ', uchar(Colors));
+        ::setCell(Cells[X++], ' ', Color);
 }
 
 uint TEditor::lineEnd( uint P )
