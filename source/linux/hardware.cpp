@@ -81,13 +81,7 @@ ushort THardwareInfo::getCaretSize() { return platf->getCaretSize(); }
 BOOL THardwareInfo::isCaretVisible() { return platf->isCaretVisible(); }
 ushort THardwareInfo::getScreenRows() { return platf->getScreenRows(); }
 ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
-ushort THardwareInfo::getScreenMode()
-{
-    ushort mode = platf->getScreenMode();
-    if( getScreenRows() > 25 )
-        mode |= TDisplay::smFont8x8;
-    return mode;
-}
+ushort THardwareInfo::getScreenMode() { return platf->getScreenMode(); }
 void THardwareInfo::setScreenMode( ushort mode ) {}
 void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
 void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len )
