@@ -164,7 +164,10 @@ static const flagName keyCodeFlags[] = {
     FN(kbAlt7),     FN(kbAlt8),     FN(kbAlt9),
     FN(kbAlt0),     FN(kbAltMinus), FN(kbAltEqual),
     FN(kbCtrlPgUp), FN(kbAltBack),  FN(kbNoKey),
-    FN(kbCtrlUp),   FN(kbCtrlDown),
+    FN(kbCtrlUp),   FN(kbCtrlDown), FN(kbAltIns),
+    FN(kbAltDel),   FN(kbAltHome),  FN(kbAltEnd),
+    FN(kbAltUp),    FN(kbAltDown),  FN(kbAltLeft),
+    FN(kbAltRight), FN(kbAltPgUp),  FN(kbAltPgDn),
 #if defined( __FLAT__ )
     FN(kbF11),      FN(kbF12),      FN(kbShiftF11),
     FN(kbShiftF12), FN(kbCtrlF11),  FN(kbCtrlF12),
