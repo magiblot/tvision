@@ -1,24 +1,37 @@
 # Turbo Vision
 
-An independent, backward-compatible port of Turbo Vision 2.0 for modern Linux systems.
+A modern port of Turbo Vision 2.0, the classical framework for text-based user interfaces. Now cross-platform and with Unicode support.
 
 ![tvedit on Konsole](https://user-images.githubusercontent.com/20713561/81506401-4fffdd80-92f6-11ea-8826-ee42612eb82a.png)
 
-I started this as a personal project at the very end of 2018. It is now very close to feature parity with the original, and I am not spending much time on it anymore, so I'm making it open in case it may be useful to someone.
+I started this as a personal project at the very end of 2018. By May 2020 I considered it was very close to feature parity with the original, and decided to make it open.
 
-Even if the linux port cannot compete against other widespread solutions (such as SET's port, which has tons of additional features), I still consider the improvements made to the Windows implementation to be useful. For example, the TVEDIT application included here can be a good replacement for the missing `EDIT.COM` on 64-bit Windows.
+<!-- Even if the linux port cannot compete against other widespread solutions (such as SET's port, which has tons of additional features), I still consider the improvements made to the Windows implementation to be useful. For example, the TVEDIT application included here can be a good replacement for the missing `EDIT.COM` on 64-bit Windows. -->
 
-The main goals of this project are:
+The original goals of this project were:
 
-* Making Turbo Vision work on Linux in the least intrusive way.
+* Making Turbo Vision work on Linux by altering the legacy codebase as little as possible.
 * Keeping it functional on DOS/Windows.
-* Being as compatible as possible at the source code level with old Turbo Vision applications. This has led me to implement some of the Borland C++ RTL functions, as explained below.
+* Being as compatible as possible at the source code level with old Turbo Vision applications. This led me to implement some of the Borland C++ RTL functions, as explained below.
 
-Initially, I planned to add features like full-fledged Unicode support into Turbo Vision. However, I realized that doing so would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
+At one point I considered I had done enough, and that any attempts at revamping the library and overcoming its original limitations would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
 
-**Update:** The API has been extended to support Unicode input and output. See <a href='#unicode'> Unicode Support</a> for more information. Also see the [Turbo](https://github.com/magiblot/turbo) text editor as a good example of Unicode support in Turbo Vision.
+However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
 
-As a GUI toolkit, Turbo Vision is pretty much outdated. Modern technologies tend to separate appearance specification from behaviour specification, and Turbo Vision is especially bad at that. Considering all its other limitations, it seems that Turbo Vision cannot fulfill the necessities of modern users and programmers. If some TUI library is to revolutionize our terminal applications in the future, that library won't be Turbo Vision, although it may be inspired by it.
+## What is Turbo Vision good for?
+
+A lot has changed since Turbo Vision was designed at Borland. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either concurrent or asynchronous programming, or both.
+
+Turbo Vision does none of that, but it certainly overcomes many of the issues programmers still face today when writing terminal applications:
+
+1. Forget about terminal capabilities and direct terminal I/O. When writing a Turbo Vision application, all you have to care about is what you want your application to behave and look like—there is no need to add workarounds in your code. Turbo Vision tries its best to produce the same results on all environments. For example: in order to get a bright background color on the linux console, the *blink* attribute has to be set. Turbo Vision does this for you.
+
+2. Do not reinvent the wheel. Turbo Vision provides many widget classes (also known as *views*), including resizable, overlapping windows, pull-down menus, dialog boxes, buttons, scroll bars, input boxes, check boxes and radio buttons. You may use and extend these; but even if you prefer creating your own, Turbo Vision already handles event dispatching, display of fullwidth unicode characters, etc.: you do not need to waste time rewriting any of that.
+
+3. Can you imagine writing a terminal application that works both on Linux and Windows (and thus is cross-platform) *by default*? Turbo Vision makes this possible. First: Turbo Vision always uses `char` arrays encoded in UTF-8, instead of relying on the implementation-defined `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as expected:
+```c++
+    std::ifstream if("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
+```
 
 ## Build environment
 
@@ -53,9 +66,32 @@ You may also need `-Iinclude/tvision` if your application uses Turbo Vision 1.x 
 
 The backward-compatibility headers in `include/tvision/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
-### Windows/DOS
+### Windows (MSVC)
 
-Turbo Vision can still be built either as a DOS or Windows library with Borland C++.
+The build process with MSVC is slightly more complex, as there are more options to choose from. I highly recommend you to create different build directories for different target arquitectures. For instance, to generate optimized binaries:
+
+```sh
+cmake . -B ./build && # Add '-A x64' (64-bit) or '-A Win32' (32-bit) to override the default platform.
+cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' and 'RelWithDebInfo'.
+```
+
+In the example above, `tvision.lib` and the example applications will be placed at `./build/Release`.
+
+If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), uncomment the following line in `CMakeLists.txt`:
+```cmake
+    # Static RTL linkage for MSVC.
+#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+```
+
+If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be built with the same settings.
+
+**Note**: Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
+
+With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
+
+### Windows/DOS (Borland C++)
+
+Turbo Vision can still be built either as a DOS or Windows library with Borland C++. Obviously, there is no Unicode support here.
 
 I can confirm the build process works with:
 
@@ -64,7 +100,7 @@ I can confirm the build process works with:
 
 You may face different problems depending on your build environment. For instance, Turbo Assembler needs a patch to work under Windows 95. On Windows XP everything seems to work fine. On Windows 10, MAKE may emit the error 'Fatal: Command arguments too long', which can be fixed by upgrading MAKE to the one bundled with Borland C++ 5.x.
 
-Yes, this works in 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit application. You will have to run it on another environment or try your luck with winevdm.
+Yes, this works in 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit application. You will have to run it on another environment or try your luck with [winevdm](https://github.com/otya128/winevdm).
 
 A Borland Makefile can be found in the `project` directory. Build can be done by doing:
 
@@ -87,23 +123,28 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 
 ## Features
 
+### Cross-platform
+
+* UTF-8 support both in terminal I/O and the API. For instance, the `tvedit` and `tvdemo` applications support Unicode.
+* 16 colors.
+* Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
+* Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
+* Compatibility with 32-bit help files.
+
 ### Linux
 
 * Ncurses-based terminal support.
 * Mouse and key modifiers support on the linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
-* UTF-8 support both in terminal I/O and the API. For instance, the `tvedit` and `tvdemo` applications support Unicode.
-* Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
-* Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
+
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
-* Compatibility with 32-bit help files.
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
 * `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ncurses` and `ansi`. Default is `ansi`, which is a custom strategy that avoids redundant buffering and UTF-8 to wide char conversions. If you have issues, you may try `ncurses` instead.
 * `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keeping the draw performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
 * `TVISION_ESCDELAY`: the delay of time, in milliseconds, that should be waited after receiving an ESC key press. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination.
-* `TVISION_CODEPAGE`: the character set used internally by Turbo Vision. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/linux/tables.cpp`.
+* `TVISION_CODEPAGE`: the character set used internally by Turbo Vision. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/linux/tables.cpp`. This does not affect Unicode support; only the way non-ASCII or non-printable 8-bit characters are displayed.
 
 ### Windows
 
@@ -111,7 +152,13 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Applications fit the console window size instead of the buffer size.
 * The console buffer is restored when exiting or suspending Turbo Vision.
 * `kbCtrlC`, Shift+Arrow, `kbShiftTab` and AltGr key combinations work properly.
-* No busy polling for events (i.e. no 100% CPU consumption on idle).
+* No busy polling for events (i.e. no 100% CPU consumption on idle, which is how it originally was).
+
+The following are not available when compiling with Borland C++:
+
+* The console's codepage is set to UTF-8 on startup and restored on exit.
+* Microsoft's C runtime functions are set automatically to UTF-8 mode, so you do not need to use the `wchar_t` variants.
+* If the console crashes, a new one is allocated automatically.
 
 ### All platforms
 
@@ -123,7 +170,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * Windows can be resized also from their bottom left corner.
 * Windows can be dragged from empty areas with the middle mouse button.
 * Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
-* Improved usability of menus: they can be closed by clicking twice on them, even submenus.
+* Improved usability of menus: they can be closed by clicking again on them, even submenus.
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
 * Views don't lose their sizes when extremely resized.
 * Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
