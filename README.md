@@ -6,8 +6,6 @@ A modern port of Turbo Vision 2.0, the classical framework for text-based user i
 
 I started this as a personal project at the very end of 2018. By May 2020 I considered it was very close to feature parity with the original, and decided to make it open.
 
-<!-- Even if the linux port cannot compete against other widespread solutions (such as SET's port, which has tons of additional features), I still consider the improvements made to the Windows implementation to be useful. For example, the TVEDIT application included here can be a good replacement for the missing `EDIT.COM` on 64-bit Windows. -->
-
 The original goals of this project were:
 
 * Making Turbo Vision work on Linux by altering the legacy codebase as little as possible.
@@ -16,22 +14,29 @@ The original goals of this project were:
 
 At one point I considered I had done enough, and that any attempts at revamping the library and overcoming its original limitations would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
 
-However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
+However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture, wrote the [Turbo](https://github.com/magiblot/turbo) text editor and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
 
 ## What is Turbo Vision good for?
 
-A lot has changed since Turbo Vision was designed at Borland. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either concurrent or asynchronous programming, or both.
+A lot has changed since Borland created Turbo Vision in the early 90's. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either concurrent or asynchronous programming, or both.
 
 Turbo Vision does none of that, but it certainly overcomes many of the issues programmers still face today when writing terminal applications:
 
-1. Forget about terminal capabilities and direct terminal I/O. When writing a Turbo Vision application, all you have to care about is what you want your application to behave and look like—there is no need to add workarounds in your code. Turbo Vision tries its best to produce the same results on all environments. For example: in order to get a bright background color on the linux console, the *blink* attribute has to be set. Turbo Vision does this for you.
+1. Forget about terminal capabilities and direct terminal I/O. When writing a Turbo Vision application, all you have to care about is what you want your application to behave and look like—there is no need to add workarounds in your code. Turbo Vision tries its best to produce the same results on all environments. For example: in order to get a bright background color on the Linux console, the *blink* attribute has to be set. Turbo Vision does this for you.
 
 2. Do not reinvent the wheel. Turbo Vision provides many widget classes (also known as *views*), including resizable, overlapping windows, pull-down menus, dialog boxes, buttons, scroll bars, input boxes, check boxes and radio buttons. You may use and extend these; but even if you prefer creating your own, Turbo Vision already handles event dispatching, display of fullwidth unicode characters, etc.: you do not need to waste time rewriting any of that.
 
-3. Can you imagine writing a terminal application that works both on Linux and Windows (and thus is cross-platform) *by default*? Turbo Vision makes this possible. First: Turbo Vision always uses `char` arrays encoded in UTF-8, instead of relying on the implementation-defined `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as expected:
+3. Can you imagine writing a terminal application that works both on Linux and Windows (and thus is cross-platform) *by default*? Turbo Vision makes this possible. First: Turbo Vision always uses `char` arrays encoded in UTF-8, instead of relying on the implementation-defined `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as intended:
 ```c++
-    std::ifstream if("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
+    std::ifstream f("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
 ```
+
+## How do I use Turbo Vision?
+
+You can get started with the [Turbo Vision For C++ User's Guide](https://archive.org/details/BorlandTurboVisionForCUserSGuide/mode/1up), and look at the sample applications [`hello`](https://github.com/magiblot/tvision/blob/master/hello.cpp), [`tvdemo`](https://github.com/magiblot/tvision/tree/master/examples/tvdemo) and [`tvedit`](https://github.com/magiblot/tvision/tree/master/examples/tvedit). Once you grasp the basics,
+I suggest you take a look at the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423), which is, in my opinion, more intuitive and easier to understand, despite using Pascal.
+
+Don't forget to check out the <a href="features">features</a> and <a href="apichanges">API changes</a> sections as well.
 
 ## Build environment
 
@@ -54,7 +59,7 @@ The build requirements are:
 
 * A compiler supporting C++ 17.
 * `libncursesw` (note the 'w').
-* `libgpm` (for mouse support in the linux console) (optional).
+* `libgpm` (for mouse support on the Linux console) (optional).
 
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
@@ -68,7 +73,7 @@ The backward-compatibility headers in `include/tvision/borland` emulate the Borl
 
 ### Windows (MSVC)
 
-The build process with MSVC is slightly more complex, as there are more options to choose from. I highly recommend you to create different build directories for different target arquitectures. For instance, to generate optimized binaries:
+The build process with MSVC is slightly more complex, as there are more options to choose from. Note that you will need different build directories for different target architectures. For instance, to generate optimized binaries:
 
 ```sh
 cmake . -B ./build && # Add '-A x64' (64-bit) or '-A Win32' (32-bit) to override the default platform.
@@ -83,9 +88,9 @@ If you wish to link Turbo Vision statically against Microsofts's run-time librar
 #     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 ```
 
-If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be built with the same settings.
+If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be linked against the RTL in the same way.
 
-**Note**: Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
+**Note:** Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
 
 With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
 
@@ -121,11 +126,13 @@ This will compile the library into a `LIB` directory next to `project`, and will
 
 I'm sorry, the root makefile assumes it is executed from the `project` directory. You can still run the original makefiles directly (in `source/tvision` and `examples/*`) if you want to use different settings.
 
+<div id="features"></div>
+
 ## Features
 
 ### Cross-platform
 
-* UTF-8 support both in terminal I/O and the API. For instance, the `tvedit` and `tvdemo` applications support Unicode.
+* UTF-8 support both in terminal I/O and the API. You can try Unicode support out in the `tvedit` and `tvdemo` applications.
 * 16 colors.
 * Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
@@ -134,9 +141,8 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 ### Linux
 
 * Ncurses-based terminal support.
-* Mouse and key modifiers support on the linux console.
+* Mouse and key modifiers support on the Linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
-
 * Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
@@ -149,7 +155,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 ### Windows
 
 * Only compatible with the Win32 Console API.
-* Applications fit the console window size instead of the buffer size.
+* Applications fit the console window size instead of the buffer size (no scrollbars are visible).
 * The console buffer is restored when exiting or suspending Turbo Vision.
 * `kbCtrlC`, Shift+Arrow, `kbShiftTab` and AltGr key combinations work properly.
 * No busy polling for events (i.e. no 100% CPU consumption on idle, which is how it originally was).
@@ -159,6 +165,8 @@ The following are not available when compiling with Borland C++:
 * The console's codepage is set to UTF-8 on startup and restored on exit.
 * Microsoft's C runtime functions are set automatically to UTF-8 mode, so you do not need to use the `wchar_t` variants.
 * If the console crashes, a new one is allocated automatically.
+
+**Note:** Turbo Vision writes UTF-8 text directly to the Windows console. If the console is set in legacy mode and the bitmap font is being used, Unicode characters will not be displayed properly ([photo](https://user-images.githubusercontent.com/20713561/91917174-7a1f4600-ecbf-11ea-8c7a-2ec80d31d2ca.png)).
 
 ### All platforms
 
@@ -174,9 +182,9 @@ The following are not available when compiling with Borland C++:
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
 * Views don't lose their sizes when extremely resized.
 * Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
-* `tvedit`: contextual menu on right click.
+* `tvedit`: context menu on right click.
 * `tvedit`: drag scroll with middle mouse button.
-* `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to linux users: they might not work on terminal emulators, but they do work on the console).
+* `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to Linux users: they might not work on terminal emulators, but they do work on the console).
 * `tvedit`: smart Home key (toggles between beginning of line and beginning of indented text).
 * `tvedit`: support for files bigger than 64 KiB on 32-bit or 64-bit builds.
 * `tvdemo`: event viewer applet useful for event debugging.
@@ -188,9 +196,7 @@ The following are not available when compiling with Borland C++:
 
 * `evMouseAuto`.
 
-## API reference
-
-See the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423). There also exists a [Turbo Vision For C++ User's Guide](https://archive.org/details/BorlandTurboVisionForCUserSGuide/mode/1up), but in my opinion the former is more intuitive and easier to understand.
+<div id="apichanges"></div>
 
 ## API changes
 
@@ -316,7 +322,7 @@ So, in short: views designed without Unicode input in mind will continue to work
 
 The original design of Turbo Vision uses 16 bits to represent a *screen cell*—8 bit for a character and 8 bit for [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes).
 
-On Linux, a new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable of holding a UTF-8 sequence in addition to extended attributes (bold, underline, italic...). However, you should not write text into a `TScreenCell` directly but make use of unicode-aware API functions instead.
+A new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable of holding a UTF-8 sequence in addition to extended attributes (bold, underline, italic...). However, you should not write text into a `TScreenCell` directly but make use of unicode-aware API functions instead.
 
 ### Text display rules
 
@@ -366,7 +372,7 @@ void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort wi
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);
 ```
-This function's name is misleading. Even in its original implementation, `source` is treated as a string. So, on Linux, this is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
+This function's name is misleading. Even in its original implementation, `source` is treated as a string. So it is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
 
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const TScreenCell *source, ushort count); // New
