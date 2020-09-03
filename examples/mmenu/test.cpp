@@ -157,7 +157,7 @@ void TTestApp::handleEvent( TEvent& event )
         curMenu = (event.message.command - cmOne) % 3;
 
         message( TProgram::menuBar, evBroadcast, cmMMChangeMenu,
-                 (void *) curMenu
+                 (void *)(size_t) curMenu
                );
         clearEvent( event );
     }
@@ -165,7 +165,7 @@ void TTestApp::handleEvent( TEvent& event )
     {
         curMenu = (curMenu + 1) % 3;
         message( TProgram::menuBar, evBroadcast, cmMMChangeMenu,
-                 (void *) curMenu
+                 (void *)(size_t) curMenu
                );
         clearEvent( event );
     }

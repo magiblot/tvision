@@ -25,6 +25,7 @@
  * menuItem2 to menuItem1, and then return menuItem1.
  ***********************************************************************/
 
+#if 0 // This function is now already provided by the library.
 TMenuItem& operator +( TMenuItem& menuItem1, TMenuItem& menuItem2 )
 {
     TMenuItem *p = &menuItem1;
@@ -33,6 +34,7 @@ TMenuItem& operator +( TMenuItem& menuItem1, TMenuItem& menuItem2 )
     p->next = &menuItem2;
     return menuItem1;
 }
+#endif
 
 
 /***********************************************************************
@@ -46,12 +48,12 @@ TMenuItem& operator +( TMenuItem& menuItem1, TMenuItem& menuItem2 )
  ***********************************************************************/
 
 TMultiMenu::TMultiMenu( const TRect& bounds, TMenu *aMenu[],
-            int nMenus ) :    TMenuBar( bounds, aMenu[0] ),
-            mList( new TMenu *[nMenus] )
+            int nMenus ) :    TMenuBar( bounds, aMenu[0] )
 {
     if( nMenus == 0)
         for( nMenus = 0; aMenu[nMenus] != NULL; nMenus++ )
             ;
+    mList = new TMenu *[nMenus];
     numMenus = nMenus;
 
     for( int i = 0; i < nMenus; i++ )
