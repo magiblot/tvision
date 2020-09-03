@@ -90,9 +90,13 @@ void Win32ConsoleStrategy::reloadScreenBufferInfo()
     GetConsoleScreenBufferInfo(consoleHandle[cnOutput], &sbInfo);
     sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
     sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
-    // Note that this also causes the console to crash often while resizing,
-    // hence the console recovery feature.
+    // Set the cursor temporally to (0, 0) to prevent the console from crashing due to a bug.
+    auto curPos = sbInfo.dwCursorPosition;
+    SetConsoleCursorPosition(consoleHandle[cnOutput], {0, 0});
+    // Resize the buffer.
     SetConsoleScreenBufferSize(consoleHandle[cnOutput], sbInfo.dwSize);
+    // Restore the cursor position (it does not matter if it is out of bounds).
+    SetConsoleCursorPosition(consoleHandle[cnOutput], curPos);
 }
 
 bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev)
