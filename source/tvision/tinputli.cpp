@@ -426,7 +426,7 @@ void TInputLine::setData( void *rec )
 void TInputLine::setState( ushort aState, Boolean enable )
 {
     TView::setState( aState, enable );
-    if( (aState == sfSelected && !enable) ||
+    if( aState == sfSelected ||
         ( aState == sfActive && (state & sfSelected) != 0 )
       )
         selectAll( enable );
