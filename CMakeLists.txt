@@ -19,7 +19,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 #     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
     add_compile_options(
-        /wd4068 /wd4166 /wd4250 /wd4267 /wd4996
+        /wd4068 /wd4146 /wd4166 /wd4244 /wd4250 /wd4267 /wd4996
         /std:c++17 /permissive- /Zc:__cplusplus
     )
     add_definitions(

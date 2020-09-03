@@ -30,7 +30,7 @@
 
 TBufListEntry * _NEAR TBufListEntry::bufList = 0;
 
-TBufListEntry::TBufListEntry( void*& o ) : owner( o )
+TBufListEntry::TBufListEntry( void*& o ) noexcept : owner( o )
 {
     next = bufList;
     prev = 0;
@@ -39,7 +39,7 @@ TBufListEntry::TBufListEntry( void*& o ) : owner( o )
         next->prev = this;
 }
 
-TBufListEntry::~TBufListEntry()
+TBufListEntry::~TBufListEntry() noexcept
 {
     owner = 0;
     if( prev == 0 )
@@ -60,7 +60,7 @@ void *TBufListEntry::operator new( size_t ) noexcept
     return 0;
 }
 
-void TBufListEntry::operator delete( void *b )
+void TBufListEntry::operator delete( void *b ) noexcept
 {
     free( b );
 }

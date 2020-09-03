@@ -115,7 +115,7 @@ Boolean TEditor::insertBuffer( const char *p,
                 delLen = selLen - insCount;
         }
 
-    long newSize = long(bufLen + delCount - selLen + delLen) + length;
+    ulong newSize = ulong(bufLen + delCount - selLen + delLen) + length;
 
     if( newSize > bufLen + delCount )
         {

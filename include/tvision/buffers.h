@@ -29,12 +29,12 @@ class TBufListEntry
 
 private:
 
-    TBufListEntry( void*& );
-    ~TBufListEntry();
+    TBufListEntry( void*& ) noexcept;
+    ~TBufListEntry() noexcept;
 
     void *operator new( size_t, size_t ) noexcept;
     void *operator new( size_t ) noexcept;
-    void operator delete( void * );
+    void operator delete( void * ) noexcept;
 
     TBufListEntry *next;
     TBufListEntry *prev;

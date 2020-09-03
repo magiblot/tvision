@@ -41,10 +41,10 @@ class HistRec
 
 public:
 
-    HistRec( uchar nId, TStringView nStr );
+    HistRec( uchar nId, TStringView nStr ) noexcept;
 
     void *operator new( size_t ) noexcept;
-    void *operator new( size_t, HistRec * );
+    void *operator new( size_t, HistRec * ) noexcept;
 
     uchar id;
     uchar len;
@@ -52,7 +52,7 @@ public:
 
 };
 
-void *HistRec::operator new( size_t, HistRec *hr )
+void *HistRec::operator new( size_t, HistRec *hr ) noexcept
 {
     return hr;
 }
@@ -63,7 +63,7 @@ void *HistRec::operator new( size_t ) noexcept
     return 0;
 }
 
-inline HistRec::HistRec( uchar nId, TStringView nStr ) :
+inline HistRec::HistRec( uchar nId, TStringView nStr ) noexcept :
     id( nId ),
     len( nStr.size() + 3 )
 {
