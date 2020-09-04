@@ -34,9 +34,9 @@ Turbo Vision does none of that, but it certainly overcomes many of the issues pr
 ## How do I use Turbo Vision?
 
 You can get started with the [Turbo Vision For C++ User's Guide](https://archive.org/details/BorlandTurboVisionForCUserSGuide/mode/1up), and look at the sample applications [`hello`](https://github.com/magiblot/tvision/blob/master/hello.cpp), [`tvdemo`](https://github.com/magiblot/tvision/tree/master/examples/tvdemo) and [`tvedit`](https://github.com/magiblot/tvision/tree/master/examples/tvedit). Once you grasp the basics,
-I suggest you take a look at the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423), which is, in my opinion, more intuitive and easier to understand, despite using Pascal.
+I suggest you take a look at the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423), which is, in my opinion, more intuitive and easier to understand, despite using Pascal. By then you will probably be interested in the [`palette`](https://github.com/magiblot/tvision/tree/master/examples/palette) example, which contains a detailed description on how palettes are used.
 
-Don't forget to check out the <a href="features">features</a> and <a href="apichanges">API changes</a> sections as well.
+Don't forget to check out the <a href="#features">features</a> and <a href="#apichanges">API changes</a> sections as well.
 
 ## Build environment
 
@@ -52,7 +52,8 @@ make
 The above produces the following files:
 
 * `libtvision.a`, which is the Turbo Vision library.
-* The demo applications `hello`, `tvdemo`, `tvedit` and `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
+* The demo applications `hello`, `tvdemo`, `tvedit`, `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
+* The demo applications `mmenu` and `palette` from Borland's Technical Support.
 * `tvhc`, the Turbo Vision Help Compiler.
 
 The build requirements are:
@@ -77,7 +78,7 @@ The build process with MSVC is slightly more complex, as there are more options 
 
 ```sh
 cmake . -B ./build && # Add '-A x64' (64-bit) or '-A Win32' (32-bit) to override the default platform.
-cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' and 'RelWithDebInfo'.
+cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
 ```
 
 In the example above, `tvision.lib` and the example applications will be placed at `./build/Release`.
