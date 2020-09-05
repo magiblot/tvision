@@ -1,6 +1,5 @@
 *
 !*.*
-!*/
 .*
 !.git*
 *.bak
@@ -26,9 +25,6 @@
 *.kdev4
 *.vcxproj*
 *.sln
-
-build/
-build32/
 
 CMakeCache.txt
 CMakeFiles
