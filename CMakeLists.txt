@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
-cmake_policy(SET CMP0091 NEW)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
+    cmake_policy(SET CMP0091 NEW)
+endif()
 
 project(tvision)
 
@@ -15,7 +17,7 @@ else()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    # Static RTL linkage for MSVC.
+    # Static RTL linkage for MSVC (requires CMake >= 3.15).
 #     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
     add_compile_options(
@@ -67,11 +69,22 @@ add_executable(palette ${PALETTESRC})
 set(LIBS tvision)
 
 if (TV_PLATF EQUAL TV_PLATF_UNIX)
-    find_library(NCURSESW ncursesw REQUIRED)
-    if (NCURSESW)
-        list(APPEND LIBS ${NCURSESW})
-        target_compile_definitions(tvision PRIVATE HAVE_NCURSES)
+    # ncursesw
+    find_library(NCURSESW ncursesw)
+    list(APPEND LIBS ${NCURSESW})
+    target_compile_definitions(tvision PRIVATE HAVE_NCURSES)
+
+    # tinfow (comes with ncurses and is often provided as 'tinfo',
+    # but we need to link the 'w' version when both are available)
+    find_library(TINFOW tinfow)
+    if (TINFOW)
+        list(APPEND LIBS ${TINFOW})
     endif()
+
+    if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+        list(APPEND LIBS "stdc++fs")
+    endif()
+
     # Optional dependencies
     find_library(GPM gpm)
     if (GPM)

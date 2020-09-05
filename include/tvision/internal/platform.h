@@ -1,6 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#include <tvision/tv.h>
 #include <memory>
 #include <functional>
 #include <queue>
