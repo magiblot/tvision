@@ -180,6 +180,9 @@ unordered_map<int, KeyDownEvent> NcursesInput::fromCursesKeyCode = {
     { KEY_SLEFT,        {{kbLeft},      kbShift}    },
     { KEY_SRIGHT,       {{kbRight},     kbShift}    },
     { KEY_SUSPEND,      {{kbCtrlZ},     kbCtrlShift}},
+    // Avoid using these, as they are reserved by the Linux console.
+    { KEY_SPREVIOUS,    {{kbPgUp},      kbShift}    },
+    { KEY_SNEXT,        {{kbPgDn},      kbShift}    },
     // Function keys F1-F12
     { KEY_F0 + 1,       {{kbF1},        0}          },
     { KEY_F0 + 2,       {{kbF2},        0}          },
