@@ -1,13 +1,17 @@
 #ifndef FINDFRST_H
 #define FINDFRST_H
 
+#include <tvision/tv.h>
 #include <string>
 #include <vector>
 #include <mutex>
-#include <filesystem>
-
-#include <tvision/tv.h>
 #include <dos.h>
+
+#ifndef _WIN32
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#endif
 
 // A class implementing the behaviour of findfirst and findnext.
 // allocate() assigns a FindFirstRec to the provided find_t struct and sets
@@ -17,36 +21,44 @@
 
 class FindFirstRec
 {
-    using directory_iterator = std::filesystem::directory_iterator;
-    using directory_entry = std::filesystem::directory_entry;
-    using path = std::filesystem::path;
-
-    struct find_t     *finfo;
-    directory_iterator dirStream;
-    unsigned           searchAttr;
-    std::string        searchDir;
-    std::string        wildcard;
 
 public:
 
-    static FindFirstRec* allocate(struct find_t *, unsigned int, const char *);
+    static FindFirstRec* allocate(struct find_t *, unsigned, const char *);
     static FindFirstRec* get(struct find_t *);
 
     bool next();
 
 private:
 
-    bool streamValid();
+    struct find_t     *finfo;
+    unsigned           searchAttr;
+
+#ifndef _WIN32
+    DIR               *dirStream {0};
+    std::string        searchDir;
+    std::string        wildcard;
+#else
+    HANDLE             hFindFile {INVALID_HANDLE_VALUE};
+    std::string        fileName;
+#endif // _WIN32
+
     bool open();
     void close();
-    bool setParameters(unsigned int, const char *);
-    bool setPath(const char*);
-    bool matchEntry(const char *);
+    bool setParameters(unsigned, const char *);
+    bool attrMatch(unsigned attrib);
 
-    bool attrMatch(unsigned int attrib);
+#ifndef _WIN32
+    bool setPath(const char*);
+    bool matchEntry(struct dirent*);
+
     static bool wildcardMatch(char const *wildcard, char const *filename);
-    static unsigned int cvtAttr(struct stat *st, const char* filename);
-    static void cvtTime(struct stat *st, struct find_t *fileinfo);
+    unsigned cvtAttr(const struct stat *st, const char* filename);
+    static void cvtTime(const struct stat *st, struct find_t *fileinfo);
+#else
+    unsigned cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename);
+    static void cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo);
+#endif // _WIN32
 
     // A vector of FindFirstRec that deallocates all directory streams
     // on destruction.
@@ -67,4 +79,4 @@ private:
     } static recList;
 };
 
-#endif
+#endif // FINDFRST_H

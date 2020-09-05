@@ -1,7 +1,5 @@
 #include <internal/findfrst.h>
 #include <internal/pathconv.h>
-#include <system_error>
-#include <sys/stat.h>
 
 #define SPECIAL_BITS (_A_SUBDIR|_A_HIDDEN|_A_SYSTEM)
 
@@ -58,14 +56,11 @@ FindFirstRec* FindFirstRec::get(struct find_t *fileinfo)
     return 0;
 }
 
-bool FindFirstRec::streamValid()
-{
-    return dirStream != directory_iterator();
-}
+#ifndef _WIN32
 
-bool FindFirstRec::setParameters(unsigned int attrib, const char *pathname)
+bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
 {
-    if (!streamValid())
+    if (!dirStream)
     {
         searchAttr = attrib;
         if (setPath(pathname))
@@ -76,30 +71,25 @@ bool FindFirstRec::setParameters(unsigned int attrib, const char *pathname)
 
 bool FindFirstRec::next()
 {
-    while (streamValid())
-    {
-        const auto &&pathName = dirStream->path().filename();
-        ++dirStream;
-        if (matchEntry((const char *) pathName.u8string().c_str()))
-            return true;
-    }
-    return false;
+    struct dirent *e;
+    bool found = false;
+    while ((e = readdir(dirStream)) && !(found = matchEntry(e)));
+    if (!e)
+        close();
+    return found;
 }
 
 bool FindFirstRec::open()
 {
-    if (!streamValid())
-    {
-        std::error_code ec;
-        dirStream = {searchDir, ec};
-        return !ec && streamValid();
-    }
+    if (!dirStream)
+        return (dirStream = opendir(searchDir.c_str()));
     return false;
 }
 
 void FindFirstRec::close()
 {
-    dirStream = {};
+    if (dirStream)
+        closedir(dirStream), dirStream = 0;
 }
 
 bool FindFirstRec::setPath(const char* pathname)
@@ -108,12 +98,7 @@ bool FindFirstRec::setPath(const char* pathname)
     if (pathname && *pathname)
     {
         searchDir = pathname;
-#ifdef _WIN32
-        // Convert directory separators temporary, but keep the drive letter.
-        path_dos2unix(searchDir, false);
-#else
         path_dos2unix(searchDir);
-#endif
         // Win32's FindFirst is designed to reject paths ending with a
         // separator. But legacy code unaware of Unix separators may be unable
         // to remove it and call findfirst with such a pathname. Therefore,
@@ -138,35 +123,32 @@ bool FindFirstRec::setPath(const char* pathname)
                 wildcard = '*';
         }
         // At this point, searchDir always ends with a '/'.
-#ifdef _WIN32
-        path_unix2dos(searchDir);
-#endif
         return true;
     }
     return false;
 }
 
-bool FindFirstRec::matchEntry(const char *name)
+bool FindFirstRec::matchEntry(struct dirent* e)
 {
     struct stat st;
-    if (wildcardMatch(wildcard.c_str(), name) &&
-        stat((searchDir + name).c_str(), &st) == 0)
+    if (wildcardMatch(wildcard.c_str(), e->d_name) &&
+        stat((searchDir + e->d_name).c_str(), &st) == 0)
     {
-        unsigned int fileAttr = cvtAttr(&st, name);
+        unsigned fileAttr = cvtAttr(&st, e->d_name);
         if (attrMatch(fileAttr))
         {
             // Match found, fill finfo.
             finfo->size = st.st_size;
             finfo->attrib = fileAttr;
             cvtTime(&st, finfo);
-            strnzcpy(finfo->name, name, sizeof(find_t::name));
+            strnzcpy(finfo->name, e->d_name, sizeof(find_t::name));
             return true;
         }
     }
     return false;
 }
 
-bool FindFirstRec::attrMatch(unsigned int attrib)
+bool FindFirstRec::attrMatch(unsigned attrib)
 {
     // Behaviour from the original _dos_findnext: 'if requested attribute
     // word includes hidden, system, or subdirectory bits, return
@@ -200,24 +182,22 @@ bool FindFirstRec::wildcardMatch(char const *wildcard, char const *filename)
     return *filename == '\0';
 }
 
-unsigned int FindFirstRec::cvtAttr(struct stat *st, const char* filename)
+unsigned FindFirstRec::cvtAttr(const struct stat *st, const char* filename)
 {
     // Returns file attributes in find_t format.
-    unsigned int attr = 0; // _A_NORMAL
+    unsigned attr = 0; // _A_NORMAL
     if (filename[0] == '.')
         attr |= _A_HIDDEN;
     if (st->st_mode & S_IFDIR)
         attr |= _A_SUBDIR;
     else if (!(st->st_mode & S_IFREG)) // If not a regular file
         attr |= _A_SYSTEM;
-#ifdef __unix__
     else if (!(st->st_mode & S_IWUSR)) // If no write access, innacurate.
         attr |= _A_RDONLY;
-#endif
     return attr;
 }
 
-void FindFirstRec::cvtTime(struct stat *st, struct find_t *fileinfo)
+void FindFirstRec::cvtTime(const struct stat *st, struct find_t *fileinfo)
 {
     // Updates fileinfo with the times in st.
     struct FatDate {
@@ -239,3 +219,87 @@ void FindFirstRec::cvtTime(struct stat *st, struct find_t *fileinfo)
                  ushort (lt->tm_min),
                  ushort (lt->tm_hour) };
 }
+
+#else
+
+bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
+{
+    if (hFindFile != INVALID_HANDLE_VALUE)
+        close();
+    fileName.assign(pathname);
+    searchAttr = attrib;
+    return open();
+}
+
+bool FindFirstRec::next()
+{
+    WIN32_FIND_DATAW findData;
+    while (true)
+    {
+        if (hFindFile == INVALID_HANDLE_VALUE)
+        {
+            MultiByteToWideChar(CP_UTF8, 0,
+                                fileName.c_str(), -1,
+                                findData.cFileName, sizeof(findData.cFileName)/sizeof(wchar_t));
+            hFindFile = FindFirstFileW(findData.cFileName, &findData);
+        }
+        else if (!FindNextFileW(hFindFile, &findData))
+        {
+            close();
+            return false;
+        }
+
+        if (hFindFile != INVALID_HANDLE_VALUE)
+        {
+            unsigned attr = cvtAttr(&findData, findData.cFileName);
+            if (attrMatch(attr)) {
+                // Match found, fill finfo.
+                finfo->size = findData.nFileSizeLow;
+                finfo->attrib = attr;
+                cvtTime(&findData, finfo);
+                WideCharToMultiByte(CP_UTF8, 0,
+                                    findData.cFileName, -1,
+                                    finfo->name, sizeof(finfo->name),
+                                    nullptr, nullptr);
+                return true;
+            }
+        }
+        else
+            return false;
+    }
+}
+
+bool FindFirstRec::open()
+{
+    return true;
+}
+
+void FindFirstRec::close()
+{
+    if (hFindFile != INVALID_HANDLE_VALUE)
+        FindClose(hFindFile), hFindFile = INVALID_HANDLE_VALUE;
+}
+
+bool FindFirstRec::attrMatch(unsigned attrib)
+{
+    return ((searchAttr & _A_VOLID) && (attrib & _A_VOLID))
+        || !(attrib & SPECIAL_BITS)
+        || (searchAttr & attrib & SPECIAL_BITS);
+}
+
+unsigned FindFirstRec::cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename)
+{
+    unsigned attr = findData->dwFileAttributes;
+    if (filename[0] == L'.')
+        attr |= _A_HIDDEN;
+    return attr;
+}
+
+void FindFirstRec::cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo)
+{
+    FILETIME localTime;
+    FileTimeToLocalFileTime(&findData->ftLastWriteTime, &localTime);
+    FileTimeToDosDateTime(&localTime, &fileinfo->wr_date, &fileinfo->wr_time);
+}
+
+#endif // _WIN32

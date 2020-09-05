@@ -74,8 +74,6 @@ You may also need:
 
 * `-Iinclude/tvision/borland` if your application includes Borland headers (`dir.h`, `iostream.h`, etc.).
 
-* `-lstdc++fs` if you are using GCC 8 or earlier.
-
 * On Gentoo (and possibly others): `-ltinfow` if both `libtinfo.so` and `libtinfow.so` are available in your system. Otherwise, you may get a segmentation fault when running Turbo Vision applications ([#11](https://github.com/magiblot/tvision/issues/11)). Note that `tinfo` is bundled with `ncurses`.
 
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
