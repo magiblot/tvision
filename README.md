@@ -68,7 +68,19 @@ The minimal command line required to build a Turbo Vision application (e.g. `hel
 g++ -std=c++17 -o hello hello.cpp libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
-You may also need `-Iinclude/tvision` if your application uses Turbo Vision 1.x includes (`#include <tv.h>` instead of `#include <tvision/tv.h>`), or `-Iinclude/tvision/borland` if your application includes Borland headers (`dir.h`, `iostream.h`, etc.). `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
+You may also need:
+
+* `-Iinclude/tvision` if your application uses Turbo Vision 1.x includes (`#include <tv.h>` instead of `#include <tvision/tv.h>`).
+
+* `-Iinclude/tvision/borland` if your application includes Borland headers (`dir.h`, `iostream.h`, etc.).
+
+* `-lstdc++fs` if you are using GCC 8 or earlier.
+
+* On Gentoo (and possibly others): `-ltinfow` if both `libtinfo.so` and `libtinfow.so` are available in your system. Otherwise, you may get a segmentation fault when running Turbo Vision applications ([#11](https://github.com/magiblot/tvision/issues/11)). Note that `tinfo` is bundled with `ncurses`.
+
+`-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
+
+If you choose the CMake build system for your application, you may simply copy the logic from Turbo Vision's [`CMakeLists.txt`](https://github.com/magiblot/tvision/blob/7d3eaf10dff44fb6969a01d6d6ae5a3f6ed06604/CMakeLists.txt#L71).
 
 The backward-compatibility headers in `include/tvision/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
