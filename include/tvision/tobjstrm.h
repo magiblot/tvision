@@ -50,7 +50,7 @@ struct fLink
 
 #define __link( s )             \
   extern TStreamableClass s;    \
-  static fLink force ## s =     \
+  static volatile fLink force ## s =     \
     { (fLink _NEAR *)&force ## s, (TStreamableClass _NEAR *)&s };
 
 #if defined( Uses_TStreamable ) && !defined( __TStreamable )
@@ -97,7 +97,7 @@ typedef TStreamable *(*BUILDER)();
 #ifndef __FLAT__
 #define __DELTA( d ) (FP_OFF((TStreamable *)(d *)1)-1)
 #else
-#define __DELTA( d ) ((int)(ptrdiff_t)(TStreamable*)(d*)1-1 )
+#define __DELTA( d ) ((int)((ptrdiff_t)(TStreamable*)(d*)1-1) )
 #endif
 
 class TStreamableClass
