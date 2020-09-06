@@ -64,6 +64,8 @@ add_executable(tvhc ${TVHELPSRC})
 add_executable(mmenu ${MMENUSRC})
 add_executable(palette ${PALETTESRC})
 
+set(TVAPPS hello tvedit tvdemo tvdir tvhc mmenu palette)
+
 # Libraries
 
 set(LIBS tvision)
@@ -89,25 +91,21 @@ if (TV_PLATF EQUAL TV_PLATF_UNIX)
     endif()
 endif()
 
-target_link_libraries(hello ${LIBS})
-target_link_libraries(tvedit ${LIBS})
-target_link_libraries(tvdemo ${LIBS})
-target_link_libraries(tvdir ${LIBS})
-target_link_libraries(tvhc ${LIBS})
-target_link_libraries(mmenu ${LIBS})
-target_link_libraries(palette ${LIBS})
+foreach(t ${TVAPPS})
+    target_link_libraries(${t} ${LIBS})
+endforeach(t)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    # Enable precompiled headers
     target_precompile_headers(tvision PRIVATE "include/tvision/tv.h")
     target_precompile_headers(hello PRIVATE "include/tvision/tv.h")
-    target_precompile_headers(tvedit REUSE_FROM hello)
-    target_precompile_headers(tvdemo REUSE_FROM hello)
-    target_precompile_headers(tvdir REUSE_FROM hello)
-    target_precompile_headers(tvhc REUSE_FROM hello)
-    target_precompile_headers(mmenu REUSE_FROM hello)
-    target_precompile_headers(palette REUSE_FROM hello)
+    foreach(t ${TVAPPS})
+        if (NOT (${t} STREQUAL hello))
+            target_precompile_headers(${t} REUSE_FROM hello)
+        endif()
+    endforeach(t)
 endif()
