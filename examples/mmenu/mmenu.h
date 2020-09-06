@@ -62,6 +62,9 @@
  * make the example code in the test module much easier to read.
  */
 
+#if !defined( __MMENU_H )
+#define __MMENU_H
+
 class TMultiMenu : public TMenuBar
 {
 
@@ -83,3 +86,5 @@ protected:
 const unsigned cmMMChangeMenu = 0x1600;
 
 TMenuItem& operator +( TMenuItem& menu1, TMenuItem& menu2 );
+
+#endif // __MMENU_H

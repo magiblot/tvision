@@ -13,6 +13,9 @@
  *
  */
 
+#if !defined( __TVEDIT_H )
+#define __TVEDIT_H
+
 class TMenuBar;
 class TStatusLine;
 class TEditWindow;
@@ -57,3 +60,4 @@ TDialog *createFindDialog();
 TDialog *createReplaceDialog();
 ushort doEditDialog( int dialog, ... );
 
+#endif // __TVEDIT_H

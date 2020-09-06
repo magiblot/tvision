@@ -11,6 +11,9 @@
  *
  */
 
+#if !defined( __TVDEMO_H )
+#define __TVDEMO_H
+
 class TStatusLine;
 class TMenuBar;
 struct TEvent;
@@ -58,3 +61,5 @@ private:
     void saveDesktop();               //  in a resource file
 
 };
+
+#endif // __TVDEMO_H

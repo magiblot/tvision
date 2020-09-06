@@ -11,6 +11,9 @@
  *
  */
 
+#if !defined( __TVCMDS_H )
+#define __TVCMDS_H
+
 const int cmAboutCmd    = 100;
 const int cmPuzzleCmd   = 101;
 const int cmCalendarCmd = 102;
@@ -27,3 +30,4 @@ const int cmEventViewCmd= 112;
 const int cmChBackground= 113;
 const int cmVideoMode   = 2002;
 
+#endif // __TVCMDS_H

@@ -1,3 +1,6 @@
+#if !defined( __DEMOHELP_H )
+#define __DEMOHELP_H
+
 const int
   hcAsciiTable           = 6,
   hcCalculator           = 4,
@@ -38,3 +41,5 @@ const int
   hcWTile                = 21,
   hcWZoom                = 20,
   hcWindows              = 18;
+
+#endif // __DEMOHELP_H
