@@ -78,7 +78,7 @@ You may also need:
 
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
-If you choose the CMake build system for your application, you may simply copy the logic from Turbo Vision's [`CMakeLists.txt`](https://github.com/magiblot/tvision/blob/7d3eaf10dff44fb6969a01d6d6ae5a3f6ed06604/CMakeLists.txt#L71).
+If you choose the CMake build system for your application, you may simply copy the logic from Turbo Vision's [`CMakeLists.txt`](https://github.com/magiblot/tvision/blob/e351600dee0ebca7fe0a0f63b247e38168fad15c/CMakeLists.txt#L73).
 
 The backward-compatibility headers in `include/tvision/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
