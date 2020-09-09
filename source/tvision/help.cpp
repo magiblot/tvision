@@ -55,10 +55,6 @@
 #include <ctype.h>
 #endif  // __CTYPE_H
 
-#if !defined( __MALLOC_H )
-#include <malloc.h>
-#endif  // __MALLOC_H
-
 #pragma warn -dsz
 
 // THelpViewer

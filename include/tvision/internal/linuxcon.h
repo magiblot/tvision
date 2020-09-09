@@ -3,7 +3,7 @@
 
 #include <internal/platform.h>
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
 
 #define Uses_TKeys
 #define Uses_TEvent

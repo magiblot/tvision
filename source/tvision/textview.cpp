@@ -22,8 +22,6 @@
 #include <string.h>
 #endif  // __STRING_H
 
-#include <malloc.h>
-
 TTextDevice::TTextDevice( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,

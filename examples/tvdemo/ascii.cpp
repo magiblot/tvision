@@ -210,7 +210,7 @@ void TReport::draw()
     statusStr
       << "  Char: " << (char ) ((asciiChar == 0) ? 0x20 : asciiChar)
       << " Decimal: " << setw(3) << (int) asciiChar
-      << " Hex " << hex << setiosflags(ios::uppercase)
+      << " Hex " << hex << std::setiosflags(ios::uppercase)
       << setw(2) << (int) asciiChar << "     " << ends;
 
     buf.moveStr(0, str, color);

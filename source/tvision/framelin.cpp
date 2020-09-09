@@ -16,8 +16,6 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
-#include <malloc.h>
-
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
 {
     uchar *FrameMask = (uchar*) alloca(size.x);

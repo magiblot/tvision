@@ -6,6 +6,7 @@
 #include <internal/sighandl.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/param.h>
 #include <cctype>
 
 TSignalHandler::TSignalHandler()
@@ -23,12 +24,22 @@ TSignalHandler::~TSignalHandler()
     sigaction(SIGILL, &oldAction(SIGILL), 0);
 }
 
+#if defined(__FreeBSD__)
+
 #if defined(__x86_64__)
-#define REG_IP REG_RIP
+#define IP mc_rip
 #elif defined(__i386__)
-#define REG_IP REG_EIP
+#define IP mc_eip
+#endif
+
 #else
-#undef REG_IP
+
+#if defined(__x86_64__)
+#define IP gregs[REG_RIP]
+#elif defined(__i386__)
+#define IP gregs[REG_EIP]
+#endif
+
 #endif
 
 void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
@@ -44,7 +55,7 @@ void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
         c = (read(0, &c, 1) > 0) ? tolower(c) : DFLT;
         clearStdin();
         if (c == 'c' || c == '\n')
-            context->uc_mcontext.gregs[REG_IP]++; // Increase instruction pointer.
+            context->uc_mcontext.IP++; // Increase instruction pointer.
         else if (c == 's')
             raise(SIGTSTP); // Suspend process.
         else if (c == 'd')
@@ -70,7 +81,7 @@ void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context)
         printf("\r\nOops, an illegal instruction (SIGILL) was caught!");
     printf("\r\nInstruction pointer: %p"
            "\r\nWhat would you like to do?"
-           "\r\n", (void*) context->uc_mcontext.gregs[REG_IP]);
+           "\r\n", (void*) context->uc_mcontext.IP);
 }
 
 void TSignalHandler::clearStdin()
