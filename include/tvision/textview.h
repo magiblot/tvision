@@ -21,7 +21,7 @@
 #if defined( Uses_TTextDevice ) && !defined( __TTextDevice )
 #define __TTextDevice
 
-#include <tvision/borland/iostream.h>
+#include <tvision/compat/iostream.h>
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
@@ -96,7 +96,7 @@ protected:
 #if defined( Uses_otstream ) && !defined( __otstream )
 #define __otstream
 
-#include <tvision/borland/iostream.h>
+#include <tvision/compat/iostream.h>
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-

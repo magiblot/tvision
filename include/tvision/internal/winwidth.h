@@ -3,7 +3,7 @@
 
 #ifdef _WIN32
 
-#include <tvision/borland/win.h>
+#include <tvision/compat/win.h>
 #include <string_view>
 #include <cstddef>
 #include <cstdint>

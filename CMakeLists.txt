@@ -42,12 +42,12 @@ endif()
 include_directories(
     include
     include/tvision
-    include/tvision/borland
+    include/tvision/compat
 )
 
 if (NOT WIN32 AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
     include_directories(
-        include/tvision/borland/malloc
+        include/tvision/compat/malloc
     )
 endif()
 

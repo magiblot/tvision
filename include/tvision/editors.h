@@ -15,7 +15,7 @@
  */
 
 #if !defined( __DIR_H )
-#include <tvision/borland/dir.h>
+#include <tvision/compat/dir.h>
 #endif  // __DIR_H
 
 #if !defined( __STRING_H )
@@ -380,7 +380,7 @@ inline opstream& operator << ( opstream& os, TMemo* cl )
 #define __TFileEditor
 
 #if !defined( __DIR_H )
-#include <tvision/borland/dir.h>
+#include <tvision/compat/dir.h>
 #endif  // __DIR_H
 
 class _FAR TRect;

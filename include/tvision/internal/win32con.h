@@ -6,7 +6,7 @@
 #ifdef _WIN32
 
 #include <tvision/tv.h>
-#include <tvision/borland/win.h>
+#include <tvision/compat/win.h>
 
 class Win32Input;
 class Win32Display;
