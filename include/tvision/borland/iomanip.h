@@ -7,6 +7,11 @@
 
 #include <iomanip>
 
+using std::resetiosflags;
+using std::setiosflags;
+using std::setbase;
+using std::setfill;
+using std::setprecision;
 using std::setw;
 
 #endif // IOMANIP_H

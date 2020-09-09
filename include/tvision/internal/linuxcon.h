@@ -30,8 +30,10 @@ public:
 
 #else
 
-class LinuxConsoleStrategy : public PlatformStrategy {};
+class LinuxConsoleStrategy : public PlatformStrategy {
+    using PlatformStrategy::PlatformStrategy;
+};
 
 #endif // __linux__
 
-#endif
+#endif // LINUXCON_H
