@@ -45,13 +45,14 @@ struct fLink
 {
     fLink _NEAR *f;
     class TStreamableClass _NEAR *t;
+    static class TStreamableClass * volatile forceLink;
 };
 #endif
 
 #define __link( s )             \
   extern TStreamableClass s;    \
-  static volatile fLink force ## s =     \
-    { (fLink _NEAR *)&force ## s, (TStreamableClass _NEAR *)&s };
+  static fLink force ## s =     \
+    { (fLink _NEAR *)&force ## s, (fLink::forceLink = &s, (TStreamableClass _NEAR *)&s) };
 
 #if defined( Uses_TStreamable ) && !defined( __TStreamable )
 #define __TStreamable

@@ -77,6 +77,8 @@
 
 const uchar nullStringLen = UCHAR_MAX;
 
+TStreamableClass* volatile fLink::forceLink;
+
 TStreamableClass::TStreamableClass( const char *n, BUILDER b, int d ) :
     name( n ),
     build( b ),
