@@ -1,13 +1,48 @@
 #ifdef __linux__
 
 #include <internal/linuxcon.h>
+#include <internal/constmap.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cstring>
-#include <unordered_map>
-using std::unordered_map;
+
+/* There are cases, such as the linux console, where it is possible to
+ * get the state of keyboard modifiers (Shift/Ctrl/Alt), but captured
+ * key events don't include that information. So, an extra translation
+ * step must be done to get the actual Turbo Vision key codes. */
+
+static constexpr auto keyCodeWithShift = constexpr_map<ushort, ushort>::from_array({
+    { kbTab,        kbShiftTab      },
+    { kbDel,        kbShiftDel      },
+    { kbIns,        kbShiftIns      }
+});
+
+static constexpr auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
+    { 0x001F,       kbCtrlBack      },
+    { kbDel,        kbCtrlDel       },
+    { kbEnd,        kbCtrlEnd       },
+    { kbHome,       kbCtrlHome      },
+    { kbIns,        kbCtrlIns       },
+    { kbLeft,       kbCtrlLeft      },
+    { kbPgDn,       kbCtrlPgDn      },
+    { kbPgUp,       kbCtrlPgUp      },
+    { kbRight,      kbCtrlRight     },
+    { kbUp,         kbCtrlUp        },
+    { kbDown,       kbCtrlDown      }
+});
+
+static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array({
+    { kbDel,        kbAltDel        },
+    { kbEnd,        kbAltEnd        },
+    { kbHome,       kbAltHome       },
+    { kbIns,        kbAltIns        },
+    { kbPgDn,       kbAltPgDn       },
+    { kbPgUp,       kbAltPgUp       },
+    { kbUp,         kbAltUp         },
+    { kbDown,       kbAltDown       },
+});
 
 LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, FdInputStrategy *i) :
     PlatformStrategy(d, i), gpm(new GpmInput())
@@ -26,14 +61,6 @@ int LinuxConsoleStrategy::getButtonCount()
     return gpm->getButtonCount();
 }
 
-void LinuxConsoleStrategy::flushScreen()
-{
-    PlatformStrategy::flushScreen();
-}
-
-// tables.cpp
-extern unordered_map<ulong, unordered_map<ushort, ushort>> keyCodeWithModifiers;
-
 bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
 {
     /* The keyboard event getter is usually unaware of key modifiers in the
@@ -41,7 +68,7 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
     if (input->getEvent(ev))
     {
         applyKeyboardModifiers(ev.keyDown);
-        ushort keyCode = keyCodeWithModifiers[ev.keyDown.controlKeyState][ev.keyDown.keyCode];
+        ushort keyCode = keyCodeWithModifiers(ev.keyDown.controlKeyState, ev.keyDown.keyCode);
         if (keyCode)
             ev.keyDown.keyCode = keyCode;
         // Do not set the Ctrl flag on these, as that would alter their meaning.
@@ -51,6 +78,17 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
         return true;
     }
     return false;
+}
+
+ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode)
+{
+    switch (controlKeyState)
+    {
+        case kbShift: return keyCodeWithShift[keyCode];
+        case kbCtrlShift: return keyCodeWithCtrl[keyCode];
+        case kbAltShift: return keyCodeWithAlt[keyCode];
+        default: return kbNoKey;
+    }
 }
 
 void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)

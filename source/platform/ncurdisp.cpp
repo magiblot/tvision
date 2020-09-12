@@ -8,8 +8,6 @@
 #include <internal/textattr.h>
 #include <ncurses.h>
 #include <clocale>
-#include <unordered_map>
-using std::unordered_map;
 
 NcursesDisplay::NcursesDisplay() :
     caretSize(1),

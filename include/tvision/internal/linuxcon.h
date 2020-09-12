@@ -17,6 +17,7 @@ class LinuxConsoleStrategy : public PlatformStrategy {
     std::unique_ptr<GpmInput> gpm;
 
     bool patchKeyEvent(TEvent &ev);
+    static ushort keyCodeWithModifiers(ulong, ushort);
     static void applyKeyboardModifiers(KeyDownEvent &key);
 
 public:
@@ -24,7 +25,6 @@ public:
     LinuxConsoleStrategy(DisplayStrategy*, FdInputStrategy*);
 
     int getButtonCount();
-    void flushScreen();
 
 };
 
