@@ -43,7 +43,7 @@
  * Still, it's up to your luck that ncurses manages to grab any of these
  * combinations from your terminal application. */
 
-static constexpr auto fromNonPrintableAscii = constexpr_map<char, KeyDownEvent>::from_array({
+static const const_unordered_map<char, KeyDownEvent> fromNonPrintableAscii = {
     { '\x01',       {{kbCtrlA},     kbCtrlShift}},
     { '\x02',       {{kbCtrlB},     kbCtrlShift}},
     { '\x03',       {{kbCtrlC},     kbCtrlShift}},
@@ -76,9 +76,9 @@ static constexpr auto fromNonPrintableAscii = constexpr_map<char, KeyDownEvent>:
     { '\x1E',       {{0x1E},        0}          }, // ^^, ?
     { '\x1F',       {{0x1F},        0}          }, // ^_, ?
     { '\x7F',       {{kbBack},      0}          }  // ^?, Delete
-});
+};
 
-static constexpr auto AltKeyCode = constexpr_map<char, ushort>::from_array({
+static const const_unordered_map<char, ushort> AltKeyCode = {
     { ' ', kbAltSpace },
     { 'Q', kbAltQ }, { 'W', kbAltW }, { 'E', kbAltE }, { 'R', kbAltR },
     { 'T', kbAltT }, { 'Y', kbAltY }, { 'U', kbAltU }, { 'I', kbAltI },
@@ -90,9 +90,9 @@ static constexpr auto AltKeyCode = constexpr_map<char, ushort>::from_array({
     { '3', kbAlt3 }, { '4', kbAlt4 }, { '5', kbAlt5 }, { '6', kbAlt6 },
     { '7', kbAlt7 }, { '8', kbAlt8 }, { '9', kbAlt9 }, { '0', kbAlt0 },
     { '-', kbAltMinus }, { '=', kbAltEqual }, { '\x08', kbAltBack }
-});
+};
 
-static constexpr auto fromCursesKeyCode = constexpr_map<int, KeyDownEvent>::from_array({
+static const const_unordered_map<int, KeyDownEvent> fromCursesKeyCode = {
     { KEY_DOWN,         {{kbDown},      0}          },
     { KEY_UP,           {{kbUp},        0}          },
     { KEY_LEFT,         {{kbLeft},      0}          },
@@ -173,9 +173,9 @@ static constexpr auto fromCursesKeyCode = constexpr_map<int, KeyDownEvent>::from
     { KEY_F0 + 58,      {{kbAltF10},    kbAltShift} },
     { KEY_F0 + 59,      {{kbAltF11},    kbAltShift} },
     { KEY_F0 + 60,      {{kbAltF12},    kbAltShift} }
-});
+};
 
-constexpr auto fromCursesHighKey = constexpr_map<std::string_view, KeyDownEvent>::from_array({
+static const const_unordered_map<std::string_view, KeyDownEvent> fromCursesHighKey = {
     /* These keys are identified by name. The int value is not known
      * at compilation time. */
     { "kDC3",       {{kbAltDel},        kbAltShift}},
@@ -228,8 +228,7 @@ constexpr auto fromCursesHighKey = constexpr_map<std::string_view, KeyDownEvent>
     { "kRIT7",      {{kbRight},         kbCtrlShift | kbAltShift}},
     { "kUP7",       {{kbUp},            kbCtrlShift | kbAltShift}},
     { "kDN7",       {{kbDown},          kbCtrlShift | kbAltShift}},
-});
-
+};
 
 NcursesInput::NcursesInput(bool mouse) :
     mouseForced(false)

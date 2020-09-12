@@ -15,16 +15,23 @@ class CpTranslator {
     struct CpTable {
         std::string_view cp;
         const uint32_t *toUtf8Int;
-        std::unordered_map<std::string_view, char> fromUtf8;
+        const std::unordered_map<std::string_view, char> fromUtf8;
+
+        static auto initMap(const std::string_view toUtf8[256])
+        {
+            std::unordered_map<std::string_view, char> map;
+            for (size_t i = 0; i < 256; ++i)
+                map.emplace(toUtf8[i], char(i));
+            return map;
+        }
 
         CpTable( std::string_view cp,
                  const std::string_view toUtf8[256],
                  const std::array<uint32_t, 256> &toUtf8Int ) :
             cp(cp),
-            toUtf8Int(toUtf8Int.data())
+            toUtf8Int(toUtf8Int.data()),
+            fromUtf8(initMap(toUtf8))
         {
-            for (int i = 0; i < 256; ++i)
-                fromUtf8.emplace(toUtf8[i], char(i));
         }
     };
     
@@ -47,11 +54,10 @@ public:
     }
 
     static char fromUtf8(TStringView s) {
-        char c = 0;
         auto it = activeTable->fromUtf8.find(s);
         if (it != activeTable->fromUtf8.end())
-            c = it->second;
-        return c;
+            return it->second;
+        return 0;
     }
 
 };

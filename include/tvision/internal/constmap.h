@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <utility>
+#include <unordered_map>
 
 template <class Key, class Value, size_t N=(size_t)-1>
 class constexpr_map
@@ -49,6 +50,27 @@ public:
     {
         return constexpr_map<Key, Value, N>(init);
     }
+};
+
+// Same as unordered_map, but with operator[] const.
+
+template<typename Key, typename Value>
+class const_unordered_map : public std::unordered_map<Key, Value>
+{
+
+    using super = std::unordered_map<Key, Value>;
+
+public:
+
+    using super::super;
+
+    Value operator[](const Key &key) const {
+        auto it = super::find(key);
+        if (it == super::end())
+            return {};
+        return it->second;
+    }
+
 };
 
 #endif // TVISION_CONSTMAP_H
