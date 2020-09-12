@@ -233,8 +233,10 @@ inline TCellChar getChar(TScreenCell cell)
 
 inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
 {
-    cell.Char = ch;
-    cell.extraWidth = extraWidth;
+    TScreenCell c = cell;
+    c.Char = ch;
+    c.extraWidth = extraWidth;
+    cell = c;
 }
 
 inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
@@ -246,8 +248,10 @@ inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
 
 inline void setChar(TScreenCell &cell, uchar ch)
 {
-    cell.Char = ch;
-    cell.extraWidth = 0;
+    TScreenCell c = cell;
+    c.Char = ch;
+    c.extraWidth = 0;
+    cell = c;
 }
 
 inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
