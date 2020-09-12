@@ -185,6 +185,10 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
         if (ev.keyDown.textLength) {
             ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown);
+            if (KeyEventW.wVirtualKeyCode == VK_MENU)
+                // This is enabled when pasting certain characters, and it confuses
+                // applications. Clear it.
+                ev.keyDown.charScan.scanCode = 0;
             if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ) {
                 // If the character cannot be represented in the current codepage,
                 // or if it would accidentally trigger a Ctrl+Key combination,
