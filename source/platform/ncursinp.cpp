@@ -359,6 +359,9 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
     // If we are lucky enough, the character will be representable in
     // the active codepage.
     ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({ev.keyDown.text, size_t(num_keys)});
+    // Prevent text from triggering Ctrl+Key shortcuts.
+    if (ev.keyDown.keyCode <= kbCtrlZ)
+        ev.keyDown.keyCode = kbNoKey;
 }
 
 void NcursesInput::setAltModifier(TEvent &ev)

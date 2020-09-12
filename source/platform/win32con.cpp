@@ -185,11 +185,12 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
         if (ev.keyDown.textLength) {
             ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown);
-            if (!ev.keyDown.charScan.charCode)
+            if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ) {
                 // If the character cannot be represented in the current codepage,
-                // make the whole keyCode zero, or else we may trigger an unexpected
-                // special key.
+                // or if it would accidentally trigger a Ctrl+Key combination,
+                // make the whole keyCode zero to avoid side effects.
                 ev.keyDown.keyCode = kbNoKey;
+            }
         } else
             ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
         ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
