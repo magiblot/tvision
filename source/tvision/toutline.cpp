@@ -522,7 +522,7 @@ void TOutlineViewer::handleEvent(TEvent& event)
         adjustFocus(newFocus);
         drawView();
   };
-};
+}
 
 /*
   Called whenever Node is selected by the user either via keyboard

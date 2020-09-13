@@ -93,7 +93,7 @@ THelpTopic::THelpTopic() : TObject()
     lastOffset = 0;
     lastLine = INT_MAX;
     lastParagraph = 0;
-};
+}
 
 void THelpTopic::readParagraphs( ipstream& s )
 {

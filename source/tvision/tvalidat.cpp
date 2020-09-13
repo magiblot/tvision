@@ -136,7 +136,7 @@ void* TPXPictureValidator::read( ipstream& is )
 TPXPictureValidator::~TPXPictureValidator()
 {
   delete pic;
-};
+}
 
 void TPXPictureValidator::error()
 {

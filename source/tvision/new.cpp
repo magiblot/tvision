@@ -86,7 +86,7 @@ TVMemMgr::TVMemMgr()
 {
     if( !inited )
         resizeSafetyPool();
-};
+}
 
 void TVMemMgr::resizeSafetyPool( size_t sz )
 {
