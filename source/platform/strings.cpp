@@ -2,6 +2,10 @@
 
 #include <strings.h>
 
+int stricmp( const char *s1, const char *s2 ) {
+    return strcasecmp(s1, s2);
+}
+
 int strnicmp( const char *s1, const char *s2, size_t maxlen ) {
     return strncasecmp(s1, s2, maxlen);
 }
