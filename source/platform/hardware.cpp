@@ -11,6 +11,7 @@
 #include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
 #include <internal/sighandl.h>
+#include <internal/stdiorec.h>
 #include <internal/getenv.h>
 #include <string_view>
 #include <chrono>
@@ -118,6 +119,7 @@ void THardwareInfo::setUpConsole()
             ExitProcess(1);
         }
 #else
+        StdioRecovery::recover();
         DisplayStrategy *disp;
         if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();
