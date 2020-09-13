@@ -45,7 +45,7 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
 });
 
 LinuxConsoleStrategy::LinuxConsoleStrategy(DisplayStrategy *d, FdInputStrategy *i) :
-    PlatformStrategy(d, i), gpm(new GpmInput())
+    UnixPlatformStrategy(d, i), gpm(new GpmInput())
 {
     /* The FdInputStrategy instance which reads key events is stored in
      * the 'input' attribute of PlatformStrategy, while the GpmInput instance

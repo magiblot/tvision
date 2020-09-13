@@ -126,7 +126,7 @@ void THardwareInfo::setUpConsole()
         if (isLinuxConsole(0))
             platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
         else
-            platf.reset(new PlatformStrategy(disp, new NcursesInput()));
+            platf.reset(new UnixPlatformStrategy(disp, new NcursesInput()));
 #endif
     }
 }

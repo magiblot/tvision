@@ -41,6 +41,41 @@ public:
 
 };
 
+class PlatformStrategy {
+
+protected:
+
+    std::unique_ptr<DisplayStrategy> display;
+    std::unique_ptr<InputStrategy> input;
+
+public:
+
+    PlatformStrategy() {}
+    PlatformStrategy(DisplayStrategy* d, InputStrategy *i) :
+        display(d), input(i) {}
+
+    virtual ~PlatformStrategy() {}
+
+    virtual bool waitForEvent(long ms, TEvent &ev) { return false; }
+    virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
+    virtual void cursorOn() { if (input) input->cursorOn(); }
+    virtual void cursorOff() { if (input) input->cursorOff(); }
+
+    virtual int getCaretSize() { return display->getCaretSize(); }
+    virtual bool isCaretVisible() { return display->isCaretVisible(); }
+    virtual void clearScreen() { display->clearScreen(); }
+    virtual int getScreenRows() { return display->getScreenRows(); }
+    virtual int getScreenCols() { return display->getScreenCols(); }
+    virtual void setCaretPosition(int x, int y) { display->setCaretPosition(x, y); }
+    virtual ushort getScreenMode() { return display->getScreenMode(); }
+    virtual void setCaretSize(int size) { display->setCaretSize(size); }
+    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
+    virtual void flushScreen() { display->flushScreen(); }
+    virtual void onScreenResize() { display->onScreenResize(); }
+
+};
+
+
 #ifdef _TV_UNIX
 struct pollfd;
 
@@ -62,45 +97,20 @@ public:
     void overrideEventGetter(std::function<bool (TEvent&)>&&);
 
 };
-#endif
 
-class PlatformStrategy {
-
-protected:
-
-    std::unique_ptr<DisplayStrategy> display;
-    std::unique_ptr<InputStrategy> input;
+class UnixPlatformStrategy : public PlatformStrategy {
 
 public:
 
-    PlatformStrategy() {}
-    PlatformStrategy(DisplayStrategy* d, InputStrategy *i) :
-        display(d), input(i) {}
+    using PlatformStrategy::PlatformStrategy;
 
-    virtual ~PlatformStrategy() {}
-
-    virtual bool waitForEvent(long ms, TEvent &ev)
-#ifdef _TV_UNIX
-    { return FdInputStrategy::waitForEvent(ms, ev); }
-#else
-    { return false; }
-#endif
-    virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
-    virtual void cursorOn() { if (input) input->cursorOn(); }
-    virtual void cursorOff() { if (input) input->cursorOff(); }
-
-    virtual int getCaretSize() { return display->getCaretSize(); }
-    virtual bool isCaretVisible() { return display->isCaretVisible(); }
-    virtual void clearScreen() { display->clearScreen(); }
-    virtual int getScreenRows() { return display->getScreenRows(); }
-    virtual int getScreenCols() { return display->getScreenCols(); }
-    virtual void setCaretPosition(int x, int y) { display->setCaretPosition(x, y); }
-    virtual ushort getScreenMode() { return display->getScreenMode(); }
-    virtual void setCaretSize(int size) { display->setCaretSize(size); }
-    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
-    virtual void flushScreen() { display->flushScreen(); }
-    virtual void onScreenResize() { display->onScreenResize(); }
+    bool waitForEvent(long ms, TEvent &ev) override
+    {
+        return FdInputStrategy::waitForEvent(ms, ev);
+    }
 
 };
 
-#endif
+#endif // _TV_UNIX
+
+#endif // PLATFORM_H

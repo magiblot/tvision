@@ -12,7 +12,7 @@
 #include <internal/gpminput.h>
 #include <memory>
 
-class LinuxConsoleStrategy : public PlatformStrategy {
+class LinuxConsoleStrategy : public UnixPlatformStrategy {
 
     std::unique_ptr<GpmInput> gpm;
 
