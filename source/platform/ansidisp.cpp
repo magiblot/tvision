@@ -6,8 +6,6 @@
 #include <internal/textattr.h>
 #include <cstdio>
 #include <cstdlib>
-#include <sstream>
-#include <string>
 #ifdef _TV_UNIX
 #include <termios.h>
 #include <sys/ioctl.h>

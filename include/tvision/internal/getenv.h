@@ -2,8 +2,6 @@
 #define GETENV_H
 
 #include <cstdlib>
-#include <type_traits>
-#include <string>
 
 template<typename T>
 inline T getEnv(const char* name, T def = T{})

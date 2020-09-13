@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <vector>
 #include <chrono>
-#include <string_view>
 
 class ScreenCursor;
 
