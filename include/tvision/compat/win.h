@@ -171,6 +171,14 @@ extern "C" {
 
 }
 
+// winbase.h
+
+extern "C" {
+
+    DWORD GetTickCount(void);
+
+}
+
 #endif // __WINDOWS_H
 
 #endif // __BORLANDC__ || _MSC_VER

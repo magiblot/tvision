@@ -199,9 +199,13 @@ void THardwareInfo::readEvents()
     }
 }
 
-ulong THardwareInfo::getTickCount()
+#ifndef _WIN32
+
+extern "C" DWORD GetTickCount(void)
 {
     // This effectively gives a system time reference in milliseconds.
     // steady_clock is best suited for measuring intervals.
-    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count() / 55;
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
+
+#endif

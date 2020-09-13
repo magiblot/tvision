@@ -350,14 +350,14 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     return False;
 }
 
+#endif  // __BORLANDC__
+
 ulong THardwareInfo::getTickCount()
 {
     // To change units from ms to clock ticks.
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
     return GetTickCount() / 55;
 }
-
-#endif  // __BORLANDC__
 
 BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
 {
