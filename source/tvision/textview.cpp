@@ -151,11 +151,12 @@ void TTerminal::draw()
 #if DRAW_DYNAMIC_STR
     size_t scap = 256;
     char *s = (char*) ::malloc(scap);
+    TScreenCell *_b = (TScreenCell*) alloca(size.x*sizeof(TScreenCell));
 #else
     char s[256];
+    TScreenCell _b[maxViewWidth];
 #endif
     size_t slen = 0;
-    TScreenCell *_b = (TScreenCell*) alloca(size.x*sizeof(TScreenCell));
     TSpan<TScreenCell> b(_b, size.x);
     short  i;
     ushort begLine, endLine;
