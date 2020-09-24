@@ -4,6 +4,7 @@
 #include <internal/ansidisp.h>
 #include <internal/codepage.h>
 #include <internal/textattr.h>
+#include <internal/stdioctl.h>
 #include <cstdio>
 #include <cstdlib>
 #ifdef _TV_UNIX
@@ -25,7 +26,7 @@ AnsiDisplayBase::AnsiDisplayBase() :
     lastAttr(SGRAttribs::defaultInit),
     sgrFlags(0)
 {
-    if (THardwareInfo::isLinuxConsole(0) || THardwareInfo::isLinuxConsole(1))
+    if (THardwareInfo::isLinuxConsole(StdioCtl::out()))
         sgrFlags |= sgrBrightIsBlink | sgrNoItalic | sgrNoUnderline;
     if (COLORS < 16)
         sgrFlags |= sgrBrightIsBold;
@@ -90,8 +91,9 @@ void AnsiDisplayBase::getCaretPosition(int &x, int &y)
     temporary.c_lflag &= ~ECHO;
     temporary.c_cflag &= ~CREAD;
     tcsetattr(0, TCSANOW, &temporary);
-    ::write(1, CSI "6n", sizeof(CSI "6n") - 1);
-    fscanf(stdin, CSI "%d;%dR", &y, &x);
+    THardwareInfo::consoleWrite(CSI "6n", sizeof(CSI "6n") - 1);
+    if (fscanf(StdioCtl::fin(), CSI "%d;%dR", &y, &x) != 2)
+        x = y = 0;
     tcsetattr(0, TCSANOW, &saved);
 }
 
@@ -99,9 +101,14 @@ void AnsiDisplayBase::getScreenSize(int &rows, int &cols)
 {
     lowlevelFlush();
     struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    rows = w.ws_row;
-    cols = w.ws_col;
+    if ( ioctl(StdioCtl::in(), TIOCGWINSZ, &w) != -1 ||
+         ioctl(StdioCtl::out(), TIOCGWINSZ, &w) != -1 )
+    {
+        rows = w.ws_row;
+        cols = w.ws_col;
+    }
+    else
+        rows = cols = 0;
 }
 
 int AnsiDisplayBase::getScreenRows()

@@ -11,6 +11,7 @@
 #include <internal/utf8.h>
 #include <internal/codepage.h>
 #include <internal/constmap.h>
+#include <internal/stdioctl.h>
 #include <string_view>
 
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
@@ -269,7 +270,7 @@ NcursesInput::NcursesInput(bool mouse) :
     }
     else buttonCount = 0;
 
-    addListener(this, 0);
+    addListener(this, StdioCtl::in());
     addListener(this, winchFd());
 }
 
@@ -283,8 +284,8 @@ NcursesInput::~NcursesInput()
 
 void NcursesInput::printEscapeSeq(const char* seq)
 {
-    fputs(seq, stdout);
-    fflush(stdout);
+    fputs(seq, StdioCtl::fout());
+    fflush(StdioCtl::fout());
 }
 
 int NcursesInput::getButtonCount()

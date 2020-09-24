@@ -154,8 +154,8 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Ncurses-based terminal support.
 * Mouse and key modifiers support on the Linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
-* Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong.
-* Ability to reconnect to a closed `stdin`/`stdout`/`stderr`.
+* Redirection of `stdin`/`stdout`/`stderr` does not interfere with terminal I/O.
+* Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong (or even better: press `Ctrl+C` to terminate gracefully).
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
@@ -163,6 +163,19 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 * `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keeping the draw performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
 * `TVISION_ESCDELAY`: the delay of time, in milliseconds, that should be waited after receiving an ESC key press. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination.
 * `TVISION_CODEPAGE`: the character set used internally by Turbo Vision to translate *extended ASCII* into Unicode. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/platform/tables.cpp`.
+* `TVISION_USE_STDIO`: if defined, terminal I/O is performed through `stdin`/`stdout`, so that it can be redirected from the shell. By default, Turbo Vision performs terminal I/O through `/dev/tty`, allowing the user to redirect `stdin`, `stdout` and `stderr` for their needs, without affecting the application's stability.
+
+    For example, the following will leave `out.txt` empty:
+
+    ```sh
+    ./tvdemo | tee out.txt
+    ```
+
+    While the following will dump all the escape sequences and text printed by the application into `out.txt`:
+
+    ```sh
+    TVISION_USE_STDIO= ./tvdemo | tee out.txt
+    ```
 
 ### Windows
 

@@ -6,6 +6,7 @@
 #include <internal/ncurdisp.h>
 #include <internal/codepage.h>
 #include <internal/textattr.h>
+#include <internal/stdioctl.h>
 #include <ncurses.h>
 #include <clocale>
 
@@ -17,7 +18,7 @@ NcursesDisplay::NcursesDisplay() :
     // Allow printing UTF-8 text.
     setlocale(LC_ALL, "");
     // Start curses mode.
-    initscr();
+    term = newterm(nullptr, StdioCtl::fout(), StdioCtl::fin());
     // Enable colors if the terminal supports it.
     hasColors = getScreenMode() & TDisplay::smCO80;
     if (hasColors)
@@ -32,13 +33,14 @@ NcursesDisplay::~NcursesDisplay()
 {
     // End curses mode.
     endwin();
+    delscreen(term);
 }
 
 int NcursesDisplay::getCaretSize() { return caretSize; }
 bool NcursesDisplay::isCaretVisible() { return caretVisible; }
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
-int NcursesDisplay::getScreenRows() { return getmaxy(stdscr); }
-int NcursesDisplay::getScreenCols() { return getmaxx(stdscr); }
+int NcursesDisplay::getScreenRows() { return max(getmaxy(stdscr), 0); }
+int NcursesDisplay::getScreenCols() { return max(getmaxx(stdscr), 0); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
 

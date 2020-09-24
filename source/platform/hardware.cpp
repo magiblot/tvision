@@ -11,7 +11,7 @@
 #include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
 #include <internal/sighandl.h>
-#include <internal/stdiorec.h>
+#include <internal/stdioctl.h>
 #include <internal/getenv.h>
 #include <string_view>
 #include <chrono>
@@ -65,8 +65,8 @@ void THardwareInfo::consoleWrite(const void *data, size_t bytes)
 #ifdef _WIN32
     Win32ConsoleStrategy::write(data, bytes);
 #else
-    fflush(stdout);
-    ::write(1, data, bytes);
+    fflush(StdioCtl::fout());
+    ::write(StdioCtl::out(), data, bytes);
 #endif
 }
 
@@ -119,13 +119,12 @@ void THardwareInfo::setUpConsole()
             ExitProcess(1);
         }
 #else
-        StdioRecovery::recover();
         DisplayStrategy *disp;
         if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();
         else
             disp = new AnsiDisplay<NcursesDisplay>();
-        if (isLinuxConsole(0))
+        if (isLinuxConsole(StdioCtl::in()))
             platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
         else
             platf.reset(new UnixPlatformStrategy(disp, new NcursesInput()));

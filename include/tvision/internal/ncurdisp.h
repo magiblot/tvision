@@ -6,8 +6,11 @@
 #ifdef HAVE_NCURSES
 
 #include <unordered_map>
+#include <ncurses.h>
 
 class NcursesDisplay : public BufferedDisplay {
+
+    SCREEN *term;
 
     int caretSize;
     bool caretVisible;

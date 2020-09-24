@@ -2,6 +2,7 @@
 
 #include <internal/linuxcon.h>
 #include <internal/constmap.h>
+#include <internal/stdioctl.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
 #include <sys/ioctl.h>
@@ -95,7 +96,7 @@ void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
 {
     char res = 6;
     ulong actualModifiers = 0;
-    if (ioctl(0, TIOCLINUX, &res) != -1)
+    if (ioctl(StdioCtl::in(), TIOCLINUX, &res) != -1)
     {
         if ((res & (1 << KG_SHIFT)) && !key.textLength)
             actualModifiers |= kbShift;
