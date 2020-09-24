@@ -26,7 +26,7 @@ AnsiDisplayBase::AnsiDisplayBase() :
     lastAttr(SGRAttribs::defaultInit),
     sgrFlags(0)
 {
-    if (THardwareInfo::isLinuxConsole(StdioCtl::out()))
+    if (THardwareInfo::isLinuxConsole())
         sgrFlags |= sgrBrightIsBlink | sgrNoItalic | sgrNoUnderline;
     if (COLORS < 16)
         sgrFlags |= sgrBrightIsBold;
