@@ -10,6 +10,7 @@
 #include <utility>
 #include <chrono>
 #include <poll.h>
+#include <sys/ioctl.h>
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 using std::vector;
@@ -32,6 +33,12 @@ FdInputStrategy::~FdInputStrategy()
     deleteListener(this);
 }
 
+static bool fdEmpty(int fd)
+{
+    int nbytes;
+    return ioctl(fd, FIONREAD, &nbytes) == -1 || !nbytes;
+}
+
 bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
 {
     bool result {false};
@@ -40,9 +47,9 @@ bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
         if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
             for (size_t i = 0; i < fds.size(); ++i)
             {
-                if (fds[i].revents & POLLHUP)
-                    // Broken pipe will cause poll to return immediately, so
-                    // remove it from the list.
+                if (fds[i].revents & POLLHUP || (fds[i].revents & POLLIN && fdEmpty(fds[i].fd)))
+                    // Broken pipe or EOF will cause poll to return immediately,
+                    // so remove it from the list.
                     deleteListener(listeners[i]);
                 else if (fds[i].revents & POLLIN)
                     ready.push(i);
