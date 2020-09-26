@@ -155,7 +155,6 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 * Mouse and key modifiers support on the Linux console.
 * Overall better display performance than SET's or Sergio Sigala's ports.
 * Redirection of `stdin`/`stdout`/`stderr` does not interfere with terminal I/O.
-* Simple segmentation fault handler that gives you the chance to 'continue running' the application if something goes wrong (or even better: press `Ctrl+C` to terminate gracefully).
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 

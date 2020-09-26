@@ -23,46 +23,41 @@ TSignalHandler::~TSignalHandler()
     sigaction(SIGILL, &oldAction(SIGILL), 0);
 }
 
-#if defined(__FreeBSD__)
-
-#if defined(__x86_64__)
-#define IP mc_rip
-#elif defined(__i386__)
-#define IP mc_eip
-#endif
-
-#else
-
-#if defined(__x86_64__)
-#define IP gregs[REG_RIP]
-#elif defined(__i386__)
-#define IP gregs[REG_EIP]
-#endif
-
-#endif
-
 void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
 {
+    // Save and disable the handler, to avoid recursion if something goes wrong.
+    struct sigaction sa;
+    sigaction(s, &oldAction(s), &sa);
+    bool restoreHandler = true;
+
     TProgram::application->suspend();
     printSignalMsg(s, si, context);
-    const char DFLT = 'c', AGAIN = '\0';
+
+    constexpr char DFLT = 'e', AGAIN = '\0';
     char c;
     do {
-        printf("(C)ontinue, (S)uspend, (D)ie? (default: C) ");
+        printf("(E)xit, (S)uspend, (D)ie? (default: E) ");
         fflush(stdout);
         clearStdin();
         c = (read(0, &c, 1) > 0) ? tolower(c) : DFLT;
         clearStdin();
-        if (c == 'c' || c == '\n')
-            context->uc_mcontext.IP++; // Increase instruction pointer.
+        if (c == 'e' || c == '\n')
+            raise(SIGINT),  // Try to exit gracefully first,
+            raise(SIGTERM), // kill as last resort.
+            raise(SIGKILL);
         else if (c == 's')
             raise(SIGTSTP); // Suspend process.
         else if (c == 'd')
-            sigaction(s, &oldAction(s), 0); // Restore default handler (abort).
+            restoreHandler = false;
         else
             c = AGAIN;
     } while (c == AGAIN);
+
     TProgram::application->resume();
+    TProgram::application->redraw();
+
+    if (restoreHandler)
+        sigaction(s, &sa, 0);
 }
 
 struct sigaction& TSignalHandler::oldAction(int s)
@@ -78,9 +73,8 @@ void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context)
                "\r\nDereferenced address: %p", si->si_addr);
     else
         printf("\r\nOops, an illegal instruction (SIGILL) was caught!");
-    printf("\r\nInstruction pointer: %p"
-           "\r\nWhat would you like to do?"
-           "\r\n", (void*) context->uc_mcontext.IP);
+    printf("\r\nWhat would you like to do?"
+           "\r\n");
 }
 
 void TSignalHandler::clearStdin()
