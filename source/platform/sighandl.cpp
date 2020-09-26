@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cctype>
+#include <cstdlib>
 
 TSignalHandler::TSignalHandler()
 {
@@ -42,9 +43,7 @@ void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
         c = (read(0, &c, 1) > 0) ? tolower(c) : DFLT;
         clearStdin();
         if (c == 'e' || c == '\n')
-            raise(SIGINT),  // Try to exit gracefully first,
-            raise(SIGTERM), // kill as last resort.
-            raise(SIGKILL);
+            exit(1);
         else if (c == 's')
             raise(SIGTSTP); // Suspend process.
         else if (c == 'd')

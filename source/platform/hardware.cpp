@@ -79,7 +79,8 @@ void THardwareInfo::consoleWrite(const void *data, size_t bytes)
  * depend on platform.h. Otherwise, any change in platform.h would affect
  * hardware.h, causing the whole tvision library to recompile. */
 
-static std::unique_ptr<PlatformStrategy> platf;
+static NullPlatform nullPlatf;
+static PlatformStrategy *platf = &nullPlatf;
 
 void THardwareInfo::setCaretSize( ushort size ) { platf->setCaretSize(size); }
 void THardwareInfo::setCaretPosition( ushort x, ushort y ) { platf->setCaretPosition(x, y); }
@@ -112,11 +113,11 @@ void THardwareInfo::setUpConsole()
     // Set up input/output control.
     // At least with the ncurses implementation, display must be initialized
     // before input.
-    if (!platf)
+    if (platf == &nullPlatf)
     {
 #ifdef _WIN32
         if (isWin32Console())
-            platf = std::make_unique<Win32ConsoleStrategy>();
+            platf = new Win32ConsoleStrategy();
         else
         {
             cerr << "Error: standard input is being redirected or is not a "
@@ -130,9 +131,9 @@ void THardwareInfo::setUpConsole()
         else
             disp = new AnsiDisplay<NcursesDisplay>();
         if (isLinuxConsole())
-            platf.reset(new LinuxConsoleStrategy(disp, new NcursesInput(false)));
+            platf = new LinuxConsoleStrategy(disp, new NcursesInput(false));
         else
-            platf.reset(new UnixPlatformStrategy(disp, new NcursesInput()));
+            platf = new UnixPlatformStrategy(disp, new NcursesInput());
 #endif
     }
 }
@@ -140,7 +141,11 @@ void THardwareInfo::setUpConsole()
 void THardwareInfo::restoreConsole()
 {
     // Tear down input/output control by deleting the platform strategy.
-    platf.reset();
+    if (platf != &nullPlatf)
+    {
+        delete platf;
+        platf = &nullPlatf;
+    }
 }
 
 BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask)

@@ -75,6 +75,28 @@ public:
 
 };
 
+class NullPlatform : public PlatformStrategy {
+
+public:
+
+    bool waitForEvent(long ms, TEvent &ev) { return false; }
+    int getButtonCount() { return 0; }
+    void cursorOn() {}
+    void cursorOff() {}
+
+    int getCaretSize() { return 0; }
+    bool isCaretVisible() { return false; }
+    void clearScreen() {}
+    int getScreenRows() { return 0; }
+    int getScreenCols() { return 0; }
+    void setCaretPosition(int x, int y) {}
+    ushort getScreenMode() { return 0; }
+    void setCaretSize(int size) {}
+    void screenWrite(int x, int y, TScreenCell *buf, int len) {}
+    void flushScreen() {}
+    void onScreenResize() {}
+
+};
 
 #ifdef _TV_UNIX
 struct pollfd;
