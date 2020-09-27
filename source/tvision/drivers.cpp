@@ -434,7 +434,7 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
 #ifdef __FLAT__
 TSpan<TScreenCell> TDrawBuffer::allocData()
 {
-    size_t len = max(TScreen::screenWidth, TScreen::screenHeight);
+    size_t len = max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
     return TSpan<TScreenCell>(new TScreenCell[len], len);
 }
 
