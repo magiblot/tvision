@@ -83,9 +83,9 @@ void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
         ensurePrintable(newCell);
         if (newCell != *bufCell)
         {
-            *bufCell = newCell;
             changed = true;
             setDirty(x, newCell, damage);
+            *bufCell = newCell;
         }
     }
     screenChanged = changed;
