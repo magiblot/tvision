@@ -402,14 +402,15 @@ void TInputLine::handleEvent( TEvent& event )
             }
 }
 
-void TInputLine::selectAll( Boolean enable )
+void TInputLine::selectAll( Boolean enable, Boolean scroll )
 {
     selStart = 0;
     if( enable )
         curPos = selEnd = strlen(data);
     else
         curPos = selEnd = 0;
-    firstPos = max( 0, displayedPos(curPos)-size.x+2 );
+    if( scroll )
+        firstPos = max( 0, displayedPos(curPos)-size.x+2 );
     drawView();
 }
 
@@ -429,7 +430,7 @@ void TInputLine::setState( ushort aState, Boolean enable )
     if( aState == sfSelected ||
         ( aState == sfActive && (state & sfSelected) != 0 )
       )
-        selectAll( enable );
+        selectAll( enable, False );
 }
 
 void TInputLine::setValidator( TValidator* aValid )

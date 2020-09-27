@@ -167,7 +167,7 @@ public:
     virtual void getData( void *rec );
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
-    void selectAll( Boolean enable );
+    void selectAll( Boolean enable, Boolean scroll=True );
     virtual void setData( void *rec );
     virtual void setState( ushort aState, Boolean enable );
     virtual Boolean valid( ushort cmd );

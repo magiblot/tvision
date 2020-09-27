@@ -141,7 +141,7 @@ I'm sorry, the root makefile assumes it is executed from the `project` directory
 
 ## Features
 
-### Cross-platform
+### Modern platforms (not Borland C++)
 
 * UTF-8 support both in terminal I/O and the API. You can try Unicode support out in the `tvedit` and `tvdemo` applications.
 * 16 colors.
@@ -205,6 +205,7 @@ The following are not available when compiling with Borland C++:
 * Improved usability of menus: they can be closed by clicking again on them, even submenus.
 * Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
 * Views don't lose their sizes when extremely resized.
+* `TInputLine`s no longer scroll the text display on focus/unfocus, allowing relevant text to stay visible.
 * Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
 * `tvedit`: context menu on right click.
 * `tvedit`: drag scroll with middle mouse button.
