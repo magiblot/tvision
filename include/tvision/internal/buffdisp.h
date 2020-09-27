@@ -15,7 +15,6 @@ class ScreenCursor;
 class BufferedDisplay : public DisplayStrategy {
 
     friend struct FlushScreenAlgorithm;
-    friend struct ScreenWriteAlgorithm;
 
     struct Range {
         int begin, end;
@@ -42,7 +41,7 @@ class BufferedDisplay : public DisplayStrategy {
     static constexpr int defaultFPS = 60;
 
     void resetBuffer();
-    void setDirty(int x, BufferCell &cell, Range &damage);
+    static void setDirty(int x, BufferCell &cell, Range &damage);
     void ensurePrintable(BufferCell &cell) const;
 
     std::vector<ScreenCursor*> cursors;
@@ -97,33 +96,6 @@ inline void BufferedDisplay::changeCursor()
 {
     instance->caretMoved = true;
 }
-
-struct ScreenWriteAlgorithm {
-
-    BufferedDisplay &disp;
-    const int x, y;
-    const TScreenCell * const buf;
-    const size_t len;
-    BufferCell * const bufCells;
-
-    bool changed;
-    BufferedDisplay::Range damage;
-
-    ScreenWriteAlgorithm(BufferedDisplay &disp, int x, int y, TScreenCell *buf, size_t len) :
-        disp(disp), x(x), y(y), buf(buf), len(len),
-        bufCells(&disp.buffer[y*disp.size.x + x]),
-        changed(disp.screenChanged),
-        damage(disp.rowDamage[y])
-    {
-    }
-
-    void run();
-    template <size_t step>
-    void loop(size_t &i, int &x);
-    template <size_t step>
-    void loopBody(size_t i, int x);
-
-};
 
 struct FlushScreenAlgorithm {
 

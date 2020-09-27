@@ -74,48 +74,22 @@ void BufferedDisplay::setCaretPosition(int x, int y)
 
 void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 {
-    ScreenWriteAlgorithm(*this, x, y, buf, max(len, 0)).run();
-}
-
-template <size_t step>
-inline void ScreenWriteAlgorithm::loopBody(size_t i, int x)
-{
-    BufferCell newCells[step], oldCells[step];
-    for (size_t j = 0; j < step; ++j) newCells[j] = buf[i + j];
-    for (size_t j = 0; j < step; ++j) disp.ensurePrintable(newCells[j]);
-    for (size_t j = 0; j < step; ++j) oldCells[j] = bufCells[i + j];
-    bool lchanged = false;
-    for (size_t j = 0; j < step; ++j) lchanged = lchanged || oldCells[j] != newCells[j];
-    if (lchanged)
+    auto changed = screenChanged;
+    auto damage = rowDamage[y];
+    auto *bufCell = &buffer[y*size.x + x];
+    for (int i = 0; i < len; ++i, ++x, ++bufCell)
     {
-        for (size_t j = 0; j < step; ++j) newCells[j].dirty = 1;
-        for (size_t j = 0; j < step; ++j) bufCells[i + j] = newCells[j];
-        if (x < damage.begin)
-            damage.begin = x;
-        if (x + (int(step) - 1) > damage.end)
-            damage.end = x + (int(step) - 1);
-        changed = changed || lchanged;
+        BufferCell newCell {buf[i]};
+        ensurePrintable(newCell);
+        if (newCell != *bufCell)
+        {
+            *bufCell = newCell;
+            changed = true;
+            setDirty(x, newCell, damage);
+        }
     }
-}
-
-template <size_t step>
-inline void ScreenWriteAlgorithm::loop(size_t &i, int &x)
-{
-    for (; i < len - (step - 1); i += step, x += step)
-        loopBody<step>(i, x);
-}
-
-inline void ScreenWriteAlgorithm::run()
-{
-    constexpr size_t STEP = 2;
-
-    size_t i = 0; int x = this->x;
-    if (len >= STEP)
-        loop<STEP>(i, x);
-    loop<1>(i, x);
-
-    disp.screenChanged = changed;
-    disp.rowDamage[y] = damage;
+    screenChanged = changed;
+    rowDamage[y] = damage;
 }
 
 void BufferedDisplay::setDirty(int x, BufferCell &cell, Range &damage)
