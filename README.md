@@ -45,8 +45,8 @@ Don't forget to check out the <a href="#features">features</a> and <a href="#api
 Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
 ```sh
-cmake .
-make
+cmake . -B ./build &&
+cmake --build ./build # or `cd ./build && make`
 ```
 
 The above produces the following files:
@@ -55,6 +55,8 @@ The above produces the following files:
 * The demo applications `hello`, `tvdemo`, `tvedit`, `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
 * The demo applications `mmenu` and `palette` from Borland's Technical Support.
 * `tvhc`, the Turbo Vision Help Compiler.
+
+The library can be found in `./build/lib`, and the executables in `./build/bin`.
 
 The build requirements are:
 
@@ -65,7 +67,7 @@ The build requirements are:
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
 ```sh
-g++ -std=c++17 -o hello hello.cpp libtvision.a -Iinclude -lncursesw -lgpm
+g++ -std=c++17 -o hello hello.cpp ./build/lib/libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
 You may also need:
