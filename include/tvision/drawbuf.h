@@ -34,7 +34,7 @@ public:
     void moveChar( ushort indent, char c, ushort attr, ushort count );
     void moveStr( ushort indent, const char _FAR *str, ushort attrs );
     void moveStr( ushort indent, TStringView str, ushort attrs );
-    void moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0 );
+    ushort moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0 );
     void moveCStr( ushort indent, const char _FAR *str, ushort attrs );
     void moveCStr( ushort indent, TStringView str, ushort attrs );
     void moveBuf( ushort indent, const void _FAR *source,

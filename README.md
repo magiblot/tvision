@@ -391,12 +391,13 @@ void TDrawBuffer::moveCStr(ushort indent, TStringView str, ushort attrs); // New
 `str` is interpreted according to the rules exposed previously.
 
 ```c++
-void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr, ushort width, ushort begin=0); // New
-void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0); // New
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0); // New
 ```
 `str` is interpreted according to the rules exposed previously. However:
 * `width` specifies the maximum number of display columns that should be read from `str`.
 * `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a multi-width character, the remaining positions in that character are filled with spaces.
+
+The return value is the number of display columns that were actually filled with text.
 
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);

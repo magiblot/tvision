@@ -406,15 +406,22 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 /*                                                                        */
 /*      begin   - initial display column in str where to start counting.  */
 /*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      actual number of display columns that were filled with text.      */
+/*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin )
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin )
 {
 #ifdef __BORLANDC__
-    int len = min(begin + width, str.size());
-    len -= begin;
-    if (len > 0)
-        moveBuf(indent, &str[begin], attr, min(width, len));
+    int count = min(min(width, str.size() - begin), length());
+    if (count > 0)
+    {
+        moveBuf(indent, &str[begin], attr, count);
+        return count;
+    }
+    return 0;
 #else
     size_t s = 0, remainder = 0;
     TText::wseek(str, s, remainder, begin);
@@ -423,11 +430,13 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort w
     size_t d = indent + remainder;
     if (d < length())
     {
-        if (attr)
-            TText::fill(data.subspan(d, width), str.substr(s), (uchar) attr);
-        else
-            TText::fill(data.subspan(d, width), str.substr(s));
+        size_t count = remainder + (attr ?
+            TText::fill(data.subspan(d, width), str.substr(s), (uchar) attr)
+          : TText::fill(data.subspan(d, width), str.substr(s))
+        );
+        return count;
     }
+    return 0;
 #endif
 }
 
