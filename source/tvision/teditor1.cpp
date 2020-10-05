@@ -640,6 +640,9 @@ void TEditor::handleEvent( TEvent& event )
                 case cmSearchAgain:
                     doSearchReplace();
                     break;
+                case cmEncoding:
+                    toggleEncoding();
+                    break;
                 default:
                     lock();
                     switch( event.message.command )
@@ -735,9 +738,6 @@ void TEditor::handleEvent( TEvent& event )
                             setCurPtr(0, selectMode);
                             selectMode |= smExtend;
                             setCurPtr(bufLen, selectMode);
-                            break;
-                        case cmEncoding:
-                            toggleEncoding();
                             break;
                         default:
                             unlock();
