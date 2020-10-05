@@ -281,9 +281,8 @@ ushort TScreen::fixCrtMode( ushort mode )
 
     if( (mode & 0xFF) != smCO80 && (mode & 0xFF) != smBW80 )
         mode = (mode & 0xFF00) | smCO80;
-#else
-    return mode;
 #endif
+    return mode;
 }
 
 void TScreen::setCrtData()
