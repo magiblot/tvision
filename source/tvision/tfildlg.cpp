@@ -202,20 +202,35 @@ void TFileDialog::sizeLimits( TPoint& min, TPoint& max )
     min.y = 19;
 }
 
-static Boolean relativePath( const char *path )
+static inline Boolean isSep( char c )
 {
-    if( *path == '\\' || *path == '/' || (*path && path[1] == ':') )
-        return False;
-    else
-        return True;
+    return c == '\\' || c == '/';
+}
+
+static inline Boolean isHomeExpand( const char *path )
+{
+#if defined( _WIN32 ) || !defined( __BORLANDC__ )
+    return path[0] == '~' && isSep( path[1] );
+#else
+    return False;
+#endif
+}
+
+static inline Boolean isLocalPath( const char *path )
+{
+    return !( isSep( path[0] ) ||
+              isHomeExpand( path ) ||
+              (isalpha(path[0]) && path[1] == ':') );
 }
 
 /* 'src' is cast to unsigned char * so that isspace sign extends it
    correctly. */
 static void trim( char *dest, const char *src )
 {
+#ifndef __FLAT__
     while( *src != EOS && isspace( * (const unsigned char *) src ) )
         src++;
+#endif
     while( *src != EOS
 #ifndef __FLAT__
            && !isspace( * (const unsigned char *) src )
@@ -236,7 +251,7 @@ char TName[MAXFILE];
 char TExt[MAXEXT];
 
     trim( buf, fileName->data );
-    if( relativePath( buf ) == True )
+    if( isLocalPath( buf ) )
         {
         strcpy( buf, directory );
         trim( buf + strlen(buf), fileName->data );

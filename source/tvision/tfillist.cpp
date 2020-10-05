@@ -50,6 +50,10 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#if !defined( __STDLIB_H )
+#include <stdlib.h>
+#endif // __STDLIB_H
+
 #if defined( __FLAT__ ) && defined( __BORLANDC__)
 extern "C" char _FAR * _CType _FARFUNC strupr(char _FAR *__s);
 #endif
@@ -242,6 +246,8 @@ void TFileList::readDirectory( TStringView aWildCard )
                 works with '/' or '\' as the subdir separator on input;
                 changes all to '\' on output.
 
+                expands '~/' into the home directory on non-DOS.
+
 */
 
 #pragma warn -inl
@@ -286,6 +292,38 @@ void squeeze( char *path )
     *dest = EOS;                // zero terminator
 }
 
+static inline Boolean isSep( char c )
+{
+    return c == '\\' || c == '/';
+}
+
+static inline Boolean isHomeExpand( const char *path )
+{
+    return path[0] == '~' && isSep( path[1] );
+}
+
+static Boolean getHomeDir( char *drive, char *dir )
+{
+#ifdef _WIN32
+    const char *homedrive = getenv( "HOMEDRIVE" );
+    const char *homepath = getenv( "HOMEPATH" );
+    if( homedrive && homepath )
+        {
+        strnzcpy( drive, homedrive, MAXDRIVE );
+        strnzcpy( dir, homepath, MAXDIR );
+        return True;
+        }
+#elif !defined( __BORLANDC__ )
+    const char *home = getenv( "HOME" );
+    if( home )
+        {
+        strnzcpy( dir, home, MAXDIR );
+        return True;
+        }
+#endif
+    return False;
+}
+
 void fexpand( char *rpath )
 {
     char path[MAXPATH];
@@ -302,14 +340,19 @@ void fexpand( char *rpath )
         drive[2] = '\0';
         }
     drive[0] = toupper(drive[0]);
-    if( (flags & DIRECTORY) == 0 || (dir[0] != '\\' && dir[0] != '/') )
+    if( (flags & DIRECTORY) == 0 || !isSep(dir[0]) )
         {
         char curdir[MAXDIR+1];
-        if ( getcurdir( drive[0] - 'A' + 1, curdir ) != 0 )
+        if( isHomeExpand( dir ) && getHomeDir( drive, curdir ) ) // Home expansion.
+            strnzcat( curdir, dir+1, MAXDIR+1 ); // 'dir' begins with "~/", so we can reuse the separator.
+        else if( getcurdir( drive[0] - 'A' + 1, curdir ) == 0 )
+            {
+            strnzcat( curdir, "\\", MAXDIR+1 ); // getcurdir does not place a separator at the end.
+            strnzcat( curdir, dir, MAXDIR+1 );
+            }
+        else
             *curdir = '\0';
-        strnzcat( curdir, "\\", MAXDIR+1 );
-        strnzcat( curdir, dir, MAXDIR+1 );
-        if( *curdir != '\\' && *curdir != '/' )
+        if( !isSep( *curdir ) )
             {
             *dir = '\\';
             strnzcpy( dir+1, curdir, MAXDIR-1 );
