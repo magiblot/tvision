@@ -49,6 +49,7 @@ public:
 #endif
 #ifndef __BORLANDC__
     TStringView(const std::string &text);
+    operator std::string() const;
 #endif
     constexpr operator TSpan<const char>() const;
 
@@ -131,6 +132,11 @@ inline TStringView::TStringView(const std::string &text) :
     str(text.data()),
     len(text.size())
 {
+}
+
+inline TStringView::operator std::string() const
+{
+    return {str, len};
 }
 #endif
 
