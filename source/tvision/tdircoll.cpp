@@ -122,15 +122,15 @@ Boolean validFileName( const char *fileName )
     return True;
 }
 
-void getCurDir( char *dir )
+void getCurDir( char *dir, char drive )
 {
-    dir[0] = (char) (getdisk() + 'A');
+    dir[0] = (char) ((0 <= drive && drive <= 'Z' - 'A' ? drive : getdisk()) + 'A');
     dir[1] = ':';
     dir[2] = '\\';
     dir[3] = '\0';
-    getcurdir( 0, dir+3 );
+    getcurdir( dir[0] - 'A' + 1, dir+3 );
     if( strlen( dir ) > 3 )
-        strcat( dir, "\\" );
+        strnzcat( dir, "\\", MAXPATH );
 }
 
 Boolean isWild( const char *f )

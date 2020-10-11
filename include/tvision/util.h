@@ -30,7 +30,8 @@ inline int max( int a, int b )
     return (a<b) ? b : a;
 }
 
-void fexpand( char * );
+void fexpand( char *rpath );
+void fexpand( char *rpath, const char *relativeTo );
 
 char hotKey( const char *s );
 ushort ctrlToArrow( ushort );
@@ -60,15 +61,11 @@ Boolean lowMemory();
 char *newStr( TStringView );
 
 Boolean driveValid( char drive );
-
 Boolean isDir( const char *str );
-
 Boolean pathValid( const char *path );
-
 Boolean validFileName( const char *fileName );
-
-void getCurDir( char *dir );
-
+void getCurDir( char *dir, char drive=-1 );
+Boolean getHomeDir( char *drive, char *dir );
 Boolean isWild( const char *f );
 
 size_t strnzcpy( char *dest, TStringView src, size_t n );

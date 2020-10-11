@@ -302,22 +302,49 @@ static inline Boolean isHomeExpand( const char *path )
     return path[0] == '~' && isSep( path[1] );
 }
 
-static Boolean getHomeDir( char *drive, char *dir )
+static inline Boolean isAbsolute( const char *path )
+{
+    return isSep( path[0] ) || (path[0] && path[1] == ':' && isSep( path[2] ) );
+}
+
+static inline void addFinalSep( char *path, size_t size )
+{
+    size_t len = strlen(path);
+    if( !(len && isSep( path[len-1] )) )
+        strnzcat( path, "\\", size );
+}
+
+#pragma warn -inl
+
+static inline int getPathDrive( const char *path )
+{
+    if( path[0] && path[1] == ':' )
+    {
+        int drive = toupper(path[0]) - 'A';
+        if (0 <= drive && drive <= 'Z' - 'A')
+            return drive;
+    }
+    return -1;
+}
+
+#pragma warn .inl
+
+Boolean getHomeDir( char *drive, char *dir )
 {
 #ifdef _WIN32
     const char *homedrive = getenv( "HOMEDRIVE" );
     const char *homepath = getenv( "HOMEPATH" );
     if( homedrive && homepath )
         {
-        strnzcpy( drive, homedrive, MAXDRIVE );
-        strnzcpy( dir, homepath, MAXDIR );
+        if (drive) strnzcpy( drive, homedrive, MAXDRIVE );
+        if (dir) strnzcpy( dir, homepath, MAXDIR );
         return True;
         }
 #elif !defined( __BORLANDC__ )
     const char *home = getenv( "HOME" );
     if( home )
         {
-        strnzcpy( dir, home, MAXDIR );
+        if (dir) strnzcpy( dir, home, MAXDIR );
         return True;
         }
 #endif
@@ -326,39 +353,67 @@ static Boolean getHomeDir( char *drive, char *dir )
 
 void fexpand( char *rpath )
 {
+    char curpath[MAXPATH];
+    getCurDir( curpath, getPathDrive(rpath) );
+    fexpand( rpath, curpath );
+}
+
+void fexpand( char *rpath, const char *relativeTo )
+{
     char path[MAXPATH];
     char drive[MAXDRIVE];
     char dir[MAXDIR];
     char file[MAXFILE];
     char ext[MAXEXT];
 
-    int flags = fnsplit( rpath, drive, dir, file, ext );
-    if( (flags & DRIVE) == 0 )
-        {
-        drive[0] = getdisk() + 'A';
-        drive[1] = ':';
-        drive[2] = '\0';
-        }
-    drive[0] = toupper(drive[0]);
+    int drv;
+    // Prioritize drive letter in 'rpath'.
+    if( (drv = getPathDrive(rpath)) == -1 &&
+        (drv = getPathDrive(relativeTo)) == -1 )
+        drv = getdisk();
+    drive[0] = drv + 'A';
+    drive[1] = ':';
+    drive[2] = '\0';
+
+    int flags = fnsplit( rpath, 0, dir, file, ext );
     if( (flags & DIRECTORY) == 0 || !isSep(dir[0]) )
         {
-        char curdir[MAXDIR+1];
-        if( isHomeExpand( dir ) && getHomeDir( drive, curdir ) ) // Home expansion.
-            strnzcat( curdir, dir+1, MAXDIR+1 ); // 'dir' begins with "~/", so we can reuse the separator.
-        else if( getcurdir( drive[0] - 'A' + 1, curdir ) == 0 )
+        char rbase[MAXPATH];
+        if( isHomeExpand(dir) && getHomeDir(drive, rbase) ) // Home expansion. Overwrite drive if necessary.
+            strnzcat( rbase, dir+1, MAXDIR ); // 'dir' begins with "~/" or "~\", so we can reuse the separator.
+        else
             {
-            strnzcat( curdir, "\\", MAXDIR+1 ); // getcurdir does not place a separator at the end.
-            strnzcat( curdir, dir, MAXDIR+1 );
+            // If 'rpath' is relative but contains a drive letter, just swap drives.
+            if( getPathDrive(rpath) != -1 )
+                {
+                if( getcurdir( drv + 1, rbase ) != 0 )
+                    rbase[0] = '\0';
+                }
+            else
+                {
+                // Expand 'relativeTo'.
+                strnzcpy( rbase, relativeTo, MAXPATH );
+                if( !isAbsolute(rbase) )
+                    {
+                    char curpath[MAXPATH];
+                    getCurDir( curpath, drv );
+                    fexpand( rbase, curpath );
+                    }
+                // Skip drive letter in 'rbase'.
+                if( getPathDrive(rbase) != -1 )
+                    memmove( rbase, rbase+2, strlen(rbase+2)+1 );
+                }
+            // Ensure 'rbase' ends with a separator.
+            addFinalSep( rbase, MAXPATH );
+            strnzcat( rbase, dir, MAXDIR );
+            }
+        if( !isSep(rbase[0]) )
+            {
+            dir[0] = '\\';
+            strnzcpy( dir+1, rbase, MAXDIR-1 );
             }
         else
-            *curdir = '\0';
-        if( !isSep( *curdir ) )
-            {
-            *dir = '\\';
-            strnzcpy( dir+1, curdir, MAXDIR-1 );
-            }
-        else
-            strnzcpy( dir, curdir, MAXDIR );
+            strnzcpy( dir, rbase, MAXDIR );
         }
 
     char *p = dir;
