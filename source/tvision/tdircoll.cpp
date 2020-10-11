@@ -84,12 +84,12 @@ Boolean pathValid( const char *path )
     strnzcpy( expPath, path, MAXPATH );
     fexpand( expPath );
     int len = strlen(expPath);
-#ifdef _WIN32
-    if( len <= 3 )
-        return driveValid(expPath[0]);
-#else
+#ifdef _TV_UNIX
     if( len == 1 && isSeparator(expPath[0]) )
         return True; // Root directory is always valid.
+#else
+    if( len <= 3 )
+        return driveValid(expPath[0]);
 #endif
     if( isSeparator(expPath[len-1]) )
         expPath[len-1] = EOS;
