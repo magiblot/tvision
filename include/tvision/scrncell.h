@@ -45,6 +45,7 @@ inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr)
 
 #include <cstring>
 #include <type_traits>
+#include <algorithm>
 
 template<typename T>
 struct alignas(T) trivially_convertible {
