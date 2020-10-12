@@ -1,0 +1,44 @@
+language: cpp
+
+env:
+  - GPM=true
+  - GPM=false
+os:
+  - linux
+  - osx
+  - windows
+
+# Linux config
+dist: focal
+
+# macOS config
+osx_image: xcode12  
+addons:
+  homebrew:
+    packages:
+    - ncurses
+
+compiler:
+  - clang
+  - gcc
+
+jobs:
+  exclude:
+    - os: osx
+      compiler: gcc
+    - os: osx
+      env: GPM=true
+
+before_install:
+  - if [[ "$GPM" == "true" ]]; then
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-get -y install libgpm-dev;
+      fi
+    fi
+
+script:
+  - cmake .
+  - cmake --build .
+
+after_success:
+  - ls -l bin lib
