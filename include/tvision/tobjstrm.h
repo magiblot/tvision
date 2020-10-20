@@ -41,18 +41,20 @@ typedef unsigned P_id_type;
 
 #if !defined( __fLink_def )
 #define __fLink_def
+
 struct fLink
 {
     fLink _NEAR *f;
     class TStreamableClass _NEAR *t;
     static class TStreamableClass * volatile forceLink;
 };
-#endif
 
 #define __link( s )             \
   extern TStreamableClass s;    \
   static fLink force ## s =     \
     { (fLink _NEAR *)&force ## s, (fLink::forceLink = &s, (TStreamableClass _NEAR *)&s) };
+
+#endif // __fLink_def
 
 #if defined( Uses_TStreamable ) && !defined( __TStreamable )
 #define __TStreamable
