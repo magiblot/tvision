@@ -174,7 +174,11 @@ BCC32.EXE -WC -Iinclude hello.cpp lib/tv32.lib
 BCC32.EXE -WX -Iinclude hello.cpp lib/tv32.lib import32.lib
 ```
 
-Note the extra `import32.lib` when using `-WX`. This file is provided by Borland C++, so it will be found as long as the compiler is configured properly (i.e. libraries and headers are looked up in `$(BCROOT)\LIB` and `$(BCROOT)\INCLUDE` by default).
+Note the extra `import32.lib` when using `-WX`. This file is provided by Borland C++, so it will be found as long as the compiler is configured properly (i.e. libraries and headers are looked up in `$(BCROOT)\LIB` and `$(BCROOT)\INCLUDE` by default). If you don't link against this file, you will get the following error:
+
+```
+Linker Error: Unresolved External 'SetConsoleActiveScreenBuffer' referenced from module hardwrvr.cpp
+```
 
 Additionally, you may get a warning like this one when running DPMI32 applications on an actual DOS environment:
 
