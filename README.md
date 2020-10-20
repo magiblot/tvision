@@ -16,6 +16,20 @@ At one point I considered I had done enough, and that any attempts at revamping 
 
 However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture, wrote the [Turbo](https://github.com/magiblot/turbo) text editor and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
 
+# Table of contents
+
+* [What is Turbo Vision good for?](#what-for)
+* [How do I use Turbo Vision?](#how-to)
+* Build environment
+    * [Linux](#build-linux)
+    * [Windows (MSVC)](#build-msvc)
+    * [Windows/DOS (Borland C++)](#build-borland)
+* [Features](#features)
+* [API changes](#apichanges)
+* [Unicode support](#unicode)
+
+<div id="what-for"></div>
+
 ## What is Turbo Vision good for?
 
 A lot has changed since Borland created Turbo Vision in the early 90's. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either concurrent or asynchronous programming, or both.
@@ -31,6 +45,8 @@ Turbo Vision does none of that, but it certainly overcomes many of the issues pr
     std::ifstream f("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
 ```
 
+<div id="how-to"></div>
+
 ## How do I use Turbo Vision?
 
 You can get started with the [Turbo Vision For C++ User's Guide](https://archive.org/details/BorlandTurboVisionForCUserSGuide/mode/1up), and look at the sample applications [`hello`](https://github.com/magiblot/tvision/blob/master/hello.cpp), [`tvdemo`](https://github.com/magiblot/tvision/tree/master/examples/tvdemo) and [`tvedit`](https://github.com/magiblot/tvision/tree/master/examples/tvedit). Once you grasp the basics,
@@ -39,6 +55,8 @@ I suggest you take a look at the [Turbo Vision 2.0 Programming Guide](https://ar
 Don't forget to check out the <a href="#features">features</a> and <a href="#apichanges">API changes</a> sections as well.
 
 ## Build environment
+
+<div id="build-linux"></div>
 
 ### Linux
 
@@ -84,6 +102,8 @@ If you choose the CMake build system for your application, you may simply copy t
 
 The backward-compatibility headers in `include/tvision/compat` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
+<div id="build-msvc"></div>
+
 ### Windows (MSVC)
 
 The build process with MSVC is slightly more complex, as there are more options to choose from. Note that you will need different build directories for different target architectures. For instance, to generate optimized binaries:
@@ -107,6 +127,8 @@ If you wish to link an application against Turbo Vision, note that MSVC won't al
 
 With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
 
+<div id="build-borland"></div>
+
 ### Windows/DOS (Borland C++)
 
 Turbo Vision can still be built either as a DOS or Windows library with Borland C++. Obviously, there is no Unicode support here.
@@ -116,9 +138,9 @@ I can confirm the build process works with:
 * Borland C++ 4.52 with the Borland DOS PowerPack.
 * Turbo Assembler 4.0.
 
-You may face different problems depending on your build environment. For instance, Turbo Assembler needs a patch to work under Windows 95. On Windows XP everything seems to work fine. On Windows 10, MAKE may emit the error 'Fatal: Command arguments too long', which can be fixed by upgrading MAKE to the one bundled with Borland C++ 5.x.
+You may face different problems depending on your build environment. For instance, Turbo Assembler needs a patch to work under Windows 95. On Windows XP everything seems to work fine. On Windows 10, MAKE may emit the error `Fatal: Command arguments too long`, which can be fixed by upgrading MAKE to the one bundled with Borland C++ 5.x.
 
-Yes, this works in 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit application. You will have to run it on another environment or try your luck with [winevdm](https://github.com/otya128/winevdm).
+Yes, this works on 64-bit Windows 10. What won't work is the Borland C++ installer, which is a 16-bit application. You will have to run it on another environment or try your luck with [winevdm](https://github.com/otya128/winevdm).
 
 A Borland Makefile can be found in the `project` directory. Build can be done by doing:
 
@@ -129,7 +151,7 @@ make.exe <options>
 
 Where `<options>` can be:
 
-* `-DDOS32` for 32-bit DPMI applications (which still work in 64-bit Windows).
+* `-DDOS32` for 32-bit DPMI applications (which still work on 64-bit Windows).
 * `-DWIN32` for 32-bit native Win32 applications (not possible for TVDEMO, which relies on `farcoreleft()` and other antiquities).
 * `-DDEBUG` to build debug versions of the application and the library.
 * `-DTVDEBUG` to link the applications with the debug version of the library.
@@ -138,6 +160,32 @@ Where `<options>` can be:
 This will compile the library into a `LIB` directory next to `project`, and will compile executables for the demo applications in their respective `examples/*` directories.
 
 I'm sorry, the root makefile assumes it is executed from the `project` directory. You can still run the original makefiles directly (in `source/tvision` and `examples/*`) if you want to use different settings.
+
+The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp`) from this project's root is:
+
+```sh
+# 16-bit, real mode DOS.
+BCC.EXE -ml -Iinclude hello.cpp lib/tv.lib
+
+# 32-bit, native Win32 application.
+BCC32.EXE -WC -Iinclude hello.cpp lib/tv32.lib
+
+# 32-bit, protected mode DOS (DPMI32).
+BCC32.EXE -WX -Iinclude hello.cpp lib/tv32.lib import32.lib
+```
+
+Note the extra `import32.lib` when using `-WX`. This file is provided by Borland C++, so it will be found as long as the compiler is configured properly (i.e. libraries and headers are looked up in `$(BCROOT)\LIB` and `$(BCROOT)\INCLUDE` by default).
+
+Additionally, you may get a warning like this one when running DPMI32 applications on an actual DOS environment:
+
+```
+32loader error: 'C:\HELLO.EXE'
+    Invalid import references:
+       - module 'kernel32.dll' entrypoint 'SetConsoleActiveScreenBuffer'
+    Do you want to attempt running this program (Y/N)?
+```
+
+But don't worry, you can ignore them.
 
 <div id="features"></div>
 
@@ -250,7 +298,7 @@ If you know of any Turbo Vision applications whose source code has not been lost
 
 <div id="unicode"></div>
 
-# Unicode Support
+# Unicode support
 
 The Turbo Vision API has been extended to allow receiving Unicode input and displaying Unicode text. The supported encoding is UTF-8, for a number of reasons:
 
