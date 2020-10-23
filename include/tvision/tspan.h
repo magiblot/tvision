@@ -37,6 +37,19 @@ public:
     {
     }
 
+#ifndef __BORLANDC__
+    constexpr TSpan(nullptr_t) :
+        TSpan()
+    {
+    }
+
+    template<size_t N>
+    constexpr TSpan(T (&array)[N]) :
+        TSpan(array, N)
+    {
+    }
+#endif
+
     constexpr operator TSpan<const T>() const
     {
         return TSpan<const T>(ptr, len);
@@ -88,6 +101,26 @@ public:
         if (n > tail)
             n = tail;
         return TSpan<T>(ptr + pos, n);
+    }
+
+    constexpr T _FAR * begin() const
+    {
+        return &ptr[0];
+    }
+
+    constexpr const T _FAR * cbegin() const
+    {
+        return &ptr[0];
+    }
+
+    constexpr T _FAR * end() const
+    {
+        return &ptr[len];
+    }
+
+    constexpr const T _FAR * cend() const
+    {
+        return &ptr[len];
     }
 
 };
