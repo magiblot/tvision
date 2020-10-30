@@ -199,7 +199,7 @@ struct KeyDownEvent
     char text[4];
     uchar textLength;
 
-    operator TStringView() const
+    TStringView asText() const
     {
         return TStringView(text, textLength);
     }
