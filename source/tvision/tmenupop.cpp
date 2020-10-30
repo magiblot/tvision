@@ -27,12 +27,6 @@ TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu
     putClickEventOnExit = False;
 }
 
-TMenuPopup::TMenuPopup(const TRect& bounds, TMenuItem &aMenu, TMenuView *aParentMenu) :
-    TMenuBox( bounds, new TMenu(aMenu), aParentMenu )
-{
-    putClickEventOnExit = False;
-}
-
 ushort TMenuPopup::execute()
 {
     // Do not highlight the default entry, because it would look ugly.

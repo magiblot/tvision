@@ -371,7 +371,6 @@ class TMenuPopup : public TMenuBox
 public:
 
     TMenuPopup(const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0);
-    TMenuPopup(const TRect& bounds, TMenuItem &aMenu, TMenuView *aParent = 0);
     virtual ushort execute();
     virtual void handleEvent(TEvent&);
 

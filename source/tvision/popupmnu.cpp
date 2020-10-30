@@ -6,6 +6,7 @@
 /*------------------------------------------------------------*/
 
 #define Uses_TMenuPopup
+#define Uses_TMenu
 #define Uses_TProgram
 #define Uses_TDeskTop
 #include <tvision/tv.h>
@@ -44,12 +45,16 @@ ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver)
     TGroup *app = TProgram::application;
     if (app)
     {
-        TPoint p = app->makeLocal(where);
-        TMenuPopup *m = new TMenuPopup(TRect(p, p), aMenu);
-        autoPlacePopup(m, p);
-        // Execute and dispose the menu.
-        res = app->execView(m);
-        TObject::destroy(m);
+        {
+            TPoint p = app->makeLocal(where);
+            TMenu *mnu = new TMenu(aMenu);
+            TMenuPopup *mpop = new TMenuPopup(TRect(p, p), mnu);
+            autoPlacePopup(mpop, p);
+            // Execute and dispose the menu.
+            res = app->execView(mpop);
+            TObject::destroy(mpop);
+            delete mnu;
+        }
         // Generate an event.
         if (res && receiver)
         {
