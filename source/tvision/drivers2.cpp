@@ -89,7 +89,7 @@ int cstrlen( TStringView text )
     size_t i = 0, width = 0;
     while (i < text.size()) {
         if (text[i] != '~')
-            TText::next(text.substr(i), i, width);
+            TText::next(text, i, width);
         else
             ++i;
     }
@@ -118,7 +118,7 @@ int strwidth( TStringView text )
 #else
     size_t i = 0, width = 0;
     while (i < text.size())
-        TText::next(text.substr(i), i, width);
+        TText::next(text, i, width);
     return width;
 #endif
 }

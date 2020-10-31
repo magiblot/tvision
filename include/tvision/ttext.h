@@ -102,10 +102,10 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttri
 
 #pragma warn .inl
 
-inline void TText::next(TStringView text, size_t &bytes, size_t &width)
+inline void TText::next(TStringView text, size_t &index, size_t &width)
 {
-    if (text.size()) {
-        ++bytes;
+    if (index < text.size()) {
+        ++index;
         ++width;
     }
 }
@@ -276,29 +276,30 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
     }
 }
 
-inline void TText::next(TStringView text, size_t &bytes, size_t &width)
+inline void TText::next(TStringView text, size_t &index, size_t &width)
 // Measures the length and width of the first character in 'text'.
 //
 // * text: input text.
-// * bytes (output parameter): gets increased by the length of the first character in 'text'.
+// * index (input/output parameter): index into 'text'. Gets increased by
+//   the length of the first character in 'text'.
 // * width (output parameter): gets increased by the display width of the first character in 'text'.
 {
-    if (text.size()) {
+    if (index < text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
-        int len = std::mbrtowc(&wc, text.data(), text.size(), &state);
+        int len = std::mbrtowc(&wc, &text[index], text.size() - index, &state);
         if (len <= 1) {
-            bytes += 1;
+            index += 1;
             width += 1;
         } else {
-            bytes += len;
 #ifdef _WIN32
-            int cWidth = std::min<int>(TText::width({&text[0], (size_t) len}), 8);
+            int cWidth = std::min<int>(TText::width({&text[index], (size_t) len}), 8);
 #else
             int cWidth = std::min<int>(TText::width(wc), 8);
 #endif
             if (cWidth != 0)
                 width += std::max<int>(cWidth, 1);
+            index += len;
         }
     }
 }
@@ -315,7 +316,7 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
     if (count > 0) {
         while (index < text.size()) {
             size_t width = 0;
-            TText::next({&text[index], text.size() - index}, index, width);
+            TText::next(text, index, width);
             count -= width;
             if (count <= 0) {
                 // Immediately return when the requested width is exceeded.
