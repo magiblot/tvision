@@ -102,7 +102,7 @@ public:
 
 protected:
 
-    void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) override;
+    void lowlevelWriteChars(std::string_view chars, TCellAttribs attr) override;
     void lowlevelMoveCursor(uint x, uint y) override;
     void lowlevelFlush() override;
 

@@ -184,7 +184,7 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
         ev.what = evKeyDown;
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
         if (ev.keyDown.textLength) {
-            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown);
+            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.asText());
             if (KeyEventW.wVirtualKeyCode == VK_MENU)
                 // This is enabled when pasting certain characters, and it confuses
                 // applications. Clear it.
@@ -336,16 +336,14 @@ ushort Win32Display::getScreenMode()
 
 // Fallback display support with rudimentary buffering.
 
-void Win32Display::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
+void Win32Display::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
 {
     if (attr != lastAttr) {
         lowlevelFlush();
         SetConsoleTextAttribute(cnHandle(), (uchar) attr);
         lastAttr = attr;
     }
-    uint i = 0;
-    while (++i < 4 && chars[i]);
-    buf.insert(buf.end(), &chars[0], &chars[i]);
+    buf.insert(buf.end(), chars.data(), chars.data()+chars.size());
 }
 
 void Win32Display::lowlevelMoveCursor(uint x, uint y)
