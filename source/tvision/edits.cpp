@@ -61,7 +61,7 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
                 } while (X%8 != 0 && X < Width);
                 ++P;
             } else
-                formatCell(Cells.subspan(X), (uint&) X, chars, P, Color);
+                formatCell(Cells, (uint&) X, chars, P, Color);
         }
     }
 fill:

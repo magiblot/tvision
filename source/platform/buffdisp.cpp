@@ -260,7 +260,7 @@ void FlushScreenAlgorithm::writeCell()
             disp.lowlevelMoveCursorX(x, y);
     }
 
-    disp.lowlevelWriteChars(cell.Char.bytes, cell.Attr);
+    disp.lowlevelWriteChars(cell.Char.asText(), cell.Attr);
     last = {x, y};
 }
 

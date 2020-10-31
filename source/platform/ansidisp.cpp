@@ -125,12 +125,10 @@ int AnsiDisplayBase::getScreenCols()
     return cols;
 }
 #endif
-void AnsiDisplayBase::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
+void AnsiDisplayBase::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
 {
     writeAttributes(attr);
-    uint i = 0;
-    while (++i < 4 && chars[i]);
-    bufWrite({(const char *) chars, i});
+    bufWrite(chars);
 }
 
 void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)

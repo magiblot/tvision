@@ -107,13 +107,13 @@ void NcursesDisplay::setCaretSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChars(const uchar chars[4], TCellAttribs attr)
+void NcursesDisplay::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
 {
     // Translate and apply text attributes.
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);
-    // Print a single character, which might be multi-byte in UTF-8.
-    waddnstr(stdscr, (const char *) chars, 4);
+    // Print characters.
+    waddnstr(stdscr, chars.data(), chars.size());
     wattroff(stdscr, curses_attr);
 }
 

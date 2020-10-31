@@ -38,7 +38,7 @@ public:
 
 protected:
 
-    void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr);
+    void lowlevelWriteChars(std::string_view chars, TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelFlush();
 

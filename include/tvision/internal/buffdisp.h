@@ -68,7 +68,7 @@ protected:
     void flushScreen();
     void onScreenResize();
 
-    virtual void lowlevelWriteChars(const uchar chars[4], TCellAttribs attr) = 0;
+    virtual void lowlevelWriteChars(std::string_view chars, TCellAttribs attr) = 0;
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelMoveCursorYby1(uint x, uint y) { lowlevelMoveCursor(x, y); }

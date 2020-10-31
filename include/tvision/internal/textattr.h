@@ -94,7 +94,7 @@ inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
         reverse = 7; // Reverse On
 }
 
-struct BufferCell : trivially_convertible<uint64_t> {
+struct BufferCell {
 
     TCellChar Char;
     TCellAttribs Attr;
@@ -102,24 +102,29 @@ struct BufferCell : trivially_convertible<uint64_t> {
         extraWidth  : 3,
         dirty       : 1;
 
-    using trivially_convertible::trivially_convertible;
-
+    BufferCell() = default;
     BufferCell(TScreenCell cell);
     bool operator!=(BufferCell other) const;
     void ensurePrintable(bool wideChars);
+
+    static constexpr void check_assumptions()
+    {
+        static_assert(std::is_trivial<BufferCell>());
+    }
 
 };
 
 inline BufferCell::BufferCell(TScreenCell cell)
 {
-    *this = (uint64_t) cell;
-    dirty = 0;
+    *this = {};
+    Char = cell.Char;
+    Attr = cell.Attr;
+    extraWidth = cell.extraWidth;
 }
 
 inline bool BufferCell::operator!=(BufferCell other) const
 {
-    // Discard dirty bit and unused bits. extraWidth is redundant.
-    return (*this ^ other) & 0x0000'FFFF'FFFF'FFFF;
+    return Char != other.Char || Attr != other.Attr;
 }
 
 #endif
