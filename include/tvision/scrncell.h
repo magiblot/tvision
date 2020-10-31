@@ -176,12 +176,44 @@ struct TScreenCellA : trivially_convertible<uint16_t>
 
 };
 
-struct TCellChar : trivially_convertible<uint64_t>
+struct alignas(4) TCellChar
 {
 
-    uint8_t bytes[8];
+    uint8_t bytes[12];
 
-    using trivially_convertible::trivially_convertible;
+    TCellChar() = default;
+
+    TCellChar(uint64_t ch)
+    {
+        *this = ch;
+    }
+
+    TCellChar& operator=(uint64_t ch)
+    {
+        memset(this, 0, sizeof(*this));
+        memcpy(bytes, &ch, std::min(sizeof(bytes), sizeof(ch)));
+        return *this;
+    }
+
+    bool operator==(TCellChar other) const
+    {
+        return memcmp(bytes, other.bytes, sizeof(bytes)) == 0;
+    }
+
+    bool operator!=(TCellChar other) const
+    {
+        return !(*this == other);
+    }
+
+    uint8_t& operator[](size_t i)
+    {
+        return bytes[i];
+    }
+
+    const uint8_t& operator[](size_t i) const
+    {
+        return bytes[i];
+    }
 
     void append(TStringView text)
     {
@@ -204,7 +236,7 @@ struct TCellChar : trivially_convertible<uint64_t>
 
     static constexpr void check_assumptions()
     {
-        check_trivial<TCellChar>();
+        static_assert(std::is_trivial<TCellChar>());
     }
 
 };

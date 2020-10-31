@@ -171,11 +171,13 @@ void BufferedDisplay::onScreenResize()
 void BufferedDisplay::ensurePrintable(BufferCell &cell) const
 {
     auto &ch = cell.Char;
-    if (ch == '\0')
-        ch = ' ';
-    else if (ch < ' ' || (0x7F <= ch && ch < 0x100)) {
-        // Translate from codepage as fallback.
-        ch = CpTranslator::toUtf8Int(ch);
+    if (!ch[1]) /* size 1 */ {
+        auto &c = ch[0];
+        if (c == '\0')
+            c = ' ';
+        else if (c < ' ' || 0x7F <= c)
+            // Translate from codepage as fallback.
+            ch = CpTranslator::toUtf8Int(c);
     } else if (ch == TScreenCell::wideCharTrail) {
         ch = widePlaceholder;
         cell.extraWidth = 0;
