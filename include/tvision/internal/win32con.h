@@ -22,9 +22,8 @@ class Win32ConsoleStrategy : public PlatformStrategy
     HANDLE consoleHandle[3];
     UINT consoleCp[2];
     DWORD consoleMode[2];
-    DWORD pendingEvent;
-    CONSOLE_CURSOR_INFO crInfo;
-    CONSOLE_SCREEN_BUFFER_INFO sbInfo;
+    CONSOLE_CURSOR_INFO crInfo {};
+    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
 
     void initConsole();
     void reloadScreenBufferInfo();

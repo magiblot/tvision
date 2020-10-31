@@ -30,11 +30,13 @@ void WinWidth::resetState()
 
 void WinWidth::setUp()
 {
-    if (!cnHandle) {
+    if (!registered) {
+        registered = true;
         // First time.
         auto &&lock = std::scoped_lock(m);
         states.push_back(this);
-    } else {
+    }
+    if (valid()) {
         tearDown();
     }
     cnHandle = CreateConsoleScreenBuffer(
@@ -56,14 +58,14 @@ void WinWidth::tearDown()
 
 int WinWidth::calcWidth(std::string_view mbc)
 {
-    if (!cnHandle)
+    if (!valid())
         setUp();
     uint32_t key = 0;
     memcpy(&key, mbc.data(), std::min(mbc.size(), sizeof(key)));
     auto it = results.find(key);
     if (it == results.end()) {
         short res = -1;
-        if (cnHandle) {
+        if (valid()) {
             SetConsoleCursorPosition(cnHandle, {0, 0});
             // I have seen WriteConsole return error despite the text being
             // printed... so don't check the return value.

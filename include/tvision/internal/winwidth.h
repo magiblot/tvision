@@ -20,7 +20,8 @@ class WinWidth {
     // A separate state is stored for every thread so that width() is both
     // thread-safe and lock-free.
 
-    HANDLE cnHandle {0};
+    HANDLE cnHandle {INVALID_HANDLE_VALUE};
+    bool registered {false};
     std::unordered_map<uint32_t, short> results;
 
     ~WinWidth();
@@ -28,6 +29,7 @@ class WinWidth {
     int calcWidth(std::string_view);
     void setUp();
     void tearDown();
+    bool valid() const;
 
     static thread_local WinWidth state;
     static std::vector<WinWidth*> states;
@@ -40,6 +42,12 @@ public:
     static void resetState();
 
 };
+
+inline bool WinWidth::valid() const
+{
+    // INVALID_HANDLE_VALUE because it's what CreateConsoleScreenBuffer returns.
+    return cnHandle != INVALID_HANDLE_VALUE;
+}
 
 inline int WinWidth::mbcwidth(std::string_view mbc)
 // At most 4 characters will be read from 'mbc', because it is expected to
