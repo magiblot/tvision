@@ -258,6 +258,12 @@ struct TScreenCell
         Attr = pair.Attr;
     }
 
+    TScreenCell(uint64_t ch)
+    {
+        memset(this, 0, sizeof(*this));
+        memcpy(this, &ch, std::min(sizeof(*this), sizeof(ch)));
+    }
+
     static constexpr uint32_t wideCharTrail = (uint32_t) -2;
 
     static constexpr void check_assumptions()

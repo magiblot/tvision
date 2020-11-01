@@ -93,7 +93,7 @@ void TSurfaceView::draw()
             // Prepare a buffer filled with whitespaces.
             TScreenCell *b = new TScreenCell[size.x];
             {
-                TScreenCell cell = {};
+                TScreenCell cell = 0;
                 ::setChar(cell, ' ');
                 ::setAttr(cell, sface->getFillColor());
                 for (int i = 0; i < size.x; ++i)
