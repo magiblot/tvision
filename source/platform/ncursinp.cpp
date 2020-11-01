@@ -331,7 +331,7 @@ bool NcursesInput::getEvent(TEvent &ev)
         if (Alt)
             setAltModifier(ev);
 
-        return ev.keyDown.keyCode != kbNoKey || *(uint32_t *) ev.keyDown.text;
+        return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }
     return false;
 }
@@ -371,7 +371,10 @@ void NcursesInput::setAltModifier(TEvent &ev)
     // Set the proper key code if Turbo Vision supports the combination.
     ushort candidate = AltKeyCode[toupper(ev.keyDown.charScan.charCode)];
     if (candidate)
+    {
         ev.keyDown.keyCode = candidate;
+        ev.keyDown.textLength = 0;
+    }
 }
 
 void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
