@@ -498,6 +498,12 @@ void TView::getEvent( TEvent& event )
         owner->getEvent(event);
 }
 
+void TView::getImmediateEvent( TEvent& event )
+{
+    if( owner != 0 )
+        owner->getImmediateEvent(event);
+}
+
 TRect TView::getExtent() const
 {
     return TRect( 0, 0, size.x, size.y );

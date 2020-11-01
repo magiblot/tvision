@@ -173,9 +173,9 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
     return False;
 }
 
-BOOL THardwareInfo::getKeyEvent( TEvent& event )
+BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
 {
-    readEvents();
+    readEvents(blocking);
     if (getPendingEvent(event, ~evMouse))
     {
         if (event.what & evKeyboard)
@@ -192,20 +192,22 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     return False;
 }
 
-void THardwareInfo::readEvents()
+void THardwareInfo::readEvents(Boolean blocking)
 {
     // Do not read any more events until the queue is empty.
     if (!eventCount)
     {
-        // Flush the screen once for every time all events have been processed.
-        THardwareInfo::flushScreen();
+        // Flush the screen once for every time all events have been processed,
+        // only for blocking requests.
+        if (blocking)
+            THardwareInfo::flushScreen();
         TEvent event;
         // Non-blocking read.
         while ( eventCount < eventQSize &&
                 platf->waitForEvent(0, event) )
             eventQ[eventCount++] = event;
         // Blocking read.
-        if (!eventCount && platf->waitForEvent(eventTimeoutMs, event))
+        if (blocking && !eventCount && platf->waitForEvent(eventTimeoutMs, event))
             eventQ[eventCount++] = event;
     }
 }

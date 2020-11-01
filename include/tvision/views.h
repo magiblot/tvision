@@ -375,6 +375,7 @@ public:
     void clearEvent( TEvent& event );
     Boolean eventAvail();
     virtual void getEvent( TEvent& event );
+    virtual void getImmediateEvent( TEvent& event );
     virtual void handleEvent( TEvent& event );
     virtual void putEvent( TEvent& event );
 

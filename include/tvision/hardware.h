@@ -107,11 +107,11 @@ public:
 // Event functions.
 
     static BOOL getMouseEvent( MouseEventType& event );
-    static BOOL getKeyEvent( TEvent& event );
+    static BOOL getKeyEvent( TEvent& event, Boolean blocking=True );
     static void clearPendingEvent();
 #ifndef __BORLANDC__
     static BOOL getPendingEvent( TEvent &event, ushort mask );
-    static void readEvents();
+    static void readEvents( Boolean blocking );
 #endif
 
 // System functions.

@@ -254,10 +254,10 @@ I   POP DS
 }
 #endif
 
-void TEvent::getKeyEvent()
+void TEvent::getKeyEvent(Boolean blocking)
 {
 #if defined( __FLAT__ )
-    if( THardwareInfo::getKeyEvent( *this ) )
+    if( THardwareInfo::getKeyEvent( *this, blocking ) )
     {
         // Need to handle special case of Alt-Space, Ctrl-Ins, Shift-Ins,
         // Ctrl-Del, Shift-Del
@@ -305,13 +305,16 @@ I   INT 16h;
     keyDown.keyCode = _AX;
     keyDown.controlKeyState = THardwareInfo::getShiftState();
 #endif
-#if defined( __BORLANDC__ )
-    if (' ' <= keyDown.charScan.charCode && keyDown.charScan.charCode != '\x7F')
+    if (what == evKeyDown)
         {
-        keyDown.text[0] = (char) keyDown.charScan.charCode;
-        keyDown.textLength = 1;
-        }
-    else
-        keyDown.textLength = 0;
+#if defined( __BORLANDC__ )
+        if (' ' <= keyDown.charScan.charCode && keyDown.charScan.charCode != '\x7F')
+            {
+            keyDown.text[0] = (char) keyDown.charScan.charCode;
+            keyDown.textLength = 1;
+            }
+        else
+            keyDown.textLength = 0;
 #endif
+        }
 }

@@ -120,7 +120,7 @@ inline Boolean hasMouse( TView *p, void *s )
                      p->mouseInView( ((TEvent *)s)->mouse.where ));
 }
 
-void TProgram::getEvent(TEvent& event)
+void TProgram::getEvent(TEvent& event, Boolean blocking)
 {
     if( pending.what != evNothing )
         {
@@ -132,11 +132,16 @@ void TProgram::getEvent(TEvent& event)
         event.getMouseEvent();
         if( event.what == evNothing )
             {
-            event.getKeyEvent();
+            event.getKeyEvent(blocking);
             if( event.what == evNothing )
                 idle();
             }
         }
+}
+
+void TProgram::getEvent(TEvent& event)
+{
+    getEvent(event, True);
 
     if( statusLine != 0 )
         {
@@ -152,6 +157,11 @@ void TProgram::getEvent(TEvent& event)
         setScreenMode( TDisplay::smChanged );
         clearEvent(event);
         }
+}
+
+void TProgram::getImmediateEvent(TEvent& event)
+{
+    getEvent(event, False);
 }
 
 TPalette& TProgram::getPalette() const

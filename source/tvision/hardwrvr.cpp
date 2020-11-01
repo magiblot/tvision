@@ -280,12 +280,12 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
     return False;
 }
 
-BOOL THardwareInfo::getKeyEvent( TEvent& event )
+BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
 {
     if( !pendingEvent )
         {
         // Don't do busy polling. Wait for a timeout instead.
-        pendingEvent = (WAIT_OBJECT_0 == WaitForSingleObject(consoleHandle[cnInput], eventTimeoutMs));
+        pendingEvent = (WAIT_OBJECT_0 == WaitForSingleObject(consoleHandle[cnInput], blocking ? eventTimeoutMs : 0));
         if( pendingEvent )
             ReadConsoleInput( consoleHandle[cnInput], &irBuffer, 1, &pendingEvent );
         }

@@ -231,7 +231,7 @@ struct TEvent
         MessageEvent message;
     };
     void getMouseEvent();
-    void getKeyEvent();
+    void getKeyEvent(Boolean blocking=True);
 
 };
 
