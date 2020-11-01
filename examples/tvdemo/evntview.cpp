@@ -255,9 +255,17 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
         decomposeFlag(out, ev.keyDown.controlKeyState, controlKeyFlags);
         out << ",\n"
             << hex
-            << "    .text = {0x"
-            << (int) (uchar) ev.keyDown.text[0] << ", 0x" << (int) (uchar) ev.keyDown.text[1] << ", 0x"
-            << (int) (uchar) ev.keyDown.text[2] << ", 0x" << (int) (uchar) ev.keyDown.text[3] << "},\n"
+            << "    .text = {";
+        Boolean first = True;
+        for (uchar i = 0; i < ev.keyDown.textLength; ++i)
+        {
+            if (first)
+                first = False;
+            else
+                out << ", ";
+            out << "0x" << (int) (uchar) ev.keyDown.text[i];
+        }
+        out << "},\n"
             << dec
             << "    .textLength = " << (int) ev.keyDown.textLength << "\n"
             << "  }\n";
