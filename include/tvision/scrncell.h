@@ -313,10 +313,10 @@ inline void setChar(TScreenCell &cell, uchar ch)
 
 inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
 {
-    TScreenCell c = {};
+    TScreenCell c = 0;
     ::setChar(c, ch, extraWidth);
     ::setAttr(c, attr);
-    cell = c;
+    memcpy(&cell, &c, sizeof(TScreenCell));
 }
 
 #endif // __BORLANDC__
