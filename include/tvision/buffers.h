@@ -60,6 +60,7 @@ class TVMemMgr
 public:
 
     TVMemMgr();
+    ~TVMemMgr();
 
     static void resizeSafetyPool( size_t = DEFAULT_SAFETY_POOL_SIZE );
     static int safetyPoolExhausted();
