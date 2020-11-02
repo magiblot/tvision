@@ -30,7 +30,9 @@
 
 TBufListEntry * _NEAR TBufListEntry::bufList = 0;
 
-TBufListEntry::TBufListEntry( void*& o ) noexcept : owner( o )
+TBufListEntry::TBufListEntry( void*& o, size_t sz ) noexcept :
+    owner( o ),
+    sz( sz )
 {
     next = bufList;
     prev = 0;
@@ -39,7 +41,7 @@ TBufListEntry::TBufListEntry( void*& o ) noexcept : owner( o )
         next->prev = this;
 }
 
-TBufListEntry::~TBufListEntry() noexcept
+void TBufListEntry::destroy()
 {
     owner = 0;
     if( prev == 0 )
@@ -48,11 +50,12 @@ TBufListEntry::~TBufListEntry() noexcept
         prev->next = next;
     if( next != 0 )
         next->prev = prev;
+    delete this;
 }
 
 void *TBufListEntry::operator new( size_t sz, size_t extra ) noexcept
 {
-    return malloc( sz + extra*sizeof( unsigned ) );
+    return malloc( sz + extra );
 }
 
 void *TBufListEntry::operator new( size_t ) noexcept
@@ -71,7 +74,7 @@ Boolean TBufListEntry::freeHead()
         return False;
     else
         {
-        delete bufList;
+        bufList->destroy();
         return True;
         }
 }
@@ -110,7 +113,7 @@ void TVMemMgr::allocateDiscardable( void *&adr, size_t sz )
         adr = 0;
     else
         {
-        TBufListEntry *newEntry = new( sz ) TBufListEntry( adr );
+        TBufListEntry *newEntry = new( sz ) TBufListEntry( adr, sz );
         if( newEntry == 0 )
             adr = 0;
         else
@@ -118,9 +121,49 @@ void TVMemMgr::allocateDiscardable( void *&adr, size_t sz )
         }
 }
 
+void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz )
+{
+    if( !sz )
+        {
+        freeDiscardable( adr );
+        adr = 0;
+        }
+    else if( !adr )
+        allocateDiscardable( adr, sz );
+    else
+        {
+        TBufListEntry *entry = (TBufListEntry *)((char *)adr - sizeof(TBufListEntry));
+        if( sz < entry->sz )
+            {
+            void *p = ::realloc(entry, sizeof(TBufListEntry) + sz);
+            if( p )
+                {
+                    TBufListEntry *newEntry = (TBufListEntry *)p;
+                    if( newEntry->prev )
+                        newEntry->prev->next = newEntry;
+                    else
+                        TBufListEntry::bufList = newEntry;
+                    newEntry->sz = sz;
+                    adr = (char *)p + sizeof(TBufListEntry);
+                }
+            else
+                {
+                freeDiscardable( adr );
+                adr = 0;
+                }
+            }
+        else if( sz > entry->sz )
+            {
+            freeDiscardable( adr );
+            allocateDiscardable( adr, sz );
+            }
+        }
+}
+
 void TVMemMgr::freeDiscardable( void *block )
 {
-    delete (TBufListEntry *)((char *)block - sizeof(TBufListEntry));
+    if (block)
+        ((TBufListEntry *)((char *)block - sizeof(TBufListEntry)))->destroy();
 }
 
 #if defined( __BORLANDC__ )

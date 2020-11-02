@@ -89,7 +89,6 @@ void TGroup::changeBounds( const TRect& bounds )
         }
     else
         {
-        freeBuffer();
         setBounds( bounds );
         clip = getExtent();
         getBuffer();
@@ -279,11 +278,7 @@ void TGroup::freeBuffer()
 {
     if( (options & ofBuffered) != 0 && buffer != 0 )
         {
-#ifdef __BORLANDC__
         TVMemMgr::freeDiscardable( buffer );
-#else
-        delete[] buffer;
-#endif
         buffer = 0;
         }
 }
@@ -291,14 +286,8 @@ void TGroup::freeBuffer()
 void TGroup::getBuffer()
 {
     if( (state & sfExposed) != 0 )
-        if( (options & ofBuffered) != 0 && (buffer == 0 ))
-            {
-#ifdef __BORLANDC__
-            TVMemMgr::allocateDiscardable( (void *&)buffer, size.x * size.y * sizeof(ushort) );
-#else
-            buffer = new TScreenCell[size.x * size.y];
-#endif
-            }
+        if( (options & ofBuffered) != 0 )
+            TVMemMgr::reallocateDiscardable( (void *&)buffer, size.x * size.y * sizeof(TScreenCell) );
 }
 
 void TGroup::getData(void *rec)
@@ -654,4 +643,4 @@ TGroup::TGroup( StreamableInit ) : TView( streamableInit )
 {
 }
 
-#endif
+#endif // NO_STREAMABLE

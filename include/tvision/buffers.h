@@ -29,8 +29,12 @@ class TBufListEntry
 
 private:
 
-    TBufListEntry( void*& ) noexcept;
-    ~TBufListEntry() noexcept;
+    TBufListEntry( void*&, size_t sz ) noexcept;
+#if __cplusplus >= 201103L
+    TBufListEntry() = default;
+    TBufListEntry(const TBufListEntry &) = default;
+#endif
+    void destroy();
 
     void *operator new( size_t, size_t ) noexcept;
     void *operator new( size_t ) noexcept;
@@ -39,6 +43,7 @@ private:
     TBufListEntry *next;
     TBufListEntry *prev;
     void*& owner;
+    size_t sz;
 
     static TBufListEntry *_NEAR bufList;
     static Boolean freeHead();
@@ -60,6 +65,7 @@ public:
     static int safetyPoolExhausted();
 
     static void allocateDiscardable( void *&, size_t );
+    static void reallocateDiscardable( void *&, size_t );
     static void freeDiscardable( void * );
 
 private:
