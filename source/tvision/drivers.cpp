@@ -288,7 +288,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
     int toggle = 1;
     uchar curAttr = ((uchar *)&attrs)[0];
 
-    while (i < length() && j < str.size())
+    while (j < str.size())
         if (str[j] == '~')
         {
             curAttr = ((uchar *) &attrs)[toggle];
@@ -297,8 +297,10 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
         }
         else
         {
-            ::setAttr(data[i], curAttr);
-            TText::eat(data, i, str, j);
+            if (i < length())
+                ::setAttr(data[i], curAttr);
+            if (!TText::eat(data, i, str, j))
+                break;
         }
 #endif
 }

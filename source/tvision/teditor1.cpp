@@ -279,13 +279,18 @@ void TEditor::nextChar( TStringView s, uint &p, uint &width )
         }
 }
 
-void TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
-                          TStringView text, uint &p, TCellAttribs color )
+Boolean TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
+                             TStringView text, uint &p, TCellAttribs color )
 {
-    ::setAttr(cells[width], color);
+    if (width < cells.size())
+        ::setAttr(cells[width], color);
     size_t p_ = 0, w_ = width;
-    TText::eat(cells, w_, text, p_);
-    p += p_; width = w_;
+    if (TText::eat(cells, w_, text, p_))
+        {
+        p += p_; width = w_;
+        return True;
+        }
+    return False;
 }
 
 int TEditor::charPos( uint p, uint target )

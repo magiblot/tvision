@@ -49,19 +49,23 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
     for (int r = 0; r < 3; ++r)
     {
         Color = ranges[r].color;
-        while (P < ranges[r].end && X < Width)
+        while (P < ranges[r].end)
         {
             TStringView chars = bufChars(P);
             uchar Char = chars[0];
             if (Char == '\r' || Char == '\n')
                 goto fill;
             if (Char == '\t') {
-                do {
-                    ::setCell(Cells[X++], ' ', Color);
-                } while (X%8 != 0 && X < Width);
-                ++P;
+                if (X < Width) {
+                    do {
+                        ::setCell(Cells[X++], ' ', Color);
+                    } while (X%8 != 0 && X < Width);
+                    ++P;
+                } else
+                    break;
             } else
-                formatCell(Cells, (uint&) X, chars, P, Color);
+                if (!formatCell(Cells, (uint&) X, chars, P, Color))
+                    break;
         }
     }
 fill:

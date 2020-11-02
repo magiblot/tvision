@@ -435,10 +435,8 @@ void TDrawBuffer::putChar(ushort indent, ushort c);
 `c` is always interpreted as a character in the active codepage.
 
 ```c++
-void TDrawBuffer::moveStr(ushort indent, const char *str, ushort attr);
-void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr); // New
-void TDrawBuffer::moveCStr(ushort indent, const char *str, ushort attrs);
-void TDrawBuffer::moveCStr(ushort indent, TStringView str, ushort attrs); // New
+void TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr);
+void TDrawBuffer::moveCStr(ushort indent, TStringView str, ushort attrs);
 ```
 `str` is interpreted according to the rules exposed previously.
 
@@ -481,15 +479,15 @@ The functions above depend on the following lower-level functions. You will need
 size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
-void TText::fill(TSpan<TScreenCell> cells, TStringView text);
+size_t TText::fill(TSpan<TScreenCell> cells, TStringView text);
 #ifdef __BORLANDC__
-void TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
+size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
 #else
 template <class Attr>
-void TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
+size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
-void TText::eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
-void TText::next(TStringView text, size_t &bytes, size_t &width);
+bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
+void TText::next(TStringView text, size_t &index, size_t &width);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
 ```
 

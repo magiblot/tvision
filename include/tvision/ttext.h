@@ -38,7 +38,7 @@ public:
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
 
-    static void eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
+    static Boolean eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 
@@ -72,14 +72,16 @@ inline size_t TText::wseek(TStringView text, int count, Boolean)
     return count > 0 ? min(count, text.size()) : 0;
 }
 
-inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
-                        TStringView text, size_t &j )
+inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
+                           TStringView text, size_t &j )
 {
     if (i < cells.size() && j < text.size()) {
         ::setChar(cells[i], text[j]);
         ++i;
         ++j;
+        return True;
     }
+    return False;
 }
 
 #pragma warn -inl
@@ -171,11 +173,8 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
 // Note that one cell is always one column wide.
 {
     size_t w = 0, b = 0;
-    while (w < cells.size() && b < text.size())
-        TText::eat(cells, w, text, b);
-    // TText::eat always increases 'w' by the width of the processed
-    // text, but it never fills more cells than there are available.
-    return std::min<size_t>(w, cells.size());
+    while (TText::eat(cells, w, text, b));
+    return w;
 }
 
 template<class Attr>
@@ -192,15 +191,17 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&att
 //
 // * Otherwise, 'attr' is directly assigned to the cell's attributes.
 {
-    size_t w = 0, b = 0;
-    while (w < cells.size() && b < text.size()) {
-        if constexpr (std::is_invocable<Attr, TScreenCell&>())
-            attr(cells[w]);
-        else
-            ::setAttr(cells[w], attr);
-        TText::eat(cells, w, text, b);
+    if (cells.size() && text.size()) {
+        size_t w = 0, b = 0;
+        do {
+            if constexpr (std::is_invocable<Attr, TScreenCell&>())
+                attr(cells[w]);
+            else
+                ::setAttr(cells[w], attr);
+        } while (TText::eat(cells, w, text, b));
+        return w;
     }
-    return std::min<size_t>(w, cells.size());
+    return 0;
 }
 
 inline bool TText::isBlacklisted(TStringView mbc)
@@ -211,8 +212,8 @@ inline bool TText::isBlacklisted(TStringView mbc)
     return mbc == "\xE2\x80\x8D"; // U+200D ZERO WIDTH JOINER.
 }
 
-inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
-                        TStringView text, size_t &j )
+inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
+                           TStringView text, size_t &j )
 // Reads a single character from a multibyte-encoded string, and writes it into
 // a screen cell.
 //
@@ -228,22 +229,31 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
 // combining characters appended to it (of width 0).
 //
 // So, when a zero-width character is found in 'text', it is combined with the
-// previous cell, i.e. cells[i - 1], provided that i > 0.
+// previous cell, i.e. cells[i - 1], as long as i > 0.
+//
+// Returns false when no more text can be written into 'cells'. In other words,
+// it is safe to use TText::eat in a loop, like this:
+//
+//      size_t i = 0, j = 0;
+//      while (TText::eat(cells, i, text, j));
 {
-    if (i < cells.size() && j < text.size()) {
+    if (j < text.size()) {
         wchar_t wc;
         std::mbstate_t state {};
         int len = std::mbrtowc(&wc, &text[j], text.size() - j, &state);
         if (len <= 1) {
-            if (len < 0)
-                ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
-            else if (len == 0) // '\0'
-                ::setChar(cells[i], ' ');
-            else {
-                ::setChar(cells[i], {&text[j], 1});
+            if (i < cells.size()) {
+                if (len < 0)
+                    ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
+                else if (len == 0) // '\0'
+                    ::setChar(cells[i], ' ');
+                else {
+                    ::setChar(cells[i], {&text[j], 1});
+                }
+                i += 1;
+                j += 1;
+                return true;
             }
-            i += 1;
-            j += 1;
         } else {
 #ifdef _WIN32
             int cWidth = TText::width({&text[j], (size_t) len});
@@ -251,8 +261,12 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
             int cWidth = TText::width(wc);
 #endif
             if (cWidth < 0) {
-                ::setChar(cells[i], "�");
-                i += 1;
+                if (i < cells.size()) {
+                    ::setChar(cells[i], "�");
+                    i += 1;
+                    j += len;
+                    return true;
+                }
             } else if (cWidth == 0) {
                 TStringView zwc {&text[j], (size_t) len};
                 // Append to the previous cell, if present.
@@ -261,19 +275,25 @@ inline void TText::eat( TSpan<TScreenCell> cells, size_t &i,
                     while (cells[--k].Char == TScreenCell::wideCharTrail && k > 0);
                     cells[k].Char.append(zwc);
                 }
+                j += len;
+                return true;
             } else {
-                uchar extraWidth = std::min<size_t>(cWidth - 1, 7);
-                ::setChar(cells[i], {&text[j], (size_t) len}, extraWidth);
-                // Fill trailing cells.
-                auto attr = ::getAttr(cells[i]);
-                size_t count = std::min<size_t>(extraWidth + 1, cells.size() - i);
-                for (size_t k = 1; k < count; ++k)
-                    ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
-                i += count;
+                if (i < cells.size()) {
+                    uchar extraWidth = std::min<size_t>(cWidth - 1, 7);
+                    ::setChar(cells[i], {&text[j], (size_t) len}, extraWidth);
+                    // Fill trailing cells.
+                    auto attr = ::getAttr(cells[i]);
+                    size_t count = std::min<size_t>(extraWidth + 1, cells.size() - i);
+                    for (size_t k = 1; k < count; ++k)
+                        ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
+                    i += count;
+                    j += len;
+                    return true;
+                }
             }
-            j += len;
         }
     }
+    return false;
 }
 
 inline void TText::next(TStringView text, size_t &index, size_t &width)
