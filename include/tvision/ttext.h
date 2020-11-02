@@ -191,17 +191,16 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&att
 //
 // * Otherwise, 'attr' is directly assigned to the cell's attributes.
 {
-    if (cells.size() && text.size()) {
-        size_t w = 0, b = 0;
-        do {
+    size_t w = 0, b = 0;
+    do {
+        if (w < cells.size()) {
             if constexpr (std::is_invocable<Attr, TScreenCell&>())
                 attr(cells[w]);
             else
                 ::setAttr(cells[w], attr);
-        } while (TText::eat(cells, w, text, b));
-        return w;
-    }
-    return 0;
+        }
+    } while (TText::eat(cells, w, text, b));
+    return w;
 }
 
 inline bool TText::isBlacklisted(TStringView mbc)
