@@ -68,12 +68,12 @@ void TStaticText::draw()
             i = p;
             int last = i + TText::wseek(TStringView(&s[i], l-i), size.x, False);
             do {
-               j = p;
-               while ((p < l) && (s[p] == ' '))
-                   ++p;
-               while ((p < l) && (s[p] != ' ') && (s[p] != '\n'))
-                   p += TText::next(TStringView(&s[p], l-p));
-               } while ((p < l) && (p < last) && (s[p] != '\n'));
+                j = p;
+                while ((p < l) && (s[p] == ' '))
+                    ++p;
+                while ((p < l) && (s[p] != ' ') && (s[p] != '\n'))
+                    p += TText::next(TStringView(&s[p], l-p));
+                } while ((p < l) && (p < last) && (s[p] != '\n'));
             if (p > last)
                 {
                 if (j > i)
@@ -83,9 +83,9 @@ void TStaticText::draw()
                 }
             int width = strwidth(TStringView(&s[i], p-i));
             if (center == True)
-               j = (size.x - width) / 2 ;
+                j = (size.x - width) / 2 ;
             else
-               j = 0;
+                j = 0;
             b.moveStr(j, TStringView(&s[i], l-i), color, (ushort) width);
             while ((p < l) && (s[p] == ' '))
                 p++;

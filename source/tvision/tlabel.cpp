@@ -75,16 +75,16 @@ TPalette& TLabel::getPalette() const
 
 void TLabel::focusLink(TEvent& event)
 {
-	if (link && (link->options & ofSelectable))
-		link->focus();
-	clearEvent(event);
+    if (link && (link->options & ofSelectable))
+        link->focus();
+    clearEvent(event);
 }
 
 void TLabel::handleEvent( TEvent& event )
 {
     TStaticText::handleEvent(event);
     if( event.what == evMouseDown )
-    	focusLink(event);
+        focusLink(event);
 
     else if( event.what == evKeyDown )
         {
@@ -93,7 +93,7 @@ void TLabel::handleEvent( TEvent& event )
                 ( c != 0 && owner->phase == TGroup::phPostProcess &&
                 toupper(event.keyDown.charScan.charCode) ==  c )
           )
-	    focusLink(event);
+            focusLink(event);
         }
     else if( event.what == evBroadcast && link &&
             ( event.message.command == cmReceivedFocus ||

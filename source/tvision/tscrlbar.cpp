@@ -301,7 +301,7 @@ void TScrollBar::setParams( int aValue,
                             int aArStep
                           )
 {
- int  sValue;
+    int  sValue;
 
     aMax = max( aMax, aMin );
     aValue = max( aMin, aValue );

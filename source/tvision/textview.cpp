@@ -24,6 +24,7 @@
 
 #include <malloc.h>
 
+#pragma argsused
 TTextDevice::TTextDevice( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,

@@ -82,11 +82,11 @@ void THistory::handleEvent( TEvent& event )
       )
         {
         if (!link->focus())
-	{
-		clearEvent(event);
-		return;
-	}
-	recordHistory(link->data);
+            {
+            clearEvent(event);
+            return;
+            }
+        recordHistory(link->data);
         r = link->getBounds();
         r.a.x--;
         r.b.x++;
@@ -113,11 +113,13 @@ void THistory::handleEvent( TEvent& event )
         }
     else
         if( event.what == evBroadcast )
+            {
             if( (event.message.command == cmReleasedFocus &&
                  event.message.infoPtr ==  link) ||
                 event.message.command ==  cmRecordHistory
               )
                 recordHistory(link->data );
+            }
 }
 
 THistoryWindow *THistory::initHistoryWindow( const TRect& bounds )
@@ -129,7 +131,7 @@ THistoryWindow *THistory::initHistoryWindow( const TRect& bounds )
 
 void THistory::recordHistory(const char* s)
 {
-	historyAdd(historyId, s);
+    historyAdd(historyId, s);
 }
 
 #if !defined(NO_STREAMABLE)

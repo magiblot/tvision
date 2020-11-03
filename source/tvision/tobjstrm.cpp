@@ -216,15 +216,23 @@ int pstream::eof() const
 {
     return state & ios::eofbit;
 }
-// Comment out references to ios::hardfail, just like Sergio Sigala did.
+
 int pstream::fail() const
 {
-    return state & (ios::failbit | ios::badbit/* | ios::hardfail*/);
+    return state & (ios::failbit | ios::badbit
+#ifdef __BORLANDC__
+        | ios::hardfail
+#endif
+    );
 }
 
 int pstream::bad() const
 {
-    return state & (ios::badbit/* | ios::hardfail*/);
+    return state & (ios::badbit
+#ifdef __BORLANDC__
+        | ios::hardfail
+#endif
+    );
 }
 
 int pstream::good() const
@@ -234,7 +242,11 @@ int pstream::good() const
 
 void pstream::clear( int i )
 {
-    state = (i & 0xFF)/* | (state & ios::hardfail)*/;
+    state = (i & 0xFF)
+#ifdef __BORLANDC__
+        | (state & ios::hardfail)
+#endif
+    ;
 }
 
 void pstream::registerType( TStreamableClass *ts )

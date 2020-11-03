@@ -144,13 +144,13 @@ void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz )
             void *p = ::realloc(entry, sizeof(TBufListEntry) + sz);
             if( p )
                 {
-                    TBufListEntry *newEntry = (TBufListEntry *)p;
-                    if( newEntry->prev )
-                        newEntry->prev->next = newEntry;
-                    else
-                        TBufListEntry::bufList = newEntry;
-                    newEntry->sz = sz;
-                    adr = (char *)p + sizeof(TBufListEntry);
+                TBufListEntry *newEntry = (TBufListEntry *)p;
+                if( newEntry->prev )
+                    newEntry->prev->next = newEntry;
+                else
+                    TBufListEntry::bufList = newEntry;
+                newEntry->sz = sz;
+                adr = (char *)p + sizeof(TBufListEntry);
                 }
             else
                 {

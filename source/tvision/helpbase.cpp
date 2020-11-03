@@ -412,7 +412,6 @@ static int widthToPos(const char *text, int offset, int size, int width)
 TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap )
 {
     int i;
-    TStringView str;
 
     i = scan(text, offset, size, '\n');
     if (i + offset > size )
@@ -441,7 +440,7 @@ TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wra
             i = widthToPos(text, offset, i - offset, width);
         i -= offset;
         }
-    str = TStringView(&text[offset], i);
+    TStringView str(&text[offset], i);
     if (str.size() && str.back() == '\n')
         str = str.substr(0, str.size() - 1);
     offset += i;
@@ -489,9 +488,9 @@ TStreamable *THelpIndex::build()
 }
 
 TStreamableClass RHelpIndex( THelpIndex::name,
-                                  THelpIndex::build,
-                                  __DELTA(THelpIndex)
-                            );
+                             THelpIndex::build,
+                             __DELTA(THelpIndex)
+                           );
 
 THelpIndex::~THelpIndex()
 {

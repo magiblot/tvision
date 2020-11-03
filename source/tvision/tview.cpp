@@ -723,10 +723,10 @@ void TView::setBounds( const TRect& bounds )
 
 void TView::setCmdState(TCommandSet& commands, Boolean enable)
 {
-	if (enable)
-		enableCommands(commands);
-	else
-		disableCommands(commands);
+    if (enable)
+        enableCommands(commands);
+    else
+        disableCommands(commands);
 }
 
 void TView::setCommands( TCommandSet& commands )

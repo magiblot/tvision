@@ -224,12 +224,12 @@ void TColorSelector::handleEvent( TEvent& event )
                 else
                     color = event.message.infoByte & 0x0F;
                 drawView();
-                return ;
+                return;
                 }
             else
                 return;
         default:
-            return ;
+            return;
         }
     drawView();
     colorChanged();

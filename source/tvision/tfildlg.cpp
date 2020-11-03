@@ -221,13 +221,13 @@ static void trim( char *dest, const char *src )
 
 void TFileDialog::getFileName( char *s )
 {
-char buf[2*MAXPATH];
-char drive[MAXDRIVE];
-char path[MAXDIR];
-char name[MAXFILE];
-char ext[MAXEXT];
-char TName[MAXFILE];
-char TExt[MAXEXT];
+    char buf[2*MAXPATH];
+    char drive[MAXDRIVE];
+    char path[MAXDIR];
+    char name[MAXFILE];
+    char ext[MAXEXT];
+    char TName[MAXFILE];
+    char TExt[MAXEXT];
 
     trim( buf, fileName->data );
     fexpand( buf, directory );

@@ -119,7 +119,7 @@ void TWindow::handleEvent( TEvent& event )
                     ( event.message.infoPtr == 0 || event.message.infoPtr == this )
                   )
                     {
-		    clearEvent(event);
+                    clearEvent(event);
                     if( (state & sfModal) == 0 )
                         close();
                     else

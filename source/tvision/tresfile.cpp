@@ -182,32 +182,32 @@ void TResourceFile::put(TStreamable *item, const char *key)
 
 void copyStream( fpstream* dest, fpstream* src, int32_t n)
 {
-	const int xferSize=256;
+    const int xferSize=256;
 
-	char *xferBuf = new char[xferSize];
-	size_t thisMove;
+    char *xferBuf = new char[xferSize];
+    size_t thisMove;
 
-	while (n > 0)
-	{
-		if (n > xferSize)
-			thisMove = xferSize;
-		else
-			thisMove = (int)n;
+    while (n > 0)
+    {
+        if (n > xferSize)
+            thisMove = xferSize;
+        else
+            thisMove = (int)n;
 
-		src->readBytes(xferBuf, thisMove);
-		dest->writeBytes(xferBuf, thisMove);
-		n -= thisMove;
-	}
+        src->readBytes(xferBuf, thisMove);
+        dest->writeBytes(xferBuf, thisMove);
+        n -= thisMove;
+    }
 
-	delete[] xferBuf;
+    delete[] xferBuf;
 }
 
 struct SwitchInfo
 {
-	fpstream* sourceStream;
-	fpstream* destStream;
-	int32_t oldBasePos;
-	int32_t newBasePos;
+    fpstream* sourceStream;
+    fpstream* destStream;
+    int32_t oldBasePos;
+    int32_t newBasePos;
 };
 
 void doCopyResource(void* item, void* arg)
@@ -229,8 +229,8 @@ fpstream* TResourceFile::switchTo( fpstream *aStream, Boolean pack )
 
   if (pack)
   {
-  	 args.sourceStream = stream;
-	 args.destStream = aStream;
+    args.sourceStream = stream;
+    args.destStream = aStream;
     aStream->seekp( args.newBasePos + sizeof(int32_t)*3);
     index->forEach(doCopyResource, &args);
     indexPos = aStream->tellp() - (streamoff) args.newBasePos;
@@ -238,7 +238,7 @@ fpstream* TResourceFile::switchTo( fpstream *aStream, Boolean pack )
   else
   {
     stream->seekg(basePos);
-	 copyStream(aStream, stream, indexPos);
+    copyStream(aStream, stream, indexPos);
   }
 
   modified = True;

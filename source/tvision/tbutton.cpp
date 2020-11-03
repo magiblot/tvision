@@ -190,7 +190,7 @@ void TButton::handleEvent( TEvent& event )
     switch( event.what )
         {
         case evMouseDown:
-            if ((state &  sfDisabled) == 0)
+            if ((state & sfDisabled) == 0)
                 {
                 clickRect.b.x++;
                 Boolean down = False;

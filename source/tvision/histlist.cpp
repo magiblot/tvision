@@ -110,11 +110,11 @@ void advanceStringPointer()
 
 void deleteString()
 {
-	size_t len = curRec->len;
+    size_t len = curRec->len;
 #if !defined(__FLAT__)
-	movmem( next( curRec ), curRec, size_t( (char *)lastRec - (char *)curRec ) );
+    movmem( next( curRec ), curRec, size_t( (char *)lastRec - (char *)curRec ) );
 #else
-	memcpy(curRec, next(curRec),    size_t( (char *)lastRec - (char *)curRec ) );
+    memcpy(curRec, next(curRec),    size_t( (char *)lastRec - (char *)curRec ) );
 #endif
     lastRec = backup( lastRec, len );
 }
@@ -128,9 +128,9 @@ void insertString( uchar id, TStringView str )
         HistRec *dst = historyBlock;
         HistRec *src = next( historyBlock );
 #if !defined(__FLAT__)
-		movmem( src, dst,  size_t( (char *)lastRec - (char *)src ) );
+        movmem( src, dst,  size_t( (char *)lastRec - (char *)src ) );
 #else
-		memcpy( dst, src,  size_t( (char *)lastRec - (char *)src ) );
+        memcpy( dst, src,  size_t( (char *)lastRec - (char *)src ) );
 #endif
         lastRec = backup( lastRec, firstLen );
         }

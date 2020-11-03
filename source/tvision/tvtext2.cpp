@@ -83,10 +83,10 @@ inline uchar hi(ushort w) { return w >> 8; }
 
 char getCtrlChar(ushort keyCode)
 {
-	if ( (lo(keyCode)!= 0) && (lo(keyCode) <= ('Z'-'A'+1)))
-		return lo(keyCode) + 'A' - 1;
-	else
-		return 0;
+    if ( (lo(keyCode)!= 0) && (lo(keyCode) <= ('Z'-'A'+1)))
+        return lo(keyCode) + 'A' - 1;
+    else
+        return 0;
 }
 
 ushort getCtrlCode(uchar ch)

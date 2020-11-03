@@ -49,10 +49,11 @@ void TMemo::getData( void *rec )
 void TMemo::setData( void *rec )
 {
     TMemoData *data = (TMemoData *)rec;
-    if (setBufSize(data->length)) {
+    if (setBufSize(data->length))
+        {
         memcpy(&buffer[bufSize - data->length], data->buffer, data->length);
         setBufLen(data->length);
-    }
+        }
 }
 
 TPalette& TMemo::getPalette() const
