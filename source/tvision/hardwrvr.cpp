@@ -31,8 +31,7 @@ DWORD THardwareInfo::pendingEvent;
 INPUT_RECORD THardwareInfo::irBuffer;
 CONSOLE_CURSOR_INFO THardwareInfo::crInfo;
 CONSOLE_SCREEN_BUFFER_INFO THardwareInfo::sbInfo;
-// Timeout after a 'tick', I guess. See getTickCount().
-int THardwareInfo::eventTimeoutMs = 55;
+int THardwareInfo::eventTimeoutMs = 50; // 20 FPS
 
 const ushort THardwareInfo::ShiftCvt[89] = {
          0,      0,      0,      0,      0,      0,      0,      0,
