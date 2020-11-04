@@ -56,6 +56,27 @@ struct TVWrite {
     }
 #endif
 
+    static TCellAttribs applyShadow(TCellAttribs attr)
+    {
+#ifdef __BORLANDC__
+        // Because we can't know if the cell has already been shadowed,
+        // we compare against the shadow attributes. This may yield some false positives.
+        if (attr == shadowAttr || attr == shadowAttrInv)
+            return attr;
+        else
+            return attr & 0xF0 ? shadowAttr : shadowAttrInv;
+#else
+        // Here TCellAttribs is a struct, so we can have a dedicated field
+        // to determine whether the shadow has been applied.
+        if (!attr.shadow)
+        {
+            attr.shadow = 1;
+            return attr & 0xF0 ? shadowAttr : shadowAttrInv;
+        }
+        return attr;
+#endif
+    }
+
 };
 
 void TView::writeView( short x, short y, short count, const void _FAR* b )
@@ -244,7 +265,7 @@ void TVWrite::copyShort( ushort *dst, const ushort *src )
         for (i = 0; i < Count - X; ++i)
         {
             loByte(ColorChar) = src[i];
-            hiByte(ColorChar) = src[i + 1] & 0xF0 ? shadowAttr : shadowAttrInv;
+            hiByte(ColorChar) = applyShadow(src[i + 1]);
             dst[i] = ColorChar;
         }
 #undef loByte
@@ -266,7 +287,7 @@ void TVWrite::copyShort2CharInfo( ushort *dst, const ushort *src )
         for (i = 0; i < 2*(Count - X); i += 2)
         {
             dst[i] = ((const uchar *) src)[i];
-            dst[i + 1] = ((const uchar *) src)[i + 1] & 0xF0 ? shadowAttr : shadowAttrInv;
+            dst[i + 1] = applyShadow(((const uchar *) src)[i + 1]);
         }
 }
 
@@ -280,7 +301,7 @@ void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
         for (i = 0; i < Count - X; ++i)
         {
             auto c = src[i];
-            ::setAttr(c, ::getAttr(c) & 0xF0 ? shadowAttr : shadowAttrInv);
+            ::setAttr(c, applyShadow(::getAttr(c)));
             dst[i] = c;
         }
 }
@@ -299,7 +320,7 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         for (i = 0; i < Count - X; ++i)
         {
             TScreenCell c {TScreenCellA(src[i])};
-            ::setAttr(c, ::getAttr(c) & 0xF0 ? shadowAttr : shadowAttrInv);
+            ::setAttr(c, applyShadow(::getAttr(c)));
             dst[i] = c;
         }
 }

@@ -78,7 +78,6 @@ protected:
     static constexpr bool check_trivial()
     {
         static_assert(std::is_trivial<C>());
-        static_assert(std::is_standard_layout<C>());
         static_assert(sizeof(C) == sizeof(T));
         static_assert(alignof(C) == alignof(T));
         return true;
@@ -115,6 +114,13 @@ struct TCellAttribs : trivially_convertible<uint16_t>
         italic      : 1,
         underline   : 1,
         reverse     : 1;
+
+private:
+    uint8_t
+        shadow      : 1;
+
+    friend class TVWrite;
+public:
 
     using trivially_convertible::trivially_convertible;
     TCellAttribs() = default;
