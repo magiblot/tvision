@@ -260,7 +260,7 @@ public:
     virtual Boolean canMoveFocus();
     virtual ushort executeDialog(TDialog*, void*data = 0);
     virtual void getEvent(TEvent& event);
-    virtual void getImmediateEvent(TEvent& event);
+    virtual size_t getTextEvent(TEvent& event, TSpan<char> dest, size_t *count);
     virtual TPalette& getPalette() const;
     virtual void handleEvent(TEvent& event);
     virtual void idle();
@@ -292,7 +292,7 @@ protected:
 
 private:
 
-    void getEvent(TEvent& event, Boolean blocking);
+    Boolean readTextEvent(TEvent &, TSpan<char>, size_t &);
 
     static const char * _NEAR exitText;
 

@@ -120,7 +120,7 @@ inline Boolean hasMouse( TView *p, void *s )
                      p->mouseInView( ((TEvent *)s)->mouse.where ));
 }
 
-void TProgram::getEvent(TEvent& event, Boolean blocking)
+void TProgram::getEvent(TEvent& event)
 {
     if( pending.what != evNothing )
         {
@@ -132,16 +132,11 @@ void TProgram::getEvent(TEvent& event, Boolean blocking)
         event.getMouseEvent();
         if( event.what == evNothing )
             {
-            event.getKeyEvent(blocking);
+            event.getKeyEvent();
             if( event.what == evNothing )
                 idle();
             }
         }
-}
-
-void TProgram::getEvent(TEvent& event)
-{
-    getEvent(event, True);
 
     if( statusLine != 0 )
         {
@@ -159,9 +154,57 @@ void TProgram::getEvent(TEvent& event)
         }
 }
 
-void TProgram::getImmediateEvent(TEvent& event)
+size_t TProgram::getTextEvent(TEvent& event, TSpan<char> dest, size_t *count)
 {
-    getEvent(event, False);
+    size_t bytes = 0;
+    size_t cnt = 0;
+
+    // If the provided event cannot be consumed, we will exit anyway
+    // from the loop below.
+    cnt += readTextEvent( event, dest, bytes ) == True;
+    event.what = evNothing;
+
+        {
+        TEvent ev;
+        if( pending.what != evNothing )
+            {
+            ev = pending;
+            pending.what = evNothing;
+            }
+        else
+            ev.getKeyEvent(False);
+        while( readTextEvent( ev, dest, bytes ) )
+            {
+            ++cnt;
+            ev.getKeyEvent(False);
+            }
+        }
+
+    if (count)
+        *count += cnt;
+    return bytes;
+}
+
+Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &bytes)
+{
+    if( event.what == evKeyDown )
+        {
+        TStringView text = event.keyDown.textLength         ? event.keyDown.asText()
+                         : event.keyDown.keyCode == kbEnter ? TStringView("\n")
+                         : event.keyDown.keyCode == kbTab   ? TStringView("\t")
+                                                            : TStringView();
+        TSpan<char> dst = dest.subspan(bytes);
+        if( text.size() && text.size() <= dst.size() )
+            {
+            for( size_t i = 0; i < text.size(); ++i )
+                dst[i] = text[i];
+            bytes += text.size();
+            return True;
+            }
+        }
+    if( event.what != evNothing )
+        putEvent(event);
+    return False;
 }
 
 TPalette& TProgram::getPalette() const

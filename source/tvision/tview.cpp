@@ -498,12 +498,6 @@ void TView::getEvent( TEvent& event )
         owner->getEvent(event);
 }
 
-void TView::getImmediateEvent( TEvent& event )
-{
-    if( owner != 0 )
-        owner->getImmediateEvent(event);
-}
-
 TRect TView::getExtent() const
 {
     return TRect( 0, 0, size.x, size.y );
@@ -526,6 +520,13 @@ TPalette& TView::getPalette() const
 Boolean TView::getState( ushort aState ) const
 {
     return Boolean( (state & aState) == aState );
+}
+
+size_t TView::getTextEvent( TEvent &event, TSpan<char> dest, size_t *count )
+{
+    if( owner != 0 )
+        return owner->getTextEvent( event, dest, count );
+    return 0;
 }
 
 void TView::growTo( short x, short y )

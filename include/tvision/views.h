@@ -375,9 +375,9 @@ public:
     void clearEvent( TEvent& event );
     Boolean eventAvail();
     virtual void getEvent( TEvent& event );
-    virtual void getImmediateEvent( TEvent& event );
     virtual void handleEvent( TEvent& event );
     virtual void putEvent( TEvent& event );
+    virtual size_t getTextEvent( TEvent &event, TSpan<char> dest, size_t *count=0 );
 
     static Boolean commandEnabled( ushort command );
     static void disableCommands( TCommandSet& commands );

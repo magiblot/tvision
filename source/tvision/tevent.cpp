@@ -254,6 +254,7 @@ I   POP DS
 }
 #endif
 
+#pragma argsused
 void TEvent::getKeyEvent(Boolean blocking)
 {
 #if defined( __FLAT__ )
