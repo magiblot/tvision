@@ -127,6 +127,19 @@ If you wish to link an application against Turbo Vision, note that MSVC won't al
 
 With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
 
+<div id="build-mingw64"></div>
+
+### Windows (MinGW-w64)
+
+Build using MinGW-w64 is following normal cmake build way.
+```sh
+cmake . -B ./build
+cmake --build ./build --config Release -j8
+```
+In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/lib` if example option is `ON`
+
+If you wish to link an application against Turbo Vision, just simply add `-L./build/lib -ltvision` to your linker and `-I./include` to your compiler
+
 <div id="build-borland"></div>
 
 ### Windows/DOS (Borland C++)
