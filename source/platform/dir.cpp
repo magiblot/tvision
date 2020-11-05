@@ -184,8 +184,11 @@ int getcurdir(int drive, char *direc)
         constexpr int lead = 1;
 #endif
         char buf[MAXDIR+lead];
-
+#if defined(__MINGW32__)
         if (GetCurrentDirectoryA(MAXDIR + lead, buf))
+#else
+        if (getcwd(buf, MAXDIR + lead))
+#endif
         {
             path_unix2dos(buf);
             strnzcpy(direc, buf+lead, MAXDIR);
