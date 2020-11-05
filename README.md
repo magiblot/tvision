@@ -136,9 +136,9 @@ Build using MinGW-w64 is following normal cmake build way.
 cmake . -B ./build
 cmake --build ./build --config Release -j8
 ```
-In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/lib` if example option is `ON`
+In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/bin` if `TV_BUILD_EXAMPLES` option is `ON`
 
-If you wish to link an application against Turbo Vision, just simply add `-L./build/lib -ltvision` to your linker and `-I./include` to your compiler
+If you wish to link an application against Turbo Vision, just simply add `-L./build/lib -ltvision` to your linker and `-I./include/tvision` to your compiler
 
 <div id="build-borland"></div>
 
