@@ -23,6 +23,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
 * Build environment
     * [Linux](#build-linux)
     * [Windows (MSVC)](#build-msvc)
+    * [Windows (MinGW-w64)](#build-mingw64)
     * [Windows/DOS (Borland C++)](#build-borland)
 * [Features](#features)
 * [API changes](#apichanges)
