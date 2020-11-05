@@ -31,7 +31,6 @@ private:
 
     TBufListEntry( void*&, size_t sz ) noexcept;
 #if __cplusplus >= 201103L
-    TBufListEntry() = default;
     TBufListEntry(const TBufListEntry &) = default;
 #endif
     void destroy();
