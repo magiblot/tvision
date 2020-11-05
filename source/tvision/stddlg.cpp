@@ -215,7 +215,7 @@ void TFileInfoPane::draw()
     Boolean PM;
     TDrawBuffer b;
     ushort  color;
-    ftime *time;
+    struct ftime *time; // mingw has same name as a function name
     char path[MAXPATH];
 
     size_t n = strnzcpy( path, ((TFileDialog *)owner)->directory, MAXPATH );
@@ -237,7 +237,7 @@ void TFileInfoPane::draw()
         ltoa( file_block.size, buf, 10 );
         b.moveStr( size.x - 38, buf, color );
 
-        time = (ftime *) &file_block.time;
+        time = (struct ftime *) &file_block.time;
         b.moveStr( size.x - 22, months[time->ft_month], color );
 
         if( time->ft_day >= 10 )

@@ -521,7 +521,7 @@ void        _RTLENTRYF setvect( int __interruptno,
 
 #else  /* defined __FLAT__ */
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 
 #pragma option -a-
 

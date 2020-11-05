@@ -16,7 +16,7 @@ struct  ftime   {
 
 #ifdef _MSC_VER
 #include <corecrt_io.h>
-#else
+#elseif !define(__MINGW32__)
 
 #include <unistd.h>
 #include <sys/stat.h>

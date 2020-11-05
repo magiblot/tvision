@@ -153,7 +153,7 @@ int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP
 }
 
 int getdisk() {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
     return _getdrive() - 1;
 #else
     // Emulate drive C.
@@ -163,7 +163,7 @@ int getdisk() {
 
 int setdisk(int drive)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
     _chdrive(drive - 1);
     return std::bitset<8*sizeof(ulong)>(_getdrives()).count();
 #else
@@ -178,13 +178,14 @@ int getcurdir(int drive, char *direc)
     // Note that drive 0 is the 'default' drive, 1 is drive A, etc.
     if (drive == 0 || drive-1 == getdisk())
     {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
         constexpr int lead = 3;
 #else
         constexpr int lead = 1;
 #endif
         char buf[MAXDIR+lead];
-        if (getcwd(buf, MAXDIR+lead))
+
+        if (GetCurrentDirectoryA(MAXDIR + lead, buf))
         {
             path_unix2dos(buf);
             strnzcpy(direc, buf+lead, MAXDIR);
@@ -193,3 +194,10 @@ int getcurdir(int drive, char *direc)
     }
     return -1;
 }
+
+#if defined(__MINGW32__)
+int _RTLENTRYF _EXPFUNC32 chdir( const char _FAR *__path ) {
+    return SetCurrentDirectoryA(__path);
+}
+#endif
+

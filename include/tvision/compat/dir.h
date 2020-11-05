@@ -23,7 +23,7 @@
 #ifdef _MSC_VER
 #include <corecrt.h>
 #include <direct.h>
-#else
+#elseif !defined(__MINGW32__)
 // For the functions commented out below, which have slightly different
 // specifiers in modern POSIX.
 #include <unistd.h>
@@ -85,7 +85,9 @@ struct  ffblk   {
 
 #endif  /* __FLAT__  */
 
-// int         _RTLENTRYF _EXPFUNC32   chdir( const char _FAR *__path );
+#if defined(__MINGW32__)
+int         _RTLENTRYF _EXPFUNC32   chdir( const char _FAR *__path );
+#endif
 int         _RTLENTRYF _EXPFUNC     findfirst( const char _FAR *__path,
                                     struct ffblk _FAR *__ffblk,
                                     int __attrib );
