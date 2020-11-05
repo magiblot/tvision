@@ -63,6 +63,11 @@ public:
     constexpr TStringView substr(size_t pos) const;
     constexpr TStringView substr(size_t pos, size_t n) const;
 
+    constexpr const char _FAR * begin() const;
+    constexpr const char _FAR * cbegin() const;
+    constexpr const char _FAR * end() const;
+    constexpr const char _FAR * cend() const;
+
     friend constexpr Boolean operator==(TStringView a, TStringView b);
     friend constexpr Boolean operator!=(TStringView a, TStringView b);
 
@@ -186,6 +191,26 @@ inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
     if (n > tail)
         n = tail;
     return TStringView(str + pos, n);
+}
+
+inline constexpr const char _FAR * TStringView::begin() const
+{
+    return &str[0];
+}
+
+inline constexpr const char _FAR * TStringView::cbegin() const
+{
+    return &str[0];
+}
+
+inline constexpr const char _FAR * TStringView::end() const
+{
+    return &str[len];
+}
+
+inline constexpr const char _FAR * TStringView::cend() const
+{
+    return &str[len];
 }
 
 inline constexpr Boolean operator==(TStringView a, TStringView b)
