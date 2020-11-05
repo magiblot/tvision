@@ -308,7 +308,8 @@ uint TEditor::indentedLineStart( uint P )
     uint startPtr = lineStart(P);
     uint destPtr = startPtr;
     char c;
-    while ( (c = bufChar(destPtr)) == ' ' || c == '\t' ) ++destPtr;
+    while( destPtr < bufLen && ((c = bufChar(destPtr)) == ' ' || c == '\t') )
+        ++destPtr;
     return destPtr == P ? startPtr : destPtr;
 }
 
