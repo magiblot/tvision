@@ -23,7 +23,7 @@
 #ifdef _MSC_VER
 #include <corecrt.h>
 #include <direct.h>
-#elseif !defined(__MINGW32__)
+#elif !defined(__MINGW32__)
 // For the functions commented out below, which have slightly different
 // specifiers in modern POSIX.
 #include <unistd.h>
