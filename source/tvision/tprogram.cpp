@@ -154,59 +154,6 @@ void TProgram::getEvent(TEvent& event)
         }
 }
 
-size_t TProgram::getTextEvent(TEvent& event, TSpan<char> dest, size_t *count)
-{
-    size_t bytes = 0;
-    size_t cnt = 0;
-
-    // If the provided event cannot be consumed, we will exit anyway
-    // from the loop below.
-    cnt += readTextEvent( event, dest, bytes ) == True;
-    event.what = evNothing;
-
-        {
-        TEvent ev;
-        if( pending.what != evNothing )
-            {
-            ev = pending;
-            pending.what = evNothing;
-            }
-        else
-            ev.getKeyEvent(False);
-        while( readTextEvent( ev, dest, bytes ) )
-            {
-            ++cnt;
-            ev.getKeyEvent(False);
-            }
-        }
-
-    if (count)
-        *count += cnt;
-    return bytes;
-}
-
-Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &bytes)
-{
-    if( event.what == evKeyDown )
-        {
-        TStringView text = event.keyDown.textLength         ? event.keyDown.asText()
-                         : event.keyDown.keyCode == kbEnter ? TStringView("\n")
-                         : event.keyDown.keyCode == kbTab   ? TStringView("\t")
-                                                            : TStringView();
-        TSpan<char> dst = dest.subspan(bytes);
-        if( text.size() && text.size() <= dst.size() )
-            {
-            for( size_t i = 0; i < text.size(); ++i )
-                dst[i] = text[i];
-            bytes += text.size();
-            return True;
-            }
-        }
-    if( event.what != evNothing )
-        putEvent(event);
-    return False;
-}
-
 TPalette& TProgram::getPalette() const
 {
     static TPalette color ( cpAppColor, sizeof( cpAppColor )-1 );
@@ -373,5 +320,59 @@ TView* TProgram::validView(TView* p)
     return p;
 }
 
+Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest,
+                             size_t &length, size_t &count )
+// If 'event' is a evKeyDown and contains text, it is also included. Otherwise,
+// it is discarded.
+// 'length' is set to the number of bytes written into 'dest', and 'count' is
+// increased by the number of key events processed.
+// On exit, 'event.what' is evNothing.
+{
+    size_t bytes = 0;
+    size_t cnt = 0;
 
+    cnt += readTextEvent( event, dest, bytes ) == True;
+    event.what = evNothing;
 
+        {
+        TEvent ev;
+        if( pending.what != evNothing )
+            {
+            ev = pending;
+            pending.what = evNothing;
+            }
+        else
+            ev.getKeyEvent(False);
+        while( readTextEvent( ev, dest, bytes ) )
+            {
+            ++cnt;
+            ev.getKeyEvent(False);
+            }
+        }
+
+    length = bytes;
+    count += cnt;
+    return bytes != 0;
+}
+
+Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &bytes)
+{
+    if( event.what == evKeyDown )
+        {
+        TStringView text = event.keyDown.textLength         ? event.keyDown.asText()
+                         : event.keyDown.keyCode == kbEnter ? TStringView("\n")
+                         : event.keyDown.keyCode == kbTab   ? TStringView("\t")
+                                                            : TStringView();
+        TSpan<char> dst = dest.subspan(bytes);
+        if( text.size() && text.size() <= dst.size() )
+            {
+            for( size_t i = 0; i < text.size(); ++i )
+                dst[i] = text[i];
+            bytes += text.size();
+            return True;
+            }
+        }
+    if( event.what != evNothing )
+        putEvent(event);
+    return False;
+}

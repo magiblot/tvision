@@ -377,7 +377,6 @@ public:
     virtual void getEvent( TEvent& event );
     virtual void handleEvent( TEvent& event );
     virtual void putEvent( TEvent& event );
-    virtual size_t getTextEvent( TEvent &event, TSpan<char> dest, size_t *count=0 );
 
     static Boolean commandEnabled( ushort command );
     static void disableCommands( TCommandSet& commands );
@@ -401,7 +400,8 @@ public:
 
     void keyEvent( TEvent& event );
     Boolean mouseEvent( TEvent& event, ushort mask );
-
+    virtual Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length, size_t &count );
+    Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
 
     TPoint makeGlobal( TPoint source );
     TPoint makeLocal( TPoint source );
@@ -503,6 +503,12 @@ inline void TView::writeLine( short x, short y, short w, short h,
                               const TDrawBuffer& b )
 {
     writeLine( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
+}
+
+inline Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length )
+{
+    size_t count = 0;
+    return textEvent( event, dest, length, count );
 }
 
 #endif  // Uses_TView

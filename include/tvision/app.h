@@ -260,13 +260,13 @@ public:
     virtual Boolean canMoveFocus();
     virtual ushort executeDialog(TDialog*, void*data = 0);
     virtual void getEvent(TEvent& event);
-    virtual size_t getTextEvent(TEvent& event, TSpan<char> dest, size_t *count);
     virtual TPalette& getPalette() const;
     virtual void handleEvent(TEvent& event);
     virtual void idle();
     virtual void initScreen();
     virtual void outOfMemory();
     virtual void putEvent( TEvent& event );
+    virtual Boolean textEvent(TEvent& event, TSpan<char> dest, size_t &length, size_t &count);
     virtual void run();
     virtual TWindow* insertWindow(TWindow*);
     void setScreenMode( ushort mode );

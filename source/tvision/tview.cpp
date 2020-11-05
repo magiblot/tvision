@@ -522,13 +522,6 @@ Boolean TView::getState( ushort aState ) const
     return Boolean( (state & aState) == aState );
 }
 
-size_t TView::getTextEvent( TEvent &event, TSpan<char> dest, size_t *count )
-{
-    if( owner != 0 )
-        return owner->getTextEvent( event, dest, count );
-    return 0;
-}
-
 void TView::growTo( short x, short y )
 {
     TRect r = TRect(origin.x, origin.y, origin.x + x, origin.y + y);
@@ -806,6 +799,13 @@ void TView::sizeLimits( TPoint& min, TPoint& max )
         max = owner->size;
     else
         max.x = max.y = INT_MAX;
+}
+
+Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length, size_t &count )
+{
+    if( owner )
+        return owner->textEvent( event, dest, length, count );
+    return False;
 }
 
 TView* TView::TopView()
