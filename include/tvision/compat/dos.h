@@ -16,7 +16,7 @@
 #include <dos.h>
 #else
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <corecrt.h>
 #endif
 
@@ -521,7 +521,7 @@ void        _RTLENTRYF setvect( int __interruptno,
 
 #else  /* defined __FLAT__ */
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 
 #pragma option -a-
 
@@ -601,7 +601,7 @@ struct  dfree   {
     unsigned df_bsec;
     unsigned df_sclus;
 };
-#ifndef _MSC_VER
+#ifndef _WIN32
 struct  diskfree_t {
     unsigned total_clusters;
     unsigned avail_clusters;

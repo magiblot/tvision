@@ -20,7 +20,7 @@
 #if !defined(__DIR_H)
 #define __DIR_H
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <corecrt.h>
 #include <direct.h>
 #else

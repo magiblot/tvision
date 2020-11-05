@@ -57,13 +57,14 @@ else()
         # You may enable the following if your system supports it:
     #     -flto
     )
+    if (WIN32)
+        add_definitions(
+            -D_CRT_SECURE_NO_WARNINGS
+            # Why do I get syntax errors unless I set this?
+            -D_HAS_EXCEPTIONS=0
+        )
+    endif()
 endif()
-
-include_directories(
-    include
-    include/tvision
-    include/tvision/compat
-)
 
 if (NOT WIN32 AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
     include_directories(
@@ -82,6 +83,12 @@ file(GLOB_RECURSE MMENUSRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/mmenu/*.cpp")
 file(GLOB_RECURSE PALETTESRC "${CMAKE_CURRENT_SOURCE_DIR}/examples/palette/*.cpp")
 
 add_library(tvision STATIC ${TVSOURCE})
+
+target_include_directories(tvision PUBLIC
+    include
+    include/tvision
+    include/tvision/compat
+)
 
 # Libraries
 

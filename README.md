@@ -23,6 +23,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
 * Build environment
     * [Linux](#build-linux)
     * [Windows (MSVC)](#build-msvc)
+    * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
 * [Features](#features)
 * [API changes](#apichanges)
@@ -126,6 +127,19 @@ If you wish to link an application against Turbo Vision, note that MSVC won't al
 **Note:** Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
 
 With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
+
+<div id="build-mingw"></div>
+
+### Windows (MinGW)
+
+Once your MinGW environment is properly set up, build is done in a similar way to Linux:
+```sh
+cmake . -B ./build -G "MinGW Makefiles"
+cmake --build ./build
+```
+In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/bin` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
+
+If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include/tvision` to your compiler
 
 <div id="build-borland"></div>
 
