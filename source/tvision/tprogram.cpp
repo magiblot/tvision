@@ -342,11 +342,21 @@ Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest,
             pending.what = evNothing;
             }
         else
+            {
             ev.getKeyEvent(False);
+#ifdef __BORLANDC__ // keyUp events are not discarded, we need to try twice.
+            if( ev.what == evNothing )
+                ev.getKeyEvent(False);
+#endif
+            }
         while( readTextEvent( ev, dest, bytes ) )
             {
             ++cnt;
             ev.getKeyEvent(False);
+#ifdef __BORLANDC__
+            if( ev.what == evNothing )
+                ev.getKeyEvent(False);
+#endif
             }
         }
 

@@ -306,16 +306,19 @@ I   INT 16h;
     keyDown.keyCode = _AX;
     keyDown.controlKeyState = THardwareInfo::getShiftState();
 #endif
-    if (what == evKeyDown)
-        {
 #if defined( __BORLANDC__ )
-        if (' ' <= keyDown.charScan.charCode && keyDown.charScan.charCode != '\x7F')
+    if( what == evKeyDown )
+        {
+        if( ' ' <= keyDown.charScan.charCode &&
+            keyDown.charScan.charCode != '\x7F' &&
+            keyDown.charScan.charCode != '\xFF'
+          )
             {
             keyDown.text[0] = (char) keyDown.charScan.charCode;
             keyDown.textLength = 1;
             }
         else
             keyDown.textLength = 0;
-#endif
         }
+#endif
 }
