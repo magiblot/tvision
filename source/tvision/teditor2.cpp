@@ -93,6 +93,24 @@ void TEditor::initBuffer()
     buffer = new char[bufSize];
 }
 
+uint TEditor::insertAndConvertText( const char *text, uint length,
+                                    Boolean selectText )
+{
+    size_t i = 0, j = 0;
+    do  {
+        if( text[i] == '\n' )
+            {
+            if( !insertText( &text[j], i - j, selectText ) ) return j;
+            if( !insertEOL( selectText ) ) return i;
+            if( i + 1 < length && text[i + 1] == '\r' )
+                ++i;
+            j = i + 1;
+            }
+        } while( ++i < length );
+    if( !insertText( &text[j], i - j, selectText ) ) return j;
+    return i;
+}
+
 Boolean TEditor::insertBuffer( const char *p,
                                uint offset,
                                uint length,
@@ -190,6 +208,11 @@ Boolean TEditor::insertBuffer( const char *p,
     return True;
 }
 
+Boolean TEditor::insertEOL( Boolean selectText )
+{
+    return insertText( eolBytes, eolSize, selectText );
+}
+
 Boolean TEditor::insertFrom( TEditor *editor )
 {
     return insertBuffer( editor->buffer,
@@ -247,7 +270,7 @@ void TEditor::newLine()
            ( (buffer[i] == ' ') || (buffer[i] == '\x9'))
          )
          i++;
-    insertText(eolBytes, eolSize, False);
+    insertEOL(False);
     if( autoIndent == True )
         insertText( &buffer[p], i - p, False);
 }

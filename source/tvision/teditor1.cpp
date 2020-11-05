@@ -622,10 +622,12 @@ void TEditor::handleEvent( TEvent& event )
                 if( overwrite == True && hasSelection() == False )
                     if( curPtr != lineEnd(curPtr) )
                         selEnd = nextChar(curPtr);
-                if ( !encSingleByte && event.keyDown.textLength )
-                    insertText( event.keyDown.text, event.keyDown.textLength, False);
-                else
-                    insertText( &event.keyDown.charScan.charCode, 1, False);
+
+                char buf[512];
+                size_t length;
+                while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
+                    insertAndConvertText( buf, (uint) length, False );
+
                 trackCursor(centerCursor);
                 unlock();
                 }

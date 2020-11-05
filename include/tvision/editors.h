@@ -196,7 +196,9 @@ public:
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& );
     virtual void initBuffer();
+    uint insertAndConvertText( const char *, uint, Boolean );
     Boolean insertBuffer( const char *, uint, uint, Boolean, Boolean );
+    Boolean insertEOL( Boolean );
     virtual Boolean insertFrom( TEditor * );
     Boolean insertText( const void *, uint, Boolean );
     void scrollTo( int, int );
