@@ -44,39 +44,39 @@
  * Still, it's up to your luck that ncurses manages to grab any of these
  * combinations from your terminal application. */
 
-static const const_unordered_map<char, KeyDownEvent> fromNonPrintableAscii = {
-    { '\x01',       {{kbCtrlA},     kbCtrlShift}},
-    { '\x02',       {{kbCtrlB},     kbCtrlShift}},
-    { '\x03',       {{kbCtrlC},     kbCtrlShift}},
-    { '\x04',       {{kbCtrlD},     kbCtrlShift}},
-    { '\x05',       {{kbCtrlE},     kbCtrlShift}},
-    { '\x06',       {{kbCtrlF},     kbCtrlShift}},
-    { '\x07',       {{kbCtrlG},     kbCtrlShift}},
-    { '\x08',       {{kbBack},      0}          }, // ^H, Backspace
-    { '\x09',       {{kbTab},       0}          }, // ^I, Tab
-    { '\x0A',       {{kbEnter},     0}          }, // ^J, Line Feed
-    { '\x0B',       {{kbCtrlK},     kbCtrlShift}},
-    { '\x0C',       {{kbCtrlL},     kbCtrlShift}},
-    { '\x0D',       {{kbEnter},     0}          }, // ^M, Carriage Return
-    { '\x0E',       {{kbCtrlN},     kbCtrlShift}},
-    { '\x0F',       {{kbCtrlO},     kbCtrlShift}},
-    { '\x10',       {{kbCtrlP},     kbCtrlShift}},
-    { '\x11',       {{kbCtrlQ},     kbCtrlShift}},
-    { '\x12',       {{kbCtrlR},     kbCtrlShift}},
-    { '\x13',       {{kbCtrlS},     kbCtrlShift}},
-    { '\x14',       {{kbCtrlT},     kbCtrlShift}},
-    { '\x15',       {{kbCtrlU},     kbCtrlShift}},
-    { '\x16',       {{kbCtrlV},     kbCtrlShift}},
-    { '\x17',       {{kbCtrlW},     kbCtrlShift}},
-    { '\x18',       {{kbCtrlX},     kbCtrlShift}},
-    { '\x19',       {{kbCtrlY},     kbCtrlShift}},
-    { '\x1A',       {{kbCtrlZ},     kbCtrlShift}},
-    { '\x1B',       {{kbEsc},       0}          }, // ^[, Escape
-    { '\x1C',       {{0x1C},        0}          }, // ^\, ?
-    { '\x1D',       {{0x1D},        0}          }, // ^], ?
-    { '\x1E',       {{0x1E},        0}          }, // ^^, ?
-    { '\x1F',       {{0x1F},        0}          }, // ^_, ?
-    { '\x7F',       {{kbBack},      0}          }  // ^?, Delete
+static constexpr KeyDownEvent fromNonPrintableAscii[32] = {
+    {{kbNoKey},     0}          , // ^@, Null
+    {{kbCtrlA},     kbCtrlShift},
+    {{kbCtrlB},     kbCtrlShift},
+    {{kbCtrlC},     kbCtrlShift},
+    {{kbCtrlD},     kbCtrlShift},
+    {{kbCtrlE},     kbCtrlShift},
+    {{kbCtrlF},     kbCtrlShift},
+    {{kbCtrlG},     kbCtrlShift},
+    {{kbBack},      0}          , // ^H, Backspace
+    {{kbTab},       0}          , // ^I, Tab
+    {{kbEnter},     0}          , // ^J, Line Feed
+    {{kbCtrlK},     kbCtrlShift},
+    {{kbCtrlL},     kbCtrlShift},
+    {{kbEnter},     0}          , // ^M, Carriage Return
+    {{kbCtrlN},     kbCtrlShift},
+    {{kbCtrlO},     kbCtrlShift},
+    {{kbCtrlP},     kbCtrlShift},
+    {{kbCtrlQ},     kbCtrlShift},
+    {{kbCtrlR},     kbCtrlShift},
+    {{kbCtrlS},     kbCtrlShift},
+    {{kbCtrlT},     kbCtrlShift},
+    {{kbCtrlU},     kbCtrlShift},
+    {{kbCtrlV},     kbCtrlShift},
+    {{kbCtrlW},     kbCtrlShift},
+    {{kbCtrlX},     kbCtrlShift},
+    {{kbCtrlY},     kbCtrlShift},
+    {{kbCtrlZ},     kbCtrlShift},
+    {{kbEsc},       0}          , // ^[, Escape
+    {{0x1C},        0}          , // ^\, ?
+    {{0x1D},        0}          , // ^], ?
+    {{0x1E},        0}          , // ^^, ?
+    {{0x1F},        0}          , // ^_, ?
 };
 
 static const const_unordered_map<char, ushort> AltKeyCode = {
@@ -316,8 +316,10 @@ bool NcursesInput::getEvent(TEvent &ev)
         if ((char) keys[0] == KEY_ESC)
             detectAlt(keys, Alt);
 
-        if (keys[0] <= 127)
-            ev.keyDown = fromNonPrintableAscii[(char) keys[0]];
+        if ((uint) keys[0] < 32)
+            ev.keyDown = fromNonPrintableAscii[keys[0]];
+        else if (keys[0] == 127)
+            ev.keyDown = {{kbBack}, 0}; // ^?, Delete
         else if (KEY_MIN < keys[0] && keys[0] < KEY_MAX)
             ev.keyDown = fromCursesKeyCode[keys[0]];
         else if (KEY_MAX < keys[0])
