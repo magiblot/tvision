@@ -119,7 +119,7 @@ private:
     uint8_t
         shadow      : 1;
 
-    friend class TVWrite;
+    friend struct TVWrite;
 public:
 
     using trivially_convertible::trivially_convertible;
