@@ -44,11 +44,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         /wd4068 /wd4146 /wd4166 /wd4244 /wd4250 /wd4267 /wd4996
         /std:c++17 /permissive- /Zc:__cplusplus
     )
-    add_definitions(
-        -D_CRT_SECURE_NO_WARNINGS
-        # Why do I get syntax errors unless I set this?
-        -D_HAS_EXCEPTIONS=0
-    )
 else()
     add_compile_options(
     #     -g
@@ -57,13 +52,14 @@ else()
         # You may enable the following if your system supports it:
     #     -flto
     )
-    if (WIN32)
-        add_definitions(
-            -D_CRT_SECURE_NO_WARNINGS
-            # Why do I get syntax errors unless I set this?
-            -D_HAS_EXCEPTIONS=0
-        )
-    endif()
+endif()
+
+if (WIN32)
+    add_definitions(
+        -D_CRT_SECURE_NO_WARNINGS
+        # Why do I get syntax errors unless I set this?
+        -D_HAS_EXCEPTIONS=0
+    )
 endif()
 
 if (NOT WIN32 AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
@@ -86,6 +82,9 @@ add_library(tvision STATIC ${TVSOURCE})
 
 target_include_directories(tvision PUBLIC
     include
+)
+
+target_include_directories(tvision PRIVATE
     include/tvision
     include/tvision/compat
 )
@@ -151,6 +150,10 @@ if (TV_BUILD_EXAMPLES)
 
     foreach(t ${TVAPPS})
         target_link_libraries(${t} ${LIBS})
+        target_include_directories(${t} PRIVATE
+            include/tvision
+            include/tvision/compat
+        )
     endforeach(t)
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
