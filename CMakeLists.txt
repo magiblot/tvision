@@ -138,7 +138,7 @@ if (TV_BUILD_EXAMPLES)
 
         add_executable(${app} ${app-src})
         target_link_libraries(${app} PUBLIC ${CMAKE_PROJECT_NAME})
-        if (NOT MSVC)
+        if (NOT MSVC AND NOT APPLE AND NOT BORLAND) ## which means GCC/MINGW
             target_compile_options(${app} PRIVATE -Wno-stringop-truncation)
         endif()
         # binaries
