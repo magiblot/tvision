@@ -114,7 +114,7 @@ Boolean TFileEditor::loadFile()
     else
         {
         f.seekg(0, ios::end);
-        long fSize = f.tellg();
+        ulong fSize = f.tellg();
         f.seekg(0);
         if( fSize > UINT_MAX-0x1Fl || setBufSize(uint(fSize)) == False )
             {
