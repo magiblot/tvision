@@ -10,7 +10,6 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
 endif()
 
 project(tvision)
-INCLUDE(CheckIncludeFiles)
 
 # Project options, Enable GPM for Unix-like system
 
@@ -35,11 +34,10 @@ file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
 add_library(${CMAKE_PROJECT_NAME} STATIC ${TVSOURCE})
 
-CHECK_INCLUDE_FILES(malloc.h HAVE_MALLOC)
 
-if (NOT HAVE_MALLOC)
+if (BORLAND OR APPLE)
     target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}include/tvision/compat/malloc")
+        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc")
 endif()
 
 if (NOT BORLAND)
