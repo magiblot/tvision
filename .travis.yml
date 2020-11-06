@@ -28,6 +28,8 @@ jobs:
       compiler: gcc
     - os: osx
       env: GPM=true
+    - os: windows
+      env: GPM=true
   include:
     - os: windows
       compiler: gcc
