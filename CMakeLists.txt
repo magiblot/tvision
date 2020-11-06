@@ -34,13 +34,13 @@ file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
 add_library(${CMAKE_PROJECT_NAME} STATIC ${TVSOURCE})
 
-if (BORLAND)
+if (BORLAND OR APPLE)
     target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}include/tvision/compat/malloc")
+endif()
 
-else()
+if (NOT BORLAND)
     target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
-
 endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
@@ -89,7 +89,7 @@ if (NOT WIN32)
         message(FATAL_ERROR "curses library is not found")
     endif()
 
-    target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC HAVE_NCURSES)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE HAVE_NCURSES)
     target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${CURSES})
 
     # tinfow (comes with ncurses and is often provided as 'tinfo',
@@ -107,7 +107,7 @@ if (NOT WIN32)
             message(WARNING "gpm library requested but not found")
         else()
             message(STATUS "gpm library found")
-            target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC HAVE_GPM)
+            target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE HAVE_GPM)
             target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${GPM})
         endif()
     endif()
@@ -148,9 +148,12 @@ endif()
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     # Enable precompiled headers
     target_precompile_headers(${CMAKE_PROJECT_NAME} PRIVATE "include/tvision/tv.h")
+    target_precompile_headers(hello PRIVATE "include/tvision/tv.h")
     if (TV_BUILD_EXAMPLES)
         foreach(app ${TVAPPS})
-            target_precompile_headers(${app} REUSE_FROM ${CMAKE_PROJECT_NAME})
+            if (NOT(app STREQUAL "hello"))
+                target_precompile_headers(${app} REUSE_FROM "hello")
+            endif()
         endforeach()
     endif()
 endif()
