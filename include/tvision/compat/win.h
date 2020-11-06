@@ -6,7 +6,10 @@
  *
  */
 
-#if defined(__BORLANDC__) || defined(_MSC_VER) || defined(__MINGW32__)
+#ifndef TVISION_WINDOWS_H
+#define TVISION_WINDOWS_H
+
+#if defined(__BORLANDC__) || defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -183,4 +186,21 @@ extern "C" {
 
 #endif // __WINDOWS_H
 
-#endif // __BORLANDC__ || _MSC_VER
+#endif // __BORLANDC__ || _WIN32
+
+// Flags that are often missing from outdated headers.
+
+#ifndef MOUSE_WHEELED
+#define MOUSE_WHEELED   0x0004
+#endif
+#ifndef MOUSE_HWHEELED
+#define MOUSE_HWHEELED  0x0008
+#endif
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+#ifndef DISABLE_NEWLINE_AUTO_RETURN
+#define DISABLE_NEWLINE_AUTO_RETURN 0x0008
+#endif
+
+#endif // TVISION_WINDOWS_H
