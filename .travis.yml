@@ -12,7 +12,7 @@ os:
 dist: focal
 
 # macOS config
-osx_image: xcode12  
+osx_image: xcode12
 addons:
   homebrew:
     packages:
@@ -28,6 +28,10 @@ jobs:
       compiler: gcc
     - os: osx
       env: GPM=true
+  include:
+    - os: windows
+      compiler: gcc
+      env: CMAKE_GENERATOR="MinGW Makefiles"
 
 before_install:
   - if [[ "$GPM" == "true" ]]; then
