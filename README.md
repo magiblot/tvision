@@ -25,6 +25,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
+    * [Turbo Vision as a CMake subproject](#build-cmake)
 * [Features](#features)
 * [API changes](#apichanges)
 * [Unicode support](#unicode)
@@ -64,7 +65,7 @@ Don't forget to check out the <a href="#features">features</a> and <a href="#api
 Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
 ```sh
-cmake . -B ./build &&
+cmake . -B ./build -DCMAKE_BUILD_TYPE=Release && # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
 cmake --build ./build # or `cd ./build && make`
 ```
 
@@ -73,9 +74,9 @@ The above produces the following files:
 * `libtvision.a`, which is the Turbo Vision library.
 * The demo applications `hello`, `tvdemo`, `tvedit`, `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
 * The demo applications `mmenu` and `palette` from Borland's Technical Support.
-* `tvhc`, the Turbo Vision Help Compiler.
+* `tvhelp`, the Turbo Vision Help Compiler.
 
-The library can be found in `./build/lib`, and the executables in `./build/bin`.
+The library and executables can be found in `./build`. 
 
 The build requirements are:
 
@@ -86,7 +87,7 @@ The build requirements are:
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
 ```sh
-g++ -std=c++17 -o hello hello.cpp ./build/lib/libtvision.a -Iinclude -lncursesw -lgpm
+g++ -std=c++17 -o hello hello.cpp ./build/libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
 You may also need:
@@ -98,8 +99,6 @@ You may also need:
 * On Gentoo (and possibly others): `-ltinfow` if both `libtinfo.so` and `libtinfow.so` are available in your system. Otherwise, you may get a segmentation fault when running Turbo Vision applications ([#11](https://github.com/magiblot/tvision/issues/11)). Note that `tinfo` is bundled with `ncurses`.
 
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
-
-If you choose the CMake build system for your application, you may simply copy the logic from Turbo Vision's [`CMakeLists.txt`](https://github.com/magiblot/tvision/blob/151956daee10e3428e6910bbf9385066d1e55507/CMakeLists.txt#L79).
 
 The backward-compatibility headers in `include/tvision/compat` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
@@ -116,11 +115,7 @@ cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' or 
 
 In the example above, `tvision.lib` and the example applications will be placed at `./build/Release`.
 
-If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), uncomment the following line in `CMakeLists.txt`:
-```cmake
-    # Static RTL linkage for MSVC.
-#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-```
+If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), enable the `TV_USE_STATIC_RTL` option (`-DTV_USE_STATIC_RTL=ON` when calling `cmake`).
 
 If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be linked against the RTL in the same way.
 
@@ -134,12 +129,12 @@ With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Tur
 
 Once your MinGW environment is properly set up, build is done in a similar way to Linux:
 ```sh
-cmake . -B ./build -G "MinGW Makefiles"
+cmake . -B ./build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release &&
 cmake --build ./build
 ```
-In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/bin` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
+In the example above, `libtvision.a` and all examples are in `./build` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
 
-If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include/tvision` to your compiler
+If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include` to your compiler
 
 <div id="build-borland"></div>
 
@@ -204,6 +199,19 @@ Additionally, you may get a warning like this one when running DPMI32 applicatio
 ```
 
 But don't worry, you can ignore them.
+
+<div id="build-cmake"></div>
+
+### Turbo Vision as a CMake subproject (not Borland C++)
+
+If you choose the CMake build system for your application, and you place Turbo Vision as a submodule in your repository, you can easily configure your application to link against Turbo Vision:
+
+```cmake
+add_subdirectory(tvision) # Assuming Turbo Vision is in the 'tvision' directory.
+target_link_libraries(my_application tvision)
+```
+
+`<tvision/tv.h>` will be available in your application's include path during compilation. Additionally, your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
 
 <div id="features"></div>
 
