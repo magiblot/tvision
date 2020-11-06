@@ -16,8 +16,10 @@
 #include <dos.h>
 #else
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #include <corecrt.h>
+#elif defined(__MINGW32__)
+#include_next <dos.h>
 #endif
 
 #ifndef __DOS_H
