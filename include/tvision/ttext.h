@@ -143,9 +143,9 @@ inline size_t TText::prev(TStringView text, size_t index)
         size_t lead = std::min<size_t>(index, 4);
         for (size_t i = 1; i <= lead; ++i) {
             std::mbstate_t state {};
-            int64_t size = std::mbrtowc(nullptr, &text[index - i], i, &state);
-            if (size > 0)
-                return (size_t) size == i ? i : 1;
+            int len = std::mbrtowc(nullptr, &text[index - i], i, &state);
+            if (len > 0)
+                return (size_t) len == i ? i : 1;
         }
         return 1;
     }
