@@ -45,6 +45,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
     set(MAY_BUILD_USING_GPM TRUE)
 endif()
+
 if (MASTER_PROJECT)
     option(TV_BUILD_EXAMPLES "Build example apps" ON)
 endif()
@@ -119,6 +120,7 @@ if (WIN32)
     )
 endif()
 
+# Dependencies
 
 if (NOT WIN32)
     # ncursesw
@@ -138,9 +140,9 @@ if (NOT WIN32)
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TINFOW})
     endif()
 
+    # gpm
     if (TV_BUILD_USING_GPM)
         tv_message(STATUS "gpm library requested")
-        # Optional dependencies
         find_library(GPM gpm)
         if (NOT GPM)
             tv_message(WARNING "gpm library requested but not found")
@@ -165,7 +167,7 @@ install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/tvision" DESTINATION includ
 
 if (TV_BUILD_EXAMPLES)
 
-    list(APPEND TVAPPS hello tvedit tvdemo tvdir tvhelp mmenu palette)
+    list(APPEND TVAPPS hello tvedit tvdemo tvdir tvhc mmenu palette)
 
     foreach(app ${TVAPPS})
         if (app STREQUAL "hello")
