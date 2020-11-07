@@ -73,9 +73,9 @@ The above produces the following files:
 * `libtvision.a`, which is the Turbo Vision library.
 * The demo applications `hello`, `tvdemo`, `tvedit`, `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
 * The demo applications `mmenu` and `palette` from Borland's Technical Support.
-* `tvhc`, the Turbo Vision Help Compiler.
+* `tvhelp`, the Turbo Vision Help Compiler.
 
-The library can be found in `./build/lib`, and the executables in `./build/bin`.
+The library and executables can be found in `./build`. 
 
 The build requirements are:
 
@@ -86,7 +86,7 @@ The build requirements are:
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
 ```sh
-g++ -std=c++17 -o hello hello.cpp ./build/lib/libtvision.a -Iinclude -lncursesw -lgpm
+g++ -std=c++17 -o hello hello.cpp ./build/libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
 You may also need:
@@ -137,7 +137,7 @@ Once your MinGW environment is properly set up, build is done in a similar way t
 cmake . -B ./build -G "MinGW Makefiles"
 cmake --build ./build
 ```
-In the example above, `libtvision.a` and the example applications will be placed at `./build/lib`. and all examples are in `./build/bin` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
+In the example above, `libtvision.a` and all examples are in `./build` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
 
 If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include/tvision` to your compiler
 
