@@ -4,7 +4,7 @@
 # * TV_BUILD_USING_GPM (default ON) (only on linux) to enable linking to libgpm
 #   (warning if not found).
 
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.5)
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
     cmake_policy(SET CMP0091 NEW)
 endif()
