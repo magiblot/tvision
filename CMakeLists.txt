@@ -33,12 +33,15 @@ target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
     "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
 )
 
 if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-    target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
     )
 endif()
@@ -129,6 +132,10 @@ if (TV_BUILD_EXAMPLES)
         endif()
 
         add_executable(${app} ${app-src})
+        target_include_directories(${app} PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
+            "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
+        )
         target_link_libraries(${app} PUBLIC ${CMAKE_PROJECT_NAME})
         # binaries
         install(TARGETS ${app} RUNTIME DESTINATION bin)
