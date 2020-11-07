@@ -11,9 +11,9 @@ endif()
 
 project(tvision)
 
-# Project options, Enable GPM for Unix-like system
+# Project options, Enable GPM for Linux
 
-if (NOT WIN32)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
 endif()
 option(TV_BUILD_EXAMPLES "Build example apps" ON)
@@ -24,32 +24,28 @@ message(STATUS "Install path  : ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Build Examples: ${TV_BUILD_EXAMPLES}")
 message(STATUS "Build w/GPM   : ${TV_BUILD_USING_GPM}")
 
-# release by default
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
 # Libraries
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
 add_library(${CMAKE_PROJECT_NAME} STATIC ${TVSOURCE})
 
-
-if (BORLAND OR APPLE)
-    target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc")
-endif()
-
-if (NOT BORLAND)
-    target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
-endif()
+target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
     "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
-    "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat")
+    "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
+)
 
-if (MSVC)
+if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+    target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
+    )
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Static RTL linkage for MSVC (requires CMake >= 3.15).
+#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC
         /wd4068
         /wd4146
@@ -59,39 +55,35 @@ if (MSVC)
         /wd4267
         /wd4996
         /permissive-
-        /Zc:__cplusplus)
+        /Zc:__cplusplus
+    )
 else()
     target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC
         -Wall
         -Wno-unknown-pragmas
         -Wno-pragmas
         -Wno-reorder
-        -Wno-deprecated)
+        -Wno-deprecated
+    )
 endif()
 
 if (WIN32)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC
         _CRT_SECURE_NO_WARNINGS
-        # Why do I get syntax errors unless I set this?
-        _HAS_EXCEPTIONS=0
     )
 endif()
 
 
 if (NOT WIN32)
     # ncursesw
-    find_library(CURSES ncursesw)
-    if (NOT CURSES AND APPLE)
+    find_library(NCURSESW ncursesw)
+    if (NOT NCURSESW AND APPLE)
         # macOS has no ncursesw by default
-        unset(CURSES)
-        find_library(CURSES ncurses)
-    endif()
-    if (NOT CURSES)
-        message(FATAL_ERROR "curses library is not found")
+        find_library(NCURSESW ncurses)
     endif()
 
     target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE HAVE_NCURSES)
-    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${CURSES})
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${NCURSESW})
 
     # tinfow (comes with ncurses and is often provided as 'tinfo',
     # but we need to link the 'w' version when both are available)
@@ -138,12 +130,14 @@ if (TV_BUILD_EXAMPLES)
 
         add_executable(${app} ${app-src})
         target_link_libraries(${app} PUBLIC ${CMAKE_PROJECT_NAME})
-        if (NOT MSVC AND NOT APPLE AND NOT BORLAND) ## which means GCC/MINGW
-            target_compile_options(${app} PRIVATE -Wno-stringop-truncation)
-        endif()
         # binaries
         install(TARGETS ${app} RUNTIME DESTINATION bin)
     endforeach()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
+    endif()
+
 endif()
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
