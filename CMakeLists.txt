@@ -136,6 +136,11 @@ if (TV_BUILD_EXAMPLES)
             "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
             "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
         )
+        if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+            target_include_directories(${app} PRIVATE
+                "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
+            )
+        endif()
         target_link_libraries(${app} PUBLIC ${CMAKE_PROJECT_NAME})
         # binaries
         install(TARGETS ${app} RUNTIME DESTINATION bin)
