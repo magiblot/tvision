@@ -12,7 +12,9 @@
 #define Uses_TVMemMgr
 #include <tvision/tv.h>
 
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #include <assert.h>
 
 #if !defined( __MEM_H )
@@ -149,6 +151,8 @@ void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz )
                     newEntry->prev->next = newEntry;
                 else
                     TBufListEntry::bufList = newEntry;
+                if( newEntry->next )
+                    newEntry->next->prev = newEntry;
                 newEntry->sz = sz;
                 adr = (char *)p + sizeof(TBufListEntry);
                 }
