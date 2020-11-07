@@ -168,6 +168,7 @@ install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/tvision" DESTINATION includ
 if (TV_BUILD_EXAMPLES)
 
     list(APPEND TVAPPS hello tvedit tvdemo tvdir tvhc mmenu palette)
+    list(APPEND TVINSTALLAPPS tvedit tvdemo tvhc)
 
     foreach(app ${TVAPPS})
         if (app STREQUAL "hello")
@@ -179,9 +180,9 @@ if (TV_BUILD_EXAMPLES)
         add_executable(${app} ${app-src})
         tv_add_private_includes(${app})
         target_link_libraries(${app} PUBLIC ${PROJECT_NAME})
-        # binaries
-        install(TARGETS ${app} RUNTIME DESTINATION bin)
     endforeach()
+
+    install(TARGETS ${TVINSTALLAPPS} RUNTIME DESTINATION bin)
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
