@@ -27,11 +27,11 @@ message(STATUS "Build w/GPM   : ${TV_BUILD_USING_GPM}")
 # Libraries
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
-add_library(tvision STATIC ${TVSOURCE})
+add_library(${PROJECT_NAME} STATIC ${TVSOURCE})
 
-target_compile_features(tvision PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
-target_include_directories(tvision PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
 )
 
@@ -47,12 +47,12 @@ function(tv_add_private_includes target)
     endif()
 endfunction()
 
-tv_add_private_includes(tvision)
+tv_add_private_includes(${PROJECT_NAME})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Static RTL linkage for MSVC (requires CMake >= 3.15).
 #     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    target_compile_options(tvision PUBLIC
+    target_compile_options(${PROJECT_NAME} PUBLIC
         /wd4068
         /wd4146
         /wd4166
@@ -64,7 +64,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /Zc:__cplusplus
     )
 else()
-    target_compile_options(tvision PUBLIC
+    target_compile_options(${PROJECT_NAME} PUBLIC
         -Wall
         -Wno-unknown-pragmas
         -Wno-pragmas
@@ -74,7 +74,7 @@ else()
 endif()
 
 if (WIN32)
-    target_compile_definitions(tvision PUBLIC
+    target_compile_definitions(${PROJECT_NAME} PUBLIC
         _CRT_SECURE_NO_WARNINGS
     )
 endif()
@@ -88,14 +88,14 @@ if (NOT WIN32)
         find_library(NCURSESW ncurses)
     endif()
 
-    target_compile_definitions(tvision PRIVATE HAVE_NCURSES)
-    target_link_libraries(tvision PUBLIC ${NCURSESW})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_NCURSES)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${NCURSESW})
 
     # tinfow (comes with ncurses and is often provided as 'tinfo',
     # but we need to link the 'w' version when both are available)
     find_library(TINFOW tinfow)
     if (TINFOW)
-        target_link_libraries(tvision PUBLIC ${TINFOW})
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${TINFOW})
     endif()
 
     if (TV_BUILD_USING_GPM)
@@ -106,8 +106,8 @@ if (NOT WIN32)
             message(WARNING "gpm library requested but not found")
         else()
             message(STATUS "gpm library found")
-            target_compile_definitions(tvision PRIVATE HAVE_GPM)
-            target_link_libraries(tvision PUBLIC ${GPM})
+            target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GPM)
+            target_link_libraries(${PROJECT_NAME} PUBLIC ${GPM})
         endif()
     endif()
 endif()
@@ -116,7 +116,7 @@ endif()
 #
 # static lib
 #
-install(TARGETS tvision ARCHIVE DESTINATION lib)
+install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib)
 
 # includes
 # ./include/tvision and children copied to destination/include/tvision etc...
@@ -136,7 +136,7 @@ if (TV_BUILD_EXAMPLES)
 
         add_executable(${app} ${app-src})
         tv_add_private_includes(${app})
-        target_link_libraries(${app} PUBLIC tvision)
+        target_link_libraries(${app} PUBLIC ${PROJECT_NAME})
         # binaries
         install(TARGETS ${app} RUNTIME DESTINATION bin)
     endforeach()
@@ -149,7 +149,7 @@ endif()
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     # Enable precompiled headers
-    target_precompile_headers(tvision PRIVATE "include/tvision/tv.h")
+    target_precompile_headers(${PROJECT_NAME} PRIVATE "include/tvision/tv.h")
     if (TV_BUILD_EXAMPLES)
         target_precompile_headers(hello PRIVATE "include/tvision/tv.h")
         foreach(app ${TVAPPS})
