@@ -25,6 +25,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
+    * [Turbo Vision as a CMake subproject](#build-cmake)
 * [Features](#features)
 * [API changes](#apichanges)
 * [Unicode support](#unicode)
@@ -64,7 +65,7 @@ Don't forget to check out the <a href="#features">features</a> and <a href="#api
 Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
 ```sh
-cmake . -B ./build &&
+cmake . -B ./build --DCMAKE_BUILD_TYPE=Release && # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
 cmake --build ./build # or `cd ./build && make`
 ```
 
@@ -98,8 +99,6 @@ You may also need:
 * On Gentoo (and possibly others): `-ltinfow` if both `libtinfo.so` and `libtinfow.so` are available in your system. Otherwise, you may get a segmentation fault when running Turbo Vision applications ([#11](https://github.com/magiblot/tvision/issues/11)). Note that `tinfo` is bundled with `ncurses`.
 
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
-
-If you choose the CMake build system for your application, you may simply copy the logic from Turbo Vision's [`CMakeLists.txt`](https://github.com/magiblot/tvision/blob/151956daee10e3428e6910bbf9385066d1e55507/CMakeLists.txt#L79).
 
 The backward-compatibility headers in `include/tvision/compat` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
 
@@ -200,6 +199,19 @@ Additionally, you may get a warning like this one when running DPMI32 applicatio
 ```
 
 But don't worry, you can ignore them.
+
+<div id="build-cmake"></div>
+
+### Turbo Vision as a CMake subproject (not Borland C++)
+
+If you choose the CMake build system for your application, and you place Turbo Vision as a submodule in your repository, you can easily configure your application to link against Turbo Vision:
+
+```cmake
+add_subdirectory(tvision) # Assuming Turbo Vision is in the 'tvision' directory.
+target_link_libraries(my_application tvision)
+```
+
+`<tvision/tv.h>` will be available in your application's include path during compilation. Additionally, your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
 
 <div id="features"></div>
 
