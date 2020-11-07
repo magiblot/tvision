@@ -35,16 +35,19 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
 )
 
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
-    "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
-)
-
-if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
+function(tv_add_private_includes target)
+    target_include_directories(${target} PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
+        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
     )
-endif()
+    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+        target_include_directories(${target} PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
+        )
+    endif()
+endfunction()
+
+tv_add_private_includes(${CMAKE_PROJECT_NAME})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Static RTL linkage for MSVC (requires CMake >= 3.15).
@@ -132,15 +135,7 @@ if (TV_BUILD_EXAMPLES)
         endif()
 
         add_executable(${app} ${app-src})
-        target_include_directories(${app} PRIVATE
-            "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
-            "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
-        )
-        if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-            target_include_directories(${app} PRIVATE
-                "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
-            )
-        endif()
+        tv_add_private_includes(${app})
         target_link_libraries(${app} PUBLIC ${CMAKE_PROJECT_NAME})
         # binaries
         install(TARGETS ${app} RUNTIME DESTINATION bin)
