@@ -116,11 +116,7 @@ cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' or 
 
 In the example above, `tvision.lib` and the example applications will be placed at `./build/Release`.
 
-If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), uncomment the following line in `CMakeLists.txt`:
-```cmake
-    # Static RTL linkage for MSVC.
-#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-```
+If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), enable the `TV_USE_STATIC_RTL` option (`-DTV_USE_STATIC_RTL=ON` when calling `cmake`).
 
 If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be linked against the RTL in the same way.
 

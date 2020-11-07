@@ -3,26 +3,47 @@
 # * TV_BUILD_EXAMPLES (default ON) to enable building examples.
 # * TV_BUILD_USING_GPM (default ON) (only on linux) to enable linking to libgpm
 #   (warning if not found).
+# * TV_USE_STATIC_RTL (default ON) to link against the static version of the
+#   runtime library (MSVC only).
 
 cmake_minimum_required (VERSION 3.5)
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
-    cmake_policy(SET CMP0091 NEW)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
+    cmake_policy(SET CMP0077 NEW) # 'option()' honors normal variables.
+endif()
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+    cmake_policy(SET CMP0091 NEW) # MSVC runtime library flags are selected by an abstraction.
 endif()
 
 project(tvision)
 
-# Project options, Enable GPM for Linux
+# Project options
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
+    set(MAY_BUILD_USING_GPM TRUE)
 endif()
-option(TV_BUILD_EXAMPLES "Build example apps" ON)
+if (PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
+    option(TV_BUILD_EXAMPLES "Build example apps" ON)
+endif()
 
-# tvision_BINARY_DIR derived from project() name
-#
-message(STATUS "Install path  : ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "Build Examples: ${TV_BUILD_EXAMPLES}")
-message(STATUS "Build w/GPM   : ${TV_BUILD_USING_GPM}")
+if (MSVC)
+    option(TV_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
+    if (TV_USE_STATIC_RTL)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+    set(MAY_USE_STATIC_RTL TRUE)
+endif()
+
+if (PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
+    message(STATUS "Install path  : ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "Build Examples: ${TV_BUILD_EXAMPLES}")
+    if (MAY_BUILD_USING_GPM)
+        message(STATUS "Build w/GPM   : ${TV_BUILD_USING_GPM}")
+    endif()
+    if (MAY_USE_STATIC_RTL)
+        message(STATUS "Link w/static RTL: ${TV_USE_STATIC_RTL}")
+    endif()
+endif()
 
 # Libraries
 file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
@@ -50,8 +71,6 @@ endfunction()
 tv_add_private_includes(${PROJECT_NAME})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Static RTL linkage for MSVC (requires CMake >= 3.15).
-#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     target_compile_options(${PROJECT_NAME} PUBLIC
         /wd4068
         /wd4146
@@ -147,11 +166,11 @@ if (TV_BUILD_EXAMPLES)
 
 endif()
 
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0")
     # Enable precompiled headers
-    target_precompile_headers(${PROJECT_NAME} PRIVATE "include/tvision/tv.h")
+    target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/tvision/tv.h")
     if (TV_BUILD_EXAMPLES)
-        target_precompile_headers(hello PRIVATE "include/tvision/tv.h")
+        target_precompile_headers(hello PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/tvision/tv.h")
         foreach(app ${TVAPPS})
             if (NOT(app STREQUAL "hello"))
                 target_precompile_headers(${app} REUSE_FROM "hello")
