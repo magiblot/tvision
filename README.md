@@ -65,7 +65,7 @@ Don't forget to check out the <a href="#features">features</a> and <a href="#api
 Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
 ```sh
-cmake . -B ./build --DCMAKE_BUILD_TYPE=Release && # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
+cmake . -B ./build -DCMAKE_BUILD_TYPE=Release && # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
 cmake --build ./build # or `cd ./build && make`
 ```
 
@@ -129,12 +129,12 @@ With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Tur
 
 Once your MinGW environment is properly set up, build is done in a similar way to Linux:
 ```sh
-cmake . -B ./build -G "MinGW Makefiles"
+cmake . -B ./build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release &&
 cmake --build ./build
 ```
 In the example above, `libtvision.a` and all examples are in `./build` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
 
-If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include/tvision` to your compiler
+If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include` to your compiler
 
 <div id="build-borland"></div>
 
