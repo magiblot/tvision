@@ -623,10 +623,15 @@ void TEditor::handleEvent( TEvent& event )
                     if( curPtr != lineEnd(curPtr) )
                         selEnd = nextChar(curPtr);
 
-                char buf[512];
-                size_t length;
-                while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
-                    insertAndConvertText( buf, (uint) length, False );
+                if( encSingleByte )
+                    insertText( &event.keyDown.charScan.charCode, 1, False);
+                else
+                    {
+                    char buf[512];
+                    size_t length;
+                    while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
+                        insertAndConvertText( buf, (uint) length, False );
+                    }
 
                 trackCursor(centerCursor);
                 unlock();
