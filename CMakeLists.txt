@@ -129,9 +129,12 @@ if (NOT WIN32)
         # macOS has no ncursesw by default
         find_library(NCURSESW ncurses)
     endif()
+    # Some distributions place ncurses.h under a separate directory.
+    find_path(NCURSESW_INCLUDE "ncurses.h")
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_NCURSES)
     target_link_libraries(${PROJECT_NAME} PUBLIC ${NCURSESW})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${NCURSESW_INCLUDE})
 
     # tinfow (comes with ncurses and is often provided as 'tinfo',
     # but we need to link the 'w' version when both are available)
