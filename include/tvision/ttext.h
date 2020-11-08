@@ -14,13 +14,13 @@
 #include <algorithm>
 #include <cstring>
 #include <cwchar>
-#include <cuchar>
 #include <type_traits>
 #ifdef _WIN32
 #include <tvision/internal/winwidth.h>
 #endif
 #ifdef __MINGW32__
 #include <tvision/compat/win.h>
+#include <cuchar>
 #endif
 #endif
 
