@@ -14,9 +14,13 @@
 #include <algorithm>
 #include <cstring>
 #include <cwchar>
+#include <cuchar>
 #include <type_traits>
 #ifdef _WIN32
 #include <tvision/internal/winwidth.h>
+#endif
+#ifdef __MINGW32__
+#include <tvision/compat/win.h>
 #endif
 #endif
 
@@ -50,6 +54,8 @@ private:
 #else
     static int width(wchar_t wc);
 #endif
+    static int mbclen(TStringView mbs);
+    static int mbctowc(wchar_t &wc, TStringView mbs);
     static bool isBlacklisted(TStringView mbc);
 #endif // __BORLANDC__
 
@@ -126,8 +132,7 @@ inline size_t TText::next(TStringView text)
 // If the sequence is not valid UTF-8, length is 1.
 {
     if (text.size()) {
-        std::mbstate_t state {};
-        int len = std::mbrtowc(nullptr, text.data(), text.size(), &state);
+        int len = TText::mbclen(text);
         return len <= 1 ? 1 : len;
     }
     return 0;
@@ -142,8 +147,7 @@ inline size_t TText::prev(TStringView text, size_t index)
         // character is found. This tolerates invalid characters.
         size_t lead = std::min<size_t>(index, 4);
         for (size_t i = 1; i <= lead; ++i) {
-            std::mbstate_t state {};
-            int len = std::mbrtowc(nullptr, &text[index - i], i, &state);
+            int len = TText::mbclen({&text[index - i], i});
             if (len > 0)
                 return (size_t) len == i ? i : 1;
         }
@@ -237,9 +241,12 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
 //      while (TText::eat(cells, i, text, j));
 {
     if (j < text.size()) {
+#ifdef _WIN32
+        int len = TText::mbclen(text.substr(j));
+#else
         wchar_t wc;
-        std::mbstate_t state {};
-        int len = std::mbrtowc(&wc, &text[j], text.size() - j, &state);
+        int len = TText::mbctowc(wc, text.substr(j));
+#endif
         if (len <= 1) {
             if (i < cells.size()) {
                 if (len < 0)
@@ -304,9 +311,12 @@ inline void TText::next(TStringView text, size_t &index, size_t &width)
 // * width (output parameter): gets increased by the display width of the first character in 'text'.
 {
     if (index < text.size()) {
+#ifdef _WIN32
+        int len = TText::mbclen(text.substr(index));
+#else
         wchar_t wc;
-        std::mbstate_t state {};
-        int len = std::mbrtowc(&wc, &text[index], text.size() - index, &state);
+        int len = TText::mbctowc(wc, text.substr(index));
+#endif
         if (len <= 1) {
             index += 1;
             width += 1;
@@ -359,6 +369,33 @@ inline int TText::width(wchar_t wc)
     return wcwidth(wc);
 }
 #endif // _WIN32
+
+inline int TText::mbclen(TStringView mbs)
+{
+#ifdef __MINGW32__
+    // 'mbrtowc' is buggy and always returns 1... What's worse, 'mbrtoc32' is also
+    // buggy and does not check if the first parameter is NULL and crashes.
+    // And it doesn't end there, because it assumes the input to always be
+    // valid UTF-8.
+    char32_t wc;
+    std::mbstate_t state {};
+    int len = std::mbrtoc32(&wc, mbs.data(), mbs.size(), &state);
+    if (len > 1 && (size_t) len <= mbs.size())
+        for (int i = 1; i < len; ++i)
+            if ((mbs[i] & 0b11000000) != 0b10000000)
+                return -1;
+    return len;
+#else
+    std::mbstate_t state {};
+    return std::mbrtowc(nullptr, mbs.data(), mbs.size(), &state);
+#endif
+}
+
+inline int TText::mbctowc(wchar_t &wc, TStringView mbs)
+{
+    std::mbstate_t state {};
+    return std::mbrtowc(&wc, mbs.data(), mbs.size(), &state);
+}
 
 #endif // __BORLANDC__
 
