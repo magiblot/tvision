@@ -42,7 +42,7 @@ public:
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
 
-    static Boolean eat(TSpan<TScreenCell> cells, size_t &width, TStringView text, size_t &bytes);
+    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
     static void next(TStringView text, size_t &bytes, size_t &width);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 

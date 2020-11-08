@@ -29,6 +29,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
 * [Features](#features)
 * [API changes](#apichanges)
 * [Unicode support](#unicode)
+* [Clipboard interaction](#clipboard)
 
 <div id="what-for"></div>
 
@@ -302,17 +303,26 @@ The following are not available when compiling with Borland C++:
 ## API changes
 
 * Screen writes are buffered and are usually sent to the terminal once for every iteration of the active event loop (see also `TVISION_MAX_FPS`). If you need to update the screen during a busy loop, you may use `TScreen::flushScreen()`.
-* `TDrawBuffer` is no longer a fixed-length array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.lenght()` method.
+* `TDrawBuffer` is no longer a fixed-length array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.length()` method.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
 * New function `popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver = 0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.
+* `fexpand` can now take a second parameter `relativeTo`.
 * New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
 * Many methods which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
 * New class `TSpan<T>`, a generic (and non-const) version of `TStringView`, inspired by `std::span`.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
-* Unicode support, see below.
+* New method `TView::textEvent` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
+* Unicode support, see [Unicode](#unicode).
+
+### Changes that you probably won't care about
+
+I don't want extensions to be left undocumented, so I'll write them down just for the record.
+
+* `TEvent::getKeyEvent()` now takes a `blocking` parameter which is `True` by default, making it possible to query input events in a non-blocking way.
+* New method `TVMemMgr::reallocateDiscardable` which can be used along `allocateDiscardable` and `freeDiscardable`.
 
 ## Screenshots
 
@@ -361,13 +371,15 @@ Unicode support consists in two new fields in `ev.keyDown` (which is a `struct K
 
 Note that the `text` field may contain garbage or uninitialized data from position `textLength` on.
 
+You can also get a `TStringView` out of a `KeyDownEvent` with the `asText()` method.
+
 So a Unicode character can be retrieved from `TEvent` in the following way:
 
 ```c++
 switch (ev.keyDown.keyCode) {
     // ...
     default: {
-        std::string_view s {ev.keyDown.text, ev.keyDown.textLength};
+        std::string_view s {ev.keyDown.asText()};
         processText(s);
     }
 }
@@ -425,7 +437,7 @@ So, in short: views designed without Unicode input in mind will continue to work
 
 The original design of Turbo Vision uses 16 bits to represent a *screen cell*—8 bit for a character and 8 bit for [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes).
 
-A new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable of holding a UTF-8 sequence in addition to extended attributes (bold, underline, italic...). However, you should not write text into a `TScreenCell` directly but make use of Unicode-aware API functions instead.
+A new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable of holding a limited number of UTF-8 codepoints in addition to extended attributes (bold, underline, italic...). However, you should not write text into a `TScreenCell` directly but make use of Unicode-aware API functions instead.
 
 ### Text display rules
 
@@ -440,7 +452,9 @@ For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This
 One of the issues of Unicode support is the existence of [multi-width](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
 
 * Multi-width characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
-* Zero-width characters are always drawn as `�`, so they become one column wide.
+* Zero-width characters overlay the previous character. For example, the sequence `में` consists of the single-width character `म` and the combining characters `े` and `ं`. In this case, three Unicode codepoints are fit into the same cell.
+
+    The `ZERO WIDTH JOINER` (`U+200D`) is always ommited, as it complicates things too much. For example, it can turn a string like `"👩👦"` (4 columns wide) into `"👩‍👦"` (2 columns wide). Not all terminal emulators respect the ZWJ, so, in order to produce predictable results, Turbo Vision will print both `"👩👦"` and `"👩‍👦"` as `👩👦`.
 * No notable graphical glitches will occur as long as your terminal emulator respects character widths as measured by `wcwidth`.
 
 Here is an example of such characters:
@@ -618,3 +632,59 @@ Views not in this list may not have needed any corrections or I simply forgot to
 Use cases where Unicode is not supported (not an exhaustive list):
 
 - [ ] Highlighted key shortcuts, in general (e.g. `TMenuBox`, `TStatusLine`, `TButton`...).
+
+<div id="clipboard"></div>
+
+# Clipboard interaction
+
+Turbo Vision does not (yet) support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal application. Turbo Vision will then receive the text through standard input.
+
+Unfortunately, each character is processed as a separate `evKeyDown` event. If the user pastes 5000 characters, the application will execute the same operations as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen, etcetera. As you can imagine, this is far from optimal.
+
+For the purpose of dealing with this situation, the Turbo Vision API has been extended with the following function:
+
+```c++
+Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length, size_t &count);
+// Or, without the 'count' parameter:
+Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length);
+```
+
+`TEditor` takes advantage of this function to provide a good user experience when pasting text through the terminal. You can check it out in the `tvedit` application. As a developer, you may be interested in using it if you are implementing a text editing component. Otherwise, you don't need to care about it.
+
+Just for the record, here is a more detailed explanation:
+
+`textEvent()` tries to read text from standard input and stores it in a user-provided buffer `dest`. It returns `False` when no more events are available in the program's input queue or a non-text event is found, in which case this event is saved with `putEvent()` so that it can be processed in the next iteration of the event loop.
+
+The exact number of bytes read is stored in the output parameter `length`, which can never be greater than `dest.size()`. `count`, if provided, is an input/output parameter which gets increased by the amount of key strokes processed.
+
+It is intended to be used as follows:
+
+```c++
+// 'ev' is a TEvent, and 'ev.what' equals 'evKeyDown'.
+switch (ev.keyDown.keyCode) {
+    // Other cases we may want to check.
+    // ...
+    default:
+        // Does the event contain text?
+        if (ev.keyDown.textLength) {
+            // Fill 'buf' with text from the input queue,
+            // including the text in 'ev'.
+            char buf[512];
+            size_t length;
+            size_t count = 0;
+            while (textEvent(ev, buf, length, count)) {
+                // Process 'length' bytes of text in 'buf'.
+                // ...
+
+                // Also, a total of 'count' characters have been read
+                // up to this moment.
+                if (count > 2) {
+                    // This looks like a large chunk of text.
+                    // It's not just the user typing fast.
+                }
+            }
+            // 'textEvent()' clears 'ev' after reading it the first time.
+            // That is, by this point, 'ev.what' is 'evNothing'.
+        }
+}
+```
