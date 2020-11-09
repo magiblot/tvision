@@ -125,11 +125,10 @@ bool BufferedDisplay::timeToFlush()
 
 void BufferedDisplay::drawCursors()
 {
-    const auto [cols, rows] = size;
     for (auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cell = buffer[y*cols + x];
+            auto &cell = buffer[y*size.x + x];
             cursor->apply(cell.Attr);
             setDirty(x, cell, rowDamage[y]);
         }
@@ -137,11 +136,10 @@ void BufferedDisplay::drawCursors()
 
 void BufferedDisplay::undrawCursors()
 {
-    const auto [cols, rows] = size;
     for (const auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cell = buffer[y*cols + x];
+            auto &cell = buffer[y*size.x + x];
             cursor->restore(cell.Attr);
             setDirty(x, cell, rowDamage[y]);
         }

@@ -181,7 +181,7 @@ void TPReadObjects::registerObject( const void *adr )
 {
     ccIndex loc = insert( (void *)adr );
     assert( (uint) loc == curId++ );    // to be sure that TNSCollection
-                                        // continues to work the way
+    (void) loc;                         // continues to work the way
                                         // it does now...
 }
 
@@ -497,7 +497,7 @@ const TStreamableClass *ipstream::readPrefix()
 {
     char ch = readByte();
     assert( ch == '[' );    // don't combine this with the previous line!
-                            // We must always do the read, even if we're
+    (void) ch;              // We must always do the read, even if we're
                             // not checking assertions
 
     char name[128];
@@ -524,7 +524,7 @@ void ipstream::readSuffix()
 {
     char ch = readByte();
     assert( ch == ']' );    // don't combine this with the previous line!
-                            // We must always do the write, even if we're
+    (void) ch;              // We must always do the write, even if we're
                             // not checking assertions
 
 }
