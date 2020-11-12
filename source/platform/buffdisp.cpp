@@ -74,22 +74,29 @@ void BufferedDisplay::setCaretPosition(int x, int y)
 
 void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 {
-    auto changed = screenChanged;
-    auto damage = rowDamage[y];
-    auto *bufCell = &buffer[y*size.x + x];
-    for (int i = 0; i < len; ++i, ++x, ++bufCell)
+    if ( 0 <= x && x < size.x && 
+         0 <= y && y < size.y )
     {
-        BufferCell newCell {buf[i]};
-        ensurePrintable(newCell);
-        if (newCell != *bufCell)
+        if (x + len >= size.x)
+            len = size.x - x;
+
+        auto changed = screenChanged;
+        auto damage = rowDamage[y];
+        auto *bufCell = &buffer[y*size.x + x];
+        for (int i = 0; i < len; ++i, ++x, ++bufCell)
         {
-            changed = true;
-            setDirty(x, newCell, damage);
-            *bufCell = newCell;
+            BufferCell newCell {buf[i]};
+            ensurePrintable(newCell);
+            if (newCell != *bufCell)
+            {
+                changed = true;
+                setDirty(x, newCell, damage);
+                *bufCell = newCell;
+            }
         }
+        screenChanged = changed;
+        rowDamage[y] = damage;
     }
-    screenChanged = changed;
-    rowDamage[y] = damage;
 }
 
 void BufferedDisplay::setDirty(int x, BufferCell &cell, Range &damage)
