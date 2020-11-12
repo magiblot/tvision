@@ -74,8 +74,7 @@ void BufferedDisplay::setCaretPosition(int x, int y)
 
 void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 {
-    if ( 0 <= x && x < size.x && 
-         0 <= y && y < size.y )
+    if (inBounds(x, y))
     {
         if (x + len >= size.x)
             len = size.x - x;
@@ -135,9 +134,12 @@ void BufferedDisplay::drawCursors()
     for (auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cell = buffer[y*size.x + x];
-            cursor->apply(cell.Attr);
-            setDirty(x, cell, rowDamage[y]);
+            if (inBounds(x, y))
+            {
+                auto &cell = buffer[y*size.x + x];
+                cursor->apply(cell.Attr);
+                setDirty(x, cell, rowDamage[y]);
+            }
         }
 }
 
@@ -146,9 +148,12 @@ void BufferedDisplay::undrawCursors()
     for (const auto* cursor : cursors)
         if (cursor->isVisible()) {
             const auto [x, y] = cursor->getPos();
-            auto &cell = buffer[y*size.x + x];
-            cursor->restore(cell.Attr);
-            setDirty(x, cell, rowDamage[y]);
+            if (inBounds(x, y))
+            {
+                auto &cell = buffer[y*size.x + x];
+                cursor->restore(cell.Attr);
+                setDirty(x, cell, rowDamage[y]);
+            }
         }
 }
 

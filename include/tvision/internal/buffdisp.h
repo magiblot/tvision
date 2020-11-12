@@ -40,6 +40,8 @@ class BufferedDisplay : public DisplayStrategy {
     static constexpr int defaultMaxFrameDrops = 4;
     static constexpr int defaultFPS = 60;
 
+    bool inBounds(int x, int y) const;
+
     void resetBuffer();
     static void setDirty(int x, BufferCell &cell, Range &damage);
     void ensurePrintable(BufferCell &cell) const;
@@ -75,6 +77,12 @@ protected:
     virtual void lowlevelFlush() {};
 
 };
+
+inline bool BufferedDisplay::inBounds(int x, int y) const
+{
+    return 0 <= x && x < size.x &&
+           0 <= y && y < size.y;
+}
 
 inline void BufferedDisplay::addCursor(ScreenCursor *cursor)
 {
