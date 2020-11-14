@@ -72,9 +72,9 @@ private:
                 r.close();
         }
         std::mutex m;
-        std::lock_guard<std::mutex> lock()
+        operator std::mutex&()
         {
-            return std::lock_guard<std::mutex>(m);
+            return m;
         }
     } static recList;
 };

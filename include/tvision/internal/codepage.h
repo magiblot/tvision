@@ -1,7 +1,6 @@
 #ifndef CODEPAGE_H
 #define CODEPAGE_H
 #include <tvision/tv.h>
-#include <string_view>
 #include <unordered_map>
 #include <array>
 
@@ -13,20 +12,20 @@ class CpTranslator {
     static CpTranslator instance;
 
     struct CpTable {
-        std::string_view cp;
+        TStringView cp;
         const uint32_t *toUtf8Int;
-        const std::unordered_map<std::string_view, char> fromUtf8;
+        const std::unordered_map<TStringView, char> fromUtf8;
 
-        static auto initMap(const std::string_view toUtf8[256])
+        static auto initMap(const TStringView toUtf8[256])
         {
-            std::unordered_map<std::string_view, char> map;
+            std::unordered_map<TStringView, char> map;
             for (size_t i = 0; i < 256; ++i)
                 map.emplace(toUtf8[i], char(i));
             return map;
         }
 
-        CpTable( std::string_view cp,
-                 const std::string_view toUtf8[256],
+        CpTable( TStringView cp,
+                 const TStringView toUtf8[256],
                  const std::array<uint32_t, 256> &toUtf8Int ) :
             cp(cp),
             toUtf8Int(toUtf8Int.data()),
@@ -40,7 +39,7 @@ class CpTranslator {
 
 public:
 
-    static void use(std::string_view cp) {
+    static void use(TStringView cp) {
         for (const CpTable &t : tables)
             if (t.cp == cp) {
                 activeTable = &t;

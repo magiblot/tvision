@@ -15,11 +15,10 @@
 
 #ifndef __BORLANDC__
 
-#if __cplusplus >= 201703L
+#include <string>
+#ifdef __cpp_lib_string_view
 #include <string_view>
 #endif
-
-#include <string>
 
 #endif // __BORLANDC__
 
@@ -43,7 +42,7 @@ public:
     constexpr TStringView(const char _FAR *str, size_t len);
     constexpr TStringView(TSpan<char> span);
     constexpr TStringView(TSpan<const char> span);
-#if __cplusplus >= 201703L
+#ifdef __cpp_lib_string_view
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
@@ -81,7 +80,7 @@ inline constexpr TStringView::TStringView() :
 
 #pragma warn -inl
 
-#if __cplusplus >= 201703L
+#ifdef __cpp_lib_string_view
 inline constexpr TStringView::TStringView(const char _FAR *str) :
     TStringView()
 {
@@ -119,7 +118,7 @@ inline constexpr TStringView::TStringView(TSpan<const char> span) :
 {
 }
 
-#if __cplusplus >= 201703L
+#ifdef __cpp_lib_string_view
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
     len(text.size())
@@ -215,7 +214,7 @@ inline constexpr const char _FAR * TStringView::cend() const
 
 inline constexpr Boolean operator==(TStringView a, TStringView b)
 {
-#if __cplusplus >= 201703L
+#ifdef __cpp_lib_string_view
     return std::string_view {a} == std::string_view {b};
 #else
     if (a.size() == b.size())
@@ -229,5 +228,24 @@ inline constexpr Boolean operator!=(TStringView a, TStringView b)
     return !(a == b);
 }
 
+#ifndef __BORLANDC__
+
+#include <typeindex>
+
+namespace std {
+#ifdef __cpp_lib_string_view
+template<>
+struct hash<TStringView> : public std::hash<std::string_view>
+{
+};
+#else
+template<>
+struct hash<TStringView> : public std::hash<std::string>
+{
+};
+#endif
+} // namespace std
+
+#endif // __BORLANDC__
 
 #endif // TVISION_TSTRVIEW_H

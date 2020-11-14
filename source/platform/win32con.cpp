@@ -336,7 +336,7 @@ ushort Win32Display::getScreenMode()
 
 // Fallback display support with rudimentary buffering.
 
-void Win32Display::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
+void Win32Display::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
     if (attr != lastAttr) {
         lowlevelFlush();

@@ -13,7 +13,6 @@
 #include <internal/sighandl.h>
 #include <internal/stdioctl.h>
 #include <internal/getenv.h>
-#include <string_view>
 #include <chrono>
 #ifdef _TV_UNIX
 #include <sys/ioctl.h>
@@ -126,7 +125,7 @@ void THardwareInfo::setUpConsole()
         }
 #else
         DisplayStrategy *disp;
-        if (getEnv<std::string_view>("TVISION_DISPLAY") == "ncurses")
+        if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
             disp = new NcursesDisplay();
         else
             disp = new AnsiDisplay<NcursesDisplay>();

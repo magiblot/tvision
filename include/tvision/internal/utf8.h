@@ -1,6 +1,5 @@
 #ifndef UTF8_H
 #define UTF8_H
-#include <string_view>
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -14,7 +13,7 @@ inline constexpr int Utf8BytesLeft(char first_byte)
 }
 
 template<size_t N>
-inline constexpr std::array<uint32_t, N> make_utf8int(const std::string_view utf8[N]) {
+inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) {
     std::array<uint32_t, N> result {};
     for (size_t i = 0; i < N; ++i) {
         uint8_t chars[4] {0};
@@ -26,7 +25,7 @@ inline constexpr std::array<uint32_t, N> make_utf8int(const std::string_view utf
     return result;
 }
 
-inline constexpr uint32_t utf8To32(std::string_view s) {
+inline constexpr uint32_t utf8To32(TStringView s) {
     // Precondition: s is a valid UTF-8 sequence.
     switch (s.size()) {
         case 1:

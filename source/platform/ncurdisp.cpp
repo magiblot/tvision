@@ -107,7 +107,7 @@ void NcursesDisplay::setCaretSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
+void NcursesDisplay::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
     // Translate and apply text attributes.
     uint curses_attr = translateAttributes(attr);

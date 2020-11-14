@@ -198,9 +198,11 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&att
     size_t w = 0, b = 0;
     do {
         if (w < cells.size()) {
+#if defined(__cpp_lib_is_invocable) && defined(__cpp_lib_if_constexpr)
             if constexpr (std::is_invocable<Attr, TScreenCell&>())
                 attr(cells[w]);
             else
+#endif
                 ::setAttr(cells[w], attr);
         }
     } while (TText::eat(cells, w, text, b));

@@ -14,7 +14,7 @@ FindFirstRec* FindFirstRec::allocate(struct find_t *fileinfo, unsigned attrib,
     // that has already been passed to us before.
     if (!fileinfo)
         return 0;
-    auto lock{recList.lock()};
+    std::lock_guard<std::mutex> lock(recList);
     FindFirstRec *r = 0;
     size_t index;
 
@@ -49,7 +49,7 @@ FindFirstRec* FindFirstRec::allocate(struct find_t *fileinfo, unsigned attrib,
 FindFirstRec* FindFirstRec::get(struct find_t *fileinfo)
 {
     // Return the FindFirstRec instance pointed to by fileinfo.
-    auto lock{recList.lock()};
+    std::lock_guard<std::mutex> lock(recList);
     size_t pos = fileinfo->reserved;
     if (0 <= pos && pos < recList.size() && recList[pos].finfo == fileinfo)
         return &recList[pos];

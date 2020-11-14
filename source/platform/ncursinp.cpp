@@ -12,7 +12,7 @@
 #include <internal/codepage.h>
 #include <internal/constmap.h>
 #include <internal/stdioctl.h>
-#include <string_view>
+#include <string>
 
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Unless those are changed, it is
@@ -176,7 +176,7 @@ static const const_unordered_map<int, KeyDownEvent> fromCursesKeyCode = {
     { KEY_F0 + 60,      {{kbAltF12},    kbAltShift} }
 };
 
-static const const_unordered_map<std::string_view, KeyDownEvent> fromCursesHighKey = {
+static const const_unordered_map<TStringView, KeyDownEvent> fromCursesHighKey = {
     /* These keys are identified by name. The int value is not known
      * at compilation time. */
     { "kDC3",       {{kbAltDel},        kbAltShift}},
@@ -261,7 +261,7 @@ NcursesInput::NcursesInput(bool mouse) :
         // This will do the trick for now.
         buttonCount = 2;
         // Force enable mouse drag support.
-        auto TERM = getEnv<std::string_view>("TERM");
+        auto TERM = getEnv<std::string>("TERM");
         if (TERM.find("xterm") == 0 || TERM.find("rxvt") == 0)
         {
             mouseForced = true;

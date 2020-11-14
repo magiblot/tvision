@@ -18,8 +18,6 @@
 #define COLORS 16
 #endif
 
-using namespace std::literals;
-
 #define CSI "\x1B["
 
 AnsiDisplayBase::AnsiDisplayBase() :
@@ -38,7 +36,7 @@ AnsiDisplayBase::~AnsiDisplayBase()
     lowlevelFlush();
 }
 
-void AnsiDisplayBase::bufWrite(std::string_view s)
+void AnsiDisplayBase::bufWrite(TStringView s)
 {
     buf.insert(buf.end(), s.data(), s.data()+s.size());
 }
@@ -67,13 +65,13 @@ void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F)
 
 void AnsiDisplayBase::clearAttributes()
 {
-    bufWrite(CSI "0m"sv);
+    bufWrite(CSI "0m");
     lastAttr = {};
 }
 
 void AnsiDisplayBase::clearScreen()
 {
-    bufWrite(CSI "2J"sv);
+    bufWrite(CSI "2J");
 }
 
 ushort AnsiDisplayBase::getScreenMode()
@@ -125,7 +123,7 @@ int AnsiDisplayBase::getScreenCols()
     return cols;
 }
 #endif
-void AnsiDisplayBase::lowlevelWriteChars(std::string_view chars, TCellAttribs attr)
+void AnsiDisplayBase::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
     writeAttributes(attr);
     bufWrite(chars);
@@ -140,7 +138,7 @@ void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)
 void AnsiDisplayBase::lowlevelMoveCursorYby1(uint, uint)
 {
     // Optimized case where the cursor only moves vertically to the line below.
-    bufWrite("\n"sv);
+    bufWrite("\n");
 }
 
 void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)

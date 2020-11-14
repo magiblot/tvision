@@ -4,7 +4,6 @@
 #include <internal/buffdisp.h>
 #include <internal/textattr.h>
 #include <vector>
-#include <string_view>
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
  * escape codes directly to stdout.
@@ -26,7 +25,7 @@ class AnsiDisplayBase {
     SGRAttribs lastAttr;
     uint sgrFlags;
 
-    void bufWrite(std::string_view s);
+    void bufWrite(TStringView s);
     void bufWriteCSI1(uint a, char F);
     void bufWriteCSI2(uint a, uint b, char F);
     void writeAttributes(TCellAttribs attr);
@@ -47,7 +46,7 @@ protected:
 
     ushort getScreenMode();
 
-    void lowlevelWriteChars(std::string_view chars, TCellAttribs attr);
+    void lowlevelWriteChars(TStringView chars, TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
     void lowlevelMoveCursorYby1(uint x, uint y);
@@ -79,7 +78,7 @@ public:
     int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
 #endif
 
-    void lowlevelWriteChars(std::string_view chars, TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
+    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
     void lowlevelMoveCursorYby1(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorYby1(x, y); }

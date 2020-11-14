@@ -13,7 +13,7 @@
  * stored by Turbo Vision into the corresponding UTF-8 mulibyte characters.
  * Taken from https://en.wikipedia.org/wiki/Code_page_437 */
 
-static constexpr std::string_view cp437toUtf8[256] = {
+static constexpr TStringView cp437toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -32,9 +32,9 @@ static constexpr std::string_view cp437toUtf8[256] = {
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
-static constexpr std::array<uint32_t, 256> cp437toUtf8Int = make_utf8int<256>(cp437toUtf8);
+static const std::array<uint32_t, 256> cp437toUtf8Int = make_utf8int<256>(cp437toUtf8);
 
-static constexpr std::string_view cp850toUtf8[256] = {
+static constexpr TStringView cp850toUtf8[256] = {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -55,7 +55,7 @@ static constexpr std::string_view cp850toUtf8[256] = {
     // it is often represented as a regular hyphen.
 };
 
-static constexpr std::array<uint32_t, 256> cp850toUtf8Int = make_utf8int<256>(cp850toUtf8);
+static const std::array<uint32_t, 256> cp850toUtf8Int = make_utf8int<256>(cp850toUtf8);
 
 const CpTranslator::CpTable CpTranslator::tables[] = {
     { "437", cp437toUtf8, cp437toUtf8Int },
@@ -67,5 +67,5 @@ CpTranslator CpTranslator::instance;
 
 CpTranslator::CpTranslator() {
     // Set the active codepage. 437 is the default.
-    use(getEnv<std::string_view>("TVISION_CODEPAGE", "437"));
+    use(getEnv<TStringView>("TVISION_CODEPAGE", "437"));
 }

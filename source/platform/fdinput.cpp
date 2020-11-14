@@ -94,7 +94,7 @@ void FdInputStrategy::deleteListener(FdInputStrategy* listener)
 
     if (shrink)
     {
-        ready = {};
+        decltype(ready)().swap(ready);
         while (shrink--)
         {
             listeners.pop_back();

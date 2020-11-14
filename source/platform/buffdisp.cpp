@@ -133,7 +133,8 @@ void BufferedDisplay::drawCursors()
 {
     for (auto* cursor : cursors)
         if (cursor->isVisible()) {
-            const auto [x, y] = cursor->getPos();
+            auto pos = cursor->getPos();
+            auto x = pos.x, y = pos.y;
             if (inBounds(x, y))
             {
                 auto &cell = buffer[y*size.x + x];
@@ -147,7 +148,8 @@ void BufferedDisplay::undrawCursors()
 {
     for (const auto* cursor : cursors)
         if (cursor->isVisible()) {
-            const auto [x, y] = cursor->getPos();
+            auto pos = cursor->getPos();
+            auto x = pos.x, y = pos.y;
             if (inBounds(x, y))
             {
                 auto &cell = buffer[y*size.x + x];
