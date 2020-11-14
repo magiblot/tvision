@@ -77,9 +77,9 @@ protected:
     template<class C>
     static constexpr bool check_trivial()
     {
-        static_assert(std::is_trivial<C>());
-        static_assert(sizeof(C) == sizeof(T));
-        static_assert(alignof(C) == alignof(T));
+        static_assert(std::is_trivial<C>(), "");
+        static_assert(sizeof(C) == sizeof(T), "");
+        static_assert(alignof(C) == alignof(T), "");
         return true;
     }
 
@@ -242,7 +242,7 @@ struct alignas(4) TCellChar
 
     static constexpr void check_assumptions()
     {
-        static_assert(std::is_trivial<TCellChar>());
+        static_assert(std::is_trivial<TCellChar>(), "");
     }
 
 };
@@ -274,7 +274,7 @@ struct TScreenCell
 
     static constexpr void check_assumptions()
     {
-        static_assert(std::is_trivial<TScreenCell>());
+        static_assert(std::is_trivial<TScreenCell>(), "");
     }
 
 };

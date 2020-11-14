@@ -109,7 +109,7 @@ struct BufferCell {
 
     static constexpr void check_assumptions()
     {
-        static_assert(std::is_trivial<BufferCell>());
+        static_assert(std::is_trivial<BufferCell>(), "");
     }
 
 };
