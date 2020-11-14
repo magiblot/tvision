@@ -19,7 +19,8 @@ void SigwinchAware::handler(int s)
     if (pipeEmpty())
     {
         char c = 0;
-        (void) write(fd[1], &c, sizeof(char));
+        int rr = write(fd[1], &c, sizeof(char));
+        (void) rr;
     }
     // Call the previous SIGWINCH handler, so as not to break
     // the original behaviour (e.g. Ncurses notices resolution change).
@@ -40,7 +41,8 @@ SigwinchAware::SigwinchAware()
     {
         firstTime = false;
         // Make the pipe non-blocking, so that read() never gets stuck.
-        (void) pipe(fd);
+        int rr = pipe(fd);
+        (void) rr;
         for (int d : fd)
         {
             int flags = fcntl(d, F_GETFL);
@@ -69,7 +71,8 @@ void SigwinchAware::winchClear()
     // as signals were caught. So it has to be responsible for invoking winchClear()
     // when it believes it has no more resize events to process.
     char c;
-    (void) read(fd[0], &c, sizeof(char));
+    int rr = read(fd[0], &c, sizeof(char));
+    (void) rr;
 }
 
 int SigwinchAware::winchFd()

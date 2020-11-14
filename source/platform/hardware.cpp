@@ -70,7 +70,8 @@ void THardwareInfo::consoleWrite(const void *data, size_t bytes)
     Win32ConsoleStrategy::write(data, bytes);
 #else
     fflush(StdioCtl::fout());
-    (void) ::write(StdioCtl::out(), data, bytes);
+    int rr = ::write(StdioCtl::out(), data, bytes);
+    (void) rr;
 #endif
 }
 
