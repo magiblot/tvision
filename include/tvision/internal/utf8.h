@@ -13,6 +13,9 @@ inline constexpr int Utf8BytesLeft(char first_byte)
 }
 
 template<size_t N>
+#ifdef __cpp_lib_array_constexpr
+constexpr
+#endif
 inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) {
     std::array<uint32_t, N> result {};
     for (size_t i = 0; i < N; ++i) {
@@ -40,7 +43,7 @@ inline constexpr uint32_t utf8To32(TStringView s) {
     return 0;
 }
 
-inline constexpr size_t utf32To8(uint32_t u, char utf8[4]) {
+inline size_t utf32To8(uint32_t u, char utf8[4]) {
     union {
         uint32_t asInt {0};
         uint8_t asChars[4];

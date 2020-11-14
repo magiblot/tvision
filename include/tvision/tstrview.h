@@ -234,15 +234,15 @@ inline constexpr Boolean operator!=(TStringView a, TStringView b)
 
 namespace std {
 #ifdef __cpp_lib_string_view
-template<>
-struct hash<TStringView> : public std::hash<std::string_view>
-{
-};
+    template<>
+    struct hash<TStringView> : public std::hash<std::string_view>
+    {
+    };
 #else
-template<>
-struct hash<TStringView> : public std::hash<std::string>
-{
-};
+    template<>
+    struct hash<TStringView> : public std::hash<std::string>
+    {
+    };
 #endif
 } // namespace std
 
