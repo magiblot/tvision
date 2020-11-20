@@ -44,16 +44,22 @@ bool FdInputStrategy::waitForEvent(int ms, TEvent &ev)
     bool result {false};
     auto &&end = steady_clock::now() + milliseconds(ms);
     do {
-        if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
-            for (size_t i = 0; i < fds.size(); ++i)
-            {
-                if (fds[i].revents & POLLHUP || (fds[i].revents & POLLIN && fdEmpty(fds[i].fd)))
-                    // Broken pipe or EOF will cause poll to return immediately,
-                    // so remove it from the list.
-                    deleteListener(listeners[i]);
-                else if (fds[i].revents & POLLIN)
+        if (ready.empty())
+        {
+            for (size_t i = 0; i < listeners.size(); ++i)
+                if (listeners[i]->hasPendingEvents())
                     ready.push(i);
-            }
+            if (ready.empty() && poll(fds.data(), fds.size(), ms) > 0)
+                for (size_t i = 0; i < fds.size(); ++i)
+                {
+                    if (fds[i].revents & POLLHUP || (fds[i].revents & POLLIN && fdEmpty(fds[i].fd)))
+                        // Broken pipe or EOF will cause poll to return immediately,
+                        // so remove it from the list.
+                        deleteListener(listeners[i]);
+                    else if (fds[i].revents & POLLIN)
+                        ready.push(i);
+                }
+        }
         if (!ready.empty())
         {
             ev = {};
@@ -85,8 +91,8 @@ void FdInputStrategy::deleteListener(FdInputStrategy* listener)
         }
         if (shrink && (i + shrink < listeners.size()))
         {
-            listeners[i] = std::move(listeners[i + shrink]);
-            fds[i] = std::move(fds[i + shrink]);
+            listeners[i] = listeners[i + shrink];
+            fds[i] = fds[i + shrink];
         }
         if (!found)
             ++i;

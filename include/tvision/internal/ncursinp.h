@@ -55,6 +55,7 @@ public:
 
     bool getEvent(TEvent &ev);
     int getButtonCount();
+    bool hasPendingEvents();
 
 };
 

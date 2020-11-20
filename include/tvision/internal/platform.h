@@ -117,6 +117,7 @@ public:
     static void deleteListener(FdInputStrategy*);
     static bool waitForEvent(int ms, TEvent &ev);
     void overrideEventGetter(std::function<bool (TEvent&)>&&);
+    virtual bool hasPendingEvents() { return false; }
 
 };
 

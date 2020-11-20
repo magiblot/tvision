@@ -295,6 +295,16 @@ int NcursesInput::getButtonCount()
     return buttonCount;
 }
 
+bool NcursesInput::hasPendingEvents()
+{
+    int k = wgetch(stdscr);
+    if (k != ERR)
+    {
+        ungetch(k);
+        return true;
+    }
+    return false;
+}
 
 bool NcursesInput::getEvent(TEvent &ev)
 {
