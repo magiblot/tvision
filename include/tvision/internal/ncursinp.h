@@ -11,14 +11,14 @@
 #include <tvision/tv.h>
 
 #include <internal/sigwinch.h>
+#include <internal/terminal.h>
 
 class NcursesInput : public FdInputStrategy, SigwinchAware {
 
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeout = 5 };
 
-    TPoint lastMousePos;
-    uchar buttonState;
+    MouseState mstate;
     int buttonCount;
     bool mouseEnabled;
 
@@ -28,27 +28,17 @@ class NcursesInput : public FdInputStrategy, SigwinchAware {
     void setAltModifier(TEvent &ev);
     void readUtf8Char(int keys[4], int &num_keys);
 
-    struct GetChBuf {
-        enum { maxSize = 31 };
-        int keys[maxSize];
-        uint size {0};
-
-        int get();
-        int last();
-        void unget();
-        void reject();
-        int getNum();
-    };
-
-    enum ParseResult { Rejected = 0, Accepted, Ignored };
-
-    ParseResult parseEscapeSeq(TEvent&);
-
-    static void setMouse(bool enable);
     bool parseCursesMouse(TEvent&);
-    bool acceptMouseEvent(TEvent&, TPoint where, uchar buttons, uchar wheel);
-    ParseResult parseX10Mouse(GetChBuf&, TEvent&);
-    ParseResult parseSGRMouse(GetChBuf&, TEvent&);
+
+    class NcGetChBuf : public GetChBuf
+    {
+
+    protected:
+
+        int do_getch() override;
+        bool do_ungetch(int) override;
+
+    };
 
 public:
 
@@ -60,49 +50,6 @@ public:
     bool hasPendingEvents();
 
 };
-
-inline int NcursesInput::GetChBuf::get()
-{
-    if (size < maxSize)
-    {
-        int k = wgetch(stdscr);
-        if (k != ERR)
-            keys[size++] = k;
-        return k;
-    }
-    return ERR;
-}
-
-inline int NcursesInput::GetChBuf::last()
-{
-    if (size)
-        return keys[size - 1];
-    return ERR;
-}
-
-inline void NcursesInput::GetChBuf::unget()
-{
-    if (size)
-        ungetch(keys[--size]);
-}
-
-inline void NcursesInput::GetChBuf::reject()
-{
-    while (size)
-        ungetch(keys[--size]);
-}
-
-inline int NcursesInput::GetChBuf::getNum()
-{
-    int num = 0, digits = 0;
-    int k;
-    while ((k = get()) != ERR && '0' <= k && k <= '9')
-    {
-        num = 10 * num + (k - '0');
-        ++digits;
-    }
-    return digits ? num : ERR;
-}
 
 #else
 
