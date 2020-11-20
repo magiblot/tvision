@@ -13,7 +13,8 @@
 #include <gpm.h>
 using std::tuple;
 
-GpmInput::GpmInput() : cursor(ScreenCursor::Negative), buttonState(0)
+GpmInput::GpmInput() :
+    buttonState(0)
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;

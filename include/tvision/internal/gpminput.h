@@ -14,7 +14,7 @@
 
 class GpmInput : public FdInputStrategy {
 
-    ScreenCursor cursor;
+    NegativeScreenCursor cursor;
     uchar buttonState;
 
     static void fitEvent(Gpm_Event&);

@@ -7,9 +7,8 @@ class ScreenCursor {
 
 public:
 
-    enum DrawStyle { Reverse, Negative };
 
-    ScreenCursor(DrawStyle);
+    ScreenCursor();
     ~ScreenCursor();
 
     void show();
@@ -22,17 +21,15 @@ public:
 
 protected:
 
-    const DrawStyle style;
     TPoint pos;
     bool visible;
     TCellAttribs backup;
 
-    virtual void draw(TCellAttribs &attr) const;
+    virtual void draw(TCellAttribs &attr) const = 0;
 
 };
 
-inline ScreenCursor::ScreenCursor(DrawStyle style) :
-    style(style),
+inline ScreenCursor::ScreenCursor() :
     pos({-1, -1}),
     visible(false),
     backup(0)
@@ -84,5 +81,21 @@ inline void ScreenCursor::restore(TCellAttribs &attr) const
 {
     attr = backup;
 }
+
+class ReverseScreenCursor : public ScreenCursor {
+
+protected:
+
+    void draw(TCellAttribs &attr) const override;
+
+};
+
+class NegativeScreenCursor : public ScreenCursor {
+
+protected:
+
+    void draw(TCellAttribs &attr) const override;
+
+};
 
 #endif
