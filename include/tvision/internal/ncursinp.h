@@ -15,12 +15,14 @@
 class NcursesInput : public FdInputStrategy, SigwinchAware {
 
     enum : char { KEY_ESC = '\x1B' };
+    enum { readTimeout = 5 };
 
     TPoint lastMousePos;
     uchar buttonState;
     int buttonCount;
     bool mouseEnabled;
 
+    static int getch_nb();
     void detectAlt(int keys[4], bool &Alt);
     void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
     void setAltModifier(TEvent &ev);

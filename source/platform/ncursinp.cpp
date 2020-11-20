@@ -244,8 +244,10 @@ NcursesInput::NcursesInput(bool mouse) :
     nonl();
     // Allow capturing function keys.
     keypad(stdscr, true);
-    // Make getch non-blocking.
-    nodelay(stdscr, true);
+    // Make getch practically non-blocking. Some terminals may feed input slowly.
+    // Note that we only risk blocking when reading multibyte characters
+    // or parsing escape sequences.
+    wtimeout(stdscr, readTimeout);
     /* Do not delay too much on ESC key presses, as the Alt modifier works well
      * in most modern terminals. Still, this delay helps ncurses distinguish
      * special key sequences, I believe. */
@@ -295,9 +297,17 @@ int NcursesInput::getButtonCount()
     return buttonCount;
 }
 
+int NcursesInput::getch_nb()
+{
+    wtimeout(stdscr, 0);
+    int k = wgetch(stdscr);
+    wtimeout(stdscr, readTimeout);
+    return k;
+}
+
 bool NcursesInput::hasPendingEvents()
 {
-    int k = wgetch(stdscr);
+    int k = getch_nb();
     if (k != ERR)
     {
         ungetch(k);
@@ -368,7 +378,7 @@ void NcursesInput::detectAlt(int keys[4], bool &Alt)
  * we check if another character has been received. If it has, we consider this
  * an Alt+Key combination. Of course, many other things sent by the terminal
  * begin with ESC, but ncurses already identifies most of them. */
-    int k = wgetch(stdscr);
+    int k = getch_nb();
     if (k != ERR)
     {
         keys[0] = k;
