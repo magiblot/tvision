@@ -291,6 +291,7 @@ private:
 #endif
 
     static Boolean _NEAR mouseEvents;
+    static Boolean _NEAR pendingMouseUp;
 
     static ushort _NEAR repeatDelay;
     static ushort _NEAR autoTicks;

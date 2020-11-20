@@ -47,6 +47,7 @@ ushort _NEAR TEventQueue::downTicks = 0;
 
 Boolean _NEAR TEventQueue::mouseEvents = False;
 Boolean _NEAR TEventQueue::mouseReverse = False;
+Boolean _NEAR TEventQueue::pendingMouseUp = False;
 ushort _NEAR TEventQueue::doubleDelay = 8;
 ushort _NEAR TEventQueue::repeatDelay = 8;
 ushort _NEAR TEventQueue::autoTicks = 0;
@@ -102,6 +103,14 @@ void TEventQueue::getMouseEvent( TEvent & ev)
 {
     if( mouseEvents == True )
         {
+        if( pendingMouseUp == True )
+            {
+            ev.what = evMouseUp;
+            ev.mouse = lastMouse;
+            lastMouse.buttons = 0;
+            pendingMouseUp = False;
+            return;
+            }
         if( !getMouseState( ev ) )
             return;
 
@@ -109,10 +118,25 @@ void TEventQueue::getMouseEvent( TEvent & ev)
 
         if( ev.mouse.buttons == 0 && lastMouse.buttons != 0 )
             {
-            ev.what = evMouseUp;
-            uchar buttons = lastMouse.buttons;
-            lastMouse = ev.mouse;
-            ev.mouse.buttons = buttons;
+            if( ev.mouse.where == lastMouse.where )
+                {
+                ev.what = evMouseUp;
+                uchar buttons = lastMouse.buttons;
+                lastMouse = ev.mouse;
+                ev.mouse.buttons = buttons;
+                }
+            else
+                {
+                ev.what = evMouseMove;
+                MouseEventType up = ev.mouse;
+                TPoint where = up.where;
+                ev.mouse = lastMouse;
+                ev.mouse.where = where;
+                ev.mouse.eventFlags |= meMouseMoved;
+                up.buttons = lastMouse.buttons;
+                lastMouse = up;
+                pendingMouseUp = True;
+                }
             return;
             }
 
