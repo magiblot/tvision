@@ -10,6 +10,8 @@ class StdioCtl {
 
     int fds[3];
     FILE *files[3];
+    int ttyfd;
+    FILE *infile, *outfile;
 
     StdioCtl() { setUp(); }
     ~StdioCtl() { tearDown(); }

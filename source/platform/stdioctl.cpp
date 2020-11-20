@@ -10,7 +10,8 @@ StdioCtl StdioCtl::instance;
 
 void StdioCtl::setUp()
 {
-    int ttyfd = -1;
+    ttyfd = -1;
+    infile = outfile = nullptr;
     if (!getEnv<const char*>("TVISION_USE_STDIO"))
         ttyfd = ::open("/dev/tty", O_RDWR);
 
@@ -18,9 +19,11 @@ void StdioCtl::setUp()
     {
         for (auto &fd : fds)
             fd = ttyfd;
-        FILE *ttyfile = ::fdopen(ttyfd, "r+");
-        for (auto &file : files)
-            file = ttyfile;
+        infile = ::fdopen(ttyfd, "r");
+        files[0] = infile;
+        outfile = ::fdopen(ttyfd, "w");
+        files[1] = outfile;
+        files[2] = outfile;
     }
     else
     {
@@ -34,25 +37,20 @@ void StdioCtl::setUp()
 
 void StdioCtl::tearDown()
 {
-    // Closing a FILE more than once is UB, so we must be careful.
-    for (int i = 0; i < 3; ++i)
+    if (ttyfd != -1)
     {
-        FILE *file = files[i];
-        if (file)
+        ::fflush(infile);
+        ::fflush(outfile);
+        ::close(ttyfd);
+        ::fclose(infile);
+        ::fclose(outfile);
+        ttyfd = -1;
+        infile = outfile = nullptr;
+        for (int i = 0; i < 3; ++i)
         {
-            for (int j = i; j < 3; ++j)
-                if (files[j] == file)
-                    files[j] = nullptr;
-            ::fflush(file);
-            ::fclose(file);
+            fds[i] = -1;
+            files[i] = nullptr;
         }
-    }
-    // There is no such issue with fds. We can close them even if the above
-    // already closed them.
-    for (int i = 0; i < 3; ++i)
-    {
-        ::close(fds[i]);
-        fds[i] = -1;
     }
 }
 
