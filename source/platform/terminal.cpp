@@ -3,8 +3,8 @@
 
 #include <internal/terminal.h>
 
-// Mouse support in Ncurses is not always good. To work around some issues,
-// we request and parse mouse events manually.
+// The default mouse experience with Ncurses is not always good. To work around
+// some issues, we request and parse mouse events manually.
 
 void TermIO::mouseOn()
 {
