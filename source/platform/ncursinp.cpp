@@ -232,7 +232,9 @@ static const const_unordered_map<TStringView, KeyDownEvent> fromCursesHighKey = 
 };
 
 NcursesInput::NcursesInput(bool mouse) :
-    mouseForced(false)
+    mouseEnabled(mouse),
+    buttonState(0),
+    buttonCount(0)
 {
     // Capture all keyboard input.
     raw();
@@ -249,26 +251,14 @@ NcursesInput::NcursesInput(bool mouse) :
      * special key sequences, I believe. */
     set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
-    if (mouse)
+    if (mouseEnabled)
     {
-        buttonState = 0;
         lastMousePos = {-1, -1};
-        mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, 0);
-        /* ncurses has the ability to recognize double/triple mouse clicks,
-         * but this results in a delay before reporting the event. We don't
-         * want this to happen. */
-        mouseinterval(0);
-        // This will do the trick for now.
+        // The button count is not really important. Turbo Vision only checks
+        // if it is non-zero.
         buttonCount = 2;
-        // Force enable mouse drag support.
-        auto TERM = getEnv<std::string>("TERM");
-        if (TERM.find("xterm") == 0 || TERM.find("rxvt") == 0)
-        {
-            mouseForced = true;
-            printEscapeSeq("\x1B[?1002h");
-        }
+        setMouse(true);
     }
-    else buttonCount = 0;
 
     addListener(this, StdioCtl::in());
     addListener(this, winchFd());
@@ -276,16 +266,28 @@ NcursesInput::NcursesInput(bool mouse) :
 
 NcursesInput::~NcursesInput()
 {
-    if (mouseForced)
-        printEscapeSeq("\x1B[?1002l");
-    // Disable mouse mode.
-    mousemask(0, 0);
+    if (mouseEnabled)
+        setMouse(false);
 }
 
-void NcursesInput::printEscapeSeq(const char* seq)
+void NcursesInput::setMouse(bool enable)
 {
-    fputs(seq, StdioCtl::fout());
-    fflush(StdioCtl::fout());
+    // Mouse support in Ncurses is not always good. To work around some issues,
+    // we request and parse mouse events manually.
+    TStringView seq;
+    if (enable)
+        seq = "\x1B[?1001s" // Save old highlight mouse reporting.
+              "\x1B[?1000h" // Enable mouse reporting.
+              "\x1B[?1002h" // Enable mouse drag reporting.
+              "\x1B[?1006h" // Enable SGR extended mouse reporting.
+            ;
+    else
+        seq = "\x1B[?1006l" // Disable SGR extended mouse reporting.
+              "\x1B[?1002l" // Disable mouse drag reporting.
+              "\x1B[?1000l" // Disable mouse reporting.
+              "\x1B[?1001r" // Restore old highlight mouse reporting.
+            ;
+    THardwareInfo::consoleWrite(seq.data(), seq.size());
 }
 
 int NcursesInput::getButtonCount()
@@ -293,27 +295,39 @@ int NcursesInput::getButtonCount()
     return buttonCount;
 }
 
-#define KEY_ESC '\x1B'
 
 bool NcursesInput::getEvent(TEvent &ev)
 {
-    // A Unicode character might be composed of up to 4 UTF-8 bytes.
-    int keys[4], num_keys = 1;
-    keys[0] = wgetch(stdscr);
+    int k = wgetch(stdscr);
 
-    if (keys[0] == KEY_RESIZE)
-        return winchEvent(ev);
-    else winchClear();
-
-    if (keys[0] != ERR)
+    switch (k)
     {
-        if (keys[0] == KEY_MOUSE)
-            return parseMouseEvent(ev);
+        case KEY_ESC:
+            switch (parseEscapeSeq(ev))
+            {
+                case Rejected: break;
+                case Accepted: return true;
+                case Ignored: return false;
+            }
+            break;
+        case KEY_MOUSE:
+            return parseCursesMouse(ev);
+        case KEY_RESIZE:
+            return winchEvent(ev);
+    }
+    // We have to invoke this when we believe there are no more resize events
+    // left. See the SigwinchAware class.
+    winchClear();
+
+    if (k != ERR)
+    {
+        // A Unicode character might be composed of up to 4 UTF-8 bytes.
+        int keys[4] = {k}, num_keys = 1;
 
         ev.what = evKeyDown;
         bool Alt = false;
 
-        if ((char) keys[0] == KEY_ESC)
+        if (keys[0] == KEY_ESC)
             detectAlt(keys, Alt);
 
         if ((uint) keys[0] < 32)
@@ -344,10 +358,10 @@ void NcursesInput::detectAlt(int keys[4], bool &Alt)
  * we check if another character has been received. If it has, we consider this
  * an Alt+Key combination. Of course, many other things sent by the terminal
  * begin with ESC, but ncurses already identifies most of them. */
-    keys[1] = wgetch(stdscr);
-    if (keys[1] != ERR)
+    int k = wgetch(stdscr);
+    if (k != ERR)
     {
-        keys[0] = keys[1];
+        keys[0] = k;
         Alt = true;
     }
 }
@@ -392,28 +406,26 @@ void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
         }
 }
 
-bool NcursesInput::parseMouseEvent(TEvent &ev)
+bool NcursesInput::parseCursesMouse(TEvent &ev)
 {
     MEVENT mevent;
     if (getmouse(&mevent) == OK)
     {
-        ev.what = evMouse;
-        uchar oldButtons = buttonState;
-
+        uchar newButtons = buttonState;
         if (mevent.bstate & BUTTON1_PRESSED)
-            buttonState |= mbLeftButton;
+            newButtons |= mbLeftButton;
         if (mevent.bstate & BUTTON1_RELEASED)
-            buttonState &= ~mbLeftButton;
+            newButtons &= ~mbLeftButton;
         if (mevent.bstate & BUTTON2_PRESSED)
-            buttonState |= mbMiddleButton;
+            newButtons |= mbMiddleButton;
         if (mevent.bstate & BUTTON2_RELEASED)
-            buttonState &= ~mbMiddleButton;
+            newButtons &= ~mbMiddleButton;
         if (mevent.bstate & BUTTON3_PRESSED)
-            buttonState |= mbRightButton;
+            newButtons |= mbRightButton;
         if (mevent.bstate & BUTTON3_RELEASED)
-            buttonState &= ~mbRightButton;
+            newButtons &= ~mbRightButton;
 
-        int mouseWheel = 0;
+        uchar mouseWheel = 0;
 #if NCURSES_MOUSE_VERSION > 1
         // Mouse wheel support was added in Ncurses v6. Before that, only
         // scroll up would work. It's better not to support wheel scrolling
@@ -423,20 +435,165 @@ bool NcursesInput::parseMouseEvent(TEvent &ev)
         else if (mevent.bstate & BUTTON5_PRESSED)
             mouseWheel = mwDown;
 #endif
-        /* Some terminal emulators send a mouse event every pixel the graphical
-         * mouse cursor moves over the window. Filter out those unnecessary
-         * events. */
-        if ( oldButtons != buttonState || mouseWheel ||
-             mevent.x != lastMousePos.x || mevent.y != lastMousePos.y )
+        return acceptMouseEvent(ev, {mevent.x, mevent.y}, newButtons, mouseWheel);
+    }
+    else
+    {
+        // Ncurses sends KEY_MOUSE when reading "\x1B[M" or "\x1B[<" even if mouse support
+        // is not enabled. We don't know which one was read. We could query terminal
+        // capabilities to deduce it, but it is also possible to just follow
+        // a trial and error approach. 'parseSGRMouse' is more likely to fail, so try it first.
+        for (auto parseMouse : {&NcursesInput::parseSGRMouse,
+                                &NcursesInput::parseX10Mouse})
         {
-            ev.mouse.buttons = buttonState;
-            ev.mouse.where.x = lastMousePos.x = mevent.x;
-            ev.mouse.where.y = lastMousePos.y = mevent.y;
-            ev.mouse.wheel = mouseWheel;
-            return true;
+            GetChBuf buf;
+            switch ((this->*parseMouse)(buf, ev))
+            {
+                case Rejected: buf.reject(); break;
+                case Accepted: return true;
+                case Ignored: return false;
+            }
         }
+        return false;
+    }
+}
+
+bool NcursesInput::acceptMouseEvent(TEvent &ev, TPoint where, uchar buttons, uchar wheel)
+{
+    // Some terminal emulators send a mouse event every pixel the graphical
+    // mouse cursor moves over the window. Filter out those unnecessary
+    // events.
+    if ( buttons != buttonState || wheel ||
+         where.x != lastMousePos.x || where.y != lastMousePos.y )
+    {
+        ev.what = evMouse;
+        ev.mouse = {};
+        ev.mouse.buttons = buttonState = buttons;
+        ev.mouse.where = lastMousePos = where;
+        ev.mouse.wheel = wheel;
+        return true;
     }
     return false;
+}
+
+NcursesInput::ParseResult NcursesInput::parseEscapeSeq(TEvent &ev)
+// Pre: "\x1B" has just been read.
+{
+    GetChBuf buf;
+    if (buf.get() == '[')
+    {
+        switch (buf.get())
+        {
+            // Mouse events are usually detected in 'parseCursesMouse'.
+            case 'M':
+                return parseX10Mouse(buf, ev) == Accepted ? Accepted : Ignored;
+            case '<':
+                return parseSGRMouse(buf, ev) == Accepted ? Accepted : Ignored;
+        }
+    }
+    buf.reject();
+    return Rejected;
+}
+
+NcursesInput::ParseResult NcursesInput::parseX10Mouse(GetChBuf &buf, TEvent &ev)
+// Pre: "\x1B[M" has just been read.
+// The complete sequence looks like "\x1B[Mabc", where:
+// * 'a' is the button number plus 32.
+// * 'b' is the column number (one-based) plus 32.
+// * 'c' is the row number (one-based) plus 32.
+{
+    int but, col, row;
+    but = buf.get();
+    if (but < 32 || 255 < but) return Rejected;
+    but -= 32;
+    for (int *i : {&col, &row})
+    {
+        *i = buf.get();
+        if (*i < 0 || 255 < *i)
+            return Rejected;
+        // In theory, this encoding only supports coordinates in the range [0, 222].
+        // However, some terminal emulators (e.g. urxvt) keep increasing the
+        // counters, causing an overflow. We can take advantage of this to support
+        // more coordinates, but we definitely don't want to reject the sequence,
+        // as that will cause Ctrl+key events to be generated.
+        if (*i > 32)
+            *i -= 32;
+        else
+            *i += (256 - 32);
+        // Make it zero-based.
+        --*i;
+    }
+
+    TPoint where = {col, row};
+    uchar wheel = 0;
+    uchar newButtons = buttonState;
+    switch (but)
+    {
+        case 0: // Press.
+        case 32: // Drag.
+            newButtons |= mbLeftButton; break;
+        case 1:
+        case 33:
+            newButtons |= mbMiddleButton; break;
+        case 2:
+        case 34:
+            newButtons |= mbRightButton; break;
+        case 3: newButtons = 0; break; // Release.
+        case 64: wheel = mwUp; break;
+        case 65: wheel = mwDown; break;
+    }
+    return acceptMouseEvent(ev, where, newButtons, wheel) ? Accepted : Ignored;
+}
+
+NcursesInput::ParseResult NcursesInput::parseSGRMouse(GetChBuf &buf, TEvent &ev)
+// https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Extended-coordinates
+// Pre: "\x1B[<" has just been read.
+// The complete sequence looks like "\x1B[<a;b;cM" or "\x1B[<a;b;cm", where:
+// * 'a' is a sequence of digits representing the button number in decimal.
+// * 'b' is a sequence of digits representing the column number (one-based) in decimal.
+// * 'c' is a sequence of digits representing the row number (one-based) in decimal.
+// The sequence ends with 'M' on button press and on 'm' on button release.
+{
+    int but, col, row, state;
+    for (int *i : {&but, &col, &row})
+        if ((*i = buf.getNum()) == ERR)
+            return Rejected;
+    // Make the coordinates zero-based.
+    --row, --col;
+    // Finally, the press/release state.
+    state = buf.last();
+    if (!(state == 'M' || state == 'm')) return Rejected;
+
+    TPoint where = {col, row};
+    uchar wheel = 0;
+    uchar newButtons = buttonState;
+    if (state == 'M') // Press, wheel or drag.
+    {
+        switch (but)
+        {
+            case 0:
+            case 32:
+                newButtons |= mbLeftButton; break;
+            case 1:
+            case 33:
+                newButtons |= mbMiddleButton; break;
+            case 2:
+            case 34:
+                newButtons |= mbRightButton; break;
+            case 64: wheel = mwUp; break;
+            case 65: wheel = mwDown; break;
+        }
+    }
+    else // Release.
+    {
+        switch (but)
+        {
+            case 0: newButtons &= ~mbLeftButton; break;
+            case 1: newButtons &= ~mbMiddleButton; break;
+            case 2: newButtons &= ~mbRightButton; break;
+        }
+    }
+    return acceptMouseEvent(ev, where, newButtons, wheel) ? Accepted : Ignored;
 }
 
 #endif // HAVE_NCURSES
