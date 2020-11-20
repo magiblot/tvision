@@ -19,6 +19,11 @@ NcursesDisplay::NcursesDisplay() :
     setlocale(LC_ALL, "");
     // Start curses mode.
     term = newterm(nullptr, StdioCtl::fout(), StdioCtl::fin());
+    if (!term)
+    {
+        cerr << "Cannot initialize Ncurses: 'newterm' failed." << endl;
+        exit(1);
+    }
     // Enable colors if the terminal supports it.
     hasColors = getScreenMode() & TDisplay::smCO80;
     if (hasColors)
