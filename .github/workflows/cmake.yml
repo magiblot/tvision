@@ -3,49 +3,170 @@ name: Build
 on: [push]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  BUILD_TYPE: MinSizeRel
 
 jobs:
-  build:
-    name: Build on Linux ${{ matrix.with_gpm }}
+  build-linux-gcc:
+    name: Linux (GCC) (${{ matrix.with_gpm }})
     runs-on: ubuntu-latest
-#    - macos-latest
-#    - windows-latest
-
     strategy:
       matrix:
-        with_gpm: [ "with GPM", "without GPM" ]
-        #generator: [ "UnixMakefiles", "Ninja" ]
-        #config: [ "Debug", "Release" ]
-
+        with_gpm: [ "GPM", "no GPM" ]
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install ncurses
-      run: sudo apt-get install libncursesw5-dev
+    - name: Install Dependencies
+      run: sudo apt -y install libncursesw5-dev
 
     - name: Install GPM
-      run: sudo apt-get install libgpm-dev
-      if: ${{ matrix.with_gpm == 'with GPM' }}
-
-    - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{runner.workspace}}/build
+      run: sudo apt -y install libgpm-dev
+      if: ${{ matrix.with_gpm == 'GPM' }}
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
       shell: bash
-      working-directory: ${{runner.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source 
-      # and build directories, but this is only available with CMake 3.13 and higher.  
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build . -j$(nproc)
+
+  build-linux-gcc5:
+    name: Linux (GCC 5)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: sudo apt -y install libncursesw5-dev g++-5
+
+    - name: Configure CMake
+      shell: bash
+      env:
+        CC: gcc-5
+        CXX: g++-5
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-linux-clang:
+    name: Linux (Clang)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: sudo apt -y install libncursesw5-dev
+
+    - name: Configure CMake
+      shell: bash
+      env:
+        CC: clang
+        CXX: clang++
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-windows-msvc32:
+    name: Windows (MSVC) (Win32)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -A Win32 -DTV_USE_STATIC_RTL=ON
+
+    - name: Build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: examples-x86
+        path: |
+          ${{env.BUILD_TYPE}}/tvdemo.exe
+          ${{env.BUILD_TYPE}}/tvedit.exe
+
+  build-windows-msvc64:
+    name: Windows (MSVC) (x64)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -A x64 -DTV_USE_STATIC_RTL=ON
+
+    - name: Build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: examples-x64
+        path: |
+          ${{env.BUILD_TYPE}}/tvdemo.exe
+          ${{env.BUILD_TYPE}}/tvedit.exe
+
+  build-windows-mingw:
+    name: Windows (MinGW)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-windows-bcc32:
+    name: Windows (BCC32) (DPMI32)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Build Tools
+      shell: bash
+      run: |
+        curl -LJO "https://github.com/magiblot/tvision/files/5578778/BC45-32.zip"
+        curl -LJO "https://github.com/magiblot/tvision/files/5578815/tasm4-32.zip"
+        unzip BC45-32.zip -d C:/BC45
+        unzip tasm4-32.zip -d C:/tasm
+
+    - name: Build
+      shell: bash
+      run: |
+        export PATH="/c/bc45/bin:/c/tasm/bin:$PATH"
+        cd project
+        /c/bc45/bin/make.exe -DDOS32
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: examples-dos32
+        path: |
+          examples/tvdemo/tvdemo.EXE
+          examples/tvedit/tvedit.EXE
+
+  build-macos-clang:
+    name: MacOS (Clang)
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(sysctl -n hw.logicalcpu)
