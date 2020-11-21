@@ -187,7 +187,6 @@ public:
     char bufChar( uint );
     uint bufPtr( uint );
     virtual void changeBounds( const TRect& );
-    TMenuItem& contextMenuEntries();
     virtual void convertEvent( TEvent& );
     Boolean cursorVisible();
     void deleteSelect();
@@ -196,6 +195,7 @@ public:
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& );
     virtual void initBuffer();
+    virtual TMenuItem& initContextMenu( TPoint );
     uint insertAndConvertText( const char *, uint, Boolean );
     Boolean insertBuffer( const char *, uint, uint, Boolean, Boolean );
     Boolean insertEOL( Boolean );

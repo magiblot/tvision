@@ -19,6 +19,7 @@
 #define Uses_TScrollBar
 #define Uses_TFindDialogRec
 #define Uses_TReplaceDialogRec
+#define Uses_TMenuItem
 #define Uses_opstream
 #define Uses_ipstream
 #include <tvision/tv.h>
@@ -91,6 +92,17 @@ void TEditor::hideSelect()
 void TEditor::initBuffer()
 {
     buffer = new char[bufSize];
+}
+
+TMenuItem& TEditor::initContextMenu( TPoint )
+// The TPoint argument is the future location of the context menu.
+// You can get the text under it with 'getMousePtr'.
+{
+    return
+        *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
+        *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
+        *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
+        *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
 }
 
 uint TEditor::insertAndConvertText( const char *text, uint length,

@@ -309,7 +309,8 @@ The following are not available when compiling with Borland C++:
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
-* New function `popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver = 0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.
+* New function `ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver=0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.
+* New virtual method `TMenuItem& TEditor::initContextMenu(TPoint p)` that determines the entries of the right-click context menu in `TEditor`.
 * `fexpand` can now take a second parameter `relativeTo`.
 * New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
 * Many methods which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).

@@ -22,7 +22,6 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TText
-#define Uses_TMenuItem
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
@@ -349,15 +348,6 @@ void TEditor::clipPaste()
         insertFrom(clipboard);
 }
 
-TMenuItem& TEditor::contextMenuEntries()
-{
-    return
-        *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
-        *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
-        *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
-        *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
-}
-
 void TEditor::convertEvent( TEvent& event )
 {
     if( event.what == evKeyDown )
@@ -564,7 +554,8 @@ void TEditor::handleEvent( TEvent& event )
         case evMouseDown:
             if( event.mouse.buttons & mbRightButton )
                 {
-                popupMenu( event.mouse.where, contextMenuEntries(), owner );
+                TMenuItem &menu = initContextMenu( event.mouse.where );
+                popupMenu( event.mouse.where, menu, owner );
                 break;
                 }
 
