@@ -20,7 +20,7 @@
 #endif  // __HELPBASE_H
 
 
-const int MAXSIZE = 80;
+const int MAXSIZE = 300;
 const int MAXSTRSIZE=256;
 const int MAXHELPTOPICID=16379;
 const char commandChar[] = ".";
