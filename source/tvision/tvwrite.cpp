@@ -70,8 +70,8 @@ struct TVWrite {
         // to determine whether the shadow has been applied.
         if (!attr.shadow)
         {
+            attr = attr & 0xF0 ? shadowAttr : shadowAttrInv;
             attr.shadow = 1;
-            return attr & 0xF0 ? shadowAttr : shadowAttrInv;
         }
         return attr;
 #endif
