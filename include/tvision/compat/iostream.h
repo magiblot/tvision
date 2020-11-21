@@ -2,8 +2,8 @@
 #include <iostream.h>
 #else
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#ifndef TVISION_COMPAT_IOSTREAM_H
+#define TVISION_COMPAT_IOSTREAM_H
 
 #include <iostream>
 #include <ios>
@@ -24,6 +24,6 @@ using std::streambuf;
 using std::streamoff;
 using std::streampos;
 
-#endif // IOSTREAM_H
+#endif // TVISION_COMPAT_IOSTREAM_H
 
 #endif // __BORLANDC__

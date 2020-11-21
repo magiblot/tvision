@@ -1,5 +1,5 @@
-#ifndef TVISION_MALLOC_H
-#define TVISION_MALLOC_H
+#ifndef TVISION_COMPAT_MALLOC_H
+#define TVISION_COMPAT_MALLOC_H
 
 #include <stdlib.h>
 
@@ -13,4 +13,4 @@
 #include <malloc_np.h>
 #endif
 
-#endif // TVISION_MALLOC_H
+#endif // TVISION_COMPAT_MALLOC_H

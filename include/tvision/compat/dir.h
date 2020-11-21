@@ -17,20 +17,16 @@
 #include <dir.h>
 #else
 
-#if !defined(__DIR_H)
-#define __DIR_H
+#ifndef TVISION_COMPAT_DIR_H
+#define TVISION_COMPAT_DIR_H
 
 #ifdef _WIN32
 #include <direct.h>
 #else
-// For the functions commented out below, which have slightly different
-// specifiers in modern POSIX.
 #include <unistd.h>
 #endif
 
-#if !defined(___DEFS_H)
 #include <_defs.h>
-#endif
 
 #define WILDCARDS 0x01
 #define EXTENSION 0x02
@@ -39,29 +35,6 @@
 #define DRIVE     0x10
 
 #define MAXDRIVE  3
-
-#if !defined(__FLAT__)
-
-#ifndef _FFBLK_DEF
-#define _FFBLK_DEF
-struct  ffblk   {
-    char        ff_reserved[21];
-    char        ff_attrib;
-    unsigned    ff_ftime;
-    unsigned    ff_fdate;
-    long        ff_fsize;
-    char        ff_name[13];
-};
-#endif
-
-#define MAXPATH   80
-#define MAXDIR    66
-#define MAXFILE   9
-#define MAXEXT    5
-
-#else  /* defined __FLAT__ */
-
-#pragma option -a-
 
 #ifndef _FFBLK_DEF
 #define _FFBLK_DEF
@@ -80,34 +53,22 @@ struct  ffblk   {
 #define MAXFILE   256
 #define MAXEXT    256
 
-#pragma option -a.  /* restore default packing */
+int findfirst( const char *__path, struct ffblk *__ffblk, int __attrib );
+int findnext( struct ffblk *__ffblk );
+void fnmerge( char *__path,
+              const char *__drive,
+              const char *__dir,
+              const char *__name,
+              const char *__ext );
+int fnsplit( const char *__path,
+             char *__drive,
+             char *__dir,
+             char *__name,
+             char *__ext );
+int getcurdir( int __drive, char *__directory );
+int getdisk( void );
+int setdisk( int __drive );
 
-#endif  /* __FLAT__  */
-
-// int         _RTLENTRYF _EXPFUNC32   chdir( const char _FAR *__path );
-int         _RTLENTRYF _EXPFUNC     findfirst( const char _FAR *__path,
-                                    struct ffblk _FAR *__ffblk,
-                                    int __attrib );
-int         _RTLENTRYF _EXPFUNC     findnext( struct ffblk _FAR *__ffblk );
-void        _RTLENTRYF _EXPFUNC     fnmerge( char _FAR *__path,
-                                    const char _FAR *__drive,
-                                    const char _FAR *__dir,
-                                    const char _FAR *__name,
-                                    const char _FAR *__ext );
-int         _RTLENTRYF _EXPFUNC     fnsplit(const char _FAR *__path,
-                                    char _FAR *__drive,
-                                    char _FAR *__dir,
-                                    char _FAR *__name,
-                                    char _FAR *__ext );
-int         _RTLENTRY  _EXPFUNC32   getcurdir( int __drive, char _FAR *__directory );
-// char _FAR * _RTLENTRY  _EXPFUNC     getcwd( char _FAR *__buf, int __buflen );
-int         _RTLENTRY  _EXPFUNC32   getdisk( void );
-// int         _RTLENTRYF _EXPFUNC32   mkdir( const char _FAR *__path );
-// char _FAR * _RTLENTRYF _EXPFUNC     mktemp( char _FAR *__template );
-// int         _RTLENTRY  _EXPFUNC32   rmdir( const char _FAR *__path );
-char _FAR * _RTLENTRYF _EXPFUNC32   searchpath( const char _FAR *__file );
-int         _RTLENTRY  _EXPFUNC32   setdisk( int __drive );
-
-#endif  /* __DIR_H */
+#endif // TVISION_COMPAT_DIR_H
 
 #endif // __BORLANDC__

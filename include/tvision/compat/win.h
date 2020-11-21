@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef TVISION_WINDOWS_H
-#define TVISION_WINDOWS_H
+#ifndef TVISION_COMPAT_WINDOWS_H
+#define TVISION_COMPAT_WINDOWS_H
 
 #if defined(__BORLANDC__) || defined(_WIN32)
 #ifndef NOMINMAX
@@ -15,9 +15,6 @@
 #endif
 #include <windows.h>
 #else
-
-#ifndef __WINDOWS_H
-#define __WINDOWS_H
 
 // winnt.h
 extern "C" {
@@ -184,8 +181,6 @@ extern "C" {
 
 }
 
-#endif // __WINDOWS_H
-
 #endif // __BORLANDC__ || _WIN32
 
 // Flags that are often missing from outdated headers.
@@ -203,4 +198,4 @@ extern "C" {
 #define DISABLE_NEWLINE_AUTO_RETURN 0x0008
 #endif
 
-#endif // TVISION_WINDOWS_H
+#endif // TVISION_COMPAT_WINDOWS_H

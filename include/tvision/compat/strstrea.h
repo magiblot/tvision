@@ -2,8 +2,8 @@
 #include <strstrea.h>
 #else
 
-#ifndef STRSTREA_H
-#define STRSTREA_H
+#ifndef TVISION_COMPAT_STRSTREA_H
+#define TVISION_COMPAT_STRSTREA_H
 
 #include <strstream>
 #include <ostream>
@@ -14,6 +14,6 @@ using std::ostrstream;
 using std::strstream;
 using std::strstreambuf;
 
-#endif // STRSTREA_H
+#endif // TVISION_COMPAT_STRSTREA_H
 
 #endif // __BORLANDC__

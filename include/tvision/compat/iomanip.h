@@ -2,8 +2,8 @@
 #include <iomanip.h>
 #else
 
-#ifndef IOMANIP_H
-#define IOMANIP_H
+#ifndef TVISION_COMPAT_IOMANIP_H
+#define TVISION_COMPAT_IOMANIP_H
 
 #include <iomanip>
 
@@ -14,6 +14,6 @@ using std::setfill;
 using std::setprecision;
 using std::setw;
 
-#endif // IOMANIP_H
+#endif // TVISION_COMPAT_IOMANIP_H
 
 #endif // __BORLANDC__

@@ -2,8 +2,8 @@
 #include <io.h>
 #else
 
-#ifndef IO_H
-#define IO_H
+#ifndef TVISION_COMPAT_IO_H
+#define TVISION_COMPAT_IO_H
 
 struct  ftime   {
   unsigned    ft_tsec  : 5;   /* Two second interval */
@@ -31,8 +31,8 @@ inline off_t filelength( int fd )
     return s.st_size;
 }
 
-#endif // _MSC_VER
+#endif // !_MSC_VER && !__MINGW32__ && !_WIN32
 
-#endif // IO_H
+#endif // TVISION_COMPAT_IO_H
 
 #endif // __BORLANDC__

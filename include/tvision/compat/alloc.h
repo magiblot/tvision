@@ -2,11 +2,11 @@
 #include <alloc.h>
 #else
 
-#ifndef ALLOC_H
-#define ALLOC_H
+#ifndef TVISION_COMPAT_ALLOC_H
+#define TVISION_COMPAT_ALLOC_H
 
 #include <cstdlib>
 
-#endif // ALLOC_H
+#endif // TVISION_COMPAT_ALLOC_H
 
 #endif // __BORLANDC__
