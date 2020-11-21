@@ -24,7 +24,7 @@ const int MAXSIZE = 300;
 const int MAXSTRSIZE=256;
 const int MAXHELPTOPICID=16379;
 const char commandChar[] = ".";
-const int bufferSize = 4096;
+const int bufferSize = 1000000;
 
 enum State { undefined, wrapping, notWrapping };
 
