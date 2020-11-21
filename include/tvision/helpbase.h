@@ -167,7 +167,7 @@ class THelpFile : public TObject
 
 public:
 
-    THelpFile( fpstream& s );
+    THelpFile( iopstream& s );
     virtual ~THelpFile();
 
     THelpTopic *getTopic( int );
@@ -175,7 +175,7 @@ public:
     void recordPositionInIndex( int );
     void putTopic( THelpTopic* );
 
-    fpstream *stream;
+    iopstream *stream;
     Boolean modified;
 
     THelpIndex *index;

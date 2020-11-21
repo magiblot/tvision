@@ -546,7 +546,7 @@ void THelpIndex::add( int i, int32_t val )
 
 // THelpFile
 
-THelpFile::THelpFile( fpstream&  s )
+THelpFile::THelpFile( iopstream&  s )
 {
     int32_t magic;
     int32_t size;

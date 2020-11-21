@@ -849,7 +849,7 @@ void recordTopicDefinitions( TTopicDefinition *p, THelpFile& helpFile )
 {
     while (p != 0)
         {
-        resolveReference(p->topic, p->value, *(helpFile.stream));
+        resolveReference(p->topic, p->value, dynamic_cast<fpstream&>(*(helpFile.stream)));
         helpFile.recordPositionInIndex(p->value);
         p = p->next;
         }
