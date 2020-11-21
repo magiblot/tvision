@@ -65,6 +65,8 @@ const int meDoubleClick = 0x02;
 const int meMouseMoved = MOUSE_MOVED;       // NT values from WINDOWS.H
 const int meDoubleClick = DOUBLE_CLICK;
 #endif
+// 0x04 and 0x08 are reserved by NT (MOUSE_WHEELED, MOUSE_HWHEELED).
+const int meTripleClick = 0x10;
 
 #endif  // __EVENT_CODES
 

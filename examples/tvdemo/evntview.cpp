@@ -99,6 +99,7 @@ static const flagName controlKeyFlags[] = {
 static const flagName mouseEvFlags[] = {
     FN(meMouseMoved),
     FN(meDoubleClick),
+    FN(meTripleClick),
     FNEND
 };
 

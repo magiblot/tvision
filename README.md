@@ -307,6 +307,7 @@ The following are not available when compiling with Borland C++:
 * `TDrawBuffer` is no longer a fixed-length array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.length()` method.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
+* Triple-click support: new mouse event flag `meTripleClick`.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
 * New function `ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver=0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.

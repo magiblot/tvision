@@ -144,10 +144,17 @@ void TEventQueue::getMouseEvent( TEvent & ev)
             {
             if( ev.mouse.buttons == downMouse.buttons &&
                 ev.mouse.where == downMouse.where &&
-                ev.what - downTicks <= doubleDelay &&
-                !(downMouse.eventFlags & meDoubleClick )
+                ev.what - downTicks <= doubleDelay
               )
-                ev.mouse.eventFlags |= meDoubleClick;
+                {
+                if( !(downMouse.eventFlags & (meDoubleClick | meTripleClick)) )
+                    ev.mouse.eventFlags |= meDoubleClick;
+                else if( downMouse.eventFlags & meDoubleClick )
+                    {
+                    ev.mouse.eventFlags &= ~meDoubleClick;
+                    ev.mouse.eventFlags |= meTripleClick;
+                    }
+                }
 
             downMouse = ev.mouse;
             autoTicks = downTicks = ev.what;
