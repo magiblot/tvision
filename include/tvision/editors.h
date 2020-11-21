@@ -41,7 +41,8 @@ const int
 
 const int
   smExtend = 0x01,
-  smDouble = 0x02;
+  smDouble = 0x02,
+  smTriple = 0x04;
 
 const unsigned
   sfSearchFailed = -0x01;

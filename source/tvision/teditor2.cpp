@@ -42,6 +42,22 @@ uint scan( const char *block, uint size, const char *str );
 uint iScan( const char *block, uint size, const char *str );
 }
 
+static int getCharType( char ch )
+{
+    if( strchr("\t ", ch) )
+        return 0;
+    if( strchr("\n\r", ch) )
+        return 1;
+    if( strchr("!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) )
+        return 2;
+    return 3;
+}
+
+static inline Boolean isWordBoundary( char a, char b )
+{
+    return getCharType(a) != getCharType(b);
+}
+
 static inline int isWordChar( int ch )
 {
     return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) == 0;
@@ -294,10 +310,15 @@ uint TEditor::nextLine( uint p )
 
 uint TEditor::nextWord( uint p )
 {
-    while( p < bufLen && isWordChar(bufChar(p)) != 0 )
-        p = nextChar(p);
-    while( p < bufLen && isWordChar(bufChar(p)) == 0 )
-        p = nextChar(p);
+    if (p < bufLen)
+        {
+        char a = bufChar(p);
+        char b;
+        do  {
+            b = a;
+            p = nextChar(p);
+            } while( p < bufLen && !isWordBoundary((a = bufChar(p)), b) );
+        }
     return p;
 }
 
@@ -308,10 +329,18 @@ uint TEditor::prevLine( uint p )
 
 uint TEditor::prevWord( uint p )
 {
-    while( p > 0 && isWordChar(bufChar(prevChar(p))) == 0 )
-        p = prevChar(p);
-    while( p > 0 && isWordChar(bufChar(prevChar(p))) != 0 )
-        p = prevChar(p);
+    if (p > 0 && (p = prevChar(p), p > 0))
+        {
+        char a = bufChar(p);
+        char b;
+        do  {
+            b = a;
+            p = prevChar(p);
+            a = bufChar(p);
+            } while( p > 0 && !isWordBoundary(a, b) );
+        if( isWordBoundary(a, b) )
+            p = nextChar(p);
+        }
     return p;
 }
 
@@ -434,6 +463,11 @@ void TEditor::setCurPtr( uint p, uchar selectMode )
         {
         if( (selectMode & smDouble) != 0 )
             {
+            p = prevWord(nextWord(p));
+            anchor = nextWord(prevWord(anchor));
+            }
+        else if( (selectMode & smTriple) != 0 )
+            {
             p = prevLine(nextLine(p));
             anchor = nextLine(prevLine(anchor));
             }
@@ -442,6 +476,11 @@ void TEditor::setCurPtr( uint p, uchar selectMode )
     else
         {
         if( (selectMode & smDouble) != 0 )
+            {
+            p = nextWord(p);
+            anchor = prevWord(nextWord(anchor));
+            }
+        else if( (selectMode & smTriple) != 0 )
             {
             p = nextLine(p);
             anchor = prevLine(nextLine(anchor));

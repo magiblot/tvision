@@ -574,6 +574,8 @@ void TEditor::handleEvent( TEvent& event )
 
             if( event.mouse.eventFlags & meDoubleClick )
                 selectMode |= smDouble;
+            else if( event.mouse.eventFlags & meTripleClick )
+                selectMode |= smTriple;
 
             do  {
                 lock();
