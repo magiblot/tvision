@@ -28,6 +28,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
     * [Turbo Vision as a CMake subproject](#build-cmake)
 * [Features](#features)
 * [API changes](#apichanges)
+* [Applications using Turbo Vision](#applications)
 * [Unicode support](#unicode)
 * [Clipboard interaction](#clipboard)
 
@@ -77,7 +78,7 @@ The above produces the following files:
 * The demo applications `mmenu` and `palette` from Borland's Technical Support.
 * `tvhelp`, the Turbo Vision Help Compiler.
 
-The library and executables can be found in `./build`. 
+The library and executables can be found in `./build`.
 
 The build requirements are:
 
@@ -331,6 +332,15 @@ You will find some screenshots [here](https://github.com/magiblot/tvision/issues
 ## Contributing
 
 If you know of any Turbo Vision applications whose source code has not been lost and that could benefit from this, let me know.
+
+<div id="applications"></div>
+
+## Applications using Turbo Vision
+
+If your application is based on this project and you'd like it to appear in the following list, just let me know.
+
+* [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
+* [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly/tmbasic), a programming language for creating console applications.
 
 <div id="unicode"></div>
 
