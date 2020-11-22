@@ -782,6 +782,8 @@ private:
 protected:
 
     TParamText( StreamableInit );
+    virtual void write( opstream& );
+    virtual void *read( ipstream& );
 
 public:
 

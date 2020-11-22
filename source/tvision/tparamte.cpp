@@ -65,6 +65,20 @@ void TParamText::setText( const char *fmt, ... )
 
 #if !defined(NO_STREAMABLE)
 
+void TParamText::write( opstream& os )
+{
+    TStaticText::write( os );
+    os.writeString(str);
+}
+
+void *TParamText::read( ipstream& is )
+{
+    TStaticText::read( is );
+    str = new char [256];
+    is.readString(str, 256);
+    return this;
+}
+
 TStreamable *TParamText::build()
 {
     return new TParamText( streamableInit );
