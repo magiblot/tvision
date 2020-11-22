@@ -132,7 +132,7 @@ short TSystemError::sysErr( short errorCode, uchar drive )
     char s[ 63 ];
     TDrawBuffer b;
 
-    /* There are 16 documented device errors, all of which have their
+    /* There are 22 documented device errors, all of which have their
      * own strings in errorString[].  However, just in case we run into
      * something weird this will prevent a crash.
      */
@@ -141,9 +141,9 @@ short TSystemError::sysErr( short errorCode, uchar drive )
     else
         sprintf( s, "Unknown critical error %d on drive %c", errorCode, drive + 'A' );
 
-    b.moveChar( 0, ' ', c, 80);
+    b.moveChar( 0, ' ', c, TScreen::screenWidth);
     b.moveCStr( 1, s, c);
-    b.moveCStr( 79-cstrlen(sRetryOrCancel), sRetryOrCancel, c);
+    b.moveCStr( TScreen::screenWidth-1-cstrlen(sRetryOrCancel), sRetryOrCancel, c);
     swapStatusLine(b);
     int res = selectKey();
     swapStatusLine(b);
