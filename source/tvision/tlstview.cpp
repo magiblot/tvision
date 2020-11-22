@@ -351,7 +351,7 @@ void TListViewer::selectItem( short )
 void TListViewer::setRange( short aRange )
 {
     range = aRange;
-    if( focused > aRange )
+    if( focused >= aRange )
         focused = 0;
     if( vScrollBar != 0 )
         vScrollBar->setParams( focused, 0, aRange - 1, vScrollBar->pgStep,
