@@ -693,6 +693,11 @@ GInt21Handler   PROC FAR
         PUSH    AX
         MOV     AX, [SavedFlags]
         MOV     [BP+8], AX
+
+        ; Pass back the DS returned by INT 21H. It may have changed.
+        MOV     AX, WORD PTR [GInt21Stack+03EAH]
+        MOV     [BP+2], AX
+
         POP     AX
         POP     BP
 
