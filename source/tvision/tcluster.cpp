@@ -36,7 +36,7 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#define cpCluster "\x10\x11\x12\x12\1f"
+#define cpCluster "\x10\x11\x12\x12\x1f"
 
 TCluster::TCluster( const TRect& bounds, TSItem *aStrings ) :
     TView(bounds),
