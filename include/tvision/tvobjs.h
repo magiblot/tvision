@@ -80,7 +80,7 @@ public:
     void atPut( ccIndex index, void *item );
     virtual ccIndex insert( void *item );
 
-    static void error( ccIndex code, ccIndex info );
+    virtual void error( ccIndex code, ccIndex info );
 
     void *firstThat( ccTestFunc Test, void *arg );
     void *lastThat( ccTestFunc Test, void *arg );
