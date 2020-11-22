@@ -570,7 +570,7 @@ TPicResult TPXPictureValidator::picture(char* input, Boolean autoFill)
   {
     reprocess = False;
 
-    while ((index < (int) strlen(pic)) && !isSpecial(pic[index], "#?&!@*{}[]"))
+    while ((index < (int) strlen(pic)) && !isSpecial(pic[index], "#?&!@*{}[],"))
     {
       if (pic[index] == ';')
           index++;
