@@ -798,7 +798,7 @@ Boolean TStringLookupValidator::lookup(const char* s)
 void TStringLookupValidator::newStringList(TStringCollection* aStrings)
 {
   if (strings)
-      delete strings;
+      destroy(strings);
 
   strings = aStrings;
 }
