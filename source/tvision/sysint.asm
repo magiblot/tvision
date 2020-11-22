@@ -585,6 +585,14 @@ Int1BHandler    ENDP
 GInt21Handler   PROC FAR
         PUSH    DS
 
+        PUSHF                     ; Check for re-entrance immediately.
+        MOV     DS, CS:[DataSel]
+        CLI
+        CMP     [InGInt21], 00H
+        JNE   @@jmpToInt21
+        INC     [InGInt21]
+        POPF
+
         PUSH    AX
         PUSH    BP
         MOV     BP, SP
@@ -597,13 +605,6 @@ GInt21Handler   PROC FAR
 
         POP     BP
         POP     AX
-
-        PUSHF
-        CLI
-        CMP     [InGInt21], 00H
-        JNE   @@jmpToInt21
-        INC     [InGInt21]
-        POPF
 
         MOV     [OldSS], SS
         MOV     [OldSP], SP
@@ -888,7 +889,7 @@ CheckAbsDrive:
         PUSH    CX
         MOV     DS, CS:[DataSel]
         PUSH    DX
-        MOV     AX, 15
+        MOV     AX, 21
         PUSH    AX
         MOV     AX, SEG @TSystemError@sysErrorFunc
         MOV     ES, AX
@@ -924,17 +925,41 @@ Int24Handler    PROC FAR
         STI                             ;Enable interrupts
         PUSH    DS
         PUSH    DI
-        AND     DI, 0FFH
+
+        PUSH    ES
+        PUSH    AX
+        PUSH    BX
+        PUSH    CX
+        PUSH    DX
+        PUSH    BP
+        PUSH    SI
+
+        XOR     BX, BX      ; Get extended error information
+        MOV     AH, 59H
+        INT     21H
+
+        SUB     AX, 13H     ; Convert extended error code to 00H-14H
+                            ; Anything over 14H will display a generic message
+                            ; which isn't likely.
+
+        MOV     DI, AX      ; Save the extended error code
+
+        POP     SI
+        POP     BP
+        POP     DX
+        POP     CX
+        POP     BX
+        POP     AX
+        POP     ES
+
         CMP     DI, 09H                 ;Printer out of paper
         JE    @@0
         TEST    AH, 80H                 ;0 = disk error
         JE    @@1
-        MOV     DI, 0DH                 ;Bad memory image of FAT
         MOV     DS, BP
         TEST    BYTE PTR DS:[SI+5], 80H ;Block device gets error 0DH
         JE    @@1
-        INC     DI                      ;Non-block devices get error 0EH
-@@0:    MOV     AL, 0FFH
+@@0:    MOV     AL, 0FEH
 @@1:    MOV     DS, CS:[DataSel]
         MOV     WORD PTR [critFlag], DI
         MOV     WORD PTR [critDrive], AX  ; AH = 0, AL is drive code.

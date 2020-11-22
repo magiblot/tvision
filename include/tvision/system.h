@@ -439,7 +439,7 @@ private:
     static ushort selectKey();
     static short sysErr( short, uchar );
 
-    static const char * const _NEAR errorString[16];
+    static const char * const _NEAR errorString[22];
     static const char * _NEAR sRetryOrCancel;
 
     static Boolean _NEAR inIDE;

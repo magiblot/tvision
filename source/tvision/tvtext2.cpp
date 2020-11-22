@@ -174,10 +174,16 @@ const char * const _NEAR TSystemError::errorString[] =
     "Printer out of paper",                         // 9
     "Write fault on drive %c",                      // A
     "Read fault on drive %c",                       // B
-    "Hardware failure on drive %c",                 // C
-    "Bad memory image of FAT detected",             // D
-    "Device access error",                          // E
-    "Insert diskette in drive %c"                   // F
+    "General failure on drive %c",                  // C
+    "Sharing violation on drive %c",                // D
+    "Lock violation on drive %c",                   // E
+    "Disk change invalid on drive %c",              // F
+    "FCB unavailable",                              //10
+    "Sharing buffer overflow",                      //11
+    "Code page mismatch",                           //12
+    "Out of input",                                 //13
+    "Insufficient disk space on drive %c",          //14
+    "Insert diskette in drive %c"                   //15
 };
 
 const char * _NEAR TSystemError::sRetryOrCancel = "~Enter~ Retry  ~Esc~ Cancel";
