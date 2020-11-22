@@ -26,7 +26,7 @@
 #include <unistd.h>
 #endif
 
-#include <_defs.h>
+#include "_defs.h"
 
 #define WILDCARDS 0x01
 #define EXTENSION 0x02

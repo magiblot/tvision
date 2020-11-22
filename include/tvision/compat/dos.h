@@ -19,7 +19,7 @@
 #ifndef TVISION_COMPAT_DOS_H
 #define TVISION_COMPAT_DOS_H
 
-#include <_defs.h>
+#include "_defs.h"
 
 #ifdef _MSC_VER
 #include <corecrt.h>

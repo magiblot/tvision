@@ -17,8 +17,8 @@
 #include <corecrt.h>
 #endif
 
-#include <_defs.h>
-#include <_null.h>
+#include "_defs.h"
+#include "_null.h"
 
 #include <cstddef>
 #include <cstring>
