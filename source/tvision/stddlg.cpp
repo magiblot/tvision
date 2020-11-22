@@ -197,6 +197,14 @@ void TSortedListBox::newList( TSortedCollection *aList )
 
 #if !defined(NO_STREAMABLE)
 
+void *TSortedListBox::read( ipstream& is )
+{
+    TListBox::read( is );
+    searchPos = -1;
+    shiftState = 0;
+    return this;
+}
+
 TStreamable *TSortedListBox::build()
 {
     return new TSortedListBox( streamableInit );

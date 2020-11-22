@@ -222,6 +222,7 @@ private:
 protected:
 
     TSortedListBox( StreamableInit ) : TListBox ( streamableInit ) {}
+    virtual void *read( ipstream& );
 
 public:
 
