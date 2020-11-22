@@ -37,6 +37,12 @@ IFNDEF __FLAT__
 @THardwareInfo@$bctr$qv  PROC    FAR
 
 ; Are we running in protected mode?
+        MOV     AX, 352FH   ; Check for a null INT 2F handler first
+        INT     21H         ; just in case.
+        MOV     AX, ES
+        OR      AX, BX
+        JZ    @@nodpmi
+
         MOV     AX, 0FB42H
         MOV     BX, 01H
         INT     2FH
