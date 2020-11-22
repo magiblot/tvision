@@ -87,8 +87,8 @@ void TDisplay::setCursorType( ushort ct )
         _CX = 0x2000;
     else
         {
-        start = ct & 0xFF;
-        end = ct >> 8;
+        start = ct >> 8;
+        end = ct & 0xFF;
 
         if( isEGAorVGA() )
             {
