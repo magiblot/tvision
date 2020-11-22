@@ -262,7 +262,7 @@ TStatusItem *TStatusLine::readItems( ipstream& is )
     while( count-- > 0 )
         {
         char *t = is.readString();
-        int key, cmd;
+        ushort key, cmd;
         is >> key >> cmd;
         cur = new TStatusItem( t, key, cmd );
         *last = cur;
@@ -282,7 +282,7 @@ TStatusDef *TStatusLine::readDefs( ipstream& is )
     is >> count;
     while( count-- > 0 )
         {
-        int min, max;
+        ushort min, max;
         is >> min >> max;
         cur = new TStatusDef( min, max, readItems( is ) );
         *last = cur;
