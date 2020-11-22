@@ -105,10 +105,12 @@ void TDeskTop::handleEvent(TEvent& event)
         switch( event.message.command )
             {
             case cmNext:
-                selectNext( False );
+                if( valid(cmReleasedFocus) )
+                    selectNext( False );
                 break;
             case cmPrev:
-                current->putInFrontOf( background );
+                if( valid(cmReleasedFocus) )
+                    current->putInFrontOf( background );
                 break;
             default:
                 return;
