@@ -111,10 +111,11 @@ void advanceStringPointer()
 void deleteString()
 {
     size_t len = curRec->len;
+    HistRec *n = next( curRec );
 #if !defined(__FLAT__)
-    movmem( next( curRec ), curRec, size_t( (char *)lastRec - (char *)curRec ) );
+    movmem( n, curRec, size_t( (char *)lastRec - (char *)n ) );
 #else
-    memcpy(curRec, next(curRec),    size_t( (char *)lastRec - (char *)curRec ) );
+    memcpy( curRec, n, size_t( (char *)lastRec - (char *)n ) );
 #endif
     lastRec = backup( lastRec, len );
 }
