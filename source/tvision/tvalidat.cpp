@@ -693,7 +693,7 @@ Boolean TRangeValidator::isValid(const char* s)
   long value;
 
   if (TFilterValidator::isValid(s))
-    if (sscanf(s,"%ld", &value) != 0)
+    if (sscanf(s, "%ld", &value) == 1)
         if ((value >= min) && (value <= max))
             return True;
 
