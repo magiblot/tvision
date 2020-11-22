@@ -365,7 +365,7 @@ ushort TMenuView::execute()
             current != 0 &&
             current->name != 0 )
                 {
-                if( current->command == 0 )
+                if( current->command == 0 && !current->disabled )
                     {
                     if( (e.what & (evMouseDown | evMouseMove)) != 0 )
                         putEvent(e);
