@@ -802,7 +802,7 @@ void TColorDialog::setIndexes(TColorIndex*& colIdx)
     if (colIdx && (colIdx->colorSize != numGroups))
     {
         delete[] colIdx;
-        colors = NULL;
+        colIdx = 0;
     }
     if (!colIdx)
     {
