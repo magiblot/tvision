@@ -161,11 +161,26 @@ int           lineCount = 0;
 TProtectedStream::TProtectedStream( const char *aFileName, openmode aMode ) :
     fstream( aFileName, aMode )
 {
-    strcpy(fileName, aFileName);
+    strnzcpy(fileName, aFileName, sizeof(fileName));
     mode = aMode;
 }
 
 void error(const char *text);
+void warning(const char *text);
+
+//----- copyPath(dest, src, size) ---------------------------------------//
+//  Safely copies a path or terminates on error.                         //
+//-----------------------------------------------------------------------//
+
+void copyPath( char *dest, const char *src, size_t size )
+{
+    if (strnzcpy(dest, src, size) < strlen(src))
+        {
+        cout << "Path too long (" << strlen(src) << " > " << size << "): \""
+             << src << "\"" << endl;
+        exit(1);
+        }
+}
 
 //----- replaceExt(fileName, nExt, force) -------------------------------//
 //  Replace the extension of the given file with the given extension.    //
@@ -206,28 +221,46 @@ Boolean fExists(const char *fileName)
         return(True);
 }
 
-//======================== Line Management ==============================//
 //----- getLine(s) ------------------------------------------------------//
 //  Returns the next line out of the stream.                             //
 //-----------------------------------------------------------------------//
 
-char *getLine( fstream& s)
+char *getLine( fstream& s )
 {
     if (s.eof())
         {
-        strcpy(line, "\x1A");
+        strnzcpy(line, "\x1A", sizeof(line));
         return line;
         }
+    ++lineCount;
     if (!lineInBuffer)
         {
-        s.getline(line, MAXSTRSIZE, '\n');
+        s.getline(line, sizeof(line), '\n');
         // Remove carriage return at the end of line.
-        int len = strlen(line);
-        if (len && line[len - 1] == '\r')
-            line[len - 1] = '\0';
+            {
+            int len = strlen(line);
+            if (len && line[len - 1] == '\r')
+                line[len - 1] = '\0';
+            }
+        // Detect truncation.
+        if ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit)
+            {
+                {
+                char buf[MAXSTRSIZE] = {0};
+                ostrstream os(buf, sizeof(buf)-1);
+                os << "Line longer than " << sizeof(line)-1 << " characters.";
+                warning(os.str());
+                }
+            // Read the rest of the line.
+            while ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit)
+                {
+                char buf[MAXSTRSIZE] = {0};
+                s.clear(s.rdstate() & ~ios::failbit);
+                s.getline(buf, sizeof(buf), '\n');
+                }
+            }
         }
     lineInBuffer = False;
-    ++lineCount;
     return line;
 }
 
@@ -237,7 +270,7 @@ char *getLine( fstream& s)
 
 void unGetLine( const char *s )
 {
-    strcpy(line,s);
+    strnzcpy(line, s, sizeof(line));
     lineInBuffer = True;
     --lineCount;
 }
@@ -508,7 +541,7 @@ TTopicDefinition *topicDefinition( const char *line, int& i )
     char topic[MAXSTRSIZE], w[MAXSTRSIZE], *endptr;
     static unsigned helpCounter = 2; //1 is hcDragging
 
-    strcpy(topic,getWord(line, i));
+    strnzcpy(topic, getWord(line, i), sizeof(topic));
     if (strlen(topic) == 0)
         {
         error("Expected topic definition");
@@ -517,11 +550,11 @@ TTopicDefinition *topicDefinition( const char *line, int& i )
     else
         {
         j = i;
-        strcpy(w,getWord(line, j));
+        strnzcpy(w, getWord(line, j), sizeof(w));
         if (strcmp(w,"=") == 0)
             {
             i = j;
-            strcpy(w,getWord(line, i));
+            strnzcpy(w, getWord(line, i), sizeof(w));
             if (!is_numeric(w))
                 error("Expected numeric");
             else
@@ -570,7 +603,7 @@ TTopicDefinition *topicDefinitionList( const char *line, int &i )
         p->next = topicList;
         topicList = p;
         j = i;
-        strcpy(w,getWord(line, j));
+        strnzcpy(w, getWord(line, j), sizeof(w));
         } while ( strcmp(w,",") == 0);
     return(topicList);
 }
@@ -585,10 +618,10 @@ TTopicDefinition *topicHeader( const char *line )
     char w[75];
 
     i = 0;
-    strcpy(w, getWord(line, i));
+    strnzcpy(w, getWord(line, i), sizeof(w));
     if (strcmp(w, commandChar) != 0)
         return(0);
-    strcpy(w, getWord(line, i));
+    strnzcpy(w, getWord(line, i), sizeof(w));
     strupr(w);
     if (strcmp(w, "TOPIC") == 0)
         return topicDefinitionList(line, i);
@@ -652,14 +685,9 @@ void replaceSpacesWithFF( char *line, int start, uchar length )
 
 void strdel(char *string, int pos, int len)
 {
-    char tempstr[MAXSTRSIZE];
-    char *strptr;
-
-    strncpy(tempstr, string, pos);
-    tempstr[pos] = 0;
-    strptr = string + pos + len;
-    strcat(tempstr, strptr);
-    strcpy(string, tempstr);
+    char *beg = string + pos;
+    char *end = string + pos + len;
+    memmove(beg, end, strlen(end) + 1);
 }
 
 void scanForCrossRefs( char *line, int& offset, TCrossRefNode *&xRefs )
@@ -760,12 +788,12 @@ TParagraph *readParagraph( fstream& textFile, int& offset, TCrossRefNode *&xRefs
 
     ofs = 0;
     state = undefined;
-    strcpy(line, getLine(textFile));
+    strnzcpy(line, getLine(textFile), sizeof(line));
     while (strlen(line) == 0)
         {
         flag = (state == wrapping)? True: False;
         addToBuffer(line, flag);
-        strcpy(line, getLine(textFile));
+        strnzcpy(line, getLine(textFile), sizeof(line));
         }
 
     if (isEndParagraph(state) == True)
@@ -785,7 +813,7 @@ TParagraph *readParagraph( fstream& textFile, int& offset, TCrossRefNode *&xRefs
         scanForCrossRefs(line, offset, xRefs);
         flag = (state == wrapping)? True: False;
         addToBuffer(line, flag);
-        strcpy(line, getLine(textFile));
+        strnzcpy(line, getLine(textFile), sizeof(line));
         }
     unGetLine(line);
     p = new TParagraph;
@@ -817,7 +845,7 @@ void skipBlankLines( fstream& s )
 
     line[0] = 0;
     while (line[0] == 0)
-        strcpy(line,getLine(s));
+        strnzcpy(line, getLine(s), sizeof(line));
     unGetLine(line);
 }
 
@@ -870,7 +898,7 @@ void readTopic( fstream& textFile, THelpFile& helpFile )
 
     // Get screen command
     skipBlankLines(textFile);
-    strcpy(line, getLine(textFile));
+    strnzcpy(line, getLine(textFile), sizeof(line));
 
     topicDef = topicHeader(line);
 
@@ -916,7 +944,7 @@ void readTopic( fstream& textFile, THelpFile& helpFile )
 void _FAR doWriteSymbol(void *p, void *p1)
 {
     int numBlanks, i;
-    ostrstream os(line, MAXSTRSIZE);
+    ostrstream os(line, sizeof(line)-1);
 
     TProtectedStream *symbFile = (TProtectedStream *)p1;
     if (((TReference *)p)->resolved)
@@ -1011,7 +1039,7 @@ int main(int argc, char **argv)
         }
 
     //  Calculate file names
-    strcpy(textName,replaceExt(argv[1], ".txt", False));
+    copyPath(textName, replaceExt(argv[1], ".txt", False), sizeof(textName));
     if (!fExists(textName))
         {
         cout << "Error: File '" << textName << "' not found." << endl;
@@ -1019,16 +1047,16 @@ int main(int argc, char **argv)
         }
 
     if (argc >= 3)
-        strcpy(helpName, replaceExt(argv[2], HELPFILE_EXT, False));
+        copyPath(helpName, replaceExt(argv[2], HELPFILE_EXT, False), sizeof(helpName));
     else
-        strcpy(helpName, replaceExt(textName, HELPFILE_EXT,  True));
+        copyPath(helpName, replaceExt(textName, HELPFILE_EXT, True), sizeof(helpName));
 
     checkOverwrite( helpName );
 
     if (argc >= 4)
-        strcpy(symbName, replaceExt(argv[3], ".h", False));
+        copyPath(symbName, replaceExt(argv[3], ".h", False), sizeof(symbName));
     else
-        strcpy(symbName, replaceExt(helpName, ".h", True));
+        copyPath(symbName, replaceExt(helpName, ".h", True), sizeof(symbName));
 
     checkOverwrite( symbName );
 
