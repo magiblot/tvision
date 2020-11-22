@@ -863,7 +863,7 @@ fpstream::fpstream()
 }
 
 fpstream::fpstream( const char* name, pstream::openmode omode) :
-        fpbase( name, omode | ios::out | ios::binary)
+        fpbase( name, omode | ios::binary)
 {
 }
 
@@ -878,7 +878,7 @@ filebuf *fpstream::rdbuf()
 
 void fpstream::open( const char _FAR *name, pstream::openmode omode)
 {
-    fpbase::open( name, omode | ios::in | ios::out | ios::binary);
+    fpbase::open( name, omode | ios::binary);
 }
 
 
