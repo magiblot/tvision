@@ -248,6 +248,12 @@ IFNDEF __FLAT__
         PUSH    CS
         POP     DS
         INT     21H
+
+        ; Ensure the Ctrl+Break flag is Off by default.
+        CALL    @THardwareInfo@getBiosSelector$qv
+        MOV     DS, AX
+        AND     BYTE PTR DS:[71H], 7FH
+
         POP     DS
 
 ; Save Int 21 handler.
@@ -538,6 +544,16 @@ Int09Handler PROC FAR
 ; Exit.
 @@8:    POP     CX
         POP     SI
+
+        CALL    @THardwareInfo@getBiosSelector$qv
+        MOV     DS, AX
+        TEST    BYTE PTR DS:[71H], 80H      ; Ctrl+Break hit?
+        JZ    @@9
+
+        AND     BYTE PTR DS:[71H], 7FH
+        MOV     DS, CS:[DataSel]
+        MOV     @TSystemError@ctrlBreakHit, 1
+
 @@9:    POP     AX
         POP     DI
         POP     DS
