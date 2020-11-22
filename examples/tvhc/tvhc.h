@@ -19,8 +19,10 @@
 #include "tvision/helpbase.h"
 #endif  // __HELPBASE_H
 
+#if !defined( __DIR_H )
+#include <dir.h>
+#endif  // __DIR_H
 
-const int MAXSIZE = 80;
 const int MAXSTRSIZE=256;
 const int MAXHELPTOPICID=16379;
 const char commandChar[] = ".";
@@ -43,7 +45,7 @@ public:
 
 private:
 
-    char fileName[MAXSIZE];
+    char fileName[MAXPATH];
     openmode mode;
 
 };
