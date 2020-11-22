@@ -103,7 +103,7 @@ void THistory::handleEvent( TEvent& event )
                 {
                 char rslt[256];
                 historyWindow->getSelection( rslt );
-                strncpy( link->data, rslt, link->maxLen );
+                strnzcpy( link->data, rslt, link->maxLen+1 );
                 link->selectAll( True );
                 link->drawView();
                 }
