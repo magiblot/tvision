@@ -139,8 +139,9 @@
  * Help compiler global variables.
  */
 int           ofs;
+int           bufferSize = 0;
 char          textName[MAXPATH];
-uchar         buffer[bufferSize];
+uchar         *buffer = 0;
 TCrossRefNode *xRefs;
 TRefTable     *refTable = 0;
 char          line[MAXSTRSIZE] = "";
@@ -632,21 +633,28 @@ TTopicDefinition *topicHeader( const char *line )
         }
 }
 
+void growBuffer( int size )
+{
+    if (size <= bufferSize)
+        return;
+    do  {
+        bufferSize = bufferSize ? 2*bufferSize : 4096;
+        } while (size > bufferSize);
+    uchar *ptr = (uchar *) realloc(buffer, bufferSize);
+    if (ptr)
+        buffer = ptr;
+    else
+        error("Text too long");
+}
+
 void addToBuffer( const char *line, Boolean wrapping )
 {
-    uchar *bufptr;
-
-    bufptr = &buffer[ofs];
-    ofs += strlen(line);
-    if( ofs > bufferSize )
-        error("Text too long");
-    strcpy((char *)bufptr, line);
-    bufptr += (strlen(line));
-    if (wrapping == False)
-        *bufptr = '\n';
-    else
-        *bufptr = ' ';
-    ofs++;
+    int len = strlen(line);
+    int nOfs = ofs + len + 1;
+    growBuffer(nOfs);
+    memcpy(&buffer[ofs], line, len + 1);
+    buffer[nOfs - 1] = wrapping ? ' ' : '\n';
+    ofs = nOfs;
 }
 
 
