@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define toupper(c) ( (('a' <= (c)) && ((c) <= 'z')) ? c += ('A'-'a') : (c) )
+#define toupper(c) ( (('a' <= (c)) && ((c) <= 'z')) ? ((c) + 'A'-'a') : (c) )
 
 // TValidator
 
