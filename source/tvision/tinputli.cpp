@@ -486,7 +486,6 @@ Boolean TInputLine::valid(ushort cmd)
         else if (cmd != cmCancel)
             if (!validator->validate(data))
                 {
-                owner->current = 0;
                 select();
                 return False;
                 }
