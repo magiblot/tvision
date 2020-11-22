@@ -388,7 +388,7 @@ void recordReference( const char *topic, opstream& s )
         }
 }
 
-void doFixUps( TFixUp *p, uint value, fpstream& s )
+void doFixUps( TFixUp *p, uint value, iopstream& s )
 {
     streampos pos;
 
@@ -405,7 +405,7 @@ void doFixUps( TFixUp *p, uint value, fpstream& s )
 //  handles forward references.                                         //
 //----------------------------------------------------------------------//
 
-void resolveReference( const char *topic, uint value, fpstream& s )
+void resolveReference( const char *topic, uint value, iopstream& s )
 {
     TReference *ref;
 
@@ -956,7 +956,7 @@ void writeSymbFile( TProtectedStream *symbFile )
 //----------------------------------------------------------------------//
 
 void processText( TProtectedStream& textFile,
-                  fpstream& helpFile,
+                  iopstream& helpFile,
                   TProtectedStream& symbFile )
 {
     THelpFile *helpRez;

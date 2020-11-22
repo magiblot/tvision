@@ -14,6 +14,9 @@
  *
  */
 
+#if !defined( __HELPBASE_H )
+#define __HELPBASE_H
+
 const int32_t magicHeader = 0x46484246L; //"FBHF"
 
 #define cHelpViewer "\x06\x07\x08"
@@ -167,7 +170,7 @@ class THelpFile : public TObject
 
 public:
 
-    THelpFile( fpstream& s );
+    THelpFile( iopstream& s );
     virtual ~THelpFile();
 
     THelpTopic *getTopic( int );
@@ -175,7 +178,7 @@ public:
     void recordPositionInIndex( int );
     void putTopic( THelpTopic* );
 
-    fpstream *stream;
+    iopstream *stream;
     Boolean modified;
 
     THelpIndex *index;
@@ -186,3 +189,4 @@ extern void notAssigned( opstream& s, int value );
 
 extern TCrossRefHandler crossRefHandler;
 
+#endif  // __HELPBASE_H
