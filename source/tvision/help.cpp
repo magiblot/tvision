@@ -251,8 +251,7 @@ void THelpViewer::handleEvent( TEvent& event )
                   (mouse.x < keyPoint.x + keyLength)));
             selected = keyCount;
             drawView();
-            if (event.mouse.eventFlags & meDoubleClick)
-                switchToTopic(keyRef);
+            switchToTopic(keyRef);
             clearEvent(event);
             break;
 
