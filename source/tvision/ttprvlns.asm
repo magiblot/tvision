@@ -26,7 +26,8 @@ ifndef __FLAT__
 else
         CMP     EDI,[ESI+TTerminalBuffer]
         JA      short @@1
-        ADD     EDI,[ESI+TTerminalBufSize]
+        MOVZX   EAX, WORD PTR [ESI+TTerminalBufSize]
+        ADD     EDI, EAX
 @@1:    DEC     EDI
 endif
         RET
@@ -45,8 +46,8 @@ ifndef __FLAT__
         RET
 else
         INC     EDI
-        MOV     EAX,[ESI+TTerminalBuffer]
-        ADD     EAX,[ESI+TTerminalBufSize]
+        MOVZX   EAX,WORD PTR [ESI+TTerminalBufSize]
+        ADD     EAX,[ESI+TTerminalBuffer]
         CMP     EDI,EAX
         JB      short @@1
         MOV     EDI,[ESI+TTerminalBuffer]
@@ -114,12 +115,12 @@ else
 @@1:    XOR     ECX,ECX
         MOV     CX,[Lines]
         JECXZ   short @@6
-        MOV     EAX,[ESI+TTerminalQueBack]
+        MOVZX   EAX, WORD PTR [ESI+TTerminalQueBack]
         ADD     EAX,[ESI+TTerminalBuffer]
         CMP     EDI,EAX
         JE      short @@7
         CALL    DecDI
-@@2:    MOV     EAX,[ESI+TTerminalQueBack]
+@@2:    MOVZX   EAX, WORD PTR [ESI+TTerminalQueBack]
         ADD     EAX,[ESI+TTerminalBuffer]
         CMP     EDI,EAX
         JA      short @@3
@@ -136,10 +137,10 @@ else
         MOV     EAX,EDI
         SUB     EAX,[ESI+TTerminalBuffer]
         INC     EAX
-        CMP     EAX,[ESI+TTerminalQueBack]
+        CMP     AX, WORD PTR [ESI+TTerminalQueBack]
         JE      @@8
-        MOV     EDI,[ESI+TTerminalBuffer]
-        ADD     EDI,[ESI+TTerminalBufSize]
+        MOVZX   EDI,WORD PTR [ESI+TTerminalBufSize]
+        ADD     EDI,[ESI+TTerminalBuffer]
         DEC     EDI
         JMP     @@2
 @@5:    DEC     [Lines]
