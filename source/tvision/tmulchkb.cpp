@@ -72,7 +72,9 @@ ushort TMultiCheckBoxes::dataSize()
 
 uchar TMultiCheckBoxes::multiMark(int item)
 {
-    return (long)((value&((flags&0xff)<<(item*(flags>>8))))>>(item*(flags>>8)));
+    int flo = flags & 0xff;
+    int fhi = (flags >> 8) * item;
+    return (long)((value & ((long)flo << fhi)) >> fhi);
 }
 
 void TMultiCheckBoxes::getData(void* p)
@@ -86,16 +88,16 @@ void TMultiCheckBoxes::press(int item)
     short curState;
 
     int flo = flags & 0xff;
-    int fhi = flags >> 8;
+    int fhi = (flags >> 8) * item;
 
-    curState = (long) (value & (flo << (item*fhi))) >> (item*fhi);
+    curState = (short)((value & ((long)flo << fhi)) >> fhi);
 
-    curState--;
+    curState++;
 
-    if ((curState >= selRange) || (curState < 0))
-        curState = selRange - 1;
+    if (curState >= selRange)
+        curState = 0;
 
-    value = (long)((value & ~(flo << (item*fhi))) | (curState<<(item * fhi)));
+    value = (long)((value & ~((long)flo << fhi)) | (curState << fhi));
 }
 
 void TMultiCheckBoxes::setData(void* p)
