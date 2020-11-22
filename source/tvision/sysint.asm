@@ -929,6 +929,27 @@ Int24Handler    ENDP
         PUSH    SI
         PUSH    DS
 
+        PUSH    BP          ; Save original BP
+
+        XOR     AX, AX      ; Allocate a descriptor for the device
+        MOV     CX, 1       ; header's segment.
+        INT     31H
+        MOV     BP, AX      ; BP = descriptor for the segment
+
+        MOV     DX, WORD PTR (INT_REGS PTR ES:[DI]._bp)
+        MOV     CL, 4
+        SHL     DX, CL
+        XOR     CX, CX
+        MOV     BX, BP
+        MOV     AX, 7       ; Set base address (16 * real mode segment addr)
+        INT     31H
+
+        MOV     BX, BP
+        XOR     CX, CX
+        MOV     DX, -1
+        MOV     AX, 8       ; Set segment limit (64k)
+        INT     31H
+
         MOV     BX, DI
         MOV     AX, WORD PTR (INT_REGS PTR ES:[BX]._ax)
         MOV     DI, WORD PTR (INT_REGS PTR ES:[BX]._di)
@@ -936,6 +957,15 @@ Int24Handler    ENDP
         PUSHF
         CALL    Int24Handler
         MOV     DI, BX
+
+        PUSH    AX
+
+        MOV     BX, BP
+        MOV     AX, 1
+        INT     31h         ; Free the descriptor
+
+        POP     AX
+        POP     BP
 
         POP     DS
         POP     SI
