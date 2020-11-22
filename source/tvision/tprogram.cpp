@@ -175,11 +175,16 @@ void TProgram::handleEvent( TEvent& event )
         char c = getAltChar( event.keyDown.keyCode );
         if( c >= '1' && c <= '9' )
             {
-            if( message( deskTop,
-                         evBroadcast,
-                         cmSelectWindowNum,
-                         (void *)(size_t)(c - '0')
-                       ) != 0 )
+            if( canMoveFocus() )
+                {
+                if( message( deskTop,
+                             evBroadcast,
+                             cmSelectWindowNum,
+                             (void *)(size_t)(c - '0')
+                           ) != 0 )
+                    clearEvent( event );
+                }
+            else
                 clearEvent( event );
             }
         }
