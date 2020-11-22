@@ -752,23 +752,25 @@ void TEditor::handleEvent( TEvent& event )
                     unlock();
                     break;
                 }
+            break;
 
         case evBroadcast:
             switch( event.message.command )
                 {
                 case cmScrollBarChanged:
-            if ((event.message.infoPtr == hScrollBar) ||
-                (event.message.infoPtr == vScrollBar))
-            {
+                    if ((event.message.infoPtr == hScrollBar) ||
+                        (event.message.infoPtr == vScrollBar))
+                        {
                         checkScrollBar( event, hScrollBar, delta.x );
                         checkScrollBar( event, vScrollBar, delta.y );
-            }
-            else
-                return;
+                        }
+                    else
+                        return;
                     break;
                 default:
                     return;
                 }
+            break;
         }
     clearEvent(event);
 }
