@@ -575,6 +575,10 @@ GInt21Handler   PROC FAR
         MOV     DS, CS:[DataSel]
         MOV     AX, [BP+4]              ; Copy DS from old to new stack.
         MOV     WORD PTR [GInt21Stack+03FEH], AX
+
+        MOV     AX, [BP+10]             ; These are flags prior to INT 21H.
+        MOV     [SavedFlags], AX        ; Store the flags.
+
         POP     BP
         POP     AX
 
@@ -606,6 +610,18 @@ GInt21Handler   PROC FAR
         ; Call old Int 21 handler & clear flag for critical error handler
 @@callToInt21:
         PUSHF
+
+        PUSH    DS
+        PUSH    AX              ; Save AX for later.
+        PUSH    BP
+        MOV     BP, SP
+        MOV     DS, CS:[DataSel]
+        MOV     AX, [SavedFlags]
+        MOV     [BP+6], AX      ; Set the flags that the INT 21H call will get.
+        POP     BP
+        POP     AX
+        POP     DS
+
         PUSH    CS
         SUB     SP, 6
         PUSH    BP
