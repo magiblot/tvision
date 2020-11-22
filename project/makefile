@@ -47,7 +47,7 @@ EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
 !endif
 !endif
 
-all: source\tvision examples\tvdemo examples\tvdir examples\tvedit examples\tvhelp
+all: source\tvision examples\tvdemo examples\tvdir examples\tvedit examples\tvhc
 
 source\tvision:
     CD ..\$@
@@ -78,7 +78,7 @@ examples\tvedit: source\tvision
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
     CD $(PRJDIR)
     
-examples\tvhelp: source\tvision
+examples\tvhc: source\tvision
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
