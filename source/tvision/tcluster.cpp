@@ -229,6 +229,7 @@ void TCluster::handleEvent( TEvent& event )
                         if (s >= strings->getCount() )
                             s = 0;
                         } while (!(buttonState(s) || (i > strings->getCount())));
+                    moveSel(i, s);
                     clearEvent(event);
                     }
                 break;
@@ -252,6 +253,7 @@ void TCluster::handleEvent( TEvent& event )
                         else
                             s = strings->getCount()-1;
                         } while (!(buttonState(s) || (i > strings->getCount())));
+                    moveSel(i, s);
                     clearEvent(event);
                     }
                 break;
