@@ -240,7 +240,7 @@ void THardwareInfo::screenWrite( ushort x, ushort y, ushort *buf, DWORD len )
 {
     COORD size = {len,1};
     COORD from = {0,0};
-    SMALL_RECT to = {x,y,x+len,y+1};
+    SMALL_RECT to = {x,y,x+len-1,y};
 
     WriteConsoleOutput( consoleHandle[cnOutput], (CHAR_INFO *) buf, size, from, &to);
 }
