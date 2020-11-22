@@ -593,6 +593,9 @@ private:
     ushort flags;
     char* states;
 
+    virtual const char *streamableName() const
+        { return name; }
+
 protected:
 
     TMultiCheckBoxes( StreamableInit );
