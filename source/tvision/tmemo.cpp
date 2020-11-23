@@ -81,7 +81,7 @@ void TMemo::write( opstream& os )
 void *TMemo::read( ipstream& is )
 {
     TEditor::read( is );
-    ushort length;
+    uint length;
     is >> length;
     if( isValid )
         {
