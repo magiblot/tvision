@@ -70,9 +70,13 @@
 /*    references,                                                        */
 /*                                                                       */
 /*      |The {file open dialog:FileOpen} allows you specify which        */
-/*       |file you wish to view.  If it also allow you to navigate       */
-/*       |directories.  To change to a given directory use the           */
+/*      |file you wish to view.  If it also allow you to navigate        */
+/*      |directories.  To change to a given directory use the            */
 /*      |{change directory dialog:ChDir}.                                */
+/*                                                                       */
+/*    To escape '{' characters outside cross references, type them       */
+/*    twice. To escape ':' or '}' characters inside cross references,    */
+/*    also type them twice.                                              */
 /*                                                                       */
 /*    The user can tab or use the mouse to select more information about */
 /*    the "file open dialog" or the "change directory dialog". The help  */
@@ -674,7 +678,7 @@ void addToBuffer( const char *line, Boolean wrapping )
 }
 
 
-void addXRef( const char *xRef, int offset, uchar length, TCrossRefNode *&xRefs )
+void addXRef( TStringView xRef, int offset, uchar length, TCrossRefNode *&xRefs )
 {
     TCrossRefNode *p, *pp, *prev;
 
@@ -714,64 +718,63 @@ void strdel(char *string, int pos, int len)
     memmove(beg, end, strlen(end) + 1);
 }
 
+char *strfnd( char *string, char **last, char ch )
+{
+    char *res;
+    while ((res = strchr(string, ch)))
+        {
+        if ((!last || res < *last) && *(res + 1) == ch)
+            {
+            strdel(string, res - string, 1);
+            string = res + 1;
+            if (last) --*last;
+            }
+        else
+            break;
+        }
+    return res;
+}
+
 void scanForCrossRefs( char *line, int& offset, TCrossRefNode *&xRefs )
 {
-    int i;
-    char begXRef = '{';
-    char endXRef = '}';
-    char aliasCh = ':';
-    char *begPtr, *endPtr, *aliasPtr, *tempPtr;
-    int begPos, endPos, aliasPos;
-    char xRef[75];
+    const char begXRef = '{';
+    const char endXRef = '}';
+    const char aliasCh = ':';
 
-    i = 0;
+    size_t i = 0;
     do  {
-        if ((begPtr = strchr(line+i,begXRef)) == 0)
+        char *begPtr;
+        if ((begPtr = strfnd(line+i, 0, begXRef)) == 0)
             i = 0;
         else
             {
-            begPos = (int)(begPtr - (line+i));
-            i += begPos + 1;
-            if (line[i + 1] == begXRef)
+            ++begPtr; // *begPtr == character after '{'.
+            i = begPtr - line; // line[i] == *begPtr.
+            char *endPtr;
+            if ((endPtr = strfnd(begPtr, 0, endXRef)) == 0)
+                error("Unterminated topic reference.");
+            else // *endPtr == '}'.
                 {
-                strdel(line, i, 1);
-                ++i;
-                }
-            else
-                {
-                if ((endPtr = strchr(line+i,endXRef)) == 0)
+                char *aliasPtr = strfnd(begPtr, &endPtr, aliasCh);
+                if ((aliasPtr == 0) || (aliasPtr > endPtr)) // No alias.
                     {
-                    error("Unterminated topic reference.");
-                    ++i;
+                    TStringView xRef(begPtr, endPtr - begPtr);
+                    uchar len = uchar(xRef.size()); // Highlight length matches reference length.
+                    addXRef(xRef, (offset + ofs + i), len, xRefs);
                     }
-                else
+                else // *aliasPtr == ':'.
                     {
-                    endPos = (int)(endPtr - (line + i));
-                    aliasPtr = strchr(line+i, aliasCh);
-                    if ((aliasPtr == 0) || (aliasPtr > endPtr))
-                        {
-                        tempPtr = line + i;
-                        strncpy(xRef, tempPtr, endPos);
-                        xRef[endPos] = 0;
-                        addXRef(xRef, (offset + ofs + i), endPos, xRefs);
-                        }
-                    else
-                        {
-                        aliasPos = (int)(aliasPtr - (line + i));
-                        tempPtr = line ;
-                        tempPtr += aliasPos+i+1;
-                        strncpy(xRef, tempPtr, (endPos - aliasPos -1));
-                        xRef[endPos - aliasPos -1] = 0;
-                        addXRef(xRef, (offset + ofs + i), (aliasPos), xRefs);
-                        strdel(line, (i + aliasPos), (endPos - aliasPos));
-                        endPtr = aliasPtr;
-                        endPos = aliasPos;
-                        }
-                    replaceSpacesWithFF(line, i, endPos -1);
-                    strdel(line, i + endPos, 1);
-                    strdel(line, i-1, 1);
-                    i += (endPos - 2);
+                    TStringView xRef(aliasPtr + 1, endPtr - (aliasPtr + 1));
+                    uchar len = uchar(aliasPtr - begPtr);
+                    addXRef(xRef, (offset + ofs + i), len, xRefs);
+                    strdel(line, aliasPtr - line, endPtr - aliasPtr); // Remove ':'.
+                    endPtr = aliasPtr; // *endPtr == '}'.
                     }
+                uchar len = uchar(endPtr - begPtr);
+                replaceSpacesWithFF(line, i, len);
+                strdel(line, i + len, 1); // Remove '}'.
+                strdel(line, i - 1, 1); // Remove '{'.
+                i = endPtr - line - 2;
                 }
             }
 
