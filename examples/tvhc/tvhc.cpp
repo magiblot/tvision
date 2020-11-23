@@ -81,6 +81,8 @@
 /*    defined, the compiler will give a warning but will still create a  */
 /*    useable help file.  If the undefined reference is used, a message  */
 /*    ("No help available...") will appear in the help window.           */
+/*                                                                       */
+/*    Lines starting with ';' are skipped.                               */
 /*=======================================================================*/
 
 #define Uses_fpstream
@@ -222,6 +224,15 @@ Boolean fExists(const char *fileName)
         return(True);
 }
 
+//----- isComment(line) -------------------------------------------------//
+//  Checks if line contains a comment.                                   //
+//-----------------------------------------------------------------------//
+
+Boolean isComment(const char *line)
+{
+    return line[0] == ';';
+}
+
 //----- getLine(s) ------------------------------------------------------//
 //  Returns the next line out of the stream.                             //
 //-----------------------------------------------------------------------//
@@ -233,35 +244,38 @@ char *getLine( fstream& s )
         strnzcpy(line, "\x1A", sizeof(line));
         return line;
         }
-    ++lineCount;
-    if (!lineInBuffer)
-        {
-        s.getline(line, sizeof(line), '\n');
-        // Remove carriage return at the end of line.
+    do  {
+        ++lineCount;
+        if (!lineInBuffer)
             {
-            int len = strlen(line);
-            if (len && line[len - 1] == '\r')
-                line[len - 1] = '\0';
-            }
-        // Detect truncation.
-        if ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit)
-            {
+            s.getline(line, sizeof(line), '\n');
+            // Remove carriage return at the end of line.
                 {
-                char buf[MAXSTRSIZE] = {0};
-                ostrstream os(buf, sizeof(buf)-1);
-                os << "Line longer than " << sizeof(line)-1 << " characters.";
-                warning(os.str());
+                int len = strlen(line);
+                if (len && line[len - 1] == '\r')
+                    line[len - 1] = '\0';
                 }
-            // Read the rest of the line.
-            while ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit)
+            // Detect truncation.
+            if ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit)
                 {
-                char buf[MAXSTRSIZE] = {0};
-                s.clear(s.rdstate() & ~ios::failbit);
-                s.getline(buf, sizeof(buf), '\n');
+                if (!isComment(line))
+                    {
+                    char buf[MAXSTRSIZE] = {0};
+                    ostrstream os(buf, sizeof(buf)-1);
+                    os << "Line longer than " << sizeof(line)-1 << " characters.";
+                    warning(os.str());
+                    }
+                // Read the rest of the line.
+                do  {
+                    char buf[MAXSTRSIZE] = {0};
+                    s.clear(s.rdstate() & ~ios::failbit);
+                    s.getline(buf, sizeof(buf), '\n');
+                    } while ((s.rdstate() & (ios::failbit | ios::eofbit)) == ios::failbit);
                 }
             }
-        }
-    lineInBuffer = False;
+        lineInBuffer = False;
+        // Skip line if it is a comment.
+        } while (isComment(line));
     return line;
 }
 
