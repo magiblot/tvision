@@ -464,7 +464,8 @@ void resolveReference( const char *topic, uint value, iopstream& s )
 
 void skipWhite( const char *line, int& i )
 {
-    while ((i <= (int) strlen(line) && line[i] == ' ') || (line[i] == 8))
+    int len = strlen(line);
+    while (i <= len && (line[i] == ' ' || line[i] == '\t'))
         ++i;
 }
 
@@ -478,7 +479,8 @@ int checkForValidChar( char ch )
 
 void skipToNonWord( const char *line, int& i )
 {
-    while (i <= (int) strlen(line) && !checkForValidChar(line[i]))
+    int len = strlen(line);
+    while (i <= len && !checkForValidChar(line[i]))
         ++i;
 }
 
