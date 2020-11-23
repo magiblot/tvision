@@ -43,7 +43,8 @@ public:
 #endif
 
     static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
-    static void next(TStringView text, size_t &bytes, size_t &width);
+    static Boolean next(TStringView text, size_t &bytes, size_t &width);
+    static Boolean next(TStringView text, size_t &bytes);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
 
 private:
@@ -110,12 +111,23 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttri
 
 #pragma warn .inl
 
-inline void TText::next(TStringView text, size_t &index, size_t &width)
+inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
 {
     if (index < text.size()) {
         ++index;
         ++width;
+        return True;
     }
+    return False;
+}
+
+inline Boolean TText::next(TStringView text, size_t &index)
+{
+    if (index < text.size()) {
+        ++index;
+        return True;
+    }
+    return False;
 }
 
 inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)
@@ -304,13 +316,15 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
     return false;
 }
 
-inline void TText::next(TStringView text, size_t &index, size_t &width)
-// Measures the length and width of the first character in 'text'.
+inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
+// Measures the length and width of the character starting at '&text[index]'.
 //
 // * text: input text.
 // * index (input/output parameter): index into 'text'. Gets increased by
-//   the length of the first character in 'text'.
-// * width (output parameter): gets increased by the display width of the first character in 'text'.
+//   the length of the character.
+// * width (input/output parameter): gets increased by the display width of the character.
+//
+// Returns false if 'index >= text.size()'.
 {
     if (index < text.size()) {
 #ifdef _WIN32
@@ -332,7 +346,26 @@ inline void TText::next(TStringView text, size_t &index, size_t &width)
                 width += std::max<int>(cWidth, 1);
             index += len;
         }
+        return true;
     }
+    return false;
+}
+
+inline Boolean TText::next(TStringView text, size_t &index)
+// Measures the length of the character starting at '&text[index]'.
+//
+// * text: input text.
+// * index (input/output parameter): index into 'text'. Gets increased by
+//   the length of the character.
+//
+// Returns false if 'index >= text.size()'.
+{
+    size_t len = TText::next(text.substr(index));
+    if (len) {
+        index += len;
+        return true;
+    }
+    return false;
 }
 
 inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)

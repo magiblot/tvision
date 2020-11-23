@@ -342,7 +342,7 @@ If you know of any Turbo Vision applications whose source code has not been lost
 If your application is based on this project and you'd like it to appear in the following list, just let me know.
 
 * [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
-* [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly/tmbasic), a programming language for creating console applications.
+* [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly), a programming language for creating console applications.
 
 <div id="unicode"></div>
 
@@ -535,7 +535,8 @@ template <class Attr>
 size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
 #endif
 bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
-void TText::next(TStringView text, size_t &index, size_t &width);
+bool TText::next(TStringView text, size_t &index, size_t &width);
+bool TText::next(TStringView text, size_t &index);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
 ```
 
