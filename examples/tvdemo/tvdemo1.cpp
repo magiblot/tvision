@@ -275,14 +275,3 @@ void TVDemo::storeDesktop(fpstream& s)
   deskTop->forEach(::writeView, &s);
   s << 0;
 }
-
-//
-// Tile function
-//
-
-void TVDemo::tile()
-{
-    deskTop->tile( deskTop->getExtent() );
-}
-
-

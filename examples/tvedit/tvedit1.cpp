@@ -96,34 +96,10 @@ void TEditorApp::changeDir()
     execDialog( new TChDirDialog( cdNormal, 0 ), 0 );
 }
 
-void TEditorApp::dosShell()
-{
-    suspend();
-#ifndef __unix__
-    cout << "Type EXIT to return..." << endl;
-    system( getenv( "COMSPEC"));
-#else
-    cout << "The application has been stopped. You can return by entering 'fg'." << endl;
-    raise(SIGTSTP);
-#endif
-    resume();
-    redraw();
-}
-
 void TEditorApp::showClip()
 {
     clipWindow->select();
     clipWindow->show();
-}
-
-void TEditorApp::tile()
-{
-    deskTop->tile( deskTop->getExtent() );
-}
-
-void TEditorApp::cascade()
-{
-    deskTop->cascade( deskTop->getExtent() );
 }
 
 void TEditorApp::handleEvent( TEvent& event )
@@ -146,20 +122,8 @@ void TEditorApp::handleEvent( TEvent& event )
                 changeDir();
                 break;
 
-            case cmDosShell:
-                dosShell();
-                break;
-
             case cmShowClip:
                 showClip();
-                break;
-
-            case cmTile:
-                tile();
-                break;
-
-            case cmCascade:
-                cascade();
                 break;
 
             default:

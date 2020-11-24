@@ -49,9 +49,6 @@ private:
     void chBackground();              // Background pattern
     void openFile( const char *fileSpec );  // File Viewer
     void changeDir();                 // Change directory
-    void shell();                     // DOS shell
-    void tile();                      // Tile windows
-    void cascade();                   // Cascade windows
     void mouse();                     // Mouse control dialog box
     void colors();                    // Color control dialog box
     void outOfMemory();               // For validView() function

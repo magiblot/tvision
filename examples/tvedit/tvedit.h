@@ -47,10 +47,7 @@ private:
     void fileOpen();
     void fileNew();
     void changeDir();
-    void dosShell();
     void showClip();
-    void tile();
-    void cascade();
 };
 
 extern TEditWindow *clipWindow;

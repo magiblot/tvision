@@ -41,25 +41,6 @@
 #include <signal.h>
 
 //
-//  DOS Shell Command.
-//
-
-void TVDemo::shell()
-{
-    suspend();
-#ifndef __unix__
-    cout << "Type EXIT to return..." << endl;
-    system( getenv( "COMSPEC"));
-#else
-    cout << "The application has been stopped. You can return by entering 'fg'." << endl;
-    raise(SIGTSTP);
-#endif
-    resume();
-    redraw();
-}
-
-
-//
 // DemoApp::handleEvent()
 //  Event loop to distribute the work.
 //
@@ -106,18 +87,6 @@ void TVDemo::handleEvent(TEvent &event)
 
             case cmChDirCmd:            //  Change directory
                 changeDir();
-                break;
-
-            case cmDOS_Cmd:             //  DOS shell
-                shell();
-                break;
-
-            case cmTile:             //  Tile current file windows
-                tile();
-                break;
-
-            case cmCascade:          //  Cascade current file windows
-                cascade();
                 break;
 
             case cmMouseCmd:            //  Mouse control dialog box
@@ -231,6 +200,7 @@ void TVDemo::calculator()
     }
 }
 
+
 //
 // Event Viewer function
 //
@@ -240,15 +210,6 @@ void TVDemo::eventViewer()
     TEventViewer *viewer = (TEventViewer *) validView(TEventViewer::toggle());
     if(viewer != 0)
         deskTop->insert(viewer);
-}
-
-//
-// Cascade function
-//
-
-void TVDemo::cascade()
-{
-    deskTop->cascade( deskTop->getExtent() );
 }
 
 

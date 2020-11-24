@@ -324,6 +324,13 @@ public:
     virtual void suspend();
     virtual void resume();
 
+    void cascade();
+    void dosShell();
+    virtual TRect getTileRect();
+    virtual void handleEvent(TEvent &event);
+    void tile();
+    virtual void writeShellMsg();
+
 };
 
 #endif

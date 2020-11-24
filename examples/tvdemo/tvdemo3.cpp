@@ -194,7 +194,7 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
         *new TMenuItem( "~O~pen...", cmOpenCmd, kbF3, hcFOpen, "F3" ) +
         *new TMenuItem( "~C~hange Dir...", cmChDirCmd, kbNoKey, hcFChangeDir ) +
          newLine() +
-        *new TMenuItem( "~D~OS Shell", cmDOS_Cmd, kbNoKey, hcFDosShell ) +
+        *new TMenuItem( "~D~OS Shell", cmDosShell, kbNoKey, hcFDosShell ) +
         *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcFExit, "Alt-X" );
 
     TSubMenu& sub3 =
