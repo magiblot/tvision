@@ -27,7 +27,7 @@ protected:
 public:
 
     int get();
-    int last();
+    int last(size_t i);
     void unget();
     void reject();
     int getNum();
@@ -46,10 +46,10 @@ inline int GetChBuf::get()
     return -1;
 }
 
-inline int GetChBuf::last()
+inline int GetChBuf::last(size_t i=0)
 {
-    if (size)
-        return keys[size - 1];
+    if (i < size)
+        return keys[size - 1 - i];
     return -1;
 }
 
@@ -88,8 +88,13 @@ namespace TermIO
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&);
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&);
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&);
+    ParseResult parseFKeyA(GetChBuf&, TEvent&);
+    ParseResult parseFKeyB(GetChBuf&, TEvent&);
+    ParseResult parseArrowKeyA(GetChBuf&, TEvent&);
+    ParseResult parseHomeEndA(GetChBuf&, TEvent&);
 
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm);
+    void setAltModifier(TEvent &ev);
 
 }
 

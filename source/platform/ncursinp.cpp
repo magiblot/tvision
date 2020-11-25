@@ -79,20 +79,6 @@ static constexpr KeyDownEvent fromNonPrintableAscii[32] = {
     {{0x1F},        0}          , // ^_, ?
 };
 
-static const const_unordered_map<char, ushort> AltKeyCode = {
-    { ' ', kbAltSpace },
-    { 'Q', kbAltQ }, { 'W', kbAltW }, { 'E', kbAltE }, { 'R', kbAltR },
-    { 'T', kbAltT }, { 'Y', kbAltY }, { 'U', kbAltU }, { 'I', kbAltI },
-    { 'O', kbAltO }, { 'P', kbAltP }, { 'A', kbAltA }, { 'S', kbAltS },
-    { 'D', kbAltD }, { 'F', kbAltF }, { 'G', kbAltG }, { 'H', kbAltH },
-    { 'J', kbAltJ }, { 'K', kbAltK }, { 'L', kbAltL }, { 'Z', kbAltZ },
-    { 'X', kbAltX }, { 'C', kbAltC }, { 'V', kbAltV }, { 'B', kbAltB },
-    { 'N', kbAltN }, { 'M', kbAltM }, { '1', kbAlt1 }, { '2', kbAlt2 },
-    { '3', kbAlt3 }, { '4', kbAlt4 }, { '5', kbAlt5 }, { '6', kbAlt6 },
-    { '7', kbAlt7 }, { '8', kbAlt8 }, { '9', kbAlt9 }, { '0', kbAlt0 },
-    { '-', kbAltMinus }, { '=', kbAltEqual }, { '\x08', kbAltBack }
-};
-
 static const const_unordered_map<int, KeyDownEvent> fromCursesKeyCode = {
     { KEY_DOWN,         {{kbDown},      0}          },
     { KEY_UP,           {{kbUp},        0}          },
@@ -358,7 +344,7 @@ bool NcursesInput::getEvent(TEvent &ev)
             parsePrintableChar(ev, keys, num_keys);
 
         if (Alt)
-            setAltModifier(ev);
+            TermIO::setAltModifier(ev);
 
         return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }
@@ -392,18 +378,6 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
     // Prevent text from triggering Ctrl+Key shortcuts.
     if (ev.keyDown.keyCode <= kbCtrlZ)
         ev.keyDown.keyCode = kbNoKey;
-}
-
-void NcursesInput::setAltModifier(TEvent &ev)
-{
-    ev.keyDown.controlKeyState |= kbAltShift;
-    // Set the proper key code if Turbo Vision supports the combination.
-    ushort candidate = AltKeyCode[toupper(ev.keyDown.charScan.charCode)];
-    if (candidate)
-    {
-        ev.keyDown.keyCode = candidate;
-        ev.keyDown.textLength = 0;
-    }
 }
 
 void NcursesInput::readUtf8Char(int keys[4], int &num_keys)

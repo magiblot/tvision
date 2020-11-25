@@ -1,7 +1,49 @@
 #define Uses_THardwareInfo
+#define Uses_TKeys
 #include <tvision/tv.h>
 
 #include <internal/terminal.h>
+#include <internal/constmap.h>
+
+static const const_unordered_map<ushort, KeyDownEvent> AltKeyCode = {
+    { ' ', {{kbAltSpace}} },
+    { 'Q', {{kbAltQ}} }, { 'W', {{kbAltW}} }, { 'E', {{kbAltE}} }, { 'R', {{kbAltR}} },
+    { 'T', {{kbAltT}} }, { 'Y', {{kbAltY}} }, { 'U', {{kbAltU}} }, { 'I', {{kbAltI}} },
+    { 'O', {{kbAltO}} }, { 'P', {{kbAltP}} }, { 'A', {{kbAltA}} }, { 'S', {{kbAltS}} },
+    { 'D', {{kbAltD}} }, { 'F', {{kbAltF}} }, { 'G', {{kbAltG}} }, { 'H', {{kbAltH}} },
+    { 'J', {{kbAltJ}} }, { 'K', {{kbAltK}} }, { 'L', {{kbAltL}} }, { 'Z', {{kbAltZ}} },
+    { 'X', {{kbAltX}} }, { 'C', {{kbAltC}} }, { 'V', {{kbAltV}} }, { 'B', {{kbAltB}} },
+    { 'N', {{kbAltN}} }, { 'M', {{kbAltM}} }, { '1', {{kbAlt1}} }, { '2', {{kbAlt2}} },
+    { '3', {{kbAlt3}} }, { '4', {{kbAlt4}} }, { '5', {{kbAlt5}} }, { '6', {{kbAlt6}} },
+    { '7', {{kbAlt7}} }, { '8', {{kbAlt8}} }, { '9', {{kbAlt9}} }, { '0', {{kbAlt0}} },
+    { '-', {{kbAltMinus}} }, { '=', {{kbAltEqual}} }, { '\x08', {{kbAltBack}} },
+    { kbF1,             {{kbAltF1},     kbAltShift}                 },
+    { kbF2,             {{kbAltF2},     kbAltShift}                 },
+    { kbF3,             {{kbAltF3},     kbAltShift}                 },
+    { kbF4,             {{kbAltF4},     kbAltShift}                 },
+    { kbF5,             {{kbAltF5},     kbAltShift}                 },
+    { kbF6,             {{kbAltF6},     kbAltShift}                 },
+    { kbF7,             {{kbAltF7},     kbAltShift}                 },
+    { kbF8,             {{kbAltF8},     kbAltShift}                 },
+    { kbF9,             {{kbAltF9},     kbAltShift}                 },
+    { kbF10,            {{kbAltF10},    kbAltShift}                 },
+    { kbF11,            {{kbAltF11},    kbAltShift}                 },
+    { kbF12,            {{kbAltF11},    kbAltShift}                 },
+    { kbDown,           {{kbAltDown},   kbAltShift}                 },
+    { kbUp,             {{kbAltUp},     kbAltShift}                 },
+    { kbLeft,           {{kbAltLeft},   kbAltShift}                 },
+    { kbRight,          {{kbAltRight},  kbAltShift}                 },
+    { kbIns,            {{kbAltIns},    kbAltShift}                 },
+    { kbDel,            {{kbAltDel},    kbAltShift}                 },
+    { kbHome,           {{kbAltHome},   kbAltShift}                 },
+    { kbEnd,            {{kbAltEnd},    kbAltShift}                 },
+    { kbPgUp,           {{kbAltPgUp},   kbAltShift}                 },
+    { kbPgDn,           {{kbAltPgDn},   kbAltShift}                 },
+    { kbCtrlDown,       {{kbDown},      kbCtrlShift | kbAltShift}   },
+    { kbCtrlUp,         {{kbUp},        kbCtrlShift | kbAltShift}   },
+    { kbCtrlLeft,       {{kbLeft},      kbCtrlShift | kbAltShift}   },
+    { kbCtrlRight,      {{kbRight},     kbCtrlShift | kbAltShift}   },
+};
 
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
@@ -44,22 +86,61 @@ bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &ne
     return false;
 }
 
+void TermIO::setAltModifier(TEvent &ev)
+{
+    ev.keyDown.controlKeyState |= kbAltShift;
+    // Set the proper key code if Turbo Vision supports the combination.
+    if (!ev.keyDown.charScan.scanCode && ev.keyDown.charScan.charCode <= '\x7F')
+        ev.keyDown.charScan.charCode = toupper(ev.keyDown.charScan.charCode);
+    KeyDownEvent keyDown = AltKeyCode[ev.keyDown.keyCode];
+    if (keyDown.keyCode)
+        ev.keyDown = keyDown;
+}
+
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // Pre: "\x1B" has just been read.
 {
-    if (buf.get() == '[')
+    ParseResult res = Rejected;
+    switch (buf.get())
     {
-        switch (buf.get())
-        {
-            // Mouse events are usually detected in 'parseCursesMouse'.
-            case 'M':
-                return parseX10Mouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
-            case '<':
-                return parseSGRMouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
-        }
+        case '[':
+            switch (buf.get())
+            {
+                // Note: mouse events are usually detected in 'NcursesInput::parseCursesMouse'.
+                case 'M':
+                    return parseX10Mouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
+                case '<':
+                    return parseSGRMouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    if (buf.get() == '~')
+                        res = parseHomeEndA(buf, ev);
+                    else
+                    {
+                        buf.unget();
+                        res = parseFKeyA(buf, ev);
+                    }
+                    break;
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                    res = parseArrowKeyA(buf, ev); break;
+            }
+            break;
+        case 'O':
+            res = parseFKeyB(buf, ev); break;
+        case '\x1B':
+            res = parseEscapeSeq(buf, ev, oldm);
+            if (res == Accepted)
+                setAltModifier(ev);
+            break;
     }
-    buf.reject();
-    return Rejected;
+    if (res == Rejected)
+        buf.reject();
+    return res;
 }
 
 ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
@@ -161,4 +242,147 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
         }
     }
     return acceptMouseEvent(ev, oldm, newm) ? Accepted : Ignored;
+}
+
+// The functions below are meant to parse a few sequences emitted
+// by terminals that do not match their terminfo / termcap entries, e.g.
+// Shift F1-4 on Konsole and F1-4 on Putty. It's easier than fixing the
+// application or updating the terminal database.
+
+ParseResult TermIO::parseFKeyA(GetChBuf &buf, TEvent &ev)
+// https://invisible-island.net/xterm/xterm-function-keys.html
+// Pre: "\x1B[n" has just been read, where 'n' is '1', '2' or '3'.
+{
+    KeyDownEvent keyDown = {};
+    switch (buf.last())
+    {
+        case '1':
+            switch (buf.get())
+            {
+                case '1': keyDown.keyCode = kbF1; break;
+                case '2': keyDown.keyCode = kbF2; break;
+                case '3': keyDown.keyCode = kbF3; break;
+                case '4': keyDown.keyCode = kbF4; break;
+                default: return Rejected;
+            }
+            break;
+        case '2':
+            switch (buf.get())
+            {
+                case '5': keyDown = {{kbShiftF1}, kbShift}; break;
+                case '6': keyDown = {{kbShiftF2}, kbShift}; break;
+                case '8': keyDown = {{kbShiftF3}, kbShift}; break;
+                case '9': keyDown = {{kbShiftF4}, kbShift}; break;
+                default: return Rejected;
+            }
+            break;
+        case '3':
+            switch (buf.get())
+            {
+                case '1': keyDown = {{kbShiftF5}, kbShift}; break;
+                case '2': keyDown = {{kbShiftF6}, kbShift}; break;
+                case '3': keyDown = {{kbShiftF7}, kbShift}; break;
+                case '4': keyDown = {{kbShiftF8}, kbShift}; break;
+                default: return Rejected;
+            }
+            break;
+        default: return Rejected;
+    }
+    if (buf.get() != '~')
+        return Rejected;
+    ev.what = evKeyDown;
+    ev.keyDown = keyDown;
+    return Accepted;
+}
+
+ParseResult TermIO::parseFKeyB(GetChBuf &buf, TEvent &ev)
+// https://invisible-island.net/xterm/xterm-function-keys.html
+// Pre: "\x1BO" has just been read.
+{
+    KeyDownEvent keyDown = {};
+    switch (buf.get())
+    {
+        case '2':
+            switch (buf.get())
+            {
+                case 'P': keyDown = {{kbShiftF1}, kbShift}; break;
+                case 'Q': keyDown = {{kbShiftF2}, kbShift}; break;
+                case 'R': keyDown = {{kbShiftF3}, kbShift}; break;
+                case 'S': keyDown = {{kbShiftF4}, kbShift}; break;
+                default: return Rejected;
+            }
+            break;
+        case '3':
+            switch (buf.get())
+            {
+                case 'P': keyDown = {{kbAltF1}, kbAltShift}; break;
+                case 'Q': keyDown = {{kbAltF2}, kbAltShift}; break;
+                case 'R': keyDown = {{kbAltF3}, kbAltShift}; break;
+                case 'S': keyDown = {{kbAltF4}, kbAltShift}; break;
+                default: return Rejected;
+            }
+            break;
+        case '5':
+            switch (buf.get())
+            {
+                case 'P': keyDown = {{kbCtrlF1}, kbCtrlShift}; break;
+                case 'Q': keyDown = {{kbCtrlF2}, kbCtrlShift}; break;
+                case 'R': keyDown = {{kbCtrlF3}, kbCtrlShift}; break;
+                case 'S': keyDown = {{kbCtrlF4}, kbCtrlShift}; break;
+                default: return Rejected;
+            }
+            break;
+        case '4':
+        case '6':
+        case '7':
+        case '8':
+            switch (buf.get())
+            {
+                // Multiple modifiers not supported by Turbo Vision.
+                case 'P': return Ignored;
+                case 'Q': return Ignored;
+                case 'R': return Ignored;
+                case 'S': return Ignored;
+                default: return Rejected;
+            }
+            break;
+        default: return Rejected;
+    }
+    ev.what = evKeyDown;
+    ev.keyDown = keyDown;
+    return Accepted;
+}
+
+ParseResult TermIO::parseArrowKeyA(GetChBuf &buf, TEvent &ev)
+// Putty.
+{
+    KeyDownEvent keyDown = {};
+    switch (buf.last())
+    {
+        case 'A': keyDown = {{kbCtrlUp}, kbCtrlShift}; break;
+        case 'B': keyDown = {{kbCtrlDown}, kbCtrlShift}; break;
+        case 'C': keyDown = {{kbCtrlRight}, kbCtrlShift}; break;
+        case 'D': keyDown = {{kbCtrlLeft}, kbCtrlShift}; break;
+        default: return Rejected;
+    }
+    ev.what = evKeyDown;
+    ev.keyDown = keyDown;
+    return Accepted;
+}
+
+ParseResult TermIO::parseHomeEndA(GetChBuf &buf, TEvent &ev)
+// Putty.
+{
+    if (buf.last() != '~')
+        return Rejected;
+    KeyDownEvent keyDown = {};
+    switch (buf.last(1))
+    {
+        case '1': keyDown = {{kbHome}}; break;
+        case '4': keyDown = {{kbEnd}}; break;
+        default: return Rejected;
+    }
+    ev.what = evKeyDown;
+    ev.keyDown = keyDown;
+    return Accepted;
 }

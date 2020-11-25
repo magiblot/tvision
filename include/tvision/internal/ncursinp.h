@@ -25,7 +25,6 @@ class NcursesInput : public FdInputStrategy, SigwinchAware {
     static int getch_nb();
     void detectAlt(int keys[4], bool &Alt);
     void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
-    void setAltModifier(TEvent &ev);
     void readUtf8Char(int keys[4], int &num_keys);
 
     bool parseCursesMouse(TEvent&);
