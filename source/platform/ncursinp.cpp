@@ -215,6 +215,10 @@ static const const_unordered_map<TStringView, KeyDownEvent> fromCursesHighKey = 
     { "kRIT7",      {{kbRight},         kbCtrlShift | kbAltShift}},
     { "kUP7",       {{kbUp},            kbCtrlShift | kbAltShift}},
     { "kDN7",       {{kbDown},          kbCtrlShift | kbAltShift}},
+    { "kpADD",      {{'+'},             0, {'+'}, 1}},
+    { "kpSUB",      {{'-'},             0, {'-'}, 1}},
+    { "kpMUL",      {{'*'},             0, {'*'}, 1}},
+    { "kpDIV",      {{'/'},             0, {'/'}, 1}},
 };
 
 NcursesInput::NcursesInput(bool mouse) :
@@ -337,9 +341,9 @@ bool NcursesInput::getEvent(TEvent &ev)
         else if (KEY_MAX < keys[0])
             ev.keyDown = fromCursesHighKey[keyname(keys[0])];
 
-        /* If it hasn't been transformed by any of the previous tables, treat it
-         * like a printable character. */
-        if (ev.keyDown.keyCode == kbNoKey)
+        // If it hasn't been transformed by any of the previous tables,
+        // and it's not a curses key, treat it like a printable character.
+        if (ev.keyDown.keyCode == kbNoKey && keys[0] < KEY_MIN)
             parsePrintableChar(ev, keys, num_keys);
 
         if (Alt)
