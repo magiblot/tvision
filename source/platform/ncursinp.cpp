@@ -297,26 +297,25 @@ bool NcursesInput::getEvent(TEvent &ev)
 {
     int k = wgetch(stdscr);
 
-    switch (k)
-    {
-        case KEY_ESC: {
-            NcGetChBuf buf;
-            switch (TermIO::parseEscapeSeq(buf, ev, mstate))
-            {
-                case Rejected: break;
-                case Accepted: return true;
-                case Ignored: return false;
-            }
-            break;
-        }
-        case KEY_MOUSE:
-            return parseCursesMouse(ev);
-        case KEY_RESIZE:
-            return winchEvent(ev);
-    }
+    if (k == KEY_RESIZE)
+        return winchEvent(ev);
     // We have to invoke this when we believe there are no more resize events
     // left. See the SigwinchAware class.
     winchClear();
+
+    if (k == KEY_MOUSE)
+        return parseCursesMouse(ev);
+    else if (k == KEY_ESC)
+    {
+        // Try to parse a escape sequence.
+        NcGetChBuf buf;
+        switch (TermIO::parseEscapeSeq(buf, ev, mstate))
+        {
+            case Rejected: break;
+            case Accepted: return true;
+            case Ignored: return false;
+        }
+    }
 
     if (k != ERR)
     {
