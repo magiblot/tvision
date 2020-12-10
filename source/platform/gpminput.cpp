@@ -10,6 +10,8 @@
 #include <internal/linuxcon.h>
 #include <algorithm>
 #include <tuple>
+#include <cstdlib>
+#include <memory>
 #include <gpm.h>
 using std::tuple;
 
@@ -25,7 +27,15 @@ GpmInput::GpmInput() :
          * In such case, GPM text selection and copy/paste will be active. */
         .minMod = 0,
         .maxMod = 0 };
-    Gpm_Open(&conn, 0);
+    // Workaround: because we only instantiate GPM in the Linux console, discard
+    // the TERM variable during Gpm_Open so that GPM won't assume it is being
+    // ran under xterm (e.g. if TERM=xterm).
+    {
+        std::unique_ptr<char[]> term {newStr(getenv("TERM"))};
+        if (term) unsetenv("TERM");
+        Gpm_Open(&conn, 0);
+        if (term) setenv("TERM", term.get(), 1);
+    }
     addListener(this, gpm_fd);
 }
 
@@ -34,7 +44,7 @@ GpmInput::~GpmInput()
     /* gpm_fd is -1 if the connection failed or -2 if it's just translating
      * xterm events. It's greater or equal than 0 if a direct connection
      * succeeded. */
-    if (0 <= gpm_fd)
+    if (gpm_fd != -1)
     {
         Gpm_Close();
     }
