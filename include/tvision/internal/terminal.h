@@ -96,6 +96,13 @@ namespace TermIO
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm);
     void setAltModifier(TEvent &ev);
 
+    #ifdef _TV_UNIX
+    namespace Unix
+    {
+        TPoint getSize();
+    }
+    #endif // _TV_UNIX
+
 }
 
 #endif // TVISION_TERMINAL_H

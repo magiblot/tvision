@@ -1,37 +1,53 @@
 #define Uses_TEvent
+#define Uses_TPoint
 #include <tvision/tv.h>
 
 #ifdef _TV_UNIX
 
 #include <internal/sigwinch.h>
+#include <internal/stdioctl.h>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <poll.h>
 
 int SigwinchAware::fd[2] = {-1, -1};
 void (*SigwinchAware::oldHandler) (int);
+bool SigwinchAware::hit = false;
 
-void SigwinchAware::handler(int s)
+bool SigwinchAware::push()
+{
+    if (!hit)
+    {
+        hit = true;
+        char c = 0;
+        int rr = ::write(fd[1], &c, sizeof(char));
+        (void) rr;
+        return true;
+    }
+    return false;
+}
+
+bool SigwinchAware::pop()
+{
+    if (hit)
+    {
+        char c;
+        int rr = ::read(fd[0], &c, sizeof(char));
+        (void) rr;
+        hit = false;
+        return true;
+    }
+    return false;
+}
+
+void SigwinchAware::handler(int)
 {
     // Write something to the pipe, so that it is seen as ready to read by
     // FdInputStrategy.
-    if (pipeEmpty())
-    {
-        char c = 0;
-        int rr = write(fd[1], &c, sizeof(char));
-        (void) rr;
-    }
-    // Call the previous SIGWINCH handler, so as not to break
-    // the original behaviour (e.g. Ncurses notices resolution change).
-    oldHandler(s);
-}
-
-bool SigwinchAware::pipeEmpty()
-{
-    struct pollfd p = { .fd = fd[0], .events = POLLIN };
-    poll(&p, 1, 0);
-    return p.revents == 0;
+    push();
+    // Don't call the previous SIGWINCH handler. Unfortunately, Ncurses
+    // clears the screen when doing so. Whichever processing was necessary
+    // will have to be done manually after winchEvent().
 }
 
 SigwinchAware::SigwinchAware()
@@ -60,19 +76,13 @@ SigwinchAware::SigwinchAware()
 
 bool SigwinchAware::winchEvent(TEvent &ev)
 {
-    ev.what = evCommand;
-    ev.message.command = cmScreenChanged;
-    return true;
-}
-
-void SigwinchAware::winchClear()
-{
-    // The underlying class may or may not call winchEvent() as many times
-    // as signals were caught. So it has to be responsible for invoking winchClear()
-    // when it believes it has no more resize events to process.
-    char c;
-    int rr = read(fd[0], &c, sizeof(char));
-    (void) rr;
+    if (pop())
+    {
+        ev.what = evCommand;
+        ev.message.command = cmScreenChanged;
+        return true;
+    }
+    return false;
 }
 
 int SigwinchAware::winchFd()

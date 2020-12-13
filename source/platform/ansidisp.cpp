@@ -5,6 +5,7 @@
 #include <internal/codepage.h>
 #include <internal/textattr.h>
 #include <internal/stdioctl.h>
+#include <internal/terminal.h>
 #include <cstdio>
 #include <cstdlib>
 #ifdef _TV_UNIX
@@ -98,15 +99,9 @@ void AnsiDisplayBase::getCaretPosition(int &x, int &y)
 void AnsiDisplayBase::getScreenSize(int &rows, int &cols)
 {
     lowlevelFlush();
-    struct winsize w;
-    if ( ioctl(StdioCtl::in(), TIOCGWINSZ, &w) != -1 ||
-         ioctl(StdioCtl::out(), TIOCGWINSZ, &w) != -1 )
-    {
-        rows = w.ws_row;
-        cols = w.ws_col;
-    }
-    else
-        rows = cols = 0;
+    TPoint s = TermIO::Unix::getSize();
+    rows = s.y;
+    cols = s.x;
 }
 
 int AnsiDisplayBase::getScreenRows()

@@ -3,6 +3,7 @@
 #include <tvision/tv.h>
 
 #include <internal/terminal.h>
+#include <internal/stdioctl.h>
 #include <internal/constmap.h>
 
 static const const_unordered_map<ushort, KeyDownEvent> AltKeyCode = {
@@ -386,3 +387,18 @@ ParseResult TermIO::parseHomeEndA(GetChBuf &buf, TEvent &ev)
     ev.keyDown = keyDown;
     return Accepted;
 }
+
+#ifdef _TV_UNIX
+#include <sys/ioctl.h>
+
+TPoint TermIO::Unix::getSize()
+{
+    struct winsize w;
+    if ( ioctl(StdioCtl::in(), TIOCGWINSZ, &w) != -1 ||
+         ioctl(StdioCtl::out(), TIOCGWINSZ, &w) != -1 )
+    {
+        return {w.ws_col, w.ws_row};
+    }
+    return {0, 0};
+}
+#endif // _TV_UNIX

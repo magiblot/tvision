@@ -12,14 +12,16 @@ class SigwinchAware {
     static int fd[2];
     static void handler(int s);
     static void (*oldHandler)(int);
-    static bool pipeEmpty();
+
+    static bool hit;
+    static bool push();
+    static bool pop();
 
 protected:
 
     SigwinchAware();
 
     static bool winchEvent(TEvent &ev);
-    static void winchClear();
     static int winchFd();
 
 };
