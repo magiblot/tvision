@@ -264,6 +264,7 @@ void TInputLine::handleEvent( TEvent& event )
     static char padKeys[] = {0x47,0x4b,0x4d,0x4f,0x73,0x74, 0};
     TView::handleEvent(event);
 
+    char keyText[ sizeof( event.keyDown.text )+1 ];
     int delta, i, len, curWidth;
     if( (state & sfSelected) != 0 )
         switch( event.what )
@@ -356,7 +357,10 @@ void TInputLine::handleEvent( TEvent& event )
                         setState(sfCursorIns, Boolean(!(state & sfCursorIns)));
                         break;
                     default:
-                        if ((len = event.keyDown.textLength))
+                        // The event text may contain null characters, but 'data' is null-terminated,
+                        // so rely on strlen to measure the text length.
+                        strnzcpy( keyText, event.keyDown.asText(), sizeof( keyText ) );
+                        if( (len = strlen(keyText)) != 0 )
                             {
                             deleteSelect();
                             if( (state & sfCursorIns) != 0 )
@@ -369,7 +373,7 @@ void TInputLine::handleEvent( TEvent& event )
                                     if( firstPos > curPos )
                                         firstPos = curPos;
                                     memmove( data+curPos+len, data+curPos, strlen(data+curPos)+1 );
-                                    memcpy( data+curPos, event.keyDown.text, len );
+                                    memcpy( data+curPos, keyText, len );
                                     curPos += len;
                                     }
                                 checkValid(False);
