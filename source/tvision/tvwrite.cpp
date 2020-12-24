@@ -260,13 +260,10 @@ void TVWrite::copyShort( ushort *dst, const ushort *src )
     {
 #define loByte(w)    (((uchar *)&w)[0])
 #define hiByte(w)    (((uchar *)&w)[1])
-        ushort ColorChar;
-        hiByte(ColorChar) = shadowAttr;
         for (i = 0; i < Count - X; ++i)
         {
-            loByte(ColorChar) = src[i];
-            hiByte(ColorChar) = applyShadow(src[i + 1]);
-            dst[i] = ColorChar;
+            loByte(dst[i]) = loByte(src[i]);
+            hiByte(dst[i]) = applyShadow(hiByte(src[i]));
         }
 #undef loByte
 #undef hiByte
