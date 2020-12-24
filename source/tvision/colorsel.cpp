@@ -856,7 +856,7 @@ TStreamable *TColorDialog::build()
 
 TColorDialog::TColorDialog( StreamableInit ) :
     TDialog( streamableInit ),
-    TWindowInit( (TFrame* (*)(TRect)) streamableInit )
+    TWindowInit( 0 )
 {
 }
 

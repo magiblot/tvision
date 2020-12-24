@@ -247,7 +247,7 @@ TStreamable *TDeskTop::build()
 
 TDeskTop::TDeskTop( StreamableInit ) :
     TGroup( streamableInit ),
-    TDeskInit( (TBackground* (*)(TRect)) streamableInit )
+    TDeskInit( 0 )
 {
     tileColumnsFirst = False;
 }
