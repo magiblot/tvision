@@ -22,28 +22,20 @@
 
 const int32_t rStreamMagic = 0x52504246uL; // 'FBPR'
 
-struct Count_type
-{
-    ushort lastCount;
-    ushort pageCount;
-};
-
-struct Info_type
-{
-    ushort infoType;
-    int32_t infoSize;
-};
-
 struct THeader
 {
     ushort signature;
     union
         {
-        Count_type count;
-        Info_type info;
+        ushort lastCount; // Count_type
+        ushort infoType;  // Info_type
+        };
+    union
+        {
+        ushort pageCount; // Count_type
+        int32_t infoSize; // Info_type
         };
 };
-
 
 TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
 {
@@ -67,18 +59,18 @@ TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
            stream->readBytes(header, sizeof(THeader));
            if (header->signature == 0x5a4d)
                {
-               basePos += ((header->count.pageCount * 512L) -
-                          (-header->count.lastCount & 511));
+               basePos += ((header->pageCount * 512L) -
+                          (-header->lastCount & 511));
                repeat = 1;
                }
            else if (header->signature == 0x4246)
                {
-               if (header->info.infoType == 0x5250)
+               if (header->infoType == 0x5250)
                    found = 1;
                else
                    {
                    basePos +=
-                      header->info.infoSize + 16 - (header->info.infoSize)%16;
+                      header->infoSize + 16 - (header->infoSize)%16;
                    repeat = 1;
                    }
                }
