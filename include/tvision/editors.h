@@ -249,8 +249,7 @@ public:
     void unlock();
     void update( uchar );
     void checkScrollBar( const TEvent&, TScrollBar *, int& );
-    void detectEolType();
-    void setEolType( const char* );
+    void detectEOL();
 
     TScrollBar *hScrollBar;
     TScrollBar *vScrollBar;
@@ -276,8 +275,7 @@ public:
     Boolean overwrite;
     Boolean autoIndent;
 
-    const char* eolBytes;
-    uint eolSize;
+    enum EOLTypes { eolCRLF, eolLF, eolCR } eolType;
 
     Boolean encSingleByte;
     char charsBuf[4];
