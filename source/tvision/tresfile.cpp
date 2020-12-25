@@ -53,6 +53,7 @@ TResourceFile::TResourceFile( fpstream *aStream ) : TObject()
     int32_t streamSize;
 
     stream = aStream;
+    modified = False;
     basePos = stream->tellp();
     stream->seekp(0, ios::end);
     streamSize = stream->tellp();
