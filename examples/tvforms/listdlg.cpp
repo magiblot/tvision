@@ -476,7 +476,8 @@ Boolean TListDialog::saveForm(TDialog *f)
         TApplication::application->outOfMemory();
         return False;
         }
-
+    // Zero-initialize so that any possible padding bytes are not left uninitialized.
+    memset(p, 0, dataCollection->itemSize);
     f->getData(p);
     // If no duplicates, make sure not attempting to add duplicate key
     if ( (!(dataCollection->duplicates) && dataCollection->search(dataCollection->keyOf(p), i)) )

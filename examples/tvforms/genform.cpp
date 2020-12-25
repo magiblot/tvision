@@ -68,7 +68,7 @@ int main(void)
     for(i = 0; i < dataCount; ++i)
         {
         // Zero-initialize the struct so that any possible padding bytes
-        // are not left unitialized.
+        // are not left uninitialized.
         p = new TDataRec();
         f->setData((void *)&data[i]);      // move into object
         f->getData(p);                     // move onto heap
