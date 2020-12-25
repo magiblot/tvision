@@ -67,8 +67,8 @@ struct TDescrRec
 
 struct TDataRec
 {
-    long partNum;
-    long qty;
+    int32_t partNum;
+    int32_t qty;
     TDescrRec descr;
 };
 

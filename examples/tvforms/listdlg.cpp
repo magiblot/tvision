@@ -93,7 +93,7 @@ void TListKeyBox::getText( char *dest, short item, short maxLen )
             TSortedListBox::getText(dest, item, maxLen);
             break;
         case longIntKey:
-            ltoa(*((long *)((TDataCollection *)list()->keyOf((TDataCollection *)list()->at(item)))), dest, 10);
+            ltoa(*((int32_t *)((TDataCollection *)list()->keyOf((TDataCollection *)list()->at(item)))), dest, 10);
             break;
         }
 }

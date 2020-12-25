@@ -86,9 +86,9 @@ int TDataCollection::compare( void *key1, void *key2 )
         return stricmp((char*)key1, (char*) key2);
     else 
         {
-        if (*(long *)key1 < *(long *)key2)
+        if (*(int32_t *)key1 < *(int32_t *)key2)
             return -1;
-        else if (*(long *)key1 == *(long *)key2)
+        else if (*(int32_t *)key1 == *(int32_t *)key2)
             return 0;
         else
             return 1;

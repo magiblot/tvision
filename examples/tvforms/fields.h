@@ -64,13 +64,13 @@ class TNumInputLine : public TInputLine
 
 public:
 
-    TNumInputLine( const TRect&, int, long, long );
+    TNumInputLine( const TRect&, int, int32_t, int32_t );
     virtual ushort dataSize();
     virtual void getData( void *);
     virtual void setData( void *);
     virtual Boolean valid( ushort );
-    long min;
-    long max;
+    int32_t min;
+    int32_t max;
 
 protected:
 

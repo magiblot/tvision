@@ -108,8 +108,8 @@ TStreamableClass RNumInputLine( TNumInputLine::name,
 
 TNumInputLine::TNumInputLine( const TRect& bounds,
                               int aMaxLen,
-                              long aMin,
-                              long aMax ) :
+                              int32_t aMin,
+                              int32_t aMax ) :
     TInputLine(bounds, aMaxLen)
 {
     min = aMin;
@@ -119,23 +119,23 @@ TNumInputLine::TNumInputLine( const TRect& bounds,
 
 ushort TNumInputLine::dataSize()
 {
-    return sizeof(long);
+    return sizeof(int32_t);
 }
 
 void TNumInputLine::getData( void *rec )
 {
-    *(long *)rec = atol(data);
+    *(int32_t *)rec = atol(data);
 }
 
 void TNumInputLine::setData( void *rec )
 {
-    ltoa(*(long *)rec, data, 10);
+    ltoa(*(int32_t *)rec, data, 10);
     selectAll(True);
 }
 
 Boolean TNumInputLine::valid( ushort command )
 {
-    long value;
+    int32_t value;
     Boolean ok;
     char msg[80];
     ostrstream os(msg, 80);
