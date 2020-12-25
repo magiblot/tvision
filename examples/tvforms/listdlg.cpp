@@ -203,7 +203,7 @@ TListDialog::~TListDialog(void)
     if (formDataFile != NULL)
         destroy(formDataFile);
     if (fileName != NULL)
-        delete fileName;
+        delete[] fileName;
 }
 
 void TListDialog::close(void)
@@ -480,7 +480,7 @@ Boolean TListDialog::saveForm(TDialog *f)
     if ( (!(dataCollection->duplicates) && dataCollection->search(dataCollection->keyOf(p), i)) )
         if ( (((TForm*)f)->prevData == NULL) || (((TForm *)f)->prevData != dataCollection->at(i)) )
             {
-            delete(p);
+            ::operator delete(p);
             messageBox("Duplicate keys are not allowed in this database."
                        "  Delete duplicate record before saving this form.",
                         mfError | mfOKButton);
@@ -498,7 +498,7 @@ Boolean TListDialog::saveForm(TDialog *f)
     dataCollection->insert(p);
     if (dataCollection->status != 0)
         {
-        delete(p);
+        ::operator delete(p);
         TApplication::application->outOfMemory();
         return False;
         }

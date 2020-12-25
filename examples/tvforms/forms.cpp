@@ -105,10 +105,10 @@ Boolean TForm::changed()
     else
         result = True;
 
-    delete (curData);
+    ::operator delete(curData);
     if (newForm)
         {
-        delete(prevData);
+        ::operator delete(prevData);
         prevData = NULL;
         }
     if (result)

@@ -104,7 +104,7 @@ void TDataCollection::error( int code )
 void TDataCollection::freeItem( void *item )
 {
     if (item != NULL)
-        delete (item);
+        ::operator delete(item);
 }
 
 void TDataCollection::setLimit( int aLimit )
@@ -128,7 +128,7 @@ void TDataCollection::setLimit( int aLimit )
                 memcpy(aItems, items, count * sizeof(void *));
             }
         if (limit != 0)
-            delete (items);
+            delete[] items;
         items = aItems;
         limit = aLimit;
         }
