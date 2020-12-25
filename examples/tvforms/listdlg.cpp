@@ -104,7 +104,7 @@ TListDialog::TListDialog( char *rezName, char *title) :
     TDialog( TRect( 2, 2, 32, 15 ), title),
     TWindowInit(&TListDialog::initFrame)
 {
-     const short
+    const short
         buttonCt      = 4,
         listX         = 2,
         listY         = 3,
@@ -114,86 +114,86 @@ TListDialog::TListDialog( char *rezName, char *title) :
         listHt        = buttonCt * 2,
         buttonWd      = 12,
         buttonY       = listY;
-     TScrollBar *sb;
-     short y;
-     TForm *f;
-     short listWd;
-     short buttonX;
+    TScrollBar *sb;
+    short y;
+    TForm *f;
+    short listWd;
+    short buttonX;
 
-     modified = False;
-     fileName = newStr(rezName);
-     // Read data off resource stream
-     if (openDataFile(fileName, formDataFile, ios::in) == True)
-         {
-         // Get horizontal size of key field
-         f = (TForm *)formDataFile->get("FormDialog");
-         if (f == NULL)
-             {
-             messageBox("Error accessing file data.", mfError | mfOKButton);
-             return;
-             }
+    modified = False;
+    fileName = newStr(rezName);
+    // Read data off resource stream
+    if (openDataFile(fileName, formDataFile, ios::in) == True)
+        {
+        // Get horizontal size of key field
+        f = (TForm *)formDataFile->get("FormDialog");
+        if (f == NULL)
+            {
+            messageBox("Error accessing file data.", mfError | mfOKButton);
+            return;
+            }
 
-             // Base listbox width on key width. Grow entire dialog if required
-         if (f->keyWidth > defaultListWd)
-             {
-             listWd = f->keyWidth;
-             growTo((short)(formWd + listWd - defaultListWd), (short)formHt);
-             }
-         else
-             listWd = defaultListWd;
+            // Base listbox width on key width. Grow entire dialog if required
+        if (f->keyWidth > defaultListWd)
+            {
+            listWd = f->keyWidth;
+            growTo((short)(formWd + listWd - defaultListWd), (short)formHt);
+            }
+        else
+            listWd = defaultListWd;
 
-         // Move to upper right corner of desktop
-         TRect r (TProgram::deskTop->getExtent());   // Desktop coordinates
-         moveTo((short)(r.b.x - size.x), 1);
+        // Move to upper right corner of desktop
+        TRect r (TProgram::deskTop->getExtent());   // Desktop coordinates
+        moveTo((short)(r.b.x - size.x), 1);
 
-         destroy(f);
+        destroy(f);
 
-         // Read data collection into memory
-         dataCollection = (TDataCollection *)formDataFile->get("FormData");
-         if (dataCollection != NULL)
-             {
-             // Loaded successfully: build ListDialog dialog
+        // Read data collection into memory
+        dataCollection = (TDataCollection *)formDataFile->get("FormData");
+        if (dataCollection != NULL)
+            {
+            // Loaded successfully: build ListDialog dialog
 
-             // Scrollbar
-             sb = new TScrollBar( TRect(listX + listWd, listY,
-                      listX + listWd + 1, listY + listHt));
-             insert(sb);
+            // Scrollbar
+            sb = new TScrollBar( TRect(listX + listWd, listY,
+                     listX + listWd + 1, listY + listHt));
+            insert(sb);
 
-             // List box
-             list = new TListKeyBox( TRect(listX, listY, listX + listWd,
-                        listY + listHt), 1, sb);
-             list->newList(dataCollection);
-             insert(list);
+            // List box
+            list = new TListKeyBox( TRect(listX, listY, listX + listWd,
+                       listY + listHt), 1, sb);
+            list->newList(dataCollection);
+            insert(list);
 
-             // Label
-             insert(new TLabel ( TRect(listX, listY - 1,
-                        listX + 10, listY), "~K~eys", list));
+            // Label
+            insert(new TLabel ( TRect(listX, listY - 1,
+                       listX + 10, listY), "~K~eys", list));
 
-             // Buttons
-             buttonX = listX + listWd + 2;
-             y = buttonY;
+            // Buttons
+            buttonX = listX + listWd + 2;
+            y = buttonY;
 
-             insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
-                        y + 2), "~E~dit", cmFormEdit, bfDefault));
+            insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
+                       y + 2), "~E~dit", cmFormEdit, bfDefault));
 
-             y += 2;
+            y += 2;
 
-             insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
-                        y + 2), "~N~ew", cmFormNew, bfNormal));
+            insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
+                       y + 2), "~N~ew", cmFormNew, bfNormal));
 
-             y += 2;
-             insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
-                        y + 2), "~D~elete", cmFormDel, bfNormal));
+            y += 2;
+            insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
+                       y + 2), "~D~elete", cmFormDel, bfNormal));
 
-             y += 2;
+            y += 2;
 
-             insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
-                        y + 2), "~S~ave", cmListSave, bfNormal));
+            insert(new TButton (TRect(buttonX, y, buttonX + buttonWd,
+                       y + 2), "~S~ave", cmListSave, bfNormal));
 
-             selectNext(False);      // Select first field
-             isValid = True;
-             }
-         }
+            selectNext(False);      // Select first field
+            isValid = True;
+            }
+        }
 }
 
 TListDialog::~TListDialog(void)
@@ -282,7 +282,7 @@ void TListDialog::deleteSelection()
         {
         f->select();
         messageBox("Data is already being edited. Close form before deleting.",
-                     mfWarning | mfOKButton);
+                    mfWarning | mfOKButton);
         return;
         }
 
@@ -403,7 +403,7 @@ Boolean TListDialog::saveList()
     form = (TForm *)formDataFile->get("FormDialog");
     if (form == NULL)
         messageBox("Cannot find original file. Data not saved.",
-             mfError | mfOKButton);
+                    mfError | mfOKButton);
     else
         {
         // Create new data file
@@ -411,7 +411,7 @@ Boolean TListDialog::saveList()
         sprintf(bufStr,"%s%s%s.$$$", drive, d, n);
         if (openDataFile(bufStr, newDataFile, ios::out) == False)
             messageBox("Cannot create file. Data not saved.",
-                              mfError | mfOKButton);
+                        mfError | mfOKButton);
         else
             {
             // Create new from form and collection in memory
@@ -431,13 +431,13 @@ Boolean TListDialog::saveList()
             if (ccode)
                 {
                 messageBox("Cannot create .BAK file. Data not saved.",
-                     mfError | mfOKButton);
+                            mfError | mfOKButton);
 
                 //Try to re-open original. New data will still be in memory
                 if (openDataFile(fileName, formDataFile, ios::in) == False)
                     {
                     messageBox("Cannot re-open original file.",
-                        mfError | mfOKButton);
+                                mfError | mfOKButton);
                     destroy(this);        // Cannot proceed. Free data and close window }
                     }
                 }
@@ -481,8 +481,8 @@ Boolean TListDialog::saveForm(TDialog *f)
         if ( (((TForm*)f)->prevData == NULL) || (((TForm *)f)->prevData != dataCollection->at(i)) )
             {
             ::operator delete(p);
-            messageBox("Duplicate keys are not allowed in this database."
-                       "  Delete duplicate record before saving this form.",
+            messageBox("Duplicate keys are not allowed in this database. "
+                       "Delete duplicate record before saving this form.",
                         mfError | mfOKButton);
             return False;
             }
