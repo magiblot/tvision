@@ -63,7 +63,7 @@ Boolean TKeyInputLine::valid( ushort command )
 
     ok = True;
     if ( ( command != cmCancel) && ( command != cmValid ) )
-	if ( strlen( data ) == 0 )
+        if ( strlen( data ) == 0 )
             {
             select();
             messageBox("This field cannot be empty.", mfError | mfOKButton);
@@ -107,9 +107,9 @@ TStreamableClass RNumInputLine( TNumInputLine::name,
                                 );
 
 TNumInputLine::TNumInputLine( const TRect& bounds,
-			      int aMaxLen,
-			      long aMin,
-			      long aMax ) :
+                              int aMaxLen,
+                              long aMin,
+                              long aMax ) :
     TInputLine(bounds, aMaxLen)
 {
     min = aMin;
