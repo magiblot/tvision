@@ -102,7 +102,11 @@ void TListKeyBox::getText( char *dest, short item, short maxLen )
 
 TListDialog::TListDialog( char *rezName, char *title) :
     TDialog( TRect( 2, 2, 32, 15 ), title),
-    TWindowInit(&TListDialog::initFrame)
+    TWindowInit(&TListDialog::initFrame),
+    dataCollection(0),
+    fileName(newStr(rezName)),
+    isValid(False),
+    modified(False)
 {
     const short
         buttonCt      = 4,
@@ -120,8 +124,6 @@ TListDialog::TListDialog( char *rezName, char *title) :
     short listWd;
     short buttonX;
 
-    modified = False;
-    fileName = newStr(rezName);
     // Read data off resource stream
     if (openDataFile(fileName, formDataFile, ios::in) == True)
         {
