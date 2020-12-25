@@ -18,7 +18,7 @@
 
 #define Uses_TStringCollection
 #define Uses_TStreamable
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 enum KeyTypes {stringKey, longIntKey};
 

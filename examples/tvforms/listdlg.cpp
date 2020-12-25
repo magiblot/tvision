@@ -27,25 +27,25 @@
 #define Uses_TLabel
 #define Uses_fpstream
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RResourceCollection )
 __link( RDialog )
 __link( RScrollBar )
 
 #if !defined( __LISTDLG_H )
-#include "Listdlg.h"
+#include "listdlg.h"
 #endif  // __LISTDLG_H
 
 #if !defined( __FORMCMDS_H )
-#include "Formcmds.h"
+#include "formcmds.h"
 #endif  // __FORMCMDS_H
 
 #if !defined( __FORMS_H )
-#include "Forms.h"
+#include "forms.h"
 #endif  // __FORMS_H
 
 #if !defined( __DATACOLL_H )
-#include "Datacoll.h"
+#include "datacoll.h"
 #endif  // __DATACOLL_H
 
 #if !defined( __STDLIB_H )

@@ -22,7 +22,7 @@
 #define Uses_TMemo
 #define Uses_TLabel
 #define Uses_TScrollBar
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RScrollBar )
 __link( RLabel )
 __link( RMemo )
@@ -50,9 +50,9 @@ __link( RButton )
 #define FORM_EXTENSION "F16"
 #endif
 
-const
-    char rezFileName[] = "PARTS." FORM_EXTENSION;
-const
+const char rezFileName[] = "PARTS." FORM_EXTENSION;
+
+const int
     partNumWidth   =   6,
     descrWidth     =  30,
     qtyWidth       =   6,
@@ -72,31 +72,30 @@ struct TDataRec
     TDescrRec descr;
 };
 
-const
-    Boolean allowDuplicates = False;
+const Boolean allowDuplicates = False;
 
-const
-    KeyTypes dataKeyType = longIntKey,
-    dataCount = 5;
+const KeyTypes dataKeyType = longIntKey;
 
-    TDataRec data[dataCount] =
-        {
-        1, 1036, { 0,  "Government standard issue\r"
-                       "and certified by FAA for\r"
-                       "international use."
-                 }, 
-        2035, 33, { 0, "Warbling mini version with\r"
-                       "modified mechanisms for\r"
-                       "handling streamliners."
-                  },
-        2034, 13, { 0, "Hybrid version." },
-        2, -123,  { 0, "Catalytic version for\r"
-                       "meeting stricter emission\r"
-                       "standards in industrial areas."
-                  },
-        45, 8567, {0, "Prototype for new model."}
+const int dataCount = 5;
 
-        };
+TDataRec data[dataCount] =
+    {
+    1, 1036, { 0,  "Government standard issue\r"
+                   "and certified by FAA for\r"
+                   "international use."
+             },
+    2035, 33, { 0, "Warbling mini version with\r"
+                   "modified mechanisms for\r"
+                   "handling streamliners."
+              },
+    2034, 13, { 0, "Hybrid version." },
+    2, -123,  { 0, "Catalytic version for\r"
+                   "meeting stricter emission\r"
+                   "standards in industrial areas."
+              },
+    45, 8567, {0, "Prototype for new model."}
+
+    };
 
 
 void initDescrLengths()
@@ -107,7 +106,7 @@ void initDescrLengths()
 
 TForm *makeForm()
 {
-    const
+    const int
         formX1 = 1,
         formY1 = 1,
         formWd = 36,

@@ -46,7 +46,7 @@
 #define Uses_TEditor
 #define Uses_TMemo
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RResourceCollection )
 __link( RButton )
 __link( RCheckBoxes )
@@ -81,7 +81,7 @@ __link( RMemo )
 #endif
 
 extern TPoint shadowSize;
-const MAXSIZE = 150;
+const int MAXSIZE = 150;
 
 
 class TFormApp : public TApplication

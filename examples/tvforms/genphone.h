@@ -25,7 +25,7 @@
 #define Uses_TMenuBar
 #define Uses_TSItem
 #define Uses_TRadioButtons
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RButton )
 __link( RCheckBoxes )
 __link( RInputLine )
@@ -60,9 +60,9 @@ __link( RFrame )
 #define FORM_EXTENSION "F16"
 #endif
 
-const
-    char rezFileName[] = "PHONENUM." FORM_EXTENSION;
-const
+const char rezFileName[] = "PHONENUM." FORM_EXTENSION;
+
+const int
     nameWidth = 25,
     companyWidth = 23,
     remarksWidth = 22,
@@ -78,33 +78,33 @@ struct TDataRec
     ushort gender;
 };
 
-const
-    Boolean allowDuplicates = True;
-const
-    KeyTypes dataKeyType = stringKey,
+const Boolean allowDuplicates = True;
+
+const KeyTypes dataKeyType = stringKey;
+
+const int
     dataCount = 4,
     male      = 0,
     female    = 1,
     business  = 0x1,
     personal  = 0x2;
 
-const
-    TDataRec data[dataCount] =
-        {
-            "Helton, Andrew", "Asterisk International", "Purch. Mgr.", "(415) 868-3964",
-                business | personal, male,
-            "White, Natalie", "Exclamation, Inc.", "VP sales", "(408) 242-2030",
-                business, female,
-            "Stern, Peter", "", "Decent violinist", "(111) 222-5555",
-                personal, male,
-            "Whitcom, Hana O.", "Nate''s girlfriend", "Birthday: Jan 8, 1990", "(408) 426-1234",
-                personal, female
-        };
+const TDataRec data[dataCount] =
+    {
+        "Helton, Andrew", "Asterisk International", "Purch. Mgr.", "(415) 868-3964",
+            business | personal, male,
+        "White, Natalie", "Exclamation, Inc.", "VP sales", "(408) 242-2030",
+            business, female,
+        "Stern, Peter", "", "Decent violinist", "(111) 222-5555",
+            personal, male,
+        "Whitcom, Hana O.", "Nate''s girlfriend", "Birthday: Jan 8, 1990", "(408) 426-1234",
+            personal, female
+    };
 
 
 TForm *makeForm()
 {
-    const
+    const int
         formX1 = 5,
         formY1 = 3,
         formWd = 41,

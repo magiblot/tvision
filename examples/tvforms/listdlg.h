@@ -22,7 +22,7 @@
 #define Uses_TDialog
 #define Uses_TResourceFile
 #define Uses_pstream
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 #if !defined( __DATACOLL_H )
 #include "datacoll.h"

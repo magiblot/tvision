@@ -18,20 +18,20 @@
 #define Uses_TDialog
 #define Uses_TStreamableClass
 #define Uses_MsgBox
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RDialog )
 __link( RView )
 
 #if !defined( __FORMS_H )
-#include "Forms.h"
+#include "forms.h"
 #endif  // __FORMS_H
 
 #if !defined( __LISTDLG_H )
-#include "Listdlg.h"
+#include "listdlg.h"
 #endif  // __LISTDLG_H
 
 #if !defined( __FORMCMDS_H )
-#include "Formcmds.h"
+#include "formcmds.h"
 #endif  // __FORMCMDS_H
 
 #if !defined( __STRING_H )

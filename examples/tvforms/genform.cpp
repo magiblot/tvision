@@ -21,7 +21,7 @@
 #define Uses_TResourceFile
 #define Uses_TScreen
 #define Uses_TStreamableClass
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link ( RResourceCollection )
 
 #if defined( PHONENUM )

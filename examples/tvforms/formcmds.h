@@ -17,7 +17,7 @@
 
 // Misc UI commands
 
-const
+const ushort
    cmAboutBox    = 2000,
    cmChgDir      = 2001,
    cmVideoMode   = 2002;
@@ -25,7 +25,7 @@ const
 // List & form-oriented commands
 // (Cannot be disabled)
 
-const
+const ushort
    cmListOpen    = 3000,
    cmListSave    = 3001,
    cmFormEdit    = 3002,
@@ -35,7 +35,7 @@ const
 
 // Broadcast commands
 
-const
+const ushort
    cmTopForm      = 3050,
    cmRegisterForm = 3051,
    cmEditingForm  = 3052,
@@ -46,7 +46,7 @@ const
 
 // History list IDs 
 
-const
+const ushort
    hlChangeDir   = 1,
    hlOpenListDlg = 2;
 

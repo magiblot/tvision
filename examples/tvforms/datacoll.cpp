@@ -14,7 +14,7 @@
 
 #define Uses_TStreamableClass
 #define Uses_TStringCollection
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RStringCollection )
 
 #if !defined( __DATACOLL_H )

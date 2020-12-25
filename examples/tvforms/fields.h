@@ -18,7 +18,7 @@
 
 #define Uses_TInputLine
 #define Uses_TStreamable
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 // Same as TInputLine, except invalid if empty 
 

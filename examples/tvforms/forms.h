@@ -22,7 +22,7 @@
 #define Uses_TRect
 #define Uses_TDialog
 #define Uses_TView
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 
 class TForm : public TDialog
 {

@@ -16,7 +16,7 @@
 #define Uses_TInputLine
 #define Uses_TStreamable
 #define Uses_MsgBox
-#include <tvision\tv.h>
+#include <tvision/tv.h>
 __link( RInputLine )
 
 #if !defined( __FIELDS_H )
