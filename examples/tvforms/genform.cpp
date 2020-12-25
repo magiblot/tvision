@@ -67,7 +67,9 @@ int main(void)
     collection->duplicates = allowDuplicates;
     for(i = 0; i < dataCount; ++i)
         {
-        p = new TDataRec;
+        // Zero-initialize the struct so that any possible padding bytes
+        // are not left unitialized.
+        p = new TDataRec();
         f->setData((void *)&data[i]);      // move into object
         f->getData(p);                     // move onto heap
         collection->insert(p);             // insert in sorted order
