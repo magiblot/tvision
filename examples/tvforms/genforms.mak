@@ -29,7 +29,7 @@ INCPATH = $(TVDIR)\INCLUDE;$(BCROOT)\INCLUDE
 
 !if $d(DOS32)
 CC      = bcc32
-TVLIB   = tv32.lib
+TVLIB   = tv32.lib import32.lib
 CCFLAGS = -WX -I$(INCPATH) -L$(LIBPATH)
 !else
 CC      = bcc

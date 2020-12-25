@@ -26,6 +26,7 @@
 #define Uses_TDeskTop
 #define Uses_TLabel
 #define Uses_fpstream
+#define Uses_TStreamableClass
 #include <tvision\tv.h>
 __link( RResourceCollection )
 __link( RDialog )
@@ -364,7 +365,7 @@ void TListDialog::handleEvent(TEvent& event)
 }
 
 Boolean TListDialog::openDataFile( char *name,
-    TResourceFile *&dataFile, int mode )
+    TResourceFile *&dataFile, pstream::openmode mode )
 {
     fpstream* s;
 

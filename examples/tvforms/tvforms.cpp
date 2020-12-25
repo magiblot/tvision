@@ -45,6 +45,7 @@
 #define Uses_TScreen
 #define Uses_TEditor
 #define Uses_TMemo
+#define Uses_TStreamableClass
 #include <tvision\tv.h>
 __link( RResourceCollection )
 __link( RButton )

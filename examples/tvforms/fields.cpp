@@ -32,7 +32,7 @@ __link( RInputLine )
 #endif  // __STDLIB_H
 
 #if !defined( __STRSTREAM_H )
-#include <strstream.h>
+#include <strstrea.h>
 #endif  // __STRSTREAM_H
 
 

@@ -21,15 +21,16 @@
 #define Uses_TScrollBar
 #define Uses_TDialog
 #define Uses_TResourceFile
+#define Uses_pstream
 #include <tvision\tv.h>
 
 #if !defined( __DATACOLL_H )
 #include "datacoll.h"
-#endif  __DATACOLL_H
+#endif  // __DATACOLL_H
 
 #if !defined( __FORMS_H )
 #include "forms.h"
-#endif  __FORMS_H
+#endif  // __FORMS_H
 
 
 typedef char * (*ExpandFunc)(char *);
@@ -58,7 +59,7 @@ public:
     TForm *editingForm();
     void formOpen( Boolean );
     virtual void handleEvent( TEvent& );
-    Boolean openDataFile( char *, TResourceFile *&, int );
+    Boolean openDataFile( char *, TResourceFile *&, pstream::openmode );
     Boolean saveList();
     Boolean saveForm(TDialog *);
     void stackOnPrev(TDialog *);
