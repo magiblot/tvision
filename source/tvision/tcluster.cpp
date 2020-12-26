@@ -297,7 +297,7 @@ void TCluster::handleEvent( TEvent& event )
 }
 
 
-void TCluster::setButtonState(unsigned long aMask, Boolean enable)
+void TCluster::setButtonState(uint32_t aMask, Boolean enable)
 {
     if (!enable)
         enableMask &= ~aMask;
@@ -307,7 +307,7 @@ void TCluster::setButtonState(unsigned long aMask, Boolean enable)
     int n = strings->getCount();
     if ( n < 32 )
     {
-        unsigned long testMask = (1 << n) - 1;
+        uint32_t testMask = (1 << n) - 1;
         if ((enableMask & testMask) != 0)
             options |= ofSelectable;
         else
@@ -430,7 +430,7 @@ __3:
 #else
     if (item < 32)
     {
-        unsigned long mask = 1;
+        uint32_t mask = 1;
 
         while (item--)
             mask <<= 1;

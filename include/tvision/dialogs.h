@@ -380,12 +380,12 @@ public:
     virtual void movedTo( int item );
     virtual void setData( void *rec );
     virtual void setState( ushort aState, Boolean enable );
-    virtual void setButtonState(unsigned long aMask, Boolean enable);
+    virtual void setButtonState(uint32_t aMask, Boolean enable);
 
 protected:
 
-    unsigned long value;
-    unsigned long enableMask;
+    uint32_t value;
+    uint32_t enableMask;
     int sel;
     TStringCollection *strings;
 
