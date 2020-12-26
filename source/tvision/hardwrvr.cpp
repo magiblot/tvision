@@ -33,6 +33,21 @@ CONSOLE_CURSOR_INFO THardwareInfo::crInfo;
 CONSOLE_SCREEN_BUFFER_INFO THardwareInfo::sbInfo;
 int THardwareInfo::eventTimeoutMs = 50; // 20 FPS
 
+const ushort THardwareInfo::NormalCvt[89] = {
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0,      0,
+         0,      0,      0,      0,      0,      0,      0, 0x8500,
+    0x8600
+};
+
 const ushort THardwareInfo::ShiftCvt[89] = {
          0,      0,      0,      0,      0,      0,      0,      0,
          0,      0,      0,      0,      0,      0,      0, 0x0F00,
@@ -300,24 +315,25 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
 
             /* Convert NT style virtual scan codes to PC BIOS codes.
              */
-            if( (event.keyDown.controlKeyState & (kbShift | kbAltShift | kbCtrlShift)) != 0 )
+            if( (event.keyDown.controlKeyState & kbCtrlShift) &&
+                (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr
+                {
+                // When AltGr+Key does not produce a character, a
+                // keyCode with unwanted effects may be read instead.
+                if (!event.keyDown.charScan.charCode)
+                    event.keyDown.keyCode = kbNoKey;
+                }
+            else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
                 {
                 uchar index = irBuffer.Event.KeyEvent.wVirtualScanCode;
-
-                if ((event.keyDown.controlKeyState & kbCtrlShift) &&
-                    (event.keyDown.controlKeyState & kbAltShift)) // Ctrl+Alt is AltGr
-                    {
-                        // When AltGr+Key does not produce a character, a
-                        // keyCode with unwanted effects may be read instead.
-                        if (!event.keyDown.charScan.charCode)
-                            event.keyDown.keyCode = kbNoKey;
-                    }
-                else if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
+                if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
                     event.keyDown.keyCode = ShiftCvt[index];
                 else if ((event.keyDown.controlKeyState & kbCtrlShift) && CtrlCvt[index] != 0)
                     event.keyDown.keyCode = CtrlCvt[index];
                 else if ((event.keyDown.controlKeyState & kbAltShift) && AltCvt[index] != 0)
                     event.keyDown.keyCode = AltCvt[index];
+                else if ( NormalCvt[index] != 0 )
+                    event.keyDown.keyCode = NormalCvt[index];
                 }
 
             /* Set/Reset insert flag.
@@ -329,7 +345,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
                 event.keyDown.controlKeyState |= kbInsState;
 
             pendingEvent = 0;
-            return True;
+            return event.keyDown.keyCode != kbNoKey;
             }
         // Ignore all events except mouse and buffer size events.
         // Pending mouse events will be read on the next polling loop.

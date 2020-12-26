@@ -201,22 +201,23 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
             ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
         ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
         // Convert NT style virtual scan codes to PC BIOS codes.
-        if (ev.keyDown.controlKeyState & (kbShift | kbAltShift | kbCtrlShift)) {
+        if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
+             (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr
+        {
+            // When AltGr+Key does not produce a character, a
+            // keyCode with unwanted effects may be read instead.
+            if (!ev.keyDown.charScan.charCode)
+                ev.keyDown.keyCode = kbNoKey;
+        } else if (KeyEventW.wVirtualScanCode < 89) {
             uchar index = KeyEventW.wVirtualScanCode;
-            if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
-                 (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr
-            {
-                // When AltGr+Key does not produce a character, a
-                // keyCode with unwanted effects may be read instead.
-                if (!ev.keyDown.charScan.charCode)
-                    ev.keyDown.keyCode = kbNoKey;
-            }
-            else if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
+            if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
                 ev.keyDown.keyCode = THardwareInfo::ShiftCvt[index];
             else if ((ev.keyDown.controlKeyState & kbCtrlShift) && THardwareInfo::CtrlCvt[index])
                 ev.keyDown.keyCode = THardwareInfo::CtrlCvt[index];
             else if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
                 ev.keyDown.keyCode = THardwareInfo::AltCvt[index];
+            else if (THardwareInfo::NormalCvt[index])
+                ev.keyDown.keyCode = THardwareInfo::NormalCvt[index];
         }
 
         // Set/reset insert flag.

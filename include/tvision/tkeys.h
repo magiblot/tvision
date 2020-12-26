@@ -83,7 +83,7 @@ const ushort
     kbAltRight  = 0x9D00,   kbAltPgUp   = 0x9900,   kbAltPgDn   = 0xA100,
 
 #if defined( __FLAT__ )
-    kbF11       = 0x5700,   kbF12       = 0x5800,   kbShiftF11  = 0x8700,
+    kbF11       = 0x8500,   kbF12       = 0x8600,   kbShiftF11  = 0x8700,
     kbShiftF12  = 0x8800,   kbCtrlF11   = 0x8900,   kbCtrlF12   = 0x8A00,
     kbAltF11    = 0x8B00,   kbAltF12    = 0x8C00,
 #endif

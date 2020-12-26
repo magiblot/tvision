@@ -113,6 +113,7 @@ public:
     static BOOL setCtrlBrkHandler( BOOL install );
     static BOOL setCritErrorHandler( BOOL install );
 
+    static const ushort NormalCvt[89];
     static const ushort ShiftCvt[89];
     static const ushort CtrlCvt[89];
     static const ushort AltCvt[89];
