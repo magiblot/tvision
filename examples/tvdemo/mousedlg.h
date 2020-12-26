@@ -11,6 +11,9 @@
  *
  */
 
+#if !defined( __MOUSEDLG_H )
+#define __MOUSEDLG_H
+
 class TClickTester : public TStaticText
 {
 
@@ -42,3 +45,5 @@ private:
     short oldDelay;
 
 };
+
+#endif // __MOUSEDLG_H
