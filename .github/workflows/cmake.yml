@@ -122,7 +122,7 @@ jobs:
 
     - name: Configure CMake
       shell: bash
-      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="-static"
 
     - name: Build
       shell: bash
