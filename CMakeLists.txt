@@ -45,7 +45,7 @@ include(CheckCXXSourceCompiles)
 
 check_cxx_source_compiles("
     #define _doDeclare(a, b) int a ## b;
-    #define _expand(...) _doDeclare( __VA_ARGS__ )
+    #define _expand(a, ...) _doDeclare(a, __VA_ARGS__)
     #define _declare(a) _expand(a, __COUNTER__)
 
     _declare(a)
@@ -130,7 +130,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /wd4996
         /permissive-
         /Zc:__cplusplus
-        /Zc:preprocessor
     )
 else()
     target_compile_options(${PROJECT_NAME} PUBLIC
