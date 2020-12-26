@@ -94,7 +94,6 @@ public:
     static TMenuBar *initMenuBar( TRect r);
     static TStatusLine *initStatusLine( TRect r);
     void changeDir();
-    void dosShell();
     void openListDialog();
 };
 
@@ -121,16 +120,6 @@ void TFormApp::changeDir()
         deskTop->execView( d );
         destroy(d);
     }
-}
-
-void TFormApp::dosShell()
-{
-    suspend();
-    system("cls");
-    cout << "Type EXIT to return...";
-    system( getenv( "COMSPEC"));
-    resume();
-    redraw();
 }
 
 void TFormApp::openListDialog()
@@ -189,9 +178,6 @@ void TFormApp::handleEvent(TEvent& event)
                 break;
             case cmChgDir:
                 changeDir();
-                break;
-            case cmDosShell:
-                dosShell();
                 break;
             case cmAboutBox:
                 strcpy(aboutMsg, "\x3Turbo Vision C++ 2.0\n\n\x3Turbo Vision Forms Demo");
