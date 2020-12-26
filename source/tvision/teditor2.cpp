@@ -633,26 +633,31 @@ void TEditor::write( opstream& os )
 {
     TView::write( os );
     os << hScrollBar << vScrollBar << indicator
-       << bufSize << (int)canUndo;
+       << bufSize << (uchar)canUndo << (uchar)eolType
+       << (uchar)encSingleByte;
 }
 
 void *TEditor::read( ipstream& is )
 {
     TView::read( is );
-    int temp;
     is >> hScrollBar >> vScrollBar >> indicator
-       >> bufSize >> temp;
-    canUndo = Boolean(temp);
+       >> bufSize;
+    uchar temp;
+    is >> temp; canUndo = Boolean(temp);
+    is >> temp; eolType = EOLTypes(temp);
+    is >> temp; encSingleByte = Boolean(temp);
     selecting = False;
     overwrite = False;
     autoIndent = True;
     lockCount = 0;
+    updateFlags = 0;
     keyState = 0;
     initBuffer();
     if( buffer != 0 )
         isValid = True;
     else
         {
+        isValid = False;
         TEditor::editorDialog( edOutOfMemory, 0 );
         bufSize = 0;
         }
