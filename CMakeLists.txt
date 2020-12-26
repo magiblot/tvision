@@ -130,6 +130,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /wd4996
         /permissive-
         /Zc:__cplusplus
+        /Zc:preprocessor
     )
 else()
     target_compile_options(${PROJECT_NAME} PUBLIC
