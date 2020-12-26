@@ -74,10 +74,10 @@ __link( RMemo )
 #include "listdlg.h"
 #endif // __LISTDLG_H
 
-#if defined( __DPMI32__ )
-#define FORM_WILDCARD "*.F32"
+#if defined( __FLAT__ )
+#define FORM_WILDCARD "*.f32"
 #else
-#define FORM_WILDCARD "*.F16"
+#define FORM_WILDCARD "*.f16"
 #endif
 
 extern TPoint shadowSize;

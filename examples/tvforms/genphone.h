@@ -54,13 +54,13 @@ __link( RFrame )
 #include <string.h>
 #endif  // _STRING_H
 
-#if defined( __DPMI32__ )
-#define FORM_EXTENSION "F32"
+#if defined( __FLAT__ )
+#define FORM_EXTENSION "f32"
 #else
-#define FORM_EXTENSION "F16"
+#define FORM_EXTENSION "f16"
 #endif
 
-const char rezFileName[] = "PHONENUM." FORM_EXTENSION;
+const char rezFileName[] = "phonenum." FORM_EXTENSION;
 
 const int
     nameWidth = 25,

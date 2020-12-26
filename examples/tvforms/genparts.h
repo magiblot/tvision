@@ -44,13 +44,13 @@ __link( RButton )
 #include "fields.h"
 #endif  // __FIELDS_H
 
-#if defined( __DPMI32__ )
-#define FORM_EXTENSION "F32"
+#if defined( __FLAT__ )
+#define FORM_EXTENSION "f32"
 #else
-#define FORM_EXTENSION "F16"
+#define FORM_EXTENSION "f16"
 #endif
 
-const char rezFileName[] = "PARTS." FORM_EXTENSION;
+const char rezFileName[] = "parts." FORM_EXTENSION;
 
 const int
     partNumWidth   =   6,
