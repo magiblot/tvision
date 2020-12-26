@@ -86,14 +86,13 @@ TListKeyBox::TListKeyBox(const TRect& bounds, ushort aNumCols,
 
 void TListKeyBox::getText( char *dest, short item, short maxLen )
 {
-
-    switch (((TDataCollection *)list())->keyType)
+    switch (list()->keyType)
         {
         case stringKey:
             TSortedListBox::getText(dest, item, maxLen);
             break;
         case longIntKey:
-            ltoa(*((int32_t *)((TDataCollection *)list()->keyOf((TDataCollection *)list()->at(item)))), dest, 10);
+            ltoa(*(int32_t *)list()->keyOf(list()->at(item)), dest, 10);
             break;
         }
 }

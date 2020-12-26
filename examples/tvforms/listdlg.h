@@ -43,8 +43,19 @@ public:
     TListKeyBox( const TRect&, ushort, TScrollBar *);
 
     virtual void getText( char *, short, short );
+    void newList( TDataCollection * );
+    TDataCollection *list();
 };
 
+inline void TListKeyBox::newList( TDataCollection * aList )
+{
+    TSortedListBox::newList(aList);
+}
+
+inline TDataCollection *TListKeyBox::list()
+{
+    return (TDataCollection *)TSortedListBox::list();
+}
 
 class TListDialog :  public TDialog
 {
