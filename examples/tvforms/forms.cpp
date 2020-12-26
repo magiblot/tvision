@@ -151,6 +151,7 @@ void TForm::handleEvent( TEvent& event)
 
     // Respond to TopForm messages
     if (event.what == evBroadcast)
+        {
         if (event.message.command == cmEditingForm)
             {
             // Already editing broadcast form?
@@ -171,6 +172,7 @@ void TForm::handleEvent( TEvent& event)
                 else if (event.message.command == cmCloseForm)
                     destroy(this);
            }
+        }
 }
 
 Boolean TForm::valid(ushort command)
@@ -179,6 +181,7 @@ Boolean TForm::valid(ushort command)
 
     action = cmYes;                    // assume calling inherited
     if (command == cmClose)
+        {
         if (changed())
             {
             select();
@@ -199,6 +202,7 @@ Boolean TForm::valid(ushort command)
             }
         else
             action = cmNo;                        // no changes
+        }
     if (action == cmYes)
         return TDialog::valid(command);
     else
