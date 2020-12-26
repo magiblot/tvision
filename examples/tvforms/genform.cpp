@@ -68,6 +68,7 @@ int main(void)
     for(i = 0; i < dataCount; ++i)
         {
         p = new TDataRec;
+        memset(p, 0 , sizeof(TDataRec));   // keep padding bytes initialized
         f->setData((void *)&data[i]);      // move into object
         f->getData(p);                     // move onto heap
         collection->insert(p);             // insert in sorted order

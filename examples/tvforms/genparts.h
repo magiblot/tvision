@@ -58,10 +58,9 @@ const int
     qtyWidth       =   6,
     descrLen       = 512;            // Length of text array
 
-
-struct TDescrRec 
+struct TDescrRec // See TMemoData.
 {
-    uint textLen;
+    ushort textLen;
     char textData[descrLen];
 };
 
@@ -100,8 +99,8 @@ TDataRec data[dataCount] =
 
 void initDescrLengths()
 {
-  for ( int i = 0 ; i < dataCount ; i++ )
-      data[i].descr.textLen = strlen(data[i].descr.textData);
+    for ( int i = 0 ; i < dataCount ; i++ )
+        data[i].descr.textLen = strlen(data[i].descr.textData);
 }
 
 TForm *makeForm()
@@ -175,7 +174,5 @@ TForm *makeForm()
 
     return f;
 }
-
-
 
 #endif  // __GENPARTS_H

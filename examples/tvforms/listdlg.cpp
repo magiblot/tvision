@@ -476,6 +476,7 @@ Boolean TListDialog::saveForm(TDialog *f)
         return False;
         }
 
+    memset(p, 0, dataCollection->itemSize);
     f->getData(p);
     // If no duplicates, make sure not attempting to add duplicate key
     if ( (!(dataCollection->duplicates) && dataCollection->search(dataCollection->keyOf(p), i)) )
