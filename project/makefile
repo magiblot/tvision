@@ -5,6 +5,9 @@
 TVDIR = ..\..
 TVFLAGS = $(TVFLAGS) -DTVDIR=$(TVDIR)
 !endif
+!if $d(DOS16)
+TVFLAGS = $(TVFLAGS) -DDOS16
+!endif
 !if $d(DOS32)
 TVFLAGS = $(TVFLAGS) -DDOS32
 !endif
@@ -47,7 +50,8 @@ EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
 !endif
 !endif
 
-all: source\tvision examples\tvdemo examples\tvdir examples\tvedit examples\tvhc
+all: source\tvision examples\tvdemo examples\tvdir examples\tvedit            \
+     examples\tvforms examples\tvhc
 
 source\tvision:
     CD ..\$@
@@ -77,7 +81,13 @@ examples\tvedit: source\tvision
     IF EXIST *.CFG DEL *.CFG
     $(MAKEDIR)\$(MAKE) $(TVFLAGS)
     CD $(PRJDIR)
-    
+
+examples\tvforms: source\tvision
+    CD ..\$@
+    IF EXIST *.CFG DEL *.CFG
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
+    CD $(PRJDIR)
+
 examples\tvhc: source\tvision
     CD ..\$@
     IF EXIST *.CFG DEL *.CFG
