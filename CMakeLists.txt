@@ -41,6 +41,33 @@ project(tvision)
 
 # Project options
 
+include(CheckCXXSourceCompiles)
+
+check_cxx_source_compiles("
+    #define _doDeclare(a, b) int a ## b;
+    #define _expand(...) _doDeclare( __VA_ARGS__ )
+    #define _declare(a) _expand(a, __COUNTER__)
+
+    _declare(a)
+    _declare(a)
+    _declare(a)
+
+    int main() { return a1; }
+"   SUPPORTS_COUNTER_MACRO)
+
+function(tv_enable_unity target)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0" AND SUPPORTS_COUNTER_MACRO)
+        set_target_properties(${target} PROPERTIES UNITY_BUILD ON)
+    endif()
+endfunction()
+
+function(tv_set_output_dir target)
+    # Place everything in the build directory, for ease of use.
+    set_target_properties(${target} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+endfunction()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
     set(MAY_BUILD_USING_GPM TRUE)
@@ -80,12 +107,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 function(tv_add_private_includes target)
     target_include_directories(${target} PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/tvision"
-        "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat"
+        "${PROJECT_SOURCE_DIR}/include/tvision"
+        "${PROJECT_SOURCE_DIR}/include/tvision/compat"
     )
     if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
         target_include_directories(${target} PRIVATE
-            "${CMAKE_CURRENT_LIST_DIR}/include/tvision/compat/malloc"
+            "${PROJECT_SOURCE_DIR}/include/tvision/compat/malloc"
         )
     endif()
 endfunction()
@@ -170,54 +197,11 @@ install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib)
 #
 install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/tvision" DESTINATION include)
 
-if (TV_BUILD_EXAMPLES)
+# Examples
 
-    list(APPEND TVAPPS hello tvedit tvdemo tvforms tvdir tvhc mmenu palette)
-    list(APPEND TVINSTALLAPPS tvedit tvdemo tvhc)
-
-    foreach(app ${TVAPPS})
-        if (app STREQUAL "hello")
-            list(APPEND app-src "${CMAKE_CURRENT_LIST_DIR}/hello.cpp")
-        else()
-            file(GLOB_RECURSE app-src "${CMAKE_CURRENT_LIST_DIR}/examples/${app}/*.cpp")
-            if (app STREQUAL "tvforms")
-                set(genform-src ${app-src})
-                list(REMOVE_ITEM genform-src "${CMAKE_CURRENT_LIST_DIR}/examples/${app}/tvforms.cpp")
-                list(REMOVE_ITEM app-src "${CMAKE_CURRENT_LIST_DIR}/examples/${app}/genform.cpp")
-                foreach(gen genparts genphone)
-                    add_executable(${gen} ${genform-src})
-                    tv_add_private_includes(${gen})
-                    target_link_libraries(${gen} PUBLIC ${PROJECT_NAME})
-                endforeach()
-                target_compile_definitions(genparts PRIVATE PARTS)
-                target_compile_definitions(genphone PRIVATE PHONENUM)
-                add_custom_command(TARGET genparts POST_BUILD COMMAND genparts)
-                add_custom_command(TARGET genphone POST_BUILD COMMAND genphone)
-            endif()
-        endif()
-
-        add_executable(${app} ${app-src})
-        tv_add_private_includes(${app})
-        target_link_libraries(${app} PUBLIC ${PROJECT_NAME})
-    endforeach()
-
-    install(TARGETS ${TVINSTALLAPPS} RUNTIME DESTINATION bin)
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(tvdir PRIVATE -Wno-stringop-truncation)
-    endif()
-
-endif()
+add_subdirectory(examples)
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0")
     # Enable precompiled headers
     target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/tvision/tv.h")
-    if (TV_BUILD_EXAMPLES)
-        target_precompile_headers(hello PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/tvision/tv.h")
-        foreach(app ${TVAPPS})
-            if (NOT(app STREQUAL "hello"))
-                target_precompile_headers(${app} REUSE_FROM "hello")
-            endif()
-        endforeach()
-    endif()
 endif()
