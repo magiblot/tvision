@@ -61,7 +61,7 @@ const int
 
 struct TDescrRec 
 {
-    ushort textLen;
+    uint textLen;
     char textData[descrLen];
 };
 
