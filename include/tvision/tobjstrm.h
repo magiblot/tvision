@@ -49,10 +49,26 @@ struct fLink
     static class TStreamableClass * volatile forceLink;
 };
 
+#ifndef __COUNTER__
+
 #define __link( s )             \
   extern TStreamableClass s;    \
   static fLink force ## s =     \
     { (fLink _NEAR *)&force ## s, (fLink::forceLink = &s, (TStreamableClass _NEAR *)&s) };
+
+#else
+
+// Take advantage of the __COUNTER__ macro so that linking the same object twice
+// doesn't trigger a compilation error.
+
+#define __link_declare( s, n )  \
+  extern TStreamableClass s;    \
+  static void * const force ## s ## n = (fLink::forceLink = &s, &s);
+
+#define __link_expand( ... ) __link_declare( __VA_ARGS__ )
+#define __link( s ) __link_expand( s, __COUNTER__ )
+
+#endif // __COUNTER__
 
 #endif // __fLink_def
 
