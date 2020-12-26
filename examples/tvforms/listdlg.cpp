@@ -409,7 +409,7 @@ Boolean TListDialog::saveList()
         {
         // Create new data file
         fnsplit(fileName, drive, d, n, e);
-        sprintf(bufStr,"%s%s%s.$$$", drive, d, n);
+        fnmerge(bufStr, drive, d, n, ".$$$");
         if (openDataFile(bufStr, newDataFile, ios::out) == False)
             messageBox("Cannot create file. Data not saved.",
                         mfError | mfOKButton);
@@ -424,7 +424,7 @@ Boolean TListDialog::saveList()
             // Close original file, rename to .BAK
             destroy (formDataFile);
             formDataFile = NULL;
-            sprintf(bufStr, "%s%s%s.BAK", drive, d, n);
+            fnmerge(bufStr, drive, d, n, ".bak");
             if (fileExists(bufStr))
                 ::remove(bufStr);
             ccode = rename(fileName, bufStr);
@@ -445,7 +445,7 @@ Boolean TListDialog::saveList()
             else
                 {
                 // Rename temp file to original file and re-open 
-                sprintf(bufStr,"%s%s%s.$$$", drive, d, n);
+                fnmerge(bufStr, drive, d, n, ".$$$");
                 rename(bufStr, fileName);
                 openDataFile(fileName, formDataFile, ios::in);
 
