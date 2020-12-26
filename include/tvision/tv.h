@@ -297,6 +297,7 @@
 
 #if defined( Uses_TSortedListBox )
 #define Uses_TListBox
+#define Uses_TSortedCollection
 #define __INC_STDDLG_H
 #endif
 

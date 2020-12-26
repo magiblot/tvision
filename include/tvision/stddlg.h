@@ -189,7 +189,6 @@ inline TSearchRec *TFileCollection::lastThat( ccTestFunc func, void *arg )
 class _FAR TRect;
 class _FAR TScrollBar;
 struct _FAR TEvent;
-class _FAR TSortedCollection;
 
 class TSortedListBox: public TListBox
 {
