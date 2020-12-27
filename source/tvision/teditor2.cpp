@@ -611,8 +611,8 @@ void TEditor::updateCommands()
     setCmdState( cmUndo, Boolean( delCount != 0 || insCount != 0 ) );
     if( isClipboard() == False )
         {
-        setCmdState(cmCut, hasSelection());
-        setCmdState(cmCopy, hasSelection());
+        setCmdState(cmCut, Boolean(clipboard != 0 && hasSelection()));
+        setCmdState(cmCopy, Boolean(clipboard != 0 && hasSelection()));
         setCmdState(cmPaste,
                     Boolean(clipboard != 0 && (clipboard->hasSelection())) );
         }
