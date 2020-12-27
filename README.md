@@ -470,8 +470,8 @@ One of the issues of Unicode support is the existence of [multi-width](https://c
     The `ZERO WIDTH JOINER` (`U+200D`) is always ommited, as it complicates things too much. For example, it can turn a string like `"👩👦"` (4 columns wide) into `"👩‍👦"` (2 columns wide). Not all terminal emulators respect the ZWJ, so, in order to produce predictable results, Turbo Vision will print both `"👩👦"` and `"👩‍👦"` as `👩👦`.
 * No notable graphical glitches will occur as long as your terminal emulator respects character widths as measured by `wcwidth`.
 
-Here is an example of such characters:
-![Wide character display](https://user-images.githubusercontent.com/20713561/89314567-18e16400-d67a-11ea-950f-d4c35d40e5f7.png)
+Here is an example of such characters in the [Turbo](https://github.com/magiblot/turbo) text editor:
+![Wide character display](https://user-images.githubusercontent.com/20713561/103179253-51344980-488a-11eb-9a29-79b9acb1b4b9.png)
 
 ### Unicode-aware API functions
 
@@ -578,7 +578,7 @@ TStatusLine *THelloApp::initStatusLine( TRect r )
 ```
 Here is what it looks like:
 
-![Unicode Hello](https://user-images.githubusercontent.com/20713561/89353910-bd35cb80-d6b7-11ea-9ad6-0f608e5ae01c.png)
+![Unicode Hello](https://user-images.githubusercontent.com/20713561/103179255-5396a380-488a-11eb-88ad-0192adbe233e.png)
 
 ### Example: writing Unicode-aware `draw()` methods
 
