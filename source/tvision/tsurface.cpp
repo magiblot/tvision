@@ -41,19 +41,18 @@ void TDrawSurface::resize(TPoint aSize)
     if (aSize.x > 0 && aSize.y > 0) {
         size_t newLength = aSize.x*aSize.y;
         void _FAR *newData = ::realloc(data, newLength*sizeof(TScreenCell));
-        if (newData) {
-            data = (TScreenCell _FAR *) newData;
-            for (size_t i = dataLength; i < newLength; ++i)
-                data[i] = fill;
-            dataLength = newLength;
-            size = aSize;
-        }
+        if (newData == 0 && newLength != 0)
+            abort();
+        data = (TScreenCell _FAR *) newData;
+        for (size_t i = dataLength; i < newLength; ++i)
+            data[i] = fill;
+        dataLength = newLength;
     } else {
         ::free(data);
         data = 0;
         dataLength = 0;
-        size.x = size.y = 0;
     }
+    size = aSize;
 }
 
 void TDrawSurface::clear()
@@ -80,7 +79,8 @@ void TSurfaceView::draw()
         const TScreenCell *data = &sface->at(max(d.y, 0), max(d.x, 0));
         const TRect extent = TRect(0, 0, size.x, size.y);
         // This is the rectangle within the current view's extent where the
-        // surface is to be drawn.
+        // surface is to be drawn. This rectangle is always valid; if no area
+        // of the surface is to be drawn, all coordinates are 0.
         const TRect clip = TRect(0, 0, ssize.x, ssize.y)
                             .move(-d.x, -d.y)
                             .intersect(extent);
