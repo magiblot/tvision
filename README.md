@@ -68,7 +68,15 @@ Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
 ```sh
 cmake . -B ./build -DCMAKE_BUILD_TYPE=Release && # Could also be 'Debug', 'MinSizeRel' or 'RelWithDebInfo'.
-cmake --build ./build # or `cd ./build && make`
+cmake --build ./build # or `cd ./build; make`
+```
+
+CMake versions older than 3.13 may not support the `-B` option. You can try the following instead:
+
+```sh
+mkdir -p build; cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release &&
+cmake --build .
 ```
 
 The above produces the following files:
