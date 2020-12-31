@@ -156,6 +156,8 @@ inline TRect& TRect::intersect( const TRect& r )
     a.y = max( a.y, r.a.y );
     b.x = min( b.x, r.b.x );
     b.y = min( b.y, r.b.y );
+    if (b.x < a.x || b.y < a.y)
+        a.x = a.y = b.x = b.y = 0;
     return *this;
 }
 
