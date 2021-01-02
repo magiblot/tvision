@@ -63,8 +63,7 @@ struct fLink
 
 #define __link_declare( s, n )  \
   extern TStreamableClass s;    \
-  static void * const force ## s ## n = (fLink::forceLink = &s, &s); \
-  static inline void force ## s ## n ## f () { (void) force ## s ## n; }
+  static void * const force ## s ## n = ((void) force ## s ## n, fLink::forceLink = &s, nullptr);
 
 #define __link_expand( s, ... ) __link_declare( s, __VA_ARGS__ )
 #define __link( s ) __link_expand( s, __COUNTER__ )
