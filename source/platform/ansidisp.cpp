@@ -6,6 +6,7 @@
 #include <internal/textattr.h>
 #include <internal/stdioctl.h>
 #include <internal/terminal.h>
+#include <internal/strings.h>
 #include <cstdio>
 #include <cstdlib>
 #ifdef _TV_UNIX
@@ -20,6 +21,8 @@
 #endif
 
 #define CSI "\x1B["
+
+using namespace detail;
 
 AnsiDisplayBase::AnsiDisplayBase() :
     lastAttr(SGRAttribs::defaultInit),

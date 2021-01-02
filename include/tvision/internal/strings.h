@@ -20,6 +20,8 @@ inline constexpr Int string_as_int(TStringView s)
     return res;
 }
 
+uint32_t fast_utoa( uint32_t value, char *buffer );
+
 } // namespace detail
 
 #endif // TVISION_STRINGS_H

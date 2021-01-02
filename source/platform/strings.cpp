@@ -1,3 +1,35 @@
+#include <cstdint>
+
+namespace detail
+{
+
+uint32_t fast_utoa ( uint32_t value, char *buffer )
+{
+    // Copyright(c) 2014-2016 Milo Yip (https://github.com/miloyip/itoa-benchmark)
+    uint32_t digits =
+        value < 10          ? 1
+      : value < 100         ? 2
+      : value < 1000        ? 3
+      : value < 10000       ? 4
+      : value < 100000UL    ? 5
+      : value < 1000000UL   ? 6
+      : value < 10000000UL  ? 7
+      : value < 100000000UL ? 8
+      : value < 1000000000UL? 9
+                            : 10;
+    buffer += digits;
+    *buffer = '\0';
+
+    do {
+        *--buffer = char(value % 10) + '0';
+        value /= 10;
+    } while (value > 0);
+
+    return digits;
+}
+
+} // namespace detail
+
 #ifndef _MSC_VER
 
 #include <strings.h>
