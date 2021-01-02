@@ -79,7 +79,7 @@ static constexpr KeyDownEvent fromNonPrintableAscii[32] = {
     {{0x1F},        0}          , // ^_, ?
 };
 
-static const const_unordered_map<int, KeyDownEvent> fromCursesKeyCode = {
+static const const_unordered_map<ushort, KeyDownEvent> fromCursesKeyCode = {
     { KEY_DOWN,         {{kbDown},      0}          },
     { KEY_UP,           {{kbUp},        0}          },
     { KEY_LEFT,         {{kbLeft},      0}          },
