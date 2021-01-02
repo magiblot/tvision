@@ -162,7 +162,8 @@ static const const_unordered_map<int, KeyDownEvent> fromCursesKeyCode = {
     { KEY_F0 + 60,      {{kbAltF12},    kbAltShift} }
 };
 
-static const const_unordered_map<TStringView, KeyDownEvent> fromCursesHighKey = {
+static const auto fromCursesHighKey =
+    const_unordered_map<uint64_t, KeyDownEvent>::with_string_keys({
     /* These keys are identified by name. The int value is not known
      * at compilation time. */
     { "kDC3",       {{kbAltDel},        kbAltShift}},
@@ -219,7 +220,7 @@ static const const_unordered_map<TStringView, KeyDownEvent> fromCursesHighKey = 
     { "kpSUB",      {{'-'},             0, {'-'}, 1}},
     { "kpMUL",      {{'*'},             0, {'*'}, 1}},
     { "kpDIV",      {{'/'},             0, {'/'}, 1}},
-};
+});
 
 NcursesInput::NcursesInput(bool mouse) :
     mstate({}),

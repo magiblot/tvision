@@ -1,12 +1,19 @@
-#ifndef CODEPAGE_H
-#define CODEPAGE_H
+#ifndef TVISION_CODEPAGE_H
+#define TVISION_CODEPAGE_H
+
+#ifndef _TV_VERSION
 #include <tvision/tv.h>
+#endif
+
+#include <tvision/internal/strings.h>
+
 #include <unordered_map>
 #include <array>
 
 // tables.cpp
 
-class CpTranslator {
+class CpTranslator
+{
 
     CpTranslator();
     static CpTranslator instance;
@@ -14,13 +21,14 @@ class CpTranslator {
     struct CpTable {
         TStringView cp;
         const uint32_t *toUtf8Int;
-        const std::unordered_map<TStringView, char> fromUtf8;
+        const std::unordered_map<uint32_t, char> fromUtf8;
 
         static auto initMap(const TStringView toUtf8[256])
         {
-            std::unordered_map<TStringView, char> map;
+            using namespace detail;
+            std::unordered_map<uint32_t, char> map;
             for (size_t i = 0; i < 256; ++i)
-                map.emplace(toUtf8[i], char(i));
+                map.emplace(string_as_int<uint32_t>(toUtf8[i]), char(i));
             return map;
         }
 
@@ -39,21 +47,26 @@ class CpTranslator {
 
 public:
 
-    static void use(TStringView cp) {
+    static void use(TStringView cp)
+    {
         for (const CpTable &t : tables)
-            if (t.cp == cp) {
+            if (t.cp == cp)
+            {
                 activeTable = &t;
                 return;
             }
         activeTable = &tables[0];
     }
 
-    static TCellChar toUtf8Int(unsigned char c) {
+    static TCellChar toUtf8Int(unsigned char c)
+    {
         return activeTable->toUtf8Int[c];
     }
 
-    static char fromUtf8(TStringView s) {
-        auto it = activeTable->fromUtf8.find(s);
+    static char fromUtf8(TStringView s)
+    {
+        using namespace detail;
+        auto it = activeTable->fromUtf8.find(string_as_int<uint32_t>(s));
         if (it != activeTable->fromUtf8.end())
             return it->second;
         return 0;
@@ -61,4 +74,4 @@ public:
 
 };
 
-#endif
+#endif // TVISION_CODEPAGE_H

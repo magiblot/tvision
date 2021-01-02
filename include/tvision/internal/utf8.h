@@ -1,5 +1,8 @@
-#ifndef UTF8_H
-#define UTF8_H
+#ifndef TVISION_UTF8_H
+#define TVISION_UTF8_H
+
+#include <internal/strings.h>
+
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -16,15 +19,12 @@ template<size_t N>
 #ifdef __cpp_lib_array_constexpr
 constexpr
 #endif
-inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) {
+inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N])
+{
+    using namespace detail;
     std::array<uint32_t, N> result {};
-    for (size_t i = 0; i < N; ++i) {
-        uint8_t chars[4] {0};
-        for (size_t j = 0; j < utf8[i].size(); ++j)
-            chars[j] = (uint8_t) utf8[i][j];
-        // This won't work in big endian systems.
-        result[i] = (chars[3] << 24) | (chars[2] << 16) | (chars[1] << 8) | chars[0];
-    }
+    for (size_t i = 0; i < N; ++i)
+        result[i] = string_as_int<uint32_t>(utf8[i]);
     return result;
 }
 
@@ -73,4 +73,4 @@ inline size_t utf32To8(uint32_t u, char utf8[4]) {
     }
 }
 
-#endif
+#endif // TVISION_UTF8_H
