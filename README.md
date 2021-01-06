@@ -352,6 +352,7 @@ If your application is based on this project and you'd like it to appear in the 
 
 * [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
 * [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly), a programming language for creating console applications.
+* [x69Emulator](https://github.com/JMWComputer/x69Emulator) by [Jonathan Cline](https://github.com/JonathanCline), an emulator for the custom x69 architecture.
 
 <div id="unicode"></div>
 
