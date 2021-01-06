@@ -13,6 +13,8 @@
 #include <string.h>
 #endif  // __STRING_H
 
+#include <tvision/internal/iosfwd.h>
+
 #ifndef __BORLANDC__
 
 #include <string>
@@ -69,6 +71,8 @@ public:
 
     friend constexpr Boolean operator==(TStringView a, TStringView b);
     friend constexpr Boolean operator!=(TStringView a, TStringView b);
+
+    friend ostream _FAR & operator<<(ostream _FAR &os, TStringView s);
 
 };
 
