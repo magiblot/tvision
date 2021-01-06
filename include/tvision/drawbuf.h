@@ -32,13 +32,10 @@ class TDrawBuffer
 public:
 
     void moveChar( ushort indent, char c, ushort attr, ushort count );
-    void moveStr( ushort indent, const char _FAR *str, ushort attrs );
-    void moveStr( ushort indent, TStringView str, ushort attrs );
+    ushort moveStr( ushort indent, TStringView str, ushort attrs );
     ushort moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0 );
-    void moveCStr( ushort indent, const char _FAR *str, ushort attrs );
-    void moveCStr( ushort indent, TStringView str, ushort attrs );
-    void moveBuf( ushort indent, const void _FAR *source,
-                  ushort attr, ushort count );
+    ushort moveCStr( ushort indent, TStringView str, ushort attrs );
+    void moveBuf( ushort indent, const void _FAR *source, ushort attr, ushort count );
     void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count );
 
     void putAttribute( ushort indent, ushort attr );
@@ -46,7 +43,6 @@ public:
     size_t length() const;
 
 #ifdef __FLAT__
-    static TSpan<TScreenCell> allocData();
     TDrawBuffer();
     ~TDrawBuffer();
 #endif
@@ -54,6 +50,8 @@ public:
 protected:
 
 #ifdef __FLAT__
+    static TSpan<TScreenCell> allocData();
+
     const TSpan<TScreenCell> data;
 #else
     TScreenCell data[maxViewWidth];
@@ -67,17 +65,13 @@ protected:
 inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
 {
     if (indent < length())
-    {
         ::setAttr(data[indent], (uchar) attr);
-    }
 }
 
 inline void TDrawBuffer::putChar( ushort indent, ushort c )
 {
     if (indent < length())
-    {
         ::setChar(data[indent], (uchar) c);
-    }
 }
 
 inline size_t TDrawBuffer::length() const

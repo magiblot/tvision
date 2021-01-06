@@ -219,58 +219,25 @@ __4:
 /*                low byte is used, and a '~' in the string toggles       */
 /*                between the low byte and the high byte.                 */
 /*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      actual number of display columns that were filled with text.      */
+/*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveCStr( ushort indent, const char _FAR *str, ushort attrs)
-{
-#if !defined ( __FLAT__ )
-I   PUSH    DS
-I   LDS     SI,str
-I   CLD
-
-    _ES = FP_SEG( &data[indent] );
-    _DI = FP_OFF( &data[indent] );
-
-I   MOV     BX,attrs
-I   MOV     AH,BL
-
-__1:
-
-I   LODSB
-I   CMP     AL,'~'
-I   JE      __2
-I   CMP     AL,0
-I   JE      __3
-I   STOSW
-I   JMP     __1
-
-__2:
-
-I   XCHG    AH,bH
-I   JMP     __1
-
-__3:
-
-I   POP     DS
-
-#else
-    moveCStr(indent, TStringView(str), attrs);
-#endif
-}
-
-void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 {
 #ifdef __BORLANDC__
     register ushort *dest = &data[indent];
     ushort *limit = &data[length()];
     register uchar _FAR *s = (uchar _FAR *) str.data();
     ushort count = (ushort) str.size();
-    int toggle;
-    uchar c, curAttr;
+    int toggle = 1;
+    uchar curAttr = ((uchar *)&attrs)[0];
 
-    for (curAttr=((uchar *)&attrs)[0], toggle=1; dest < limit && count--; s++)
+    for (; dest < limit && count; --count, ++s)
         {
-        c = *s;
+        uchar c = *s;
         if (c == '~')
             {
             curAttr = ((uchar *)&attrs)[toggle];
@@ -283,6 +250,7 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
             dest++;
             }
         }
+    return dest - &data[indent];
 #else
     size_t i = indent, j = 0;
     int toggle = 1;
@@ -290,18 +258,19 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 
     while (j < str.size())
         if (str[j] == '~')
-        {
+            {
             curAttr = ((uchar *) &attrs)[toggle];
             toggle = 1 - toggle;
             ++j;
-        }
+            }
         else
-        {
+            {
             if (i < length())
                 ::setAttr(data[i], curAttr);
             if (!TText::eat(data, i, str, j))
                 break;
-        }
+            }
+    return i - indent;
 #endif
 }
 
@@ -320,73 +289,42 @@ void TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 /*      attr    - text attribute to be put into the buffer with each      */
 /*                character in the string.                                */
 /*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      actual number of display columns that were filled with text.      */
+/*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveStr( ushort indent, const char _FAR *str, ushort attr )
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 {
-#if !defined ( __FLAT__ )
-I   PUSH    DS
-I   LDS     SI,str
-I   CLD
-
-    _ES = FP_SEG( &data[indent] );
-    _DI = FP_OFF( &data[indent] );
-
-I   MOV     AH, byte ptr attr
-I   OR      AH, AH
-I   JZ      __2
-
-__1:
-
-I   LODSB
-I   OR      AL,AL
-I   JZ      __3
-I   STOSW
-I   JMP     __1
-
-__2:
-
-I   LODSB
-I   OR      AL,AL
-I   JZ      __3
-I   STOSB
-I   INC            DI
-I   JMP     __2
-
-__3:
-
-I   POP     DS
-#else
-    moveStr(indent, TStringView(str), attr);
-#endif
-}
-
-void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
-{
-#ifdef __BORLANDC__
-    register ushort *dest = &data[indent];
-    ushort *limit = &data[length()];
-    register uchar _FAR *s = (uchar _FAR *) str.data();
-    ushort count = (ushort) str.size();
-
-    if (attr != 0)
-        for (; dest < limit && count; --count, ++s, ++dest)
-            {
-            ((uchar*)dest)[0] = *s;
-            ((uchar*)dest)[1] = (uchar)attr;
-            }
-    else
-        while (dest < limit && count--)
-            *(uchar *)dest++ = *s++;
-#else
     if (indent < length())
-    {
-        if (attr)
-            TText::fill(data.subspan(indent), str, (uchar) attr);
+        {
+#ifdef __BORLANDC__
+        register ushort *dest = &data[indent];
+        register uchar _FAR *s = (uchar _FAR *) str.data();
+        ushort count = min(str.size(), length() - indent);
+        ushort remain = count;
+
+        if (attr != 0)
+            for (; remain; --remain, ++s, ++dest)
+                {
+                ((uchar*)dest)[0] = *s;
+                ((uchar*)dest)[1] = (uchar)attr;
+                }
         else
-            TText::fill(data.subspan(indent), str);
-    }
+            for (; remain; --remain, ++s, ++dest)
+                *(uchar *)dest = *s;
+        return count;
+#else
+        return TText::fill(data.subspan(indent), str,
+            [attr] (auto &cell) {
+                if (attr)
+                    ::setAttr(cell, (uchar)attr);
+            }
+        );
 #endif
+        }
+    return 0;
 }
 
 /*------------------------------------------------------------------------*/
@@ -417,27 +355,27 @@ void TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin )
 {
 #ifdef __BORLANDC__
-    int count = min(min(width, str.size() - begin), length());
-    if (count > 0)
-    {
-        moveBuf(indent, &str[begin], attr, count);
-        return count;
-    }
+    if (begin < str.size())
+        return moveStr(indent, str.substr(begin, width), attr);
     return 0;
 #else
     size_t s = 0, remainder = 0;
     TText::wseek(str, s, remainder, begin);
-    if (remainder)
-        moveChar(indent, ' ', attr, remainder);
-    size_t d = indent + remainder;
-    if (d < length())
-    {
-        size_t count = remainder + (attr ?
-            TText::fill(data.subspan(d, width), str.substr(s), (uchar) attr)
-          : TText::fill(data.subspan(d, width), str.substr(s))
-        );
-        return count;
-    }
+    if (remainder < width)
+        {
+        if (remainder)
+            moveChar(indent, ' ', attr, remainder);
+        size_t d = indent + remainder;
+        if (d < length())
+            {
+            return remainder + TText::fill(data.subspan(d, width - remainder), str.substr(s),
+                [attr] (auto &cell) {
+                    if (attr)
+                        ::setAttr(cell, (uchar)attr);
+                }
+            );
+            }
+        }
     return 0;
 #endif
 }

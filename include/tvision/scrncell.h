@@ -16,7 +16,7 @@ typedef ushort TScreenCell;
 typedef uchar TCellAttribs;
 typedef uchar TCellChar;
 
-inline TCellAttribs getAttr(TScreenCell cell)
+inline const TCellAttribs &getAttr(const TScreenCell &cell)
 {
     return ((uchar *) &cell)[1];
 }
@@ -26,7 +26,7 @@ inline void setAttr(TScreenCell &cell, TCellAttribs attr)
     ((uchar *) &cell)[1] = attr;
 }
 
-inline TCellChar getChar(TScreenCell cell)
+inline const TCellChar &getChar(const TScreenCell &cell)
 {
     return ((uchar *) &cell)[0];
 }
@@ -194,10 +194,23 @@ struct alignas(4) TCellChar
         *this = ch;
     }
 
+    TCellChar(TStringView text)
+    {
+        *this = text;
+    }
+
     TCellChar& operator=(uint64_t ch)
     {
         memset(this, 0, sizeof(*this));
         memcpy(bytes, &ch, std::min(sizeof(bytes), sizeof(ch)));
+        return *this;
+    }
+
+    TCellChar& operator=(TStringView text)
+    {
+        memset(this, 0, sizeof(*this));
+        if (text.size() <= sizeof(bytes))
+            memcpy(bytes, text.data(), text.size());
         return *this;
     }
 
@@ -279,7 +292,7 @@ struct TScreenCell
 
 };
 
-inline TCellAttribs getAttr(TScreenCell cell)
+inline const TCellAttribs &getAttr(const TScreenCell &cell)
 {
     return cell.Attr;
 }
@@ -289,7 +302,7 @@ inline void setAttr(TScreenCell &cell, TCellAttribs attr)
     cell.Attr = attr;
 }
 
-inline TCellChar getChar(TScreenCell cell)
+inline const TCellChar &getChar(const TScreenCell &cell)
 {
     return cell.Char;
 }
@@ -304,8 +317,7 @@ inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
 
 inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
 {
-    TCellChar ch = 0;
-    memcpy(&ch, text.data(), std::min(text.size(), sizeof(ch)));
+    TCellChar ch = text;
     ::setChar(cell, ch, extraWidth);
 }
 
