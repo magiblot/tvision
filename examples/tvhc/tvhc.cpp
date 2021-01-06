@@ -266,7 +266,7 @@ char *getLine( fstream& s )
                     {
                     char buf[MAXSTRSIZE] = {0};
                     ostrstream os(buf, sizeof(buf)-1);
-                    os << "Line longer than " << sizeof(line)-1 << " characters.";
+                    os << "Line longer than " << (sizeof(line)-1) << " characters.";
                     warning(os.str());
                     }
                 // Read the rest of the line.
@@ -721,7 +721,7 @@ void strdel(char *string, int pos, int len)
 char *strfnd( char *string, char **last, char ch )
 {
     char *res;
-    while ((res = strchr(string, ch)))
+    while ((res = strchr(string, ch)) != 0)
         {
         if ((!last || res < *last) && *(res + 1) == ch)
             {

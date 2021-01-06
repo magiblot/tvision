@@ -297,7 +297,7 @@ TNode* traverseTree(TOutlineViewer* outLine,
   if (cur == outLine->getRoot())
   {
     TNode *next = cur;
-    while ((next = outLine->getNext(next)))
+    while ((next = outLine->getNext(next)) != 0)
     {
       ret = traverseTree(outLine, action, position, checkResult,
                           next, level, lines, Boolean(!outLine->getNext(next)));
@@ -452,7 +452,7 @@ void TOutlineViewer::handleEvent(TEvent& event)
                 selected(foc);
         else
         {
-          if (dragged < 2 && (cur = firstThat(isFocused)))
+          if (dragged < 2 && (cur = firstThat(isFocused)) != 0)
           {
             graph = getGraph(focLevel,focLines,focFlags);
             if (mouse.x < strwidth(graph) )
