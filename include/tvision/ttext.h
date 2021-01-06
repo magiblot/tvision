@@ -35,11 +35,11 @@ public:
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
     static size_t fill(TSpan<TScreenCell> cells, TStringView text);
-#ifdef __BORLANDC__
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
-#else
-    template<class Attr>
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr);
+#ifndef __BORLANDC__
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, uchar attr);
+    template<class Func>
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
 #endif
 
     static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
@@ -193,30 +193,38 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
     return w;
 }
 
-template<class Attr>
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Attr &&attr)
-// Same as above, but gives total control over every iterated cell:
-//
-// * If 'Attr' is a callable type, it is invoked with the cell as parameter.
-//   The most common use case for this is if you need to modify the cell attributes
-//   in a way other than simply replacing them.
+
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
+// Same as above, but sets the attributes of filled cells to 'attr'.
+{
+    size_t w = 0, b = 0;
+    do {
+        if (w < cells.size())
+            ::setAttr(cells[w], attr);
+    } while (TText::eat(cells, w, text, b));
+    return w;
+}
+
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, uchar attr)
+{
+    return TText::fill(cells, text, TCellAttribs {attr});
+}
+
+template<class Func>
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func)
+// Similar to the above, but gives total control over every iterated cell through
+// the 'func' callback. 'func' takes a TScreenCell& by parameter.
+// A possible use case for this is if you need to modify the cell attributes
+// in a way other than simply replacing them.
 //
 //   Examples:
 //     TText::fill(cells, text, [] (auto &cell) { cell.Attr.fgSet(0x00); }); // OK.
 //     TText::fill(cells, text, [] (void) {}); // Error: callback cannot take a TScreenCell&.
-//
-// * Otherwise, 'attr' is directly assigned to the cell's attributes.
 {
     size_t w = 0, b = 0;
     do {
-        if (w < cells.size()) {
-#if defined(__cpp_lib_is_invocable) && defined(__cpp_if_constexpr)
-            if constexpr (std::is_invocable<Attr, TScreenCell&>())
-                attr(cells[w]);
-            else
-#endif
-                ::setAttr(cells[w], attr);
-        }
+        if (w < cells.size())
+            func(cells[w]); // If you get a compilation error here, you are using the wrong overload.
     } while (TText::eat(cells, w, text, b));
     return w;
 }
