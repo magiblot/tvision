@@ -23,6 +23,7 @@
 #include <tvision/tv.h>
 
 #include <iostream.h>
+#include <stdlib.h>
 #include <signal.h>
 
 TStaticInit::TStaticInit()
