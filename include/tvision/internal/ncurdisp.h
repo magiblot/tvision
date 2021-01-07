@@ -19,6 +19,8 @@ class NcursesDisplay : public BufferedDisplay {
     std::unordered_map<ushort, int> pairIdentifiers;
     ushort definedPairs;
 
+    bool usesNcursesDraw;
+
     void getCaretPosition(int &x, int &y);
     uint translateAttributes(uchar attr);
     uint getColorPair(uchar pairKey);
@@ -28,13 +30,14 @@ public:
     NcursesDisplay();
     ~NcursesDisplay();
 
-    void setCaretSize(int size);
-    int getCaretSize();
-    bool isCaretVisible();
-    void clearScreen();
-    int getScreenRows();
-    int getScreenCols();
-    ushort getScreenMode();
+    void reloadScreenInfo() override;
+    TPoint getScreenSize() override;
+
+    void setCaretSize(int size) override;
+    int getCaretSize() override;
+    bool isCaretVisible() override;
+    void clearScreen() override;
+    ushort getScreenMode() override;
 
 protected:
 

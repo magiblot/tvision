@@ -154,7 +154,7 @@ THardwareInfo::THardwareInfo()
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
 }
 
-void THardwareInfo::reloadScreenBufferInfo()
+void THardwareInfo::reloadScreenInfo()
 {
     // Update sbInfo with the current screen buffer info.
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
@@ -167,7 +167,7 @@ void THardwareInfo::setUpConsole()
     if( platform == plWinNT )
         {
         SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
-        reloadScreenBufferInfo();
+        reloadScreenInfo();
         }
 }
 
@@ -226,7 +226,7 @@ void THardwareInfo::setScreenMode( ushort mode )
         SetConsoleScreenBufferSize( consoleHandle[cnOutput], newSize );
         }
 
-    reloadScreenBufferInfo();
+    reloadScreenInfo();
 }
 
 void THardwareInfo::setCaretPosition( ushort x, ushort y )
@@ -354,7 +354,6 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
             pendingEvent = 0;
             if( irBuffer.EventType == WINDOW_BUFFER_SIZE_EVENT )
                 {
-                reloadScreenBufferInfo();
                 event.what = evCommand;
                 event.message.command = cmScreenChanged;
                 return True;

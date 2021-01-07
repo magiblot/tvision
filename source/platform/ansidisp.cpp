@@ -78,49 +78,6 @@ void AnsiDisplayBase::clearScreen()
     bufWrite(CSI "2J");
 }
 
-ushort AnsiDisplayBase::getScreenMode()
-{
-    return TDisplay::smCO80;
-}
-#ifdef _TV_UNIX
-void AnsiDisplayBase::getCaretPosition(int &x, int &y)
-{
-    lowlevelFlush();
-    struct termios saved, temporary;
-    tcgetattr(0, &saved);
-    temporary = saved;
-    temporary.c_lflag &= ~ICANON;
-    temporary.c_lflag &= ~ECHO;
-    temporary.c_cflag &= ~CREAD;
-    tcsetattr(0, TCSANOW, &temporary);
-    THardwareInfo::consoleWrite(CSI "6n", sizeof(CSI "6n") - 1);
-    if (fscanf(StdioCtl::fin(), CSI "%d;%dR", &y, &x) != 2)
-        x = y = 0;
-    tcsetattr(0, TCSANOW, &saved);
-}
-
-void AnsiDisplayBase::getScreenSize(int &rows, int &cols)
-{
-    lowlevelFlush();
-    TPoint s = TermIO::Unix::getSize();
-    rows = s.y;
-    cols = s.x;
-}
-
-int AnsiDisplayBase::getScreenRows()
-{
-    int rows, _;
-    getScreenSize(rows, _);
-    return rows;
-}
-
-int AnsiDisplayBase::getScreenCols()
-{
-    int cols, _;
-    getScreenSize(_, cols);
-    return cols;
-}
-#endif
 void AnsiDisplayBase::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
     writeAttributes(attr);

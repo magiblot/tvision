@@ -34,6 +34,12 @@ BufferedDisplay::~BufferedDisplay()
     instance = 0;
 }
 
+void BufferedDisplay::reloadScreenInfo()
+{
+    DisplayStrategy::reloadScreenInfo();
+    init();
+}
+
 void BufferedDisplay::init()
 {
     // Check if FPS shall be limited.
@@ -52,17 +58,17 @@ void BufferedDisplay::init()
 
 void BufferedDisplay::resetBuffer()
 {
-    int rows = getScreenRows(), cols = getScreenCols();
+    buffer.resize(0);
+    buffer.resize(size.x*size.y);
 
-    size = {cols, rows};
-    buffer.resize(rows*cols);
-    rowDamage.resize(rows);
+    rowDamage.resize(0);
+    rowDamage.resize(size.y);
 
-    for (int i = 0; i < rows; ++i) {
+    for (int i = 0; i < size.y; ++i)
+    {
         rowDamage[i] = {INT_MAX, INT_MIN};
-        for (int j = 0; j < cols; ++j) {
+        for (int j = 0; j < size.x; ++j)
             buffer[i*size.x + j] = {};
-        }
     }
 }
 
@@ -173,12 +179,6 @@ void BufferedDisplay::flushScreen()
         lowlevelFlush();
     }
 }
-
-void BufferedDisplay::onScreenResize()
-{
-    resetBuffer();
-}
-
 
 void BufferedDisplay::ensurePrintable(BufferCell &cell) const
 {

@@ -86,9 +86,7 @@ public:
     static TScreenCell *allocateScreenBuffer();
     static void freeScreenBuffer( TScreenCell *buffer );
     static void resizeScreenBuffer( TScreenCell *&buffer );
-#ifdef __BORLANDC__
-    static void reloadScreenBufferInfo();
-#endif
+    static void reloadScreenInfo();
     static void setUpConsole();
     static void restoreConsole();
 
@@ -227,13 +225,11 @@ inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer )
 #endif
 }
 
-#ifdef __BORLANDC__
 inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
 {
     freeScreenBuffer(buffer);
     buffer = allocateScreenBuffer();
 }
-#endif
 
 // Mouse functions.
 

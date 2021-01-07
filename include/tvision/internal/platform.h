@@ -1,6 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#define Uses_TPoint
 #include <tvision/tv.h>
 #include <memory>
 #include <functional>
@@ -13,17 +14,31 @@ class DisplayStrategy {
 public:
 
     virtual ~DisplayStrategy() {}
+
+    // 'size' must not change until 'reloadScreenInfo()' is invoked.
+    // Invariant: 'size' is in sync with the actual screen size after
+    // 'DisplayStrategy::reloadScreenInfo()' has been invoked.
+
+    TPoint size {};
+
+    // This function can be overriden by inheritors in order to update
+    // internal structs when the display properties change.
+
+    virtual void reloadScreenInfo() { size = getScreenSize(); };
+
+    // The function is meant to be overriden by inheritors. Its only
+    // responsibility should be to return the updated screen size.
+
+    virtual TPoint getScreenSize() { return size; }
+
     virtual int getCaretSize() { return 0; }
     virtual bool isCaretVisible() { return false; }
     virtual void clearScreen() {}
-    virtual int getScreenRows() { return 0; }
-    virtual int getScreenCols() { return 0; }
     virtual void setCaretPosition(int x, int y) {}
     virtual ushort getScreenMode() { return 0; }
     virtual void setCaretSize(int size) {}
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) {}
     virtual void flushScreen() {}
-    virtual void onScreenResize() {}
 
 };
 
@@ -52,7 +67,10 @@ public:
 
     PlatformStrategy() {}
     PlatformStrategy(DisplayStrategy* d, InputStrategy *i) :
-        display(d), input(i) {}
+        display(d), input(i)
+    {
+        if (d) d->reloadScreenInfo();
+    }
 
     virtual ~PlatformStrategy() {}
 
@@ -64,14 +82,14 @@ public:
     virtual int getCaretSize() { return display->getCaretSize(); }
     virtual bool isCaretVisible() { return display->isCaretVisible(); }
     virtual void clearScreen() { display->clearScreen(); }
-    virtual int getScreenRows() { return display->getScreenRows(); }
-    virtual int getScreenCols() { return display->getScreenCols(); }
+    virtual int getScreenRows() { return display->size.y; }
+    virtual int getScreenCols() { return display->size.x; }
     virtual void setCaretPosition(int x, int y) { display->setCaretPosition(x, y); }
     virtual ushort getScreenMode() { return display->getScreenMode(); }
     virtual void setCaretSize(int size) { display->setCaretSize(size); }
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() { display->flushScreen(); }
-    virtual void onScreenResize() { display->onScreenResize(); }
+    virtual void reloadScreenInfo() { display->reloadScreenInfo(); }
 
 };
 
@@ -79,22 +97,21 @@ class NullPlatform : public PlatformStrategy {
 
 public:
 
-    bool waitForEvent(long ms, TEvent &ev) { return false; }
-    int getButtonCount() { return 0; }
-    void cursorOn() {}
-    void cursorOff() {}
+    bool waitForEvent(long ms, TEvent &ev) override { return false; }
+    int getButtonCount() override { return 0; }
+    void cursorOn() override {}
+    void cursorOff() override {}
 
-    int getCaretSize() { return 0; }
-    bool isCaretVisible() { return false; }
-    void clearScreen() {}
-    int getScreenRows() { return 0; }
-    int getScreenCols() { return 0; }
-    void setCaretPosition(int x, int y) {}
-    ushort getScreenMode() { return 0; }
-    void setCaretSize(int size) {}
-    void screenWrite(int x, int y, TScreenCell *buf, int len) {}
-    void flushScreen() {}
-    void onScreenResize() {}
+    int getCaretSize() override { return 0; }
+    bool isCaretVisible() override { return false; }
+    void clearScreen() override {}
+    int getScreenRows() override { return 0; }
+    int getScreenCols() override { return 0; }
+    void setCaretPosition(int x, int y) override {}
+    ushort getScreenMode() override { return 0; }
+    void setCaretSize(int size) override {}
+    void screenWrite(int x, int y, TScreenCell *buf, int len) override {}
+    void flushScreen() override {}
 
 };
 

@@ -301,12 +301,7 @@ bool NcursesInput::hasPendingEvents()
 bool NcursesInput::getEvent(TEvent &ev)
 {
     if (winchEvent(ev))
-    {
-        TPoint size = TermIO::Unix::getSize();
-        // 'resize_term' and not 'resizeterm', which clears the screen.
-        resize_term(size.y, size.x);
         return true;
-    }
 
     int k = wgetch(stdscr);
 

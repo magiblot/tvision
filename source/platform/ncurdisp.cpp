@@ -7,13 +7,15 @@
 #include <internal/codepage.h>
 #include <internal/textattr.h>
 #include <internal/stdioctl.h>
+#include <internal/terminal.h>
 #include <ncurses.h>
 #include <clocale>
 
 NcursesDisplay::NcursesDisplay() :
     caretSize(1),
     caretVisible(true),
-    definedPairs(0)
+    definedPairs(0),
+    usesNcursesDraw(false)
 {
     // Allow printing UTF-8 text.
     setlocale(LC_ALL, "");
@@ -28,7 +30,6 @@ NcursesDisplay::NcursesDisplay() :
     hasColors = getScreenMode() & TDisplay::smCO80;
     if (hasColors)
         start_color();
-    BufferedDisplay::init();
     /* Refresh now so that a possible first getch() doesn't make any relevant
      * changes to the screen due to its implicit refresh(). */
     wrefresh(stdscr);
@@ -41,11 +42,30 @@ NcursesDisplay::~NcursesDisplay()
     delscreen(term);
 }
 
+void NcursesDisplay::reloadScreenInfo()
+{
+    TPoint size = TermIO::Unix::getSize();
+    // When Ncurses is not used for drawing (e.g. AnsiDisplay<NcursesDisplay>),
+    // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
+    // However, when Ncurses is used for drawing, 'resizeterm' is necessary, as
+    // the screen becomes garbled otherwise.
+    if (usesNcursesDraw)
+        resizeterm(size.y, size.x);
+    else
+        resize_term(size.y, size.x);
+    BufferedDisplay::reloadScreenInfo();
+}
+
+TPoint NcursesDisplay::getScreenSize()
+{
+    int y, x;
+    getmaxyx(stdscr, y, x);
+    return {max(x, 0), max(y, 0)};
+}
+
 int NcursesDisplay::getCaretSize() { return caretSize; }
 bool NcursesDisplay::isCaretVisible() { return caretVisible; }
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
-int NcursesDisplay::getScreenRows() { return max(getmaxy(stdscr), 0); }
-int NcursesDisplay::getScreenCols() { return max(getmaxx(stdscr), 0); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
 
@@ -114,6 +134,7 @@ void NcursesDisplay::setCaretSize(int size)
 
 void NcursesDisplay::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
+    usesNcursesDraw = true;
     // Translate and apply text attributes.
     uint curses_attr = translateAttributes(attr);
     wattron(stdscr, curses_attr);

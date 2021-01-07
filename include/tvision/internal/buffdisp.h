@@ -20,7 +20,6 @@ class BufferedDisplay : public DisplayStrategy {
         int begin, end;
     };
 
-    TPoint size;
     std::vector<BufferCell> buffer;
     std::vector<Range> rowDamage;
     bool screenChanged;
@@ -66,9 +65,9 @@ protected:
     void init();
 
     void setCaretPosition(int x, int y);
-    void screenWrite(int x, int y, TScreenCell *buf, int len);
-    void flushScreen();
-    void onScreenResize();
+    void screenWrite(int x, int y, TScreenCell *buf, int len) override;
+    void flushScreen() override;
+    void reloadScreenInfo() override;
 
     virtual void lowlevelWriteChars(TStringView chars, TCellAttribs attr) = 0;
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;

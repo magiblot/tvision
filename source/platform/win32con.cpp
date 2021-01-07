@@ -167,13 +167,10 @@ bool Win32Input::getEvent(TEvent &ev)
         case MOUSE_EVENT:
             return getMouseEvent(irBufferW.Event.MouseEvent, ev);
         case WINDOW_BUFFER_SIZE_EVENT:
-            {
-                cnState.reloadScreenBufferInfo();
-                ev.what = evCommand;
-                ev.message.command = cmScreenChanged;
-                ev.message.infoPtr = 0;
-                return True;
-            }
+            ev.what = evCommand;
+            ev.message.command = cmScreenChanged;
+            ev.message.infoPtr = 0;
+            return True;
         }
     }
     return false;
@@ -288,7 +285,17 @@ Win32Display::Win32Display(Win32ConsoleStrategy &cnState) :
     cnState(cnState),
     lastAttr('\x00')
 {
-    BufferedDisplay::init();
+}
+
+void Win32Display::reloadScreenInfo()
+{
+    cnState.reloadScreenBufferInfo();
+    BufferedDisplay::reloadScreenInfo();
+}
+
+TPoint Win32Display::getScreenSize()
+{
+    return {cnState.sbInfo.dwSize.X, cnState.sbInfo.dwSize.Y};
 }
 
 void Win32Display::setCaretSize(int size)
@@ -316,20 +323,10 @@ bool Win32Display::isCaretVisible()
 void Win32Display::clearScreen()
 {
     COORD coord = {0, 0};
-    int chars = getScreenCols()*getScreenRows();
+    DWORD length = cnState.sbInfo.dwSize.X * cnState.sbInfo.dwSize.Y;
     DWORD read;
-    FillConsoleOutputAttribute(cnHandle(), 0x07, chars, coord, &read);
-    FillConsoleOutputCharacter(cnHandle(), ' ', chars, coord, &read);
-}
-
-int Win32Display::getScreenRows()
-{
-    return cnState.sbInfo.dwSize.Y;
-}
-
-int Win32Display::getScreenCols()
-{
-    return cnState.sbInfo.dwSize.X;
+    FillConsoleOutputAttribute(cnHandle(), 0x07, length, coord, &read);
+    FillConsoleOutputCharacter(cnHandle(), ' ', length, coord, &read);
 }
 
 ushort Win32Display::getScreenMode()

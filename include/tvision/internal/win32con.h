@@ -91,12 +91,13 @@ public:
 
     Win32Display(Win32ConsoleStrategy &);
 
+    void reloadScreenInfo() override;
+    TPoint getScreenSize() override;
+
     void setCaretSize(int size) override;
     int getCaretSize() override;
     bool isCaretVisible() override;
     void clearScreen() override;
-    int getScreenRows() override;
-    int getScreenCols() override;
     ushort getScreenMode() override;
 
 protected:

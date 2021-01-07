@@ -97,12 +97,7 @@ void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len
     if (alwaysFlush)
         flushScreen();
 }
-void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
-{
-    freeScreenBuffer(buffer);
-    buffer = allocateScreenBuffer();
-    platf->onScreenResize();
-}
+void THardwareInfo::reloadScreenInfo() { platf->reloadScreenInfo(); }
 DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
 void THardwareInfo::cursorOn() { platf->cursorOn(); }
 void THardwareInfo::cursorOff() { platf->cursorOff(); }

@@ -37,14 +37,6 @@ protected:
 
     void clearAttributes();
     void clearScreen();
-#ifdef _TV_UNIX
-    void getCaretPosition(int &x, int &y);
-    void getScreenSize(int &rows, int &cols);
-    int getScreenRows();
-    int getScreenCols();
-#endif
-
-    ushort getScreenMode();
 
     void lowlevelWriteChars(TStringView chars, TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
@@ -72,21 +64,15 @@ public:
     {
     }
 
-    ushort getScreenMode() { return AnsiDisplayBase::getScreenMode(); }
-#ifdef _TV_UNIX
-    int getScreenRows() { return AnsiDisplayBase::getScreenRows(); }
-    int getScreenCols() { return AnsiDisplayBase::getScreenCols(); }
-#endif
+    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
+    void lowlevelMoveCursor(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
+    void lowlevelMoveCursorX(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
+    void lowlevelMoveCursorYby1(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorYby1(x, y); }
+    void lowlevelFlush() override { AnsiDisplayBase::lowlevelFlush(); }
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
-    void lowlevelMoveCursor(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
-    void lowlevelMoveCursorX(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
-    void lowlevelMoveCursorYby1(uint x, uint y) { AnsiDisplayBase::lowlevelMoveCursorYby1(x, y); }
-    void lowlevelFlush() { AnsiDisplayBase::lowlevelFlush(); }
-
-    void onScreenResize() {
-        BufferedDisplay::onScreenResize();
-        DisplayBase::lowlevelFlush();
+    void reloadScreenInfo() override
+    {
+        DisplayBase::reloadScreenInfo();
         clearAttributes();
     }
 
