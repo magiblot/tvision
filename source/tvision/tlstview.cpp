@@ -157,18 +157,23 @@ void TListViewer::focusItem( short item )
         vScrollBar->setValue( item );
     else
         drawView();
-    if( item < topItem )
-        if( numCols == 1 )
-            topItem = item;
-        else
-            topItem = item - item % size.y;
-    else if( item >= topItem + size.y*numCols )
+    if( size.y > 0 )
+        {
+        if( item < topItem )
+            {
+            if( numCols == 1 )
+                topItem = item;
+            else
+                topItem = item - item % size.y;
+            }
+        else if( item >= topItem + size.y*numCols )
             {
             if( numCols == 1 )
                 topItem = item - size.y + 1;
             else
                 topItem = item - item % size.y - (size.y * (numCols-1));
             }
+        }
 }
 
 void TListViewer::focusItemNum( short item )
