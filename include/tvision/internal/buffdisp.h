@@ -41,7 +41,7 @@ class BufferedDisplay : public DisplayStrategy {
 
     bool inBounds(int x, int y) const;
 
-    void resetBuffer();
+    void resizeBuffer();
     static void setDirty(int x, BufferCell &cell, Range &damage);
     void ensurePrintable(BufferCell &cell) const;
 
@@ -61,8 +61,6 @@ protected:
 
     BufferedDisplay();
     ~BufferedDisplay();
-
-    void init();
 
     void setCaretPosition(int x, int y);
     void screenWrite(int x, int y, TScreenCell *buf, int len) override;

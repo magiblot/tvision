@@ -27,21 +27,6 @@ BufferedDisplay::BufferedDisplay() :
     , lastFlush()
 {
     instance = this;
-}
-
-BufferedDisplay::~BufferedDisplay()
-{
-    instance = 0;
-}
-
-void BufferedDisplay::reloadScreenInfo()
-{
-    DisplayStrategy::reloadScreenInfo();
-    init();
-}
-
-void BufferedDisplay::init()
-{
     // Check if FPS shall be limited.
     int fps = getEnv<int>("TVISION_MAX_FPS", defaultFPS);
     limitFPS = (fps > 0);
@@ -53,23 +38,26 @@ void BufferedDisplay::init()
     screenChanged = true;
     caretMoved = false;
     caretPosition = {-1, -1};
-    resetBuffer();
 }
 
-void BufferedDisplay::resetBuffer()
+BufferedDisplay::~BufferedDisplay()
+{
+    instance = 0;
+}
+
+void BufferedDisplay::reloadScreenInfo()
+{
+    DisplayStrategy::reloadScreenInfo();
+    resizeBuffer();
+}
+
+void BufferedDisplay::resizeBuffer()
 {
     buffer.resize(0);
-    buffer.resize(size.x*size.y);
+    buffer.resize(size.x*size.y); // Zero-initialized.
 
     rowDamage.resize(0);
-    rowDamage.resize(size.y);
-
-    for (int i = 0; i < size.y; ++i)
-    {
-        rowDamage[i] = {INT_MAX, INT_MIN};
-        for (int j = 0; j < size.x; ++j)
-            buffer[i*size.x + j] = {};
-    }
+    rowDamage.resize(size.y, {INT_MAX, INT_MIN});
 }
 
 void BufferedDisplay::setCaretPosition(int x, int y)
