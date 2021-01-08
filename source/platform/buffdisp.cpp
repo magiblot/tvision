@@ -249,18 +249,13 @@ void FlushScreenAlgorithm::processCell()
 
 void FlushScreenAlgorithm::writeCell()
 {
-//     Workaround for Ncurses bug
+    // Workaround for Ncurses bug
 //     if (y != last.y)
 //         lowlevelFlush();
-    if (uint(y - last.y) > 1) // Not in the current or following line: absolute move.
+    if (y != last.y)
         disp.lowlevelMoveCursor(x, y);
-    else
-    {
-        if (uint(y - last.y) == 1) // Vertical move to the next line.
-            disp.lowlevelMoveCursorYby1(x, y);
-        if (x != last.x + 1) // Horizontal move unless it's the next column.
-            disp.lowlevelMoveCursorX(x, y);
-    }
+    else if (x != last.x + 1 + cell.extraWidth)
+        disp.lowlevelMoveCursorX(x, y);
 
     disp.lowlevelWriteChars(cell.Char.asText(), cell.Attr);
     last = {x, y};

@@ -41,7 +41,6 @@ protected:
     void lowlevelWriteChars(TStringView chars, TCellAttribs attr);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
-    void lowlevelMoveCursorYby1(uint x, uint y);
     void lowlevelFlush();
 
 };
@@ -67,7 +66,6 @@ public:
     void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
     void lowlevelMoveCursor(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
-    void lowlevelMoveCursorYby1(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorYby1(x, y); }
     void lowlevelFlush() override { AnsiDisplayBase::lowlevelFlush(); }
 
     void reloadScreenInfo() override
