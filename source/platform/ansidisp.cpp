@@ -107,7 +107,7 @@ void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
     SGRAttribs last = lastAttr;
     if (sgr != lastAttr)
     {
-        char s[32] = CSI;
+        char s[64] = CSI;
         char *p = s + sizeof(CSI) - 1;
         if (sgr.fg != last.fg)
         {
