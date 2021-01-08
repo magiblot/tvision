@@ -14,8 +14,10 @@ target_link_libraries(genphone PUBLIC ${PROJECT_NAME})
 target_compile_definitions(genparts PRIVATE PARTS)
 target_compile_definitions(genphone PRIVATE PHONENUM)
 
-add_custom_command(TARGET genparts POST_BUILD COMMAND genparts WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-add_custom_command(TARGET genphone POST_BUILD COMMAND genphone WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+if (NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(TARGET genparts POST_BUILD COMMAND genparts WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    add_custom_command(TARGET genphone POST_BUILD COMMAND genphone WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
 
 add_executable(tvforms ${tvforms-src})
 target_link_libraries(tvforms PUBLIC ${PROJECT_NAME})
