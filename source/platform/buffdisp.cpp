@@ -249,16 +249,19 @@ void FlushScreenAlgorithm::processCell()
 
 void FlushScreenAlgorithm::writeCell()
 {
+    // 'last' is the last written cell occupied by text.
+    // That is, the hardware cursor is located at {last.x + 1, last.y}.
+
     // Workaround for Ncurses bug
 //     if (y != last.y)
 //         lowlevelFlush();
     if (y != last.y)
         disp.lowlevelMoveCursor(x, y);
-    else if (x != last.x + 1 + cell.extraWidth)
+    else if (x != last.x + 1)
         disp.lowlevelMoveCursorX(x, y);
 
     disp.lowlevelWriteChars(cell.Char.asText(), cell.Attr);
-    last = {x, y};
+    last = {x + cell.extraWidth, y};
 }
 
 void FlushScreenAlgorithm::handleWideCharSpill()
@@ -280,8 +283,9 @@ void FlushScreenAlgorithm::handleWideCharSpill()
             cell.Char = ' ';
             writeCell();
         }
+        return;
     }
-    // Check character does not spill on next cells.
+    // Ensure character does not spill on next cells.
     int wbegin = x;
     while (width-- && ++x < size.x) {
         getCell();
@@ -289,7 +293,6 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         if (cell.Char != '\0') {
             if (wideCanOverlap()) {
                 // Write over the wide character.
-                disp.lowlevelMoveCursorX(x, y);
                 writeCell();
                 return;
             } else {
@@ -307,12 +310,9 @@ void FlushScreenAlgorithm::handleWideCharSpill()
             }
         }
     }
-    // Otherwise, skip placeholders. x now points to the last column occupied
-    // by the wide character in the screen.
-    last = {x, y};
+    // If the next character has a different attribute, print it anyway
+    // to avoid attribute spill.
     if (x + 1 < size.x) {
-        // Anyway, print the next character just in case it is not dirty
-        // to avoid attribute spill.
         ++x;
         getCell();
         if (Attr != cell.Attr) {
