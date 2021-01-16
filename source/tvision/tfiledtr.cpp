@@ -45,11 +45,6 @@
 #include <alloc.h>
 #endif
 
-inline uint min( uint u1, uint u2 )
-{
-    return u1 < u2 ? u1 : u2;
-}
-
 TFileEditor::TFileEditor( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,
@@ -239,7 +234,8 @@ Boolean TFileEditor::setBufSize( uint newSize )
             return False;
             }
         uint n = bufLen - curPtr + delCount;
-        memcpy( buffer, temp, min( newSize, bufSize ) );
+        uint min = newSize < bufSize ? newSize : bufSize;
+        memcpy( buffer, temp, min );
         memmove( &buffer[newSize - n], &temp[bufSize - n], n );
         delete temp;
         bufSize = newSize;
