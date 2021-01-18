@@ -15,6 +15,7 @@ Win32ConsoleStrategy* Win32ConsoleStrategy::instance = 0;
 Win32ConsoleStrategy::Win32ConsoleStrategy()
 {
     initConsole();
+    display->reloadScreenInfo();
     instance = this;
 }
 
