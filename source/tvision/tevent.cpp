@@ -341,8 +341,8 @@ I   INT 16h;
     if( what == evKeyDown )
         {
         if( ' ' <= keyDown.charScan.charCode &&
-            keyDown.charScan.charCode != '\x7F' &&
-            keyDown.charScan.charCode != '\xFF'
+            keyDown.charScan.charCode != 0x7F &&
+            keyDown.charScan.charCode != 0xFF
           )
             {
             keyDown.text[0] = (char) keyDown.charScan.charCode;
