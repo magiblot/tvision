@@ -21,10 +21,7 @@ Win32ConsoleStrategy::Win32ConsoleStrategy()
 Win32ConsoleStrategy::~Win32ConsoleStrategy()
 {
     flushScreen();
-    // Restore the startup codepages and screen buffer.
-    SetConsoleCP(consoleCp[cnInput]);
-    SetConsoleOutputCP(consoleCp[cnOutput]);
-    SetConsoleActiveScreenBuffer(consoleHandle[cnStartup]);
+    restoreConsole();
     instance = 0;
 }
 
@@ -77,9 +74,19 @@ void Win32ConsoleStrategy::initConsole()
     input = std::make_unique<Win32Input>(*this);
 }
 
+void Win32ConsoleStrategy::restoreConsole()
+{
+    // Restore the startup codepages and screen buffer.
+    SetConsoleCP(consoleCp[cnInput]);
+    SetConsoleOutputCP(consoleCp[cnOutput]);
+    SetConsoleActiveScreenBuffer(consoleHandle[cnStartup]);
+    CloseHandle(consoleHandle[cnOutput]);
+}
+
 void Win32ConsoleStrategy::resetConsole()
 {
     // Open the application in a new console with no data loss.
+    restoreConsole();
     FreeConsole();
     AllocConsole();
     initConsole();

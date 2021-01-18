@@ -26,8 +26,9 @@ class Win32ConsoleStrategy : public PlatformStrategy
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
 
     void initConsole();
-    void reloadScreenBufferInfo();
+    void restoreConsole();
     void resetConsole();
+    void reloadScreenBufferInfo();
 
     static Win32ConsoleStrategy *instance;
 
