@@ -61,10 +61,14 @@ function(tv_enable_unity target)
     endif()
 endfunction()
 
+set(TV_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
 function(tv_set_output_dir target)
     # Place everything in the build directory, for ease of use.
     set_target_properties(${target} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY ${TV_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${TV_BINARY_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${TV_BINARY_DIR}
     )
 endfunction()
 
