@@ -183,7 +183,7 @@ void copyPath( char *dest, const char *src, size_t size )
 {
     if (strnzcpy(dest, src, size) < strlen(src))
         {
-        cout << "Path too long (" << strlen(src) << " > " << size << "): \""
+        cerr << "Path too long (" << strlen(src) << " > " << size << "): \""
              << src << "\"" << endl;
         exit(1);
         }
@@ -303,10 +303,10 @@ void unGetLine( const char *s )
 void prntMsg( const char *pref, const char *text )
 {
     if (lineCount > 0)
-        cout << pref << ": " << textName << "("
+        cerr << pref << ": " << textName << "("
              << lineCount << "): " << text << "\n";
     else
-        cout << pref << ": " << textName << " "
+        cerr << pref << ": " << textName << " "
              << text << "\n";
 }
 
@@ -1069,7 +1069,7 @@ int main(int argc, char **argv)
     copyPath(textName, replaceExt(argv[1], ".txt", False), sizeof(textName));
     if (!fExists(textName))
         {
-        cout << "Error: File '" << textName << "' not found." << endl;
+        cerr << "Error: File '" << textName << "' not found." << endl;
         exit(1);
         }
 
