@@ -172,12 +172,6 @@ asm POP DS
 
 #define cpEditor    "\x06\x07"
 
-#ifdef __BORLANDC__
-#define _encSB True
-#else
-#define _encSB False
-#endif
-
 TEditor::TEditor( const TRect& bounds,
                   TScrollBar *aHScrollBar,
                   TScrollBar *aVScrollBar,
@@ -192,7 +186,7 @@ TEditor::TEditor( const TRect& bounds,
     selecting( False ),
     overwrite( False ),
     autoIndent( True ) ,
-    encSingleByte( _encSB ),
+    encSingleByte( False ),
     lockCount( 0 ),
     updateFlags( 0 ),
     keyState( 0 )
