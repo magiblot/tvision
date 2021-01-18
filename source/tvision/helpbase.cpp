@@ -201,7 +201,7 @@ void THelpTopic::addParagraph( TParagraph *p )
 }
 
 void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
-         int& ref )
+                              int& ref )
 {
     int oldOffset, curOffset, offset, paraOffset;
     TParagraph *p;
@@ -253,9 +253,9 @@ TStringView THelpTopic::getLine( int line )
         lastLine = line;
         }
     while (p != 0)
-    {
-        while (offset < p->size)
         {
+        while (offset < p->size)
+            {
             --line;
             TStringView lineText = wrapText(p->text, p->size, offset, p->wrap);
             if (line == 0)
@@ -264,10 +264,10 @@ TStringView THelpTopic::getLine( int line )
                 lastParagraph = p;
                 return lineText;
                 }
-        }
+            }
         p = p->next;
         offset = 0;
-    }
+        }
     return TStringView();
 }
 
