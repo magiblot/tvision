@@ -81,6 +81,7 @@ void TListViewer::draw()
     short colWidth, curCol, indent;
     TDrawBuffer b;
     uchar scOff;
+    Boolean focusedVis;
 
     if( (state&(sfSelected | sfActive)) == (sfSelected | sfActive))
         {
@@ -100,6 +101,7 @@ void TListViewer::draw()
     else
         indent = 0;
 
+    focusedVis = False;
     colWidth = size.x / numCols + 1;
     for( i = 0; i < size.y; i++ )
         {
@@ -114,6 +116,7 @@ void TListViewer::draw()
                 color = focusedColor;
                 setCursor( curCol + 1, i );
                 scOff = 0;
+                focusedVis = True;
                 }
             else if( item < range && isSelected(item) )
                 {
@@ -148,6 +151,9 @@ void TListViewer::draw()
             }
         writeLine( 0, i, size.x, 1, b );
         }
+
+    if ( !focusedVis )
+        setCursor( -1, -1 );
 }
 
 void TListViewer::focusItem( short item )
