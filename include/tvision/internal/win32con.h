@@ -22,7 +22,6 @@ class Win32ConsoleStrategy : public PlatformStrategy
     HANDLE consoleHandle[3];
     UINT consoleCp[2];
     DWORD consoleMode[2];
-    CONSOLE_CURSOR_INFO crInfo {};
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
 
     void initConsole();
@@ -95,9 +94,6 @@ public:
     void reloadScreenInfo() override;
     TPoint getScreenSize() override;
 
-    void setCaretSize(int size) override;
-    int getCaretSize() override;
-    bool isCaretVisible() override;
     void clearScreen() override;
     ushort getScreenMode() override;
 
@@ -105,6 +101,7 @@ protected:
 
     void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override;
     void lowlevelMoveCursor(uint x, uint y) override;
+    void lowlevelCursorSize(int size) override;
     void lowlevelFlush() override;
 
 };

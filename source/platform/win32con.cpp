@@ -30,7 +30,6 @@ void Win32ConsoleStrategy::initConsole()
 {
     consoleHandle[cnInput] = GetStdHandle(STD_INPUT_HANDLE);
     consoleHandle[cnStartup] = GetStdHandle(STD_OUTPUT_HANDLE);
-    GetConsoleCursorInfo(consoleHandle[cnStartup], &crInfo);
     GetConsoleScreenBufferInfo(consoleHandle[cnStartup], &sbInfo);
     // Create a new buffer to draw into.
     consoleHandle[cnOutput] = CreateConsoleScreenBuffer(
@@ -293,6 +292,9 @@ Win32Display::Win32Display(Win32ConsoleStrategy &cnState) :
     cnState(cnState),
     lastAttr('\x00')
 {
+    CONSOLE_CURSOR_INFO crInfo {};
+    GetConsoleCursorInfo(cnHandle(), &crInfo);
+    setCaretSize(crInfo.bVisible ? crInfo.dwSize : 0);
 }
 
 void Win32Display::reloadScreenInfo()
@@ -306,26 +308,17 @@ TPoint Win32Display::getScreenSize()
     return {cnState.sbInfo.dwSize.X, cnState.sbInfo.dwSize.Y};
 }
 
-void Win32Display::setCaretSize(int size)
+void Win32Display::lowlevelCursorSize(int size)
 {
+    CONSOLE_CURSOR_INFO crInfo;
     if (size) {
-        cnState.crInfo.bVisible = TRUE;
-        cnState.crInfo.dwSize = size;
+        crInfo.bVisible = TRUE;
+        crInfo.dwSize = size;
     } else {
-        cnState.crInfo.bVisible = FALSE;
-        cnState.crInfo.dwSize = 1;
+        crInfo.bVisible = FALSE;
+        crInfo.dwSize = 1;
     }
-    SetConsoleCursorInfo(cnHandle(), &cnState.crInfo);
-}
-
-int Win32Display::getCaretSize()
-{
-    return cnState.crInfo.dwSize;
-}
-
-bool Win32Display::isCaretVisible()
-{
-    return cnState.crInfo.bVisible;
+    SetConsoleCursorInfo(cnHandle(), &crInfo);
 }
 
 void Win32Display::clearScreen()

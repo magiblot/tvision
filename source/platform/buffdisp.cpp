@@ -38,6 +38,7 @@ BufferedDisplay::BufferedDisplay() :
     screenChanged = true;
     caretMoved = false;
     caretPosition = {-1, -1};
+    caretSize = lastCaretSize = 0;
 }
 
 BufferedDisplay::~BufferedDisplay()
@@ -153,18 +154,26 @@ void BufferedDisplay::undrawCursors()
         }
 }
 
+bool BufferedDisplay::needsFlush() const
+{
+    return screenChanged || caretMoved || caretSize != lastCaretSize;
+}
+
 void BufferedDisplay::flushScreen()
 {
-    if ((screenChanged || caretMoved) && timeToFlush())
+    if (needsFlush() && timeToFlush())
     {
         drawCursors();
         FlushScreenAlgorithm(*this).run();
         if (caretPosition.x != -1)
             lowlevelMoveCursor(caretPosition.x, caretPosition.y);
         undrawCursors();
+        if (caretSize != lastCaretSize)
+            lowlevelCursorSize(caretSize);
+        lowlevelFlush();
         screenChanged = false;
         caretMoved = false;
-        lowlevelFlush();
+        lastCaretSize = caretSize;
     }
 }
 

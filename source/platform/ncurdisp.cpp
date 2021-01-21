@@ -12,8 +12,6 @@
 #include <clocale>
 
 NcursesDisplay::NcursesDisplay() :
-    caretSize(1),
-    caretVisible(true),
     definedPairs(0),
     usesNcursesDraw(false)
 {
@@ -63,8 +61,6 @@ TPoint NcursesDisplay::getScreenSize()
     return {max(x, 0), max(y, 0)};
 }
 
-int NcursesDisplay::getCaretSize() { return caretSize; }
-bool NcursesDisplay::isCaretVisible() { return caretVisible; }
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
@@ -82,7 +78,7 @@ ushort NcursesDisplay::getScreenMode()
     return has_colors() ? TDisplay::smCO80 : TDisplay::smMono;
 }
 
-void NcursesDisplay::setCaretSize(int size)
+void NcursesDisplay::lowlevelCursorSize(int size)
 {
 /* The caret is the keyboard cursor. If size is 0, the caret is hidden. The
  * other possible values are from 1 to 100, theoretically, and represent the
@@ -91,13 +87,8 @@ void NcursesDisplay::setCaretSize(int size)
  *
  * ncurses supports only three levels: invisible (0), normal (1) and
  * very visible (2). They don't make a difference in all terminals, but
- * we can try mapping them to the values requested by Turbo Vision.
- *
- * Regarding the 'caretSize' and 'caretVisible' variables, they are here
- * just to replicate the behaviour of THardwareInfo on Windows. */
-    caretSize = size ? size : 1;
-    caretVisible = size != 0;
-    curs_set(size > 0 ? size == 100 ? 2 : 1 : 0);
+ * we can try mapping them to the values requested by Turbo Vision. */
+    curs_set(size > 0 ? size == 100 ? 2 : 1 : 0); // Implies refresh().
 }
 
 /* Turbo Vision stores char/attribute information in a CHAR_INFO struct:
