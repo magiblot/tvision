@@ -39,7 +39,9 @@ protected:
     virtual TPoint getScreenSize() { return size; }
 
     // 'getCaretSize()' must return a value in the range 0 to 100. Zero means
-    // the caret is not visible.
+    // the caret is not visible. Note that PlatformStrategy::getCaretSize()
+    // adjusts this to the range 1 to 100, because that's what the original
+    // THardwareInfo::getCaretSize() did, and what TScreen expects.
 
     virtual int getCaretSize() { return caretSize; }
 
@@ -94,7 +96,7 @@ public:
     virtual void cursorOn() { if (input) input->cursorOn(); }
     virtual void cursorOff() { if (input) input->cursorOff(); }
 
-    virtual int getCaretSize() { return display->caretSize; }
+    virtual int getCaretSize() { return min(max(display->caretSize, 1), 100); }
     virtual bool isCaretVisible() { return display->isCaretVisible(); }
     virtual void clearScreen() { display->clearScreen(); }
     virtual int getScreenRows() { return display->size.y; }
