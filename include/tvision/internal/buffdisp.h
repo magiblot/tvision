@@ -14,23 +14,6 @@ class ScreenCursor;
 
 class BufferedDisplay : public DisplayStrategy {
 
-protected:
-
-    // 'caretSize' must be a value in the range 0 to 100. Zero means it is not
-    // visible.
-
-    int caretSize;
-
-    // 'getCaretSize()' must return a number in the range 1 to 100,
-    // because the original THardwareInfo interface maps directly to
-    // the Win32 Console API (see CONSOLE_CURSOR_INFO).
-
-    int getCaretSize() override { return max(caretSize, 1); }
-    bool isCaretVisible() override { return caretSize > 0; }
-    void setCaretSize(int size) override { caretSize = size; }
-
-private:
-
     friend struct FlushScreenAlgorithm;
 
     struct Range {
@@ -45,7 +28,7 @@ private:
     const uint widePlaceholder;
     bool caretMoved;
     TPoint caretPosition;
-    int lastCaretSize;
+    int newCaretSize;
 
     bool limitFPS;
     int frameDrops;
@@ -81,7 +64,8 @@ protected:
     BufferedDisplay();
     ~BufferedDisplay();
 
-    void setCaretPosition(int x, int y);
+    void setCaretSize(int size) override;
+    void setCaretPosition(int x, int y) override;
     void screenWrite(int x, int y, TScreenCell *buf, int len) override;
     void flushScreen() override;
     void reloadScreenInfo() override;

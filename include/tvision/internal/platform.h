@@ -15,24 +15,37 @@ public:
 
     virtual ~DisplayStrategy() {}
 
-    // 'size' must not change until 'reloadScreenInfo()' is invoked.
-    // Invariant: 'size' is in sync with the actual screen size after
-    // 'DisplayStrategy::reloadScreenInfo()' has been invoked.
+    // Invariant: these variables are is in sync with the actual screen state
+    // after 'DisplayStrategy::reloadScreenInfo()' has been invoked.
 
     TPoint size {};
+    int caretSize {};
 
     // This function can be overriden by inheritors in order to update
-    // internal structs when the display properties change.
+    // internal structs when the display properties change. But
+    // 'DisplayStrategy::reloadScreenInfo()' must be invoked eventually.
 
-    virtual void reloadScreenInfo() { size = getScreenSize(); };
+    virtual void reloadScreenInfo()
+    {
+        size = getScreenSize();
+        caretSize = getCaretSize();
+    }
 
-    // The function is meant to be overriden by inheritors. Its only
-    // responsibility should be to return the updated screen size.
+protected:
+
+    // These functions are meant to be overriden by inheritors. Their only
+    // responsibility should be to return updated values.
 
     virtual TPoint getScreenSize() { return size; }
 
-    virtual int getCaretSize() { return 0; }
-    virtual bool isCaretVisible() { return false; }
+    // 'getCaretSize()' must return a value in the range 0 to 100. Zero means
+    // the caret is not visible.
+
+    virtual int getCaretSize() { return caretSize; }
+
+public:
+
+    bool isCaretVisible() { return caretSize != 0; }
     virtual void clearScreen() {}
     virtual void setCaretPosition(int x, int y) {}
     virtual ushort getScreenMode() { return 0; }
@@ -79,7 +92,7 @@ public:
     virtual void cursorOn() { if (input) input->cursorOn(); }
     virtual void cursorOff() { if (input) input->cursorOff(); }
 
-    virtual int getCaretSize() { return display->getCaretSize(); }
+    virtual int getCaretSize() { return display->caretSize; }
     virtual bool isCaretVisible() { return display->isCaretVisible(); }
     virtual void clearScreen() { display->clearScreen(); }
     virtual int getScreenRows() { return display->size.y; }

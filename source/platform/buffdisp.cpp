@@ -38,7 +38,7 @@ BufferedDisplay::BufferedDisplay() :
     screenChanged = true;
     caretMoved = false;
     caretPosition = {-1, -1};
-    caretSize = lastCaretSize = 0;
+    newCaretSize = 0;
 }
 
 BufferedDisplay::~BufferedDisplay()
@@ -59,6 +59,11 @@ void BufferedDisplay::resizeBuffer()
 
     rowDamage.resize(0);
     rowDamage.resize(size.y, {INT_MAX, INT_MIN});
+}
+
+void BufferedDisplay::setCaretSize(int size)
+{
+    newCaretSize = size;
 }
 
 void BufferedDisplay::setCaretPosition(int x, int y)
@@ -156,7 +161,7 @@ void BufferedDisplay::undrawCursors()
 
 bool BufferedDisplay::needsFlush() const
 {
-    return screenChanged || caretMoved || caretSize != lastCaretSize;
+    return screenChanged || caretMoved || caretSize != newCaretSize;
 }
 
 void BufferedDisplay::flushScreen()
@@ -168,12 +173,12 @@ void BufferedDisplay::flushScreen()
         if (caretPosition.x != -1)
             lowlevelMoveCursor(caretPosition.x, caretPosition.y);
         undrawCursors();
-        if (caretSize != lastCaretSize)
-            lowlevelCursorSize(caretSize);
+        if (caretSize != newCaretSize)
+            lowlevelCursorSize(newCaretSize);
         lowlevelFlush();
         screenChanged = false;
         caretMoved = false;
-        lastCaretSize = caretSize;
+        caretSize = newCaretSize;
     }
 }
 

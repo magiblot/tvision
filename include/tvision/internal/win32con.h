@@ -93,6 +93,7 @@ public:
 
     void reloadScreenInfo() override;
     TPoint getScreenSize() override;
+    int getCaretSize() override;
 
     void clearScreen() override;
     ushort getScreenMode() override;

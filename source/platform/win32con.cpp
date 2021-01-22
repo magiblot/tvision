@@ -292,9 +292,6 @@ Win32Display::Win32Display(Win32ConsoleStrategy &cnState) :
     cnState(cnState),
     lastAttr('\x00')
 {
-    CONSOLE_CURSOR_INFO crInfo {};
-    GetConsoleCursorInfo(cnHandle(), &crInfo);
-    setCaretSize(crInfo.bVisible ? crInfo.dwSize : 0);
 }
 
 void Win32Display::reloadScreenInfo()
@@ -306,6 +303,13 @@ void Win32Display::reloadScreenInfo()
 TPoint Win32Display::getScreenSize()
 {
     return {cnState.sbInfo.dwSize.X, cnState.sbInfo.dwSize.Y};
+}
+
+int Win32Display::getCaretSize()
+{
+    CONSOLE_CURSOR_INFO crInfo {};
+    GetConsoleCursorInfo(cnHandle(), &crInfo);
+    return crInfo.bVisible ? crInfo.dwSize : 0;
 }
 
 void Win32Display::lowlevelCursorSize(int size)
