@@ -22,7 +22,8 @@ class LinuxConsoleStrategy : public UnixPlatformStrategy {
 
 public:
 
-    LinuxConsoleStrategy(DisplayStrategy*, FdInputStrategy*);
+    LinuxConsoleStrategy( std::unique_ptr<DisplayStrategy> &&,
+                          std::unique_ptr<FdInputStrategy> && );
 
     int getButtonCount();
 

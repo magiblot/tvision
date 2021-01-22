@@ -96,12 +96,27 @@ namespace TermIO
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm);
     void setAltModifier(TEvent &ev);
 
-    #ifdef _TV_UNIX
+#ifdef _TV_UNIX
     namespace Unix
     {
+        void consoleWrite(const void *data, size_t bytes);
         TPoint getSize();
     }
-    #endif // _TV_UNIX
+    namespace Impl = Unix;
+#elif defined(_WIN32)
+    namespace Win32
+    {
+        void consoleWrite(const void *data, size_t bytes);
+    }
+    namespace Impl = Win32;
+#endif // _TV_UNIX
+
+    bool isLinuxConsole();
+
+    inline void consoleWrite(const void *data, size_t bytes)
+    {
+        Impl::consoleWrite(data, bytes);
+    }
 
 }
 

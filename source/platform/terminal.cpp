@@ -1,4 +1,3 @@
-#define Uses_THardwareInfo
 #define Uses_TKeys
 #include <tvision/tv.h>
 
@@ -56,7 +55,7 @@ void TermIO::mouseOn()
                       "\x1B[?1002h" // Enable mouse drag reporting.
                       "\x1B[?1006h" // Enable SGR extended mouse reporting.
                     ;
-    THardwareInfo::consoleWrite(seq.data(), seq.size());
+    consoleWrite(seq.data(), seq.size());
 }
 
 void TermIO::mouseOff()
@@ -66,7 +65,7 @@ void TermIO::mouseOff()
                       "\x1B[?1000l" // Disable mouse reporting.
                       "\x1B[?1001r" // Restore old highlight mouse reporting.
                     ;
-    THardwareInfo::consoleWrite(seq.data(), seq.size());
+    consoleWrite(seq.data(), seq.size());
 }
 
 bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm)
@@ -389,6 +388,7 @@ ParseResult TermIO::parseHomeEndA(GetChBuf &buf, TEvent &ev)
 }
 
 #ifdef _TV_UNIX
+#include <unistd.h>
 #include <sys/ioctl.h>
 
 TPoint TermIO::Unix::getSize()
@@ -401,4 +401,34 @@ TPoint TermIO::Unix::getSize()
     }
     return {0, 0};
 }
+
+void TermIO::Unix::consoleWrite(const void *data, size_t bytes)
+{
+    fflush(StdioCtl::fout());
+    int rr = ::write(StdioCtl::out(), data, bytes);
+    (void) rr;
+}
+
+#elif defined(_WIN32)
+
+void TermIO::Win32::consoleWrite(const void *data, size_t bytes)
+{
+    WriteConsole(StdioCtl::out(), data, bytes, nullptr, nullptr);
+}
+
 #endif // _TV_UNIX
+
+bool TermIO::isLinuxConsole()
+{
+#ifdef __linux__
+    /* This is the same function used to get the Shift/Ctrl/Alt modifiers
+     * on the console. It fails if stdin is not a console file descriptor. */
+    for (int fd : {StdioCtl::in(), StdioCtl::out()})
+    {
+        char subcode[] = {6, 0}; // Null-terminate so that valgrind doesn't complain.
+        if (ioctl(fd, TIOCLINUX, subcode) != -1)
+            return true;
+    }
+#endif
+    return false;
+}

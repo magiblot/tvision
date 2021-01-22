@@ -11,7 +11,7 @@
 #include <internal/ansidisp.h>
 #include <internal/linuxcon.h>
 #include <internal/sighandl.h>
-#include <internal/stdioctl.h>
+#include <internal/terminal.h>
 #include <internal/getenv.h>
 #include <chrono>
 #ifdef _TV_UNIX
@@ -34,44 +34,6 @@ THardwareInfo::THardwareInfo()
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
 #ifdef _TV_UNIX
     static TSignalHandler h;
-#endif
-}
-
-bool THardwareInfo::isLinuxConsole()
-{
-#ifdef __linux__
-    /* This is the same function used to get the Shift/Ctrl/Alt modifiers
-     * on the console. It fails if stdin is not a console file descriptor. */
-    for (int fd : {StdioCtl::in(), StdioCtl::out()})
-    {
-        char subcode[] = {6, 0}; // Null-terminate so that valgrind doesn't complain.
-        if (ioctl(fd, TIOCLINUX, subcode) != -1)
-            return true;
-    }
-    return false;
-#else
-    return false;
-#endif
-}
-
-bool THardwareInfo::isWin32Console()
-{
-#ifdef _WIN32
-    DWORD consoleMode;
-    return GetConsoleMode( GetStdHandle(STD_INPUT_HANDLE), &consoleMode ) != 0;
-#else
-    return false;
-#endif
-}
-
-void THardwareInfo::consoleWrite(const void *data, size_t bytes)
-{
-#ifdef _WIN32
-    Win32ConsoleStrategy::write(data, bytes);
-#else
-    fflush(StdioCtl::fout());
-    int rr = ::write(StdioCtl::out(), data, bytes);
-    (void) rr;
 #endif
 }
 
@@ -111,24 +73,23 @@ void THardwareInfo::setUpConsole()
     if (platf == &nullPlatf)
     {
 #ifdef _WIN32
-        if (isWin32Console())
-            platf = new Win32ConsoleStrategy();
-        else
+        if (!(platf = Win32ConsoleStrategy::create()))
         {
-            cerr << "Error: standard input is being redirected or is not a "
-                    "Win32 console." << endl;
+            cerr << "Error: cannot get a console." << endl;
             ExitProcess(1);
         }
 #else
-        DisplayStrategy *disp;
+        std::unique_ptr<DisplayStrategy> disp;
         if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
-            disp = new NcursesDisplay();
+            disp = std::make_unique<NcursesDisplay>();
         else
-            disp = new AnsiDisplay<NcursesDisplay>();
-        if (isLinuxConsole())
-            platf = new LinuxConsoleStrategy(disp, new NcursesInput(false));
+            disp = std::make_unique<AnsiDisplay<NcursesDisplay>>();
+        if (TermIO::isLinuxConsole())
+            platf = new LinuxConsoleStrategy( std::move(disp),
+                                              std::make_unique<NcursesInput>(false) );
         else
-            platf = new UnixPlatformStrategy(disp, new NcursesInput());
+            platf = new UnixPlatformStrategy( std::move(disp),
+                                              std::make_unique<NcursesInput>() );
 #endif
     }
 }

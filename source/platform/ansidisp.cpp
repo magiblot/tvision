@@ -1,19 +1,10 @@
-#define Uses_TScreen
-#define Uses_THardwareInfo
-#include <tvision/tv.h>
 #include <internal/ansidisp.h>
 #include <internal/codepage.h>
 #include <internal/textattr.h>
-#include <internal/stdioctl.h>
 #include <internal/terminal.h>
 #include <internal/strings.h>
 #include <cstdio>
 #include <cstdlib>
-#ifdef _TV_UNIX
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#endif
 #ifdef HAVE_NCURSES
 #include <ncurses.h> // For COLORS
 #else
@@ -28,7 +19,7 @@ AnsiDisplayBase::AnsiDisplayBase() :
     lastAttr(SGRAttribs::defaultInit),
     sgrFlags(0)
 {
-    if (THardwareInfo::isLinuxConsole())
+    if (TermIO::isLinuxConsole())
         sgrFlags |= sgrBrightIsBlink | sgrNoItalic | sgrNoUnderline;
     if (COLORS < 16)
         sgrFlags |= sgrBrightIsBold;
@@ -98,7 +89,7 @@ void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)
 }
 
 void AnsiDisplayBase::lowlevelFlush() {
-    THardwareInfo::consoleWrite(buf.data(), buf.size());
+    TermIO::consoleWrite(buf.data(), buf.size());
     buf.resize(0);
 }
 

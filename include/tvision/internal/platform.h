@@ -79,10 +79,12 @@ protected:
 public:
 
     PlatformStrategy() {}
-    PlatformStrategy(DisplayStrategy* d, InputStrategy *i) :
-        display(d), input(i)
+    PlatformStrategy( std::unique_ptr<DisplayStrategy> &&d,
+                      std::unique_ptr<InputStrategy> &&i ) :
+        display(std::move(d)),
+        input(std::move(i))
     {
-        if (d) d->reloadScreenInfo();
+        if (display) display->reloadScreenInfo();
     }
 
     virtual ~PlatformStrategy() {}

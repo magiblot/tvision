@@ -6,119 +6,109 @@
 #define Uses_TScreen
 #include <tvision/tv.h>
 #include <internal/win32con.h>
+#include <internal/stdioctl.h>
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
 #include <internal/ansidisp.h>
 
-Win32ConsoleStrategy* Win32ConsoleStrategy::instance = 0;
-
-Win32ConsoleStrategy::Win32ConsoleStrategy()
+Win32ConsoleStrategy* Win32ConsoleStrategy::create()
 {
-    initConsole();
-    display->reloadScreenInfo();
-    instance = this;
+    UINT cpInput, cpOutput;
+    std::unique_ptr<DisplayStrategy> display;
+    std::unique_ptr<InputStrategy> input;
+    if (initConsole(cpInput, cpOutput, display, input))
+    {
+        return new Win32ConsoleStrategy( cpInput, cpOutput,
+                                         std::move(display),
+                                         std::move(input) );
+    }
+    return nullptr;
+}
+
+Win32ConsoleStrategy::Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
+                                            std::unique_ptr<DisplayStrategy> &&display,
+                                            std::unique_ptr<InputStrategy> &&input ) :
+    PlatformStrategy(std::move(display), std::move(input)),
+    cpInput(cpInput),
+    cpOutput(cpOutput)
+{
 }
 
 Win32ConsoleStrategy::~Win32ConsoleStrategy()
 {
     flushScreen();
     restoreConsole();
-    instance = 0;
 }
 
-void Win32ConsoleStrategy::initConsole()
+bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
+                                        std::unique_ptr<DisplayStrategy> &display,
+                                        std::unique_ptr<InputStrategy> &input )
 {
-    consoleHandle[cnInput] = GetStdHandle(STD_INPUT_HANDLE);
-    consoleHandle[cnStartup] = GetStdHandle(STD_OUTPUT_HANDLE);
-    GetConsoleScreenBufferInfo(consoleHandle[cnStartup], &sbInfo);
-    // Create a new buffer to draw into.
-    consoleHandle[cnOutput] = CreateConsoleScreenBuffer(
-        GENERIC_READ | GENERIC_WRITE,
-        0,
-        0,
-        CONSOLE_TEXTMODE_BUFFER,
-        0);
-    // Force the screen buffer size to match the window size.
-    // The Console API guarantees this, but some implementations
-    // are not compliant (e.g. Wine).
-    sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
-    sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
-    SetConsoleScreenBufferSize(consoleHandle[cnOutput], sbInfo.dwSize);
-    SetConsoleActiveScreenBuffer(consoleHandle[cnOutput]);
+    StdioCtl::instance.setUp();
     // Set the input mode.
-    GetConsoleMode(consoleHandle[cnInput], &consoleMode[cnInput]);
-    consoleMode[cnInput] |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
-    consoleMode[cnInput] &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
-    consoleMode[cnInput] |= ENABLE_EXTENDED_FLAGS;   // Disable the Quick Edit mode,
-    consoleMode[cnInput] &= ~ENABLE_QUICK_EDIT_MODE; // which inhibits the mouse.
-    SetConsoleMode(consoleHandle[cnInput], consoleMode[cnInput]);
+    {
+        DWORD consoleMode = 0;
+        if (!GetConsoleMode(StdioCtl::in(), &consoleMode)) return false;
+        consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
+        consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
+        consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
+        consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
+        SetConsoleMode(StdioCtl::in(), consoleMode);
+    }
     // Set the output mode.
-    GetConsoleMode(consoleHandle[cnOutput], &consoleMode[cnOutput]);
-    consoleMode[cnOutput] &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
-    SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
-    // Try enabling VT sequences.
-    consoleMode[cnOutput] |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
-    consoleMode[cnOutput] |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-    bool supportsVT = SetConsoleMode(consoleHandle[cnOutput], consoleMode[cnOutput]);
+    bool supportsVT;
+    {
+        DWORD consoleMode = 0;
+        if (!GetConsoleMode(StdioCtl::out(), &consoleMode)) return false;
+        consoleMode &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
+        SetConsoleMode(StdioCtl::out(), consoleMode);
+        // Try enabling VT sequences.
+        consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
+        consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
+        supportsVT = SetConsoleMode(StdioCtl::out(), consoleMode);
+    }
+
     // Set the console and the environment in UTF-8 mode.
-    consoleCp[cnInput] = GetConsoleCP();
-    consoleCp[cnOutput] = GetConsoleOutputCP();
+    cpInput = GetConsoleCP();
+    cpOutput = GetConsoleOutputCP();
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
     setlocale(LC_ALL, ".utf8"); // Note that this must be done after SetConsoleCP().
     // Initialize the character width meter, which depends on the console.
     WinWidth::resetState();
     // Initialize the input and display strategies.
-    display = supportsVT ? std::make_unique<AnsiDisplay<Win32Display>>(*this)
-                         : std::make_unique<Win32Display>(*this);
-    input = std::make_unique<Win32Input>(*this);
+    display = supportsVT ? std::make_unique<AnsiDisplay<Win32Display>>()
+                         : std::make_unique<Win32Display>();
+    input = std::make_unique<Win32Input>();
+    return true;
 }
 
 void Win32ConsoleStrategy::restoreConsole()
 {
     // Restore the startup codepages and screen buffer.
-    SetConsoleCP(consoleCp[cnInput]);
-    SetConsoleOutputCP(consoleCp[cnOutput]);
-    SetConsoleActiveScreenBuffer(consoleHandle[cnStartup]);
-    CloseHandle(consoleHandle[cnOutput]);
+    SetConsoleCP(cpInput);
+    SetConsoleOutputCP(cpOutput);
+    StdioCtl::instance.tearDown();
 }
 
 void Win32ConsoleStrategy::resetConsole()
 {
-    // Open the application in a new console with no data loss.
+    // Attach the application to a new console with no data loss.
     restoreConsole();
-    FreeConsole();
-    AllocConsole();
-    initConsole();
-}
-
-void Win32ConsoleStrategy::reloadScreenBufferInfo()
-{
-    // Set the buffer size to the viewport size so that the scrollbars
-    // do not become visible after resizing.
-    GetConsoleScreenBufferInfo(consoleHandle[cnOutput], &sbInfo);
-    sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
-    sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
-    // Set the cursor temporally to (0, 0) to prevent the console from crashing due to a bug.
-    auto curPos = sbInfo.dwCursorPosition;
-    SetConsoleCursorPosition(consoleHandle[cnOutput], {0, 0});
-    // Resize the buffer.
-    SetConsoleScreenBufferSize(consoleHandle[cnOutput], sbInfo.dwSize);
-    // Restore the cursor position (it does not matter if it is out of bounds).
-    SetConsoleCursorPosition(consoleHandle[cnOutput], curPos);
+    initConsole(cpInput, cpOutput, display, input);
 }
 
 bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev)
 {
     DWORD events = 0;
-    if (!GetNumberOfConsoleInputEvents(consoleHandle[cnInput], &events))
+    if (!GetNumberOfConsoleInputEvents(StdioCtl::in(), &events))
     {
         // The console likely crashed.
         resetConsole();
     }
-    if (!events && WaitForSingleObject(consoleHandle[cnInput], ms) == WAIT_OBJECT_0)
+    if (!events && WaitForSingleObject(StdioCtl::in(), ms) == WAIT_OBJECT_0)
     {
-        GetNumberOfConsoleInputEvents(consoleHandle[cnInput], &events);
+        GetNumberOfConsoleInputEvents(StdioCtl::in(), &events);
     }
     // getEvent() often return false due to discarded events. But this
     // function should not return false if there are pending events, as that
@@ -133,8 +123,7 @@ bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev)
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 
-Win32Input::Win32Input(Win32ConsoleStrategy &cnState) :
-    cnState(cnState),
+Win32Input::Win32Input() :
     insertState(true),
     surrogate(0)
 {
@@ -149,18 +138,23 @@ int Win32Input::getButtonCount()
 
 void Win32Input::cursorOn()
 {
-    SetConsoleMode(cnHandle(), cnState.consoleMode[0] | ENABLE_MOUSE_INPUT);
+    DWORD consoleMode = 0;
+    GetConsoleMode(StdioCtl::in(), &consoleMode);
+    SetConsoleMode(StdioCtl::in(), consoleMode | ENABLE_MOUSE_INPUT);
 }
 
-void Win32Input::cursorOff() {
-    SetConsoleMode(cnHandle(), cnState.consoleMode[0] & ~ENABLE_MOUSE_INPUT);
+void Win32Input::cursorOff()
+{
+    DWORD consoleMode = 0;
+    GetConsoleMode(StdioCtl::in(), &consoleMode);
+    SetConsoleMode(StdioCtl::in(), consoleMode & ~ENABLE_MOUSE_INPUT);
 }
 
 bool Win32Input::getEvent(TEvent &ev)
 {
     INPUT_RECORD irBufferW = {};
     DWORD ok = 0;
-    if (ReadConsoleInputW(cnHandle(), &irBufferW, 1, &ok) && ok)
+    if (ReadConsoleInputW(StdioCtl::in(), &irBufferW, 1, &ok) && ok)
     {
         switch (irBufferW.EventType)
         {
@@ -288,27 +282,41 @@ bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev)
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
-Win32Display::Win32Display(Win32ConsoleStrategy &cnState) :
-    cnState(cnState),
+Win32Display::Win32Display() :
+    dwSize {},
     lastAttr('\x00')
 {
 }
 
 void Win32Display::reloadScreenInfo()
 {
-    cnState.reloadScreenBufferInfo();
+    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
+    // Set the buffer size to the viewport size so that the scrollbars
+    // do not become visible after resizing.
+    GetConsoleScreenBufferInfo(StdioCtl::out(), &sbInfo);
+    sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
+    sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
+    // Set the cursor temporally to (0, 0) to prevent the console from crashing due to a bug.
+    auto curPos = sbInfo.dwCursorPosition;
+    SetConsoleCursorPosition(StdioCtl::out(), {0, 0});
+    // Resize the buffer.
+    SetConsoleScreenBufferSize(StdioCtl::out(), sbInfo.dwSize);
+    // Restore the cursor position (it does not matter if it is out of bounds).
+    SetConsoleCursorPosition(StdioCtl::out(), curPos);
+    // Update internal state.
+    dwSize = sbInfo.dwSize;
     BufferedDisplay::reloadScreenInfo();
 }
 
 TPoint Win32Display::getScreenSize()
 {
-    return {cnState.sbInfo.dwSize.X, cnState.sbInfo.dwSize.Y};
+    return {dwSize.X, dwSize.Y};
 }
 
 int Win32Display::getCaretSize()
 {
     CONSOLE_CURSOR_INFO crInfo {};
-    GetConsoleCursorInfo(cnHandle(), &crInfo);
+    GetConsoleCursorInfo(StdioCtl::out(), &crInfo);
     return crInfo.bVisible ? crInfo.dwSize : 0;
 }
 
@@ -322,16 +330,16 @@ void Win32Display::lowlevelCursorSize(int size)
         crInfo.bVisible = FALSE;
         crInfo.dwSize = 1;
     }
-    SetConsoleCursorInfo(cnHandle(), &crInfo);
+    SetConsoleCursorInfo(StdioCtl::out(), &crInfo);
 }
 
 void Win32Display::clearScreen()
 {
     COORD coord = {0, 0};
-    DWORD length = cnState.sbInfo.dwSize.X * cnState.sbInfo.dwSize.Y;
+    DWORD length = dwSize.X * dwSize.Y;
     DWORD read;
-    FillConsoleOutputAttribute(cnHandle(), 0x07, length, coord, &read);
-    FillConsoleOutputCharacter(cnHandle(), ' ', length, coord, &read);
+    FillConsoleOutputAttribute(StdioCtl::out(), 0x07, length, coord, &read);
+    FillConsoleOutputCharacter(StdioCtl::out(), ' ', length, coord, &read);
 }
 
 ushort Win32Display::getScreenMode()
@@ -343,9 +351,10 @@ ushort Win32Display::getScreenMode()
 
 void Win32Display::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 {
-    if (attr != lastAttr) {
+    if (attr != lastAttr)
+    {
         lowlevelFlush();
-        SetConsoleTextAttribute(cnHandle(), (uchar) attr);
+        SetConsoleTextAttribute(StdioCtl::out(), (uchar) attr);
         lastAttr = attr;
     }
     buf.insert(buf.end(), chars.data(), chars.data()+chars.size());
@@ -354,12 +363,12 @@ void Win32Display::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
 void Win32Display::lowlevelMoveCursor(uint x, uint y)
 {
     lowlevelFlush();
-    SetConsoleCursorPosition(cnHandle(), {(short) x, (short) y});
+    SetConsoleCursorPosition(StdioCtl::out(), {(short) x, (short) y});
 }
 
 void Win32Display::lowlevelFlush()
 {
-    WriteConsole(cnHandle(), buf.data(), buf.size(), nullptr, nullptr);
+    WriteConsole(StdioCtl::out(), buf.data(), buf.size(), nullptr, nullptr);
     buf.resize(0);
 }
 #endif // _WIN32

@@ -32,18 +32,34 @@ public:
 
 };
 
-#else
+#elif defined(_WIN32)
 
-class StdioCtl {
+#include <tvision/compat/win.h>
+
+class StdioCtl
+{
+
+    friend class Win32ConsoleStrategy;
+
+    enum { input = 0, activeOutput = 1, startupOutput = 2 };
+
+    struct
+    {
+        HANDLE handle {INVALID_HANDLE_VALUE};
+        bool owning {false};
+    } cn[3];
+
+    bool ownsConsole {};
+
+    void setUp();
+    void tearDown();
+
+    static StdioCtl instance;
 
 public:
 
-    static int in() { return 0; }
-    static int out() { return 1; }
-    static int err() { return 2; }
-    static FILE *fin() { return stdin; }
-    static FILE *fout() { return stdout; }
-    static FILE *ferr() { return stderr; }
+    static HANDLE in() { return instance.cn[input].handle; }
+    static HANDLE out() { return instance.cn[activeOutput].handle; }
 
 };
 

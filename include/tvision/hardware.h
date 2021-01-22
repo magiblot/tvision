@@ -54,9 +54,6 @@ public:
     static TEvent eventQ[eventQSize];
     static size_t eventCount;
     static void flushScreen();
-    static bool isLinuxConsole();
-    static bool isWin32Console();
-    static void consoleWrite(const void*, size_t);
 #endif
 
     static ulong getTickCount();

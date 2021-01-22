@@ -14,44 +14,29 @@ class Win32Display;
 class Win32ConsoleStrategy : public PlatformStrategy
 {
 
-    friend class Win32Display;
-    friend class Win32Input;
+    UINT cpInput, cpOutput;
 
-    enum ConsoleType { cnInput = 0, cnOutput = 1, cnStartup = 2 };
+    Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
+                          std::unique_ptr<DisplayStrategy> &&display,
+                          std::unique_ptr<InputStrategy> &&input );
+    ~Win32ConsoleStrategy();
 
-    HANDLE consoleHandle[3];
-    UINT consoleCp[2];
-    DWORD consoleMode[2];
-    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
-
-    void initConsole();
+    static bool initConsole( UINT &cpInput, UINT &cpOutput,
+                             std::unique_ptr<DisplayStrategy> &display,
+                             std::unique_ptr<InputStrategy> &input );
     void restoreConsole();
     void resetConsole();
-    void reloadScreenBufferInfo();
-
-    static Win32ConsoleStrategy *instance;
 
 public:
 
-    Win32ConsoleStrategy();
-    ~Win32ConsoleStrategy();
+    static Win32ConsoleStrategy *create();
 
     bool waitForEvent(long ms, TEvent &ev) override;
-
-    static void write(const void *data, size_t bytes);
-
 };
-
-inline void Win32ConsoleStrategy::write(const void *data, size_t bytes)
-{
-    if (instance)
-        WriteConsole(instance->consoleHandle[cnOutput], data, bytes, nullptr, nullptr);
-}
 
 class Win32Input : public InputStrategy
 {
 
-    Win32ConsoleStrategy &cnState;
     bool insertState;
     ushort surrogate;
 
@@ -59,11 +44,9 @@ class Win32Input : public InputStrategy
     bool getUnicodeEvent(KEY_EVENT_RECORD, TEvent &ev);
     bool getMouseEvent(MOUSE_EVENT_RECORD, TEvent &ev);
 
-    HANDLE cnHandle() const;
-
 public:
 
-    Win32Input(Win32ConsoleStrategy &);
+    Win32Input();
 
     int getButtonCount() override;
     void cursorOn() override;
@@ -72,24 +55,16 @@ public:
 
 };
 
-inline HANDLE Win32Input::cnHandle() const
-{
-    return cnState.consoleHandle[0];
-}
-
 class Win32Display : public BufferedDisplay
 {
 
-    Win32ConsoleStrategy &cnState;
-
+    COORD dwSize;
     uchar lastAttr;
     std::vector<char> buf;
 
-    HANDLE cnHandle() const;
-
 public:
 
-    Win32Display(Win32ConsoleStrategy &);
+    Win32Display();
 
     void reloadScreenInfo() override;
     TPoint getScreenSize() override;
@@ -106,11 +81,6 @@ protected:
     void lowlevelFlush() override;
 
 };
-
-inline HANDLE Win32Display::cnHandle() const
-{
-    return cnState.consoleHandle[1];
-}
 
 #endif // _WIN32
 
