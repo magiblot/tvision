@@ -61,6 +61,13 @@ TPoint NcursesDisplay::getScreenSize()
     return {max(x, 0), max(y, 0)};
 }
 
+int NcursesDisplay::getCaretSize()
+{
+    int size = curs_set(0);
+    curs_set(size);
+    return size <= 0 ? 0 : size == 1 ? 1 : 100;
+}
+
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
