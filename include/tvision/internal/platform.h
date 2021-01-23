@@ -107,14 +107,19 @@ public:
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() { display->flushScreen(); }
     virtual void reloadScreenInfo() { display->reloadScreenInfo(); }
+    virtual int wcwidth(TStringView mbc, char32_t wc) { return 1; }
+
+    static PlatformStrategy *instance; // hardware.cpp
 
 };
 
 class NullPlatform : public PlatformStrategy {
 
+    NullPlatform() = default;
+    ~NullPlatform() = default;
+
 public:
 
-    bool waitForEvent(long ms, TEvent &ev) override { return false; }
     int getButtonCount() override { return 0; }
     void cursorOn() override {}
     void cursorOff() override {}
@@ -129,6 +134,8 @@ public:
     void setCaretSize(int size) override {}
     void screenWrite(int x, int y, TScreenCell *buf, int len) override {}
     void flushScreen() override {}
+
+    static NullPlatform instance; // hardware.cpp
 
 };
 
@@ -165,6 +172,8 @@ public:
     {
         return FdInputStrategy::waitForEvent(ms, ev);
     }
+
+    int wcwidth(TStringView mbc, char32_t wc) override; // ttext.cpp
 
 };
 

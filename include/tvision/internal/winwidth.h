@@ -38,7 +38,7 @@ class WinWidth {
 public:
 
     static int mbcwidth(TStringView);
-    static void resetState();
+    static void clearState();
 
 };
 

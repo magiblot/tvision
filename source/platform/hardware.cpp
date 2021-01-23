@@ -41,8 +41,12 @@ THardwareInfo::THardwareInfo()
  * depend on platform.h. Otherwise, any change in platform.h would affect
  * hardware.h, causing the whole tvision library to recompile. */
 
-static NullPlatform nullPlatf;
-static PlatformStrategy *platf = &nullPlatf;
+NullPlatform NullPlatform::instance;
+PlatformStrategy* PlatformStrategy::instance = &NullPlatform::instance;
+
+// For brevity.
+static constexpr PlatformStrategy* &platf = PlatformStrategy::instance;
+static constexpr NullPlatform* nullPlatf = &NullPlatform::instance;
 
 void THardwareInfo::setCaretSize( ushort size ) { platf->setCaretSize(size); }
 void THardwareInfo::setCaretPosition( ushort x, ushort y ) { platf->setCaretPosition(x, y); }
@@ -70,7 +74,7 @@ void THardwareInfo::setUpConsole()
     // Set up input/output control.
     // At least with the ncurses implementation, display must be initialized
     // before input.
-    if (platf == &nullPlatf)
+    if (platf == nullPlatf)
     {
 #ifdef _WIN32
         if (!(platf = Win32ConsoleStrategy::create()))
@@ -97,10 +101,10 @@ void THardwareInfo::setUpConsole()
 void THardwareInfo::restoreConsole()
 {
     // Tear down input/output control by deleting the platform strategy.
-    if (platf != &nullPlatf)
+    if (platf != nullPlatf)
     {
         delete platf;
-        platf = &nullPlatf;
+        platf = nullPlatf;
     }
 }
 
