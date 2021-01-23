@@ -37,7 +37,7 @@
 #endif  // __DOS_H
 
 extern "C" {
-int countLines( void *buf, uint count );
+int countLines( const char *buf, uint count );
 uint scan( const char *block, uint size, const char *str );
 uint iScan( const char *block, uint size, const char *str );
 }

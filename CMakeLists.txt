@@ -3,8 +3,13 @@
 # * TV_BUILD_EXAMPLES (default ON) to enable building examples.
 # * TV_BUILD_USING_GPM (default ON) (only on linux) to enable linking to libgpm
 #   (warning if not found).
-# * TV_USE_STATIC_RTL (default ON) to link against the static version of the
+# * TV_USE_STATIC_RTL (default OFF) to link against the static version of the
 #   runtime library (MSVC only).
+# * TV_REDUCE_APP_SIZE (default OFF) to reduce executable size by asking the
+#   linker to strip out unused funcions and data. This affects the library's PUBLIC
+#   linker flags.
+# * TV_LIBRARY_UNITY_BUILD (default OFF) to reduce the build time of the main library
+#   (CMake 3.16 or newer).
 
 cmake_minimum_required (VERSION 3.5)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
@@ -72,6 +77,18 @@ function(tv_set_output_dir target)
     )
 endfunction()
 
+function(tv_add_private_includes target)
+    target_include_directories(${target} PRIVATE
+        "${PROJECT_SOURCE_DIR}/include/tvision"
+        "${PROJECT_SOURCE_DIR}/include/tvision/compat"
+    )
+    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+        target_include_directories(${target} PRIVATE
+            "${PROJECT_SOURCE_DIR}/include/tvision/compat/malloc"
+        )
+    endif()
+endfunction()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
     set(MAY_BUILD_USING_GPM TRUE)
@@ -89,6 +106,21 @@ if (MSVC)
     set(MAY_USE_STATIC_RTL TRUE)
 endif()
 
+option(TV_REDUCE_APP_SIZE "Strip out unused funcions and data from executables" OFF)
+if ((CMAKE_VERSION VERSION_LESS "3.13.0") AND TV_REDUCE_APP_SIZE)
+    tv_message(WARNING "'TV_REDUCE_APP_SIZE' requested but only available in CMake 3.13.0 or newer.")
+    set(TV_REDUCE_APP_SIZE OFF)
+endif()
+
+option(TV_LTO "Enable link-time optimization" OFF)
+
+option(TV_LIBRARY_UNITY_BUILD "Use CMake's Unity Build" OFF)
+if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_LIBRARY_UNITY_BUILD)
+    tv_message(WARNING "'TV_LIBRARY_UNITY_BUILD' requested but only available in CMake 3.16.0 or newer.")
+    set(TV_LIBRARY_UNITY_BUILD OFF)
+endif()
+
+
 tv_message_mp(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
 tv_message(STATUS "Build Examples: ${TV_BUILD_EXAMPLES}")
 if (MAY_BUILD_USING_GPM)
@@ -98,118 +130,10 @@ if (MAY_USE_STATIC_RTL)
     tv_message_mp(STATUS "Link w/static RTL: ${TV_USE_STATIC_RTL}")
 endif()
 
-# Libraries
-file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
-list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
-add_library(${PROJECT_NAME} STATIC ${TVSOURCE})
+# Library
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
-
-target_include_directories(${PROJECT_NAME} PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/include"
-)
-
-function(tv_add_private_includes target)
-    target_include_directories(${target} PRIVATE
-        "${PROJECT_SOURCE_DIR}/include/tvision"
-        "${PROJECT_SOURCE_DIR}/include/tvision/compat"
-    )
-    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-        target_include_directories(${target} PRIVATE
-            "${PROJECT_SOURCE_DIR}/include/tvision/compat/malloc"
-        )
-    endif()
-endfunction()
-
-tv_add_private_includes(${PROJECT_NAME})
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        /wd4068
-        /wd4146
-        /wd4166
-        /wd4244
-        /wd4250
-        /wd4267
-        /wd4996
-        /permissive-
-        /Zc:__cplusplus
-    )
-else()
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wall
-        -Wno-unknown-pragmas
-        -Wno-pragmas
-        -Wno-reorder
-        -Wno-deprecated
-    )
-endif()
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wno-overloaded-virtual
-    )
-endif()
-if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC
-        _CRT_SECURE_NO_WARNINGS
-    )
-endif()
-
-# Dependencies
-
-if (NOT WIN32)
-    # ncursesw
-    find_library(NCURSESW ncursesw)
-    if (NOT NCURSESW AND APPLE)
-        # macOS has no ncursesw by default
-        find_library(NCURSESW ncurses)
-    endif()
-    # Some distributions place ncurses.h under a separate directory.
-    find_path(NCURSESW_INCLUDE "ncursesw/ncurses.h")
-    if (NCURSESW_INCLUDE)
-        target_include_directories(${PROJECT_NAME} PRIVATE "${NCURSESW_INCLUDE}/ncursesw")
-    endif()
-
-    target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_NCURSES)
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${NCURSESW})
-
-    # tinfow (comes with ncurses and is often provided as 'tinfo',
-    # but we need to link the 'w' version when both are available)
-    find_library(TINFOW tinfow)
-    if (TINFOW)
-        target_link_libraries(${PROJECT_NAME} PUBLIC ${TINFOW})
-    endif()
-
-    # gpm
-    if (TV_BUILD_USING_GPM)
-        tv_message(STATUS "gpm library requested")
-        find_library(GPM gpm)
-        if (NOT GPM)
-            tv_message(WARNING "gpm library requested but not found")
-        else()
-            tv_message(STATUS "gpm library found")
-            target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_GPM)
-            target_link_libraries(${PROJECT_NAME} PUBLIC ${GPM})
-        endif()
-    endif()
-endif()
-
-# allow CMAKE_INSTALL_PREFIX to decide final install position
-#
-# static lib
-#
-install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib)
-
-# includes
-# ./include/tvision and children copied to destination/include/tvision etc...
-#
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/tvision" DESTINATION include)
+add_subdirectory(source)
 
 # Examples
 
 add_subdirectory(examples)
-
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0")
-    # Enable precompiled headers
-    target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/tvision/tv.h")
-endif()

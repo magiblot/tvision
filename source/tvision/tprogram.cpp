@@ -114,7 +114,7 @@ ushort TProgram::executeDialog( TDialog* pD, void* data )
     return c;
 }
 
-inline Boolean hasMouse( TView *p, void *s )
+static Boolean viewHasMouse( TView *p, void *s )
 {
     return Boolean( (p->state & sfVisible) != 0 &&
                      p->mouseInView( ((TEvent *)s)->mouse.where ));
@@ -142,7 +142,7 @@ void TProgram::getEvent(TEvent& event)
         {
         if( (event.what & evKeyDown) != 0 ||
             ( (event.what & evMouseDown) != 0 &&
-              firstThat( hasMouse, &event ) == statusLine
+              firstThat( viewHasMouse, &event ) == statusLine
             )
           )
             statusLine->handleEvent( event );

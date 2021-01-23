@@ -105,6 +105,7 @@ void THelpViewer::draw()
     keyCount = 0;
     keyPoint.x = 0;
     keyPoint.y = 0;
+    keyLength = 0;
     topic->setWidth(size.x);
     if (topic->getNumCrossRefs() > 0)
         {

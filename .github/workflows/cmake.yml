@@ -7,24 +7,17 @@ env:
 
 jobs:
   build-linux-gcc:
-    name: Linux (GCC) (${{ matrix.with_gpm }})
+    name: Linux (GCC) (Unity)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        with_gpm: [ "GPM", "no GPM" ]
     steps:
     - uses: actions/checkout@v2
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev
-
-    - name: Install GPM
-      run: sudo apt -y install libgpm-dev
-      if: ${{ matrix.with_gpm == 'GPM' }}
+      run: sudo apt -y install libncursesw5-dev libgpm-dev
 
     - name: Configure CMake
       shell: bash
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTV_REDUCE_APP_SIZE=ON -DTV_LIBRARY_UNITY_BUILD=ON
 
     - name: Build
       shell: bash

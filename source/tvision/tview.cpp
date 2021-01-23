@@ -78,13 +78,7 @@ void TView::blockCursor()
      setState(sfCursorIns, True);
 }
 
-#define grow(i) (( growMode & gfGrowRel ) ? \
-                    ( s != d ) ? \
-                        (i = (i * s + ((s - d) >> 1)) / (s - d)) \
-                      : (0) \
-                  : (i += d))
-
-inline int range( int val, int min, int max )
+static inline int range( int val, int min, int max )
 {
     if( min > max )
         min = max;
@@ -121,8 +115,21 @@ static int balancedRange( int val, int min, int max, int &balance)
         }
 }
 
-#define fitToLimits(a, b, min, max, balance) \
+static inline void fitToLimits( int a, int b, int min, int max, int &balance)
+{
     b = a + balancedRange( b - a, min, max, balance );
+}
+
+static inline void grow( TView *p, int s, int d, int &i )
+{
+    if( p->growMode & gfGrowRel )
+        {
+        if( s != d )
+            i = (i * s + ((s - d) >> 1)) / (s - d);
+        }
+    else
+        i += d;
+}
 
 void TView::calcBounds( TRect& bounds, TPoint delta )
 {
@@ -132,19 +139,19 @@ void TView::calcBounds( TRect& bounds, TPoint delta )
     short d = delta.x;
 
     if( (growMode & gfGrowLoX) != 0 )
-        grow(bounds.a.x);
+        grow(this, s, d, bounds.a.x);
 
     if( (growMode & gfGrowHiX) != 0 )
-        grow(bounds.b.x);
+        grow(this, s, d, bounds.b.x);
 
     s = owner->size.y;
     d = delta.y;
 
     if( (growMode & gfGrowLoY) != 0 )
-        grow(bounds.a.y);
+        grow(this, s, d, bounds.a.y);
 
     if( (growMode & gfGrowHiY) != 0 )
-        grow(bounds.b.y);
+        grow(this, s, d, bounds.b.y);
 
     TPoint minLim, maxLim;
     sizeLimits( minLim, maxLim );
