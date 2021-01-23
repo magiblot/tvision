@@ -1,6 +1,10 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#ifdef __FreeBSD__
+#undef wcwidth
+#endif
+
 #define Uses_TPoint
 #include <tvision/tv.h>
 #include <memory>
