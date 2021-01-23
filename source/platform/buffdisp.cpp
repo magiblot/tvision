@@ -132,14 +132,18 @@ bool BufferedDisplay::timeToFlush()
 void BufferedDisplay::drawCursors()
 {
     for (auto* cursor : cursors)
-        if (cursor->isVisible()) {
+        if (cursor->isVisible())
+        {
             auto pos = cursor->getPos();
             auto x = pos.x, y = pos.y;
             if (inBounds(x, y))
             {
-                auto &cell = buffer[y*size.x + x];
-                cursor->apply(cell.Attr);
-                setDirty(x, cell, rowDamage[y]);
+                auto *cell = &buffer[y*size.x + x];
+                if ( cell->Char == TScreenCell::wideCharTrail &&
+                     x > 0 && (cell - 1)->extraWidth )
+                    --cell, --x;
+                cursor->apply(cell->Attr);
+                setDirty(x, *cell, rowDamage[y]);
             }
         }
 }
@@ -147,14 +151,18 @@ void BufferedDisplay::drawCursors()
 void BufferedDisplay::undrawCursors()
 {
     for (const auto* cursor : cursors)
-        if (cursor->isVisible()) {
+        if (cursor->isVisible())
+        {
             auto pos = cursor->getPos();
             auto x = pos.x, y = pos.y;
             if (inBounds(x, y))
             {
-                auto &cell = buffer[y*size.x + x];
-                cursor->restore(cell.Attr);
-                setDirty(x, cell, rowDamage[y]);
+                auto *cell = &buffer[y*size.x + x];
+                if ( cell->Char == TScreenCell::wideCharTrail &&
+                     x > 0 && (cell - 1)->extraWidth )
+                    --cell, --x;
+                cursor->restore(cell->Attr);
+                setDirty(x, *cell, rowDamage[y]);
             }
         }
 }
