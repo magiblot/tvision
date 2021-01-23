@@ -14,13 +14,19 @@
  * key events don't include that information. So, an extra translation
  * step must be done to get the actual Turbo Vision key codes. */
 
-static constexpr auto keyCodeWithShift = constexpr_map<ushort, ushort>::from_array({
+#if __cpp_constexpr >= 201304L
+constexpr
+#endif
+static auto keyCodeWithShift = constexpr_map<ushort, ushort>::from_array({
     { kbTab,        kbShiftTab      },
     { kbDel,        kbShiftDel      },
     { kbIns,        kbShiftIns      }
 });
 
-static constexpr auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
+#if __cpp_constexpr >= 201304L
+constexpr
+#endif
+static auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
     { 0x001F,       kbCtrlBack      },
     { kbDel,        kbCtrlDel       },
     { kbEnd,        kbCtrlEnd       },
@@ -34,7 +40,10 @@ static constexpr auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_arra
     { kbDown,       kbCtrlDown      }
 });
 
-static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array({
+#if __cpp_constexpr >= 201304L
+constexpr
+#endif
+static auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array({
     { kbDel,        kbAltDel        },
     { kbEnd,        kbAltEnd        },
     { kbHome,       kbAltHome       },
@@ -45,10 +54,10 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
     { kbDown,       kbAltDown       },
 });
 
-LinuxConsoleStrategy::LinuxConsoleStrategy( std::unique_ptr<DisplayStrategy> &&d,
-                                            std::unique_ptr<FdInputStrategy> &&i ) :
-    UnixPlatformStrategy(std::move(d), std::move(i)),
-    gpm(std::make_unique<GpmInput>())
+LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy *d,
+                                            FdInputStrategy *i ) :
+    UnixPlatformStrategy(d, i),
+    gpm(new GpmInput())
 {
     /* The FdInputStrategy instance which reads key events is stored in
      * the 'input' attribute of PlatformStrategy, while the GpmInput instance

@@ -68,10 +68,10 @@ struct TVWrite {
 #else
         // Here TCellAttribs is a struct, so we can have a dedicated field
         // to determine whether the shadow has been applied.
-        if (!attr.shadow)
+        if (!attr.reserved)
         {
             attr = attr & 0xF0 ? shadowAttr : shadowAttrInv;
-            attr.shadow = 1;
+            attr.reserved = 1;
         }
         return attr;
 #endif

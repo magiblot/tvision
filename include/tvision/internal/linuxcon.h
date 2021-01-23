@@ -22,8 +22,7 @@ class LinuxConsoleStrategy : public UnixPlatformStrategy {
 
 public:
 
-    LinuxConsoleStrategy( std::unique_ptr<DisplayStrategy> &&,
-                          std::unique_ptr<FdInputStrategy> && );
+    LinuxConsoleStrategy(DisplayStrategy *, FdInputStrategy *);
 
     int getButtonCount() override;
     int wcwidth(TStringView mbc, char32_t wc) override; // ttext.cpp

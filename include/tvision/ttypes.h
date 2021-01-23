@@ -41,7 +41,7 @@ typedef unsigned long ulong;
 
 #ifndef __BORLANDC__
 #include <cstddef>
-#include <cstdint>
+#include <stdint.h>
 #else
 #include <stddef.h>
 typedef char int8_t;

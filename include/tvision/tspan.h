@@ -97,10 +97,7 @@ public:
 
     constexpr TSpan subspan(size_t pos, size_t n) const
     {
-        size_t tail = len - pos;
-        if (n > tail)
-            n = tail;
-        return TSpan<T>(ptr + pos, n);
+        return TSpan<T>(ptr + pos, n <= len - pos ? n : len - pos);
     }
 
     constexpr T _FAR * begin() const

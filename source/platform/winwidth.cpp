@@ -10,14 +10,14 @@ WinWidth thread_local WinWidth::state;
 
 WinWidth::WinWidth()
 {
-    auto &&lock = std::scoped_lock(m);
+    auto &&lock = std::lock_guard<std::mutex>(m);
     states.push_back(this);
 }
 
 WinWidth::~WinWidth()
 {
     {
-        auto &&lock = std::scoped_lock(m);
+        auto &&lock = std::lock_guard<std::mutex>(m);
         // In theory this object should appear only once in the list, but whatever.
         auto it = states.cbegin();
         while (it != states.cend())
@@ -31,7 +31,7 @@ WinWidth::~WinWidth()
 
 void WinWidth::clearState()
 {
-    auto &&lock = std::scoped_lock(m);
+    auto &&lock = std::lock_guard<std::mutex>(m);
     for (auto *state : states)
         state->tearDown();
 }

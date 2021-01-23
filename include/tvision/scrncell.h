@@ -75,12 +75,11 @@ struct alignas(T) trivially_convertible {
 protected:
 
     template<class C>
-    static constexpr bool check_trivial()
+    static void check_trivial()
     {
         static_assert(std::is_trivial<C>(), "");
         static_assert(sizeof(C) == sizeof(T), "");
         static_assert(alignof(C) == alignof(T), "");
-        return true;
     }
 
 };
@@ -115,12 +114,8 @@ struct TCellAttribs : trivially_convertible<uint16_t>
         underline   : 1,
         reverse     : 1;
 
-private:
     uint8_t
-        shadow      : 1;
-
-    friend struct TVWrite;
-public:
+        reserved    : 1;
 
     using trivially_convertible::trivially_convertible;
     TCellAttribs() = default;
@@ -159,7 +154,7 @@ public:
         *this = (*this & ~0xFF00) | (other & 0xFF00);
     }
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         check_trivial<TCellAttribs>();
     }
@@ -175,7 +170,7 @@ struct TScreenCellA : trivially_convertible<uint16_t>
     using trivially_convertible::trivially_convertible;
     TScreenCellA() = default;
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         check_trivial<TScreenCellA>();
     }
@@ -253,7 +248,7 @@ struct alignas(4) TCellChar
         return {(const char*) bytes, size()};
     }
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         static_assert(std::is_trivial<TCellChar>(), "");
     }
@@ -283,9 +278,9 @@ struct TScreenCell
         memcpy(this, &ch, std::min(sizeof(*this), sizeof(ch)));
     }
 
-    static constexpr uint32_t wideCharTrail = (uint32_t) -2;
+    enum : uint32_t { wideCharTrail = (uint32_t) -2 };
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         static_assert(std::is_trivial<TScreenCell>(), "");
     }
@@ -331,7 +326,7 @@ inline void setChar(TScreenCell &cell, uchar ch)
 
 inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
 {
-    TScreenCell c = 0;
+    TScreenCell c {};
     ::setChar(c, ch, extraWidth);
     ::setAttr(c, attr);
     memcpy(&cell, &c, sizeof(TScreenCell));

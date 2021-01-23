@@ -317,7 +317,7 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
         return count;
 #else
         return TText::fill(data.subspan(indent), str,
-            [attr] (auto &cell) {
+            [attr] (TScreenCell &cell) {
                 if (attr)
                     ::setAttr(cell, (uchar)attr);
             }
@@ -369,7 +369,7 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort
         if (d < length())
             {
             return remainder + TText::fill(data.subspan(d, width - remainder), str.substr(s),
-                [attr] (auto &cell) {
+                [attr] (TScreenCell &cell) {
                     if (attr)
                         ::setAttr(cell, (uchar)attr);
                 }

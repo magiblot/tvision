@@ -83,17 +83,17 @@ void THardwareInfo::setUpConsole()
             ExitProcess(1);
         }
 #else
-        std::unique_ptr<DisplayStrategy> disp;
+        DisplayStrategy *disp;
         if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
-            disp = std::make_unique<NcursesDisplay>();
+            disp = new NcursesDisplay();
         else
-            disp = std::make_unique<AnsiDisplay<NcursesDisplay>>();
+            disp = new AnsiDisplay<NcursesDisplay>();
         if (TermIO::isLinuxConsole())
-            platf = new LinuxConsoleStrategy( std::move(disp),
-                                              std::make_unique<NcursesInput>(false) );
+            platf = new LinuxConsoleStrategy( disp,
+                                              new NcursesInput(false) );
         else
-            platf = new UnixPlatformStrategy( std::move(disp),
-                                              std::make_unique<NcursesInput>() );
+            platf = new UnixPlatformStrategy( disp,
+                                              new NcursesInput() );
 #endif
     }
 }

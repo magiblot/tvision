@@ -9,7 +9,6 @@
 #include <ios>
 #include <streambuf>
 #include <ostream>
-#include <cstdio>
 
 using std::cerr;
 using std::cin;

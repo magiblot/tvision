@@ -103,7 +103,7 @@ file(GLOB_RECURSE TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/*/*.cpp")
 list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/source/tvision/geninc.cpp")
 add_library(${PROJECT_NAME} STATIC ${TVSOURCE})
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
@@ -144,7 +144,11 @@ else()
         -Wno-deprecated
     )
 endif()
-
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(${PROJECT_NAME} PUBLIC
+        -Wno-overloaded-virtual
+    )
+endif()
 if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PUBLIC
         _CRT_SECURE_NO_WARNINGS

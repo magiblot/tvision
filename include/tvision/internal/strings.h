@@ -11,7 +11,10 @@ namespace detail
 {
 
 template<class Int>
-inline constexpr Int string_as_int(TStringView s)
+#if __cpp_constexpr >= 201304L
+constexpr
+#endif
+inline Int string_as_int(TStringView s)
 {
     Int res = 0;
     for (size_t i = 0; i < std::min(s.size(), sizeof(res)); ++i)

@@ -81,10 +81,9 @@ protected:
 public:
 
     PlatformStrategy() {}
-    PlatformStrategy( std::unique_ptr<DisplayStrategy> &&d,
-                      std::unique_ptr<InputStrategy> &&i ) :
-        display(std::move(d)),
-        input(std::move(i))
+    PlatformStrategy( DisplayStrategy *d, InputStrategy *i ) :
+        display(d),
+        input(i)
     {
         if (display) display->reloadScreenInfo();
     }

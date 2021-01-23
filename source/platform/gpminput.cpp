@@ -9,11 +9,9 @@
 #include <internal/gpminput.h>
 #include <internal/linuxcon.h>
 #include <algorithm>
-#include <tuple>
 #include <cstdlib>
 #include <memory>
 #include <gpm.h>
-using std::tuple;
 
 GpmInput::GpmInput() :
     buttonState(0)
@@ -58,17 +56,24 @@ int GpmInput::getButtonCount()
 void GpmInput::fitEvent(Gpm_Event &gpmEvent)
 {
     short &x = gpmEvent.x, &y = gpmEvent.y;
-    x = std::clamp<short>(x, 0, TScreen::screenWidth - 1);
-    y = std::clamp<short>(y, 0, TScreen::screenHeight - 1);
+    x = std::min<short>(std::max<short>(x, 0), TScreen::screenWidth - 1);
+    y = std::min<short>(std::max<short>(y, 0), TScreen::screenHeight - 1);
 }
 
-using gpm_flag_t = decltype(GPM_B_LEFT);
-using mb_flag_t = decltype(mbLeftButton);
+struct GpmMbFlag
+{
+    using gpm_flag_t = decltype(GPM_B_LEFT);
+    using mb_flag_t = decltype(mbLeftButton);
 
-static constexpr tuple<gpm_flag_t, mb_flag_t> gpmButtonFlags[] = {
+    gpm_flag_t gpm;
+    mb_flag_t mb;
+};
+
+static constexpr GpmMbFlag gpmButtonFlags[] =
+{
     {GPM_B_LEFT, mbLeftButton},
     {GPM_B_RIGHT, mbRightButton},
-    {GPM_B_MIDDLE, mbMiddleButton}
+    {GPM_B_MIDDLE, mbMiddleButton},
 };
 
 bool GpmInput::getEvent(TEvent &ev)
@@ -84,17 +89,18 @@ bool GpmInput::getEvent(TEvent &ev)
             ev.what = evMouse;
             ev.mouse.where.x = gpmEvent.x;
             ev.mouse.where.y = gpmEvent.y;
-            for (const auto& [gpmFlag, mbFlag] : gpmButtonFlags)
-                if (gpmEvent.buttons & gpmFlag) {
+            for (const auto& flag : gpmButtonFlags)
+                if (gpmEvent.buttons & flag.gpm)
+                {
                     if (gpmEvent.type & GPM_DOWN)
-                        buttonState |= mbFlag;
+                        buttonState |= flag.mb;
                     if (gpmEvent.type & GPM_UP)
-                        buttonState &= ~mbFlag;
+                        buttonState &= ~flag.mb;
                 }
             ev.mouse.buttons = buttonState;
-            if ( gpmEvent.wdy )
+            if (gpmEvent.wdy)
                 ev.mouse.wheel = gpmEvent.wdy > 0 ? mwUp : mwDown;
-            else if ( gpmEvent.wdx )
+            else if (gpmEvent.wdx)
                 ev.mouse.wheel = gpmEvent.wdx > 0 ? mwRight : mwLeft;
             else
                 ev.mouse.wheel = 0;

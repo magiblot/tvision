@@ -39,7 +39,7 @@ struct SGRAttribs : trivially_convertible<uint64_t> {
     SGRAttribs(decltype(defaultInit));
     SGRAttribs(TCellAttribs bios, uint flags);
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         check_trivial<SGRAttribs>();
     }
@@ -107,7 +107,7 @@ struct BufferCell {
     bool operator!=(BufferCell other) const;
     void ensurePrintable(bool wideChars);
 
-    static constexpr void check_assumptions()
+    static void check_assumptions()
     {
         static_assert(std::is_trivial<BufferCell>(), "");
     }

@@ -17,8 +17,8 @@ class Win32ConsoleStrategy : public PlatformStrategy
     UINT cpInput, cpOutput;
 
     Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
-                          std::unique_ptr<DisplayStrategy> &&display,
-                          std::unique_ptr<InputStrategy> &&input );
+                          DisplayStrategy *display,
+                          InputStrategy *input );
     ~Win32ConsoleStrategy();
 
     static bool initConsole( UINT &cpInput, UINT &cpOutput,

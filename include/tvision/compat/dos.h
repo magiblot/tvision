@@ -69,7 +69,7 @@ struct  find_t {
     char            name[256];         /* asciiz name of matched file */
 };
 
-#include <cstdio> // SEEK_SET, SEEK_CUR, SEEK_END
+#include <stdio.h> // SEEK_SET, SEEK_CUR, SEEK_END
 
 unsigned _dos_findfirst( const char * __path, unsigned __attrib, struct find_t *__finfo );
 unsigned _dos_findnext( struct find_t *__finfo );

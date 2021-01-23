@@ -19,16 +19,16 @@ Win32ConsoleStrategy* Win32ConsoleStrategy::create()
     if (initConsole(cpInput, cpOutput, display, input))
     {
         return new Win32ConsoleStrategy( cpInput, cpOutput,
-                                         std::move(display),
-                                         std::move(input) );
+                                         display.release(),
+                                         input.release() );
     }
     return nullptr;
 }
 
 Win32ConsoleStrategy::Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
-                                            std::unique_ptr<DisplayStrategy> &&display,
-                                            std::unique_ptr<InputStrategy> &&input ) :
-    PlatformStrategy(std::move(display), std::move(input)),
+                                            DisplayStrategy *display,
+                                            InputStrategy *input ) :
+    PlatformStrategy(display, input),
     cpInput(cpInput),
     cpOutput(cpOutput)
 {

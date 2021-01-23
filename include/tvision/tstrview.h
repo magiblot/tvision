@@ -40,7 +40,10 @@ class TStringView {
 public:
 
     constexpr TStringView();
-    constexpr TStringView(const char _FAR *str);
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+              TStringView(const char _FAR *str);
     constexpr TStringView(const char _FAR *str, size_t len);
     constexpr TStringView(TSpan<char> span);
     constexpr TStringView(TSpan<const char> span);
@@ -69,9 +72,6 @@ public:
     constexpr const char _FAR * end() const;
     constexpr const char _FAR * cend() const;
 
-    friend constexpr Boolean operator==(TStringView a, TStringView b);
-    friend constexpr Boolean operator!=(TStringView a, TStringView b);
-
     friend ostream _FAR & operator<<(ostream _FAR &os, TStringView s);
 
 };
@@ -84,15 +84,17 @@ inline constexpr TStringView::TStringView() :
 
 #pragma warn -inl
 
-#ifdef __cpp_lib_string_view
-inline constexpr TStringView::TStringView(const char _FAR *str) :
-    TStringView()
+#if __cpp_constexpr >= 201304L
+constexpr
+#endif
+#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
+inline TStringView::TStringView(const char _FAR *str) :
+    str(str),
+    len(str ? std::char_traits<char>::length(str) : 0)
 {
-    if (str)
-        *this = std::string_view {str};
 }
 #else
-inline constexpr TStringView::TStringView(const char _FAR *str) :
+inline TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(0)
 {
@@ -190,10 +192,7 @@ inline constexpr TStringView TStringView::substr(size_t pos) const
 
 inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
 {
-    size_t tail = len - pos;
-    if (n > tail)
-        n = tail;
-    return TStringView(str + pos, n);
+    return TStringView(str + pos, n <= len - pos ? n : len - pos);
 }
 
 inline constexpr const char _FAR * TStringView::begin() const
@@ -216,23 +215,31 @@ inline constexpr const char _FAR * TStringView::cend() const
     return &str[len];
 }
 
+#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
 inline constexpr Boolean operator==(TStringView a, TStringView b)
 {
-#ifdef __cpp_lib_string_view
-    return std::string_view {a} == std::string_view {b};
+    return a.size() == b.size()
+      ? std::char_traits<char>::compare(a.data(), b.data(), b.size()) == 0
+      : False;
+}
 #else
+inline Boolean operator==(TStringView a, TStringView b)
+{
     if (a.size() == b.size())
         return memcmp(a.data(), b.data(), b.size()) == 0;
     return False;
-#endif
 }
+#endif
 
-inline constexpr Boolean operator!=(TStringView a, TStringView b)
+#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
+constexpr
+#endif
+inline Boolean operator!=(TStringView a, TStringView b)
 {
     return !(a == b);
 }
 
-#ifndef __BORLANDC__
+#if __cplusplus >= 201103L
 
 #include <typeindex>
 
@@ -250,6 +257,6 @@ namespace std {
 #endif
 } // namespace std
 
-#endif // __BORLANDC__
+#endif // __cplusplus >= 201103L
 
 #endif // TVISION_TSTRVIEW_H

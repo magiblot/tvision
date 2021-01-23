@@ -18,7 +18,10 @@ class constexpr_map
 
 public:
 
-    constexpr constexpr_map(const std::pair<Key, Value> (&init) [N]) :
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+    constexpr_map(const std::pair<Key, Value> (&init) [N]) :
         keys {},
         values {}
     {
@@ -28,7 +31,10 @@ public:
         }
     }
 
-    constexpr Value operator[](const Key &key) const {
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+    Value operator[](const Key &key) const {
         for (size_t i = 0; i < N; ++i)
             if (keys[i] == key)
                 return values[i];
@@ -50,7 +56,11 @@ class constexpr_map<Key, Value, (size_t)-1>
 public:
 
     template<size_t N>
-    static constexpr auto from_array(const std::pair<Key, Value> (&init) [N])
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+    static constexpr_map<Key, Value, N>
+    from_array(const std::pair<Key, Value> (&init) [N])
     {
         return constexpr_map<Key, Value, N>(init);
     }
