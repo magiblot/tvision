@@ -4,7 +4,6 @@
 #ifdef _WIN32
 
 #include <tvision/compat/win.h>
-#include <string_view>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -20,36 +19,36 @@ class WinWidth {
     // A separate state is stored for every thread so that width() is both
     // thread-safe and lock-free.
 
-    HANDLE cnHandle {INVALID_HANDLE_VALUE};
-    bool registered {false};
     std::unordered_map<uint32_t, short> results;
+    HANDLE cnHandle {INVALID_HANDLE_VALUE};
 
+    WinWidth();
     ~WinWidth();
 
-    int calcWidth(std::string_view);
+    int calcWidth(TStringView);
     void setUp();
     void tearDown();
-    bool valid() const;
+    static bool valid(HANDLE h);
 
-    static thread_local WinWidth state;
     static std::vector<WinWidth*> states;
     static std::mutex m;
+    static thread_local WinWidth state;
 
 
 public:
 
-    static int mbcwidth(std::string_view);
+    static int mbcwidth(TStringView);
     static void resetState();
 
 };
 
-inline bool WinWidth::valid() const
+inline bool WinWidth::valid(HANDLE h)
 {
     // INVALID_HANDLE_VALUE because it's what CreateConsoleScreenBuffer returns.
-    return cnHandle != INVALID_HANDLE_VALUE;
+    return h != INVALID_HANDLE_VALUE;
 }
 
-inline int WinWidth::mbcwidth(std::string_view mbc)
+inline int WinWidth::mbcwidth(TStringView mbc)
 // At most 4 characters will be read from 'mbc', because it is expected to
 // contain exactly one UTF-8 sequence. The result won't be what you expect
 // if you pass a longer string.

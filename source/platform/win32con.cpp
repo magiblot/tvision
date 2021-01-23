@@ -74,8 +74,6 @@ bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
     setlocale(LC_ALL, ".utf8"); // Note that this must be done after SetConsoleCP().
-    // Initialize the character width meter, which depends on the console.
-    WinWidth::resetState();
     // Initialize the input and display strategies.
     display = supportsVT ? std::make_unique<AnsiDisplay<Win32Display>>()
                          : std::make_unique<Win32Display>();
@@ -88,6 +86,7 @@ void Win32ConsoleStrategy::restoreConsole()
     // Restore the startup codepages and screen buffer.
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
+    WinWidth::clearState();
     StdioCtl::instance.tearDown();
 }
 

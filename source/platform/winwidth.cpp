@@ -3,42 +3,43 @@
 #include <internal/winwidth.h>
 #include <algorithm>
 
-WinWidth thread_local WinWidth::state;
-
 std::vector<WinWidth*> WinWidth::states;
 std::mutex WinWidth::m;
+// Order matters! This relies on the above variables being initialized.
+WinWidth thread_local WinWidth::state;
+
+WinWidth::WinWidth()
+{
+    auto &&lock = std::scoped_lock(m);
+    states.push_back(this);
+}
 
 WinWidth::~WinWidth()
 {
-    auto &&lock = std::scoped_lock(m);
-    // In theory this object should appear only once in the list, but whatever.
-    auto it = states.cbegin();
-    while (it != states.cend())
-        if (*it == this)
-            it = states.erase(it);
-        else
-            ++it;
+    {
+        auto &&lock = std::scoped_lock(m);
+        // In theory this object should appear only once in the list, but whatever.
+        auto it = states.cbegin();
+        while (it != states.cend())
+            if (*it == this)
+                it = states.erase(it);
+            else
+                ++it;
+    }
     tearDown();
 }
 
-void WinWidth::resetState()
+void WinWidth::clearState()
 {
     auto &&lock = std::scoped_lock(m);
     for (auto *state : states)
-        state->setUp();
+        state->tearDown();
 }
 
 void WinWidth::setUp()
 {
-    if (!registered) {
-        registered = true;
-        // First time.
-        auto &&lock = std::scoped_lock(m);
-        states.push_back(this);
-    }
-    if (valid()) {
+    if (valid(cnHandle))
         tearDown();
-    }
     cnHandle = CreateConsoleScreenBuffer(
         GENERIC_READ | GENERIC_WRITE,
         0,
@@ -51,21 +52,24 @@ void WinWidth::setUp()
 
 void WinWidth::tearDown()
 {
-    CloseHandle(cnHandle);
-    cnHandle = 0;
+    if (cnHandle != INVALID_HANDLE_VALUE)
+        CloseHandle(cnHandle);
+    cnHandle = INVALID_HANDLE_VALUE;
     results.clear();
 }
 
-int WinWidth::calcWidth(std::string_view mbc)
+int WinWidth::calcWidth(TStringView mbc)
 {
-    if (!valid())
+    if (!valid(cnHandle))
         setUp();
     uint32_t key = 0;
     memcpy(&key, mbc.data(), std::min(mbc.size(), sizeof(key)));
     auto it = results.find(key);
-    if (it == results.end()) {
+    if (it == results.end())
+    {
         short res = -1;
-        if (valid()) {
+        if (valid(cnHandle))
+        {
             SetConsoleCursorPosition(cnHandle, {0, 0});
             // I have seen WriteConsole return error despite the text being
             // printed... so don't check the return value.
@@ -78,7 +82,8 @@ int WinWidth::calcWidth(std::string_view mbc)
             results.emplace(key, res);
         }
         return res;
-    } else
+    }
+    else
         return it->second;
 }
 
