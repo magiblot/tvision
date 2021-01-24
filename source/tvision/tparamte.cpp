@@ -13,6 +13,8 @@
  */
 
 #define Uses_TParamText
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 
 #if !defined( __STDIO_H )

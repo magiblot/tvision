@@ -18,6 +18,8 @@
 #define Uses_TEvent
 #define Uses_TDrawBuffer
 #define Uses_TKeys
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 #include <string.h>
 

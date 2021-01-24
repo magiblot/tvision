@@ -30,6 +30,7 @@ __link( RWindow )
 #include <stdlib.h>
 #include <ctype.h>
 #include <strstrea.h>
+#include <iostream.h>
 #include <iomanip.h>
 
 #include "ascii.h"

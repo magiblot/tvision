@@ -14,6 +14,8 @@
 
 #define Uses_TResourceCollection
 #define Uses_TResourceItem
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 
 TResourceCollection::TResourceCollection( short aLimit, short aDelta) :

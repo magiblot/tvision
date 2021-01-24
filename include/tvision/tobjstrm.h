@@ -398,19 +398,6 @@ public:
     char _FAR * _Cdecl readString();
     char _FAR * _Cdecl readString( char _FAR *, unsigned );
 
-    friend ipstream& _Cdecl operator >> ( ipstream&, char& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, signed char& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, unsigned char& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, signed short& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, unsigned short& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, signed int& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, unsigned int& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, signed long& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, unsigned long& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, float& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, double& );
-    friend ipstream& _Cdecl operator >> ( ipstream&, long double& );
-
     friend ipstream& _Cdecl operator >> ( ipstream&, TStreamable& );
     friend ipstream& _Cdecl operator >> ( ipstream&, void _FAR *& );
 
@@ -475,19 +462,6 @@ public:
     void _Cdecl writeWord( ushort );
     void _Cdecl writeString( const char _FAR * );
     void _Cdecl writeString( TStringView );
-
-    friend opstream& _Cdecl operator << ( opstream&, char );
-    friend opstream& _Cdecl operator << ( opstream&, signed char );
-    friend opstream& _Cdecl operator << ( opstream&, unsigned char );
-    friend opstream& _Cdecl operator << ( opstream&, signed short );
-    friend opstream& _Cdecl operator << ( opstream&, unsigned short );
-    friend opstream& _Cdecl operator << ( opstream&, signed int );
-    friend opstream& _Cdecl operator << ( opstream&, unsigned int );
-    friend opstream& _Cdecl operator << ( opstream&, signed long );
-    friend opstream& _Cdecl operator << ( opstream&, unsigned long );
-    friend opstream& _Cdecl operator << ( opstream&, float );
-    friend opstream& _Cdecl operator << ( opstream&, double );
-    friend opstream& _Cdecl operator << ( opstream&, long double );
 
     friend opstream& _Cdecl operator << ( opstream&, TStreamable& );
     friend opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );

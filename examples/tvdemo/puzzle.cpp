@@ -19,6 +19,8 @@
 #define Uses_TStreamable
 #define Uses_TView
 #define Uses_TWindow
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 __link( RView )
 __link( RWindow )

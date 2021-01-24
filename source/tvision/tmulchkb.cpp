@@ -13,6 +13,8 @@
  */
 
 #define Uses_TMultiCheckBoxes
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 
 TMultiCheckBoxes::TMultiCheckBoxes( TRect& bounds, TSItem* aStrings,

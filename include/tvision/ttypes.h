@@ -61,6 +61,36 @@ class _FAR opstream;
 class _FAR TStreamable;
 class _FAR TStreamableTypes;
 
+ipstream& _Cdecl operator >> ( ipstream&, char& );
+ipstream& _Cdecl operator >> ( ipstream&, signed char& );
+ipstream& _Cdecl operator >> ( ipstream&, unsigned char& );
+ipstream& _Cdecl operator >> ( ipstream&, signed short& );
+ipstream& _Cdecl operator >> ( ipstream&, unsigned short& );
+ipstream& _Cdecl operator >> ( ipstream&, signed int& );
+ipstream& _Cdecl operator >> ( ipstream&, unsigned int& );
+ipstream& _Cdecl operator >> ( ipstream&, signed long& );
+ipstream& _Cdecl operator >> ( ipstream&, unsigned long& );
+ipstream& _Cdecl operator >> ( ipstream&, float& );
+ipstream& _Cdecl operator >> ( ipstream&, double& );
+ipstream& _Cdecl operator >> ( ipstream&, long double& );
+ipstream& _Cdecl operator >> ( ipstream&, TStreamable& );
+ipstream& _Cdecl operator >> ( ipstream&, void _FAR *& );
+
+opstream& _Cdecl operator << ( opstream&, char );
+opstream& _Cdecl operator << ( opstream&, signed char );
+opstream& _Cdecl operator << ( opstream&, unsigned char );
+opstream& _Cdecl operator << ( opstream&, signed short );
+opstream& _Cdecl operator << ( opstream&, unsigned short );
+opstream& _Cdecl operator << ( opstream&, signed int );
+opstream& _Cdecl operator << ( opstream&, unsigned int );
+opstream& _Cdecl operator << ( opstream&, signed long );
+opstream& _Cdecl operator << ( opstream&, unsigned long );
+opstream& _Cdecl operator << ( opstream&, float );
+opstream& _Cdecl operator << ( opstream&, double );
+opstream& _Cdecl operator << ( opstream&, long double );
+opstream& _Cdecl operator << ( opstream&, TStreamable& );
+opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
+
 typedef int ccIndex;
 typedef Boolean (*ccTestFunc)( void *, void * );
 typedef void (*ccAppFunc)( void *, void * );

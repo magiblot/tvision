@@ -24,6 +24,8 @@
 #define Uses_TRangeValidator
 #define Uses_TLookupValidator
 #define Uses_TStringLookupValidator
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 #include <string.h>
 #include <stdio.h>

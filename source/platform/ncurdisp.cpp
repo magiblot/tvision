@@ -8,6 +8,7 @@
 #include <internal/textattr.h>
 #include <internal/stdioctl.h>
 #include <internal/terminal.h>
+#include <iostream.h>
 #include <ncurses.h>
 #include <clocale>
 

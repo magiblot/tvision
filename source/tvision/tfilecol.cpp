@@ -15,6 +15,8 @@
 
 #define Uses_TFileCollection
 #define Uses_TSearchRec
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )

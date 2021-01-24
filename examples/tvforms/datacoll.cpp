@@ -14,6 +14,8 @@
 
 #define Uses_TStreamableClass
 #define Uses_TStringCollection
+#define Uses_ipstream
+#define Uses_opstream
 #include <tvision/tv.h>
 __link( RStringCollection )
 

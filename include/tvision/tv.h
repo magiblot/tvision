@@ -51,8 +51,6 @@
 
 #define Uses_EventCodes
 #define Uses_ViewCommands
-#define Uses_ipstream
-#define Uses_opstream
 #define __INC_STDDLG_H
 
 #if defined( Uses_TApplication )
@@ -529,8 +527,6 @@
 
 #if defined( Uses_TRect )
 #define Uses_TPoint
-#define Uses_ipstream
-#define Uses_opstream
 #define __INC_OBJECTS_H
 #endif
 
