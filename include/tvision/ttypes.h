@@ -52,6 +52,16 @@ typedef ushort uint16_t;
 typedef ulong uint32_t;
 #endif
 
+#ifdef __BORLANDC__
+typedef ushort TScreenCell;
+typedef uchar TCellAttribs;
+typedef uchar TCellChar;
+#else
+struct TScreenCell;
+struct TCellAttribs;
+struct TCellChar;
+#endif
+
 const char EOS = '\0';
 
 enum StreamableInit { streamableInit };

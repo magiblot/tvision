@@ -506,6 +506,7 @@
 #endif
 
 #if defined( Uses_THardwareInfo )
+#define Uses_TScreenCell
 #define __INC_HARDWARE_H
 #endif
 
@@ -535,6 +536,7 @@
 #endif
 
 #if defined( Uses_TDrawBuffer )
+#define Uses_TScreenCell
 #define __INC_DRAWBUF_H
 #endif
 
@@ -625,14 +627,22 @@
 #endif
 
 #if defined( Uses_TText )
+#define Uses_TScreenCell
 #define __INC_TTEXT_H
+#endif
+
+#if defined( Uses_TScreenCell )
+#define __INC_SCRNCELL_H
 #endif
 
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
 #include <tvision/tspan.h>
 #include <tvision/tstrview.h>
+
+#if defined( __INC_SCRNCELL_H )
 #include <tvision/scrncell.h>
+#endif
 
 #if defined( __INC_HARDWARE_H )
 #include <tvision/hardware.h>

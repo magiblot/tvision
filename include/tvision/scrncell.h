@@ -7,14 +7,10 @@
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
-#ifndef TVISION_SCRNCELL_H
-#define TVISION_SCRNCELL_H
+#if defined( Uses_TScreenCell ) && !defined( __TScreenCell )
+#define __TScreenCell
 
 #ifdef __BORLANDC__
-
-typedef ushort TScreenCell;
-typedef uchar TCellAttribs;
-typedef uchar TCellChar;
 
 inline const TCellAttribs &getAttr(const TScreenCell &cell)
 {
@@ -334,4 +330,4 @@ inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar ex
 
 #endif // __BORLANDC__
 
-#endif
+#endif // Uses_TScreenCell

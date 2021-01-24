@@ -1,6 +1,7 @@
 #ifndef TEXTATTR_H
 #define TEXTATTR_H
 
+#define Uses_TScreenCell
 #include <tvision/tv.h>
 
 inline void swapRedBlue(TCellAttribs &c) {

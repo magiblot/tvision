@@ -43,7 +43,7 @@ public:
         activeTable = &tables[0];
     }
 
-    static TCellChar toUtf8Int(unsigned char c)
+    static uint32_t toUtf8Int(unsigned char c)
     {
         return activeTable->toUtf8Int[c];
     }

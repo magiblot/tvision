@@ -13,7 +13,6 @@
 #include <tvision/internal/codepage.h>
 #include <algorithm>
 #include <cstring>
-#include <type_traits>
 #endif
 
 class TText {
