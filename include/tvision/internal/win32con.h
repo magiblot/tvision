@@ -32,7 +32,7 @@ public:
     static Win32ConsoleStrategy *create();
 
     bool waitForEvent(long ms, TEvent &ev) override;
-    int wcwidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
 };
 
 class Win32Input : public InputStrategy

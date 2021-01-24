@@ -25,7 +25,7 @@ public:
     LinuxConsoleStrategy(DisplayStrategy *, FdInputStrategy *);
 
     int getButtonCount() override;
-    int wcwidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
 
 };
 

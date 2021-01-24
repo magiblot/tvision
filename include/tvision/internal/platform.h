@@ -106,7 +106,7 @@ public:
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() { display->flushScreen(); }
     virtual void reloadScreenInfo() { display->reloadScreenInfo(); }
-    virtual int wcwidth(TStringView mbc, char32_t wc) { return 1; }
+    virtual int charWidth(TStringView mbc, char32_t wc) { return 1; }
 
     static PlatformStrategy *instance; // hardware.cpp
 
@@ -172,7 +172,7 @@ public:
         return FdInputStrategy::waitForEvent(ms, ev);
     }
 
-    int wcwidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
 
 };
 
