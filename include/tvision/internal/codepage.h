@@ -32,6 +32,12 @@ class CpTranslator
     static const CpTable tables[2];
     static const CpTable *activeTable;
 
+    static void useTable(const CpTable *table)
+    {
+        activeTable = table;
+        tv_cp2utf8 = table->toUtf8Int;
+    }
+
 public:
 
     static void use(TStringView cp)
@@ -39,11 +45,10 @@ public:
         for (const CpTable &t : tables)
             if (t.cp == cp)
             {
-                activeTable = &t;
-                return;
+                useTable(&t);
+                return; // Watch out!
             }
-        activeTable = &tables[0];
-        tv_cp2utf8 = activeTable->toUtf8Int;
+        useTable(&tables[0]);
     }
 
     static uint32_t toUtf8Int(unsigned char c)
