@@ -10,6 +10,7 @@
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
 #include <internal/ansidisp.h>
+#include <clocale>
 
 Win32ConsoleStrategy* Win32ConsoleStrategy::create()
 {

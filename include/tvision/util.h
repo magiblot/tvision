@@ -18,17 +18,30 @@
 
 #include <stddef.h>
 
-class TStringView;
-
-inline int min( int a, int b )
+inline constexpr int min( int a, int b )
 {
-    return (a>b) ? b : a;
+    return a < b ? a : b;
 }
 
-inline int max( int a, int b )
+inline constexpr int max( int a, int b )
 {
-    return (a<b) ? b : a;
+    return a > b ? a : b;
 }
+
+#if !defined( __MINMAX_DEFINED ) // Also defined in Borland C++'s stdlib.h.
+#define __MINMAX_DEFINED
+template <class T>
+inline constexpr const T& min( const T& a, const T& b )
+{
+    return a < b ? a : b;
+}
+
+template <class T>
+inline constexpr const T& max( const T& a, const T& b )
+{
+    return a > b ? a : b;
+}
+#endif  // __MINMAX_DEFINED
 
 void fexpand( char *rpath );
 void fexpand( char *rpath, const char *relativeTo );
@@ -71,7 +84,7 @@ Boolean isWild( const char *f );
 size_t strnzcpy( char *dest, TStringView src, size_t n );
 size_t strnzcat( char *dest, TStringView src, size_t n );
 
-#if !defined( __BORLANDC__ ) && !defined( _MSC_VER )
+#if !defined( __BORLANDC__ ) && !defined( _WIN32 )
 
 int stricmp( const char *s1, const char *s2 );
 int strnicmp( const char *s1, const char *s2, size_t maxlen );

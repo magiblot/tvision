@@ -20,6 +20,7 @@
 #define Uses_TSystemError
 #include <tvision/tv.h>
 #include <dos.h>
+#include <iostream.h>
 
 #if defined( __FLAT__ )
 

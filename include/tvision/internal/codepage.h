@@ -10,6 +10,8 @@
 
 // tables.cpp
 
+extern const uint32_t *tv_cp2utf8;
+
 class CpTranslator
 {
 
@@ -41,6 +43,7 @@ public:
                 return;
             }
         activeTable = &tables[0];
+        tv_cp2utf8 = activeTable->toUtf8Int;
     }
 
     static uint32_t toUtf8Int(unsigned char c)

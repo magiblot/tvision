@@ -163,11 +163,11 @@ Boolean TFileEditor::saveAs()
     return res;
 }
 
-static void writeBlock( ofstream& f, char *buf, unsigned len )
+static void writeBlock( ofstream& f, char *buf, uint len )
 {
     while( len > 0 )
         {
-        int l = len < INT_MAX ? len : INT_MAX;
+        int l = min( len, uint(INT_MAX) );
         f.write( buf, l );
         buf += l;
         len -= l;

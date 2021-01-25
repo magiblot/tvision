@@ -42,7 +42,7 @@ struct SGRAttribs : trivially_convertible<uint64_t> {
 
     static void check_assumptions()
     {
-        check_trivial<SGRAttribs>();
+        check_convertible<SGRAttribs>();
     }
 
 };
@@ -110,7 +110,7 @@ struct BufferCell {
 
     static void check_assumptions()
     {
-        static_assert(std::is_trivial<BufferCell>(), "");
+        scrncell::check_trivial<BufferCell>();
     }
 
 };

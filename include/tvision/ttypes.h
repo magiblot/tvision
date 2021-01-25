@@ -101,6 +101,10 @@ opstream& _Cdecl operator << ( opstream&, long double );
 opstream& _Cdecl operator << ( opstream&, TStreamable& );
 opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
 
+#include <tvision/internal/iosfwd.h>
+class TStringView;
+ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
+
 typedef int ccIndex;
 typedef Boolean (*ccTestFunc)( void *, void * );
 typedef void (*ccAppFunc)( void *, void * );
@@ -117,6 +121,12 @@ extern const uchar specialChars[];
 #if __cplusplus < 201103L
 #define constexpr
 #define noexcept
+#endif
+
+// Do not include unnecessary STL headers if TVISION_NO_STL is defined.
+// This speeds up compilation when building the library.
+#if !defined( __BORLANDC__ ) && !defined( TVISION_NO_STL )
+#define TVISION_STL
 #endif
 
 #endif  // __TTYPES_H

@@ -9,22 +9,19 @@
 #ifndef TVISION_TSTRVIEW_H
 #define TVISION_TSTRVIEW_H
 
-#if !defined( __STRING_H )
 #include <string.h>
-#endif  // __STRING_H
-
 #include <tvision/internal/iosfwd.h>
 
-#ifndef __BORLANDC__
-
+#ifdef TVISION_STL
 #include <string>
+
 #ifdef __cpp_lib_string_view
 #include <string_view>
 #endif
+#endif // TVISION_STL
 
-#endif // __BORLANDC__
-
-class TStringView {
+class TStringView
+{
 
     // This class exists only to compensate for the lack of std::string_view
     // in Borland C++. Unless you are programming for that compiler, you should
@@ -47,14 +44,14 @@ public:
     constexpr TStringView(const char _FAR *str, size_t len);
     constexpr TStringView(TSpan<char> span);
     constexpr TStringView(TSpan<const char> span);
+#ifdef TVISION_STL
 #ifdef __cpp_lib_string_view
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
-#ifndef __BORLANDC__
     TStringView(const std::string &text);
     operator std::string() const;
-#endif
+#endif // TVISION_STL
     constexpr operator TSpan<const char>() const;
 
     constexpr const char _FAR * data() const;
@@ -72,8 +69,6 @@ public:
     constexpr const char _FAR * end() const;
     constexpr const char _FAR * cend() const;
 
-    friend ostream _FAR & operator<<(ostream _FAR &os, TStringView s);
-
 };
 
 inline constexpr TStringView::TStringView() :
@@ -87,7 +82,7 @@ inline constexpr TStringView::TStringView() :
 #if __cpp_constexpr >= 201304L
 constexpr
 #endif
-#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
+#if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
 inline TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(str ? std::char_traits<char>::length(str) : 0)
@@ -124,6 +119,7 @@ inline constexpr TStringView::TStringView(TSpan<const char> span) :
 {
 }
 
+#ifdef TVISION_STL
 #ifdef __cpp_lib_string_view
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
@@ -137,7 +133,6 @@ inline constexpr TStringView::operator std::string_view() const
 }
 #endif
 
-#ifndef __BORLANDC__
 inline TStringView::TStringView(const std::string &text) :
     str(text.data()),
     len(text.size())
@@ -148,7 +143,7 @@ inline TStringView::operator std::string() const
 {
     return {str, len};
 }
-#endif
+#endif // TVISION_STL
 
 inline constexpr TStringView::operator TSpan<const char>() const
 {
@@ -215,7 +210,7 @@ inline constexpr const char _FAR * TStringView::cend() const
     return &str[len];
 }
 
-#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
+#if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
 inline constexpr Boolean operator==(TStringView a, TStringView b)
 {
     return a.size() == b.size()
@@ -231,7 +226,7 @@ inline Boolean operator==(TStringView a, TStringView b)
 }
 #endif
 
-#if __cplusplus >= 201703L || __cpp_lib_constexpr_char_traits
+#if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
 constexpr
 #endif
 inline Boolean operator!=(TStringView a, TStringView b)
@@ -239,7 +234,7 @@ inline Boolean operator!=(TStringView a, TStringView b)
     return !(a == b);
 }
 
-#if __cplusplus >= 201103L
+#if defined(TVISION_STL) && __cplusplus >= 201103L
 
 #include <typeindex>
 
@@ -257,6 +252,6 @@ namespace std {
 #endif
 } // namespace std
 
-#endif // __cplusplus >= 201103L
+#endif // TVISION_STL && __cplusplus >= 201103L
 
 #endif // TVISION_TSTRVIEW_H

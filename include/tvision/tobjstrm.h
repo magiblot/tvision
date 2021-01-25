@@ -288,9 +288,7 @@ private:
 #if defined( Uses_pstream ) && !defined( __pstream )
 #define __pstream
 
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
+#include <tvision/internal/iosfwd.h>
 
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
@@ -312,18 +310,8 @@ public:
     _Cdecl pstream( streambuf _FAR * );
     virtual _Cdecl ~pstream();
 
-    /* ios::open_mode and ios::seek_dir are deprecated in modern C++ and are
-     * incompatible with the implementation-defined equivalents ios::openmode
-     * and ios::seekdir. Since pstream is a simplified version of ios, we can
-     * overcome this conflict by defining pstream::openmode and psteam::seekdir,
-     * which simply redirect to the appropiate type on each platform. */
-#ifdef __BORLANDC__
-    typedef ios::open_mode openmode;
-    typedef ios::seek_dir seekdir;
-#else
-    typedef ios::openmode openmode;
-    typedef ios::seekdir seekdir;
-#endif
+    typedef int openmode;
+    typedef int seekdir;
 
     int _Cdecl rdstate() const;
     int _Cdecl eof() const;
@@ -368,10 +356,6 @@ protected:
 
 #if defined( Uses_ipstream ) && !defined( __ipstream )
 #define __ipstream
-
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
 
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
@@ -432,10 +416,6 @@ private:
 #if defined( Uses_opstream ) && !defined( __opstream )
 #define __opstream
 
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
-
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
@@ -495,10 +475,6 @@ private:
 
 #if defined( Uses_iopstream ) && !defined( __iopstream )
 #define __iopstream
-
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
 
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
@@ -573,10 +549,6 @@ private:
 #if defined( Uses_ifpstream ) && !defined( __ifpstream )
 #define __ifpstream
 
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
-
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
@@ -612,10 +584,6 @@ public:
 
 #if defined( Uses_ofpstream ) && !defined( __ofpstream )
 #define __ofpstream
-
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
 
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
@@ -654,10 +622,6 @@ public:
 
 #if defined( Uses_fpstream ) && !defined( __fpstream )
 #define __fpstream
-
-#if !defined( __IOSTREAM_H )
-#include <tvision/compat/iostream.h>
-#endif  // __IOSTREAM_H
 
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)

@@ -39,9 +39,22 @@ inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr)
 
 #else
 
-#include <cstring>
+#include <string.h>
+
+#ifdef SCRNCELL_DEBUG
 #include <type_traits>
-#include <algorithm>
+#endif
+
+namespace scrncell
+{
+    template <class T>
+    inline void check_trivial()
+    {
+#ifdef SCRNCELL_DEBUG
+        static_assert(std::is_trivial<T>(), "");
+#endif
+    }
+}
 
 template<typename T>
 struct alignas(T) trivially_convertible {
@@ -71,13 +84,12 @@ struct alignas(T) trivially_convertible {
 protected:
 
     template<class C>
-    static void check_trivial()
+    static void check_convertible()
     {
-        static_assert(std::is_trivial<C>(), "");
+        scrncell::check_trivial<C>();
         static_assert(sizeof(C) == sizeof(T), "");
         static_assert(alignof(C) == alignof(T), "");
     }
-
 };
 
 // TCellAttribs Attribute masks
@@ -152,7 +164,7 @@ struct TCellAttribs : trivially_convertible<uint16_t>
 
     static void check_assumptions()
     {
-        check_trivial<TCellAttribs>();
+        check_convertible<TCellAttribs>();
     }
 
 };
@@ -168,7 +180,7 @@ struct TScreenCellA : trivially_convertible<uint16_t>
 
     static void check_assumptions()
     {
-        check_trivial<TScreenCellA>();
+        check_convertible<TScreenCellA>();
     }
 
 };
@@ -193,7 +205,7 @@ struct alignas(4) TCellChar
     TCellChar& operator=(uint64_t ch)
     {
         memset(this, 0, sizeof(*this));
-        memcpy(bytes, &ch, std::min(sizeof(bytes), sizeof(ch)));
+        memcpy(bytes, &ch, min(sizeof(bytes), sizeof(ch)));
         return *this;
     }
 
@@ -246,7 +258,7 @@ struct alignas(4) TCellChar
 
     static void check_assumptions()
     {
-        static_assert(std::is_trivial<TCellChar>(), "");
+        scrncell::check_trivial<TCellChar>();
     }
 
 };
@@ -271,14 +283,14 @@ struct TScreenCell
     TScreenCell(uint64_t ch)
     {
         memset(this, 0, sizeof(*this));
-        memcpy(this, &ch, std::min(sizeof(*this), sizeof(ch)));
+        memcpy(this, &ch, min(sizeof(*this), sizeof(ch)));
     }
 
     enum : uint32_t { wideCharTrail = (uint32_t) -2 };
 
     static void check_assumptions()
     {
-        static_assert(std::is_trivial<TScreenCell>(), "");
+        scrncell::check_trivial<TScreenCell>();
     }
 
 };

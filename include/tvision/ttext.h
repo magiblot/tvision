@@ -10,9 +10,7 @@
 #define __TText
 
 #ifndef __BORLANDC__
-#include <tvision/internal/codepage.h>
-#include <algorithm>
-#include <cstring>
+#include <string.h>
 #endif
 
 class TText {
@@ -45,6 +43,7 @@ private:
     static mbstat_r mbstat(TStringView text);
     static int mblen(TStringView text);
     static bool isBlacklisted(TStringView mbc);
+    static uint32_t cp2utf8(uchar c);
 #endif // __BORLANDC__
 
 };
@@ -146,7 +145,7 @@ inline size_t TText::prev(TStringView text, size_t index)
     {
         // Try reading backwards character by character, until a valid
         // character is found. This tolerates invalid characters.
-        size_t lead = std::min<size_t>(index, 4);
+        size_t lead = min<size_t>(index, 4);
         for (size_t i = 1; i <= lead; ++i)
         {
             int len = TText::mblen({&text[index - i], i});
@@ -219,6 +218,12 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&fun
     return w;
 }
 
+inline uint32_t TText::cp2utf8(uchar c)
+{
+    extern const uint32_t *tv_cp2utf8;
+    return tv_cp2utf8[c];
+}
+
 inline bool TText::isBlacklisted(TStringView mbc)
 // We want to avoid printing certain characters which are usually represented
 // differently by different terminal applications or which can combine different
@@ -260,7 +265,7 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
             if (i < cells.size())
             {
                 if (mb.length < 0)
-                    ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
+                    ::setChar(cells[i], cp2utf8(text[j]));
                 else if (mb.length == 0) // '\0'
                     ::setChar(cells[i], ' ');
                 else
@@ -299,11 +304,11 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
             {
                 if (i < cells.size())
                 {
-                    uchar extraWidth = std::min<size_t>(mb.width - 1, 7);
+                    uchar extraWidth = min(mb.width - 1, 7);
                     ::setChar(cells[i], {&text[j], (size_t) mb.length}, extraWidth);
                     // Fill trailing cells.
                     auto attr = ::getAttr(cells[i]);
-                    size_t count = std::min<size_t>(extraWidth + 1, cells.size() - i);
+                    size_t count = min(extraWidth + 1, cells.size() - i);
                     for (size_t k = 1; k < count; ++k)
                         ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
                     i += count;
@@ -336,9 +341,9 @@ inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
         }
         else
         {
-            mb.width = std::min<int>(mb.width, 8);
+            mb.width = min(mb.width, 8);
             if (mb.width != 0)
-                width += std::max<int>(mb.width, 1);
+                width += max(mb.width, 1);
             index += mb.length;
         }
         return true;

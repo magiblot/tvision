@@ -75,6 +75,17 @@
 #define _HUGE huge
 #endif
 
+// ios::open_mode and ios::seek_dir are deprecated in modern C++ and are
+// incompatible with the implementation-defined equivalents ios::openmode
+// and ios::seekdir. We simply redirect to the appropiate type on each platform.
+#ifdef __BORLANDC__
+    typedef ios::open_mode openmode;
+    typedef ios::seek_dir seekdir;
+#else
+    typedef ios::openmode openmode;
+    typedef ios::seekdir seekdir;
+#endif
+
 const uchar nullStringLen = UCHAR_MAX;
 
 TStreamableClass* volatile fLink::forceLink;
@@ -331,9 +342,9 @@ ipstream& ipstream::seekg( streamoff off, pstream::seekdir dir )
 {
     objs.removeAll();
 #ifdef __BORLANDC__
-    bp->seekoff( off, dir );
+    bp->seekoff( off, ::seekdir(dir) );
 #else
-    bp->pubseekoff( off, dir );
+    bp->pubseekoff( off, ::seekdir(dir) );
 #endif
     return *this;
 }
@@ -577,9 +588,9 @@ opstream& opstream::seekp( streamoff pos, pstream::seekdir dir )
     objs->freeAll();
     objs->removeAll();
 #ifdef __BORLANDC__
-    bp->seekoff( pos, dir );
+    bp->seekoff( pos, ::seekdir(dir) );
 #else
-    bp->pubseekoff( pos, dir );
+    bp->pubseekoff( pos, ::seekdir(dir) );
 #endif
     return *this;
 }
@@ -795,7 +806,7 @@ void fpbase::open( const char *b, pstream::openmode m)
 {
     if( buf.is_open() )
         clear(ios::failbit);        // fail - already open
-    else if( buf.open(b, m) )
+    else if( buf.open(b, ::openmode(m)) )
         clear(ios::goodbit);        // successful open
     else
         clear(ios::badbit);     // open failed

@@ -75,6 +75,11 @@ if (WIN32)
     )
 endif()
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    # Do not include unnecessary STL headers to speed up compilation.
+    TVISION_NO_STL
+)
+
 # Dependencies
 
 if (NOT WIN32)

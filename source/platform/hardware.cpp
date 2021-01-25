@@ -13,12 +13,8 @@
 #include <internal/sighandl.h>
 #include <internal/terminal.h>
 #include <internal/getenv.h>
+#include <iostream.h>
 #include <chrono>
-#ifdef _TV_UNIX
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <cstdio>
-#endif
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;

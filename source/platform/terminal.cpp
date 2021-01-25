@@ -4,6 +4,7 @@
 #include <internal/terminal.h>
 #include <internal/stdioctl.h>
 #include <internal/constmap.h>
+#include <cctype>
 
 static const const_unordered_map<ushort, KeyDownEvent> AltKeyCode = {
     { ' ', {{kbAltSpace}} },

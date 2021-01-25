@@ -40,6 +40,10 @@
 #include <malloc.h>
 #endif  // __MALLOC_H
 
+#if !defined( __STDLIB_H )
+#include <stdlib.h>
+#endif  // __STDLIB_H
+
 #ifndef __BORLANDC__
 #define register
 #endif

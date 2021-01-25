@@ -22,6 +22,7 @@
 #ifdef __FLAT__
 
 #include <string.h>
+#include <stdlib.h>
 #include <malloc.h>
 
 extern TPoint shadowSize;

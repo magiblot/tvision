@@ -1,5 +1,6 @@
-#define Uses_TScreenCell
-#define Uses_TText
+#define Uses_TApplication
+#define Uses_TDialog
 #include <tvision/tv.h>
-#include <iostream.h>
+#include <unordered_map>
 #include <memory>
+#include <string>

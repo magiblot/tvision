@@ -6,7 +6,6 @@
 #include <internal/strings.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
-#include <array>
 
 /* The Turbo Vision library has all its characters encoded in code page 437.
  * While Unicode support is not added, it's better to just translate them
@@ -81,7 +80,8 @@ const CpTranslator::CpTable CpTranslator::tables[] = {
     { "850", cp850toUtf8, cp850toUtf8Int }
 };
 
-const CpTranslator::CpTable *CpTranslator::activeTable;
+const uint32_t *tv_cp2utf8 = nullptr;
+const CpTranslator::CpTable *CpTranslator::activeTable = nullptr;
 CpTranslator CpTranslator::instance;
 
 CpTranslator::CpTranslator() {

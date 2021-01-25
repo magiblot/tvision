@@ -4,12 +4,18 @@
 #ifdef __BORLANDC__
 
 class _EXPCLASS ostream;
+class _EXPCLASS streambuf;
+typedef long streampos;
+typedef long streamoff;
 
 #else
 
 #include <iosfwd>
 
 using std::ostream;
+using std::streambuf;
+using std::streampos;
+using std::streamoff;
 
 #endif // __BORLANDC__
 

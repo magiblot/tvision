@@ -637,6 +637,8 @@
 
 #include <tvision/config.h>
 #include <tvision/ttypes.h>
+#include <tvision/util.h>
+
 #include <tvision/tspan.h>
 #include <tvision/tstrview.h>
 
@@ -651,8 +653,6 @@
 #if defined( __INC_TKEYS_H )
 #include <tvision/tkeys.h>
 #endif
-
-#include <tvision/util.h>
 
 #if defined( __INC_TTEXT_H )
 #include <tvision/ttext.h>

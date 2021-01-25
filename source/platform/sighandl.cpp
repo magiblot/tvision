@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <cctype>
 #include <cstdlib>
+#include <cstdio>
 
 TSignalHandler::TSignalHandler()
 {
