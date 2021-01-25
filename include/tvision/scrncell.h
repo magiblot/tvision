@@ -324,14 +324,6 @@ inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
     ::setChar(cell, ch, extraWidth);
 }
 
-inline void setChar(TScreenCell &cell, uchar ch)
-{
-    TScreenCell c = cell;
-    c.Char = ch;
-    c.extraWidth = 0;
-    cell = c;
-}
-
 inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
 {
     TScreenCell c {};
