@@ -165,8 +165,12 @@ public:
     fileCount=0;
     files=0;
   }
+  ~TFilePane() {
+    deleteFiles();
+  }
   void newDir( const char *path );
   virtual void draw();
+  void deleteFiles();
 };
 
 void TFilePane::draw() {
@@ -203,13 +207,10 @@ void TFilePane::newDir( const char *path ) {
     int result;
     short i;
 
-    for (i=0;i<fileCount;i++)
-      delete files[i];
-    delete [] files;
+    deleteFiles();
 
     ostrstream os( searchPath, sizeof( searchPath )-1 );
     os << path << "*.*" << ends;
-    fileCount=0;
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
     while (result==0) {
       if (!(searchRec.attrib & FA_DIREC))
@@ -242,7 +243,15 @@ void TFilePane::newDir( const char *path ) {
     else
       setLimit( strwidth(files[0]), fileCount );
     drawView();
-  }
+}
+
+void TFilePane::deleteFiles() {
+    short i;
+    for (i=0;i<fileCount;i++)
+      delete files[i];
+    delete[] files;
+    fileCount=0;
+}
 
 class TDirWindow: public TWindow {
   char *drive;
@@ -294,6 +303,9 @@ public:
     fp->newDir( path );
 
   }
+  ~TDirWindow() {
+    delete[] drive;
+  }
   virtual void handleEvent( TEvent &event ) {
     char buffer[128];
     if ((event.what == evCommand) &&
@@ -321,6 +333,7 @@ class TDirApp : public TApplication
 public:
 
     TDirApp( const char *driveInit );
+    ~TDirApp();
 
     virtual void handleEvent( TEvent& event );
     static TMenuBar *initMenuBar( TRect );
@@ -337,6 +350,11 @@ TDirApp::TDirApp( const char *driveInit ) :
 {
    drive = newStr(driveInit);
    insertWindow( new TDirWindow( driveInit ) );
+}
+
+TDirApp::~TDirApp()
+{
+    delete[] drive;
 }
 
 void TDirApp::handleEvent( TEvent& event )
