@@ -97,14 +97,16 @@ ushort TFileList::dataSize()
 
 void* TFileList::getKey( const char *s )
 {
-static TSearchRec sR;
+    static thread_local TSearchRec sR;
 
     if( (shiftState & kbShift) != 0 || *s == '.' )
         sR.attr = FA_DIREC;
     else
         sR.attr = 0;
     strcpy( sR.name, s );
+#ifndef __FLAT__
     strupr( sR.name );
+#endif
     return &sR;
 }
 
