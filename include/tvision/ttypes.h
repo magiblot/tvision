@@ -121,6 +121,7 @@ extern const uchar specialChars[];
 #if __cplusplus < 201103L
 #define constexpr
 #define noexcept
+#define thread_local
 #endif
 
 // Do not include unnecessary STL headers if TVISION_NO_STL is defined.

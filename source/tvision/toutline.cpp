@@ -46,8 +46,8 @@ void TOutlineViewer::adjustFocus(int newFocus)
     scrollTo(delta.x, newFocus - size.y + 1);
 }
 
-static TDrawBuffer *pdBuf;
-static int auxPos;
+static thread_local TDrawBuffer *pdBuf;
+static thread_local int auxPos;
 
 // Called to draw the outline
 
@@ -204,6 +204,13 @@ char* TOutlineViewer::createGraph(int level, long lines, ushort flags,
   return graph;
 }
 
+static Boolean visitNoArg( TOutlineViewer* outLine, TNode* cur, int level,
+                           int position, long lines, ushort flags, void* arg )
+{
+  return (**(TOutlineVisitorNoArg*) arg)( outLine, cur, level, position,
+                                          lines, flags );
+}
+
 /*
   FirstThat iterates over the nodes of the outline until the given
   local function returns true. The declaration for the local function
@@ -228,10 +235,14 @@ char* TOutlineViewer::createGraph(int level, long lines, ushort flags,
     Flags:     Various flags for drawing (see ovXXXX flags).  Can be used
                in a call to getGraph or createGraph.
 */
-TNode* TOutlineViewer::firstThat(
-        Boolean (*test)(TOutlineViewer*, TNode* ,int ,int ,long ,ushort ))
+TNode* TOutlineViewer::firstThat(TOutlineVisitor test, void* arg)
 {
-  return iterate(test, True);
+  return iterate(test, arg, True);
+}
+
+TNode* TOutlineViewer::firstThat(TOutlineVisitorNoArg test)
+{
+  return iterate(visitNoArg, &test, True);
 }
 
 // Called whenever Node is receives focus
@@ -248,10 +259,10 @@ void TOutlineViewer::focused(int i)
 */
 
 
-TNode* traverseTree(TOutlineViewer* outLine,
-        Boolean (*action)(TOutlineViewer*, TNode*, int, int, long, ushort),
-        int& position, Boolean& checkResult, TNode* cur, int level,
-        long lines, Boolean lastChild)
+static TNode* traverseTree( TOutlineViewer* outLine,
+                            TOutlineVisitor action, void *arg,
+                            int& position, Boolean& checkResult, TNode* cur,
+                            int level, long lines, Boolean lastChild )
 {
 
   Boolean result;
@@ -276,21 +287,21 @@ TNode* traverseTree(TOutlineViewer* outLine,
 
   position++;
 
-  result = (*action)(outLine, cur, level, position, lines, flags);
+  result = (*action)(outLine, cur, level, position, lines, flags, arg);
   if (checkResult && result)
         return cur;
 
   if (children && outLine->isExpanded(cur))
   {
-    int lines_ = lines;
-    if (! lastChild)
-        lines_ |=  1 << level;
+    int childLines = lines;
+    if (!lastChild)
+        childLines |=  1 << level;
     TNode *child = outLine->getChild(cur, 0);
     do
     {
       TNode *next = outLine->getNext(child);
-      ret = traverseTree(outLine, action, position, checkResult,
-                         child, level + 1, lines_, Boolean(!next));
+      ret = traverseTree( outLine, action, arg, position, checkResult,
+                          child, level + 1, childLines, Boolean(!next) );
       child = next;
       if (ret)
         return ret;
@@ -301,8 +312,8 @@ TNode* traverseTree(TOutlineViewer* outLine,
     TNode *next = cur;
     while ((next = outLine->getNext(next)) != 0)
     {
-      ret = traverseTree(outLine, action, position, checkResult,
-                          next, level, lines, Boolean(!outLine->getNext(next)));
+      ret = traverseTree( outLine, action, arg, position, checkResult,
+                          next, level, lines, Boolean(!outLine->getNext(next)) );
       if (ret)
         return ret;
     }
@@ -311,25 +322,28 @@ TNode* traverseTree(TOutlineViewer* outLine,
 }
 
 
-TNode* TOutlineViewer::iterate(
-        Boolean (*action)(TOutlineViewer*, TNode*, int, int, long, ushort),
-        Boolean checkResult)
+TNode* TOutlineViewer::iterate( TOutlineVisitor action, void *arg,
+                                Boolean checkResult )
 {
   int position = -1;
   TNode *root = getRoot();
   if (root)
-    return traverseTree(this, action, position, checkResult,
-                        root, 0, 0, Boolean(getNext(root) == 0));
+    return traverseTree( this, action, arg, position, checkResult,
+                         root, 0, 0, Boolean(getNext(root) == 0) );
   return 0;
 }
 
 
 // Iterates over all the nodes.     See FirstThat for a more details
 
-TNode* TOutlineViewer::forEach(
-        Boolean (*action)(TOutlineViewer*,TNode*,int,int,long,ushort))
+TNode* TOutlineViewer::forEach(TOutlineVisitor action, void *arg)
 {
-  return iterate(action, False);
+  return iterate(action, arg, False);
+}
+
+TNode* TOutlineViewer::forEach(TOutlineVisitorNoArg action)
+{
+  return iterate(visitNoArg, &action, False);
 }
 
 // Returns the outline palette
@@ -356,8 +370,8 @@ char* TOutlineViewer::getGraph(int level, long lines, ushort flags)
 }
 
 #pragma warn -par
-static Boolean isNode(TOutlineViewer* outLine, TNode* node, int level,
-                                int position, long lines, ushort flags)
+static Boolean isNode( TOutlineViewer* outLine, TNode* node, int level,
+                       int position, long lines, ushort flags )
 {
     return Boolean(auxPos == position);
 }
@@ -382,13 +396,13 @@ Boolean TOutlineViewer::isSelected(int i)
   return (foc == i) ? True:False;
 }
 
-static long focLines;
-static ushort focFlags;
-static int focLevel;
+static thread_local long focLines;
+static thread_local ushort focFlags;
+static thread_local int focLevel;
 
 #pragma warn -par
-static Boolean isFocused(TOutlineViewer* focusCheck, TNode* cur, int level,
-                int position, long lines, ushort flags)
+static Boolean isFocused( TOutlineViewer* focusCheck, TNode* cur, int level,
+                          int position, long lines, ushort flags )
 {
       if (position == focusCheck->foc)
       {
@@ -544,12 +558,12 @@ void TOutlineViewer::setState(ushort aState, Boolean enable)
         drawView();
 }
 
-static int updateCount;
-static int updateMaxX;
+static thread_local int updateCount;
+static thread_local int updateMaxX;
 
 #pragma warn -par
-static Boolean countNode(TOutlineViewer* beingCounted, TNode* p, int level,
-                                int position, long lines,  ushort flags)
+static Boolean countNode( TOutlineViewer* beingCounted, TNode* p, int level,
+                          int position, long lines,  ushort flags )
 {
     int len;
     char *graph;
@@ -581,40 +595,14 @@ void TOutlineViewer::update()
   adjustFocus(foc);
 }
 
-#ifdef DEBUG_TOUTLINE
-static int depth = 0;
-static int lastNode = 0;
-#endif
-
 void TOutlineViewer::disposeNode(TNode* node)
 {  
   if (node)
   {
-#ifdef DEBUG_TOUTLINE
-      int i; 
-      for (i = 0; i < depth; ++i) cerr << "  ";
-      int numNode = lastNode++;
-      cerr << "#" << dec << numNode << ": " << hex << node << ": \"";
-      cerr << node->text << "\"" << endl;
-#endif
       if (node->childList)
-      {
-#ifdef DEBUG_TOUTLINE
-        ++depth;
-#endif
         disposeNode(node->childList);
-#ifdef DEBUG_TOUTLINE
-        --depth;
-#endif
-      }
       if (node->next)
-      {
         disposeNode(node->next);
-      }
-#ifdef DEBUG_TOUTLINE
-      for (i = 0; i < depth; ++i) cerr << "  ";
-      cerr << "*" << dec << numNode << endl;
-#endif
       delete node;
   }
 }

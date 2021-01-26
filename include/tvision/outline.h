@@ -70,7 +70,15 @@ inline TNode::~TNode() {
 
 class _FAR TRect;
 class _FAR TScrollBar;
+class _FAR TOutlineViewer;
 struct _FAR TEvent;
+
+// Callback types for TOutlineViewer's traverse functions.
+
+typedef Boolean (*TOutlineVisitor)( TOutlineViewer*, TNode*,
+                                    int, int, long, ushort, void* );
+typedef Boolean (*TOutlineVisitorNoArg)( TOutlineViewer*, TNode*,
+                                         int, int, long, ushort );
 
 class TOutlineViewer : public TScroller
 {
@@ -98,10 +106,12 @@ public:
 
     void update();
     void expandAll(TNode* node);
-    TNode* firstThat(Boolean (*test)(TOutlineViewer*, TNode*,int,int,long,
-        ushort));
-    TNode* forEach(Boolean (*action)(TOutlineViewer*, TNode*,int,int,long,
-        ushort));
+
+    TNode* firstThat(TOutlineVisitor test, void* arg);
+    TNode* firstThat(TOutlineVisitorNoArg test);
+
+    TNode* forEach(TOutlineVisitor action, void* arg);
+    TNode* forEach(TOutlineVisitorNoArg action);
 
     char* createGraph(int level, long lines, ushort flags, int levWidth,
         int endWidth, const char* chars);
@@ -119,8 +129,7 @@ public:
 
 private:
     void adjustFocus(int newFocus);
-    TNode* iterate(Boolean (*action)(TOutlineViewer*, TNode*, int, int, long,
-                ushort), Boolean checkResult);
+    TNode* iterate(TOutlineVisitor action, void *arg, Boolean checkResult);
 };
 
 inline TOutlineViewer::TOutlineViewer( StreamableInit s) :

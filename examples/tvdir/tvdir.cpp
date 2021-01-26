@@ -73,7 +73,6 @@ public:
 };
 
 class TDirOutline: public TOutline {
-  static TNode *parentSearch;
 public:
   TDirOutline( const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb, TNode *root ):
     TOutline( bounds, hsb, vsb, root ) {}
@@ -81,15 +80,15 @@ public:
     foc=i;
     message( owner, evCommand, cmNewDirFocused, 0 );
   }
-  static Boolean isParent( TOutlineViewer *, TNode *cur, int, int, long, ushort );
+  static Boolean isParent( TOutlineViewer *, TNode *cur, int, int, long, ushort, void * );
   TNode *getParent( TNode *child ) {
-    parentSearch=child;
-    return firstThat( isParent );
+    return firstThat( isParent, child );
   }
   void getCurrentPath( char *buffer, short bufferSize );
 };
 
-Boolean TDirOutline::isParent( TOutlineViewer *, TNode *cur, int, int, long, ushort ) {
+Boolean TDirOutline::isParent( TOutlineViewer *, TNode *cur, int, int, long, ushort, void *arg ) {
+    TNode *parentSearch = (TNode*)arg;
     TNode *temp = cur->childList;
     while (temp!=0) {
       if (temp==parentSearch)
@@ -121,8 +120,6 @@ void TDirOutline::getCurrentPath( char *buffer, short bufferSize ) {
       strncat(buffer, sep, bufferSize - 1);
     strncat(buffer, temp1, bufferSize - 1);
 }
-
-TNode *TDirOutline::parentSearch;
 
 TNode *getDirList( const char *path, QuickMessage *qm = 0 ) {
   TNode  *dirList = 0,
