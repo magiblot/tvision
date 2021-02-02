@@ -207,34 +207,39 @@ void THelpTopic::addParagraph( TParagraph *p )
 void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
                               int& ref )
 {
-    int oldOffset, curOffset, offset, paraOffset;
+    int curOffset, offset, paraOffset;
     TParagraph *p;
     int line;
     TCrossRef *crossRefPtr;
 
     paraOffset = 0;
     curOffset = 0;
-    oldOffset = 0;
     line = 0;
     crossRefPtr = crossRefs + i;
     offset = crossRefPtr->offset;
     p = paragraphs;
-    while (paraOffset + curOffset < offset)
-        {
-        oldOffset = paraOffset + curOffset;
+    do  {
+        int lineOffset = curOffset;
         wrapText(p->text, p->size, curOffset, p->wrap);
         ++line;
+        if (offset <= paraOffset + curOffset)
+            {
+            int refOffset = offset - (paraOffset + lineOffset) - 1;
+            TStringView textBefore(&p->text[lineOffset], refOffset);
+            TStringView refText(&p->text[lineOffset + refOffset], crossRefPtr->length);
+            loc.x = strwidth(textBefore);
+            loc.y = line;
+            length = strwidth(refText);
+            ref = crossRefPtr->ref;
+            return;
+            }
         if (curOffset >= p->size)
             {
             paraOffset += p->size;
             p = p->next;
             curOffset = 0;
             }
-        }
-    loc.x = offset - oldOffset - 1;
-    loc.y = line;
-    length = crossRefPtr->length;
-    ref = crossRefPtr->ref;
+        } while (True);
 }
 
 TStringView THelpTopic::getLine( int line )
