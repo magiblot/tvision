@@ -1,6 +1,3 @@
-#define Uses_THardwareInfo
-#include <tvision/tv.h>
-
 #include <internal/buffdisp.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
@@ -35,7 +32,7 @@ BufferedDisplay::BufferedDisplay() :
     maxFrameDrops = max(0, getEnv<int>("TVISION_MAX_FRAMEDROPS", defaultMaxFrameDrops));
     frameDrops = 0;
     // Initialize variables.
-    screenChanged = true;
+    screenTouched = true;
     caretMoved = false;
     caretPosition = {-1, -1};
     newCaretSize = 0;
@@ -54,8 +51,11 @@ void BufferedDisplay::reloadScreenInfo()
 
 void BufferedDisplay::resizeBuffer()
 {
-    buffer.resize(0);
-    buffer.resize(size.x*size.y); // Zero-initialized.
+    for (auto *buf : {&buffer, &flushBuffer})
+    {
+        buf->resize(0);
+        buf->resize(size.x*size.y); // Zero-initialized.
+    }
 
     rowDamage.resize(0);
     rowDamage.resize(size.y, {INT_MAX, INT_MIN});
@@ -74,39 +74,24 @@ void BufferedDisplay::setCaretPosition(int x, int y)
 
 void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len)
 {
-    if (inBounds(x, y))
+    if (inBounds(x, y) && len)
     {
-        if (x + len >= size.x)
-            len = size.x - x;
+        len = min(len, size.x - x);
+        memcpy(&buffer[y*size.x + x], buf, len*sizeof(TScreenCell));
 
-        auto changed = screenChanged;
-        auto damage = rowDamage[y];
-        auto *bufCell = &buffer[y*size.x + x];
-        for (int i = 0; i < len; ++i, ++x, ++bufCell)
-        {
-            BufferCell newCell {buf[i]};
-            ensurePrintable(newCell);
-            if (newCell != *bufCell)
-            {
-                changed = true;
-                setDirty(x, newCell, damage);
-                *bufCell = newCell;
-            }
-        }
-        screenChanged = changed;
-        rowDamage[y] = damage;
+        setDirty(x, y, len);
+        screenTouched = true;
     }
 }
 
-void BufferedDisplay::setDirty(int x, BufferCell &cell, Range &damage)
+void BufferedDisplay::setDirty(int x, int y, int len)
 {
-    cell.dirty = 1;
-    Range dam = damage;
+    Range dam = rowDamage[y];
     if (x < dam.begin)
         dam.begin = x;
-    if (x > dam.end)
-        dam.end = x;
-    damage = dam;
+    if (x + len - 1 > dam.end)
+        dam.end = x + len - 1;
+    rowDamage[y] = dam;
 }
 
 bool BufferedDisplay::timeToFlush()
@@ -143,7 +128,7 @@ void BufferedDisplay::drawCursors()
                      x > 0 && (cell - 1)->extraWidth )
                     --cell, --x;
                 cursor->apply(cell->Attr);
-                setDirty(x, *cell, rowDamage[y]);
+                setDirty(x, y, 1);
             }
         }
 }
@@ -162,14 +147,14 @@ void BufferedDisplay::undrawCursors()
                      x > 0 && (cell - 1)->extraWidth )
                     --cell, --x;
                 cursor->restore(cell->Attr);
-                setDirty(x, *cell, rowDamage[y]);
+                setDirty(x, y, 1);
             }
         }
 }
 
 bool BufferedDisplay::needsFlush() const
 {
-    return screenChanged || caretMoved || caretSize != newCaretSize;
+    return screenTouched || caretMoved || caretSize != newCaretSize;
 }
 
 void BufferedDisplay::flushScreen()
@@ -184,13 +169,13 @@ void BufferedDisplay::flushScreen()
         if (caretSize != newCaretSize)
             lowlevelCursorSize(newCaretSize);
         lowlevelFlush();
-        screenChanged = false;
+        screenTouched = false;
         caretMoved = false;
         caretSize = newCaretSize;
     }
 }
 
-void BufferedDisplay::ensurePrintable(BufferCell &cell) const
+void BufferedDisplay::validateCell(TScreenCell &cell) const
 {
     auto &ch = cell.Char;
     if (!ch[1]) /* size 1 */ {
@@ -206,12 +191,12 @@ void BufferedDisplay::ensurePrintable(BufferCell &cell) const
     }
 }
 
-static inline bool isNull(BufferCell cell)
+static inline bool isNull(TScreenCell cell)
 {
     return __builtin_expect(cell.Char == '\0', 0);
 }
 
-static inline bool isWide(BufferCell cell)
+static inline bool isWide(TScreenCell cell)
 {
     return __builtin_expect(cell.extraWidth, 0);
 }
@@ -232,13 +217,13 @@ void FlushScreenAlgorithm::run()
             for (; x <= damage.end; ++x)
             {
                 getCell();
-                if (cell.dirty || isNull(cell)) {
+                if (cellDirty() || isNull(cell)) {
                     if (wideSpillBefore) {
                         --x;
                         getCell();
                         wideSpillBefore = false;
                     }
-                    pCell->dirty = 0;
+                    commitDirty();
                     processCell();
                 } else
                     wideSpillBefore = wideCanSpill() && !wideCanOverlap() && isWide(cell);
@@ -311,7 +296,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
     int wbegin = x;
     while (width-- && ++x < size.x) {
         getCell();
-        pCell->dirty = 0;
+        commitDirty();
         if (cell.Char != '\0') {
             if (wideCanOverlap()) {
                 // Write over the wide character.
@@ -338,7 +323,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         ++x;
         getCell();
         if (Attr != cell.Attr) {
-            pCell->dirty = 0;
+            commitDirty();
             processCell();
         } else
             --x;
@@ -363,7 +348,7 @@ void FlushScreenAlgorithm::handleNull()
     }
     // Print successive placeholders as spaces.
     do {
-        pCell->dirty = 0;
+        commitDirty();
         cell.Char = ' ';
         writeCell();
         ++x;

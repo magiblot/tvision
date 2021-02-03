@@ -20,9 +20,9 @@ class BufferedDisplay : public DisplayStrategy {
         int begin, end;
     };
 
-    std::vector<BufferCell> buffer;
+    std::vector<TScreenCell> buffer, flushBuffer;
     std::vector<Range> rowDamage;
-    bool screenChanged;
+    bool screenTouched;
 
     const bool wideOverlapping;
     const uint widePlaceholder;
@@ -43,8 +43,8 @@ class BufferedDisplay : public DisplayStrategy {
     bool inBounds(int x, int y) const;
 
     void resizeBuffer();
-    static void setDirty(int x, BufferCell &cell, Range &damage);
-    void ensurePrintable(BufferCell &cell) const;
+    void setDirty(int x, int y, int len);
+    void validateCell(TScreenCell &cell) const;
 
     std::vector<ScreenCursor*> cursors;
     void drawCursors();
@@ -111,7 +111,8 @@ struct FlushScreenAlgorithm {
     TPoint size;
     TPoint last;
     int x, y;
-    BufferCell cell, *pCell;
+    TScreenCell cell;
+    size_t iCell;
     BufferedDisplay::Range damage;
 
     FlushScreenAlgorithm(BufferedDisplay &disp) :
@@ -119,28 +120,42 @@ struct FlushScreenAlgorithm {
     {
     }
 
-    BufferCell &cellAt(int y, int x);
+    TScreenCell &cellAt(int y, int x);
     void getCell();
+    bool cellDirty() const;
     bool wideCanSpill() const;
     bool wideCanOverlap() const;
 
     void run();
     void processCell();
     void writeCell();
+    void commitDirty();
     void handleWideCharSpill();
     void handleNull();
 
 };
 
-inline BufferCell& FlushScreenAlgorithm::cellAt(int y, int x)
+inline TScreenCell& FlushScreenAlgorithm::cellAt(int y, int x)
 {
     return disp.buffer[y*size.x + x];
 }
 
 inline void FlushScreenAlgorithm::getCell()
 {
-    pCell = &cellAt(y, x);
+    auto *pCell = &cellAt(y, x);
+    iCell = pCell - &cellAt(0, 0);
     cell = *pCell;
+    disp.validateCell(cell);
+}
+
+inline bool FlushScreenAlgorithm::cellDirty() const
+{
+    return memcmp(&disp.flushBuffer[iCell], &cell, sizeof(TScreenCell)) != 0;
+}
+
+inline void FlushScreenAlgorithm::commitDirty()
+{
+    disp.flushBuffer[iCell] = cell;
 }
 
 inline bool FlushScreenAlgorithm::wideCanSpill() const

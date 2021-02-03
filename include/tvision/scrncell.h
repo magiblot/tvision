@@ -263,13 +263,12 @@ struct alignas(4) TCellChar
 
 };
 
-struct TScreenCell
+struct alignas(16) TScreenCell
 {
 
     TCellChar Char;
     TCellAttribs Attr;
-    uint8_t
-        extraWidth : 3;
+    uint16_t extraWidth;
 
     TScreenCell() = default;
 
@@ -312,10 +311,8 @@ inline const TCellChar &getChar(const TScreenCell &cell)
 
 inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
 {
-    TScreenCell c = cell;
-    c.Char = ch;
-    c.extraWidth = extraWidth;
-    cell = c;
+    cell.Char = ch;
+    cell.extraWidth = extraWidth;
 }
 
 inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)

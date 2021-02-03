@@ -187,12 +187,7 @@ __4:
     if (attr != 0)
         if (c != 0)
             while (count--)
-                {
-                TScreenCell cell = *dest;
-                ::setChar(cell, (uchar) c);
-                ::setAttr(cell, (uchar) attr);
-                *dest++ = cell;
-                }
+                ::setCell(*dest++, (uchar) c, (uchar) attr);
         else
             while(count--)
                 ::setAttr(*dest++, (uchar) attr);

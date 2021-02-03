@@ -95,37 +95,4 @@ inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
         reverse = 7; // Reverse On
 }
 
-struct BufferCell {
-
-    TCellChar Char;
-    TCellAttribs Attr;
-    uint8_t
-        extraWidth  : 3,
-        dirty       : 1;
-
-    BufferCell() = default;
-    BufferCell(TScreenCell cell);
-    bool operator!=(BufferCell other) const;
-    void ensurePrintable(bool wideChars);
-
-    static void check_assumptions()
-    {
-        scrncell::check_trivial<BufferCell>();
-    }
-
-};
-
-inline BufferCell::BufferCell(TScreenCell cell)
-{
-    *this = {};
-    Char = cell.Char;
-    Attr = cell.Attr;
-    extraWidth = cell.extraWidth;
-}
-
-inline bool BufferCell::operator!=(BufferCell other) const
-{
-    return Char != other.Char || Attr != other.Attr;
-}
-
 #endif
