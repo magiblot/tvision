@@ -231,33 +231,35 @@ void TEditor::changeBounds( const TRect& bounds )
 
 TStringView TEditor::bufChars( uint P )
 {
+    static thread_local char buf[4];
     if (!encSingleByte)
         {
-        int len = min(4, max(max(curPtr, bufLen) - P, 1));
+        int len = min(max(max(curPtr, bufLen) - P, 1), sizeof(buf));
         for (int i = 0; i < len; ++i)
-            charsBuf[i] = bufChar(P + i);
-        return TStringView(charsBuf, len);
+            buf[i] = bufChar(P + i);
+        return TStringView(buf, len);
         }
     else
         {
-        charsBuf[0] = bufChar(P);
-        return TStringView(charsBuf, 1);
+        buf[0] = bufChar(P);
+        return TStringView(buf, 1);
         }
 }
 
 TStringView TEditor::bufPrevChars( uint P )
 {
+    static thread_local char buf[4];
     if (!encSingleByte)
         {
-        int len = min(4, max(P, 1));
+        int len = min(max(P, 1), sizeof(buf));
         for (int i = 0; i < len; ++i)
-            charsBuf[i] = bufChar(P - len + i);
-        return TStringView(charsBuf, len);
+            buf[i] = bufChar(P - len + i);
+        return TStringView(buf, len);
         }
     else
         {
-        charsBuf[0] = bufChar(P - 1);
-        return TStringView(charsBuf, 1);
+        buf[0] = bufChar(P - 1);
+        return TStringView(buf, 1);
         }
 }
 

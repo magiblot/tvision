@@ -278,7 +278,6 @@ public:
     enum EOLTypes { eolCRLF, eolLF, eolCR } eolType;
 
     Boolean encSingleByte;
-    char charsBuf[4];
     void nextChar( TStringView, uint &P, uint &width );
     Boolean formatCell( TSpan<TScreenCell>, uint&, TStringView, uint& , TCellAttribs );
     TStringView bufChars( uint );
