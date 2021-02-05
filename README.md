@@ -636,7 +636,7 @@ The following views can display Unicode text properly. Some of them also do hori
 - [x] `TFrame` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
 - [x] `TStatusLine` ([`477b3ae9`](https://github.com/magiblot/tvision/commit/477b3ae91fd84eb1487dca18a87b3f7b8699c576)).
 - [x] `THistoryViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
-- [x] `THelpViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679), [`8c7dac2a`](https://github.com/magiblot/tvision/commit/8c7dac2a61000f17e09cc31ebbb58b030f95c0e5)).
+- [x] `THelpViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679), [`8c7dac2a`](https://github.com/magiblot/tvision/commit/8c7dac2a61000f17e09cc31ebbb58b030f95c0e5), [`20f331e3`](https://github.com/magiblot/tvision/commit/20f331e362255d45859c36050ff75ffab078c3ab)).
 - [x] `TListViewer` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
 - [x] `TMenuBox` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679)).
 - [x] `TTerminal` ([`ee821b69`](https://github.com/magiblot/tvision/commit/ee821b69c5dd81c565fe1add1ac6f0a2f8a96a01)).
@@ -666,8 +666,6 @@ Unfortunately, each character is processed as a separate `evKeyDown` event. If t
 For the purpose of dealing with this situation, the Turbo Vision API has been extended with the following function:
 
 ```c++
-Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length, size_t &count);
-// Or, without the 'count' parameter:
 Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length);
 ```
 
@@ -675,9 +673,9 @@ Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length);
 
 Just for the record, here is a more detailed explanation:
 
-`textEvent()` tries to read text from standard input and stores it in a user-provided buffer `dest`. It returns `False` when no more events are available in the program's input queue or a non-text event is found, in which case this event is saved with `putEvent()` so that it can be processed in the next iteration of the event loop.
+`textEvent()` tries to read text from standard input and stores it in a user-provided buffer `dest`. It returns `False` when no more events are available in the program's input queue or if a non-text event is found, in which case this event is saved with `putEvent()` so that it can be processed in the next iteration of the event loop.
 
-The exact number of bytes read is stored in the output parameter `length`, which can never be greater than `dest.size()`. `count`, if provided, is an input/output parameter which gets increased by the amount of key strokes processed.
+The exact number of bytes read is stored in the output parameter `length`, which can never be greater than `dest.size()`.
 
 It is intended to be used as follows:
 
@@ -689,21 +687,13 @@ switch (ev.keyDown.keyCode) {
     default:
         // Does the event contain text?
         if (ev.keyDown.textLength) {
-            // Fill 'buf' with text from the input queue,
-            // including the text in 'ev'.
             char buf[512];
             size_t length;
-            size_t count = 0;
-            while (textEvent(ev, buf, length, count)) {
+            // Fill 'buf' with text from the input queue,
+            // including the text in 'ev'.
+            while (textEvent(ev, buf, length)) {
                 // Process 'length' bytes of text in 'buf'.
                 // ...
-
-                // Also, a total of 'count' characters have been read
-                // up to this moment.
-                if (count > 2) {
-                    // This looks like a large chunk of text.
-                    // It's not just the user typing fast.
-                }
             }
             // 'textEvent()' clears 'ev' after reading it the first time.
             // That is, by this point, 'ev.what' is 'evNothing'.

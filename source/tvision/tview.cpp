@@ -809,10 +809,10 @@ void TView::sizeLimits( TPoint& min, TPoint& max )
         max.x = max.y = INT_MAX;
 }
 
-Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length, size_t &count )
+Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length )
 {
     if( owner )
-        return owner->textEvent( event, dest, length, count );
+        return owner->textEvent( event, dest, length );
     return False;
 }
 

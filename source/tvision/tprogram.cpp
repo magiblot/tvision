@@ -325,52 +325,35 @@ TView* TProgram::validView(TView* p)
     return p;
 }
 
-Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest,
-                             size_t &length, size_t &count )
-// If 'event' is a evKeyDown and contains text, it is also included. Otherwise,
-// it is discarded.
-// 'length' is set to the number of bytes written into 'dest', and 'count' is
-// increased by the number of key events processed.
+Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
+// Fill the 'dest' buffer with text from successive events.
+// 'event' must be either an evNothing or an evKeyDown, in which case its text
+// is also included in 'dest'. The function stops when a non-text event is found.
+// 'length' is set to the number of bytes written into 'dest'.
 // On exit, 'event.what' is evNothing.
 {
-    size_t bytes = 0;
-    size_t cnt = 0;
-
-    cnt += readTextEvent( event, dest, bytes ) == True;
-    event.what = evNothing;
-
-        {
-        TEvent ev;
+    length = 0;
+    readTextEvent( event, dest, length );
+    do  {
         if( pending.what != evNothing )
             {
-            ev = pending;
+            event = pending;
             pending.what = evNothing;
             }
         else
             {
-            ev.getKeyEvent(False);
+            event.getKeyEvent(False);
 #ifdef __BORLANDC__ // keyUp events are not discarded, we need to try twice.
-            if( ev.what == evNothing )
-                ev.getKeyEvent(False);
+            if( event.what == evNothing )
+                event.getKeyEvent(False);
 #endif
             }
-        while( readTextEvent( ev, dest, bytes ) )
-            {
-            ++cnt;
-            ev.getKeyEvent(False);
-#ifdef __BORLANDC__
-            if( ev.what == evNothing )
-                ev.getKeyEvent(False);
-#endif
-            }
-        }
+        } while( readTextEvent( event, dest, length ) );
 
-    length = bytes;
-    count += cnt;
-    return bytes != 0;
+    return length != 0;
 }
 
-Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &bytes)
+Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length)
 {
     if( event.what == evKeyDown )
         {
@@ -378,16 +361,18 @@ Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &bytes)
                          : event.keyDown.keyCode == kbEnter ? TStringView("\n")
                          : event.keyDown.keyCode == kbTab   ? TStringView("\t")
                                                             : TStringView();
-        TSpan<char> dst = dest.subspan(bytes);
+        TSpan<char> dst = dest.subspan(length);
         if( text.size() && text.size() <= dst.size() )
             {
             for( size_t i = 0; i < text.size(); ++i )
                 dst[i] = text[i];
-            bytes += text.size();
+            length += text.size();
+            clearEvent(event);
             return True;
             }
         }
     if( event.what != evNothing )
         putEvent(event);
+    clearEvent(event);
     return False;
 }

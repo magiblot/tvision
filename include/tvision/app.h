@@ -266,7 +266,7 @@ public:
     virtual void initScreen();
     virtual void outOfMemory();
     virtual void putEvent( TEvent& event );
-    virtual Boolean textEvent(TEvent& event, TSpan<char> dest, size_t &length, size_t &count);
+    virtual Boolean textEvent(TEvent& event, TSpan<char> dest, size_t &length);
     virtual void run();
     virtual TWindow* insertWindow(TWindow*);
     void setScreenMode( ushort mode );

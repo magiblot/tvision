@@ -400,8 +400,7 @@ public:
 
     void keyEvent( TEvent& event );
     Boolean mouseEvent( TEvent& event, ushort mask );
-    virtual Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length, size_t &count );
-    Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
+    virtual Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
 
     TPoint makeGlobal( TPoint source );
     TPoint makeLocal( TPoint source );
@@ -503,12 +502,6 @@ inline void TView::writeLine( short x, short y, short w, short h,
                               const TDrawBuffer& b )
 {
     writeLine( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
-}
-
-inline Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length )
-{
-    size_t count = 0;
-    return textEvent( event, dest, length, count );
 }
 
 #endif  // Uses_TView
