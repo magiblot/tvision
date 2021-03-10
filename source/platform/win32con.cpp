@@ -75,6 +75,43 @@ bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
     setlocale(LC_ALL, ".utf8"); // Note that this must be done after SetConsoleCP().
+    if (!supportsVT)
+    {
+        // Disable bitmap font in legacy console because multibyte characters
+        // are not displayed correctly.
+        CONSOLE_FONT_INFOEX fontInfo {};
+        fontInfo.cbSize = sizeof(fontInfo);
+        auto isBitmap = [](UINT family)
+        {
+            // https://docs.microsoft.com/en-us/windows/console/console-font-infoex
+            // "FontFamily: see the description of the tmPitchAndFamily member
+            //  of the TEXTMETRIC structure."
+            // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-textmetricw
+            // "A monospace bitmap font has all of these low-order bits clear".
+            return !(family & (TMPF_FIXED_PITCH | TMPF_VECTOR | TMPF_TRUETYPE | TMPF_DEVICE));
+        };
+        if ( GetCurrentConsoleFontEx(StdioCtl::out(), FALSE, &fontInfo)
+             && isBitmap(fontInfo.FontFamily) )
+        {
+            // Compute the new font height based on the bitmap font size.
+            auto &oldSize = fontInfo.dwFontSize;
+            short fontY = 2*min(oldSize.X, oldSize.Y);
+            for (auto *name : {L"Consolas", L"Lucida Console"})
+            {
+                fontInfo.nFont = 0;
+                fontInfo.FontFamily = FF_DONTCARE;
+                fontInfo.FontWeight = FW_NORMAL;
+                fontInfo.dwFontSize = {0, fontY}; // Width estimated automatically, it seems.
+                wcscpy(fontInfo.FaceName, name);
+                // SetCurrentConsoleFontEx succeeds even if the font is not available.
+                // We need to check whether the font has actually been set.
+                SetCurrentConsoleFontEx(StdioCtl::out(), FALSE, &fontInfo);
+                GetCurrentConsoleFontEx(StdioCtl::out(), FALSE, &fontInfo);
+                if (wcscmp(fontInfo.FaceName, name) == 0)
+                    break;
+            }
+        }
+    }
     // Initialize the input and display strategies.
     display = supportsVT ? std::make_unique<AnsiDisplay<Win32Display>>()
                          : std::make_unique<Win32Display>();
