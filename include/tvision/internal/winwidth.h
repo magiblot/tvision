@@ -3,6 +3,7 @@
 
 #ifdef _WIN32
 
+#include <tvision/tv.h>
 #include <tvision/compat/win.h>
 #include <cstddef>
 #include <cstdint>
