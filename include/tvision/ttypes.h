@@ -39,11 +39,11 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+#include <stddef.h>
+
 #ifndef __BORLANDC__
-#include <cstddef>
 #include <stdint.h>
 #else
-#include <stddef.h>
 typedef char int8_t;
 typedef short int16_t;
 typedef long int32_t;

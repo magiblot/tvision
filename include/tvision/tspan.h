@@ -38,7 +38,7 @@ public:
     }
 
 #ifndef __BORLANDC__
-    constexpr TSpan(std::nullptr_t) :
+    constexpr TSpan(decltype(nullptr)) :
         TSpan()
     {
     }
