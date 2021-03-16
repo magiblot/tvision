@@ -89,11 +89,8 @@ inline TStringView::TStringView(const char _FAR *str) :
 #else
 inline TStringView::TStringView(const char _FAR *str) :
     str(str),
-    len(0)
+    len(str ? strlen(str) : 0)
 {
-    if (str)
-        while (str[len])
-            ++len;
 }
 #endif
 
