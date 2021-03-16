@@ -43,7 +43,7 @@ TStaticText::~TStaticText()
 
 void TStaticText::draw()
 {
-    uchar color;
+    TColorAttr color;
     Boolean center;
     int i, j, l, p, y;
     TDrawBuffer b;

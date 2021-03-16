@@ -126,7 +126,7 @@ void TCalcDisplay::handleEvent(TEvent& event)
 
 void TCalcDisplay::draw()
 {
-    char color = getColor(1);
+    TColorAttr color = getColor(1);
     short i;
     TDrawBuffer buf;
 

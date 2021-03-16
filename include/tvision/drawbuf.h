@@ -31,15 +31,15 @@ class TDrawBuffer
 
 public:
 
-    void moveChar( ushort indent, char c, ushort attr, ushort count );
-    ushort moveStr( ushort indent, TStringView str, ushort attrs );
-    ushort moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0 );
-    ushort moveCStr( ushort indent, TStringView str, ushort attrs );
-    void moveBuf( ushort indent, const void _FAR *source, ushort attr, ushort count );
+    void moveChar( ushort indent, char c, TColorAttr attr, ushort count );
+    ushort moveStr( ushort indent, TStringView str, TColorAttr attr );
+    ushort moveStr( ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0 );
+    ushort moveCStr( ushort indent, TStringView str, TAttrPair attrs );
+    void moveBuf( ushort indent, const void _FAR *source, TColorAttr attr, ushort count );
     void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count );
 
-    void putAttribute( ushort indent, ushort attr );
-    void putChar( ushort indent, ushort c );
+    void putAttribute( ushort indent, TColorAttr attr );
+    void putChar( ushort indent, uchar c );
     size_t length() const;
 
 #ifdef __FLAT__
@@ -62,16 +62,16 @@ protected:
 #define loByte(w)    (((uchar *)&w)[0])
 #define hiByte(w)    (((uchar *)&w)[1])
 
-inline void TDrawBuffer::putAttribute( ushort indent, ushort attr )
+inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr )
 {
     if (indent < length())
-        ::setAttr(data[indent], (uchar) attr);
+        ::setAttr(data[indent], attr);
 }
 
-inline void TDrawBuffer::putChar( ushort indent, ushort c )
+inline void TDrawBuffer::putChar( ushort indent, uchar c )
 {
     if (indent < length())
-        ::setChar(data[indent], (uchar) c);
+        ::setChar(data[indent], c);
 }
 
 inline size_t TDrawBuffer::length() const

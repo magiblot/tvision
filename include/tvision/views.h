@@ -551,7 +551,7 @@ public:
 
 private:
 
-    void frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color );
+    void frameLine( TDrawBuffer& frameBuf, short y, short n, TColorAttr color );
     void dragWindow( TEvent& event, uchar dragMode );
 
     friend class TDisplay;

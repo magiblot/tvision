@@ -47,7 +47,7 @@ THeapView::THeapView(TRect& r) : TView( r )
 void THeapView::draw()
 {
     TDrawBuffer buf;
-    char c = getColor(2);
+    TColorAttr c = getColor(2);
 
     buf.moveChar(0, ' ', c, (short)size.x);
     buf.moveStr(0, heapStr, c);
@@ -134,7 +134,7 @@ TClockView::TClockView( TRect& r ) : TView( r )
 void TClockView::draw()
 {
     TDrawBuffer buf;
-    char c = getColor(2);
+    TColorAttr c = getColor(2);
 
     buf.moveChar(0, ' ', c, (short)size.x);
     buf.moveStr(0, curTime, c);

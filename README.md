@@ -487,19 +487,19 @@ Here is an example of such characters in the [Turbo](https://github.com/magiblot
 The usual way of writing to the screen is by using `TDrawBuffer`. A few methods have been added and others have changed their meaning:
 
 ```c++
-void TDrawBuffer::moveChar(ushort indent, char c, ushort attr, ushort count);
+void TDrawBuffer::moveChar(ushort indent, char c, TColorAttr attr, ushort count);
 void TDrawBuffer::putChar(ushort indent, ushort c);
 ```
 `c` is always interpreted as a character in the active codepage.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr);
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, ushort attrs);
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
 ```
 `str` is interpreted according to the rules exposed previously.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin=0); // New
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0); // New
 ```
 `str` is interpreted according to the rules exposed previously. However:
 * `width` specifies the maximum number of display columns that should be read from `str`.
@@ -508,7 +508,7 @@ ushort TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort 
 The return values are the number of display columns that were actually filled with text.
 
 ```c++
-void TDrawBuffer::moveBuf(ushort indent, const void *source, ushort attr, ushort count);
+void TDrawBuffer::moveBuf(ushort indent, const void *source, TColorAttr attr, ushort count);
 ```
 This function's name is misleading. Even in its original implementation, `source` is treated as a string. So it is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
 
@@ -538,7 +538,7 @@ size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
 size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
 size_t TText::fill(TSpan<TScreenCell> cells, TStringView text);
-size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
+size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr);
 #ifndef __BORLANDC__
 template <class Func>
 size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
@@ -606,7 +606,7 @@ writeBuf( 0, i, size.x, 1, b );
 ```
 All it does is move part of a string in `fileLines` into `b`, which is a `TDrawBuffer`. `delta` is a `TPoint` representing the scroll offset in the text view, and `i` is the index of the visible line being processed. `c` is the text color. A few issues are present:
 
-* `TDrawBuffer::moveStr(ushort, const char *, ushort)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
+* `TDrawBuffer::moveStr(ushort, const char *, TColorAttr)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
 * `delta.x` is the first visible column. With multibyte-encoded text, it is no longer true that such column begins at position `delta.x` in the string.
 
 Below is a corrected version of the code above that handles Unicode properly:
@@ -619,7 +619,7 @@ if (delta.y + i < fileLines->getCount()) {
 }
 writeBuf( 0, i, size.x, 1, b );
 ```
-The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, ushort attr, ushort width, ushort begin)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
+The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
 
 * The intermediary copy is avoided, so the displayed text is not limited to `maxLineLength` bytes.
 * `moveStr` takes care of printing the string starting at column `delta.x`. We do not even need to worry about how many bytes correspond to `delta.x` columns.
@@ -659,7 +659,7 @@ Use cases where Unicode is not supported (not an exhaustive list):
 
 # Clipboard interaction
 
-Turbo Vision does not (yet) support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal application. Turbo Vision will then receive the text through standard input.
+Turbo Vision does not support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal application. Turbo Vision will then receive the text through standard input.
 
 Unfortunately, each character is processed as a separate `evKeyDown` event. If the user pastes 5000 characters, the application will execute the same operations as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen, etcetera. As you can imagine, this is far from optimal.
 

@@ -99,7 +99,7 @@ void TInputLine::draw()
     int l, r;
     TDrawBuffer b;
 
-    uchar color = (state & sfFocused) ? getColor( 2 ) : getColor( 1 );
+    TColorAttr color = getColor( (state & sfFocused) ? 2 : 1 );
 
     b.moveChar( 0, ' ', color, size.x );
     if( size.x > 1 )

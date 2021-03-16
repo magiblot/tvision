@@ -78,7 +78,7 @@ TTable::TTable(TRect& r) :
 void TTable::draw()
 {
     TDrawBuffer buf;
-    char        color = getColor(6);
+    TColorAttr  color = getColor(6);
 
     for(ushort y = 0; y <= size.y-1; y++)
     {
@@ -204,7 +204,7 @@ TReport::TReport(TRect& r) :
 void TReport::draw()
 {
     TDrawBuffer buf;
-    char        color = getColor(6);
+    TColorAttr  color = getColor(6);
     char        str[80];
     ostrstream  statusStr( str, sizeof str );
 

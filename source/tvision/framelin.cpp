@@ -19,10 +19,10 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, uchar color )
+void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, TColorAttr color )
 {
     uchar *FrameMask = (uchar*) alloca(size.x);
-    int x; // For Borland C++ compatibility
+    int x;
 
     FrameMask[0] = initFrame[n];
     for (x = 1; x < size.x - 1; ++x)

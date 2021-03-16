@@ -31,19 +31,19 @@ uint TEditor::bufPtr( uint P )
 void TEditor::formatLine( TScreenCell *DrawBuf,
                           uint P,
                           int Width,
-                          ushort Colors
+                          TAttrPair Colors
                         )
 {
-    const struct { uchar color; uint end; } ranges[] =
+    const struct { TColorAttr color; uint end; } ranges[] =
     {
-        // The attributes for normal text are in the lower byte of 'Colors'.
-        // The attributes for text selection are in the upper byte.
-        { uchar(Colors), selStart },
-        { uchar(Colors >> 8), selEnd },
-        { uchar(Colors), bufLen }
+        // The attributes for normal text are in the lower half of 'Colors'.
+        // The attributes for text selection are in the upper half.
+        { TColorAttr(Colors), selStart },
+        { TColorAttr(Colors >> 8), selEnd },
+        { TColorAttr(Colors), bufLen }
     };
 
-    uchar Color;
+    TColorAttr Color;
     TSpan<TScreenCell> Cells(DrawBuf, Width);
     int X = 0;
     for (int r = 0; r < 3; ++r)
@@ -52,7 +52,7 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
         while (P < ranges[r].end)
         {
             TStringView chars = bufChars(P);
-            uchar Char = chars[0];
+            char Char = chars[0];
             if (Char == '\r' || Char == '\n')
                 goto fill;
             if (Char == '\t') {

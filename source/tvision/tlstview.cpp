@@ -77,7 +77,7 @@ void TListViewer::changeBounds( const TRect& bounds )
 void TListViewer::draw()
 {
     short i, j, item;
-    ushort normalColor, selectedColor, focusedColor, color;
+    TColorAttr normalColor, selectedColor, focusedColor, color;
     short colWidth, curCol, indent;
     TDrawBuffer b;
     uchar scOff;

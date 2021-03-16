@@ -44,7 +44,7 @@ void TLabel::shutDown()
 
 void TLabel::draw()
 {
-    ushort color;
+    TAttrPair color;
     TDrawBuffer b;
     uchar scOff;
 

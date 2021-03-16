@@ -222,7 +222,7 @@ void TFileInfoPane::draw()
 {
     Boolean PM;
     TDrawBuffer b;
-    ushort  color;
+    TColorAttr color;
     struct ftime *time; // mingw has same name as a function name
     char path[MAXPATH];
 

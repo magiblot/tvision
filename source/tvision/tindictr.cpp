@@ -36,7 +36,8 @@ TIndicator::TIndicator( const TRect& bounds ) :
 
 void TIndicator::draw()
 {
-    uchar color, frame;
+    TColorAttr color;
+    char frame;
     TDrawBuffer b;
     char s[15];
 
@@ -59,7 +60,7 @@ void TIndicator::draw()
     os << ' ' << (location.y+1)
        << ':' << (location.x+1) << ' ' << ends;
 
-    b.moveCStr( 8-int(strchr(s, ':')-s), s, color);
+    b.moveStr( 8-int(strchr(s, ':')-s), s, color);
     writeBuf(0, 0, size.x, 1, b);
 }
 

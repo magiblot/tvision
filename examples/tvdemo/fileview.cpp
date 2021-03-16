@@ -61,7 +61,7 @@ void TFileViewer::draw()
 {
     char *p;
 
-    ushort c =  getColor(0x0301);
+    TColorAttr c =  getColor(1);
     for( short i = 0; i < size.y; i++ )
         {
         TDrawBuffer b;

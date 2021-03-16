@@ -87,15 +87,15 @@ void TCluster::drawBox( const char *icon, char marker)
 void TCluster::drawMultiBox( const char *icon, const char* marker)
 {
     TDrawBuffer b;
-    ushort color;
+    TAttrPair color;
     int i, j, cur;
 
-    ushort cNorm = getColor( 0x0301 );
-    ushort cSel = getColor( 0x0402 );
-    ushort cDis = getColor( 0x0505 );
+    TAttrPair cNorm = getColor( 0x0301 );
+    TAttrPair cSel = getColor( 0x0402 );
+    TAttrPair cDis = getColor( 0x0505 );
     for( i = 0; i <= size.y; i++ )
     {
-        b.moveChar(0, ' ',(uchar)cNorm, size.x);
+        b.moveChar(0, ' ', cNorm, size.x);
         for( j = 0; j <= (strings->getCount()-1)/size.y + 1; j++ )
         {
             cur = j * size.y + i;

@@ -67,12 +67,12 @@ void TStatusLine::draw()
 void TStatusLine::drawSelect( TStatusItem *selected )
 {
     TDrawBuffer b;
-    ushort color;
+    TAttrPair color;
 
-    ushort cNormal = getColor(0x0301);
-    ushort cSelect = getColor(0x0604);
-    ushort cNormDisabled = getColor(0x0202);
-    ushort cSelDisabled = getColor(0x0505);
+    TAttrPair cNormal = getColor(0x0301);
+    TAttrPair cSelect = getColor(0x0604);
+    TAttrPair cNormDisabled = getColor(0x0202);
+    TAttrPair cSelDisabled = getColor(0x0505);
     b.moveChar( 0, ' ', cNormal, size.x );
     TStatusItem *T =  items;
     ushort i = 0;

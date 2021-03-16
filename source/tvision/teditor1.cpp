@@ -480,7 +480,7 @@ void TEditor::draw()
 
 void TEditor::drawLines( int y, int count, uint linePtr )
 {
-    ushort color = getColor(0x0201);
+    TAttrPair color = getColor(0x0201);
 #ifndef __FLAT__
     TScreenCell b[maxLineLength];
 #else

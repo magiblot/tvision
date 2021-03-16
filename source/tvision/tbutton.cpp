@@ -69,7 +69,7 @@ void TButton::draw()
 void TButton::drawTitle( TDrawBuffer &b,
                          int s,
                          int i,
-                         ushort cButton,
+                         TAttrPair cButton,
                          Boolean down
                        )
 {
@@ -99,7 +99,7 @@ void TButton::drawTitle( TDrawBuffer &b,
 
 void TButton::drawState(Boolean down)
 {
-    ushort cButton, cShadow;
+    TAttrPair cButton, cShadow;
     TDrawBuffer b;
 
     if( (state & sfDisabled) != 0 )

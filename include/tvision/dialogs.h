@@ -284,7 +284,7 @@ protected:
 
 private:
 
-    void drawTitle( TDrawBuffer&, int, int, ushort, Boolean );
+    void drawTitle( TDrawBuffer&, int, int, TAttrPair, Boolean );
     void pressButton( TEvent& );
     TRect getActiveRect();
 

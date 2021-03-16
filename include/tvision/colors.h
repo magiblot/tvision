@@ -661,6 +661,7 @@ struct TAttrPair
     inline ushort asBIOS() const;
 
     inline operator ushort() const;
+    inline TAttrPair operator>>(int shift) const;
     inline TAttrPair& operator|=(TColorAttr attr);
 
     inline TColorAttr& operator[](size_t i);
@@ -693,6 +694,14 @@ inline ushort TAttrPair::asBIOS() const
 inline TAttrPair::operator ushort() const
 {
     return asBIOS();
+}
+
+inline TAttrPair TAttrPair::operator>>(int shift) const
+{
+    // Legacy code may use '>> 8' on an attribute pair to get the higher attribute.
+    if (shift == 8)
+        return {_attrs[1]};
+    return asBIOS() >> shift;
 }
 
 inline TAttrPair& TAttrPair::operator|=(TColorAttr attr)

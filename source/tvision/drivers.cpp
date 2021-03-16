@@ -51,7 +51,7 @@
 /*------------------------------------------------------------------------*/
 
 void TDrawBuffer::moveBuf( ushort indent, const void _FAR *source,
-                           ushort attr, ushort count )
+                           TColorAttr attr, ushort count )
 
 {
 #if !defined( __FLAT__ )
@@ -145,7 +145,7 @@ void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveChar( ushort indent, char c, ushort attr, ushort count )
+void TDrawBuffer::moveChar( ushort indent, char c, TColorAttr attr, ushort count )
 {
 #if !defined( __FLAT__ )
 I   MOV     CX,count
@@ -186,11 +186,15 @@ __4:
 
     if (attr != 0)
         if (c != 0)
+        {
+            TScreenCell cell;
+            ::setCell(cell, (uchar) c, attr);
             while (count--)
-                ::setCell(*dest++, (uchar) c, (uchar) attr);
+                *dest++ = cell;
+        }
         else
             while(count--)
-                ::setAttr(*dest++, (uchar) attr);
+                ::setAttr(*dest++, attr);
     else
         while (count--)
             ::setChar(*dest++, (uchar) c);
@@ -220,7 +224,7 @@ __4:
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs )
 {
 #ifdef __BORLANDC__
     register ushort *dest = &data[indent];
@@ -249,12 +253,12 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 #else
     size_t i = indent, j = 0;
     int toggle = 1;
-    uchar curAttr = ((uchar *)&attrs)[0];
+    auto curAttr = attrs[0];
 
     while (j < str.size())
         if (str[j] == '~')
             {
-            curAttr = ((uchar *) &attrs)[toggle];
+            curAttr = attrs[toggle];
             toggle = 1 - toggle;
             ++j;
             }
@@ -290,7 +294,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, ushort attrs )
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr )
 {
     if (indent < length())
         {
@@ -347,7 +351,8 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr )
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveStr( ushort indent, TStringView str, ushort attr, ushort width, ushort begin )
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
+                             ushort width, ushort begin )
 {
 #ifdef __BORLANDC__
     if (begin < str.size())

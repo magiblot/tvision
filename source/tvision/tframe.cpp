@@ -34,7 +34,7 @@ TFrame::TFrame( const TRect& bounds ) : TView( bounds )
 
 void TFrame::draw()
 {
-    ushort cFrame, cTitle;
+    TAttrPair cFrame, cTitle;
     short  f, i, l, width;
     TDrawBuffer b;
 
@@ -65,7 +65,7 @@ void TFrame::draw()
 
     if( ( ((TWindow *)owner)->flags & (wfClose | wfZoom) ) != 0 )
         l -= 6;
-    frameLine( b, 0, f, uchar(cFrame) );
+    frameLine( b, 0, f, cFrame );
     if( ((TWindow *)owner)->number != wnNoNumber &&
         ((TWindow *)owner)->number < 10
       )

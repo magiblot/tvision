@@ -55,7 +55,7 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
                   int position, long lines, ushort flags )
 {
   TDrawBuffer &dBuf = *pdBuf;
-  ushort  color;
+  TAttrPair color;
   int x;
 
   if (position >= beingDrawn->delta.y)
@@ -79,7 +79,7 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
       }
       {
         TStringView text = beingDrawn->getText(cur);
-        uchar c = (flags & ovExpanded) ? color : (color >> 8);
+        TColorAttr c = (flags & ovExpanded) ? color : (color >> 8);
         dBuf.moveStr(max(0, x), text, c, (ushort) -1U, max(0, -x));
       }
       beingDrawn->writeLine(0, position-beingDrawn->delta.y,
@@ -92,7 +92,7 @@ Boolean drawTree( TOutlineViewer *beingDrawn, TNode* cur, int level,
 
 void TOutlineViewer::draw()
 {
-  ushort nrmColor = getColor(0x0401);
+  TAttrPair nrmColor = getColor(0x0401);
   TDrawBuffer dBuf;
   pdBuf = &dBuf;
   auxPos = -1;

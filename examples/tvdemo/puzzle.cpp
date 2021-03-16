@@ -109,7 +109,7 @@ TPuzzleView::TPuzzleView(TRect& r) : TView(r)
 void TPuzzleView::draw()
 {
     char tmp[8];
-    char color[2], colorBack;
+    TColorAttr color[2], colorBack;
     TDrawBuffer buf;
 
     color[0] = color[1] = colorBack = getColor(1);

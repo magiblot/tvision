@@ -162,7 +162,7 @@ void TTerminal::draw()
     short  i;
     ushort begLine, endLine;
     ushort bottomLine;
-    uchar color = mapColor(1);
+    TColorAttr color = mapColor(1);
 
     bottomLine = size.y + delta.y;
     if( limit.y > bottomLine )

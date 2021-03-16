@@ -47,15 +47,15 @@ TMenuBar::~TMenuBar()
 
 void TMenuBar::draw()
 {
-    ushort color;
+    TAttrPair color;
     short x, l;
     TMenuItem *p;
     TDrawBuffer b;
 
-    ushort cNormal = getColor(0x0301);
-    ushort cSelect = getColor(0x0604);
-    ushort cNormDisabled =  getColor(0x0202);
-    ushort cSelDisabled =  getColor(0x0505);
+    TAttrPair cNormal = getColor(0x0301);
+    TAttrPair cSelect = getColor(0x0604);
+    TAttrPair cNormDisabled = getColor(0x0202);
+    TAttrPair cSelDisabled = getColor(0x0505);
     b.moveChar( 0, ' ', cNormal, size.x );
     if( menu != 0 )
         {

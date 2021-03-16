@@ -75,7 +75,7 @@ void TClickTester::handleEvent(TEvent& event)
 void TClickTester::draw()
 {
     TDrawBuffer buf;
-    char c;
+    TColorAttr c;
 
     if (clicked)
         c = getColor(2);

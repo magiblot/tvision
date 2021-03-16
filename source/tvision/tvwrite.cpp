@@ -351,13 +351,14 @@ void TView::writeChar( short x, short y, char c, uchar color, short count )
 {
     if (count > 0)
     {
-        ushort attrcolor = (mapColor(color) << 8) | (uchar) c;
-        ushort* attributed = (ushort*) alloca(sizeof(ushort)*count);
-        for (int i = 0; i < count; ++i)
+        TScreenCell cell;
+        ::setCell(cell, c, mapColor(color));
+        TScreenCell *buf = (TScreenCell *) alloca(count*sizeof(TScreenCell));
+        for (short i = 0; i < count; ++i)
         {
-            attributed[i] = attrcolor;
+            buf[i] = cell;
         }
-        writeView(x, y, count, attributed);
+        writeView(x, y, count, buf);
     }
 }
 
@@ -383,17 +384,16 @@ void TView::writeStr( short x, short y, const char *str, uchar color )
 {
     if (str != 0)
     {
-        int length = strlen(str);
+        size_t length = strlen(str);
         if (length > 0)
         {
-            uchar attr = mapColor(color);
-            ushort *attributed = (ushort*) alloca(sizeof(ushort)*length);
-            for (int i = 0; i < length; ++i)
+            TColorAttr attr = mapColor(color);
+            TScreenCell *buf = (TScreenCell*) alloca(length*sizeof(TScreenCell));
+            for (size_t i = 0; i < length; ++i)
             {
-        // The lower byte must be unsigned for concatenation to always work.
-                attributed[i] = (attr << 8) | (uchar) str[i];
+                ::setCell(buf[i], str[i], attr);
             }
-            writeView(x, y, length, attributed);
+            writeView(x, y, length, buf);
         }
     }
 }

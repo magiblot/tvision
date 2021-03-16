@@ -127,7 +127,7 @@ void TCalendarView::draw()
     char current = (char)(1 - dayOfWeek(1, month, year));
     char days = (char)( daysInMonth[month] +
                         ((year % 4 == 0 && month == 2) ? 1 : 0) );
-    char color, boldColor;
+    TColorAttr color, boldColor;
     short  i, j;
     TDrawBuffer buf;
 

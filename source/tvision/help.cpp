@@ -94,7 +94,7 @@ void THelpViewer::draw()
     TDrawBuffer b;
     int i, j, l;
     int keyCount;
-    ushort normal, keyword, selKeyword, c;
+    TColorAttr normal, keyword, selKeyword, c;
     TPoint keyPoint;
     uchar keyLength;
     int keyRef;

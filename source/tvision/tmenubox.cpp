@@ -68,7 +68,7 @@ TMenuBox::TMenuBox( const TRect& bounds,
     options |= ofPreProcess;
 }
 
-static ushort cNormal, color;
+static thread_local TAttrPair cNormal, color;
 
 void TMenuBox::frameLine( TDrawBuffer& b, short n )
 {
@@ -82,9 +82,9 @@ void TMenuBox::draw()
     TDrawBuffer    b;
 
     cNormal = getColor(0x0301);
-    ushort cSelect = getColor(0x0604);
-    ushort cNormDisabled = getColor(0x0202);
-    ushort cSelDisabled = getColor(0x0505);
+    TAttrPair cSelect = getColor(0x0604);
+    TAttrPair cNormDisabled = getColor(0x0202);
+    TAttrPair cSelDisabled = getColor(0x0505);
     short y = 0;
     color =  cNormal;
     frameLine( b, 0 );
