@@ -16,9 +16,6 @@ inline constexpr uint Utf8BytesLeft(char first_byte)
 }
 
 template<size_t N>
-#ifdef __cpp_lib_array_constexpr
-constexpr
-#endif
 inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N])
 {
     using namespace detail;
@@ -28,10 +25,7 @@ inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N])
     return result;
 }
 
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-inline uint32_t utf8To32(TStringView s) {
+inline constexpr uint32_t utf8To32(TStringView s) {
     // Precondition: s is a valid UTF-8 sequence.
     switch (s.size()) {
         case 1:

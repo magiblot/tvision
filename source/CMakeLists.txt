@@ -5,7 +5,8 @@ list(REMOVE_ITEM TVSOURCE "${CMAKE_CURRENT_LIST_DIR}/tvision/geninc.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${TVSOURCE})
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${PROJECT_SOURCE_DIR}/include"

@@ -90,14 +90,14 @@ The library and executables can be found in `./build`.
 
 The build requirements are:
 
-* A compiler supporting C++ 11.
+* A compiler supporting C++14.
 * `libncursesw` (note the 'w').
 * `libgpm` (for mouse support on the Linux console) (optional).
 
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
 ```sh
-g++ -std=c++11 -o hello hello.cpp ./build/libtvision.a -Iinclude -lncursesw -lgpm
+g++ -std=c++14 -o hello hello.cpp ./build/libtvision.a -Iinclude -lncursesw -lgpm
 ```
 
 You may also need:

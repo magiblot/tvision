@@ -11,14 +11,11 @@ namespace detail
 {
 
 template<class Int>
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-inline Int string_as_int(TStringView s)
+inline constexpr Int string_as_int(TStringView s)
 {
     Int res = 0;
     for (size_t i = 0; i < std::min(s.size(), sizeof(res)); ++i)
-        // This won't work in big endian systems.
+        // CAUTION: Assumes Little Endian.
         res |= uint64_t(uint8_t(s[i])) << 8*i;
     return res;
 }
