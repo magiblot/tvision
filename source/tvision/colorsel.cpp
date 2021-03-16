@@ -371,7 +371,7 @@ void TColorDisplay::handleEvent( TEvent& event )
             }
 }
 
-void TColorDisplay::setColor( uchar *aColor )
+void TColorDisplay::setColor( TColorAttr *aColor )
 {
     color = aColor;
     message( owner, evBroadcast, cmColorSet, (void *)(size_t)(*color) );
@@ -759,7 +759,7 @@ void TColorDialog::handleEvent( TEvent& event )
         groupIndex = groups->focused;
     TDialog::handleEvent( event );
     if( event.what==evBroadcast && event.message.command==cmNewColorIndex )
-        display->setColor( (uchar *)&pal->data[event.message.infoByte] );
+        display->setColor( &pal->data[event.message.infoByte] );
 }
 
 ushort TColorDialog::dataSize()
@@ -780,7 +780,7 @@ void TColorDialog::setData( void *rec)
     *pal = *(TPalette *) rec;
 
     setIndexes(colorIndexes);
-    display->setColor((uchar *)&pal->data[groups->getGroupIndex(groupIndex)]);
+    display->setColor(&pal->data[groups->getGroupIndex(groupIndex)]);
     groups->focusItem( groupIndex);
     if( showMarkers )
         {

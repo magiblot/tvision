@@ -218,11 +218,11 @@ public:
     virtual ~TColorDisplay();
     virtual void draw();
     virtual void handleEvent( TEvent& event );
-    virtual void setColor( uchar *aColor );
+    virtual void setColor( TColorAttr *aColor );
 
 protected:
 
-    uchar *color;
+    TColorAttr *color;
     const char *text;
 
 private:

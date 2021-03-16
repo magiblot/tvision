@@ -287,16 +287,29 @@ class TPalette
 public:
 
     TPalette( const char *, ushort );
+#ifndef __BORLANDC__
+    TPalette( const TColorAttr *, ushort );
+    template <size_t N>
+    TPalette( const TColorAttr (&array) [N] ) :
+        TPalette(array, (ushort) N)
+    {
+    }
+#endif
     TPalette( const TPalette& );
     ~TPalette();
 
     TPalette& operator = ( const TPalette& );
 
-    uchar& operator[]( int ) const;
+    TColorAttr& operator[]( int ) const;
 
-    uchar *data;
+    TColorAttr *data;
 
 };
+
+inline TColorAttr& TPalette::operator[]( int index ) const
+{
+    return data[index];
+}
 
 #endif  // Uses_TPalette
 
@@ -390,9 +403,9 @@ public:
     virtual void endModal( ushort command );
     virtual ushort execute();
 
-    ushort getColor( ushort color );
+    TAttrPair getColor( ushort color );
     virtual TPalette& getPalette() const;
-    uchar mapColor( uchar );
+    virtual TColorAttr mapColor( uchar );
 
     Boolean getState( ushort aState ) const;
     void select();

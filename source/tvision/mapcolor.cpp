@@ -17,8 +17,9 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
-uchar TView::mapColor( uchar color )
+TColorAttr TView::mapColor( uchar index )
 {
+    TColorAttr color = index;
     if( color == 0 )
         return errorAttr;
     TView *cur = this;

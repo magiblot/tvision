@@ -504,6 +504,7 @@ struct TColorAttr
     inline uchar toBIOS() const; // Quantization.
 
     inline operator uchar() const;
+    inline TAttrPair operator<<(int shift) const;
 
     inline bool operator==(const TColorAttr &other) const;
     inline bool operator!=(const TColorAttr &other) const;
@@ -660,6 +661,7 @@ struct TAttrPair
     inline ushort asBIOS() const;
 
     inline operator ushort() const;
+    inline TAttrPair& operator|=(TColorAttr attr);
 
     inline TColorAttr& operator[](size_t i);
     inline const TColorAttr& operator[](size_t i) const;
@@ -693,6 +695,13 @@ inline TAttrPair::operator ushort() const
     return asBIOS();
 }
 
+inline TAttrPair& TAttrPair::operator|=(TColorAttr attr)
+{
+    // Legacy code may use '|=' on an attribute pair to set the lower attribute.
+    _attrs[0] = attr;
+    return *this;
+}
+
 inline TColorAttr& TAttrPair::operator[](size_t i)
 {
     return _attrs[i];
@@ -714,6 +723,14 @@ inline TColorAttr& TColorAttr::operator=(const TAttrPair &attrs)
 {
     *this = attrs[0];
     return *this;
+}
+
+inline TAttrPair TColorAttr::operator<<(int shift) const
+{
+    // Legacy code may use '<< 8' on an attribute to construct an attribute pair.
+    if (shift == 8)
+        return {uchar(0), *this};
+    return asBIOS() << shift;
 }
 
 #endif // __BORLANDC__

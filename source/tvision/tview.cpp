@@ -478,9 +478,9 @@ TRect TView::getClipRect() const
     return clip;
 }
 
-ushort TView::getColor( ushort color )
+TAttrPair TView::getColor( ushort color )
 {
-    ushort colorPair = color >> 8;
+    TAttrPair colorPair = color >> 8;
 
     if( colorPair != 0 )
         colorPair = mapColor(colorPair) << 8;

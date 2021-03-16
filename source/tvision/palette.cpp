@@ -21,16 +21,26 @@
 
 
 TPalette::TPalette( const char* d, ushort len ) :
-    data( new uchar[ len+1 ] )
+    data( new TColorAttr[ len+1 ] )
 {
     data[0] = len;
-    memcpy( data+1, d, len );
+    for (ushort i = 0; i < len; ++i)
+        data[i + 1] = d[i];
 }
 
-TPalette::TPalette( const TPalette& tp ) :
-    data( new uchar[ tp.data[0] + 1 ] )
+#ifndef __BORLANDC__
+TPalette::TPalette( const TColorAttr* d, ushort len ) :
+    data( new TColorAttr[ len+1 ] )
 {
-    memcpy( data, tp.data, tp.data[0] + 1 );
+    data[0] = len;
+    memcpy( data+1, d, len*sizeof(TColorAttr) );
+}
+#endif
+
+TPalette::TPalette( const TPalette& tp ) :
+    data( new TColorAttr[ tp.data[0] + 1 ] )
+{
+    memcpy( data, tp.data, (tp.data[0] + 1)*sizeof(TColorAttr) );
 }
 
 TPalette::~TPalette()
@@ -45,15 +55,10 @@ TPalette& TPalette::operator = ( const TPalette& tp )
         if( data[0] != tp.data[0] )
             {
             delete[] data;
-            data = new uchar[ tp.data[0] + 1 ];
+            data = new TColorAttr[ tp.data[0] + 1 ];
             data[0] = tp.data[0];
             }
-        memcpy( data+1, tp.data+1, data[0] );
+        memcpy( data+1, tp.data+1, data[0]*sizeof(TColorAttr) );
         }
     return *this;
-}
-
-uchar& TPalette::operator[]( int index ) const
-{
-    return data[index];
 }
