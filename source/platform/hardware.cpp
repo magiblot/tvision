@@ -33,13 +33,6 @@ THardwareInfo::THardwareInfo()
 #endif
 }
 
-/* We don't include these in hardware.h as done originally to prevent it to
- * depend on platform.h. Otherwise, any change in platform.h would affect
- * hardware.h, causing the whole tvision library to recompile. */
-
-NullPlatform NullPlatform::instance;
-PlatformStrategy* PlatformStrategy::instance = &NullPlatform::instance;
-
 // For brevity.
 static constexpr PlatformStrategy* &platf = PlatformStrategy::instance;
 static constexpr NullPlatform* nullPlatf = &NullPlatform::instance;
