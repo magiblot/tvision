@@ -1,11 +1,11 @@
 #ifdef HAVE_NCURSES
 
 #define Uses_TScreen
+#define Uses_TColorAttr
 #include <tvision/tv.h>
 
 #include <internal/ncurdisp.h>
 #include <internal/codepage.h>
-#include <internal/textattr.h>
 #include <internal/stdioctl.h>
 #include <internal/terminal.h>
 #include <iostream.h>
@@ -136,7 +136,7 @@ void NcursesDisplay::lowlevelCursorSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
+void NcursesDisplay::lowlevelWriteChars(TStringView chars, TColorAttr attr)
 {
     usesNcursesDraw = true;
     // Translate and apply text attributes.
@@ -147,7 +147,7 @@ void NcursesDisplay::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
     wattroff(stdscr, curses_attr);
 }
 
-uint NcursesDisplay::translateAttributes(uchar attr)
+uint NcursesDisplay::translateAttributes(TColorAttr attr)
 {
     /* To understand the bit masks, please read:
      * https://docs.microsoft.com/en-us/windows/console/char-info-str
@@ -155,8 +155,9 @@ uint NcursesDisplay::translateAttributes(uchar attr)
      * we do the following: if it doesn't support 16 colors, then we provide
      * the terminal with 3-bit colors and use Bold to represent a bright
      * foreground. Otherwise, we provide 4-bit colors directly to the terminal. */
-    uchar pairKey = attr & (COLORS < 16 ? 0x77 : 0xFF);
-    bool fgIntense = attr & (COLORS < 16 ? 0x08 : 0x00);
+    uchar bios = attr.toBIOS();
+    uchar pairKey = bios & (COLORS < 16 ? 0x77 : 0xFF);
+    bool fgIntense = bios & (COLORS < 16 ? 0x08 : 0x00);
     return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
 }
 
@@ -169,9 +170,8 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
     if (id == 0)
     {
         // Foreground color in the lower half, background in the upper half.
-        TCellAttribs c {pairKey};
-        swapRedBlue(c);
-        init_pair(++definedPairs, c.fgGet(), c.bgGet());
+        TColorAttr c {pairKey};
+        init_pair(++definedPairs, ::getFore(c).asBIOS(), ::getBack(c).asBIOS());
         id = pairIdentifiers[pairKey] = definedPairs;
     }
     return COLOR_PAIR(id);

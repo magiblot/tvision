@@ -155,8 +155,8 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                 if (i > 0 && !isZWJ(zwc))
                 {
                     size_t k = i;
-                    while (cells[--k].Char == TScreenCell::wideCharTrail && k > 0);
-                    cells[k].Char.append(zwc);
+                    while (cells[--k].ch.isWideCharTrail() && k > 0);
+                    cells[k].ch.appendZeroWidth(zwc);
                 }
                 return {true, 0, mb.length};
             }
@@ -164,13 +164,13 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
             {
                 if (i < cells.size())
                 {
-                    uchar extraWidth = min(mb.width - 1, 7);
-                    ::setChar(cells[i], {&text[j], (size_t) mb.length}, extraWidth);
+                    bool wide = mb.width > 1;
+                    ::setChar(cells[i], {&text[j], (size_t) mb.length}, wide);
                     // Fill trailing cells.
                     auto attr = ::getAttr(cells[i]);
-                    int count = min(extraWidth + 1, cells.size() - i);
+                    int count = min(wide + 1, cells.size() - i);
                     for (int k = 1; k < count; ++k)
-                        ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
+                        ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
                     return {true, count, mb.length};
                 }
             }

@@ -77,7 +77,7 @@ protected:
     void flushScreen() override;
     void reloadScreenInfo() override;
 
-    virtual void lowlevelWriteChars(TStringView chars, TCellAttribs attr) = 0;
+    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) = 0;
     virtual void lowlevelMoveCursor(uint x, uint y) = 0;
     virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
     virtual void lowlevelCursorSize(int size) = 0;

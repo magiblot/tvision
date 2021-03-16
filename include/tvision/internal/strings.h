@@ -20,7 +20,33 @@ inline constexpr Int string_as_int(TStringView s)
     return res;
 }
 
-uint32_t fast_utoa( uint32_t value, char *buffer );
+// NOTE: 'buffer' is not left null-terminated.
+size_t fast_utoa(uint32_t value, char *buffer);
+
+template <class T, size_t N>
+struct constarray;
+
+struct alignas(4) btoa_lut_elem_t
+{
+    char chars[3];
+    uint8_t digits;
+};
+
+using btoa_lut_t = constarray<btoa_lut_elem_t, 256>;
+
+// NOTE: 'buffer' is not left null-terminated.
+inline size_t fast_btoa(uint8_t value, char *buffer)
+{
+    extern const btoa_lut_t btoa_lut;
+    const auto &lut = (btoa_lut_elem_t (&) [256]) btoa_lut;
+    // CAUTION: Assumes Little Endian.
+    // We can afford to write more bytes into 'buffer' than digits.
+    uint32_t asInt;
+    memcpy(&asInt, &lut[value], 4);
+    memcpy(buffer, &asInt, 4);
+    return asInt >> 24;
+    static_assert(sizeof(btoa_lut_elem_t) == 4, "");
+}
 
 } // namespace detail
 

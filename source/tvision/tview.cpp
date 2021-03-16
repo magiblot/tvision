@@ -33,7 +33,6 @@
 
 TPoint shadowSize = {2,1};
 uchar shadowAttr = 0x08;
-uchar shadowAttrInv = 0x80;
 Boolean _NEAR TView::showMarkers = False;
 uchar _NEAR TView::errorAttr = 0xCF;
 Boolean _NEAR TView::commandSetChanged = False;

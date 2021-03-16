@@ -2,22 +2,21 @@
 /*                                                                         */
 /*   SCRNCELL.H                                                            */
 /*                                                                         */
-/*   Defines the low level structs used to represent text and attributes   */
-/*   on the screen, most notably TCellAttribs and TScreenCell.             */
+/*   Defines the structs TCellChar and TScreenCell.                        */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
-#if defined( Uses_TScreenCell ) && !defined( __TScreenCell )
-#define __TScreenCell
+#ifndef TVISION_SCRNCELL_H
+#define TVISION_SCRNCELL_H
 
 #ifdef __BORLANDC__
 
-inline const TCellAttribs &getAttr(const TScreenCell &cell)
+inline const TColorAttr &getAttr(const TScreenCell &cell)
 {
     return ((uchar *) &cell)[1];
 }
 
-inline void setAttr(TScreenCell &cell, TCellAttribs attr)
+inline void setAttr(TScreenCell &cell, TColorAttr attr)
 {
     ((uchar *) &cell)[1] = attr;
 }
@@ -32,303 +31,306 @@ inline void setChar(TScreenCell &cell, TCellChar ch)
     ((uchar *) &cell)[0] = ch;
 }
 
-inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr)
+inline void setCell(TScreenCell &cell, TCellChar ch, TColorAttr attr)
 {
     cell = ushort((attr << 8) | ch);
 }
 
 #else
 
-#include <string.h>
+//// TCellChar
+//
+// Represents text in a screen cell. You should usually not need to interact
+// with this manually. In order to write text into a screen cell, just use
+// the functions in the TText namespace.
+//
+// INVARIANT:
+// * '_text' contains one of the following:
+//     1. A single byte of ASCII or 'extended ASCII' text (1 column wide).
+//     2. Up to 12 bytes of UTF-8 text (1 or 2 columns wide in total,
+//        meaning that it must not contain just zero-width characters).
+//     3. A special value that marks it as wide char trail.
+
+struct TCellChar
+{
+
+    uint8_t _text[12];
+
+    enum WideCharTrail : uint32_t { wideCharTrail=(uint32_t)-2 };
+
+    // We define both a constructor and an assignment operator for each type
+    // because it helps compilers emit more efficient code. Without the
+    // overloaded assignment operator each assignment will generate a temporary
+    // TCellChar object in the stack which neither GCC or Clang will optimize out.
+    // There would be no such issue if we used named functions instead of
+    // overloaded constructors and assignment operators. But this doesn't
+    // actually matter because client programmers don't have to use this type
+    // directly.
+
+    TCellChar() = default;
+    inline TCellChar(WideCharTrail);
+    inline TCellChar(char ch);
+    inline TCellChar(uchar ch);
+    inline TCellChar(uint32_t ch);
+    inline TCellChar(TStringView text);
+    inline TCellChar &operator=(WideCharTrail);
+    inline TCellChar &operator=(char);
+    inline TCellChar &operator=(uchar);
+    inline TCellChar &operator=(uint32_t);
+    inline TCellChar &operator=(TStringView);
+
+    inline bool isWideCharTrail() const;
+    inline void appendZeroWidth(TStringView text);
+    inline TStringView asText() const;
+    inline size_t size() const;
+
+    inline uint8_t& operator[](size_t i);
+    inline const uint8_t& operator[](size_t i) const;
+    inline bool operator==(const TCellChar &other) const;
+    inline bool operator!=(const TCellChar &other) const;
+
+};
+
+inline TCellChar::TCellChar(WideCharTrail)
+{
+    *this = wideCharTrail;
+}
+
+inline TCellChar::TCellChar(char ch)
+{
+    *this = ch;
+}
+
+inline TCellChar::TCellChar(uchar ch)
+{
+    *this = ch;
+}
+
+inline TCellChar::TCellChar(uint32_t ch)
+{
+    *this = ch;
+}
+
+inline TCellChar::TCellChar(TStringView text)
+{
+    *this = text;
+}
+
+inline TCellChar &TCellChar::operator=(WideCharTrail)
+{
+    *this = (uint32_t) wideCharTrail;
+    return *this;
+}
+
+inline TCellChar &TCellChar::operator=(char ch)
+{
+    *this = (uchar) ch;
+    return *this;
+}
+
+inline TCellChar &TCellChar::operator=(uchar ch)
+{
+    memset(this, 0, sizeof(*this));
+    memcpy(_text, &ch, sizeof(ch));
+    return *this;
+}
+
+inline TCellChar &TCellChar::operator=(uint32_t ch)
+{
+    memset(this, 0, sizeof(*this));
+    memcpy(_text, &ch, sizeof(ch));
+    return *this;
+}
+
+inline TCellChar& TCellChar::operator=(TStringView text)
+{
+    memset(this, 0, sizeof(*this));
+    if (text.size() <= sizeof(_text))
+        memcpy(_text, text.data(), text.size());
+    return *this;
+}
+
+inline bool TCellChar::isWideCharTrail() const
+{
+    uint32_t ch;
+    memcpy(&ch, _text, sizeof(ch));
+    return ch == wideCharTrail;
+}
+
+inline void TCellChar::appendZeroWidth(TStringView text)
+{
+    if (!_text[0])
+        _text[0] = ' ';
+    size_t sz = size();
+    if (text.size() <= sizeof(_text) - sz)
+        memcpy(&_text[sz], text.data(), text.size());
+}
+
+inline TStringView TCellChar::asText() const
+{
+    return {(const char *) _text, size()};
+}
+
+inline size_t TCellChar::size() const
+{
+    size_t i = 0;
+    while (++i < sizeof(_text) && _text[i]);
+    return i;
+}
+
+inline uint8_t& TCellChar::operator[](size_t i)
+{
+    return _text[i];
+}
+
+inline const uint8_t& TCellChar::operator[](size_t i) const
+{
+    return _text[i];
+}
+
+inline bool TCellChar::operator==(const TCellChar &other) const
+{
+    return memcmp(this, &other, sizeof(*this)) == 0;
+}
+
+inline bool TCellChar::operator!=(const TCellChar &other) const
+{
+    return !(*this == other);
+}
+
+//// TScreenCell
+//
+// Stores the text and color attributes in a screen cell.
+// Please use the functions in the TText namespace in order to fill screen cells
+// with text.
+//
+// Considerations:
+// * 'wide' indicates the width of the text in 'ch' minus one. In practice,
+//   the only possible character widths are 0, 1 and 2, and the text in a
+//   TCellChar is at least one column wide. So 'wide' will be either 0 or 1.
+// * In order for a double-width character to be displayed entirely, its cell
+//   must be followed by another containing a wide char trail. If it is not,
+//   or if a wide char trail is not preceded by a double-width character,
+//   we'll understand that a double-width character is being overlapped partially.
+
+struct TScreenCell
+{
+
+    TColorAttr attr;
+    TCellChar ch;
+    uint8_t wide;
+    uint8_t _unused[3];
+
+    TScreenCell() = default;
+    inline TScreenCell(ushort bios);
+    inline TScreenCell& operator=(ushort bios);
+
+    inline bool operator==(const TScreenCell &other) const;
+    inline bool operator!=(const TScreenCell &other) const;
+
+};
+
+inline const TColorAttr &getAttr(const TScreenCell &cell);
+inline void setAttr(TScreenCell &cell, const TColorAttr &attr);
+inline const TCellChar &getChar(const TScreenCell &cell);
+inline void setChar(TScreenCell &cell, const TCellChar &ch, bool wide=0);
+inline void setChar(TScreenCell &cell, TStringView text, bool wide=0);
+inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &attr, bool wide=0);
+
+inline TScreenCell::TScreenCell(ushort bios)
+{
+    *this = bios;
+}
+
+inline TScreenCell& TScreenCell::operator=(ushort bios)
+{
+    memset(this, 0, sizeof(*this));
+    ch = uchar(bios);
+    attr = uchar(bios >> 8);
+    return *this;
+}
+
+inline bool TScreenCell::operator==(const TScreenCell &other) const
+{
+    return memcmp(this, &other, sizeof(*this)) == 0;
+}
+
+inline bool TScreenCell::operator!=(const TScreenCell &other) const
+{
+    return !(*this == other);
+}
+
+inline const TColorAttr &getAttr(const TScreenCell &cell)
+{
+    return cell.attr;
+}
+
+inline void setAttr(TScreenCell &cell, const TColorAttr &attr)
+{
+    cell.attr = attr;
+}
+
+inline const TCellChar &getChar(const TScreenCell &cell)
+{
+    return cell.ch;
+}
+
+inline void setChar(TScreenCell &cell, const TCellChar &ch, bool wide)
+{
+    cell.ch = ch;
+    cell.wide = wide;
+}
+
+inline void setChar(TScreenCell &cell, TStringView text, bool wide)
+{
+    cell.ch = text;
+    cell.wide = wide;
+}
+
+inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &attr, bool wide)
+{
+    memset(&cell, 0, sizeof(cell));
+    ::setChar(cell, ch, wide);
+    ::setAttr(cell, attr);
+}
 
 #ifdef SCRNCELL_DEBUG
 #include <type_traits>
-#endif
 
 namespace scrncell
 {
     template <class T>
     inline void check_trivial()
     {
-#ifdef SCRNCELL_DEBUG
         static_assert(std::is_trivial<T>(), "");
-#endif
-    }
-}
-
-template<typename T>
-struct alignas(T) trivially_convertible {
-
-    // If you want the derived classes to be trivial, make sure you also
-    // define a trivial default constructor in them.
-    trivially_convertible() = default;
-
-    trivially_convertible(T asT)
-    {
-        *this = asT;
     }
 
-    T operator=(T asT)
-    {
-        memcpy(this, &asT, sizeof(T));
-        return asT;
-    }
-
-    operator T() const
-    {
-        T asT;
-        memcpy(&asT, this, sizeof(T));
-        return asT;
-    }
-
-protected:
-
-    template<class C>
+    template<class C, class T = typename C::trivial_t>
     static void check_convertible()
     {
         scrncell::check_trivial<C>();
         static_assert(sizeof(C) == sizeof(T), "");
         static_assert(alignof(C) == alignof(T), "");
     }
-};
 
-// TCellAttribs Attribute masks
-
-const ushort
-    afFgDefault = 0x0001,
-    afBgDefault = 0x0002,
-    afBold      = 0x0004,
-    afItalic    = 0x0008,
-    afUnderline = 0x0010,
-    afReverse   = 0x0020;
-
-struct TCellAttribs : trivially_convertible<uint16_t>
-{
-
-    uint8_t
-        fgBlue      : 1,
-        fgGreen     : 1,
-        fgRed       : 1,
-        fgBright    : 1,
-        bgBlue      : 1,
-        bgGreen     : 1,
-        bgRed       : 1,
-        bgBright    : 1;
-    uint8_t
-        fgDefault   : 1,
-        bgDefault   : 1,
-        bold        : 1,
-        italic      : 1,
-        underline   : 1,
-        reverse     : 1;
-
-    uint8_t
-        reserved    : 1;
-
-    using trivially_convertible::trivially_convertible;
-    TCellAttribs() = default;
-
-    TCellAttribs(uint8_t color, ushort flags)
+    inline void check_assumptions()
     {
-        *this = color | (flags << 8);
+        check_trivial<TColorDesired>();
+        check_trivial<TColorAttr>();
+        check_trivial<TAttrPair>();
+        check_trivial<TCellChar>();
+        check_trivial<TScreenCell>();
+        check_convertible<TColorBIOS>();
+        check_convertible<TColorRGB>();
+        check_convertible<TColorXTerm>();
+        static_assert(sizeof(TScreenCell) == 24, "");
+        static_assert(sizeof(TColorDesired) == 4, "");
+        static_assert(sizeof(TColorAttr) == 8, "");
     }
-
-    uint8_t fgGet() const
-    {
-        return uint8_t(*this) & 0x0F;
-    }
-
-    uint8_t bgGet() const
-    {
-        return uint8_t(*this) >> 4;
-    }
-
-    void fgSet(uint8_t fg)
-    {
-        if (fg != fgGet())
-            fgDefault = 0;
-        *this = (*this & ~0x0F) | (fg & 0x0F);
-    }
-
-    void bgSet(uint8_t bg)
-    {
-        if (bg != bgGet())
-            bgDefault = 0;
-        *this = (*this & ~0xF0) | ((bg & 0x0F) << 4);
-    }
-
-    void attrSet(TCellAttribs other)
-    {
-        *this = (*this & ~0xFF00) | (other & 0xFF00);
-    }
-
-    static void check_assumptions()
-    {
-        check_convertible<TCellAttribs>();
-    }
-
-};
-
-struct TScreenCellA : trivially_convertible<uint16_t>
-{
-
-    uint8_t Char;
-    uint8_t Attr;
-
-    using trivially_convertible::trivially_convertible;
-    TScreenCellA() = default;
-
-    static void check_assumptions()
-    {
-        check_convertible<TScreenCellA>();
-    }
-
-};
-
-struct alignas(4) TCellChar
-{
-
-    uint8_t bytes[12];
-
-    TCellChar() = default;
-
-    TCellChar(uint64_t ch)
-    {
-        *this = ch;
-    }
-
-    TCellChar(TStringView text)
-    {
-        *this = text;
-    }
-
-    TCellChar& operator=(uint64_t ch)
-    {
-        memset(this, 0, sizeof(*this));
-        memcpy(bytes, &ch, min(sizeof(bytes), sizeof(ch)));
-        return *this;
-    }
-
-    TCellChar& operator=(TStringView text)
-    {
-        memset(this, 0, sizeof(*this));
-        if (text.size() <= sizeof(bytes))
-            memcpy(bytes, text.data(), text.size());
-        return *this;
-    }
-
-    bool operator==(TCellChar other) const
-    {
-        return memcmp(bytes, other.bytes, sizeof(bytes)) == 0;
-    }
-
-    bool operator!=(TCellChar other) const
-    {
-        return !(*this == other);
-    }
-
-    uint8_t& operator[](size_t i)
-    {
-        return bytes[i];
-    }
-
-    const uint8_t& operator[](size_t i) const
-    {
-        return bytes[i];
-    }
-
-    void append(TStringView text)
-    {
-        size_t sz = size();
-        if (text.size() <= sizeof(bytes) - sz)
-            memcpy(&bytes[sz], text.data(), text.size());
-    }
-
-    size_t size() const
-    {
-        size_t i = 0;
-        while (++i < sizeof(bytes) && bytes[i]);
-        return i;
-    }
-
-    TStringView asText() const
-    {
-        return {(const char*) bytes, size()};
-    }
-
-    static void check_assumptions()
-    {
-        scrncell::check_trivial<TCellChar>();
-    }
-
-};
-
-struct alignas(16) TScreenCell
-{
-
-    TCellChar Char;
-    TCellAttribs Attr;
-    uint16_t extraWidth;
-
-    TScreenCell() = default;
-
-    TScreenCell(TScreenCellA pair)
-    {
-        *this = {};
-        Char = pair.Char;
-        Attr = pair.Attr;
-    }
-
-    TScreenCell(uint64_t ch)
-    {
-        memset(this, 0, sizeof(*this));
-        memcpy(this, &ch, min(sizeof(*this), sizeof(ch)));
-    }
-
-    enum : uint32_t { wideCharTrail = (uint32_t) -2 };
-
-    static void check_assumptions()
-    {
-        scrncell::check_trivial<TScreenCell>();
-    }
-
-};
-
-inline const TCellAttribs &getAttr(const TScreenCell &cell)
-{
-    return cell.Attr;
 }
 
-inline void setAttr(TScreenCell &cell, TCellAttribs attr)
-{
-    cell.Attr = attr;
-}
-
-inline const TCellChar &getChar(const TScreenCell &cell)
-{
-    return cell.Char;
-}
-
-inline void setChar(TScreenCell &cell, TCellChar ch, uchar extraWidth=0)
-{
-    cell.Char = ch;
-    cell.extraWidth = extraWidth;
-}
-
-inline void setChar(TScreenCell &cell, TStringView text, uchar extraWidth=0)
-{
-    TCellChar ch = text;
-    ::setChar(cell, ch, extraWidth);
-}
-
-inline void setCell(TScreenCell &cell, TCellChar ch, TCellAttribs attr, uchar extraWidth=0)
-{
-    TScreenCell c {};
-    ::setChar(c, ch, extraWidth);
-    ::setAttr(c, attr);
-    memcpy(&cell, &c, sizeof(TScreenCell));
-}
+#endif // SCRNCELL_DEBUG
 
 #endif // __BORLANDC__
 
-#endif // Uses_TScreenCell
+#endif // TVISION_SCRNCELL_H

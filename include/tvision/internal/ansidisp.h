@@ -1,9 +1,65 @@
 #ifndef ANSIDISP_H
 #define ANSIDISP_H
 
+#define Uses_TScreenCell
+#include <tvision/tv.h>
+
 #include <internal/termdisp.h>
-#include <internal/textattr.h>
 #include <vector>
+
+// TermColor represents a color that is to be printed to screen
+// using certain ANSI escape sequences.
+
+struct TermColor
+{
+    enum TermColorTypes : uint8_t { Default, Indexed, RGB, NoColor };
+
+    union
+    {
+        uint8_t idx;
+        uint8_t bgr[3];
+    };
+    TermColorTypes type;
+
+    TermColor() = default;
+
+    // GCC has issues optimizing the initialization of this struct.
+    // So do bit-casting manually.
+
+    TermColor& operator=(uint32_t val)
+    {
+        memcpy(this, &val, sizeof(*this));
+        return *this;
+        static_assert(sizeof(*this) == 4, "");
+    }
+    operator uint32_t() const
+    {
+        uint32_t val;
+        memcpy(&val, this, sizeof(*this));
+        return val;
+    }
+    TermColor(uint8_t aIdx, TermColorTypes aType)
+    {
+        *this = aIdx | (uint32_t(aType) << 24);
+    }
+    TermColor(TColorRGB c, TermColorTypes aType)
+    {
+        *this = uint32_t(c) | (uint32_t(aType) << 24);
+    }
+    TermColor(TermColorTypes aType)
+    {
+        *this = uint32_t(aType) << 24;
+    }
+
+};
+
+using attrstyle_t = TColorAttr::Style;
+
+struct TermAttr
+{
+    TermColor fg, bg;
+    attrstyle_t style;
+};
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
  * escape codes directly to stdout.
@@ -21,22 +77,20 @@
 class AnsiDisplayBase {
 
     std::vector<char> buf;
-    SGRAttribs lastAttr;
+    TermAttr lastAttr {};
 
     void bufWrite(TStringView s);
     void bufWriteCSI1(uint a, char F);
     void bufWriteCSI2(uint a, uint b, char F);
-    void writeAttributes(TCellAttribs attr, const TermCap &);
 
 protected:
 
-    AnsiDisplayBase();
     ~AnsiDisplayBase();
 
     void clearAttributes();
     void clearScreen();
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr, const TermCap &);
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr, const TermCap &);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
     void lowlevelFlush();
@@ -61,7 +115,7 @@ public:
     {
     }
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) override
         { AnsiDisplayBase::lowlevelWriteChars(chars, attr, TerminalDisplay::termcap); }
     void lowlevelMoveCursor(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }

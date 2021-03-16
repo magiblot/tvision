@@ -279,7 +279,7 @@ void TEditor::nextChar( TStringView s, uint &p, uint &width )
 }
 
 Boolean TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
-                             TStringView text, uint &p, TCellAttribs color )
+                             TStringView text, uint &p, TColorAttr color )
 {
     if (width < cells.size())
         ::setAttr(cells[width], color);

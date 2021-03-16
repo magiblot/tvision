@@ -1,12 +1,15 @@
-#include <cstdint>
+#include <tvision/tv.h>
+#include <internal/constarr.h>
+#include <internal/strings.h>
 
 namespace detail
 {
 
-uint32_t fast_utoa ( uint32_t value, char *buffer )
+static constexpr
+size_t _fast_utoa(uint32_t value, char *buffer)
 {
     // Copyright(c) 2014-2016 Milo Yip (https://github.com/miloyip/itoa-benchmark)
-    uint32_t digits =
+    size_t digits =
         value < 10          ? 1
       : value < 100         ? 2
       : value < 1000        ? 3
@@ -18,7 +21,6 @@ uint32_t fast_utoa ( uint32_t value, char *buffer )
       : value < 1000000000UL? 9
                             : 10;
     buffer += digits;
-    *buffer = '\0';
 
     do {
         *--buffer = char(value % 10) + '0';
@@ -27,6 +29,23 @@ uint32_t fast_utoa ( uint32_t value, char *buffer )
 
     return digits;
 }
+
+size_t fast_utoa(uint32_t value, char *buffer)
+{
+    return _fast_utoa(value, buffer);
+}
+
+static constexpr
+btoa_lut_t init_btoa_lut()
+{
+    btoa_lut_t res {};
+    for (uint32_t i = 0; i < 256; ++i)
+        res[i].digits = _fast_utoa(i, res[i].chars);
+    return res;
+}
+
+extern constexpr
+btoa_lut_t btoa_lut = init_btoa_lut();
 
 } // namespace detail
 
@@ -51,7 +70,7 @@ char *strupr(char *s) {
     return s;
 }
 
-// Quick and dirty implementation of itoa, ltoa, ultoa radixd on sprintf.
+// Quick and dirty implementation of itoa, ltoa, ultoa based on sprintf.
 // It won't provide the expected results in some cases, but at least will not
 // crash. Support for arbitrary bases can be later added if needed.
 

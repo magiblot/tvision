@@ -54,12 +54,16 @@ typedef ulong uint32_t;
 
 #ifdef __BORLANDC__
 typedef ushort TScreenCell;
-typedef uchar TCellAttribs;
 typedef uchar TCellChar;
+typedef uchar TColorDesired;
+typedef uchar TColorAttr;
+typedef ushort TAttrPair;
 #else
 struct TScreenCell;
-struct TCellAttribs;
 struct TCellChar;
+struct TColorDesired;
+struct TColorAttr;
+struct TAttrPair;
 #endif
 
 const char EOS = '\0';

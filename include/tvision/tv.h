@@ -436,6 +436,7 @@
 #endif
 
 #if defined( Uses_TPalette )
+#define Uses_TColorAttr
 #define __INC_VIEWS_H
 #endif
 
@@ -632,7 +633,12 @@
 #endif
 
 #if defined( Uses_TScreenCell )
+#define Uses_TColorAttr
 #define __INC_SCRNCELL_H
+#endif
+
+#if defined( Uses_TColorAttr )
+#define __INC_COLORS_H
 #endif
 
 #include <tvision/config.h>
@@ -641,6 +647,10 @@
 
 #include <tvision/tspan.h>
 #include <tvision/tstrview.h>
+
+#if defined( __INC_COLORS_H )
+#include <tvision/colors.h>
+#endif
 
 #if defined( __INC_SCRNCELL_H )
 #include <tvision/scrncell.h>

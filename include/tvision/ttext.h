@@ -24,7 +24,7 @@ public:
     static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
 
     static size_t fill(TSpan<TScreenCell> cells, TStringView text);
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr);
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr);
 #ifndef __BORLANDC__
     static size_t fill(TSpan<TScreenCell> cells, TStringView text, uchar attr);
     template<class Func>
@@ -87,7 +87,7 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
     return count;
 }
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr)
 {
     size_t count = min(cells.size(), text.size());
     for (size_t i = 0; i < count; ++i)
@@ -183,7 +183,7 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
 }
 
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttribs attr)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr)
 // Same as above, but sets the attributes of filled cells to 'attr'.
 {
     size_t w = 0, b = 0;
@@ -196,24 +196,24 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TCellAttri
 
 inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, uchar attr)
 {
-    return TText::fill(cells, text, TCellAttribs {attr});
+    return TText::fill(cells, text, TColorAttr {attr});
 }
 
 template<class Func>
 inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func)
-// Similar to the above, but gives total control over every iterated cell through
-// the 'func' callback. 'func' takes a TScreenCell& by parameter.
-// A possible use case for this is if you need to modify the cell attributes
+// Similar to the above, but gives total control over every iterated color attribute
+// through the 'func' callback. 'func' takes a TColorAttr& by parameter.
+// A possible use case for this is if you need to modify the color attributes
 // in a way other than simply replacing them.
 //
 //   Examples:
-//     TText::fill(cells, text, [] (auto &cell) { cell.Attr.fgSet(0x00); }); // OK.
-//     TText::fill(cells, text, [] (void) {}); // Error: callback cannot take a TScreenCell&.
+//     TText::fill(cells, text, [] (auto &attr) { ::setFore(attr, '\x0'); }); // OK.
+//     TText::fill(cells, text, [] (void) {}); // Error: callback cannot take a TColorAttr&.
 {
     size_t w = 0, b = 0;
     do {
         if (w < cells.size())
-            func(cells[w]); // If you get a compilation error here, you are using the wrong overload.
+            func(cells[w].attr); // If you get a compilation error here, you are using the wrong overload.
     } while (TText::eat(cells, w, text, b));
     return w;
 }
@@ -269,7 +269,6 @@ inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
         }
         else
         {
-            mb.width = min(mb.width, 8);
             if (mb.width != 0)
                 width += max(mb.width, 1);
             index += mb.length;

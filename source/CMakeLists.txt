@@ -37,6 +37,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /wd4996
         /permissive-
         /Zc:__cplusplus
+        /Zc:externConstexpr
+        /Zc:inline
     )
     if (TV_REDUCE_APP_SIZE) # Implies CMake >= 3.13.0
         target_compile_options(${PROJECT_NAME} PRIVATE

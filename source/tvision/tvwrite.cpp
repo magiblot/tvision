@@ -27,7 +27,6 @@
 
 extern TPoint shadowSize;
 extern uchar shadowAttr;
-extern uchar shadowAttrInv;
 
 struct TVWrite {
 
@@ -57,22 +56,27 @@ struct TVWrite {
     }
 #endif
 
-    static TCellAttribs applyShadow(TCellAttribs attr)
+    static TColorAttr applyShadow(TColorAttr attr)
     {
 #ifdef __BORLANDC__
         // Because we can't know if the cell has already been shadowed,
         // we compare against the shadow attributes. This may yield some false positives.
+        TColorAttr shadowAttrInv = reverseAttribute(shadowAttr);
         if (attr == shadowAttr || attr == shadowAttrInv)
             return attr;
         else
             return attr & 0xF0 ? shadowAttr : shadowAttrInv;
 #else
-        // Here TCellAttribs is a struct, so we can have a dedicated field
+        // Here TColorAttr is a struct, so we can have a dedicated field
         // to determine whether the shadow has been applied.
-        if (!attr.reserved)
+        auto style = ::getStyle(attr);
+        if (!(style & slNoShadow))
         {
-            attr = attr & 0xF0 ? shadowAttr : shadowAttrInv;
-            attr.reserved = 1;
+            if (::getBack(attr).toBIOS(false) != 0)
+                attr = shadowAttr;
+            else // Reverse the shadow attribute on black areas.
+                attr = reverseAttribute(shadowAttr);
+            ::setStyle(attr, style | slNoShadow);
         }
         return attr;
 #endif
@@ -311,13 +315,13 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         // Expand character/attribute pair
         for (i = 0; i < Count - X; ++i)
         {
-            dst[i] = TScreenCell(TScreenCellA(src[i]));
+            dst[i] = TScreenCell {src[i]};
         }
     else
         // Mix in shadow attribute
         for (i = 0; i < Count - X; ++i)
         {
-            TScreenCell c {TScreenCellA(src[i])};
+            TScreenCell c {src[i]};
             ::setAttr(c, applyShadow(::getAttr(c)));
             dst[i] = c;
         }

@@ -1,3 +1,6 @@
+#define Uses_TScreenCell
+#include <tvision/tv.h>
+
 #include <internal/buffdisp.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
@@ -124,10 +127,10 @@ void BufferedDisplay::drawCursors()
             if (inBounds(x, y))
             {
                 auto *cell = &buffer[y*size.x + x];
-                if ( cell->Char == TScreenCell::wideCharTrail &&
-                     x > 0 && (cell - 1)->extraWidth )
+                if ( cell->ch.isWideCharTrail() &&
+                     x > 0 && (cell - 1)->wide )
                     --cell, --x;
-                cursor->apply(cell->Attr);
+                cursor->apply(cell->attr);
                 setDirty(x, y, 1);
             }
         }
@@ -143,10 +146,10 @@ void BufferedDisplay::undrawCursors()
             if (inBounds(x, y))
             {
                 auto *cell = &buffer[y*size.x + x];
-                if ( cell->Char == TScreenCell::wideCharTrail &&
-                     x > 0 && (cell - 1)->extraWidth )
+                if ( cell->ch.isWideCharTrail() &&
+                     x > 0 && (cell - 1)->wide )
                     --cell, --x;
-                cursor->restore(cell->Attr);
+                cursor->restore(cell->attr);
                 setDirty(x, y, 1);
             }
         }
@@ -186,18 +189,18 @@ void BufferedDisplay::flushScreen()
 
 inline void BufferedDisplay::validateCell(TScreenCell &cell) const
 {
-    auto &ch = cell.Char;
-    if (!ch[1]) /* size 1 */ {
-        auto &c = ch[0];
+    auto &ch = cell.ch;
+    if (!ch[1]) // size 1
+    {
+        uchar c = ch[0];
         if (c == '\0')
-            c = ' ';
+            ch[0] = ' ';
         else if (c < ' ' || 0x7F <= c)
             // Translate from codepage as fallback.
             ch = CpTranslator::toUtf8Int(c);
-    } else if (ch == TScreenCell::wideCharTrail) {
-        ch = widePlaceholder;
-        cell.extraWidth = 0;
     }
+    else if (ch.isWideCharTrail())
+        ch = widePlaceholder;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -212,9 +215,8 @@ struct FlushScreenAlgorithm
     BufferedDisplay &disp;
     TPoint size;
     TPoint last;
-    int x, y;
-    TScreenCell cell;
-    size_t iCell;
+    int x, y, rowOffs;
+    TScreenCell *cell;
     BufferedDisplay::Range damage;
 
     FlushScreenAlgorithm(BufferedDisplay &disp) :
@@ -222,7 +224,7 @@ struct FlushScreenAlgorithm
     {
     }
 
-    TScreenCell &cellAt(int y, int x);
+    const TScreenCell &cellAt(int x) const;
     void getCell();
     bool cellDirty() const;
     bool wideCanSpill() const;
@@ -231,6 +233,8 @@ struct FlushScreenAlgorithm
     void run();
     void processCell();
     void writeCell();
+    void writeSpace();
+    void writeCell(const TCellChar &Char, const TColorAttr &Attr, bool wide);
     void commitDirty();
     void handleWideCharSpill();
     void handleNull();
@@ -239,35 +243,33 @@ struct FlushScreenAlgorithm
 
 inline bool isNull(const TScreenCell &cell)
 {
-    return __builtin_expect(cell.Char == '\0', 0);
+    return __builtin_expect(cell.ch[0] == '\0', 0);
 }
 
 inline bool isWide(const TScreenCell &cell)
 {
-    return __builtin_expect(cell.extraWidth, 0);
+    return __builtin_expect(cell.wide, 0);
 }
 
-inline TScreenCell& FlushScreenAlgorithm::cellAt(int y, int x)
+inline const TScreenCell& FlushScreenAlgorithm::cellAt(int x) const
 {
-    return disp.buffer[y*size.x + x];
+    return disp.buffer[rowOffs + x];
 }
 
 inline void FlushScreenAlgorithm::getCell()
 {
-    auto *pCell = &cellAt(y, x);
-    iCell = pCell - &cellAt(0, 0);
-    cell = *pCell;
-    disp.validateCell(cell);
+    cell = &disp.buffer[rowOffs + x];
+    disp.validateCell(*cell);
 }
 
 inline bool FlushScreenAlgorithm::cellDirty() const
 {
-    return memcmp(&disp.flushBuffer[iCell], &cell, sizeof(TScreenCell)) != 0;
+    return *cell != disp.flushBuffer[cell - &disp.buffer[0]];
 }
 
 inline void FlushScreenAlgorithm::commitDirty()
 {
-    disp.flushBuffer[iCell] = cell;
+    disp.flushBuffer[cell - &disp.buffer[0]] = *cell;
 }
 
 inline bool FlushScreenAlgorithm::wideCanSpill() const
@@ -289,7 +291,8 @@ inline void FlushScreenAlgorithm::run()
 {
     size = disp.size;
     last = {INT_MIN, INT_MIN};
-    for (y = 0; y < size.y; ++y)
+    rowOffs = 0;
+    for (y = 0; y < size.y; ++y, rowOffs += size.x)
     {
         damage = disp.rowDamage[y];
         if (damage.begin <= damage.end)
@@ -297,11 +300,11 @@ inline void FlushScreenAlgorithm::run()
             x = damage.begin;
             // Check for a wide character before the first draw position
             // if overlapping is not allowed.
-            bool wideSpillBefore = wideCanSpill() && !wideCanOverlap() && 0 < x && isWide(cellAt(y, x-1));
+            bool wideSpillBefore = wideCanSpill() && !wideCanOverlap() && 0 < x && isWide(cellAt(x-1));
             for (; x <= damage.end; ++x)
             {
                 getCell();
-                if (cellDirty() || isNull(cell)) {
+                if (cellDirty() || isNull(*cell)) {
                     if (wideSpillBefore) {
                         --x;
                         getCell();
@@ -310,11 +313,11 @@ inline void FlushScreenAlgorithm::run()
                     commitDirty();
                     processCell();
                 } else
-                    wideSpillBefore = wideCanSpill() && !wideCanOverlap() && isWide(cell);
+                    wideSpillBefore = wideCanSpill() && !wideCanOverlap() && isWide(*cell);
             }
             if (x < size.x) {
                 getCell();
-                if (isNull(cell))
+                if (isNull(*cell))
                     // The beginning of a wide character has been overwritten
                     // and attribute spill may happen in the remaining trails.
                     handleNull();
@@ -327,10 +330,10 @@ inline void FlushScreenAlgorithm::run()
 inline void FlushScreenAlgorithm::processCell()
 {
     if (wideCanSpill()) {
-        if (isWide(cell)) {
+        if (isWide(*cell)) {
             handleWideCharSpill();
             return;
-        } else if (isNull(cell)) {
+        } else if (isNull(*cell)) {
             handleNull();
             return;
         }
@@ -340,39 +343,46 @@ inline void FlushScreenAlgorithm::processCell()
 
 inline void FlushScreenAlgorithm::writeCell()
 {
+    writeCell(cell->ch, cell->attr, cell->wide);
+}
+
+inline void FlushScreenAlgorithm::writeSpace()
+{
+    writeCell(' ', cell->attr, 0);
+}
+
+inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,
+                                             const TColorAttr &Attr,
+                                             bool wide )
+{
     // 'last' is the last written cell occupied by text.
     // That is, the hardware cursor is located at {last.x + 1, last.y}.
 
-    // Workaround for Ncurses bug
-//     if (y != last.y)
-//         lowlevelFlush();
     if (y != last.y)
         disp.lowlevelMoveCursor(x, y);
     else if (x != last.x + 1)
         disp.lowlevelMoveCursorX(x, y);
 
-    disp.lowlevelWriteChars(cell.Char.asText(), cell.Attr);
-    last = {x + cell.extraWidth, y};
+    disp.lowlevelWriteChars(Char.asText(), Attr);
+    last = {x + wide, y};
 }
 
-inline void FlushScreenAlgorithm::handleWideCharSpill()
+void FlushScreenAlgorithm::handleWideCharSpill()
 {
-    uchar width = cell.extraWidth;
-    const auto Attr = cell.Attr;
+    uchar width = cell->wide;
+    const auto Attr = cell->attr;
     if (x + width < size.x)
         writeCell();
     else {
         // Replace with spaces if it would otherwise be printed on the next line.
-        cell.Char = ' ';
-        writeCell();
+        writeSpace();
         while (--width && ++x < size.x) {
             getCell();
-            if (cell.Char != '\0') {
+            if (!isNull(*cell)) {
                 --x;
                 return;
             }
-            cell.Char = ' ';
-            writeCell();
+            writeSpace();
         }
         return;
     }
@@ -381,24 +391,22 @@ inline void FlushScreenAlgorithm::handleWideCharSpill()
     while (width-- && ++x < size.x) {
         getCell();
         commitDirty();
-        if (cell.Char != '\0') {
+        if (!isNull(*cell)) {
             if (wideCanOverlap()) {
                 // Write over the wide character.
                 writeCell();
-                return;
             } else {
                 // Replace the whole wide character with spaces.
                 int wend = x;
                 x = wbegin;
                 do {
                     getCell();
-                    cell.Char = ' ';
-                    writeCell();
+                    writeSpace();
                 } while (++x < wend);
                 getCell();
                 writeCell();
-                return;
             }
+            return;
         }
     }
     // If the next character has a different attribute, print it anyway
@@ -406,7 +414,7 @@ inline void FlushScreenAlgorithm::handleWideCharSpill()
     if (x + 1 < size.x) {
         ++x;
         getCell();
-        if (Attr != cell.Attr) {
+        if (Attr != cell->attr) {
             commitDirty();
             processCell();
         } else
@@ -414,16 +422,16 @@ inline void FlushScreenAlgorithm::handleWideCharSpill()
     }
 }
 
-inline void FlushScreenAlgorithm::handleNull()
+void FlushScreenAlgorithm::handleNull()
 {
     // Having '\0' in a cell implies wide characters can spill, as '\0'
     // is otherwise discarded in ensurePrintable().
-    const auto Attr = cell.Attr;
+    const auto Attr = cell->attr;
     if (x > 0) {
         --x;
         getCell();
         // Check the character behind the placeholder.
-        if (cell.extraWidth) {
+        if (cell->wide) {
             handleWideCharSpill();
             return;
         }
@@ -433,16 +441,15 @@ inline void FlushScreenAlgorithm::handleNull()
     // Print successive placeholders as spaces.
     do {
         commitDirty();
-        cell.Char = ' ';
-        writeCell();
+        writeSpace();
         ++x;
         if (x < size.x)
             getCell();
         else
             return;
-    } while (cell.Char == '\0');
+    } while (isNull(*cell));
     // We now got a normal character.
-    if (x > damage.end && Attr != cell.Attr) {
+    if (x > damage.end && Attr != cell->attr) {
         // Redraw a character that would otherwise not be printed,
         // to prevent attribute spill.
         processCell();

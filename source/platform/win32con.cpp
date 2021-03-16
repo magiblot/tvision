@@ -382,9 +382,11 @@ void Win32Display::clearScreen()
 {
     COORD coord = {0, 0};
     DWORD length = dwSize.X * dwSize.Y;
+    BYTE attr = 0x07;
     DWORD read;
-    FillConsoleOutputAttribute(StdioCtl::out(), 0x07, length, coord, &read);
+    FillConsoleOutputAttribute(StdioCtl::out(), attr, length, coord, &read);
     FillConsoleOutputCharacter(StdioCtl::out(), ' ', length, coord, &read);
+    lastAttr = attr;
 }
 
 ushort Win32Display::getScreenMode()
@@ -394,13 +396,14 @@ ushort Win32Display::getScreenMode()
 
 // Fallback display support with rudimentary buffering.
 
-void Win32Display::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
+void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr)
 {
-    if (attr != lastAttr)
+    uchar bios = attr.toBIOS();
+    if (bios != lastAttr)
     {
         lowlevelFlush();
-        SetConsoleTextAttribute(StdioCtl::out(), (uchar) attr);
-        lastAttr = attr;
+        SetConsoleTextAttribute(StdioCtl::out(), bios);
+        lastAttr = bios;
     }
     buf.insert(buf.end(), chars.data(), chars.data()+chars.size());
 }

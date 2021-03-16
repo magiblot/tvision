@@ -1,6 +1,9 @@
 #ifndef CARET_H
 #define CARET_H
 
+#define Uses_TColorAttr
+#include <tvision/tv.h>
+
 #include <internal/buffdisp.h>
 
 class ScreenCursor {
@@ -16,16 +19,16 @@ public:
     bool isVisible() const;
     void setPos(const TPoint &p);
     const TPoint& getPos() const;
-    void apply(TCellAttribs &attr);
-    void restore(TCellAttribs &attr) const;
+    void apply(TColorAttr &attr);
+    void restore(TColorAttr &attr) const;
 
 protected:
 
     TPoint pos;
     bool visible;
-    TCellAttribs backup;
+    TColorAttr backup;
 
-    virtual void draw(TCellAttribs &attr) const = 0;
+    virtual void draw(TColorAttr &attr) const = 0;
 
 };
 
@@ -71,13 +74,13 @@ inline const TPoint& ScreenCursor::getPos() const
     return pos;
 }
 
-inline void ScreenCursor::apply(TCellAttribs &attr)
+inline void ScreenCursor::apply(TColorAttr &attr)
 {
     backup = attr;
     draw(attr);
 }
 
-inline void ScreenCursor::restore(TCellAttribs &attr) const
+inline void ScreenCursor::restore(TColorAttr &attr) const
 {
     attr = backup;
 }
@@ -86,7 +89,7 @@ class ReverseScreenCursor : public ScreenCursor {
 
 protected:
 
-    void draw(TCellAttribs &attr) const override;
+    void draw(TColorAttr &attr) const override;
 
 };
 
@@ -94,7 +97,7 @@ class NegativeScreenCursor : public ScreenCursor {
 
 protected:
 
-    void draw(TCellAttribs &attr) const override;
+    void draw(TColorAttr &attr) const override;
 
 };
 

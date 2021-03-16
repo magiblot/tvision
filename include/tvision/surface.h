@@ -30,8 +30,8 @@ public:
     void grow(TPoint aDelta);
     void clear();
 
-    TCellAttribs getFillColor() const;
-    void setFillColor(TCellAttribs fillColor);
+    TColorAttr getFillColor() const;
+    void setFillColor(TColorAttr fillColor);
 
     // Warning: no bounds checking.
     TScreenCell _FAR &at(int y, int x);
@@ -44,12 +44,12 @@ inline void TDrawSurface::grow(TPoint aDelta)
     resize(size + aDelta);
 }
 
-inline TCellAttribs TDrawSurface::getFillColor() const
+inline TColorAttr TDrawSurface::getFillColor() const
 {
     return ::getAttr(fill);
 }
 
-inline void TDrawSurface::setFillColor(TCellAttribs fillColor)
+inline void TDrawSurface::setFillColor(TColorAttr fillColor)
 {
     ::setAttr(fill, fillColor);
 }

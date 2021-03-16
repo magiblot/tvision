@@ -19,7 +19,7 @@ class NcursesDisplay : public TerminalDisplay {
     bool usesNcursesDraw;
 
     void getCaretPosition(int &x, int &y);
-    uint translateAttributes(uchar attr);
+    uint translateAttributes(TColorAttr attr);
     uint getColorPair(uchar pairKey);
 
 public:
@@ -37,7 +37,7 @@ public:
 
 protected:
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override;
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) override;
     void lowlevelMoveCursor(uint x, uint y) override;
     void lowlevelCursorSize(int size) override;
     void lowlevelFlush() override;
