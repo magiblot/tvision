@@ -1,14 +1,14 @@
 #ifndef NCURDISP_H
 #define NCURDISP_H
 
-#include <internal/buffdisp.h>
+#include <internal/termdisp.h>
 
 #ifdef HAVE_NCURSES
 
 #include <unordered_map>
 #include <ncurses.h>
 
-class NcursesDisplay : public BufferedDisplay {
+class NcursesDisplay : public TerminalDisplay {
 
     SCREEN *term;
 
@@ -30,6 +30,7 @@ public:
     void reloadScreenInfo() override;
     TPoint getScreenSize() override;
     int getCaretSize() override;
+    int getColorCount() override;
 
     void clearScreen() override;
     ushort getScreenMode() override;

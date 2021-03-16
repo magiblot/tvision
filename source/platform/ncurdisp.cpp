@@ -52,7 +52,7 @@ void NcursesDisplay::reloadScreenInfo()
         resizeterm(size.y, size.x);
     else
         resize_term(size.y, size.x);
-    BufferedDisplay::reloadScreenInfo();
+    TerminalDisplay::reloadScreenInfo();
 }
 
 TPoint NcursesDisplay::getScreenSize()
@@ -67,6 +67,11 @@ int NcursesDisplay::getCaretSize()
     int size = curs_set(0);
     curs_set(size);
     return size <= 0 ? 0 : size == 1 ? 1 : 100;
+}
+
+int NcursesDisplay::getColorCount()
+{
+    return COLORS;
 }
 
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }

@@ -342,7 +342,7 @@ void Win32Display::reloadScreenInfo()
     SetConsoleCursorPosition(StdioCtl::out(), curPos);
     // Update internal state.
     dwSize = sbInfo.dwSize;
-    BufferedDisplay::reloadScreenInfo();
+    TerminalDisplay::reloadScreenInfo();
 }
 
 TPoint Win32Display::getScreenSize()
@@ -355,6 +355,14 @@ int Win32Display::getCaretSize()
     CONSOLE_CURSOR_INFO crInfo {};
     GetConsoleCursorInfo(StdioCtl::out(), &crInfo);
     return crInfo.bVisible ? crInfo.dwSize : 0;
+}
+
+int Win32Display::getColorCount()
+{
+    // Conhost has had high color support for some time:
+    // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
+    // TODO: find out if we can be more accurate.
+    return 16;
 }
 
 void Win32Display::lowlevelCursorSize(int size)

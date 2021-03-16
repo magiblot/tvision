@@ -5,7 +5,6 @@
 #include <tvision/tv.h>
 
 #include <internal/platform.h>
-#include <internal/textattr.h>
 #include <algorithm>
 #include <vector>
 #include <chrono>

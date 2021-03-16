@@ -1,28 +1,13 @@
 #include <internal/ansidisp.h>
-#include <internal/codepage.h>
 #include <internal/textattr.h>
 #include <internal/terminal.h>
 #include <internal/strings.h>
-#include <cstdio>
-#include <cstdlib>
-#ifdef HAVE_NCURSES
-#include <ncurses.h> // For COLORS
-#else
-#define COLORS 16
-#endif
 
 #define CSI "\x1B["
 
-using namespace detail;
-
 AnsiDisplayBase::AnsiDisplayBase() :
-    lastAttr(SGRAttribs::defaultInit),
-    sgrFlags(0)
+    lastAttr(SGRAttribs::defaultInit)
 {
-    if (TermIO::isLinuxConsole())
-        sgrFlags |= sgrBrightIsBlink | sgrNoItalic | sgrNoUnderline;
-    if (COLORS < 16)
-        sgrFlags |= sgrBrightIsBold;
 }
 
 AnsiDisplayBase::~AnsiDisplayBase()
@@ -38,6 +23,7 @@ void AnsiDisplayBase::bufWrite(TStringView s)
 
 void AnsiDisplayBase::bufWriteCSI1(uint a, char F)
 {
+    using namespace detail;
     // CSI a F
     char s[32] = CSI;
     char *p = s + sizeof(CSI) - 1;
@@ -48,6 +34,7 @@ void AnsiDisplayBase::bufWriteCSI1(uint a, char F)
 
 void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F)
 {
+    using namespace detail;
     // CSI a ; b F
     char s[32] = CSI;
     char *p = s + sizeof(CSI) - 1;
@@ -69,9 +56,10 @@ void AnsiDisplayBase::clearScreen()
     bufWrite(CSI "2J");
 }
 
-void AnsiDisplayBase::lowlevelWriteChars(TStringView chars, TCellAttribs attr)
+void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TCellAttribs attr,
+                                          const TermCap &termcap )
 {
-    writeAttributes(attr);
+    writeAttributes(attr, termcap);
     bufWrite(chars);
 }
 
@@ -93,8 +81,9 @@ void AnsiDisplayBase::lowlevelFlush() {
     buf.resize(0);
 }
 
-void AnsiDisplayBase::writeAttributes(TCellAttribs c) {
-    SGRAttribs sgr {c, sgrFlags};
+void AnsiDisplayBase::writeAttributes(TCellAttribs c, const TermCap &termcap) {
+    using namespace detail;
+    SGRAttribs sgr {c, termcap.quirks};
     SGRAttribs last = lastAttr;
     if (sgr != lastAttr)
     {

@@ -4,6 +4,8 @@
 #define Uses_TScreenCell
 #include <tvision/tv.h>
 
+#include <internal/termdisp.h>
+
 inline void swapRedBlue(TCellAttribs &c) {
     // Swap the Red and Blue bits so that each color can be
     // straightforwardly converted to an SGR color code.
@@ -14,14 +16,6 @@ inline void swapRedBlue(TCellAttribs &c) {
     c.bgBlue = c.bgRed;
     c.bgRed = bgAux;
 }
-
-// SGRAttribs conversion flags.
-
-const uint
-    sgrBrightIsBold   = 0x0001,
-    sgrBrightIsBlink  = 0x0002,
-    sgrNoItalic       = 0x0004,
-    sgrNoUnderline    = 0x0008;
 
 struct SGRAttribs : trivially_convertible<uint64_t> {
 
@@ -38,7 +32,7 @@ struct SGRAttribs : trivially_convertible<uint64_t> {
 
     enum {defaultInit};
     SGRAttribs(decltype(defaultInit));
-    SGRAttribs(TCellAttribs bios, uint flags);
+    SGRAttribs(TCellAttribs bios, uint quirks);
 
     static void check_assumptions()
     {
@@ -59,7 +53,7 @@ inline SGRAttribs::SGRAttribs(decltype(defaultInit))
     reverse = 27;   // Reverse Off
 }
 
-inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
+inline SGRAttribs::SGRAttribs(TCellAttribs c, uint quirks) :
     SGRAttribs(defaultInit)
 {
     swapRedBlue(c);
@@ -73,23 +67,23 @@ inline SGRAttribs::SGRAttribs(TCellAttribs c, uint flags) :
         bg += (c.bgGet() & 0x07);
     if (c.fgBright)
     {
-        if (flags & sgrBrightIsBold)
+        if (quirks & qfBoldIsBright)
             bold = 1; // Bold On
         else
             fg += 60;
     }
     if (c.bgBright)
     {
-        if (flags & sgrBrightIsBlink)
+        if (quirks & qfBlinkIsBright)
             blink = 5; // Blink On
         else
             bg += 60;
     }
     if (c.bold)
         bold = 1; // Bold On
-    if (!(flags & sgrNoItalic) && c.italic)
+    if (!(quirks & qfNoItalic) && c.italic)
         italic = 3; // Italic On
-    if (!(flags & sgrNoUnderline) && c.underline)
+    if (!(quirks & qfNoUnderline) && c.underline)
         underline = 4; // Underline On
     if (c.reverse)
         reverse = 7; // Reverse On

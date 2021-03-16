@@ -1,13 +1,12 @@
 #ifndef ANSIDISP_H
 #define ANSIDISP_H
 
-#include <internal/buffdisp.h>
+#include <internal/termdisp.h>
 #include <internal/textattr.h>
 #include <vector>
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
  * escape codes directly to stdout.
- * Character attributes are supported but assume Ncurses is being used.
  *
  * AnsiDisplay implements only a subset of DisplayStrategy's pure virtual
  * functions, so it depends on another implementation from which it inherits,
@@ -23,12 +22,11 @@ class AnsiDisplayBase {
 
     std::vector<char> buf;
     SGRAttribs lastAttr;
-    uint sgrFlags;
 
     void bufWrite(TStringView s);
     void bufWriteCSI1(uint a, char F);
     void bufWriteCSI2(uint a, uint b, char F);
-    void writeAttributes(TCellAttribs attr);
+    void writeAttributes(TCellAttribs attr, const TermCap &);
 
 protected:
 
@@ -38,7 +36,7 @@ protected:
     void clearAttributes();
     void clearScreen();
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr);
+    void lowlevelWriteChars(TStringView chars, TCellAttribs attr, const TermCap &);
     void lowlevelMoveCursor(uint x, uint y);
     void lowlevelMoveCursorX(uint x, uint y);
     void lowlevelFlush();
@@ -50,8 +48,8 @@ class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
 
     void assertBaseClassBuffered()
     {
-        static_assert(std::is_base_of<BufferedDisplay, DisplayBase>::value,
-            "The base class of AnsiDisplay must be a derived of BufferedDisplay."
+        static_assert(std::is_base_of<TerminalDisplay, DisplayBase>::value,
+            "The base class of AnsiDisplay must be a derived of TerminalDisplay."
         );
     }
 
@@ -63,7 +61,8 @@ public:
     {
     }
 
-    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override { AnsiDisplayBase::lowlevelWriteChars(chars, attr); }
+    void lowlevelWriteChars(TStringView chars, TCellAttribs attr) override
+        { AnsiDisplayBase::lowlevelWriteChars(chars, attr, TerminalDisplay::termcap); }
     void lowlevelMoveCursor(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
     void lowlevelMoveCursorX(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
     void lowlevelFlush() override { AnsiDisplayBase::lowlevelFlush(); }

@@ -1,7 +1,7 @@
 #ifndef WIN32CON_H
 #define WIN32CON_H
 
-#include <internal/buffdisp.h>
+#include <internal/termdisp.h>
 
 #ifdef _WIN32
 
@@ -56,7 +56,7 @@ public:
 
 };
 
-class Win32Display : public BufferedDisplay
+class Win32Display : public TerminalDisplay
 {
 
     COORD dwSize;
@@ -70,6 +70,7 @@ public:
     void reloadScreenInfo() override;
     TPoint getScreenSize() override;
     int getCaretSize() override;
+    int getColorCount() override;
 
     void clearScreen() override;
     ushort getScreenMode() override;
