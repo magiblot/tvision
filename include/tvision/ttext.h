@@ -42,8 +42,8 @@ private:
     struct mbstat_r { int length, width; };
     static mbstat_r mbstat(TStringView text);
     static int mblen(TStringView text);
-    static bool isBlacklisted(TStringView mbc);
-    static uint32_t cp2utf8(uchar c);
+    struct eat_r { int ok, width, length; };
+    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TStringView, size_t);
 #endif // __BORLANDC__
 
 };
@@ -218,20 +218,6 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&fun
     return w;
 }
 
-inline uint32_t TText::cp2utf8(uchar c)
-{
-    extern const uint32_t *tv_cp2utf8;
-    return tv_cp2utf8[c];
-}
-
-inline bool TText::isBlacklisted(TStringView mbc)
-// We want to avoid printing certain characters which are usually represented
-// differently by different terminal applications or which can combine different
-// characters together, changing the width of a whole string.
-{
-    return mbc == "\xE2\x80\x8D"; // U+200D ZERO WIDTH JOINER.
-}
-
 inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
                            TStringView text, size_t &j )
 // Reads a single character from a multibyte-encoded string, and writes it into
@@ -257,68 +243,10 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
 //      size_t i = 0, j = 0;
 //      while (TText::eat(cells, i, text, j));
 {
-    if (j < text.size())
-    {
-        auto mb = TText::mbstat(text.substr(j));
-        if (mb.length <= 1)
-        {
-            if (i < cells.size())
-            {
-                if (mb.length < 0)
-                    ::setChar(cells[i], cp2utf8(text[j]));
-                else if (mb.length == 0) // '\0'
-                    ::setChar(cells[i], ' ');
-                else
-                    ::setChar(cells[i], {&text[j], 1});
-                i += 1;
-                j += 1;
-                return true;
-            }
-        }
-        else
-        {
-            if (mb.width < 0)
-            {
-                if (i < cells.size())
-                {
-                    ::setChar(cells[i], "�");
-                    i += 1;
-                    j += mb.length;
-                    return true;
-                }
-            }
-            else if (mb.width == 0)
-            {
-                TStringView zwc {&text[j], (size_t) mb.length};
-                // Append to the previous cell, if present.
-                if (i > 0 && !isBlacklisted(zwc))
-                {
-                    size_t k = i;
-                    while (cells[--k].Char == TScreenCell::wideCharTrail && k > 0);
-                    cells[k].Char.append(zwc);
-                }
-                j += mb.length;
-                return true;
-            }
-            else
-            {
-                if (i < cells.size())
-                {
-                    uchar extraWidth = min(mb.width - 1, 7);
-                    ::setChar(cells[i], {&text[j], (size_t) mb.length}, extraWidth);
-                    // Fill trailing cells.
-                    auto attr = ::getAttr(cells[i]);
-                    size_t count = min(extraWidth + 1, cells.size() - i);
-                    for (size_t k = 1; k < count; ++k)
-                        ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
-                    i += count;
-                    j += mb.length;
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
+    auto result = eat_internal(cells, i, text, j);
+    i += (size_t) result.width;
+    j += (size_t) result.length;
+    return result.ok;
 }
 
 inline Boolean TText::next(TStringView text, size_t &index, size_t &width)

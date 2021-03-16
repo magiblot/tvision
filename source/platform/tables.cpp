@@ -80,7 +80,6 @@ const CpTranslator::CpTable CpTranslator::tables[] = {
     { "850", cp850toUtf8, cp850toUtf8Int }
 };
 
-const uint32_t *tv_cp2utf8 = nullptr;
 const CpTranslator::CpTable *CpTranslator::activeTable = nullptr;
 CpTranslator CpTranslator::instance;
 

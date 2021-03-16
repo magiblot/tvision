@@ -10,8 +10,6 @@
 
 // tables.cpp
 
-extern const uint32_t *tv_cp2utf8;
-
 class CpTranslator
 {
 
@@ -35,7 +33,6 @@ class CpTranslator
     static void useTable(const CpTable *table)
     {
         activeTable = table;
-        tv_cp2utf8 = table->toUtf8Int;
     }
 
 public:

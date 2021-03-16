@@ -1,6 +1,7 @@
 #define Uses_TText
 #include <tvision/tv.h>
 
+#include <internal/codepage.h>
 #include <internal/platform.h>
 #include <internal/linuxcon.h>
 #include <internal/win32con.h>
@@ -101,3 +102,79 @@ int Win32ConsoleStrategy::charWidth(TStringView mbc, char32_t)
     return WinWidth::mbcwidth(mbc);
 }
 #endif // _WIN32
+
+namespace ttext
+{
+
+    static inline bool isZWJ(TStringView mbc)
+    // We want to avoid printing certain characters which are usually represented
+    // differently by different terminal applications or which can combine different
+    // characters together, changing the width of a whole string.
+    {
+        return mbc == "\xE2\x80\x8D"; // U+200D ZERO WIDTH JOINER.
+    }
+
+} // namespace ttext
+
+TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
+                                  TStringView text, size_t j )
+{
+    using namespace ttext;
+    if (j < text.size())
+    {
+        auto mb = TText::mbstat(text.substr(j));
+        if (mb.length <= 1)
+        {
+            if (i < cells.size())
+            {
+                // This is redudant except if non-UTF-8 text is mixed with
+                // combining characters.
+                if (mb.length < 0)
+                    ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
+                else if (mb.length == 0) // '\0'
+                    ::setChar(cells[i], ' ');
+                else
+                    ::setChar(cells[i], text[j]);
+                return {true, 1, 1};
+            }
+        }
+        else
+        {
+            if (mb.width < 0)
+            {
+                if (i < cells.size())
+                {
+                    ::setChar(cells[i], "�");
+                    return {true, 1, mb.length};
+                }
+            }
+            else if (mb.width == 0)
+            {
+                TStringView zwc {&text[j], (size_t) mb.length};
+                // Append to the previous cell, if present.
+                if (i > 0 && !isZWJ(zwc))
+                {
+                    size_t k = i;
+                    while (cells[--k].Char == TScreenCell::wideCharTrail && k > 0);
+                    cells[k].Char.append(zwc);
+                }
+                return {true, 0, mb.length};
+            }
+            else
+            {
+                if (i < cells.size())
+                {
+                    uchar extraWidth = min(mb.width - 1, 7);
+                    ::setChar(cells[i], {&text[j], (size_t) mb.length}, extraWidth);
+                    // Fill trailing cells.
+                    auto attr = ::getAttr(cells[i]);
+                    int count = min(extraWidth + 1, cells.size() - i);
+                    for (int k = 1; k < count; ++k)
+                        ::setCell(cells[i + k], TScreenCell::wideCharTrail, attr);
+                    return {true, count, mb.length};
+                }
+            }
+        }
+    }
+    return {false, 0, 0};
+}
