@@ -30,7 +30,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#define toupper(c) ( (('a' <= (c)) && ((c) <= 'z')) ? ((c) + 'A'-'a') : (c) )
+static inline Boolean uppercase(char c)
+{
+    return (('a' <= c) && (c <= 'z')) ? c + 'A'-'a' : c;
+}
 
 // TValidator
 
@@ -399,10 +402,10 @@ TPicResult TPXPictureValidator::scan(char* input, int termCh)
         if (! isLetter(ch))
             return prError;
                 else 
-            consume(toupper(ch), input);
+            consume(uppercase(ch), input);
         break;
         case  '!': 
-        consume(toupper(ch), input);
+        consume(uppercase(ch), input);
         break;
         case  '@':
         consume(ch, input);
@@ -438,7 +441,7 @@ TPicResult TPXPictureValidator::scan(char* input, int termCh)
 
           if (pic[index] == ';')
           index++;
-          if (toupper(pic[index]) != toupper(ch))
+          if (uppercase(pic[index]) != uppercase(ch))
           {
             if (ch == ' ')
              ch = pic[index];
