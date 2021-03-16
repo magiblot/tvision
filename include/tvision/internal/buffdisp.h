@@ -12,9 +12,17 @@
 
 class ScreenCursor;
 
+namespace buffdisp {
+namespace {
+
+    struct FlushScreenAlgorithm;
+
+}
+}
+
 class BufferedDisplay : public DisplayStrategy {
 
-    friend struct FlushScreenAlgorithm;
+    friend buffdisp::FlushScreenAlgorithm;
 
     struct Range {
         int begin, end;
@@ -103,69 +111,6 @@ inline void BufferedDisplay::removeCursor(ScreenCursor *cursor)
 inline void BufferedDisplay::changeCursor()
 {
     instance->caretMoved = true;
-}
-
-struct FlushScreenAlgorithm {
-
-    BufferedDisplay &disp;
-    TPoint size;
-    TPoint last;
-    int x, y;
-    TScreenCell cell;
-    size_t iCell;
-    BufferedDisplay::Range damage;
-
-    FlushScreenAlgorithm(BufferedDisplay &disp) :
-        disp(disp)
-    {
-    }
-
-    TScreenCell &cellAt(int y, int x);
-    void getCell();
-    bool cellDirty() const;
-    bool wideCanSpill() const;
-    bool wideCanOverlap() const;
-
-    void run();
-    void processCell();
-    void writeCell();
-    void commitDirty();
-    void handleWideCharSpill();
-    void handleNull();
-
-};
-
-inline TScreenCell& FlushScreenAlgorithm::cellAt(int y, int x)
-{
-    return disp.buffer[y*size.x + x];
-}
-
-inline void FlushScreenAlgorithm::getCell()
-{
-    auto *pCell = &cellAt(y, x);
-    iCell = pCell - &cellAt(0, 0);
-    cell = *pCell;
-    disp.validateCell(cell);
-}
-
-inline bool FlushScreenAlgorithm::cellDirty() const
-{
-    return memcmp(&disp.flushBuffer[iCell], &cell, sizeof(TScreenCell)) != 0;
-}
-
-inline void FlushScreenAlgorithm::commitDirty()
-{
-    disp.flushBuffer[iCell] = cell;
-}
-
-inline bool FlushScreenAlgorithm::wideCanSpill() const
-{
-    return disp.widePlaceholder == '\0';
-}
-
-inline bool FlushScreenAlgorithm::wideCanOverlap() const
-{
-    return disp.wideOverlapping;
 }
 
 #endif

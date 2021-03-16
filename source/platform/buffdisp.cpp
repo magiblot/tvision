@@ -157,12 +157,21 @@ bool BufferedDisplay::needsFlush() const
     return screenTouched || caretMoved || caretSize != newCaretSize;
 }
 
+namespace buffdisp {
+namespace {
+
+    void flushScreenAlgorithm(BufferedDisplay &);
+
+}
+}
+
 void BufferedDisplay::flushScreen()
 {
+    using namespace buffdisp;
     if (needsFlush() && timeToFlush())
     {
         drawCursors();
-        FlushScreenAlgorithm(*this).run();
+        flushScreenAlgorithm(*this);
         if (caretPosition.x != -1)
             lowlevelMoveCursor(caretPosition.x, caretPosition.y);
         undrawCursors();
@@ -175,7 +184,7 @@ void BufferedDisplay::flushScreen()
     }
 }
 
-void BufferedDisplay::validateCell(TScreenCell &cell) const
+inline void BufferedDisplay::validateCell(TScreenCell &cell) const
 {
     auto &ch = cell.Char;
     if (!ch[1]) /* size 1 */ {
@@ -191,17 +200,92 @@ void BufferedDisplay::validateCell(TScreenCell &cell) const
     }
 }
 
-static inline bool isNull(TScreenCell cell)
+//////////////////////////////////////////////////////////////////////////
+// FlushScreenAlgorithm
+
+namespace buffdisp {
+namespace {
+
+struct FlushScreenAlgorithm
+{
+
+    BufferedDisplay &disp;
+    TPoint size;
+    TPoint last;
+    int x, y;
+    TScreenCell cell;
+    size_t iCell;
+    BufferedDisplay::Range damage;
+
+    FlushScreenAlgorithm(BufferedDisplay &disp) :
+        disp(disp)
+    {
+    }
+
+    TScreenCell &cellAt(int y, int x);
+    void getCell();
+    bool cellDirty() const;
+    bool wideCanSpill() const;
+    bool wideCanOverlap() const;
+
+    void run();
+    void processCell();
+    void writeCell();
+    void commitDirty();
+    void handleWideCharSpill();
+    void handleNull();
+
+};
+
+inline bool isNull(const TScreenCell &cell)
 {
     return __builtin_expect(cell.Char == '\0', 0);
 }
 
-static inline bool isWide(TScreenCell cell)
+inline bool isWide(const TScreenCell &cell)
 {
     return __builtin_expect(cell.extraWidth, 0);
 }
 
-void FlushScreenAlgorithm::run()
+inline TScreenCell& FlushScreenAlgorithm::cellAt(int y, int x)
+{
+    return disp.buffer[y*size.x + x];
+}
+
+inline void FlushScreenAlgorithm::getCell()
+{
+    auto *pCell = &cellAt(y, x);
+    iCell = pCell - &cellAt(0, 0);
+    cell = *pCell;
+    disp.validateCell(cell);
+}
+
+inline bool FlushScreenAlgorithm::cellDirty() const
+{
+    return memcmp(&disp.flushBuffer[iCell], &cell, sizeof(TScreenCell)) != 0;
+}
+
+inline void FlushScreenAlgorithm::commitDirty()
+{
+    disp.flushBuffer[iCell] = cell;
+}
+
+inline bool FlushScreenAlgorithm::wideCanSpill() const
+{
+    return disp.widePlaceholder == '\0';
+}
+
+inline bool FlushScreenAlgorithm::wideCanOverlap() const
+{
+    return disp.wideOverlapping;
+}
+
+inline void flushScreenAlgorithm(BufferedDisplay &disp)
+{
+    FlushScreenAlgorithm(disp).run();
+}
+
+inline void FlushScreenAlgorithm::run()
 {
     size = disp.size;
     last = {INT_MIN, INT_MIN};
@@ -240,7 +324,7 @@ void FlushScreenAlgorithm::run()
     }
 }
 
-void FlushScreenAlgorithm::processCell()
+inline void FlushScreenAlgorithm::processCell()
 {
     if (wideCanSpill()) {
         if (isWide(cell)) {
@@ -254,7 +338,7 @@ void FlushScreenAlgorithm::processCell()
     writeCell();
 }
 
-void FlushScreenAlgorithm::writeCell()
+inline void FlushScreenAlgorithm::writeCell()
 {
     // 'last' is the last written cell occupied by text.
     // That is, the hardware cursor is located at {last.x + 1, last.y}.
@@ -271,7 +355,7 @@ void FlushScreenAlgorithm::writeCell()
     last = {x + cell.extraWidth, y};
 }
 
-void FlushScreenAlgorithm::handleWideCharSpill()
+inline void FlushScreenAlgorithm::handleWideCharSpill()
 {
     uchar width = cell.extraWidth;
     const auto Attr = cell.Attr;
@@ -330,7 +414,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
     }
 }
 
-void FlushScreenAlgorithm::handleNull()
+inline void FlushScreenAlgorithm::handleNull()
 {
     // Having '\0' in a cell implies wide characters can spill, as '\0'
     // is otherwise discarded in ensurePrintable().
@@ -366,5 +450,8 @@ void FlushScreenAlgorithm::handleNull()
         // Decrease for next iteration
         --x;
     }
+
 }
 
+} // namespace
+} // namespace buffdisp
