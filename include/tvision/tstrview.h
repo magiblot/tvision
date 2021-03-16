@@ -37,7 +37,7 @@ class TStringView
 public:
 
     constexpr TStringView();
-#if __cpp_constexpr >= 201304L
+#if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
     constexpr
 #endif
               TStringView(const char _FAR *str);
@@ -79,10 +79,8 @@ inline constexpr TStringView::TStringView() :
 
 #pragma warn -inl
 
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
 #if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
+constexpr
 inline TStringView::TStringView(const char _FAR *str) :
     str(str),
     len(str ? std::char_traits<char>::length(str) : 0)
