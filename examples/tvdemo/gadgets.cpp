@@ -110,7 +110,13 @@ long THeapView::heapSize()
 #elif defined(__GLIBC__) && !defined(__UCLIBC__) && !defined(__MUSL__)
     // mallinfo is defined in malloc.h but only exists in Glibc.
     // It doesn't exactly measure the heap size, but it kinda does the trick.
-    int allocatedBytes = mallinfo().uordblks;
+    int allocatedBytes =
+#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 33)
+        mallinfo2()
+#else
+        mallinfo()
+#endif
+        .uordblks;
     totalStr << setw(12) << allocatedBytes << ends;
     return allocatedBytes;
 #else
