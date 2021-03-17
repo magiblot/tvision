@@ -78,23 +78,22 @@ const KeyTypes dataKeyType = longIntKey;
 const int dataCount = 5;
 
 TDataRec data[dataCount] =
-    {
-    1, 1036, { 0,  "Government standard issue\r"
-                   "and certified by FAA for\r"
-                   "international use."
-             },
-    2035, 33, { 0, "Warbling mini version with\r"
-                   "modified mechanisms for\r"
-                   "handling streamliners."
-              },
-    2034, 13, { 0, "Hybrid version." },
-    2, -123,  { 0, "Catalytic version for\r"
-                   "meeting stricter emission\r"
-                   "standards in industrial areas."
-              },
-    45, 8567, {0, "Prototype for new model."}
-
-    };
+{
+    {1, 1036,  { 0, "Government standard issue\r"
+                    "and certified by FAA for\r"
+                    "international use."
+               }},
+    {2035, 33, { 0, "Warbling mini version with\r"
+                    "modified mechanisms for\r"
+                    "handling streamliners."
+               }},
+    {2034, 13, { 0, "Hybrid version." }},
+    {2, -123,  { 0, "Catalytic version for\r"
+                    "meeting stricter emission\r"
+                    "standards in industrial areas."
+               }},
+    {45, 8567, { 0, "Prototype for new model." }},
+};
 
 
 void initDescrLengths()
