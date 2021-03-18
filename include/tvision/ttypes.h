@@ -134,6 +134,12 @@ extern const uchar specialChars[];
 #define TVISION_STL
 #endif
 
+#if __cpp_constexpr >= 201304L
+#define TV_CONSTEXPR_14 constexpr
+#else
+#define TV_CONSTEXPR_14
+#endif
+
 // In types with user-defined constructors, the default assignment operator
 // creates a temporary object. If the type is large enough, the compiler
 // may not be able to optimize out the temporary object. This has been observed

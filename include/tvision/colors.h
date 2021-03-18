@@ -296,15 +296,15 @@ const uchar
 struct TColorDesired
 {
 
-    uint8_t _data[4];
+    uint32_t _data;
 
     TColorDesired() = default;
 
     // Constructors for use with literals.
 
-    inline TColorDesired(char bios);   // e.g. {'\xF'}
-    inline TColorDesired(uchar bios);
-    inline TColorDesired(int rgb);     // e.g. {0x7F00BB}
+    constexpr inline TColorDesired(char bios);   // e.g. {'\xF'}
+    constexpr inline TColorDesired(uchar bios);
+    constexpr inline TColorDesired(int rgb);     // e.g. {0x7F00BB}
     // Use zero-initialization for for type Default: {}
 
     // Constructors with explicit type names.
@@ -315,11 +315,11 @@ struct TColorDesired
 
     TV_TRIVIALLY_ASSIGNABLE(TColorDesired)
 
-    inline uchar type() const;
-    inline bool isDefault() const;
-    inline bool isBIOS() const;
-    inline bool isRGB() const;
-    inline bool isXTerm() const;
+    constexpr inline uchar type() const;
+    constexpr inline bool isDefault() const;
+    constexpr inline bool isBIOS() const;
+    constexpr inline bool isRGB() const;
+    constexpr inline bool isXTerm() const;
 
     // No conversion is performed! Make sure to check the type first.
 
@@ -334,81 +334,79 @@ struct TColorDesired
     inline bool operator==(TColorDesired other) const;
     inline bool operator!=(TColorDesired other) const;
 
+    constexpr inline uint32_t bitCast() const;
+    TV_CONSTEXPR_14 inline void bitCast(uint32_t val);
+
 };
 
-inline TColorDesired::TColorDesired(char bios) :
-    TColorDesired(TColorBIOS(bios))
+constexpr inline TColorDesired::TColorDesired(char bios) :
+    TColorDesired(uchar(bios))
 {
 }
 
-inline TColorDesired::TColorDesired(uchar bios) :
-    TColorDesired(TColorBIOS(bios))
+constexpr inline TColorDesired::TColorDesired(uchar bios) :
+    _data((bios & 0xF) | (ctBIOS << 24))
 {
 }
 
-inline TColorDesired::TColorDesired(int rgb) :
-    TColorDesired(TColorRGB(rgb))
+constexpr inline TColorDesired::TColorDesired(int rgb) :
+    _data((rgb & 0xFFFFFF) | (ctRGB << 24))
 {
 }
 
-inline TColorDesired::TColorDesired(TColorBIOS bios)
+inline TColorDesired::TColorDesired(TColorBIOS bios) :
+    TColorDesired(uchar(bios))
 {
-    uint32_t val = bios | (ctBIOS << 24);
-    memcpy(this, &val, sizeof(*this));
 }
 
-inline TColorDesired::TColorDesired(TColorRGB rgb)
+inline TColorDesired::TColorDesired(TColorRGB rgb) :
+    TColorDesired(int(rgb))
 {
-    uint32_t val = rgb | (ctRGB << 24);
-    memcpy(this, &val, sizeof(*this));
 }
 
-inline TColorDesired::TColorDesired(TColorXTerm xterm)
+inline TColorDesired::TColorDesired(TColorXTerm xterm) :
+    _data(xterm | (ctXTerm << 24))
 {
-    uint32_t val = xterm | (ctXTerm << 24);
-    memcpy(this, &val, sizeof(*this));
 }
 
-inline uchar TColorDesired::type() const
+constexpr inline uchar TColorDesired::type() const
 {
-    return _data[3];
+    return _data >> 24;
 }
 
-inline bool TColorDesired::isDefault() const
+constexpr inline bool TColorDesired::isDefault() const
 {
     return type() == ctDefault;
 }
 
-inline bool TColorDesired::isBIOS() const
+constexpr inline bool TColorDesired::isBIOS() const
 {
     return type() == ctBIOS;
 }
 
-inline bool TColorDesired::isRGB() const
+constexpr inline bool TColorDesired::isRGB() const
 {
     return type() == ctRGB;
 }
 
-inline bool TColorDesired::isXTerm() const
+constexpr inline bool TColorDesired::isXTerm() const
 {
     return type() == ctXTerm;
 }
 
 inline TColorBIOS TColorDesired::asBIOS() const
 {
-    return _data[0];
+    return _data;
 }
 
 inline TColorRGB TColorDesired::asRGB() const
 {
-    uint32_t val;
-    memcpy(&val, this, sizeof(val));
-    return val;
+    return _data;
 }
 
 inline TColorXTerm TColorDesired::asXTerm() const
 {
-    return _data[0];
+    return _data;
 }
 
 inline TColorBIOS TColorDesired::toBIOS(bool isForeground) const
@@ -439,6 +437,16 @@ inline bool TColorDesired::operator==(TColorDesired other) const
 inline bool TColorDesired::operator!=(TColorDesired other) const
 {
     return !(*this == other);
+}
+
+constexpr inline uint32_t TColorDesired::bitCast() const
+{
+    return _data;
+}
+
+TV_CONSTEXPR_14 inline void TColorDesired::bitCast(uint32_t val)
+{
+    _data = val;
 }
 
 //// TColorAttr
@@ -495,8 +503,8 @@ struct TColorAttr
         _bg         : 27;
 
     TColorAttr() = default;
-    inline TColorAttr(int bios);
-    inline TColorAttr(TColorDesired fg, TColorDesired bg, ushort style=0);
+    constexpr inline TColorAttr(int bios);
+    constexpr inline TColorAttr(TColorDesired fg, TColorDesired bg, ushort style=0);
     inline TColorAttr(const TAttrPair &attrs);
     TV_TRIVIALLY_ASSIGNABLE(TColorAttr)
 
@@ -515,27 +523,26 @@ struct TColorAttr
 
 };
 
-inline TColorDesired getFore(const TColorAttr &attr);
-inline TColorDesired getBack(const TColorAttr &attr);
-inline ushort getStyle(const TColorAttr &attr);
-inline void setFore(TColorAttr &attr, TColorDesired fg);
-inline void setBack(TColorAttr &attr, TColorDesired bg);
-inline void setStyle(TColorAttr &attr, ushort style);
-inline TColorAttr reverseAttribute(TColorAttr attr);
+TV_CONSTEXPR_14 inline TColorDesired getFore(const TColorAttr &attr);
+TV_CONSTEXPR_14 inline TColorDesired getBack(const TColorAttr &attr);
+TV_CONSTEXPR_14 inline ushort getStyle(const TColorAttr &attr);
+TV_CONSTEXPR_14 inline void setFore(TColorAttr &attr, TColorDesired fg);
+TV_CONSTEXPR_14 inline void setBack(TColorAttr &attr, TColorDesired bg);
+TV_CONSTEXPR_14 inline void setStyle(TColorAttr &attr, ushort style);
+TV_CONSTEXPR_14 inline TColorAttr reverseAttribute(TColorAttr attr);
 
-inline TColorAttr::TColorAttr(int bios)
+constexpr inline TColorAttr::TColorAttr(int bios) :
+    _style(0),
+    _fg(TColorDesired(uchar(bios)).bitCast()),
+    _bg(TColorDesired(uchar(bios >> 4)).bitCast())
 {
-    memset(this, 0, sizeof(*this));
-    ::setFore(*this, uchar(bios));
-    ::setBack(*this, uchar(bios >> 4));
 }
 
-inline TColorAttr::TColorAttr(TColorDesired fg, TColorDesired bg, ushort style)
+constexpr inline TColorAttr::TColorAttr(TColorDesired fg, TColorDesired bg, ushort style) :
+    _style(style),
+    _fg(fg.bitCast()),
+    _bg(bg.bitCast())
 {
-    memset(this, 0, sizeof(*this));
-    ::setFore(*this, fg);
-    ::setBack(*this, bg);
-    ::setStyle(*this, style);
 }
 
 inline bool TColorAttr::isBIOS() const
@@ -585,47 +592,41 @@ inline bool TColorAttr::operator!=(int bios) const
     return !(*this == bios);
 }
 
-inline TColorDesired getFore(const TColorAttr &attr)
+TV_CONSTEXPR_14 inline TColorDesired getFore(const TColorAttr &attr)
 {
-    uint32_t val = attr._fg;
-    TColorDesired color;
-    memcpy(&color, &val, sizeof(color));
+    TColorDesired color {};
+    color.bitCast(attr._fg);
     return color;
 }
 
-inline TColorDesired getBack(const TColorAttr &attr)
+TV_CONSTEXPR_14 inline TColorDesired getBack(const TColorAttr &attr)
 {
-    uint32_t val = attr._bg;
-    TColorDesired color;
-    memcpy(&color, &val, sizeof(color));
+    TColorDesired color {};
+    color.bitCast(attr._bg);
     return color;
 }
 
-inline ushort getStyle(const TColorAttr &attr)
+TV_CONSTEXPR_14 inline ushort getStyle(const TColorAttr &attr)
 {
     return attr._style;
 }
 
-inline void setFore(TColorAttr &attr, TColorDesired color)
+TV_CONSTEXPR_14 inline void setFore(TColorAttr &attr, TColorDesired color)
 {
-    uint32_t val;
-    memcpy(&val, &color, sizeof(val));
-    attr._fg = val;
+    attr._fg = color.bitCast();
 }
 
-inline void setBack(TColorAttr &attr, TColorDesired color)
+TV_CONSTEXPR_14 inline void setBack(TColorAttr &attr, TColorDesired color)
 {
-    uint32_t val;
-    memcpy(&val, &color, sizeof(val));
-    attr._bg = val;
+    attr._bg = color.bitCast();
 }
 
-inline void setStyle(TColorAttr &attr, ushort style)
+TV_CONSTEXPR_14 inline void setStyle(TColorAttr &attr, ushort style)
 {
     attr._style = style;
 }
 
-inline TColorAttr reverseAttribute(TColorAttr attr)
+TV_CONSTEXPR_14 inline TColorAttr reverseAttribute(TColorAttr attr)
 {
     auto fg = ::getFore(attr),
          bg = ::getBack(attr);
@@ -658,8 +659,8 @@ struct TAttrPair
     TColorAttr _attrs[2];
 
     TAttrPair() = default;
-    inline TAttrPair(int bios);
-    inline TAttrPair(const TColorAttr &lo, const TColorAttr &hi=uchar(0));
+    constexpr inline TAttrPair(int bios);
+    constexpr inline TAttrPair(const TColorAttr &lo, const TColorAttr &hi=uchar(0));
     TV_TRIVIALLY_ASSIGNABLE(TAttrPair)
 
     inline ushort asBIOS() const;
@@ -673,12 +674,12 @@ struct TAttrPair
 
 };
 
-inline TAttrPair::TAttrPair(int bios) :
+constexpr inline TAttrPair::TAttrPair(int bios) :
     _attrs {uchar(bios & 0xFF), uchar(bios >> 8)}
 {
 }
 
-inline TAttrPair::TAttrPair(const TColorAttr &lo, const TColorAttr &hi) :
+constexpr inline TAttrPair::TAttrPair(const TColorAttr &lo, const TColorAttr &hi) :
     _attrs {lo, hi}
 {
 }
