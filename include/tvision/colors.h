@@ -300,7 +300,7 @@ struct TColorDesired
 
     TColorDesired() = default;
 
-    // Constructors for list-initialization.
+    // Constructors for use with literals.
 
     inline TColorDesired(char bios);   // e.g. {'\xF'}
     inline TColorDesired(uchar bios);
@@ -312,6 +312,8 @@ struct TColorDesired
     inline TColorDesired(TColorBIOS bios);
     inline TColorDesired(TColorRGB rgb);
     inline TColorDesired(TColorXTerm xterm);
+
+    TV_TRIVIALLY_ASSIGNABLE(TColorDesired)
 
     inline uchar type() const;
     inline bool isDefault() const;
@@ -493,11 +495,10 @@ struct TColorAttr
         _bg         : 27;
 
     TColorAttr() = default;
-    inline TColorAttr(uchar bios);
+    inline TColorAttr(int bios);
     inline TColorAttr(TColorDesired fg, TColorDesired bg, ushort style=0);
     inline TColorAttr(const TAttrPair &attrs);
-    inline TColorAttr& operator=(uchar);
-    inline TColorAttr& operator=(const TAttrPair &attrs);
+    TV_TRIVIALLY_ASSIGNABLE(TColorAttr)
 
     inline bool isBIOS() const;
     inline uchar asBIOS() const; // Result is meaningful only if it actually is BIOS.
@@ -522,9 +523,11 @@ inline void setBack(TColorAttr &attr, TColorDesired bg);
 inline void setStyle(TColorAttr &attr, ushort style);
 inline TColorAttr reverseAttribute(TColorAttr attr);
 
-inline TColorAttr::TColorAttr(uchar bios)
+inline TColorAttr::TColorAttr(int bios)
 {
-    *this = bios;
+    memset(this, 0, sizeof(*this));
+    ::setFore(*this, uchar(bios));
+    ::setBack(*this, uchar(bios >> 4));
 }
 
 inline TColorAttr::TColorAttr(TColorDesired fg, TColorDesired bg, ushort style)
@@ -533,14 +536,6 @@ inline TColorAttr::TColorAttr(TColorDesired fg, TColorDesired bg, ushort style)
     ::setFore(*this, fg);
     ::setBack(*this, bg);
     ::setStyle(*this, style);
-}
-
-inline TColorAttr& TColorAttr::operator=(uchar bios)
-{
-    memset(this, 0, sizeof(*this));
-    ::setFore(*this, TColorBIOS(bios));
-    ::setBack(*this, TColorBIOS(bios >> 4));
-    return *this;
 }
 
 inline bool TColorAttr::isBIOS() const
@@ -647,6 +642,15 @@ inline TColorAttr reverseAttribute(TColorAttr attr)
 }
 
 //// TAttrPair
+//
+// Represents a pair of color attributes.
+// Example:
+//
+//     TColorAttr cNormal = {0x234983, 0x267232};
+//     TColorAttr cHigh = {0x309283, 0x127844};
+//     TAttrPair attrs = {cNormal, cHigh};
+//     TDrawBuffer b;
+//     b.moveCStr(0, "Normal text, ~Highlighted text~", attrs);
 
 struct TAttrPair
 {
@@ -654,9 +658,9 @@ struct TAttrPair
     TColorAttr _attrs[2];
 
     TAttrPair() = default;
-    inline TAttrPair(ushort bios);
+    inline TAttrPair(int bios);
     inline TAttrPair(const TColorAttr &lo, const TColorAttr &hi=uchar(0));
-    inline TAttrPair& operator=(ushort bios);
+    TV_TRIVIALLY_ASSIGNABLE(TAttrPair)
 
     inline ushort asBIOS() const;
 
@@ -669,21 +673,14 @@ struct TAttrPair
 
 };
 
-inline TAttrPair::TAttrPair(ushort bios)
+inline TAttrPair::TAttrPair(int bios) :
+    _attrs {uchar(bios & 0xFF), uchar(bios >> 8)}
 {
-    *this = bios;
 }
 
 inline TAttrPair::TAttrPair(const TColorAttr &lo, const TColorAttr &hi) :
     _attrs {lo, hi}
 {
-}
-
-inline TAttrPair& TAttrPair::operator=(ushort bios)
-{
-    _attrs[0] = uchar(bios & 0xFF);
-    _attrs[1] = uchar(bios >> 8);
-    return *this;
 }
 
 inline ushort TAttrPair::asBIOS() const
@@ -725,13 +722,7 @@ inline const TColorAttr& TAttrPair::operator[](size_t i) const
 
 inline TColorAttr::TColorAttr(const TAttrPair &attrs)
 {
-    *this = attrs;
-}
-
-inline TColorAttr& TColorAttr::operator=(const TAttrPair &attrs)
-{
     *this = attrs[0];
-    return *this;
 }
 
 inline TAttrPair TColorAttr::operator<<(int shift) const

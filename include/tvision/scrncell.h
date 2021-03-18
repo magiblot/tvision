@@ -58,26 +58,13 @@ struct TCellChar
 
     enum WideCharTrail : uint32_t { wideCharTrail=(uint32_t)-2 };
 
-    // We define both a constructor and an assignment operator for each type
-    // because it helps compilers emit more efficient code. Without the
-    // overloaded assignment operator each assignment will generate a temporary
-    // TCellChar object in the stack which neither GCC or Clang will optimize out.
-    // There would be no such issue if we used named functions instead of
-    // overloaded constructors and assignment operators. But this doesn't
-    // actually matter because client programmers don't have to use this type
-    // directly.
-
     TCellChar() = default;
     inline TCellChar(WideCharTrail);
     inline TCellChar(char ch);
     inline TCellChar(uchar ch);
     inline TCellChar(uint32_t ch);
     inline TCellChar(TStringView text);
-    inline TCellChar &operator=(WideCharTrail);
-    inline TCellChar &operator=(char);
-    inline TCellChar &operator=(uchar);
-    inline TCellChar &operator=(uint32_t);
-    inline TCellChar &operator=(TStringView);
+    TV_TRIVIALLY_ASSIGNABLE(TCellChar)
 
     inline bool isWideCharTrail() const;
     inline void appendZeroWidth(TStringView text);
@@ -93,61 +80,31 @@ struct TCellChar
 
 inline TCellChar::TCellChar(WideCharTrail)
 {
-    *this = wideCharTrail;
+    *this = (uint32_t) wideCharTrail;
 }
 
 inline TCellChar::TCellChar(char ch)
 {
-    *this = ch;
+    *this = (uchar) ch;
 }
 
 inline TCellChar::TCellChar(uchar ch)
 {
-    *this = ch;
+    memset(this, 0, sizeof(*this));
+    memcpy(_text, &ch, sizeof(ch));
 }
 
 inline TCellChar::TCellChar(uint32_t ch)
 {
-    *this = ch;
+    memset(this, 0, sizeof(*this));
+    memcpy(_text, &ch, sizeof(ch));
 }
 
 inline TCellChar::TCellChar(TStringView text)
 {
-    *this = text;
-}
-
-inline TCellChar &TCellChar::operator=(WideCharTrail)
-{
-    *this = (uint32_t) wideCharTrail;
-    return *this;
-}
-
-inline TCellChar &TCellChar::operator=(char ch)
-{
-    *this = (uchar) ch;
-    return *this;
-}
-
-inline TCellChar &TCellChar::operator=(uchar ch)
-{
-    memset(this, 0, sizeof(*this));
-    memcpy(_text, &ch, sizeof(ch));
-    return *this;
-}
-
-inline TCellChar &TCellChar::operator=(uint32_t ch)
-{
-    memset(this, 0, sizeof(*this));
-    memcpy(_text, &ch, sizeof(ch));
-    return *this;
-}
-
-inline TCellChar& TCellChar::operator=(TStringView text)
-{
     memset(this, 0, sizeof(*this));
     if (text.size() <= sizeof(_text))
         memcpy(_text, text.data(), text.size());
-    return *this;
 }
 
 inline bool TCellChar::isWideCharTrail() const
@@ -223,7 +180,7 @@ struct TScreenCell
 
     TScreenCell() = default;
     inline TScreenCell(ushort bios);
-    inline TScreenCell& operator=(ushort bios);
+    TV_TRIVIALLY_ASSIGNABLE(TScreenCell)
 
     inline bool operator==(const TScreenCell &other) const;
     inline bool operator!=(const TScreenCell &other) const;
@@ -239,15 +196,9 @@ inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &at
 
 inline TScreenCell::TScreenCell(ushort bios)
 {
-    *this = bios;
-}
-
-inline TScreenCell& TScreenCell::operator=(ushort bios)
-{
     memset(this, 0, sizeof(*this));
     ch = uchar(bios);
     attr = uchar(bios >> 8);
-    return *this;
 }
 
 inline bool TScreenCell::operator==(const TScreenCell &other) const
