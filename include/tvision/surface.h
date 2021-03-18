@@ -12,11 +12,11 @@
 // A TDrawSurface holds a two-dimensional buffer of TScreenCells
 // that can be freely written to.
 
-class TDrawSurface {
+class TDrawSurface
+{
 
     size_t dataLength;
     TScreenCell _FAR *data;
-    TScreenCell fill;
 
 public:
 
@@ -30,9 +30,6 @@ public:
     void grow(TPoint aDelta);
     void clear();
 
-    TColorAttr getFillColor() const;
-    void setFillColor(TColorAttr fillColor);
-
     // Warning: no bounds checking.
     TScreenCell _FAR &at(int y, int x);
     const TScreenCell _FAR &at(int y, int x) const;
@@ -42,16 +39,6 @@ public:
 inline void TDrawSurface::grow(TPoint aDelta)
 {
     resize(size + aDelta);
-}
-
-inline TColorAttr TDrawSurface::getFillColor() const
-{
-    return ::getAttr(fill);
-}
-
-inline void TDrawSurface::setFillColor(TColorAttr fillColor)
-{
-    ::setAttr(fill, fillColor);
 }
 
 inline TScreenCell _FAR &TDrawSurface::at(int y, int x)
@@ -73,15 +60,18 @@ inline const TScreenCell _FAR &TDrawSurface::at(int y, int x) const
 // (delta.x, delta.y), (delta.x+size.x, delta.y+size.y). Any parts of the region
 // which exceed the TDrawSurface's bounds are displayed as whitespaces.
 
-class TSurfaceView : public TView {
+class TSurfaceView : public TView
+{
 
 public:
 
     const TDrawSurface _FAR *sface;
     TPoint delta;
+    TColorAttr fillColor;
 
     TSurfaceView( const TRect &bounds,
-                  const TDrawSurface _FAR *aSface=0 );
+                  const TDrawSurface _FAR *aSface=0,
+                  TColorAttr aColor=TColorAttr() );
 
     virtual void draw();
 

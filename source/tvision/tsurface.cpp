@@ -17,16 +17,14 @@
 
 TDrawSurface::TDrawSurface() :
     dataLength(0),
-    data(0),
-    fill(0)
+    data(0)
 {
     size.x = size.y = 0;
 }
 
 TDrawSurface::TDrawSurface(TPoint aSize) :
     dataLength(0),
-    data(0),
-    fill(0)
+    data(0)
 {
     resize(aSize);
 }
@@ -38,16 +36,25 @@ TDrawSurface::~TDrawSurface()
 
 void TDrawSurface::resize(TPoint aSize)
 {
-    if (aSize.x > 0 && aSize.y > 0) {
+    if (aSize.x > 0 && aSize.y > 0)
+    {
         size_t newLength = aSize.x*aSize.y;
-        void _FAR *newData = ::realloc(data, newLength*sizeof(TScreenCell));
+        size_t sz = newLength*sizeof(TScreenCell);
+        void _FAR *newData;
+        if (newLength <= dataLength)
+            newData = ::realloc(data, sz);
+        else
+        {
+            ::free(data);
+            newData = ::malloc(sz);
+        }
         if (newData == 0 && newLength != 0)
             abort();
         data = (TScreenCell _FAR *) newData;
-        for (size_t i = dataLength; i < newLength; ++i)
-            data[i] = fill;
         dataLength = newLength;
-    } else {
+    }
+    else
+    {
         ::free(data);
         data = 0;
         dataLength = 0;
@@ -57,14 +64,15 @@ void TDrawSurface::resize(TPoint aSize)
 
 void TDrawSurface::clear()
 {
-    for (size_t i = 0; i < dataLength; ++i)
-        data[i] = fill;
+    memset(data, 0, dataLength*sizeof(TScreenCell));
 }
 
 TSurfaceView::TSurfaceView( const TRect &bounds,
-                            const TDrawSurface _FAR *aSface ) :
+                            const TDrawSurface _FAR *aSface,
+                            TColorAttr aColor ) :
     TView(bounds),
-    sface(aSface)
+    sface(aSface),
+    fillColor(aColor)
 {
     delta.x = delta.y = 0;
 }
@@ -94,7 +102,7 @@ void TSurfaceView::draw()
             TScreenCell *b = new TScreenCell[size.x];
             {
                 TScreenCell cell;
-                ::setCell(cell, ' ', sface->getFillColor());
+                ::setCell(cell, ' ', fillColor);
                 for (int i = 0; i < size.x; ++i)
                     b[i] = cell;
             }
