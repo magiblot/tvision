@@ -1,6 +1,6 @@
 # Options summary:
 #
-# * TV_BUILD_EXAMPLES (default ON) to enable building examples.
+# * TV_BUILD_EXAMPLES (default ON) to build example applications.
 # * TV_BUILD_USING_GPM (default ON) (only on linux) to enable linking to libgpm
 #   (warning if not found).
 # * TV_USE_STATIC_RTL (default OFF) to link against the static version of the
@@ -10,6 +10,8 @@
 #   linker flags.
 # * TV_LIBRARY_UNITY_BUILD (default OFF) to reduce the build time of the main library
 #   (CMake 3.16 or newer).
+# * TV_BUILD_AVSCOLOR (default OFF) to build an AviSynth plugin for testing the
+#   terminal color quantization (Unix only).
 
 cmake_minimum_required (VERSION 3.5)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
@@ -112,14 +114,13 @@ if ((CMAKE_VERSION VERSION_LESS "3.13.0") AND TV_REDUCE_APP_SIZE)
     set(TV_REDUCE_APP_SIZE OFF)
 endif()
 
-option(TV_LTO "Enable link-time optimization" OFF)
-
 option(TV_LIBRARY_UNITY_BUILD "Use CMake's Unity Build" OFF)
 if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_LIBRARY_UNITY_BUILD)
     tv_message(WARNING "'TV_LIBRARY_UNITY_BUILD' requested but only available in CMake 3.16.0 or newer.")
     set(TV_LIBRARY_UNITY_BUILD OFF)
 endif()
 
+option(TV_BUILD_AVSCOLOR "Build AviSynth TermColor plugin" OFF)
 
 tv_message_mp(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
 tv_message(STATUS "Build Examples: ${TV_BUILD_EXAMPLES}")
