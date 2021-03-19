@@ -31,6 +31,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
 * [Applications using Turbo Vision](#applications)
 * [Unicode support](#unicode)
 * [Clipboard interaction](#clipboard)
+* [Extended color support](#color)
 
 <div id="what-for"></div>
 
@@ -700,3 +701,395 @@ switch (ev.keyDown.keyCode) {
         }
 }
 ```
+
+<div id="color"></div>
+
+# Extended color support
+
+The Turbo Vision API has been extended to allow more than the original 16 colors.
+
+Colors can be specified using any of the following formats:
+
+* [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes) (4-bit), the format used originally on MS-DOS.
+* RGB (24-bit).
+* `xterm-256color` palette indices (8-bit).
+* The *terminal default* color. This is the color used by terminal emulators when no display attributes (bold, color...) are enabled (usually white for foreground and black for background).
+
+Although Turbo Vision applications are likely to be ran in a terminal emulator, the API makes no assumptions about the display device. That is, the complexity of dealing with terminal emulators is hidden from the programmer and managed by Turbo Vision itself.
+
+For example: color support varies among terminals. If the programmer uses a color format not supported by the terminal emulator, Turbo Vision will quantize it to what the term can display. The following table represents the quantization of a 24-bit RGB picture to 256, 16 and 8 color palettes:
+
+| `COLORTERM=truecolor` (original) | `TERM=xterm-256color`|
+|:-:|:-:|
+|![mpv-shot0005](https://user-images.githubusercontent.com/20713561/111095336-7c4f4080-853d-11eb-8331-798898a2af68.png)|![mpv-shot0002](https://user-images.githubusercontent.com/20713561/111095333-7b1e1380-853d-11eb-8c4d-989fe24d0498.png)|
+
+| `TERM=xterm-16color` | `TERM=xterm` (bold as bright) |
+|:-:|:-:|
+|![mpv-shot0003](https://user-images.githubusercontent.com/20713561/111095334-7bb6aa00-853d-11eb-9a3f-e7decc0bac7d.png)|![mpv-shot0004](https://user-images.githubusercontent.com/20713561/111095335-7bb6aa00-853d-11eb-9098-38d6f6c3c1da.png)|
+
+<br/>
+<details>
+<summary>API reference of extended color support (<i>click to expand</i>)</summary>
+
+## Data Types
+
+In the first place we will explain the data types the programmer needs to know in order to take advantage of the extended color suport.
+
+To get access to them, define the macro `Uses_TColorAttr` before including `<tvision/tv.h>`. You may not need to do this because other classes like `TView` or `TDrawBuffer` already depend on it.
+
+All the types described in this section are *trivial*. This means that they can be `memset`'d and `memcpy`'d. But variables of these types are *uninitialized* when declared without initializer, just like primitive types. So make sure you don't manipulate them before initializing them.
+
+### Color format types
+
+Several types are defined which represent different color formats.
+The reason why these types exist is to allow distinguishing color formats using the type system. Some of them also have public fields which make it easier to manipulate individual bits.
+
+* `TColorBIOS` represents a BIOS color. It behaves the same as `uint8_t`, but allows accessing the `r`, `g`, `b` and `bright` bits individually.
+
+    The memory layout is:
+
+    * Bit 0: Blue (field `b`).
+    * Bit 1: Green (field `g`).
+    * Bit 2: Red (field `r`).
+    * Bit 3: Bright (field `bright`).
+    * Bits 4-7: unused.
+
+    ```c++
+    TColorBIOS bios = 0x4;  // 0x4: red.
+    bios.bright = 1;        // 0xC: light red.
+    bios.b = bios.r;        // 0xD: light magenta.
+    bios = bios ^ 3;        // 0xE: yellow.
+    uint8_t c = bios;       // Implicit conversion to integer types.
+    ```
+
+    In terminal emulators, BIOS colors are mapped to the basic 16 ANSI colors.
+
+* `TColorRGB` represents a color in 24-bit RGB. It behaves the same as `uint32_t` but allows accessing the `r`, `g` and `b` bit fields individually.
+
+    The memory layout is:
+
+    * Bits 0-7: Blue (field `b`).
+    * Bits 8-15: Green (field `g`).
+    * Bits 16-23: Red (field `r`).
+    * Bits 24-31: unused.
+
+    ```c++
+    TColorRGB rgb = 0x9370DB;
+    rgb = rgb ^ 0xFFFFFF;   // Negated.
+    rgb.g = rgb.r & 0x88;   // Access to individual components.
+    uint32_t c = rgb;       // Implicit conversion to integer types.
+    ```
+
+* `TColorXTerm` represents an index into the `xterm-256color` color palette. It behaves the same as `uint8_t`.
+
+### `TColorDesired`
+
+`TColorDesired` represents a color which the programmer intends to show on screen, encoded in any of the supported color types.
+
+A `TColorDesired` can be initialized in the following ways:
+
+* As a BIOS color: with a `char` literal or a `TColorBIOS` object:
+
+    ```c++
+    TColorDesired bios1 = '\xF';
+    TColorDesired bios2 = TColorBIOS(0xF);
+    ```
+* As a RGB color: with an `int` literal or a `TColorRGB` object:
+
+    ```c++
+    TColorDesired rgb1 = 0xFFFFFF;
+    TColorDesired rgb2 = TColorRGB(0xFFFFFF);
+    ```
+* As an XTerm palette index: with a `TColorXTerm` object.
+* As the *terminal default* color: through zero-initialization:
+
+    ```c++
+    TColorDesired def1 {};
+    // Or with 'memset':
+    TColorDesired def2;
+    memset(&def2, 0, sizeof(def2));
+    ```
+
+`TColorDesired` has methods to query the contained color, but you will usually not need to use them. See the struct definition in `<tvision/colors.h>` for more information.
+
+Trivia: the name is inspired by [Scintilla](https://www.scintilla.org/index.html)'s `ColourDesired`.
+
+### `TColorAttr`
+
+`TColorAttr` describes the color attributes of a screen cell. This is the type you are most likely to interact with if you intend to change the colors in a view.
+
+A `TColorAttr` is composed of:
+
+* A foreground color, of type `TColorDesired`.
+* A background color, of type `TColorDesired`.
+* A style bitmask containing a combination of the following flags:
+
+    * `slBold`.
+    * `slItalic`.
+    * `slUnderline`.
+    * `slBlink`.
+    * `slReverse`.
+    * `slStrike`.
+
+    These flags are based on the basic display attributes selectable through [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters). The results may vary between terminal emulators. `slReverse` is probably the least reliable of them: prefer using the `TColorAttr reverseAttribute(TColorAttr attr)` free function over setting this flag.
+
+The most straight-forward way to create a `TColorAttr` is by means of the `TColorAttr(TColorDesired fg, TColorDesired bg, ushort style=0)` and `TColorAttr(int bios)` constructors:
+
+```c++
+// Foreground: RGB 0x892312
+// Background: RGB 0x7F00BB
+// Style: Normal.
+TColorAttr a1 = {0x892312, 0x7F00BB};
+
+// Foreground: BIOS 0x7.
+// Background: RGB 0x7F00BB.
+// Style: Bold, Italic.
+TColorAttr a2 = {'\x7', 0x7F00BB, slBold | slItalic};
+
+// Foreground: Terminal default.
+// Background: BIOS 0xF.
+// Style: Normal.
+TColorAttr a3 = {{}, '\xF'};
+
+// Foreground: Terminal default.
+// Background: Terminal default.
+// Style: Normal.
+TColorAttr a4 = {};
+
+// Foreground: BIOS 0x0
+// Background: BIOS 0x7
+// Style: Normal
+TColorAttr a5 = 0x70;
+```
+
+The fields of a `TColorAttr` can be accessed with the following free functions:
+
+```c++
+TColorDesired getFore(const TColorAttr &attr);
+TColorDesired getBack(const TColorAttr &attr);
+ushort getStyle(const TColorAttr &attr);
+void setFore(TColorAttr &attr, TColorDesired fg);
+void setBack(TColorAttr &attr, TColorDesired bg);
+void setStyle(TColorAttr &attr, ushort style);
+```
+
+### `TAttrPair`
+
+`TAttrPair` is a pair of `TColorAttr`, used by some API functions to pass two attributes at once.
+
+You may initialize a `TAttrPair` with the `TAttrPair(const TColorAttrs &lo, const TColorAttrs &hi)` constructor:
+
+```c++
+TColorAttr cNormal = {0x234983, 0x267232};
+TColorAttr cHigh = {0x309283, 0x127844};
+TAttrPair attrs = {cNormal, cHigh};
+TDrawBuffer b;
+b.moveCStr(0, "Normal text, ~Highlighted text~", attrs);
+```
+
+The attributes can be accessed with the `[0]` and `[1]` subindices:
+
+```c++
+TColorAttr lo = {0x892343, 0x271274};
+TColorAttr hi = '\x93';
+TAttrPair attrs = {lo, hi};
+assert(lo == attrs[0]);
+assert(hi == attrs[1]);
+```
+
+## Changing the appearance of a `TView`
+
+Views are commonly drawn by means of a `TDrawBuffer`. Most `TDrawBuffer` member functions take color attributes by parameter. For example:
+
+```c++
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
+void TDrawBuffer::putAttribute(ushort indent, TColorAttr attr);
+```
+
+However, the views provided with Turbo Vision usually store their color information in palettes. A view's palette can be queried with the following member functions:
+
+```c++
+TColorAttr TView::mapColor(uchar index);
+TAttrPair TView::getColor(ushort indices);
+```
+
+* `mapColor` looks up a single color attribute in the view's palette, given an index into the palette. Remember that the palette indices for each view class can be found in the Turbo Vision headers. For example, `<tvision/views.h>` says the following about `TScrollBar`:
+
+    ```c++
+    /* ---------------------------------------------------------------------- */
+    /*      class TScrollBar                                                  */
+    /*                                                                        */
+    /*      Palette layout                                                    */
+    /*        1 = Page areas                                                  */
+    /*        2 = Arrows                                                      */
+    /*        3 = Indicator                                                   */
+    /* ---------------------------------------------------------------------- */
+    ```
+
+* `getColor` is a helper function that allows querying two cell attributes at once. Each byte in the `indices` parameter contains an index into the palette. The `TAttrPair` result contains the two cell attributes.
+
+    For example, the following can be found in the `draw` method of `TMenuBar`:
+
+    ```c++
+    TAttrPair cNormal = getColor(0x0301);
+    TAttrPair cSelect = getColor(0x0604);
+    ```
+
+    Which would be equivalent to this:
+
+    ```c++
+    TAttrPair cNormal = {mapColor(1), mapColor(3)};
+    TAttrPair cSelect = {mapColor(4), mapColor(6)};
+    ```
+
+As an API extension, the `mapColor` method has been made `virtual`. This makes it possible to override Turbo Vision's hierarchical palette system with a custom solution without having to rewrite the `draw()` method.
+
+So, in general, there are three ways to use extended colors in views:
+
+1. By providing extended color attributes directly to `TDrawBuffer` methods, if the palette system is not being used. For example:
+
+    ```c++
+    // The 'TMyView' class inherits from 'TView' and overrides 'TView::draw'.
+    void TMyView::draw()
+    {
+        TDrawBuffer b;
+        TColorAttr color {0x1F1C1B, 0xFAFAFA, slBold};
+        b.moveStr(0, "This is bold black text over a white background", color);
+        /* ... */
+    }
+    ```
+
+2. By modifying the palettes. There are two ways to do this:
+
+    1. By modifying the application palette after it has been built. Note that the palette elements are `TColorAttr`. For example:
+
+    ```c++
+    void updateAppPalette()
+    {
+        TPalette &pal = TProgram::application->getPalete();
+        pal[1] = {0x762892, 0x828712};              // TBackground.
+        pal[2] = {0x874832, 0x249838, slBold};      // TMenuView normal text.
+        pal[3] = {{}, {}, slItalic | slUnderline};  // TMenuView disabled text.
+        /* ... */
+    }
+    ```
+
+    2. By using extended color attributes in the application palette definition:
+
+    ```c++
+    static const TColorAttr cpMyApp[] =
+    {
+        {0x762892, 0x828712},               // TBackground.
+        {0x874832, 0x249838, slBold},       // TMenuView normal text.
+        {{}, {}, slItalic | slUnderline},   // TMenuView disabled text.
+        /* ... */
+    };
+
+    // The 'TMyApp' class inherits from 'TApplication' and overrides 'TView::getPalette'.
+    TPalette &TMyApp::getPalette() const
+    {
+        static TPalette palette(cpMyApp);
+        return palette;
+    }
+    ```
+
+3. By returning extended color attributes from an overriden `mapColor` method:
+
+```c++
+// The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.
+TColorAttr TMyScrollBar::mapColor(uchar index)
+{
+    // In this example the values are hardcoded,
+    // but they could be stored elsewhere if desired.
+    switch (index)
+    {
+        case 1:     return {0x492983, 0x826124}; // Page areas.
+        case 2:     return {0x438939, 0x091297}; // Arrows.
+        case 3:     return {0x123783, 0x329812}; // Indicator.
+        default:    return errorAttr;
+    }
+}
+```
+
+## Backward-compatibility
+
+The types defined previously represent concepts that are also important when developing for Borland C++:
+
+| Concept | Layout in Borland C++ | Layout in modern platforms |
+|:-:|:-:|:-:|
+| Color Attribute | `uchar`. A BIOS color attribute. | `struct TColorAttr`. |
+| Color | A 4-bit number. | `struct TColorDesired`. |
+| Attribute Pair | `ushort`. An attribute in each byte. | `struct TAttrPair`. |
+
+One of this project's key principles is that the API should be used in the same way both in Borland C++ and modern platforms, that is, without the need for `#ifdef`s. Another principle is that legacy code should compile out-of-the-box, and adapting it to the new features should increase complexity as little as possible.
+
+Backward-compatibility is accomplished in the following way:
+
+* In Borland C++, `TColorAttr` and `TAttrPair` are `typedef`'d to `uchar` and `ushort`, respectively.
+* In modern platforms, `TColorAttr` and `TAttrPair` can be used in place of `uchar` and `ushort`, respectively. That is, the assertions in the following code won't fail:
+
+    ```c++
+    // Any value which fits into a 'uchar' can be
+    // losslessly passed through TColorAttr.
+    uchar c = 0;
+    do {
+        assert(uchar(TColorAttr {c}) == c);
+    } while (c++ < UCHAR_MAX);
+
+    // Any value which fits into a 'ushort' can be
+    // losslessly passed through TAttrPair.
+    ushort s = 0;
+    do {
+        assert(ushort(TAttrPair {s}) == s);
+    } while (s++ < USHRT_MAX);
+    ```
+
+    A `TColorAttr` initialized with `uchar` represents a BIOS color attribute. When converting back to `uchar`, the following happens:
+
+    * If `fg` and `bg` are BIOS colors, and `style` is cleared, the resulting `uchar` represents the same BIOS color attribute contained in the `TColorAttr` (as in the code above).
+    * Otherwise, the conversion results in a color attribute that stands out, i.e. white on magenta, meaning that the programmer should consider replacing `uchar`/`ushort` with `TColorAttr`/`TAttrPair` if they intend to support the extended color attributes.
+
+    The same goes for `TAttrPair` and `ushort`, considering that it is composed of two `TColorAttr`.
+
+A use case of backward-compatibility within Turbo Vision itself is the `TPalette` class, core of the palette system. In its original design, it used a single data type (`uchar`) to represent different things: array length, palette indices or color attributes.
+
+The new design simply replaces `uchar` with `TColorAttr`. This means there are no changes in the way `TPalette` is used, yet `TPalette` is now able to store extended color attributes.
+
+`TColorDialog` hasn't been remodeled yet, and thus it can't be used to pick extended color attributes at runtime.
+
+### Example: adding extended color support to legacy code
+
+The following pattern of code is common across `draw` methods of views:
+
+```c++
+void TMyView::draw()
+{
+    ushort cFrame, cTitle;
+    if (state & sfDragging)
+    {
+        cFrame = 0x0505;
+        cTitle = 0x0005;
+    }
+    else
+    {
+        cFrame = 0x0503;
+        cTitle = 0x0004;
+    }
+    cFrame = getColor(cFrame);
+    cTitle = getColor(cTitle);
+    /* ... */
+}
+```
+
+In this case, `ushort` is used both as a pair of palette indices and as a pair of color attributes. `getColor` now returns a `TAttrPair`, so even though this compiles out-of-the-box, extended attributes will be lost in the implicit conversion to `ushort`.
+
+The code above still works just like it did originally. It's only non-BIOS color attributes that don't produce the expected result. Because of the compatibility between `TAttrPair` and `ushort`, the following is enough to enable support for extended color attributes:
+
+```diff
+-    ushort cFrame, cTitle;
++    TAttrPair cFrame, cTitle;
+```
+
+Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is, minimizing the risk of increasing code complexity or introducing bugs.
+</details>
