@@ -8,7 +8,7 @@ env:
 jobs:
   build-linux-gcc:
     name: Linux (GCC) (Unity)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
 
@@ -25,7 +25,7 @@ jobs:
 
   build-linux-gcc5:
     name: Linux (GCC 5)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
 
@@ -45,7 +45,7 @@ jobs:
 
   build-linux-clang:
     name: Linux (Clang)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
 
@@ -75,7 +75,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+      run: cmake --build . --config $BUILD_TYPE -- -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
@@ -97,7 +97,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+      run: cmake --build . --config $BUILD_TYPE -- -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
