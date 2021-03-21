@@ -231,7 +231,7 @@ target_link_libraries(my_application tvision)
 ### Modern platforms (not Borland C++)
 
 * UTF-8 support both in terminal I/O and the API. You can try Unicode support out in the `tvedit` and `tvdemo` applications.
-* 16 colors.
+* True Color.
 * Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
 * Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
 * Compatibility with 32-bit help files.
@@ -329,6 +329,7 @@ The following are not available when compiling with Borland C++:
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
 * New method `TView::textEvent` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
 * Unicode support, see [Unicode](#unicode).
+* True Color support, see [extended colors](#color).
 
 ### Changes that you probably won't care about
 
@@ -660,7 +661,7 @@ Use cases where Unicode is not supported (not an exhaustive list):
 
 # Clipboard interaction
 
-Turbo Vision does not support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal application. Turbo Vision will then receive the text through standard input.
+Turbo Vision does not support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal emulator. Turbo Vision will then receive the text through standard input.
 
 Unfortunately, each character is processed as a separate `evKeyDown` event. If the user pastes 5000 characters, the application will execute the same operations as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen, etcetera. As you can imagine, this is far from optimal.
 
@@ -717,7 +718,7 @@ Colors can be specified using any of the following formats:
 
 Although Turbo Vision applications are likely to be ran in a terminal emulator, the API makes no assumptions about the display device. That is, the complexity of dealing with terminal emulators is hidden from the programmer and managed by Turbo Vision itself.
 
-For example: color support varies among terminals. If the programmer uses a color format not supported by the terminal emulator, Turbo Vision will quantize it to what the term can display. The following table represents the quantization of a 24-bit RGB picture to 256, 16 and 8 color palettes:
+For example: color support varies among terminals. If the programmer uses a color format not supported by the terminal emulator, Turbo Vision will quantize it to what the terminal can display. The following images represent the quantization of a 24-bit RGB picture to 256, 16 and 8 color palettes:
 
 | `COLORTERM=truecolor` (original) | `TERM=xterm-256color`|
 |:-:|:-:|
@@ -727,9 +728,18 @@ For example: color support varies among terminals. If the programmer uses a colo
 |:-:|:-:|
 |![mpv-shot0003](https://user-images.githubusercontent.com/20713561/111095334-7bb6aa00-853d-11eb-9a3f-e7decc0bac7d.png)|![mpv-shot0004](https://user-images.githubusercontent.com/20713561/111095335-7bb6aa00-853d-11eb-9098-38d6f6c3c1da.png)|
 
-<br/>
+Extended color support basically comes down to the following:
+* Turbo Vision has originally used [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes) stored in an `uchar`. `ushort` is used to represent attribute pairs. This is still the case when using Borland C++.
+* In modern platforms there is a new type named `TColorAttr` which replaces `uchar`. It specifies a foreground and background colors and a style. Colors can be specified in different formats (BIOS color attributes, 24-bit RGB...). Styles are the typical ones (bold, italic, underline...). There's also `TAttrPair`, which replaces `ushort`.
+* The `TDrawBuffer` methods, which used to take `uchar` or `ushort` parameters to specify color attributes, now take `TColorAttr` or `TAttrPair`.
+* `TPalette`, which used to contain an array of `uchar`, now contains an array of `TColorAttr`. The `TView::mapColor` method also returns `TColorAttr` instead of `uchar`.
+* `TView::mapColor` has been made virtual so that the palette system can be bypassed without having to rewrite any `draw` methods.
+* `TColorAttr` and `TAttrPair` can be initialized with and casted into `uchar` and `ushort` in a way such that legacy code compiles out-of-the-box continues to  without any change in functionality.
+
+Below is a more detailed explanation aimed at programmers.
+
 <details>
-<summary>API reference of extended color support (<i>click to expand</i>)</summary>
+<summary>API reference of extended color support (<i>click to expand</i>).</summary>
 
 ## Data Types
 
@@ -774,10 +784,11 @@ The reason why these types exist is to allow distinguishing color formats using 
     * Bits 24-31: unused.
 
     ```c++
-    TColorRGB rgb = 0x9370DB;
-    rgb = rgb ^ 0xFFFFFF;   // Negated.
-    rgb.g = rgb.r & 0x88;   // Access to individual components.
-    uint32_t c = rgb;       // Implicit conversion to integer types.
+    TColorRGB rgb = 0x9370DB;   // 0xRRGGBB.
+    rgb = {0x93, 0x70, 0xDB};   // {R, G, B}.
+    rgb = rgb ^ 0xFFFFFF;       // Negated.
+    rgb.g = rgb.r & 0x88;       // Access to individual components.
+    uint32_t c = rgb;           // Implicit conversion to integer types.
     ```
 
 * `TColorXTerm` represents an index into the `xterm-256color` color palette. It behaves the same as `uint8_t`.
@@ -797,8 +808,9 @@ A `TColorDesired` can be initialized in the following ways:
 * As a RGB color: with an `int` literal or a `TColorRGB` object:
 
     ```c++
-    TColorDesired rgb1 = 0xFFFFFF;
-    TColorDesired rgb2 = TColorRGB(0xFFFFFF);
+    TColorDesired rgb1 = 0xFF7700; // 0xRRGGBB.
+    TColorDesired rgb2 = TColorRGB(0xFF, 0x77, 0x00); // {R, G, B}.
+    TColorDesired rgb3 = TColorRGB(0xFF7700); // 0xRRGGBB.
     ```
 * As an XTerm palette index: with a `TColorXTerm` object.
 * As the *terminal default* color: through zero-initialization:
@@ -839,7 +851,7 @@ The most straight-forward way to create a `TColorAttr` is by means of the `TColo
 // Foreground: RGB 0x892312
 // Background: RGB 0x7F00BB
 // Style: Normal.
-TColorAttr a1 = {0x892312, 0x7F00BB};
+TColorAttr a1 = {TColorRGB(0x89, 0x23, 0x12), TColorRGB(0x7F, 0x00, 0xBB)};
 
 // Foreground: BIOS 0x7.
 // Background: RGB 0x7F00BB.
@@ -849,7 +861,7 @@ TColorAttr a2 = {'\x7', 0x7F00BB, slBold | slItalic};
 // Foreground: Terminal default.
 // Background: BIOS 0xF.
 // Style: Normal.
-TColorAttr a3 = {{}, '\xF'};
+TColorAttr a3 = {{}, TColorBIOS(0xF)};
 
 // Foreground: Terminal default.
 // Background: Terminal default.
