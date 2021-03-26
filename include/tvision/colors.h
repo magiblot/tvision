@@ -58,14 +58,8 @@ namespace colors
 
         trivially_convertible(T asT)
         {
-            *this = asT;
-        }
-
-        T operator=(T asT)
-        {
             asT &= mask;
             memcpy(this, &asT, sizeof(T));
-            return asT;
         }
 
         operator T() const
@@ -90,18 +84,24 @@ namespace colors
 
 struct TColorRGB : colors::trivially_convertible<uint32_t, 0xFFFFFF>
 {
-    uint8_t b;
-    uint8_t g;
-    uint8_t r;
-    uint8_t _unused;
+    uint32_t
+        b       : 8,
+        g       : 8,
+        r       : 8,
+        _unused : 8;
 
     using trivially_convertible::trivially_convertible;
     TColorRGB() = default;
-    TColorRGB(uint8_t r, uint8_t g, uint8_t b)
-    {
-        *this = b | ((g  | (r << 8)) << 8);
-    }
+    constexpr inline TColorRGB(uint8_t r, uint8_t g, uint8_t b);
 };
+
+constexpr inline TColorRGB::TColorRGB(uint8_t r, uint8_t g, uint8_t b) :
+    b(b),
+    g(g),
+    r(r),
+    _unused(0)
+{
+}
 
 ////// TColorBIOS
 //
