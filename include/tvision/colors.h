@@ -79,8 +79,12 @@ namespace colors
 //
 // Can be initialized like this:
 //     TColorRGB rgb = {127, 0, 187}; // {red, green, blue}.
-// Or like this (bit-casting from integer):
+// Or with an integer:
 //     TColorRGB rgb = 0x7F00BB;      // 0xRRGGBB
+// Can be converted back to integer types:
+//     uint32_t asInt = TColorRGB(127, 0, 187);
+// When doing so, the unused bits are discarded:
+//     uint32_t(TColorRGB(0xAABBCCDD)) == 0xBBCCDD;
 
 struct TColorRGB : colors::trivially_convertible<uint32_t, 0xFFFFFF>
 {
@@ -107,10 +111,14 @@ constexpr inline TColorRGB::TColorRGB(uint8_t r, uint8_t g, uint8_t b) :
 //
 // This is the 4-bit color encoding used originally by Turbo Vision on MS-DOS.
 //
-// Examples:
+// Can be initialized with an integer:
 //     TColorBIOS black = 0x0,
 //                blue = 0x1,
 //                dark_gray = 0x8;
+// And converted back to a integer types:
+//     uint8_t asChar = TColorBIOS(0xC);
+// When doing so, the unused bits are discarded:
+//     uint8_t(TColorBIOS(0xAB)) == 0xB;
 
 struct TColorBIOS : colors::trivially_convertible<uint8_t, 0xF>
 {
@@ -135,6 +143,10 @@ struct TColorBIOS : colors::trivially_convertible<uint8_t, 0xF>
 // https://jonasjacek.github.io/colors/
 //
 // Indices 0 to 15 will be displayed just like BIOS colors.
+//
+// This type can be converted from and into integer types:
+//     TColorXTerm xterm = 0xFE;
+//     uint8_t asChar = xterm;
 
 struct TColorXTerm : colors::trivially_convertible<uint8_t>
 {

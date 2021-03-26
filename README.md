@@ -85,7 +85,7 @@ The above produces the following files:
 * `libtvision.a`, which is the Turbo Vision library.
 * The demo applications `hello`, `tvdemo`, `tvedit`, `tvdir`, which were bundled with the original Turbo Vision (although some of them have a few improvements).
 * The demo applications `mmenu` and `palette` from Borland's Technical Support.
-* `tvhelp`, the Turbo Vision Help Compiler.
+* `tvhc`, the Turbo Vision Help Compiler.
 
 The library and executables can be found in `./build`.
 
@@ -94,6 +94,8 @@ The build requirements are:
 * A compiler supporting C++14.
 * `libncursesw` (note the 'w').
 * `libgpm` (for mouse support on the Linux console) (optional).
+
+If your distribution provides separate *devel* packages (e.g. `libncurses-dev`, `libgpm-dev` in Debian-based distros), install these too.
 
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
@@ -130,6 +132,15 @@ If you wish to link Turbo Vision statically against Microsofts's run-time librar
 
 If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be linked against the RTL in the same way.
 
+If you develop your own Turbo Vision application make sure to enable the following compiler flags, or else you will get compilation errors when including `<tvision/tv.h>`:
+
+```
+/permissive-
+/Zc:__cplusplus
+```
+
+If you use [Turbo Vision as a CMake submodule](#build-cmake), these flags will be enabled automatically.
+
 **Note:** Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
 
 With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
@@ -155,7 +166,7 @@ Turbo Vision can still be built either as a DOS or Windows library with Borland 
 
 I can confirm the build process works with:
 
-* Borland C++ 4.52 with the Borland DOS PowerPack.
+* Borland C++ 4.52 with the Borland PowerPack for DOS.
 * Turbo Assembler 4.0.
 
 You may face different problems depending on your build environment. For instance, Turbo Assembler needs a patch to work under Windows 95. On Windows XP everything seems to work fine. On Windows 10, MAKE may emit the error `Fatal: Command arguments too long`, which can be fixed by upgrading MAKE to the one bundled with Borland C++ 5.x.
@@ -222,7 +233,7 @@ add_subdirectory(tvision) # Assuming Turbo Vision is in the 'tvision' directory.
 target_link_libraries(my_application tvision)
 ```
 
-`<tvision/tv.h>` will be available in your application's include path during compilation. Additionally, your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
+`<tvision/tv.h>` will be available in your application's include path during compilation. In addition, your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
 
 <div id="features"></div>
 
@@ -734,7 +745,7 @@ Extended color support basically comes down to the following:
 * The `TDrawBuffer` methods, which used to take `uchar` or `ushort` parameters to specify color attributes, now take `TColorAttr` or `TAttrPair`.
 * `TPalette`, which used to contain an array of `uchar`, now contains an array of `TColorAttr`. The `TView::mapColor` method also returns `TColorAttr` instead of `uchar`.
 * `TView::mapColor` has been made virtual so that the palette system can be bypassed without having to rewrite any `draw` methods.
-* `TColorAttr` and `TAttrPair` can be initialized with and casted into `uchar` and `ushort` in a way such that legacy code compiles out-of-the-box continues to  without any change in functionality.
+* `TColorAttr` and `TAttrPair` can be initialized with and casted into `uchar` and `ushort` in a way such that legacy code still compiles out-of-the-box without any change in functionality.
 
 Below is a more detailed explanation aimed at programmers.
 
