@@ -101,13 +101,14 @@ static inline size_t convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
     using namespace ansidisp;
     TermAttr attr {};
     attr.style = ::getStyle(c);
+
+    convertColor(::getFore(c), attr.fg, attr.style, termcap, true);
+    convertColor(::getBack(c), attr.bg, attr.style, termcap, false);
+
     if (termcap.quirks & qfNoItalic)
         attr.style &= ~slItalic;
     if (termcap.quirks & qfNoUnderline)
         attr.style &= ~slUnderline;
-
-    convertColor(::getFore(c), attr.fg, attr.style, termcap, true);
-    convertColor(::getBack(c), attr.bg, attr.style, termcap, false);
 
     size_t length = writeAttributes(attr, lastAttr, buf);
 
@@ -265,9 +266,24 @@ static size_t writeColor(TermColor color, bool isFg, char * const s)
 
 // Color conversion functions
 
-static colorconv_r convertNoColor(TColorDesired, const TermCap &, bool)
+static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isFg)
 {
-    return {{TermColor::NoColor}};
+    colorconv_r cnv {{TermColor::NoColor}};
+    // Mimic the mono palettes with styles.
+    if (color.isBIOS())
+    {
+        auto bios = color.asBIOS();
+        if (isFg)
+        {
+            if (bios & 0x8)
+                cnv.extraStyle |= slBold;
+            else if (bios == 0x1)
+                cnv.extraStyle |= slUnderline;
+        }
+        else if ((bios & 0x7) == 0x7)
+            cnv.extraStyle |= slReverse;
+    }
+    return cnv;
 }
 
 static colorconv_r convertIndexed8( TColorDesired color,
