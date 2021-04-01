@@ -146,7 +146,19 @@ static const const_unordered_map<ushort, KeyDownEvent> fromCursesKeyCode = {
     { KEY_F0 + 34,      {{kbCtrlF10},   kbCtrlShift}},
     { KEY_F0 + 35,      {{kbCtrlF11},   kbCtrlShift}},
     { KEY_F0 + 36,      {{kbCtrlF12},   kbCtrlShift}},
-    // Ctrl+Shift+F(n) supported by ncurses but not Turbo Vision
+    // Ctrl+Shift+F1-12
+    { KEY_F0 + 37,      {{kbCtrlF1},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 38,      {{kbCtrlF2},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 39,      {{kbCtrlF3},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 40,      {{kbCtrlF4},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 41,      {{kbCtrlF5},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 42,      {{kbCtrlF6},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 43,      {{kbCtrlF7},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 44,      {{kbCtrlF8},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 45,      {{kbCtrlF9},    kbShift | kbCtrlShift}},
+    { KEY_F0 + 46,      {{kbCtrlF10},   kbShift | kbCtrlShift}},
+    { KEY_F0 + 47,      {{kbCtrlF11},   kbShift | kbCtrlShift}},
+    { KEY_F0 + 48,      {{kbCtrlF12},   kbShift | kbCtrlShift}},
     // Alt+F1-F12
     { KEY_F0 + 49,      {{kbAltF1},     kbAltShift} },
     { KEY_F0 + 50,      {{kbAltF2},     kbAltShift} },
@@ -176,16 +188,16 @@ static const auto fromCursesHighKey =
     { "kRIT3",      {{kbAltRight},      kbAltShift}},
     { "kUP3",       {{kbAltUp},         kbAltShift}},
     { "kDN3",       {{kbAltDown},       kbAltShift}},
-    { "kDC4",       {{kbShiftDel},      kbShift | kbAltShift}},
-    { "kEND4",      {{kbEnd},           kbShift | kbAltShift}},
-    { "kHOM4",      {{kbHome},          kbShift | kbAltShift}},
-    { "kIC4",       {{kbShiftIns},      kbShift | kbAltShift}},
-    { "kLFT4",      {{kbLeft},          kbShift | kbAltShift}},
-    { "kNXT4",      {{kbPgDn},          kbShift | kbAltShift}},
-    { "kPRV4",      {{kbPgUp},          kbShift | kbAltShift}},
-    { "kRIT4",      {{kbRight},         kbShift | kbAltShift}},
-    { "kUP4",       {{kbUp},            kbShift | kbAltShift}},
-    { "kDN4",       {{kbDown},          kbShift | kbAltShift}},
+    { "kDC4",       {{kbAltDel},        kbShift | kbAltShift}},
+    { "kEND4",      {{kbAltEnd},        kbShift | kbAltShift}},
+    { "kHOM4",      {{kbAltHome},       kbShift | kbAltShift}},
+    { "kIC4",       {{kbAltIns},        kbShift | kbAltShift}},
+    { "kLFT4",      {{kbAltLeft},       kbShift | kbAltShift}},
+    { "kNXT4",      {{kbAltPgDn},       kbShift | kbAltShift}},
+    { "kPRV4",      {{kbAltPgUp},       kbShift | kbAltShift}},
+    { "kRIT4",      {{kbAltRight},      kbShift | kbAltShift}},
+    { "kUP4",       {{kbAltUp},         kbShift | kbAltShift}},
+    { "kDN4",       {{kbAltDown},       kbShift | kbAltShift}},
     { "kDC5",       {{kbCtrlDel},       kbCtrlShift}},
     { "kEND5",      {{kbCtrlEnd},       kbCtrlShift}},
     { "kHOM5",      {{kbCtrlHome},      kbCtrlShift}},
@@ -206,16 +218,16 @@ static const auto fromCursesHighKey =
     { "kRIT6",      {{kbCtrlRight},     kbCtrlShift | kbShift}},
     { "kUP6",       {{kbCtrlUp},        kbCtrlShift | kbShift}},
     { "kDN6",       {{kbCtrlDown},      kbCtrlShift | kbShift}},
-    { "kDC7",       {{kbDel},           kbCtrlShift | kbAltShift}}, // Please do not attempt this one
-    { "kEND7",      {{kbEnd},           kbCtrlShift | kbAltShift}},
-    { "kHOM7",      {{kbHome},          kbCtrlShift | kbAltShift}},
-    { "kIC7",       {{kbIns},           kbCtrlShift | kbAltShift}},
-    { "kLFT7",      {{kbLeft},          kbCtrlShift | kbAltShift}},
-    { "kNXT7",      {{kbPgDn},          kbCtrlShift | kbAltShift}},
-    { "kPRV7",      {{kbPgUp},          kbCtrlShift | kbAltShift}},
-    { "kRIT7",      {{kbRight},         kbCtrlShift | kbAltShift}},
-    { "kUP7",       {{kbUp},            kbCtrlShift | kbAltShift}},
-    { "kDN7",       {{kbDown},          kbCtrlShift | kbAltShift}},
+    { "kDC7",       {{kbAltDel},        kbCtrlShift | kbAltShift}}, // Please do not attempt this one
+    { "kEND7",      {{kbAltEnd},        kbCtrlShift | kbAltShift}},
+    { "kHOM7",      {{kbAltHome},       kbCtrlShift | kbAltShift}},
+    { "kIC7",       {{kbAltIns},        kbCtrlShift | kbAltShift}},
+    { "kLFT7",      {{kbAltLeft},       kbCtrlShift | kbAltShift}},
+    { "kNXT7",      {{kbAltPgDn},       kbCtrlShift | kbAltShift}},
+    { "kPRV7",      {{kbAltPgUp},       kbCtrlShift | kbAltShift}},
+    { "kRIT7",      {{kbAltRight},      kbCtrlShift | kbAltShift}},
+    { "kUP7",       {{kbAltUp},         kbCtrlShift | kbAltShift}},
+    { "kDN7",       {{kbAltDown},       kbCtrlShift | kbAltShift}},
     { "kpADD",      {{'+'},             0, {'+'}, 1}},
     { "kpSUB",      {{'-'},             0, {'-'}, 1}},
     { "kpMUL",      {{'*'},             0, {'*'}, 1}},
@@ -244,6 +256,7 @@ NcursesInput::NcursesInput(bool mouse) :
      * special key sequences, I believe. */
     set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
+    TermIO::kittyKeysOn();
     if (mouseEnabled)
     {
         mstate.where = {-1, -1};
@@ -261,6 +274,7 @@ NcursesInput::~NcursesInput()
 {
     if (mouseEnabled)
         TermIO::mouseOff();
+    TermIO::kittyKeysOff();
 }
 
 int NcursesInput::getButtonCount()
@@ -348,7 +362,7 @@ bool NcursesInput::getEvent(TEvent &ev)
             parsePrintableChar(ev, keys, num_keys);
 
         if (Alt)
-            TermIO::setAltModifier(ev);
+            TermIO::setAltModifier(ev.keyDown);
 
         return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }
