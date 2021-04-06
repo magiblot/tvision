@@ -325,6 +325,8 @@ public:
         smCO80      = 0x0003,
         smMono      = 0x0007,
         smFont8x8   = 0x0100,
+        smColor256  = 0x0200,
+        smColorHigh = 0x0400,
         smChanged   = 0x1000
         };
 

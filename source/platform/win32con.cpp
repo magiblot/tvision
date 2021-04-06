@@ -389,11 +389,6 @@ void Win32Display::clearScreen()
     lastAttr = attr;
 }
 
-ushort Win32Display::getScreenMode()
-{
-    return TDisplay::smCO80;
-}
-
 // Fallback display support with rudimentary buffering.
 
 void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr)

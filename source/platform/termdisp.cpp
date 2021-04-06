@@ -1,3 +1,6 @@
+#define Uses_TScreen
+#include <tvision/tv.h>
+
 #include <internal/termdisp.h>
 #include <internal/terminal.h>
 #include <internal/getenv.h>
@@ -39,3 +42,17 @@ TermCap TerminalDisplay::getCapabilities()
     return termcap;
 }
 
+ushort TerminalDisplay::getScreenMode()
+{
+    if (termcap.colors == NoColor)
+        return TDisplay::smMono;
+    else
+    {
+        ushort mode = TDisplay::smCO80;
+        if (termcap.colors == Direct)
+            mode |= TDisplay::smColor256 | TDisplay::smColorHigh;
+        else if (termcap.colors == Indexed256)
+            mode |= TDisplay::smColor256;
+        return mode;
+    }
+}

@@ -40,6 +40,8 @@ protected:
     virtual int getColorCount();
     virtual TermCap getCapabilities();
 
+    ushort getScreenMode() override;
+
 };
 
 #endif // TVISION_TERMDISP_H

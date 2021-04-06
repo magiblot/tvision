@@ -73,7 +73,6 @@ public:
     int getColorCount() override;
 
     void clearScreen() override;
-    ushort getScreenMode() override;
 
 protected:
 

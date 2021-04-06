@@ -1,6 +1,5 @@
 #ifdef HAVE_NCURSES
 
-#define Uses_TScreen
 #define Uses_TColorAttr
 #include <tvision/tv.h>
 
@@ -26,8 +25,7 @@ NcursesDisplay::NcursesDisplay() :
         exit(1);
     }
     // Enable colors if the terminal supports it.
-    hasColors = getScreenMode() & TDisplay::smCO80;
-    if (hasColors)
+    if ((hasColors = has_colors()))
         start_color();
     /* Refresh now so that a possible first getch() doesn't make any relevant
      * changes to the screen due to its implicit refresh(). */
@@ -77,19 +75,6 @@ int NcursesDisplay::getColorCount()
 void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
-
-ushort NcursesDisplay::getScreenMode()
-{
-/* The original implementation just reads the video mode, and sets the small font
- * if the number of rows is greater than 25.
- * This function is called from TDisplay::getCrtMode, which just returns the
- * value this does, and it is then assigned to a attribute of TScreen.
- *
- * For the time being, we will only use the video mode to tell Turbo Vision
- * to use color or monochrome formatting according to the terminal capabilities.
- * The video mode does not determine the number of rows or columns used. */
-    return has_colors() ? TDisplay::smCO80 : TDisplay::smMono;
-}
 
 void NcursesDisplay::lowlevelCursorSize(int size)
 {
