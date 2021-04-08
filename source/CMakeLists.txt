@@ -9,7 +9,8 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-    "${PROJECT_SOURCE_DIR}/include"
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>"
 )
 
 function(tv_add_private_includes target)
@@ -81,7 +82,7 @@ if (NOT WIN32)
     if (NOT NCURSESW)
         tv_message(FATAL_ERROR "Library 'ncursesw' not found")
     else()
-        tv_message(STATUS "Found 'ncursesw'")
+        tv_message(STATUS "Found 'ncursesw': ${NCURSESW}")
     endif()
     # Some distributions place ncurses.h under a separate directory.
     find_path(NCURSESW_INCLUDE "ncursesw/ncurses.h")
@@ -112,7 +113,7 @@ if (NOT WIN32)
         if (NOT GPM)
             tv_message(WARNING "'gpm' library requested but not found")
         else()
-            tv_message(STATUS "Found 'gpm'")
+            tv_message(STATUS "Found 'gpm': ${GPM}")
             find_path(GPM_INCLUDE "gpm.h")
             if (GPM_INCLUDE)
                 target_include_directories(${PROJECT_NAME} PRIVATE "${GPM_INCLUDE}")
@@ -131,7 +132,17 @@ tv_set_output_dir(${PROJECT_NAME})
 #
 # static lib
 #
-install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib)
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-config
+    ARCHIVE DESTINATION lib
+)
+
+# package configuration
+
+install(EXPORT ${PROJECT_NAME}-config
+    DESTINATION share/cmake/${PROJECT_NAME}
+    FILE ${PROJECT_NAME}-config.cmake
+)
 
 # includes
 # ./include/tvision and children copied to destination/include/tvision etc...
