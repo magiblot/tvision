@@ -474,8 +474,8 @@ ParseResult TermIO::parseFKeyB(GetChBuf &buf, TEvent &ev)
 // Konsole.
 {
     using namespace terminp;
-    auto mods = (uint) buf.getNum();
-    auto key = (uint) buf.last();
+    int mods = buf.getNum();
+    int key = buf.last();
     if (mods == -1)
         return Rejected;
     ushort keyCode = 0;
@@ -488,7 +488,7 @@ ParseResult TermIO::parseFKeyB(GetChBuf &buf, TEvent &ev)
         default: return Rejected;
     }
     ev.what = evKeyDown;
-    ev.keyDown = keyWithXTermMods(keyCode, mods);
+    ev.keyDown = keyWithXTermMods(keyCode, (uint) mods);
     return Accepted;
 }
 
