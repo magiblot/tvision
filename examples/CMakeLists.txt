@@ -18,6 +18,7 @@ if (TV_BUILD_EXAMPLES)
     function(tv_app_common app)
         tv_set_output_dir(${app})
         tv_add_private_includes(${app})
+        tv_set_warnings(${app})
         tv_app_optimize(${app})
         # Until CMake 3.13, 'install' only accepts targets defined
         # in the current directory. So install from this function.

@@ -25,16 +25,11 @@ function(tv_add_private_includes target)
 endfunction()
 
 tv_add_private_includes(${PROJECT_NAME})
+tv_set_warnings(${PROJECT_NAME})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(${PROJECT_NAME} PUBLIC
-        /wd4068
-        /wd4146
-        /wd4166
-        /wd4244
-        /wd4250
-        /wd4267
-        /wd4996
+        /wd4068 # Unrecognized pragmas
         /permissive-
         /Zc:__cplusplus
         /Zc:externConstexpr
@@ -50,11 +45,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif()
 else()
     target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wall
         -Wno-unknown-pragmas
         -Wno-pragmas
-        -Wno-reorder
-        -Wno-deprecated
     )
     if (TV_REDUCE_APP_SIZE) # Implies CMake >= 3.13.0
         target_compile_options(${PROJECT_NAME} PRIVATE
@@ -64,12 +56,6 @@ else()
             -Wl,--gc-sections
         )
     endif()
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wno-overloaded-virtual
-    )
 endif()
 
 if (WIN32)

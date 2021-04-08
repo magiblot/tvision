@@ -91,6 +91,30 @@ function(tv_add_private_includes target)
     endif()
 endfunction()
 
+function(tv_set_warnings target)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(${target} PRIVATE
+            /wd4146 # Unsigned despite minus sign
+            /wd4166 # Illegal calling convention for constructor/destructor
+            /wd4244 # Possible data loss in type conversion
+            /wd4250 # Inheritance via dominance
+            /wd4267 # Possible data loss in conversion from size_t to other type
+            /wd4996 # Usage of deprecated symbol
+        )
+    else()
+        target_compile_options(${target} PRIVATE
+            -Wall
+            -Wno-reorder
+            -Wno-deprecated
+        )
+    endif()
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(${target} PRIVATE
+            -Wno-overloaded-virtual
+        )
+    endif()
+endfunction()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(TV_BUILD_USING_GPM "Use GPM" ON)
     set(MAY_BUILD_USING_GPM TRUE)
