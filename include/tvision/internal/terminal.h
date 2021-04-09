@@ -30,7 +30,8 @@ public:
     int last(size_t i);
     void unget();
     void reject();
-    int getNum();
+    bool getNum(uint &);
+    bool getInt(int &);
 
 };
 
@@ -66,16 +67,41 @@ inline void GetChBuf::reject()
         unget();
 }
 
-inline int GetChBuf::getNum()
+// getNum, getInt: INVARIANT: the last non-digit read key (or -1)
+// can be accessed with 'last()' and can also be ungetted.
+
+inline bool GetChBuf::getNum(uint &result)
 {
-    int num = 0, digits = 0;
+    uint num = 0, digits = 0;
     int k;
     while ((k = get(true)) != -1 && '0' <= k && k <= '9')
     {
         num = 10 * num + (k - '0');
         ++digits;
     }
-    return digits ? num : -1;
+    if (digits)
+        return (result = num), true;
+    return false;
+}
+
+inline bool GetChBuf::getInt(int &result)
+{
+    int num = 0, digits = 0, sign = 1;
+    int k = get(true);
+    if (k == '-')
+    {
+        sign = -1;
+        k = get(true);
+    }
+    while (k != -1 && '0' <= k && k <= '9')
+    {
+        num = 10 * num + (k - '0');
+        ++digits;
+        k = get(true);
+    }
+    if (digits)
+        return (result = sign*num), true;
+    return false;
 }
 
 enum ParseResult { Rejected = 0, Accepted, Ignored };
@@ -98,7 +124,7 @@ struct CSIData
         for (uint i = 0; i < maxLength; ++i)
         {
             int k;
-            if (val[i] = uint(k = buf.getNum()), k == -1) return false;
+            if (!buf.getNum(val[i])) return false;
             if (sep[i] = uint(k = buf.last()), k == -1) return false;
             if (sep[i] != ';')
                 return (length = i + 1), true;
@@ -125,7 +151,7 @@ namespace TermIO
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&);
     ParseResult parseCSIKey(const CSIData &csi, TEvent&);
     ParseResult parseFKeyA(GetChBuf&, TEvent&);
-    ParseResult parseFKeyB(GetChBuf&, TEvent&);
+    ParseResult parseSS3Key(GetChBuf&, TEvent&);
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&);
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&);
 

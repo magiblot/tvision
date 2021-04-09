@@ -258,7 +258,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm)
             }
             break;
         case 'O':
-            res = parseFKeyB(buf, ev);
+            res = parseSS3Key(buf, ev);
             break;
         case '\x1B':
             res = parseEscapeSeq(buf, ev, oldm);
@@ -330,14 +330,17 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // * 'c' is a sequence of digits representing the row number (one-based) in decimal.
 // The sequence ends with 'M' on button press and on 'm' on button release.
 {
-    int but, col, row, state;
-    for (int *i : {&but, &col, &row})
-        if ((*i = buf.getNum()) == -1)
-            return Rejected;
+    uint but, state;
+    // IntelliJ may emit negative coordinates.
+    int col, row;
+    if (!buf.getNum(but)) return Rejected;
+    if (!buf.getInt(col) || !buf.getInt(row)) return Rejected;
     // Make the coordinates zero-based.
+    row = max(row, 1);
+    col = max(col, 1);
     --row, --col;
     // Finally, the press/release state.
-    state = buf.last();
+    state = (uint) buf.last();
     if (!(state == 'M' || state == 'm')) return Rejected;
 
     MouseState newm = {};
@@ -468,19 +471,24 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
     return Accepted;
 }
 
-ParseResult TermIO::parseFKeyB(GetChBuf &buf, TEvent &ev)
+ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev)
 // https://invisible-island.net/xterm/xterm-function-keys.html
 // Pre: "\x1BO" has just been read.
-// Konsole.
+// Konsole, IntelliJ.
 {
     using namespace terminp;
-    int mods = buf.getNum();
+    uint mods;
+    if (!buf.getNum(mods)) return Rejected;
     int key = buf.last();
-    if (mods == -1)
-        return Rejected;
     ushort keyCode = 0;
     switch (key)
     {
+        case 'A': keyCode = kbUp; break;
+        case 'B': keyCode = kbDown; break;
+        case 'C': keyCode = kbRight; break;
+        case 'D': keyCode = kbLeft; break;
+        case 'F': keyCode = kbEnd; break;
+        case 'H': keyCode = kbHome; break;
         case 'P': keyCode = kbF1; break;
         case 'Q': keyCode = kbF2; break;
         case 'R': keyCode = kbF3; break;
@@ -488,7 +496,7 @@ ParseResult TermIO::parseFKeyB(GetChBuf &buf, TEvent &ev)
         default: return Rejected;
     }
     ev.what = evKeyDown;
-    ev.keyDown = keyWithXTermMods(keyCode, (uint) mods);
+    ev.keyDown = keyWithXTermMods(keyCode, mods);
     return Accepted;
 }
 
