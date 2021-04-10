@@ -431,7 +431,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
     else if (csi.length == 2 && csi.sep[0] == ';')
     {
         ushort keyCode = 0;
-        if (csi.val[0] == 1 && 'A' <= terminator && terminator <= 'Z')
+        if (csi.val[0] == 1)
         {
             switch (terminator)
             {
@@ -445,6 +445,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
                 case 'Q': keyCode = kbF2; break;
                 case 'R': keyCode = kbF3; break;
                 case 'S': keyCode = kbF4; break;
+                case 'Z': keyCode = kbTab; break;
                 default: return Rejected;
             }
         }
@@ -456,6 +457,10 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
                 case  3: keyCode = kbDel; break;
                 case  5: keyCode = kbPgUp; break;
                 case  6: keyCode = kbPgDn; break;
+                case 11: keyCode = kbF1; break;
+                case 12: keyCode = kbF2; break;
+                case 13: keyCode = kbF3; break;
+                case 14: keyCode = kbF4; break;
                 case 15: keyCode = kbF5; break;
                 case 17: keyCode = kbF6; break;
                 case 18: keyCode = kbF7; break;
@@ -467,6 +472,8 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
                 default: return Rejected;
             }
         }
+        else
+            return Rejected;
         keyDown = keyWithXTermMods(keyCode, csi.val[1]);
     }
     else
