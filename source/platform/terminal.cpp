@@ -230,18 +230,6 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm)
                     return parseX10Mouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
                 case '<':
                     return parseSGRMouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
-                case 'A':
-                case 'B':
-                case 'C':
-                case 'D':
-                    res = parseArrowKeyA(buf, ev);
-                    break;
-                case 'P':
-                case 'Q':
-                case 'R':
-                case 'S':
-                    res = parseFKeyA(buf, ev);
-                    break;
                 default:
                 {
                     buf.unget();
@@ -386,7 +374,8 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
 {
     using namespace terminp;
     KeyDownEvent keyDown = {};
-    if (csi.length == 1 && csi.terminator() == '~')
+    uint terminator = csi.terminator();
+    if (csi.length == 1 && terminator == '~')
     {
         switch (csi.val[0])
         {
@@ -422,9 +411,25 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
             default: return Rejected;
         }
     }
+    else if (csi.length == 1 && csi.val[0] == 1)
+    {
+        switch (terminator)
+        {
+            case 'A': keyDown = {{kbUp}}; break;
+            case 'B': keyDown = {{kbDown}}; break;
+            case 'C': keyDown = {{kbRight}}; break;
+            case 'D': keyDown = {{kbLeft}}; break;
+            case 'F': keyDown = {{kbEnd}}; break;
+            case 'H': keyDown = {{kbHome}}; break;
+            case 'P': keyDown = {{kbF1}}; break;
+            case 'Q': keyDown = {{kbF2}}; break;
+            case 'R': keyDown = {{kbF3}}; break;
+            case 'S': keyDown = {{kbF4}}; break;
+            default: return Rejected;
+        }
+    }
     else if (csi.length == 2 && csi.sep[0] == ';')
     {
-        uint terminator = csi.terminator();
         ushort keyCode = 0;
         if (csi.val[0] == 1 && 'A' <= terminator && terminator <= 'Z')
         {
@@ -497,43 +502,6 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev)
     }
     ev.what = evKeyDown;
     ev.keyDown = keyWithXTermMods(keyCode, mods);
-    return Accepted;
-}
-
-ParseResult TermIO::parseArrowKeyA(GetChBuf &buf, TEvent &ev)
-// Pre: "\x1B[a" has been read, with 'a' being a character from 'A' to 'D'.
-// Putty.
-{
-    KeyDownEvent keyDown = {};
-    switch (buf.last())
-    {
-        case 'A': keyDown = {{kbCtrlUp}, kbCtrlShift}; break;
-        case 'B': keyDown = {{kbCtrlDown}, kbCtrlShift}; break;
-        case 'C': keyDown = {{kbCtrlRight}, kbCtrlShift}; break;
-        case 'D': keyDown = {{kbCtrlLeft}, kbCtrlShift}; break;
-        default: return Rejected;
-    }
-    ev.what = evKeyDown;
-    ev.keyDown = keyDown;
-    return Accepted;
-}
-
-
-ParseResult TermIO::parseFKeyA(GetChBuf &buf, TEvent &ev)
-// Pre: "\x1B[a" has been read, with 'a' being a character from 'P' to 'S'.
-// Kitty.
-{
-    KeyDownEvent keyDown = {};
-    switch (buf.last())
-    {
-        case 'P': keyDown = {{kbF1}}; break;
-        case 'Q': keyDown = {{kbF2}}; break;
-        case 'R': keyDown = {{kbF3}}; break;
-        case 'S': keyDown = {{kbF4}}; break;
-        default: return Rejected;
-    }
-    ev.what = evKeyDown;
-    ev.keyDown = keyDown;
     return Accepted;
 }
 

@@ -123,10 +123,11 @@ struct CSIData
         length = 0;
         for (uint i = 0; i < maxLength; ++i)
         {
-            int k;
-            if (!buf.getNum(val[i])) return false;
-            if (sep[i] = uint(k = buf.last()), k == -1) return false;
-            if (sep[i] != ';')
+            if (!buf.getNum(val[i]))
+                val[i] = 1;
+            int k = buf.last();
+            if (k == -1) return false;
+            if ((sep[i] = (uint) k) != ';')
                 return (length = i + 1), true;
         }
         return false;
