@@ -25,7 +25,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
-    * [Turbo Vision as a CMake subproject](#build-cmake)
+    * [Turbo Vision as a CMake dependency](#build-cmake)
 * [Features](#features)
 * [API changes](#apichanges)
 * [Applications using Turbo Vision](#applications)
@@ -224,16 +224,48 @@ But don't worry, you can ignore them.
 
 <div id="build-cmake"></div>
 
-### Turbo Vision as a CMake subproject (not Borland C++)
+### Turbo Vision as a CMake dependency (not Borland C++)
 
-If you choose the CMake build system for your application, and you place Turbo Vision as a submodule in your repository, you can easily configure your application to link against Turbo Vision:
+If you choose the CMake build system for your application, there are two main ways to link against Turbo Vision:
 
-```cmake
-add_subdirectory(tvision) # Assuming Turbo Vision is in the 'tvision' directory.
-target_link_libraries(my_application tvision)
-```
+* Installing Turbo Vision and importing it with `find_package`. Installation depends on the generator type:
 
-`<tvision/tv.h>` will be available in your application's include path during compilation. In addition, your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
+    * First, decide an install prefix. The default one will work out-of-the-box, but usually requires admin privileges. On Unix systems, you can use `$HOME/.local` instead. On Windows, you can use any custom path you want but you'll have to add it to the `CMAKE_PREFIX_PATH` environment variable when building your application.
+    * For mono-config generators (`Unix Makefiles`, `Ninja`...), you only have to build and install once:
+        
+        ```sh
+        cmake . -B ./build # '-DCMAKE_INSTALL_PREFIX=...' to override the install prefix.
+        cmake --build ./build
+        cmake --install ./build
+        ```
+    * For multi-config generators (`Visual Studio`, `Ninja Multi-Config`...) you should build and install all configurations:
+
+        ```sh
+        cmake . -B ./build # '-DCMAKE_INSTALL_PREFIX=...' to override the install prefix.
+        cmake --build ./build --config Release
+        cmake --build ./build --config Debug --target tvision
+        cmake --build ./build --config RelWithDebInfo --target tvision
+        cmake --build ./build --config MinSizeRel --target tvision
+        cmake --install ./build --config Release
+        cmake --install ./build --config Debug --component library
+        cmake --install ./build --config RelWithDebInfo --component library
+        cmake --install ./build --config MinSizeRel --component library
+        ```
+    Then, in your application's `CMakeLists.txt`, you may import it like this:
+    ```cmake
+    find_package(tvision CONFIG)
+    target_link_libraries(my_application tvision)
+    ```
+
+* Have Turbo Vision in a submodule in your repository, and import it with `add_subdirectory`:
+
+
+    ```cmake
+    add_subdirectory(tvision) # Assuming Turbo Vision is in the 'tvision' directory.
+    target_link_libraries(my_application tvision)
+    ```
+
+In either case, `<tvision/tv.h>` will be available in your application's include path during compilation, and your application will be linked against the necessary libraries (Ncurses, GPM...) automatically.
 
 <div id="features"></div>
 
@@ -365,7 +397,6 @@ If your application is based on this project and you'd like it to appear in the 
 
 * [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
 * [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly), a programming language for creating console applications.
-* [x69Emulator](https://github.com/JMWComputer/x69Emulator) by [Jonathan Cline](https://github.com/JonathanCline), an emulator for the custom x69 architecture.
 
 <div id="unicode"></div>
 

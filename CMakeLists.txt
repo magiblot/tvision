@@ -17,9 +17,6 @@ cmake_minimum_required (VERSION 3.5)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
     cmake_policy(SET CMP0077 NEW) # 'option()' honors normal variables.
 endif()
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    cmake_policy(SET CMP0091 NEW) # MSVC runtime library flags are selected by an abstraction.
-endif()
 
 set(MASTER_PROJECT FALSE)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -124,12 +121,12 @@ if (MASTER_PROJECT)
     option(TV_BUILD_EXAMPLES "Build example apps" ON)
 endif()
 
+option(TV_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 if (MSVC)
-    option(TV_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
-    if (TV_USE_STATIC_RTL)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    endif()
     set(MAY_USE_STATIC_RTL TRUE)
+elseif (TV_USE_STATIC_RTL)
+    tv_message(WARNING "'TV_USE_STATIC_RTL' requested but only available in MSVC or equivalent.")
+    set(TV_USE_STATIC_RTL OFF)
 endif()
 
 option(TV_REDUCE_APP_SIZE "Strip out unused funcions and data from executables" OFF)

@@ -59,6 +59,22 @@ else()
     endif()
 endif()
 
+foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
+    # Ensure all configurations produce different library names,
+    # so that they can be installed together.
+    string(TOUPPER ${cfg} cfg_up)
+    string(TOLOWER ${cfg} cfg_low)
+    if (NOT (cfg_up STREQUAL "RELEASE"))
+        set_target_properties(${PROJECT_NAME} PROPERTIES ${cfg_up}_POSTFIX -${cfg_low})
+    endif()
+endforeach()
+
+if (TV_USE_STATIC_RTL) # Implies MSVC
+    target_compile_options(${PROJECT_NAME} PUBLIC
+        /MT$<$<CONFIG:Debug>:d>
+    )
+endif()
+
 if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PUBLIC
         _CRT_SECURE_NO_WARNINGS
@@ -135,6 +151,7 @@ tv_set_output_dir(${PROJECT_NAME})
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-config
     ARCHIVE DESTINATION lib
+    COMPONENT library
 )
 
 # package configuration
@@ -142,6 +159,7 @@ install(TARGETS ${PROJECT_NAME}
 install(EXPORT ${PROJECT_NAME}-config
     DESTINATION share/cmake/${PROJECT_NAME}
     FILE ${PROJECT_NAME}-config.cmake
+    COMPONENT library
 )
 
 # includes
