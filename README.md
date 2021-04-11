@@ -254,7 +254,7 @@ If you choose the CMake build system for your application, there are two main wa
     Then, in your application's `CMakeLists.txt`, you may import it like this:
     ```cmake
     find_package(tvision CONFIG)
-    target_link_libraries(my_application tvision)
+    target_link_libraries(my_application tvision::tvision)
     ```
 
 * Have Turbo Vision in a submodule in your repository, and import it with `add_subdirectory`:
