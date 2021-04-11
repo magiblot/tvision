@@ -157,7 +157,7 @@ install(TARGETS ${PROJECT_NAME}
 # package configuration
 
 install(EXPORT ${PROJECT_NAME}-config
-    DESTINATION share/cmake/${PROJECT_NAME}
+    DESTINATION lib/cmake/${PROJECT_NAME}
     FILE ${PROJECT_NAME}-config.cmake
     COMPONENT library
 )
