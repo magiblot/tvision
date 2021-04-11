@@ -37,6 +37,10 @@ TermCap TerminalDisplay::getCapabilities()
             termcap.quirks |= qfBoldIsBright;
             if (TermIO::isLinuxConsole())
                 termcap.quirks |= qfBlinkIsBright | qfNoItalic | qfNoUnderline;
+            else if (getEnv<TStringView>("TERM") == "xterm")
+                // Let's assume all terminals disguising themselves as 'xterm'
+                // support at least 16 colors.
+                termcap.colors = Indexed16;
         }
     }
     return termcap;
