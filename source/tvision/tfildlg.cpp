@@ -52,15 +52,6 @@
 #include <strstrea.h>
 #endif
 
-// File dialog flags
-const int
-    ffOpen        = 0x0001,
-    ffSaveAs      = 0x0002;
-
-const int
-    cmOpenDialogOpen    = 100,
-    cmOpenDialogReplace = 101;
-
 TFileDialog::TFileDialog( TStringView aWildCard,
                           TStringView aTitle,
                           TStringView inputName,
