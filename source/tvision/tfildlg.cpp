@@ -67,9 +67,9 @@ TFileDialog::TFileDialog( TStringView aWildCard,
                           ushort aOptions,
                           uchar histId
                         ) :
+    TWindowInit( &TFileDialog::initFrame ),
     TDialog( TRect( 15, 1, 64, 20 ), aTitle ),
-    directory( newStr("") ),
-    TWindowInit( &TFileDialog::initFrame )
+    directory( newStr("") )
 {
     options |= ofCentered;
     flags |= wfGrow;

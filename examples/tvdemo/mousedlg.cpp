@@ -93,8 +93,8 @@ void TClickTester::draw()
 //
 
 TMouseDialog::TMouseDialog() :
-    TDialog( TRect(0, 0, 34, 12), "Mouse options" ),
-    TWindowInit( &TMouseDialog::initFrame )
+    TWindowInit( &TMouseDialog::initFrame ),
+    TDialog( TRect(0, 0, 34, 12), "Mouse options" )
 {
     TRect r(3, 4, 30, 5);
 

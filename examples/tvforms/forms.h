@@ -29,7 +29,7 @@ class TForm : public TDialog
 
 public:
 
-    TForm( StreamableInit ) : TDialog (streamableInit), TWindowInit(&TForm::initFrame) {};
+    TForm( StreamableInit ) : TWindowInit(&TForm::initFrame), TDialog (streamableInit) {};
     TForm( const TRect&, const char* );
     virtual Boolean changed();
     virtual void handleEvent( TEvent& );

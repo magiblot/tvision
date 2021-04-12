@@ -32,8 +32,8 @@ TEditWindow::TEditWindow( const TRect& bounds,
                           TStringView fileName,
                           int aNumber
                         ) :
-    TWindow( bounds, 0, aNumber ),
-    TWindowInit( &TEditWindow::initFrame )
+    TWindowInit( &TEditWindow::initFrame ),
+    TWindow( bounds, 0, aNumber )
 {
     options |= ofTileable;
 
@@ -115,8 +115,8 @@ TStreamable *TEditWindow::build()
 }
 
 TEditWindow::TEditWindow( StreamableInit ) :
-    TWindow( streamableInit ),
-    TWindowInit( 0 )
+    TWindowInit( 0 ),
+    TWindow( streamableInit )
 {
 }
 

@@ -99,10 +99,10 @@ public:
 
 // TFormApp
 TFormApp::TFormApp() :
-    TApplication(),
     TProgInit(&TFormApp::initStatusLine,
               &TFormApp::initMenuBar,
-              &TFormApp::initDeskTop)
+              &TFormApp::initDeskTop),
+    TApplication()
 {
     TEvent event;
 

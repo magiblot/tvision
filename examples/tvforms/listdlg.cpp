@@ -100,8 +100,8 @@ void TListKeyBox::getText( char *dest, short item, short maxLen )
 // TListDialog
 
 TListDialog::TListDialog( char *rezName, char *title) :
-    TDialog( TRect( 2, 2, 32, 15 ), title),
     TWindowInit(&TListDialog::initFrame),
+    TDialog(TRect( 2, 2, 32, 15 ), title),
     dataCollection(0),
     fileName(newStr(rezName)),
     isValid(False),

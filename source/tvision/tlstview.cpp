@@ -34,10 +34,10 @@ TListViewer::TListViewer( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar) :
     TView( bounds ),
-    range( 0 ),
     numCols( aNumCols ),
+    topItem( 0 ),
     focused( 0 ),
-    topItem( 0 )
+    range( 0 )
 {
     short arStep, pgStep;
 

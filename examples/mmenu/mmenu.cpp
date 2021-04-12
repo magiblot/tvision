@@ -70,8 +70,8 @@ TMultiMenu::TMultiMenu( const TRect& bounds, TMenu *aMenu[],
 TMultiMenu::TMultiMenu( const TRect& bounds, TSubMenu aMenu[],
                         int nMenus ) :
     TMenuBar( bounds, aMenu[0] ),
-    numMenus( nMenus ),
-    mList( new TMenu *[nMenus] )
+    mList( new TMenu *[nMenus] ),
+    numMenus( nMenus )
 {
     mList[0] = menu;                  // First menu is already allocated.
     for( int i = 1; i < nMenus; i++ )

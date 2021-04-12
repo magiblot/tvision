@@ -266,8 +266,8 @@ TStreamableClass RAsciiChart( TAsciiChart::name,
 
 
 TAsciiChart::TAsciiChart() :
-    TWindow(TRect(0, 0, 34, 12), "ASCII Chart", wnNoNumber),
-    TWindowInit( &TAsciiChart::initFrame )
+    TWindowInit( &TAsciiChart::initFrame ),
+    TWindow(TRect(0, 0, 34, 12), "ASCII Chart", wnNoNumber)
 {
     TView *control;
 

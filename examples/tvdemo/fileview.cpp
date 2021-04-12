@@ -175,8 +175,8 @@ TStreamableClass RFileView( TFileViewer::name,
 static short winNumber = 0;
 
 TFileWindow::TFileWindow( const char *fileName ) :
-    TWindow( TProgram::deskTop->getExtent(), fileName, winNumber++ ),
-    TWindowInit( &TFileWindow::initFrame )
+    TWindowInit( &TFileWindow::initFrame ),
+    TWindow( TProgram::deskTop->getExtent(), fileName, winNumber++ )
 {
     options |= ofTileable;
     TRect r( getExtent() );

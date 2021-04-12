@@ -38,13 +38,13 @@ TWindow::TWindow( const TRect& bounds,
                   TStringView aTitle,
                   short aNumber
                 ) :
+    TWindowInit( &TWindow::initFrame ),
     TGroup( bounds ),
     flags( wfMove | wfGrow | wfClose | wfZoom ),
     zoomRect( getBounds() ),
     number( aNumber ),
     palette( wpBlueWindow ),
-    title( newStr( aTitle ) ),
-    TWindowInit( &TWindow::initFrame )
+    title( newStr( aTitle ) )
 {
     state |= sfShadow;
     options |= ofSelectable | ofTopSelect;
@@ -254,8 +254,8 @@ TStreamable *TWindow::build()
 }
 
 TWindow::TWindow( StreamableInit ) :
-    TGroup( streamableInit ),
-    TWindowInit( 0 )
+    TWindowInit( 0 ),
+    TGroup( streamableInit )
 {
 }
 

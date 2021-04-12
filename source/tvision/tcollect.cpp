@@ -31,8 +31,8 @@
 #endif  // __ALLOC_H
 
 TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) :
-    count( 0 ),
     items( 0 ),
+    count( 0 ),
     limit( 0 ),
     delta( aDelta ),
     shouldDelete( True )
@@ -41,8 +41,8 @@ TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) :
 }
 
 TNSCollection::TNSCollection() :
-    count( 0 ),
     items( 0 ),
+    count( 0 ),
     limit( 0 ),
     delta( 0 ),
     shouldDelete( True )

@@ -331,10 +331,10 @@ TMonoSelector::TMonoSelector( StreamableInit ) : TCluster( streamableInit )
 
 TColorDisplay::TColorDisplay( const TRect& bounds, TStringView aText ) :
     TView( bounds ),
-    text( newStr( aText ) ),
-    color( 0 )
+    color( 0 ),
+    text( newStr( aText ) )
 {
-  eventMask |= evBroadcast;
+    eventMask |= evBroadcast;
 }
 
 TColorDisplay::~TColorDisplay()
@@ -692,8 +692,8 @@ TColorItemList::TColorItemList( StreamableInit ) :
 #endif
 
 TColorDialog::TColorDialog( TPalette *aPalette, TColorGroup *aGroups ):
-    TDialog( TRect( 0, 0, 61, 18 ), colors ),
-    TWindowInit( &TColorDialog::initFrame )
+    TWindowInit( &TColorDialog::initFrame ),
+    TDialog( TRect( 0, 0, 61, 18 ), colors )
 {
     options |= ofCentered;
     if( aPalette != 0 )
@@ -855,8 +855,8 @@ TStreamable *TColorDialog::build()
 }
 
 TColorDialog::TColorDialog( StreamableInit ) :
-    TDialog( streamableInit ),
-    TWindowInit( 0 )
+    TWindowInit( 0 ),
+    TDialog( streamableInit )
 {
 }
 

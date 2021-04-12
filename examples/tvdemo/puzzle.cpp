@@ -335,8 +335,8 @@ TStreamableClass RPuzzleWindow( TPuzzleWindow::name,
 
 
 TPuzzleWindow::TPuzzleWindow() :
-    TWindow( TRect(1, 1, 21, 7), "Puzzle", wnNoNumber),
-    TWindowInit( &TPuzzleWindow::initFrame )
+    TWindowInit( &TPuzzleWindow::initFrame ),
+    TWindow( TRect(1, 1, 21, 7), "Puzzle", wnNoNumber )
 {
     flags &= ~(wfZoom | wfGrow);
     growMode = 0;

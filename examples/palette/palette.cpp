@@ -66,9 +66,8 @@ TPalette& TTestView::getPalette() const
 #define cpGrayWindow "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
 
 TTestWindow::TTestWindow() :
-    TWindow( TRect(0, 0, TEST_WIDTH, TEST_HEIGHT), 0,
-             wnNoNumber),
-    TWindowInit( initFrame )
+    TWindowInit( initFrame ),
+    TWindow( TRect(0, 0, TEST_WIDTH, TEST_HEIGHT), 0, wnNoNumber )
 {
     TRect r = getExtent();
     r.grow(-2, -2);

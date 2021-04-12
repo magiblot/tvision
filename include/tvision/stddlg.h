@@ -437,8 +437,8 @@ private:
 
 protected:
 
-    TFileDialog( StreamableInit ) : TDialog ( streamableInit ),
-        TWindowInit( TFileDialog::initFrame ) {}
+    TFileDialog( StreamableInit ) :
+        TWindowInit( TFileDialog::initFrame ), TDialog ( streamableInit ) {}
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -698,8 +698,8 @@ private:
 
 protected:
 
-    TChDirDialog( StreamableInit ) : TDialog( streamableInit ),
-        TWindowInit( TChDirDialog::initFrame ) {}
+    TChDirDialog( StreamableInit ) :
+        TWindowInit( TChDirDialog::initFrame ), TDialog( streamableInit ) {}
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 

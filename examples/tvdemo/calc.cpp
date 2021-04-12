@@ -321,8 +321,8 @@ TStreamableClass RCalculator( TCalculator::name,
 
 
 TCalculator::TCalculator() :
-    TDialog( TRect(5, 3, 29, 18), "Calculator" ),
-    TWindowInit( &TCalculator::initFrame )
+    TWindowInit( &TCalculator::initFrame ),
+    TDialog( TRect(5, 3, 29, 18), "Calculator" )
 {
     TView *tv;
     TRect r;

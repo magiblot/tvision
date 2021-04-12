@@ -75,8 +75,8 @@ TStreamableClass RForm( TForm::name,
                       );
 
 TForm::TForm( const TRect& bounds, const char *aTitle) :
-       TDialog( bounds, aTitle),
-       TWindowInit(&TForm::initFrame)
+       TWindowInit(&TForm::initFrame),
+       TDialog(bounds, aTitle)
 {
 }
 

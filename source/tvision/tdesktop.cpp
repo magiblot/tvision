@@ -31,8 +31,8 @@ TDeskInit::TDeskInit( TBackground *(*cBackground)( TRect ) ) :
 }
 
 TDeskTop::TDeskTop( const TRect& bounds ) :
-    TGroup(bounds),
-    TDeskInit( &TDeskTop::initBackground )
+    TDeskInit( &TDeskTop::initBackground ),
+    TGroup(bounds)
 {
     growMode = gfGrowHiX | gfGrowHiY;
     tileColumnsFirst = False;
@@ -246,8 +246,8 @@ TStreamable *TDeskTop::build()
 }
 
 TDeskTop::TDeskTop( StreamableInit ) :
-    TGroup( streamableInit ),
-    TDeskInit( 0 )
+    TDeskInit( 0 ),
+    TGroup( streamableInit )
 {
     tileColumnsFirst = False;
 }

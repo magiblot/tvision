@@ -95,8 +95,8 @@ TSortedListBox::TSortedListBox( const TRect& bounds,
                                 ushort aNumCols,
                                 TScrollBar *aScrollBar) :
     TListBox(bounds, aNumCols, aScrollBar),
-    searchPos( -1 ),
-    shiftState( 0 )
+    shiftState( 0 ),
+    searchPos( -1 )
 {
     showCursor();
     setCursor(1, 0);

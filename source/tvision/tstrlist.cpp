@@ -35,12 +35,12 @@ TStrIndexRec::TStrIndexRec() :
 }
 
 TStrListMaker::TStrListMaker( ushort aStrSize, ushort aIndexSize ) :
-    strSize( aStrSize ),
-    indexSize( aIndexSize ),
-    strings( new char[aStrSize] ),
-    index( new TStrIndexRec[aIndexSize] ),
     strPos( 0 ),
-    indexPos( 0 )
+    strSize( aStrSize ),
+    strings( new char[aStrSize] ),
+    indexPos( 0 ),
+    indexSize( aIndexSize ),
+    index( new TStrIndexRec[aIndexSize] )
 {
 }
 
@@ -82,9 +82,9 @@ void TStrListMaker::put( ushort key, char *str )
 #if !defined(NO_STREAMABLE)
 
 TStringList::TStringList( StreamableInit ) :
+    basePos(0),
     indexSize(0),
-    index(0),
-    basePos(0)
+    index(0)
 {
 }
 #endif

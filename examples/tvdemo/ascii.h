@@ -104,8 +104,8 @@ class TAsciiChart : public TWindow
 public:
 
     TAsciiChart();
-    TAsciiChart( StreamableInit ) : TWindow(streamableInit),
-       TWindowInit(&initFrame) { };
+    TAsciiChart( StreamableInit ) :
+        TWindowInit(&initFrame), TWindow(streamableInit) { };
     virtual void handleEvent( TEvent &event );
 
 private:

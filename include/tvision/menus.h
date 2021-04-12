@@ -213,17 +213,17 @@ inline TMenuView::TMenuView( const TRect& bounds,
                              TMenu *aMenu,
                              TMenuView *aParent
                            ) :
-    TView(bounds), current( 0 ), menu( aMenu ), parentMenu( aParent ),
+    TView(bounds), parentMenu( aParent ), menu( aMenu ), current( 0 ),
     putClickEventOnExit( True )
 {
-     eventMask |= evBroadcast;
+    eventMask |= evBroadcast;
 }
 
 inline TMenuView::TMenuView( const TRect& bounds ) :
     TView(bounds), parentMenu(0), menu(0), current(0),
     putClickEventOnExit( True )
 {
-     eventMask |= evBroadcast;
+    eventMask |= evBroadcast;
 }
 
 #endif  // Uses_TMenuView
@@ -418,7 +418,7 @@ inline TStatusItem::TStatusItem( TStringView aText,
                                  ushort cmd,
                                  TStatusItem *aNext
                                 ) :
-    text( newStr(aText) ), keyCode( key ), command( cmd ), next( aNext )
+     next( aNext ), text( newStr(aText) ), keyCode( key ), command( cmd )
 {
 }
 
@@ -454,7 +454,7 @@ inline TStatusDef::TStatusDef( ushort aMin,
                                TStatusItem *someItems,
                                TStatusDef *aNext
                              ) :
-    min( aMin ), max( aMax ), items( someItems ), next( aNext )
+    next( aNext ), min( aMin ), max( aMax ), items( someItems )
 {
 }
 

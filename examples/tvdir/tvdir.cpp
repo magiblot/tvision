@@ -50,8 +50,8 @@ class QuickMessage: public TWindow
     TParamText *currentDir;
 public:
     QuickMessage( const char *drive ):
-        TWindow( TRect( 15,8,65,19 ), "Please Wait...", 0 ),
-        TWindowInit( TWindow::initFrame ) {
+        TWindowInit( TWindow::initFrame ),
+        TWindow( TRect( 15,8,65,19 ), "Please Wait...", 0 ) {
 
     flags = 0; // no move, close, grow or zoom
     options |= ofCentered;
@@ -261,8 +261,8 @@ class TDirWindow: public TWindow {
   TScrollBar *hsb, *vsb;
 public:
   TDirWindow( const char *driveInit ):
-    TWindow( TRect( 1,1,76,21 ), driveInit, 0 ),
-    TWindowInit( TWindow::initFrame ) {
+    TWindowInit( TWindow::initFrame ),
+    TWindow( TRect( 1,1,76,21 ), driveInit, 0 ) {
 
     drive = newStr( driveInit );
 

@@ -101,7 +101,6 @@ function(tv_set_warnings target)
     else()
         target_compile_options(${target} PRIVATE
             -Wall
-            -Wno-reorder
             -Wno-deprecated
         )
     endif()

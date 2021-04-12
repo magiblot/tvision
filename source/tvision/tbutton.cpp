@@ -45,10 +45,10 @@ TButton::TButton( const TRect& bounds,
                   ushort aCommand,
                   ushort aFlags) :
     TView( bounds ),
-    flags( aFlags ),
-    amDefault( Boolean( (aFlags & bfDefault) != 0 ) ),
     title( newStr( aTitle ) ),
-    command( aCommand )
+    command( aCommand ),
+    flags( aFlags ),
+    amDefault( Boolean( (aFlags & bfDefault) != 0 ) )
 {
     options |= ofSelectable | ofFirstClick | ofPreProcess | ofPostProcess;
     eventMask |= evBroadcast;

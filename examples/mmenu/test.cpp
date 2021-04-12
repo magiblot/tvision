@@ -66,8 +66,8 @@ protected:
  *
  ***********************************************************************/
 TTestApp::TTestApp() :
-    TApplication(),
     TProgInit( initStatusLine, initMenuBar, initDeskTop ),
+    TApplication(),
     curMenu( 0 )
 {
 }
