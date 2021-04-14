@@ -144,9 +144,11 @@ uint NcursesDisplay::translateAttributes(TColorAttr attr)
      * we do the following: if it doesn't support 16 colors, then we provide
      * the terminal with 3-bit colors and use Bold to represent a bright
      * foreground. Otherwise, we provide 4-bit colors directly to the terminal. */
-    uchar bios = attr.toBIOS();
-    uchar pairKey = bios & (COLORS < 16 ? 0x77 : 0xFF);
-    bool fgIntense = bios & (COLORS < 16 ? 0x08 : 0x00);
+    auto fg = BIOStoXTerm16(::getFore(attr).toBIOS(true)),
+         bg = BIOStoXTerm16(::getBack(attr).toBIOS(false));
+    uchar idx = fg | (bg << 4);
+    uchar pairKey = idx & (COLORS < 16 ? 0x77 : 0xFF);
+    bool fgIntense = (COLORS < 16) && (fg & 0x8);
     return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
 }
 
@@ -159,8 +161,7 @@ uint NcursesDisplay::getColorPair(uchar pairKey)
     if (id == 0)
     {
         // Foreground color in the lower half, background in the upper half.
-        TColorAttr c {pairKey};
-        init_pair(++definedPairs, ::getFore(c).asBIOS(), ::getBack(c).asBIOS());
+        init_pair(++definedPairs, pairKey & 0xF, pairKey >> 4);
         id = pairIdentifiers[pairKey] = definedPairs;
     }
     return COLOR_PAIR(id);
