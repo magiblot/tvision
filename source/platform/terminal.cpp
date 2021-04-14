@@ -5,6 +5,7 @@
 #include <internal/stdioctl.h>
 #include <internal/constmap.h>
 #include <internal/codepage.h>
+#include <internal/getenv.h>
 #include <internal/utf8.h>
 
 namespace terminp
@@ -576,10 +577,17 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev)
 TPoint TermIO::Unix::getSize()
 {
     struct winsize w;
-    if ( ioctl(StdioCtl::in(), TIOCGWINSZ, &w) != -1 ||
-         ioctl(StdioCtl::out(), TIOCGWINSZ, &w) != -1 )
+    for (int fd : {StdioCtl::in(), StdioCtl::out()})
     {
-        return {w.ws_col, w.ws_row};
+        if (ioctl(fd, TIOCGWINSZ, &w) != -1)
+        {
+            int env_col = getEnv<int>("COLUMNS", INT_MAX);
+            int env_row = getEnv<int>("LINES", INT_MAX);
+            return {
+                min(max(w.ws_col, 0), max(env_col, 0)),
+                min(max(w.ws_row, 0), max(env_row, 0)),
+            };
+        }
     }
     return {0, 0};
 }

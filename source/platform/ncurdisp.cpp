@@ -26,7 +26,11 @@ NcursesDisplay::NcursesDisplay() :
     }
     // Enable colors if the terminal supports it.
     if ((hasColors = has_colors()))
+    {
         start_color();
+        // Use default colors when clearing the screen.
+        use_default_colors();
+    }
     /* Refresh now so that a possible first getch() doesn't make any relevant
      * changes to the screen due to its implicit refresh(). */
     wrefresh(stdscr);
