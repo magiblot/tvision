@@ -16,6 +16,11 @@
 #include <dos.h>
 #else
 
+#ifdef TVISION_COMPAT_DOS_INCNEXT
+#undef TVISION_COMPAT_DOS_INCNEXT
+#include_next <dos.h>
+#endif // TVISION_COMPAT_DOS_INCNEXT
+
 #ifndef TVISION_COMPAT_DOS_H
 #define TVISION_COMPAT_DOS_H
 
@@ -24,7 +29,9 @@
 #ifdef _MSC_VER
 #include <corecrt.h>
 #elif defined(__MINGW32__)
-#include_next <dos.h>
+#define TVISION_COMPAT_DOS_INCNEXT
+#include <dos.h>
+#undef TVISION_COMPAT_DOS_INCNEXT
 #endif
 
 #include <cerrno>

@@ -2,6 +2,11 @@
 #include <io.h>
 #else
 
+#ifdef TVISION_COMPAT_IO_INCNEXT
+#undef TVISION_COMPAT_IO_INCNEXT
+#include_next <io.h>
+#endif // TVISION_COMPAT_IO_INCNEXT
+
 #ifndef TVISION_COMPAT_IO_H
 #define TVISION_COMPAT_IO_H
 
@@ -17,7 +22,9 @@ struct  ftime   {
 #ifdef _MSC_VER
 #include <corecrt_io.h>
 #elif defined(__MINGW32__)
-#include_next <io.h>
+#define TVISION_COMPAT_IO_INCNEXT
+#include <io.h>
+#undef TVISION_COMPAT_IO_INCNEXT
 #elif !defined(_WIN32)
 
 #include <unistd.h>
