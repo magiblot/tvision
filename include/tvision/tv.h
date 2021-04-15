@@ -130,6 +130,7 @@
 #endif
 
 #if defined( Uses_TDrawSurface )
+#define Uses_TScreenCell
 #define Uses_TPoint
 #define __INC_SURFACE_H
 #endif
