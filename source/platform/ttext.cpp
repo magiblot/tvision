@@ -52,6 +52,8 @@ namespace ttext
 {
 
     static int mbtowc(char32_t &wc, TStringView text)
+    // Returns n >= 1 if 'text' begins with a UTF-8 multibyte character that's
+    // 'n' bytes long, -1 otherwise.
     {
         uint32_t state = 0;
         uint32_t codep = 0;
@@ -156,7 +158,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                 // combining characters.
                 if (mb.length < 0)
                     ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
-                else if (mb.length == 0) // '\0'
+                else if (text[j] == '\0')
                     ::setChar(cells[i], ' ');
                 else
                     ::setChar(cells[i], text[j]);
