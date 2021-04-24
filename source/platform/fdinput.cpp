@@ -78,34 +78,28 @@ void FdInputStrategy::addListener(FdInputStrategy* a, int fd)
 
 void FdInputStrategy::deleteListener(FdInputStrategy* listener)
 {
+    size_t size = listeners.size();
     size_t shrink = 0;
     size_t i = 0;
 
-    while (i < listeners.size() - shrink)
+    while (i < size - shrink)
     {
-        bool found = false;
-        if (listeners[i] == listener)
-        {
-            found = true;
-            ++shrink;
-        }
-        if (shrink && (i + shrink < listeners.size()))
+        if (shrink != 0)
         {
             listeners[i] = listeners[i + shrink];
             fds[i] = fds[i + shrink];
         }
-        if (!found)
+        if (listeners[i] == listener)
+            ++shrink;
+        else
             ++i;
     }
 
     if (shrink)
     {
         decltype(ready)().swap(ready);
-        while (shrink--)
-        {
-            listeners.pop_back();
-            fds.pop_back();
-        }
+        listeners.resize(size - shrink);
+        fds.resize(size - shrink);
     }
 }
 
