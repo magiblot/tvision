@@ -109,10 +109,10 @@ enum ParseResult { Rejected = 0, Accepted, Ignored };
 struct CSIData
 {
     // Represents the data stored in a CSI escape sequence:
-    // \x1B [ val[0] sep[0] val[1] sep[1]
+    // \x1B [ val[0] sep[0] val[1] sep[1] ...
 
     // CSIs can be longer, but this is the largest we need for now.
-    enum { maxLength = 2 };
+    enum { maxLength = 3 };
 
     uint val[maxLength];
     uint sep[maxLength];

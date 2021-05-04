@@ -105,6 +105,11 @@ static const const_unordered_map<ushort, KeyDownEvent> fromCursesKeyCode = {
     // Avoid using these, as they are reserved by the Linux console.
     { KEY_SPREVIOUS,    {{kbPgUp},      kbShift}    },
     { KEY_SNEXT,        {{kbPgDn},      kbShift}    },
+    // Keypad
+    { KEY_A1,           {{kbHome},      0}          },
+    { KEY_A3,           {{kbPgUp},      0}          },
+    { KEY_C1,           {{kbEnd},       0}          },
+    { KEY_C3,           {{kbPgDn},      0}          },
     // Function keys F1-F12
     { KEY_F0 + 1,       {{kbF1},        0}          },
     { KEY_F0 + 2,       {{kbF2},        0}          },
@@ -228,10 +233,17 @@ static const auto fromCursesHighKey =
     { "kRIT7",      {{kbAltRight},      kbCtrlShift | kbAltShift}},
     { "kUP7",       {{kbAltUp},         kbCtrlShift | kbAltShift}},
     { "kDN7",       {{kbAltDown},       kbCtrlShift | kbAltShift}},
+    { "kpCMA",      {{'+'},             0, {'+'}, 1}},
     { "kpADD",      {{'+'},             0, {'+'}, 1}},
     { "kpSUB",      {{'-'},             0, {'-'}, 1}},
     { "kpMUL",      {{'*'},             0, {'*'}, 1}},
     { "kpDIV",      {{'/'},             0, {'/'}, 1}},
+    { "kpZRO",      {{'0'},             0, {'0'}, 1}},
+    { "kpDOT",      {{'.'},             0, {'.'}, 1}},
+    { "ka2",        {{kbUp},            0}},
+    { "kb1",        {{kbLeft},          0}},
+    { "kb3",        {{kbRight},         0}},
+    { "kc2",        {{kbDown},          0}},
 });
 
 NcursesInput::NcursesInput(bool mouse) :

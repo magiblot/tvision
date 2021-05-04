@@ -55,6 +55,14 @@ public:
 
     static char fromUtf8(TStringView s);
 
+    static char printableFromUtf8(TStringView s)
+    {
+        uchar c = fromUtf8(s);
+        if (c < ' ')
+            return '\0';
+        return c;
+    }
+
 };
 
 #endif // TVISION_CODEPAGE_H

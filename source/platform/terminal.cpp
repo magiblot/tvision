@@ -99,7 +99,7 @@ namespace terminp
         { kbIns,       kbAltIns    }, { kbDel,       kbAltDel    },
         { kbHome,      kbAltHome   }, { kbEnd,       kbAltEnd    },
         { kbPgUp,      kbAltPgUp   }, { kbPgDn,      kbAltPgDn   },
-        { kbShiftIns,  kbCtrlIns   }, { kbShiftDel,  kbCtrlDel   },
+        { kbShiftIns,  kbAltIns    }, { kbShiftDel,  kbAltDel    },
         { kbCtrlBack,  kbAltBack   },
         { kbCtrlDown,  kbAltDown   }, { kbCtrlUp,    kbAltUp     },
         { kbCtrlLeft,  kbAltLeft   }, { kbCtrlRight, kbAltRight  },
@@ -145,15 +145,114 @@ namespace terminp
         return keyDown;
     }
 
+    const uint XTermModDefault = 1;
+
     static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods)
     {
-        mods -= 1;
+        mods -= XTermModDefault;
         ulong tvmods =
             (kbShift & -(mods & 1))
             | (kbAltShift & -(mods & 2))
             | (kbCtrlShift & -(mods & 4))
             ;
         return keyWithModifiers(keyCode, tvmods);
+    }
+
+    static bool isAlpha(uint32_t ascii)
+    {
+        return ' ' <= ascii && ascii < 127;
+    };
+
+    static bool isPrivate(uint32_t codepoint)
+    {
+        return 57344 <= codepoint && codepoint <= 63743;
+    };
+
+    static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown)
+    {
+
+        ushort keyCode = 0;
+        switch (value)
+        {
+            case     8: keyCode = kbBack;   break;
+            case     9: keyCode = kbTab;    break;
+            case    13: keyCode = kbEnter;  break;
+            case    27: keyCode = kbEsc;    break;
+            case   127: keyCode = kbBack;   break;
+            // Functional keys as represented in Kitty's keyboard protocol.
+            // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html#functional
+            // Keypad.
+            case 57414: keyCode = kbEnter;  break;
+            case 57417: keyCode = kbLeft;   break;
+            case 57418: keyCode = kbRight;  break;
+            case 57419: keyCode = kbUp;     break;
+            case 57420: keyCode = kbDown;   break;
+            case 57421: keyCode = kbPgUp;   break;
+            case 57422: keyCode = kbPgDn;   break;
+            case 57423: keyCode = kbHome;   break;
+            case 57424: keyCode = kbEnd;    break;
+            case 57425: keyCode = kbIns;    break;
+            case 57426: keyCode = kbDel;    break;
+            default: if (isAlpha(value)) keyCode = value;
+        }
+        keyDown = keyWithXTermMods(keyCode, mods);
+        // Note that 'keyDown.keyCode' may be different from 'keyCode'
+        // if there are modifiers.
+        if ( (keyDown.keyCode == 0 || isAlpha(keyDown.keyCode)) &&
+            ' ' <= value && !isPrivate(value) )
+        {
+            keyDown.textLength = utf32To8(value, keyDown.text);
+            keyDown.charScan.charCode =
+                CpTranslator::printableFromUtf8({keyDown.text, keyDown.textLength});
+        }
+        return keyDown.keyCode != 0 || keyDown.textLength != 0;
+    }
+
+    static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown)
+    {
+        ushort keyCode = 0;
+        switch (letter)
+        {
+            case 'A': keyCode = kbUp; break;
+            case 'B': keyCode = kbDown; break;
+            case 'C': keyCode = kbRight; break;
+            case 'D': keyCode = kbLeft; break;
+            case 'E': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
+            case 'F': keyCode = kbEnd; break;
+            case 'H': keyCode = kbHome; break;
+            case 'P': keyCode = kbF1; break;
+            case 'Q': keyCode = kbF2; break;
+            case 'R': keyCode = kbF3; break;
+            case 'S': keyCode = kbF4; break;
+            case 'Z': keyCode = kbTab; break;
+            // Keypad in XTerm (SS3).
+            case 'j': keyCode = '*'; break;
+            case 'k': keyCode = '+'; break;
+            case 'm': keyCode = '-'; break;
+            case 'M': keyCode = kbEnter; break;
+            case 'n': keyCode = kbDel; break;
+            case 'o': keyCode = '/'; break;
+            case 'p': keyCode = kbIns; break;
+            case 'q': keyCode = kbEnd; break;
+            case 'r': keyCode = kbDown; break;
+            case 's': keyCode = kbPgDn; break;
+            case 't': keyCode = kbLeft; break;
+            case 'u': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
+            case 'v': keyCode = kbRight; break;
+            case 'w': keyCode = kbHome; break;
+            case 'x': keyCode = kbUp; break;
+            case 'y': keyCode = kbPgUp; break;
+            default: return false;
+        }
+        keyDown = keyWithXTermMods(keyCode, mod);
+        // Note that 'keyDown.keyCode' may be different from 'keyCode'
+        // if there are modifiers.
+        if (isAlpha(keyDown.keyCode))
+        {
+            keyDown.text[0] = keyDown.keyCode;
+            keyDown.textLength = 1;
+        }
+        return true;
     }
 
 } // namespace terminp
@@ -374,84 +473,59 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 {
     using namespace terminp;
-    KeyDownEvent keyDown = {};
     uint terminator = csi.terminator();
     if (csi.length == 1 && terminator == '~')
     {
         switch (csi.val[0])
         {
-            case 1: keyDown = {{kbHome}}; break;
-            case 2: keyDown = {{kbIns}}; break;
-            case 3: keyDown = {{kbDel}}; break;
-            case 4: keyDown = {{kbEnd}}; break;
-            case 5: keyDown = {{kbPgUp}}; break;
-            case 6: keyDown = {{kbPgDn}}; break;
+            case 1: ev.keyDown = {{kbHome}}; break;
+            case 2: ev.keyDown = {{kbIns}}; break;
+            case 3: ev.keyDown = {{kbDel}}; break;
+            case 4: ev.keyDown = {{kbEnd}}; break;
+            case 5: ev.keyDown = {{kbPgUp}}; break;
+            case 6: ev.keyDown = {{kbPgDn}}; break;
             // Note that these numbers can be interpreted in different ways, i.e.
             // they could be interpreted as F1-F12 instead of F1-F10.
             // But this fallback is triggered by Putty, which uses F1-F10.
-            case 11: keyDown = {{kbF1}}; break;
-            case 12: keyDown = {{kbF2}}; break;
-            case 13: keyDown = {{kbF3}}; break;
-            case 14: keyDown = {{kbF4}}; break;
-            case 15: keyDown = {{kbF5}}; break;
-            case 17: keyDown = {{kbF6}}; break;
-            case 18: keyDown = {{kbF7}}; break;
-            case 19: keyDown = {{kbF8}}; break;
-            case 20: keyDown = {{kbF9}}; break;
-            case 21: keyDown = {{kbF10}}; break;
-            case 23: keyDown = {{kbShiftF1}, kbShift}; break;
-            case 24: keyDown = {{kbShiftF2}, kbShift}; break;
-            case 25: keyDown = {{kbShiftF3}, kbShift}; break;
-            case 26: keyDown = {{kbShiftF4}, kbShift}; break;
-            case 28: keyDown = {{kbShiftF5}, kbShift}; break;
-            case 29: keyDown = {{kbShiftF6}, kbShift}; break;
-            case 31: keyDown = {{kbShiftF7}, kbShift}; break;
-            case 32: keyDown = {{kbShiftF8}, kbShift}; break;
-            case 33: keyDown = {{kbShiftF9}, kbShift}; break;
-            case 34: keyDown = {{kbShiftF10}, kbShift}; break;
+            case 11: ev.keyDown = {{kbF1}}; break;
+            case 12: ev.keyDown = {{kbF2}}; break;
+            case 13: ev.keyDown = {{kbF3}}; break;
+            case 14: ev.keyDown = {{kbF4}}; break;
+            case 15: ev.keyDown = {{kbF5}}; break;
+            case 17: ev.keyDown = {{kbF6}}; break;
+            case 18: ev.keyDown = {{kbF7}}; break;
+            case 19: ev.keyDown = {{kbF8}}; break;
+            case 20: ev.keyDown = {{kbF9}}; break;
+            case 21: ev.keyDown = {{kbF10}}; break;
+            case 23: ev.keyDown = {{kbShiftF1}, kbShift}; break;
+            case 24: ev.keyDown = {{kbShiftF2}, kbShift}; break;
+            case 25: ev.keyDown = {{kbShiftF3}, kbShift}; break;
+            case 26: ev.keyDown = {{kbShiftF4}, kbShift}; break;
+            case 28: ev.keyDown = {{kbShiftF5}, kbShift}; break;
+            case 29: ev.keyDown = {{kbShiftF6}, kbShift}; break;
+            case 31: ev.keyDown = {{kbShiftF7}, kbShift}; break;
+            case 32: ev.keyDown = {{kbShiftF8}, kbShift}; break;
+            case 33: ev.keyDown = {{kbShiftF9}, kbShift}; break;
+            case 34: ev.keyDown = {{kbShiftF10}, kbShift}; break;
             default: return Rejected;
         }
     }
     else if (csi.length == 1 && csi.val[0] == 1)
     {
-        switch (terminator)
-        {
-            case 'A': keyDown = {{kbUp}}; break;
-            case 'B': keyDown = {{kbDown}}; break;
-            case 'C': keyDown = {{kbRight}}; break;
-            case 'D': keyDown = {{kbLeft}}; break;
-            case 'F': keyDown = {{kbEnd}}; break;
-            case 'H': keyDown = {{kbHome}}; break;
-            case 'P': keyDown = {{kbF1}}; break;
-            case 'Q': keyDown = {{kbF2}}; break;
-            case 'R': keyDown = {{kbF3}}; break;
-            case 'S': keyDown = {{kbF4}}; break;
-            default: return Rejected;
-        }
+        if (!keyFromLetter(terminator, XTermModDefault, ev.keyDown))
+            return Rejected;
     }
-    else if (csi.length == 2 && csi.sep[0] == ';')
+    else if (csi.length == 2)
     {
-        ushort keyCode = 0;
+        uint mod = csi.val[1];
         if (csi.val[0] == 1)
         {
-            switch (terminator)
-            {
-                case 'A': keyCode = kbUp; break;
-                case 'B': keyCode = kbDown; break;
-                case 'C': keyCode = kbRight; break;
-                case 'D': keyCode = kbLeft; break;
-                case 'F': keyCode = kbEnd; break;
-                case 'H': keyCode = kbHome; break;
-                case 'P': keyCode = kbF1; break;
-                case 'Q': keyCode = kbF2; break;
-                case 'R': keyCode = kbF3; break;
-                case 'S': keyCode = kbF4; break;
-                case 'Z': keyCode = kbTab; break;
-                default: return Rejected;
-            }
+            if (!keyFromLetter(terminator, mod, ev.keyDown))
+                return Rejected;
         }
         else if (terminator == '~')
         {
+            ushort keyCode = 0;
             switch (csi.val[0])
             {
                 case  2: keyCode = kbIns; break;
@@ -472,15 +546,22 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
                 case 24: keyCode = kbF12; break;
                 default: return Rejected;
             }
+            ev.keyDown = keyWithXTermMods(keyCode, csi.val[1]);
         }
         else
             return Rejected;
-        keyDown = keyWithXTermMods(keyCode, csi.val[1]);
+    }
+    else if (csi.length == 3 && csi.val[0] == 27 && terminator == '~')
+    {
+        // XTerm's "modifyOtherKeys" mode.
+        uint key = csi.val[2];
+        uint mod = csi.val[1];
+        if (!keyFromCodepoint(key, mod, ev.keyDown))
+            return Ignored;
     }
     else
         return Rejected;
     ev.what = evKeyDown;
-    ev.keyDown = keyDown;
     return Accepted;
 }
 
@@ -490,26 +571,11 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev)
 // Konsole, IntelliJ.
 {
     using namespace terminp;
-    uint mods;
-    if (!buf.getNum(mods)) return Rejected;
-    int key = buf.last();
-    ushort keyCode = 0;
-    switch (key)
-    {
-        case 'A': keyCode = kbUp; break;
-        case 'B': keyCode = kbDown; break;
-        case 'C': keyCode = kbRight; break;
-        case 'D': keyCode = kbLeft; break;
-        case 'F': keyCode = kbEnd; break;
-        case 'H': keyCode = kbHome; break;
-        case 'P': keyCode = kbF1; break;
-        case 'Q': keyCode = kbF2; break;
-        case 'R': keyCode = kbF3; break;
-        case 'S': keyCode = kbF4; break;
-        default: return Rejected;
-    }
+    uint mod;
+    if (!buf.getNum(mod)) return Rejected;
+    uint key = (uint) buf.last();
+    if (!keyFromLetter(key, mod, ev.keyDown)) return Rejected;
     ev.what = evKeyDown;
-    ev.keyDown = keyWithXTermMods(keyCode, mods);
     return Accepted;
 }
 
@@ -518,51 +584,13 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev)
 // http://www.leonerd.org.uk/hacks/fixterms/
 {
     using namespace terminp;
-    auto isAlpha = [] (uint32_t ascii)
-    {
-        return ' ' <= ascii && ascii < 127;
-    };
-    auto isPrivate = [] (uint32_t codepoint)
-    {
-        return 57344 <= codepoint && codepoint <= 63743;
-    };
 
     if (csi.length < 1 || csi.terminator() != 'u')
         return Rejected;
 
-    uint ukey = csi.val[0];
-    ushort keyCode = 0;
-    switch (ukey)
-    {
-        case     9: keyCode = kbTab;    break;
-        case    13: keyCode = kbEnter;  break;
-        case    27: keyCode = kbEsc;    break;
-        case   127: keyCode = kbBack;   break;
-        // Keypad.
-        case 57414: keyCode = kbEnter;  break;
-        case 57417: keyCode = kbLeft;   break;
-        case 57418: keyCode = kbRight;  break;
-        case 57419: keyCode = kbUp;     break;
-        case 57420: keyCode = kbDown;   break;
-        case 57421: keyCode = kbPgUp;   break;
-        case 57422: keyCode = kbPgDn;   break;
-        case 57423: keyCode = kbHome;   break;
-        case 57424: keyCode = kbEnd;    break;
-        case 57425: keyCode = kbIns;    break;
-        case 57426: keyCode = kbDel;    break;
-        default: if (isAlpha(ukey)) keyCode = ukey;
-    }
+    uint key = csi.val[0];
     uint mods = (csi.length > 1) ? max(csi.val[1], 1) : 1;
-    ev.keyDown = keyWithXTermMods(keyCode, mods);
-
-    if ( (ev.keyDown.keyCode == 0 || isAlpha(ev.keyDown.keyCode))
-         && ' ' <= ukey && !isPrivate(ukey) )
-    {
-        ev.keyDown.textLength = utf32To8(ukey, ev.keyDown.text);
-        ev.keyDown.charScan.charCode = CpTranslator::fromUtf8({ev.keyDown.text, ev.keyDown.textLength});
-    }
-
-    if (ev.keyDown.keyCode != 0 || ev.keyDown.textLength != 0)
+    if (keyFromCodepoint(key, mods, ev.keyDown))
     {
         ev.what = evKeyDown;
         return Accepted;
