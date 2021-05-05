@@ -14,19 +14,13 @@
  * key events don't include that information. So, an extra translation
  * step must be done to get the actual Turbo Vision key codes. */
 
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-static auto keyCodeWithShift = constexpr_map<ushort, ushort>::from_array({
+static constexpr auto keyCodeWithShift = constexpr_map<ushort, ushort>::from_array({
     { kbTab,        kbShiftTab      },
     { kbDel,        kbShiftDel      },
     { kbIns,        kbShiftIns      }
 });
 
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-static auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
+static constexpr auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
     { 0x001F,       kbCtrlBack      },
     { kbDel,        kbCtrlDel       },
     { kbEnd,        kbCtrlEnd       },
@@ -40,10 +34,8 @@ static auto keyCodeWithCtrl = constexpr_map<ushort, ushort>::from_array({
     { kbDown,       kbCtrlDown      }
 });
 
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-static auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array({
+static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array({
+    { kbBack,       kbAltBack       },
     { kbDel,        kbAltDel        },
     { kbEnd,        kbAltEnd        },
     { kbHome,       kbAltHome       },
@@ -94,13 +86,13 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
 
 ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode)
 {
-    switch (controlKeyState)
-    {
-        case kbShift: return keyCodeWithShift[keyCode];
-        case kbCtrlShift: return keyCodeWithCtrl[keyCode];
-        case kbAltShift: return keyCodeWithAlt[keyCode];
-        default: return kbNoKey;
-    }
+    if (controlKeyState & kbAltShift)
+        return keyCodeWithAlt[keyCode];
+    if (controlKeyState & kbCtrlShift)
+        return keyCodeWithCtrl[keyCode];
+    if (controlKeyState & kbShift)
+        return keyCodeWithShift[keyCode];
+    return kbNoKey;
 }
 
 void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
