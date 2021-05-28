@@ -361,7 +361,10 @@ int Win32Display::getColorCount()
 {
     // Conhost has had high color support for some time:
     // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
-    // TODO: find out if we can be more accurate.
+    DWORD consoleMode = 0;
+    GetConsoleMode(StdioCtl::out(), &consoleMode);
+    if (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+        return 256*256*256;
     return 16;
 }
 
