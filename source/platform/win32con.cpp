@@ -66,7 +66,11 @@ bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
         // Try enabling VT sequences.
         consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
         consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-        supportsVT = SetConsoleMode(StdioCtl::out(), consoleMode);
+        // On Wine, SetConsoleMode succeeds even if VT sequences are not supported.
+        // So check whether the flag has actually been set.
+        SetConsoleMode(StdioCtl::out(), consoleMode);
+        GetConsoleMode(StdioCtl::out(), &consoleMode);
+        supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     }
 
     // Set the console and the environment in UTF-8 mode.
