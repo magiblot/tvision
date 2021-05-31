@@ -553,8 +553,7 @@ Boolean TListDialog::valid(ushort command)
         case cmValid:
             ok = isValid;
             if (!ok)
-                messageBox("Error opening file (%s).",
-                            mfError | mfOKButton);
+                messageBox(mfError | mfOKButton, "Error opening file (%s).", fileName);
             break;
 
         case cmQuit:
