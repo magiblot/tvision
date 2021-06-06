@@ -52,6 +52,10 @@ void TDrawSurface::resize(TPoint aSize)
             abort();
         data = (TScreenCell _FAR *) newData;
         dataLength = newLength;
+#ifndef __BORLANDC__
+        // Initialize the buffer, like TGroup does.
+        memset(data, 0, sz);
+#endif
     }
     else
     {
