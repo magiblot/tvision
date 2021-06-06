@@ -32,6 +32,7 @@ public:
 #endif
 
     static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
+    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TSpan<const uint32_t> text, size_t &j);
     static Boolean next(TStringView text, size_t &bytes, size_t &width);
     static Boolean next(TStringView text, size_t &bytes);
     static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
@@ -44,6 +45,7 @@ private:
     static int mblen(TStringView text);
     struct eat_r { int ok, width, length; };
     static eat_r eat_internal(TSpan<TScreenCell>, size_t, TStringView, size_t);
+    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TSpan<const uint32_t>, size_t);
 #endif // __BORLANDC__
 
 };
@@ -242,6 +244,16 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
 //
 //      size_t i = 0, j = 0;
 //      while (TText::eat(cells, i, text, j));
+{
+    auto result = eat_internal(cells, i, text, j);
+    i += (size_t) result.width;
+    j += (size_t) result.length;
+    return result.ok;
+}
+
+inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
+                           TSpan<const uint32_t> text, size_t &j )
+// Same as above, but 'text' is an array of UTF-32 codepoints.
 {
     auto result = eat_internal(cells, i, text, j);
     i += (size_t) result.width;

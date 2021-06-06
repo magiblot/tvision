@@ -6,6 +6,7 @@
 #include <internal/linuxcon.h>
 #include <internal/win32con.h>
 #include <internal/winwidth.h>
+#include <internal/utf8.h>
 #include <wchar.h>
 
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -72,6 +73,11 @@ namespace ttext
         return -1;
     }
 
+    static int charWidth(TStringView mbc, char32_t wc)
+    {
+        return PlatformStrategy::instance->charWidth(mbc, wc);
+    }
+
 }
 
 int TText::mblen(TStringView text)
@@ -88,7 +94,7 @@ TText::mbstat_r TText::mbstat(TStringView text)
     int length = mbtowc(wc, text);
     int width = -1;
     if (length > 1)
-        width = PlatformStrategy::instance->charWidth({&text[0], (size_t) length}, wc);
+        width = charWidth({&text[0], (size_t) length}, wc);
     return {length, width};
 }
 
@@ -200,6 +206,53 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                         ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
                     return {true, count, mb.length};
                 }
+            }
+        }
+    }
+    return {false, 0, 0};
+}
+
+TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
+                                  TSpan<const uint32_t> textU32, size_t j )
+{
+    using namespace ttext;
+    if (j < textU32.size())
+    {
+        char utf8[4] = {};
+        size_t length = utf32To8(textU32[j], utf8);
+        TStringView textU8(utf8, length);
+        int width = charWidth(textU8, textU32[j]);
+        if (width < 0)
+        {
+            if (i < cells.size())
+            {
+                ::setChar(cells[i], "�");
+                return {true, 1, 1};
+            }
+        }
+        else if (textU32[j] != 0 && width == 0)
+        {
+            // Append to the previous cell, if present.
+            if (i > 0 && !isZWJ(textU8))
+            {
+                size_t k = i;
+                while (cells[--k].ch.isWideCharTrail() && k > 0);
+                cells[k].ch.appendZeroWidth(textU8);
+            }
+            return {true, 0, 1};
+        }
+        else
+        {
+            if (i < cells.size())
+            {
+                bool wide = width > 1;
+                ::setChar(cells[i], textU8, wide);
+                // Fill trailing cells.
+                auto attr = ::getAttr(cells[i]);
+                int count = min(wide + 1, cells.size() - i);
+                for (int k = 1; k < count; ++k)
+                    ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
+                return {true, count, 1};
             }
         }
     }
