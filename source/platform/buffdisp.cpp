@@ -17,7 +17,8 @@ BufferedDisplay *BufferedDisplay::instance = 0;
 
 BufferedDisplay::BufferedDisplay() :
     // This could be checked at runtime, but for now this is as much as I know.
-    widePlaceholder('\0') // Replace with space if terminal treats all characters one column wide.
+    // Replace with space if terminal treats all characters one column wide.
+    widePlaceholder(TCellChar::wideCharTrail)
 #ifdef _WIN32
     , wideOverlapping(false)
 #else
@@ -237,13 +238,13 @@ struct FlushScreenAlgorithm
     void writeCell(const TCellChar &Char, const TColorAttr &Attr, bool wide);
     void commitDirty();
     void handleWideCharSpill();
-    void handleNull();
+    void handleTrail();
 
 };
 
-inline bool isNull(const TScreenCell &cell)
+inline bool isTrail(const TScreenCell &cell)
 {
-    return __builtin_expect(cell.ch[0] == '\0', 0);
+    return __builtin_expect(cell.ch.isWideCharTrail(), 0);
 }
 
 inline bool isWide(const TScreenCell &cell)
@@ -274,7 +275,7 @@ inline void FlushScreenAlgorithm::commitDirty()
 
 inline bool FlushScreenAlgorithm::wideCanSpill() const
 {
-    return disp.widePlaceholder == '\0';
+    return disp.widePlaceholder == TCellChar::wideCharTrail;
 }
 
 inline bool FlushScreenAlgorithm::wideCanOverlap() const
@@ -304,7 +305,7 @@ inline void FlushScreenAlgorithm::run()
             for (; x <= damage.end; ++x)
             {
                 getCell();
-                if (cellDirty() || isNull(*cell)) {
+                if (cellDirty() || isTrail(*cell)) {
                     if (wideSpillBefore) {
                         --x;
                         getCell();
@@ -317,10 +318,10 @@ inline void FlushScreenAlgorithm::run()
             }
             if (x < size.x) {
                 getCell();
-                if (isNull(*cell))
+                if (isTrail(*cell))
                     // The beginning of a wide character has been overwritten
                     // and attribute spill may happen in the remaining trails.
-                    handleNull();
+                    handleTrail();
             }
         }
         disp.rowDamage[y] = {INT_MAX, INT_MIN};
@@ -333,8 +334,8 @@ inline void FlushScreenAlgorithm::processCell()
         if (isWide(*cell)) {
             handleWideCharSpill();
             return;
-        } else if (isNull(*cell)) {
-            handleNull();
+        } else if (isTrail(*cell)) {
+            handleTrail();
             return;
         }
     }
@@ -378,7 +379,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
         writeSpace();
         while (--width && ++x < size.x) {
             getCell();
-            if (!isNull(*cell)) {
+            if (!isTrail(*cell)) {
                 --x;
                 return;
             }
@@ -391,7 +392,7 @@ void FlushScreenAlgorithm::handleWideCharSpill()
     while (width-- && ++x < size.x) {
         getCell();
         commitDirty();
-        if (!isNull(*cell)) {
+        if (!isTrail(*cell)) {
             if (wideCanOverlap()) {
                 // Write over the wide character.
                 writeCell();
@@ -422,10 +423,10 @@ void FlushScreenAlgorithm::handleWideCharSpill()
     }
 }
 
-void FlushScreenAlgorithm::handleNull()
+void FlushScreenAlgorithm::handleTrail()
 {
-    // Having '\0' in a cell implies wide characters can spill, as '\0'
-    // is otherwise discarded in ensurePrintable().
+    // Having TCellChar::wideCharTrail in a cell implies wide characters
+    // can spill, as the value is otherwise discarded in ensurePrintable().
     const auto Attr = cell->attr;
     if (x > 0) {
         --x;
@@ -447,7 +448,7 @@ void FlushScreenAlgorithm::handleNull()
             getCell();
         else
             return;
-    } while (isNull(*cell));
+    } while (isTrail(*cell));
     // We now got a normal character.
     if (x > damage.end && Attr != cell->attr) {
         // Redraw a character that would otherwise not be printed,
