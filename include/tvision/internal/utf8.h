@@ -42,12 +42,11 @@ inline constexpr uint32_t utf8To32(TStringView s) {
 
 inline size_t utf32To8(uint32_t u, char utf8[4]) {
     union {
-        uint32_t asInt {0};
-        uint8_t asChars[4];
+        uint8_t asChars[4] {0};
+        uint32_t asInt;
     };
     if (u <= 0x007F) {
-        asInt = u;
-        memcpy(&utf8[0], asChars, 4);
+        memcpy(&utf8[0], &u, 4);
         return 1;
     } else if (u <= 0x07FF) {
         asChars[1] =  (u        & 0b00111111) | 0b10000000;
