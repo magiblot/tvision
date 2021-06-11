@@ -16,10 +16,13 @@ At one point I considered I had done enough, and that any attempts at revamping 
 
 However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture, wrote the [Turbo](https://github.com/magiblot/turbo) text editor and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
 
+The original location of this project is https://github.com/magiblot/tvision.
+
 # Table of contents
 
 * [What is Turbo Vision good for?](#what-for)
 * [How do I use Turbo Vision?](#how-to)
+* [Releases and downloads](#downloads)
 * Build environment
     * [Linux](#build-linux)
     * [Windows (MSVC)](#build-msvc)
@@ -37,7 +40,7 @@ However, between July and August 2020 I found the way to integrate full-fledged 
 
 ## What is Turbo Vision good for?
 
-A lot has changed since Borland created Turbo Vision in the early 90's. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either concurrent or asynchronous programming, or both.
+A lot has changed since Borland created Turbo Vision in the early 90's. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either parallel or asynchronous programming, or both.
 
 Turbo Vision does none of that, but it certainly overcomes many of the issues programmers still face today when writing terminal applications:
 
@@ -58,6 +61,20 @@ You can get started with the [Turbo Vision For C++ User's Guide](https://archive
 I suggest you take a look at the [Turbo Vision 2.0 Programming Guide](https://archive.org/details/bitsavers_borlandTurrogrammingGuide1992_25707423), which is, in my opinion, more intuitive and easier to understand, despite using Pascal. By then you will probably be interested in the [`palette`](https://github.com/magiblot/tvision/tree/master/examples/palette) example, which contains a detailed description of how palettes are used.
 
 Don't forget to check out the <a href="#features">features</a> and <a href="#apichanges">API changes</a> sections as well.
+
+<div id="downloads"></div>
+
+## Releases and downloads
+
+This project has no stable releases for the time being. If you are a developer, try to stick to the latest commit and report any issues you find while upgrading.
+
+If you just want to test the demo applications:
+
+* Unix systems: you'll have to build Turbo Vision yourself. You may follow the [build instructions](#build-linux) below.
+* Windows: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
+    * `examples-dos32.zip`: 32-bit executables built with Borland C++. No Unicode support.
+    * `examples-x86.zip`: 32-bit executables built with MSVC. Windows Vista or later required.
+    * `examples-x64.zip`: 64-bit executables built with MSVC. x64 Windows Vista or later required.
 
 ## Build environment
 
@@ -232,7 +249,7 @@ If you choose the CMake build system for your application, there are two main wa
 
     * First, decide an install prefix. The default one will work out-of-the-box, but usually requires admin privileges. On Unix systems, you can use `$HOME/.local` instead. On Windows, you can use any custom path you want but you'll have to add it to the `CMAKE_PREFIX_PATH` environment variable when building your application.
     * For mono-config generators (`Unix Makefiles`, `Ninja`...), you only have to build and install once:
-        
+
         ```sh
         cmake . -B ./build # '-DCMAKE_INSTALL_PREFIX=...' to override the install prefix.
         cmake --build ./build
