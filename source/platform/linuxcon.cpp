@@ -44,6 +44,8 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
     { kbPgUp,       kbAltPgUp       },
     { kbUp,         kbAltUp         },
     { kbDown,       kbAltDown       },
+    { kbLeft,       kbAltLeft       },
+    { kbRight,      kbAltRight      },
 });
 
 LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy *d,
@@ -86,13 +88,14 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
 
 ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode)
 {
-    if (controlKeyState & kbAltShift)
-        return keyCodeWithAlt[keyCode];
-    if (controlKeyState & kbCtrlShift)
-        return keyCodeWithCtrl[keyCode];
-    if (controlKeyState & kbShift)
-        return keyCodeWithShift[keyCode];
-    return kbNoKey;
+    ushort result = 0;
+    if ((controlKeyState & kbAltShift) && (result = keyCodeWithAlt[keyCode]))
+        return result;
+    if ((controlKeyState & kbCtrlShift) && (result = keyCodeWithCtrl[keyCode]))
+        return result;
+    if ((controlKeyState & kbShift) && (result = keyCodeWithShift[keyCode]))
+        return result;
+    return result;
 }
 
 void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
