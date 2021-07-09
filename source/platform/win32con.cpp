@@ -10,6 +10,7 @@
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
 #include <internal/ansidisp.h>
+#include <internal/terminal.h>
 #include <clocale>
 
 Win32ConsoleStrategy* Win32ConsoleStrategy::create()
@@ -418,7 +419,7 @@ void Win32Display::lowlevelMoveCursor(uint x, uint y)
 
 void Win32Display::lowlevelFlush()
 {
-    WriteConsole(StdioCtl::out(), buf.data(), buf.size(), nullptr, nullptr);
+    TermIO::consoleWrite(buf.data(), buf.size());
     buf.resize(0);
 }
 #endif // _WIN32

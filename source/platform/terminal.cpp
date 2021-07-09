@@ -631,7 +631,10 @@ void TermIO::Unix::consoleWrite(const void *data, size_t bytes)
 
 void TermIO::Win32::consoleWrite(const void *data, size_t bytes)
 {
-    WriteConsole(StdioCtl::out(), data, bytes, nullptr, nullptr);
+    // Writing 0 bytes causes the cursor to become invisible for some time
+    // in old versions of the Windows console.
+    if (bytes != 0)
+        WriteConsole(StdioCtl::out(), data, bytes, nullptr, nullptr);
 }
 
 #endif // _TV_UNIX
