@@ -10,6 +10,7 @@ struct MouseState
     TPoint where;
     uchar buttons;
     uchar wheel;
+    uchar mods;
 };
 
 class GetChBuf

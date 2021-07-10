@@ -305,6 +305,7 @@ bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &ne
         ev.mouse.buttons = newm.buttons;
         ev.mouse.where = newm.where;
         ev.mouse.wheel = newm.wheel;
+        ev.mouse.controlKeyState = newm.mods;
         oldm = newm;
         return true;
     }
@@ -359,6 +360,10 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm)
     return res;
 }
 
+const ushort
+    mmAlt = 0x08,
+    mmCtrl = 0x10;
+
 ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // Pre: "\x1B[M" has just been read.
 // The complete sequence looks like "\x1B[Mabc", where:
@@ -366,10 +371,11 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // * 'b' is the column number (one-based) plus 32.
 // * 'c' is the row number (one-based) plus 32.
 {
-    int but, col, row;
-    but = buf.get();
-    if (but < 32 || 255 < but) return Rejected;
-    but -= 32;
+    uint butm = (uint) buf.get();
+    uint mod = butm & (mmAlt | mmCtrl);
+    uint but = (butm & ~(mmAlt | mmCtrl)) - 32;
+    if (255 - 32 < but) return Rejected;
+    int col, row;
     for (int *i : {&col, &row})
     {
         *i = buf.get();
@@ -391,6 +397,7 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
     MouseState newm = {};
     newm.where = {col, row};
     newm.buttons = oldm.buttons;
+    newm.mods = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
     switch (but)
     {
         case 0: // Press.
@@ -418,22 +425,25 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // * 'c' is a sequence of digits representing the row number (one-based) in decimal.
 // The sequence ends with 'M' on button press and on 'm' on button release.
 {
-    uint but, state;
+    uint butm;
+    if (!buf.getNum(butm)) return Rejected;
+    uint mod = butm & (mmAlt | mmCtrl);
+    uint but = butm & ~(mmAlt | mmCtrl);
     // IntelliJ may emit negative coordinates.
     int col, row;
-    if (!buf.getNum(but)) return Rejected;
     if (!buf.getInt(col) || !buf.getInt(row)) return Rejected;
     // Make the coordinates zero-based.
     row = max(row, 1);
     col = max(col, 1);
     --row, --col;
     // Finally, the press/release state.
-    state = (uint) buf.last();
+    uint state = (uint) buf.last();
     if (!(state == 'M' || state == 'm')) return Rejected;
 
     MouseState newm = {};
     newm.where = {col, row};
     newm.buttons = oldm.buttons;
+    newm.mods = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
     if (state == 'M') // Press, wheel or drag.
     {
         switch (but)
