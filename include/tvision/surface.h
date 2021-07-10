@@ -53,27 +53,35 @@ inline const TScreenCell _FAR &TDrawSurface::at(int y, int x) const
 
 #endif
 
+/* ---------------------------------------------------------------------- */
+/*      class TSurfaceView                                                */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Empty area                                                  */
+/* ---------------------------------------------------------------------- */
+
 #if defined( Uses_TSurfaceView ) && !defined( __TSurfaceView )
 #define __TSurfaceView
 
-// A TSurfaceView displays a region of a TDrawSurface with coordinates
-// (delta.x, delta.y), (delta.x+size.x, delta.y+size.y). Any parts of the region
-// which exceed the TDrawSurface's bounds are displayed as whitespaces.
+// A TSurfaceView displays a region of a TDrawSurface between 'delta' and
+// '{delta.x + size.x, delta.y + size.y}'.
+// Out-of-bounds areas (or the whole view if 'surface' is null) are
+// displayed as whitespaces.
+
+// The "empty area" color maps to TWindow's and TDialog's "frame passive" color.
 
 class TSurfaceView : public TView
 {
 
 public:
 
-    const TDrawSurface _FAR *sface;
+    const TDrawSurface _FAR *surface;
     TPoint delta;
-    TColorAttr fillColor;
 
-    TSurfaceView( const TRect &bounds,
-                  const TDrawSurface _FAR *aSface=0,
-                  TColorAttr aColor=TColorAttr() );
+    TSurfaceView(const TRect &bounds, const TDrawSurface _FAR *aSurface=0);
 
     virtual void draw();
+    virtual TPalette& getPalette() const;
 
 };
 

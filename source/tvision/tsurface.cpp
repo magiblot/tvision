@@ -14,6 +14,9 @@
 #include <tvision/tv.h>
 
 #include <stdlib.h>
+#include <malloc.h>
+
+#define cpSurfaceView "\x01"
 
 TDrawSurface::TDrawSurface() :
     dataLength(0),
@@ -72,60 +75,73 @@ void TDrawSurface::clear()
 }
 
 TSurfaceView::TSurfaceView( const TRect &bounds,
-                            const TDrawSurface _FAR *aSface,
-                            TColorAttr aColor ) :
+                            const TDrawSurface _FAR *aSurface ) :
     TView(bounds),
-    sface(aSface),
-    fillColor(aColor)
+    surface(aSurface)
 {
     delta.x = delta.y = 0;
 }
 
+static void fillWithSpaces(TScreenCell *b, int len, TColorAttr c)
+{
+    TScreenCell cell;
+    ::setCell(cell, ' ', c);
+    for (int i = 0; i < len; ++i)
+        b[i] = cell;
+}
+
 void TSurfaceView::draw()
 {
-    if (sface && size.x > 0) {
-        // Cache these in local variables.
-        const TPoint d = delta;
-        const TPoint ssize = sface->size;
-        const TPoint size = this->size;
-        const TScreenCell *data = &sface->at(max(d.y, 0), max(d.x, 0));
-        const TRect extent = TRect(0, 0, size.x, size.y);
+    if (size.x <= 0 || size.y <= 0)
+        return;
+    TScreenCell *b = (TScreenCell *) alloca(size.x*sizeof(TScreenCell));
+    TColorAttr cEmpty = mapColor(1);
+    int y;
+    if (surface)
+    {
+        const TRect extent = TRect(TPoint(), size);
         // This is the rectangle within the current view's extent where the
-        // surface is to be drawn. This rectangle is always valid; if no area
-        // of the surface is to be drawn, all coordinates are 0.
-        const TRect clip = TRect(0, 0, ssize.x, ssize.y)
-                            .move(-d.x, -d.y)
-                            .intersect(extent);
-        int y;
-        if (clip == extent) {
-            // Surface fills all of the view's extent. Can perform direct copy.
-            for (y = 0; y < size.y; ++y, data += ssize.x)
-                writeBuf(0, y, size.x, 1, data);
-        } else {
-            // Prepare a buffer filled with whitespaces.
-            TScreenCell *b = new TScreenCell[size.x];
-            {
-                TScreenCell cell;
-                ::setCell(cell, ' ', fillColor);
-                for (int i = 0; i < size.x; ++i)
-                    b[i] = cell;
-            }
-            // Write the empty area at the top and the bottom.
-            for (y = 0; y < clip.a.y; ++y)
-                writeBuf(0, y, size.x, 1, b);
-            for (y = clip.b.y; y < size.y; ++y)
-                writeBuf(0, y, size.x, 1, b);
-            // Write the surface's contents.
-            if (clip.a.x == 0 && clip.b.x == size.x)
-                // Direct copy also possible.
-                for (y = clip.a.y; y < clip.b.y; ++y, data += ssize.x)
+        // surface is to be drawn.
+        const TRect clip = TRect(TPoint(), surface->size)
+            .move(-delta.x, -delta.y)
+            .intersect(extent);
+        if ( 0 <= clip.a.x && clip.a.x < clip.b.x &&
+             0 <= clip.a.y && clip.a.y < clip.b.y )
+        {
+            const TScreenCell *data = &surface->at(max(delta.y, 0), max(delta.x, 0));
+            if (clip == extent)
+                // Surface fills all of the view's extent. Can perform direct copy.
+                for (y = 0; y < size.y; ++y, data += surface->size.x)
                     writeBuf(0, y, size.x, 1, data);
             else
-                for (y = clip.a.y; y < clip.b.y; ++y, data += ssize.x) {
-                    memcpy(&b[clip.a.x], data, (clip.b.x - clip.a.x)*sizeof(TScreenCell));
-                    writeBuf(0, y, size.x, 1, b);
-                }
-            delete[] b;
+            {
+                fillWithSpaces(b, size.x, cEmpty);
+                // Write the empty area at the top and the bottom.
+                writeLine(0,        0, size.x,          clip.a.y, b);
+                writeLine(0, clip.b.y, size.x, size.y - clip.b.y, b);
+                // Write the surface's contents.
+                if (clip.a.x == 0 && clip.b.x == size.x)
+                    // Direct copy also possible.
+                    for (y = clip.a.y; y < clip.b.y; ++y, data += surface->size.x)
+                        writeBuf(0, y, size.x, 1, data);
+                else
+                    for (y = clip.a.y; y < clip.b.y; ++y, data += surface->size.x)
+                    {
+                        memcpy(&b[clip.a.x], data, (clip.b.x - clip.a.x)*sizeof(TScreenCell));
+                        writeBuf(0, y, size.x, 1, b);
+                    }
+            }
         }
     }
+    else
+    {
+        fillWithSpaces(b, size.x, cEmpty);
+        writeLine(0, 0, size.x, size.y, b);
+    }
+}
+
+TPalette &TSurfaceView::getPalette() const
+{
+    static TPalette palette(cpSurfaceView, sizeof(cpSurfaceView) - 1);
+    return palette;
 }
