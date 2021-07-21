@@ -38,7 +38,7 @@
 
 #define cpCluster "\x10\x11\x12\x12\x1f"
 
-TCluster::TCluster( const TRect& bounds, TSItem *aStrings ) :
+TCluster::TCluster( const TRect& bounds, TSItem *aStrings ) noexcept :
     TView(bounds),
     value( 0 ),
     sel( 0 )
@@ -471,7 +471,7 @@ TStreamable *TCluster::build()
     return new TCluster( streamableInit );
 }
 
-TCluster::TCluster( StreamableInit ) : TView( streamableInit )
+TCluster::TCluster( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

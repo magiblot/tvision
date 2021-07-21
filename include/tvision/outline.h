@@ -32,8 +32,8 @@ const int
 class TNode
 {
 public:
-    TNode(TStringView aText);
-    TNode(TStringView aText, TNode* aChildren, TNode* aNext, Boolean initialState = True);
+    TNode(TStringView aText) noexcept;
+    TNode(TStringView aText, TNode* aChildren, TNode* aNext, Boolean initialState = True) noexcept;
     virtual ~TNode();
 
     TNode* next;
@@ -42,13 +42,13 @@ public:
     Boolean expanded;
 };
 
-inline TNode::TNode(TStringView aText) :
+inline TNode::TNode(TStringView aText) noexcept :
     next(0), text(newStr(aText)), childList(0), expanded(True)
 {
 }
 
 inline TNode::TNode( TStringView aText, TNode* aChildren,
-                     TNode* aNext, Boolean initialState ) :
+                     TNode* aNext, Boolean initialState ) noexcept :
     next(aNext), text(newStr(aText)),
     childList(aChildren), expanded(initialState)
 {
@@ -84,8 +84,8 @@ class TOutlineViewer : public TScroller
 {
 public:
     TOutlineViewer(const TRect& bounds, TScrollBar* aHScrollBar,
-        TScrollBar* aVScrollBar);
-    TOutlineViewer(StreamableInit s);
+        TScrollBar* aVScrollBar) noexcept;
+    TOutlineViewer(StreamableInit s) noexcept;
     virtual void adjust(TNode* node, Boolean expand)=0;
     virtual void draw();
     virtual void focused(int i);
@@ -104,22 +104,22 @@ public:
     virtual void selected(int i);
     virtual void setState(ushort aState, Boolean enable);
 
-    void update();
+    void update() noexcept;
     void expandAll(TNode* node);
 
-    TNode* firstThat(TOutlineVisitor test, void* arg);
-    TNode* firstThat(TOutlineVisitorNoArg test);
+    TNode* firstThat(TOutlineVisitor test, void* arg) noexcept;
+    TNode* firstThat(TOutlineVisitorNoArg test) noexcept;
 
-    TNode* forEach(TOutlineVisitor action, void* arg);
-    TNode* forEach(TOutlineVisitorNoArg action);
+    TNode* forEach(TOutlineVisitor action, void* arg) noexcept;
+    TNode* forEach(TOutlineVisitorNoArg action) noexcept;
 
     char* createGraph(int level, long lines, ushort flags, int levWidth,
-        int endWidth, const char* chars);
+        int endWidth, const char* chars) noexcept;
 
     int foc;
 
 protected:
-    static void disposeNode(TNode* node);
+    static void disposeNode(TNode* node) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -128,11 +128,11 @@ public:
     static const char * const _NEAR name;
 
 private:
-    void adjustFocus(int newFocus);
-    TNode* iterate(TOutlineVisitor action, void *arg, Boolean checkResult);
+    void adjustFocus(int newFocus) noexcept;
+    TNode* iterate(TOutlineVisitor action, void *arg, Boolean checkResult) noexcept;
 };
 
-inline TOutlineViewer::TOutlineViewer( StreamableInit s) :
+inline TOutlineViewer::TOutlineViewer( StreamableInit s) noexcept :
     TScroller(s)
 {
 }
@@ -160,7 +160,7 @@ class TOutline : public TOutlineViewer
 {
 public:
     TOutline(const TRect& bounds, TScrollBar* aHScrollBar, TScrollBar* aVScrollBar,
-        TNode* aRoot);
+        TNode* aRoot) noexcept;
     ~TOutline();
 
     virtual void adjust(TNode* node, Boolean expand);
@@ -179,7 +179,7 @@ protected:
     virtual void* read( ipstream& );
     virtual void writeNode( TNode*, opstream& );
     virtual TNode* readNode( ipstream& );
-    TOutline( StreamableInit );
+    TOutline( StreamableInit ) noexcept;
 
 public:
     static TStreamable* build();
@@ -191,7 +191,7 @@ private:
 
 };
 
-inline TOutline::TOutline( StreamableInit s ) : TOutlineViewer( s )
+inline TOutline::TOutline( StreamableInit s ) noexcept : TOutlineViewer( s )
 {
 }
 

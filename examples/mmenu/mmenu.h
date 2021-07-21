@@ -85,6 +85,4 @@ protected:
 
 const unsigned cmMMChangeMenu = 0x1600;
 
-TMenuItem& operator +( TMenuItem& menu1, TMenuItem& menu2 );
-
 #endif // __MMENU_H

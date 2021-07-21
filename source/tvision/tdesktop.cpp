@@ -25,12 +25,12 @@
 #include <math.h>
 #endif
 
-TDeskInit::TDeskInit( TBackground *(*cBackground)( TRect ) ) :
+TDeskInit::TDeskInit( TBackground *(*cBackground)( TRect ) ) noexcept :
     createBackground( cBackground )
 {
 }
 
-TDeskTop::TDeskTop( const TRect& bounds ) :
+TDeskTop::TDeskTop( const TRect& bounds ) noexcept :
     TDeskInit( &TDeskTop::initBackground ),
     TGroup(bounds)
 {
@@ -245,7 +245,7 @@ TStreamable *TDeskTop::build()
     return new TDeskTop( streamableInit );
 }
 
-TDeskTop::TDeskTop( StreamableInit ) :
+TDeskTop::TDeskTop( StreamableInit ) noexcept :
     TDeskInit( 0 ),
     TGroup( streamableInit )
 {

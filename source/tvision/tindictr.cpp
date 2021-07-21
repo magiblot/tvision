@@ -26,7 +26,7 @@
 
 #define cpIndicator "\x02\x03"
 
-TIndicator::TIndicator( const TRect& bounds ) :
+TIndicator::TIndicator( const TRect& bounds ) noexcept :
     TView( bounds ),
     location( TPoint() ),
     modified( False )
@@ -94,7 +94,7 @@ TStreamable *TIndicator::build()
     return new TIndicator( streamableInit );
 }
 
-TIndicator::TIndicator( StreamableInit ) : TView( streamableInit )
+TIndicator::TIndicator( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

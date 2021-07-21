@@ -97,7 +97,7 @@ void *TSortedCollection::read( ipstream& is )
 }
 
 
-TSortedCollection::TSortedCollection( StreamableInit ) :
+TSortedCollection::TSortedCollection( StreamableInit ) noexcept :
     TCollection( streamableInit )
 {
 }

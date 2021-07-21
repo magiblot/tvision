@@ -26,7 +26,7 @@
 
 #define cpFrame "\x01\x01\x02\x02\x03"
 
-TFrame::TFrame( const TRect& bounds ) : TView( bounds )
+TFrame::TFrame( const TRect& bounds ) noexcept : TView( bounds )
 {
     growMode = gfGrowHiX + gfGrowHiY;
     eventMask |= evBroadcast | evMouseUp;
@@ -213,7 +213,7 @@ TStreamable *TFrame::build()
     return new TFrame( streamableInit );
 }
 
-TFrame::TFrame( StreamableInit ) : TView( streamableInit )
+TFrame::TFrame( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

@@ -27,7 +27,7 @@
 
 #define cpLabel "\x07\x08\x09\x09"
 
-TLabel::TLabel( const TRect& bounds, TStringView aText, TView* aLink) :
+TLabel::TLabel( const TRect& bounds, TStringView aText, TView* aLink) noexcept :
     TStaticText( bounds, aText ),
     link( aLink ),
     light( False )
@@ -126,7 +126,7 @@ TStreamable *TLabel::build()
     return new TLabel( streamableInit );
 }
 
-TLabel::TLabel( StreamableInit ) : TStaticText( streamableInit )
+TLabel::TLabel( StreamableInit ) noexcept : TStaticText( streamableInit )
 {
 }
 

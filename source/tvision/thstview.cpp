@@ -35,7 +35,7 @@
 THistoryViewer::THistoryViewer( const TRect& bounds,
                                 TScrollBar *aHScrollBar,
                                 TScrollBar *aVScrollBar,
-                                ushort aHistoryId) :
+                                ushort aHistoryId ) noexcept :
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
     historyId( aHistoryId )
 {
@@ -84,7 +84,7 @@ void THistoryViewer::handleEvent( TEvent& event )
             TListViewer::handleEvent( event );
 }
 
-int THistoryViewer::historyWidth()
+int THistoryViewer::historyWidth() noexcept
 {
     int width = 0;
     int count = historyCount( historyId );

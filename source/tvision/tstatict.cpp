@@ -29,7 +29,7 @@
 
 #define cpStaticText "\x06"
 
-TStaticText::TStaticText( const TRect& bounds, TStringView aText ) :
+TStaticText::TStaticText( const TRect& bounds, TStringView aText ) noexcept :
     TView( bounds ),
     text( newStr( aText ) )
 {
@@ -136,7 +136,7 @@ TStreamable *TStaticText::build()
     return new TStaticText( streamableInit );
 }
 
-TStaticText::TStaticText( StreamableInit ) : TView( streamableInit )
+TStaticText::TStaticText( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

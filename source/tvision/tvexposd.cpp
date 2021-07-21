@@ -21,32 +21,32 @@ struct TVExposd {
     int eax, ebx, ecx, esi;
     TView *target;
 
-    TVExposd();
+    TVExposd() noexcept;
 
-    Boolean L0( TView* );
-    Boolean L1( TView* );
-    Boolean L10( TView* );
-    Boolean L11( TView* );
-    Boolean L12( TGroup* );
-    Boolean L13( TGroup* );
-    Boolean L20( TView* );
-    Boolean L21( TView* );
-    Boolean L22( TView* );
-    Boolean L23( TView* );
+    Boolean L0( TView* ) noexcept;
+    Boolean L1( TView* ) noexcept;
+    Boolean L10( TView* ) noexcept;
+    Boolean L11( TView* ) noexcept;
+    Boolean L12( TGroup* ) noexcept;
+    Boolean L13( TGroup* ) noexcept;
+    Boolean L20( TView* ) noexcept;
+    Boolean L21( TView* ) noexcept;
+    Boolean L22( TView* ) noexcept;
+    Boolean L23( TView* ) noexcept;
 
 };
 
-Boolean TView::exposed()
+Boolean TView::exposed() noexcept
 {
     return TVExposd().L0(this);
 }
 
-TVExposd::TVExposd() :
+TVExposd::TVExposd() noexcept :
     eax(0), ebx(0), ecx(0), esi(0), target(0)
 {
 }
 
-Boolean TVExposd::L0( TView *dest )
+Boolean TVExposd::L0( TView *dest ) noexcept
 {
     if (!(dest->state & sfExposed))
         return False;
@@ -55,7 +55,7 @@ Boolean TVExposd::L0( TView *dest )
     return L1(dest);
 }
 
-Boolean TVExposd::L1( TView *dest )
+Boolean TVExposd::L1( TView *dest ) noexcept
 {
     int i = 0;
     do {
@@ -69,7 +69,7 @@ Boolean TVExposd::L1( TView *dest )
     return False;
 }
 
-Boolean TVExposd::L10( TView *dest )
+Boolean TVExposd::L10( TView *dest ) noexcept
 {
     TGroup *owner = dest->owner;
     if (owner->buffer != 0 || owner->lockFlag != 0)
@@ -77,7 +77,7 @@ Boolean TVExposd::L10( TView *dest )
     return L11(owner);
 }
 
-Boolean TVExposd::L11( TView *dest )
+Boolean TVExposd::L11( TView *dest ) noexcept
 {
     target = dest;
     eax += dest->origin.y;
@@ -96,7 +96,7 @@ Boolean TVExposd::L11( TView *dest )
     return L12(owner);
 }
 
-Boolean TVExposd::L12( TGroup *owner )
+Boolean TVExposd::L12( TGroup *owner ) noexcept
 {
     if (ecx <= owner->clip.b.x)
         return L13(owner);
@@ -104,14 +104,14 @@ Boolean TVExposd::L12( TGroup *owner )
     return L13(owner);
 }
 
-Boolean TVExposd::L13( TGroup *owner )
+Boolean TVExposd::L13( TGroup *owner ) noexcept
 {
     if (ebx >= ecx)
         return True;
     return L20(owner->last);
 }
 
-Boolean TVExposd::L20( TView *dest )
+Boolean TVExposd::L20( TView *dest ) noexcept
 {
     TView *next = dest->next;
     if (next == target)
@@ -119,7 +119,7 @@ Boolean TVExposd::L20( TView *dest )
     return L21(next);
 }
 
-Boolean TVExposd::L21( TView *next )
+Boolean TVExposd::L21( TView *next ) noexcept
 {
     if (!(next->state & sfVisible))
         return L20(next);
@@ -141,7 +141,7 @@ Boolean TVExposd::L21( TView *next )
     return True;
 }
 
-Boolean TVExposd::L22( TView *next )
+Boolean TVExposd::L22( TView *next ) noexcept
 {
     if (ecx <= esi)
         return L20(next);
@@ -152,7 +152,7 @@ Boolean TVExposd::L22( TView *next )
     return L20(next);
 }
 
-Boolean TVExposd::L23( TView *next )
+Boolean TVExposd::L23( TView *next ) noexcept
 {
     TView *_target = target;
     int _esi = esi, _ecx = ecx, _eax = eax;

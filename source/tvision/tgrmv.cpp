@@ -16,7 +16,7 @@
 #define Uses_TView
 #include <tvision/tv.h>
 
-void TGroup::removeView( TView *p )
+void TGroup::removeView( TView *p ) noexcept
 {
     if (last)
     {

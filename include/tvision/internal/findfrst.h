@@ -24,10 +24,10 @@ class FindFirstRec
 
 public:
 
-    static FindFirstRec* allocate(struct find_t *, unsigned, const char *);
-    static FindFirstRec* get(struct find_t *);
+    static FindFirstRec* allocate(struct find_t *, unsigned, const char *) noexcept;
+    static FindFirstRec* get(struct find_t *) noexcept;
 
-    bool next();
+    bool next() noexcept;
 
 private:
 
@@ -43,21 +43,21 @@ private:
     std::string        fileName;
 #endif // _WIN32
 
-    bool open();
-    void close();
-    bool setParameters(unsigned, const char *);
-    bool attrMatch(unsigned attrib);
+    bool open() noexcept;
+    void close() noexcept;
+    bool setParameters(unsigned, const char *) noexcept;
+    bool attrMatch(unsigned attrib) noexcept;
 
 #ifndef _WIN32
-    bool setPath(const char*);
-    bool matchEntry(struct dirent*);
+    bool setPath(const char*) noexcept;
+    bool matchEntry(struct dirent*) noexcept;
 
-    static bool wildcardMatch(char const *wildcard, char const *filename);
-    unsigned cvtAttr(const struct stat *st, const char* filename);
-    static void cvtTime(const struct stat *st, struct find_t *fileinfo);
+    static bool wildcardMatch(char const *wildcard, char const *filename) noexcept;
+    unsigned cvtAttr(const struct stat *st, const char* filename) noexcept;
+    static void cvtTime(const struct stat *st, struct find_t *fileinfo) noexcept;
 #else
-    unsigned cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename);
-    static void cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo);
+    unsigned cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename) noexcept;
+    static void cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo) noexcept;
 #endif // _WIN32
 
     // A vector of FindFirstRec that deallocates all directory streams

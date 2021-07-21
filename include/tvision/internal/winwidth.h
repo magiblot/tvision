@@ -23,13 +23,13 @@ class WinWidth {
     std::unordered_map<uint32_t, short> results;
     HANDLE cnHandle {INVALID_HANDLE_VALUE};
 
-    WinWidth();
+    WinWidth() noexcept;
     ~WinWidth();
 
-    int calcWidth(TStringView);
-    void setUp();
-    void tearDown();
-    static bool valid(HANDLE h);
+    int calcWidth(TStringView) noexcept;
+    void setUp() noexcept;
+    void tearDown() noexcept;
+    static bool valid(HANDLE h) noexcept;
 
     static std::vector<WinWidth*> states;
     static std::mutex m;
@@ -38,18 +38,18 @@ class WinWidth {
 
 public:
 
-    static int mbcwidth(TStringView);
-    static void clearState();
+    static int mbcwidth(TStringView) noexcept;
+    static void clearState() noexcept;
 
 };
 
-inline bool WinWidth::valid(HANDLE h)
+inline bool WinWidth::valid(HANDLE h) noexcept
 {
     // INVALID_HANDLE_VALUE because it's what CreateConsoleScreenBuffer returns.
     return h != INVALID_HANDLE_VALUE;
 }
 
-inline int WinWidth::mbcwidth(TStringView mbc)
+inline int WinWidth::mbcwidth(TStringView mbc) noexcept
 // At most 4 characters will be read from 'mbc', because it is expected to
 // contain exactly one UTF-8 sequence. The result won't be what you expect
 // if you pass a longer string.

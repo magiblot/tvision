@@ -19,7 +19,7 @@
 
 TMultiCheckBoxes::TMultiCheckBoxes( TRect& bounds, TSItem* aStrings,
                                     uchar aSelRange, ushort aFlags,
-                                    const char* aStates) :
+                                    const char* aStates) noexcept :
     TCluster(bounds, aStrings)
 {
     selRange = aSelRange;
@@ -29,7 +29,7 @@ TMultiCheckBoxes::TMultiCheckBoxes( TRect& bounds, TSItem* aStrings,
 
 #if !defined(NO_STREAMABLE)
 
-TMultiCheckBoxes::TMultiCheckBoxes( StreamableInit ) :
+TMultiCheckBoxes::TMultiCheckBoxes( StreamableInit ) noexcept :
     TCluster( streamableInit )
 {
 }

@@ -17,7 +17,7 @@
 #include <tvision/tv.h>
 __link( RInputLine )
 
-TFileInputLine::TFileInputLine( StreamableInit ) :
+TFileInputLine::TFileInputLine( StreamableInit ) noexcept :
                 TInputLine( streamableInit)
 {
 }

@@ -16,8 +16,8 @@ class StdioCtl {
     StdioCtl() { setUp(); }
     ~StdioCtl() { tearDown(); }
 
-    void setUp();
-    void tearDown();
+    void setUp() noexcept;
+    void tearDown() noexcept;
 
     static StdioCtl instance;
 
@@ -51,8 +51,8 @@ class StdioCtl
 
     bool ownsConsole {};
 
-    void setUp();
-    void tearDown();
+    void setUp() noexcept;
+    void tearDown() noexcept;
 
     static StdioCtl instance;
 

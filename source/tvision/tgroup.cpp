@@ -24,7 +24,7 @@
 TView *TheTopView = 0;
 TGroup* ownerGroup = 0;
 
-TGroup::TGroup( const TRect& bounds ) :
+TGroup::TGroup( const TRect& bounds ) noexcept :
     TView(bounds), current( 0 ), last( 0 ), phase( phFocused ), buffer( 0 ),
     lockFlag( 0 ), endState( 0 )
 {
@@ -148,7 +148,7 @@ void TGroup::draw()
         }
 }
 
-void TGroup::drawSubViews( TView* p, TView* bottom )
+void TGroup::drawSubViews( TView* p, TView* bottom ) noexcept
 {
     while( p != bottom )
         {
@@ -186,7 +186,7 @@ ushort TGroup::execute()
     return endState;
 }
 
-ushort TGroup::execView( TView* p )
+ushort TGroup::execView( TView* p ) noexcept
 {
     if( p == 0 )
         return cmCancel;
@@ -214,7 +214,7 @@ ushort TGroup::execView( TView* p )
     return retval;
 }
 
-TView *TGroup::first()
+TView *TGroup::first() noexcept
 {
     if( last == 0 )
         return 0;
@@ -222,7 +222,7 @@ TView *TGroup::first()
         return last->next;
 }
 
-TView* TGroup::findNext(Boolean forwards)
+TView* TGroup::findNext(Boolean forwards) noexcept
 {
     TView* p, *result;
 
@@ -256,7 +256,7 @@ Boolean TGroup::focusNext(Boolean forwards)
         return True;
 }
 
-TView *TGroup::firstMatch( ushort aState, ushort aOptions )
+TView *TGroup::firstMatch( ushort aState, ushort aOptions ) noexcept
 {
     if( last == 0 )
         return 0;
@@ -274,7 +274,7 @@ TView *TGroup::firstMatch( ushort aState, ushort aOptions )
         }
 }
 
-void TGroup::freeBuffer()
+void TGroup::freeBuffer() noexcept
 {
     if( (options & ofBuffered) != 0 && buffer != 0 )
         {
@@ -283,7 +283,7 @@ void TGroup::freeBuffer()
         }
 }
 
-void TGroup::getBuffer()
+void TGroup::getBuffer() noexcept
 {
     if( (state & sfExposed) != 0 )
         if( (options & ofBuffered) != 0 )
@@ -384,7 +384,7 @@ void TGroup::handleEvent( TEvent& event )
         }
 }
 
-void TGroup::insert( TView* p )
+void TGroup::insert( TView* p ) noexcept
 {
     insertBefore( p, first() );
 }
@@ -407,7 +407,7 @@ void TGroup::insertBefore( TView *p, TView *Target )
         }
 }
 
-void TGroup::insertView( TView* p, TView* Target )
+void TGroup::insertView( TView* p, TView* Target ) noexcept
 {
     p->owner = this;
     if( Target != 0 )
@@ -429,13 +429,13 @@ void TGroup::insertView( TView* p, TView* Target )
         }
 }
 
-void TGroup::lock()
+void TGroup::lock() noexcept
 {
     if( buffer != 0 || lockFlag != 0 )
         lockFlag++;
 }
 
-void TGroup::redraw()
+void TGroup::redraw() noexcept
 {
     drawSubViews( first(), 0 );
 }
@@ -553,7 +553,7 @@ void TGroup::setState( ushort aState, Boolean enable )
         }
 }
 
-void TGroup::unlock()
+void TGroup::unlock() noexcept
 {
     if( lockFlag != 0 && --lockFlag == 0 )
         drawView();
@@ -650,7 +650,7 @@ TStreamable *TGroup::build()
     return new TGroup( streamableInit );
 }
 
-TGroup::TGroup( StreamableInit ) : TView( streamableInit )
+TGroup::TGroup( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

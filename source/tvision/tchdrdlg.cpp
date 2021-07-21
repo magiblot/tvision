@@ -41,7 +41,7 @@
 #include <strstrea.h>
 #endif
 
-TChDirDialog::TChDirDialog( ushort opts, ushort histId ) :
+TChDirDialog::TChDirDialog( ushort opts, ushort histId ) noexcept :
     TWindowInit( &TChDirDialog::initFrame ),
     TDialog( TRect( 16, 2, 64, 20 ), changeDirTitle )
 {
@@ -181,9 +181,10 @@ Boolean TChDirDialog::valid( ushort command )
 
     if( changeDir( path ) != 0 )
         {
-        char buf[256] = {0};
+        char buf[256];
         ostrstream os( buf, sizeof( buf )-1 );
         os << invalidText << ": '" << path << "'." << ends;
+        buf[sizeof( buf )-1] = '\0';
         messageBox( buf, mfError | mfOKButton );
         return False;
         }

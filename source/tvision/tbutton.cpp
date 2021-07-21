@@ -43,7 +43,7 @@ const int
 TButton::TButton( const TRect& bounds,
                   TStringView aTitle,
                   ushort aCommand,
-                  ushort aFlags) :
+                  ushort aFlags ) noexcept :
     TView( bounds ),
     title( newStr( aTitle ) ),
     command( aCommand ),

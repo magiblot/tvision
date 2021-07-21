@@ -28,7 +28,7 @@ class TBackground : public TView
 
 public:
 
-    TBackground( const TRect& bounds, char aPattern );
+    TBackground( const TRect& bounds, char aPattern ) noexcept;
     virtual void draw();
     virtual TPalette& getPalette() const;
 
@@ -41,7 +41,7 @@ private:
 
 protected:
 
-    TBackground( StreamableInit );
+    TBackground( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -77,7 +77,7 @@ class TDeskInit
 
 public:
 
-    TDeskInit( TBackground *(*cBackground)( TRect ) );
+    TDeskInit( TBackground *(*cBackground)( TRect ) ) noexcept;
 
 protected:
 
@@ -90,7 +90,7 @@ class TDeskTop : public TGroup, public virtual TDeskInit
 
 public:
 
-    TDeskTop( const TRect& );
+    TDeskTop( const TRect& ) noexcept;
 
     void cascade( const TRect& );
     virtual void handleEvent( TEvent& );
@@ -114,7 +114,7 @@ private:
 
 protected:
 
-    TDeskTop( StreamableInit );
+    TDeskTop( StreamableInit ) noexcept;
 
 public:
 
@@ -216,7 +216,7 @@ public:
     TProgInit( TStatusLine *(*cStatusLine)( TRect ),
                TMenuBar *(*cMenuBar)( TRect ),
                TDeskTop *(*cDeskTop )( TRect )
-             );
+             ) noexcept;
 
 protected:
 
@@ -254,7 +254,7 @@ class TProgram : public TGroup, public virtual TProgInit
 
 public:
 
-    TProgram();
+    TProgram() noexcept;
     virtual ~TProgram();
 
     virtual Boolean canMoveFocus();
@@ -270,7 +270,7 @@ public:
     virtual void run();
     virtual TWindow* insertWindow(TWindow*);
     void setScreenMode( ushort mode );
-    TView *validView( TView *p );
+    TView *validView( TView *p ) noexcept;
     virtual void shutDown();
 
     virtual void suspend() {}
@@ -307,7 +307,7 @@ class TStaticInit
 {
 
 public:
-    TStaticInit();
+    TStaticInit() noexcept;
 
 };
 
@@ -317,7 +317,7 @@ class TApplication : public TProgram, public virtual TStaticInit
 
 protected:
 
-    TApplication();
+    TApplication() noexcept;
     virtual ~TApplication();
 
 public:

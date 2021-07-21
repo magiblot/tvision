@@ -21,7 +21,7 @@
 #define Uses_TDeskTop
 #include <tvision/tv.h>
 
-TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) :
+TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu) noexcept :
     TMenuBox( bounds, aMenu, aParentMenu )
 {
     putClickEventOnExit = False;
@@ -65,7 +65,7 @@ TStreamable *TMenuPopup::build()
     return new TMenuPopup( streamableInit );
 }
 
-TMenuPopup::TMenuPopup( StreamableInit ) : TMenuBox( streamableInit )
+TMenuPopup::TMenuPopup( StreamableInit ) noexcept : TMenuBox( streamableInit )
 {
 }
 

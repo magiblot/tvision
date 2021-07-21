@@ -47,7 +47,7 @@
 
 static TColorIndex* colorIndexes = 0;
 
-TColorItem::TColorItem( const char *nm, uchar idx, TColorItem *nxt )
+TColorItem::TColorItem( const char *nm, uchar idx, TColorItem *nxt ) noexcept
 {
     index = idx;
     next = nxt;
@@ -59,7 +59,7 @@ TColorItem::~TColorItem()
     delete[] (char *) name;
 }
 
-TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt )
+TColorGroup::TColorGroup( const char *nm, TColorItem *itm, TColorGroup *nxt ) noexcept
 {
     items = itm;
     next = nxt;
@@ -71,7 +71,7 @@ TColorGroup::~TColorGroup()
     delete[] (char *) name;
 }
 
-TColorItem& operator + ( TColorItem& i1, TColorItem& i2 )
+TColorItem& operator + ( TColorItem& i1, TColorItem& i2 ) noexcept
 {
     TColorItem *cur = &i1;
     while( cur->next != 0 )
@@ -80,7 +80,7 @@ TColorItem& operator + ( TColorItem& i1, TColorItem& i2 )
     return i1;
 }
 
-TColorGroup& operator + ( TColorGroup& g, TColorItem& i )
+TColorGroup& operator + ( TColorGroup& g, TColorItem& i ) noexcept
 {
     TColorGroup *grp = &g;
     while( grp->next != 0 )
@@ -98,7 +98,7 @@ TColorGroup& operator + ( TColorGroup& g, TColorItem& i )
     return g;
 }
 
-TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 )
+TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 ) noexcept
 {
     TColorGroup *cur = &g1;
     while( cur->next != 0 )
@@ -108,7 +108,7 @@ TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 )
 }
 
 
-TColorSelector::TColorSelector( const TRect& bounds, ColorSel aSelType ) :
+TColorSelector::TColorSelector( const TRect& bounds, ColorSel aSelType ) noexcept :
     TView( bounds )
 {
     options |= ofSelectable | ofFirstClick | ofFramed;
@@ -258,7 +258,7 @@ TStreamable *TColorSelector::build()
     return new TColorSelector( streamableInit );
 }
 
-TColorSelector::TColorSelector( StreamableInit ) : TView( streamableInit )
+TColorSelector::TColorSelector( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 
@@ -266,7 +266,7 @@ TColorSelector::TColorSelector( StreamableInit ) : TView( streamableInit )
 
 const uchar monoColors[] = { 0x07, 0x0F, 0x01, 0x70, 0x09 };
 
-TMonoSelector::TMonoSelector( const TRect& bounds ) :
+TMonoSelector::TMonoSelector( const TRect& bounds ) noexcept :
     TCluster( bounds, new TSItem( normal,
                       new TSItem( highlight,
                       new TSItem( underline,
@@ -322,14 +322,14 @@ TStreamable *TMonoSelector::build()
     return new TMonoSelector( streamableInit );
 }
 
-TMonoSelector::TMonoSelector( StreamableInit ) : TCluster( streamableInit )
+TMonoSelector::TMonoSelector( StreamableInit ) noexcept : TCluster( streamableInit )
 {
 }
 
 #endif
 
 
-TColorDisplay::TColorDisplay( const TRect& bounds, TStringView aText ) :
+TColorDisplay::TColorDisplay( const TRect& bounds, TStringView aText ) noexcept :
     TView( bounds ),
     color( 0 ),
     text( newStr( aText ) )
@@ -399,7 +399,7 @@ TStreamable *TColorDisplay::build()
     return new TColorDisplay( streamableInit );
 }
 
-TColorDisplay::TColorDisplay( StreamableInit ) : TView( streamableInit )
+TColorDisplay::TColorDisplay( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 
@@ -408,7 +408,7 @@ TColorDisplay::TColorDisplay( StreamableInit ) : TView( streamableInit )
 TColorGroupList::TColorGroupList( const TRect& bounds,
                                   TScrollBar *aScrollBar,
                                   TColorGroup *aGroups
-                                ) :
+                                ) noexcept :
     TListViewer( bounds, 1, 0, aScrollBar ),
     groups( aGroups )
 {
@@ -421,7 +421,7 @@ TColorGroupList::TColorGroupList( const TRect& bounds,
     setRange(i);
 }
 
-static void freeItems( TColorItem *curItem )
+static void freeItems( TColorItem *curItem ) noexcept
 {
     while( curItem != 0 )
         {
@@ -431,7 +431,7 @@ static void freeItems( TColorItem *curItem )
         }
 }
 
-static void freeGroups( TColorGroup *curGroup )
+static void freeGroups( TColorGroup *curGroup ) noexcept
 {
     while( curGroup != 0 )
         {
@@ -605,7 +605,7 @@ TStreamable *TColorGroupList::build()
     return new TColorGroupList( streamableInit );
 }
 
-TColorGroupList::TColorGroupList( StreamableInit ) :
+TColorGroupList::TColorGroupList( StreamableInit ) noexcept :
     TListViewer( streamableInit )
 {
 }
@@ -615,7 +615,7 @@ TColorGroupList::TColorGroupList( StreamableInit ) :
 TColorItemList::TColorItemList( const TRect& bounds,
                                 TScrollBar *aScrollBar,
                                 TColorItem *aItems
-                              ) :
+                              ) noexcept :
     TListViewer( bounds, 1, 0, aScrollBar ),
     items( aItems )
 {
@@ -684,14 +684,14 @@ TStreamable *TColorItemList::build()
     return new TColorItemList( streamableInit );
 }
 
-TColorItemList::TColorItemList( StreamableInit ) :
+TColorItemList::TColorItemList( StreamableInit ) noexcept :
     TListViewer( streamableInit )
 {
 }
 
 #endif
 
-TColorDialog::TColorDialog( TPalette *aPalette, TColorGroup *aGroups ):
+TColorDialog::TColorDialog( TPalette *aPalette, TColorGroup *aGroups ) noexcept :
     TWindowInit( &TColorDialog::initFrame ),
     TDialog( TRect( 0, 0, 61, 18 ), colors )
 {
@@ -854,7 +854,7 @@ TStreamable *TColorDialog::build()
     return new TColorDialog( streamableInit );
 }
 
-TColorDialog::TColorDialog( StreamableInit ) :
+TColorDialog::TColorDialog( StreamableInit ) noexcept :
     TWindowInit( 0 ),
     TDialog( streamableInit )
 {

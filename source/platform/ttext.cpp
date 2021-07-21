@@ -37,7 +37,7 @@ static const uint8_t utf8d[] =
 };
 
 static inline
-uint32_t decode_utf8(uint32_t* state, uint32_t* codep, uint8_t byte)
+uint32_t decode_utf8(uint32_t* state, uint32_t* codep, uint8_t byte) noexcept
 {
     uint32_t type = utf8d[byte];
 
@@ -52,7 +52,7 @@ uint32_t decode_utf8(uint32_t* state, uint32_t* codep, uint8_t byte)
 namespace ttext
 {
 
-    static int mbtowc(char32_t &wc, TStringView text)
+    static int mbtowc(char32_t &wc, TStringView text) noexcept
     // Returns n >= 1 if 'text' begins with a UTF-8 multibyte character that's
     // 'n' bytes long, -1 otherwise.
     {
@@ -73,21 +73,21 @@ namespace ttext
         return -1;
     }
 
-    static int charWidth(TStringView mbc, char32_t wc)
+    static int charWidth(TStringView mbc, char32_t wc) noexcept
     {
         return PlatformStrategy::instance->charWidth(mbc, wc);
     }
 
 }
 
-int TText::mblen(TStringView text)
+int TText::mblen(TStringView text) noexcept
 {
     using namespace ttext;
     char32_t wc;
     return mbtowc(wc, text);
 }
 
-TText::mbstat_r TText::mbstat(TStringView text)
+TText::mbstat_r TText::mbstat(TStringView text) noexcept
 {
     using namespace ttext;
     char32_t wc;
@@ -150,7 +150,7 @@ namespace ttext
 } // namespace ttext
 
 TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
-                                  TStringView text, size_t j )
+                                  TStringView text, size_t j ) noexcept
 {
     using namespace ttext;
     if (j < text.size())
@@ -213,7 +213,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
 }
 
 TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
-                                  TSpan<const uint32_t> textU32, size_t j )
+                                  TSpan<const uint32_t> textU32, size_t j ) noexcept
 {
     using namespace ttext;
     if (j < textU32.size())

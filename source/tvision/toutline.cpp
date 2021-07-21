@@ -24,7 +24,7 @@
 #include <string.h>
 
 TOutlineViewer::TOutlineViewer(const TRect& bounds, TScrollBar* aHScrollBar,
-  TScrollBar* aVScrollBar) : TScroller(bounds, aHScrollBar, aVScrollBar)
+  TScrollBar* aVScrollBar) noexcept : TScroller(bounds, aHScrollBar, aVScrollBar)
 {
   growMode = gfGrowHiX + gfGrowHiY;
   foc = 0;
@@ -32,7 +32,7 @@ TOutlineViewer::TOutlineViewer(const TRect& bounds, TScrollBar* aHScrollBar,
 
 // Called internally to ensure the focus is within range and displayed
 
-void TOutlineViewer::adjustFocus(int newFocus)
+void TOutlineViewer::adjustFocus(int newFocus) noexcept
 {
   if (newFocus < 0)
    newFocus = 0;
@@ -163,7 +163,7 @@ void TOutlineViewer::expandAll(TNode* node)
 */
 
 char* TOutlineViewer::createGraph(int level, long lines, ushort flags,
- int levWidth, int endWidth,  const char* chars)
+ int levWidth, int endWidth,  const char* chars) noexcept
 {
   static const int
     FillerOrBar      = 0,
@@ -235,12 +235,12 @@ static Boolean visitNoArg( TOutlineViewer* outLine, TNode* cur, int level,
     Flags:     Various flags for drawing (see ovXXXX flags).  Can be used
                in a call to getGraph or createGraph.
 */
-TNode* TOutlineViewer::firstThat(TOutlineVisitor test, void* arg)
+TNode* TOutlineViewer::firstThat(TOutlineVisitor test, void* arg) noexcept
 {
   return iterate(test, arg, True);
 }
 
-TNode* TOutlineViewer::firstThat(TOutlineVisitorNoArg test)
+TNode* TOutlineViewer::firstThat(TOutlineVisitorNoArg test) noexcept
 {
   return iterate(visitNoArg, &test, True);
 }
@@ -323,7 +323,7 @@ static TNode* traverseTree( TOutlineViewer* outLine,
 
 
 TNode* TOutlineViewer::iterate( TOutlineVisitor action, void *arg,
-                                Boolean checkResult )
+                                Boolean checkResult ) noexcept
 {
   int position = -1;
   TNode *root = getRoot();
@@ -336,12 +336,12 @@ TNode* TOutlineViewer::iterate( TOutlineVisitor action, void *arg,
 
 // Iterates over all the nodes.     See FirstThat for a more details
 
-TNode* TOutlineViewer::forEach(TOutlineVisitor action, void *arg)
+TNode* TOutlineViewer::forEach(TOutlineVisitor action, void *arg) noexcept
 {
   return iterate(action, arg, False);
 }
 
-TNode* TOutlineViewer::forEach(TOutlineVisitorNoArg action)
+TNode* TOutlineViewer::forEach(TOutlineVisitorNoArg action) noexcept
 {
   return iterate(visitNoArg, &action, False);
 }
@@ -586,7 +586,7 @@ static Boolean countNode( TOutlineViewer* beingCounted, TNode* p, int level,
   of the TOutlineViewer the data being displayed changes, Update
   and DrawView must be called. }
 */
-void TOutlineViewer::update()
+void TOutlineViewer::update() noexcept
 {
   updateCount = 0;
   updateMaxX = 0;
@@ -595,8 +595,8 @@ void TOutlineViewer::update()
   adjustFocus(foc);
 }
 
-void TOutlineViewer::disposeNode(TNode* node)
-{  
+void TOutlineViewer::disposeNode(TNode* node) noexcept
+{
   if (node)
   {
       if (node->childList)
@@ -627,7 +627,7 @@ void TOutlineViewer::write(opstream& op)
 // TOutline
 
 TOutline::TOutline(const TRect& bounds, TScrollBar* aHScrollBar,
-                        TScrollBar* aVScrollBar,  TNode* aRoot) :
+                        TScrollBar* aVScrollBar,  TNode* aRoot) noexcept :
                 TOutlineViewer(bounds,    aHScrollBar, aVScrollBar)
 {
   root = aRoot;

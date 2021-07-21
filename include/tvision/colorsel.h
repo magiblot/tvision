@@ -34,9 +34,9 @@ const int
 class _FAR TColorItem;
 class _FAR TColorGroup;
 
-TColorItem& operator + ( TColorItem& i1, TColorItem& i2 );
-TColorGroup& operator + ( TColorGroup& g, TColorItem& i );
-TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 );
+TColorItem& operator + ( TColorItem& i1, TColorItem& i2 ) noexcept;
+TColorGroup& operator + ( TColorGroup& g, TColorItem& i ) noexcept;
+TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 ) noexcept;
 
 #if defined( Uses_TColorItem ) && !defined( __TColorItem )
 #define __TColorItem
@@ -48,13 +48,13 @@ class TColorItem
 
 public:
 
-    TColorItem( const char *nm, uchar idx, TColorItem *nxt = 0 );
+    TColorItem( const char *nm, uchar idx, TColorItem *nxt = 0 ) noexcept;
     virtual ~TColorItem();
     const char *name;
     uchar index;
     TColorItem *next;
-    friend TColorGroup& operator + ( TColorGroup&, TColorItem& );
-    friend TColorItem& operator + ( TColorItem& i1, TColorItem& i2 );
+    friend TColorGroup& operator + ( TColorGroup&, TColorItem& ) noexcept;
+    friend TColorItem& operator + ( TColorItem& i1, TColorItem& i2 ) noexcept;
 
 };
 
@@ -70,14 +70,14 @@ class TColorGroup
 
 public:
 
-    TColorGroup( const char *nm, TColorItem *itm = 0, TColorGroup *nxt = 0 );
+    TColorGroup( const char *nm, TColorItem *itm = 0, TColorGroup *nxt = 0 ) noexcept;
     virtual ~TColorGroup();
     const char *name;
     uchar index;
     TColorItem *items;
     TColorGroup *next;
-    friend TColorGroup& operator + ( TColorGroup&, TColorItem& );
-    friend TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 );
+    friend TColorGroup& operator + ( TColorGroup&, TColorItem& ) noexcept;
+    friend TColorGroup& operator + ( TColorGroup& g1, TColorGroup& g2 ) noexcept;
 
 
 };
@@ -106,7 +106,7 @@ public:
 
     enum ColorSel { csBackground, csForeground };
 
-    TColorSelector( const TRect& Bounds, ColorSel ASelType );
+    TColorSelector( const TRect& Bounds, ColorSel ASelType ) noexcept;
     virtual void draw();
     virtual void handleEvent( TEvent& event );
 
@@ -126,7 +126,7 @@ private:
 
 protected:
 
-    TColorSelector( StreamableInit );
+    TColorSelector( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -161,7 +161,7 @@ class TMonoSelector : public TCluster
 
 public:
 
-    TMonoSelector( const TRect& bounds );
+    TMonoSelector( const TRect& bounds ) noexcept;
     virtual void draw();
     virtual void handleEvent( TEvent& event );
     virtual Boolean mark( int item );
@@ -182,7 +182,7 @@ private:
 
 protected:
 
-    TMonoSelector( StreamableInit );
+    TMonoSelector( StreamableInit ) noexcept;
 
 public:
 
@@ -214,7 +214,7 @@ class TColorDisplay : public TView
 
 public:
 
-    TColorDisplay( const TRect& bounds, TStringView aText );
+    TColorDisplay( const TRect& bounds, TStringView aText ) noexcept;
     virtual ~TColorDisplay();
     virtual void draw();
     virtual void handleEvent( TEvent& event );
@@ -232,7 +232,7 @@ private:
 
 protected:
 
-    TColorDisplay( StreamableInit );
+    TColorDisplay( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -272,7 +272,7 @@ public:
     TColorGroupList( const TRect& bounds,
                      TScrollBar *aScrollBar,
                      TColorGroup *aGroups
-                   );
+                   ) noexcept;
     virtual ~TColorGroupList();
     virtual void focusItem( short item );
     virtual void getText( char *dest, short item, short maxLen );
@@ -295,7 +295,7 @@ private:
 
 protected:
 
-    TColorGroupList( StreamableInit );
+    TColorGroupList( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -339,7 +339,7 @@ public:
     TColorItemList( const TRect& bounds,
                     TScrollBar *aScrollBar,
                     TColorItem *aItems
-                  );
+                  ) noexcept;
     virtual void focusItem( short item );
     virtual void getText( char *dest, short item, short maxLen );
     virtual void handleEvent( TEvent& event );
@@ -355,7 +355,7 @@ private:
 
 protected:
 
-    TColorItemList( StreamableInit );
+    TColorItemList( StreamableInit ) noexcept;
 
 public:
 
@@ -394,7 +394,7 @@ class TColorDialog : public TDialog
 
 public:
 
-    TColorDialog( TPalette *aPalette, TColorGroup *aGroups );
+    TColorDialog( TPalette *aPalette, TColorGroup *aGroups ) noexcept;
     ~TColorDialog();
     virtual ushort dataSize();
     virtual void getData( void *rec );
@@ -432,7 +432,7 @@ private:
 
 protected:
 
-    TColorDialog( StreamableInit );
+    TColorDialog( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 

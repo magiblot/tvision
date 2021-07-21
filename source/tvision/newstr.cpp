@@ -19,7 +19,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-char *newStr( TStringView s )
+char *newStr( TStringView s ) noexcept
 {
     if( s.data() == 0 )
         return 0;

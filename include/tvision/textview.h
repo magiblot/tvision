@@ -39,7 +39,7 @@ public:
                  TScrollBar *aHScrollBar,
                  TScrollBar *aVScrollBar,
                  ushort aBufSize = 256
-               );
+               ) noexcept;
     ~TTextDevice();
 
     virtual int do_sputn( const char *s, int count ) = 0;
@@ -70,7 +70,7 @@ public:
                TScrollBar *aHScrollBar,
                TScrollBar *aVScrollBar,
                ushort aBufSize
-             );
+             ) noexcept;
     ~TTerminal();
 
     virtual int do_sputn( const char *s, int count );

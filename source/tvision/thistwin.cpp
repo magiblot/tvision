@@ -18,7 +18,7 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-THistInit::THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) :
+THistInit::THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) noexcept :
     createListViewer( cListViewer )
 {
 }
@@ -26,7 +26,7 @@ THistInit::THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) 
 #define cpHistoryWindow "\x13\x13\x15\x18\x17\x13\x14"
 
 THistoryWindow::THistoryWindow( const TRect& bounds,
-                                ushort historyId ) :
+                                ushort historyId ) noexcept :
     TWindowInit( &THistoryWindow::initFrame ),
     THistInit( &THistoryWindow::initViewer ),
     TWindow( bounds, 0, wnNoNumber )

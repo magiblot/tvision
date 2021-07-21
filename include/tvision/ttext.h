@@ -19,33 +19,33 @@ class TText {
 
 public:
 
-    static size_t next(TStringView text);
-    static size_t prev(TStringView text, size_t index);
-    static size_t wseek(TStringView text, int count, Boolean incRemainder=True);
+    static size_t next(TStringView text) noexcept;
+    static size_t prev(TStringView text, size_t index) noexcept;
+    static size_t wseek(TStringView text, int count, Boolean incRemainder=True) noexcept;
 
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text);
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr);
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text) noexcept;
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr) noexcept;
 #ifndef __BORLANDC__
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, uchar attr);
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, uchar attr) noexcept;
     template<class Func>
-    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
+    static size_t fill(TSpan<TScreenCell> cells, TStringView text, Func &&func) noexcept;
 #endif
 
-    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
-    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TSpan<const uint32_t> text, size_t &j);
-    static Boolean next(TStringView text, size_t &bytes, size_t &width);
-    static Boolean next(TStringView text, size_t &bytes);
-    static void wseek(TStringView text, size_t &index, size_t &remainder, int count);
+    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j) noexcept;
+    static Boolean eat(TSpan<TScreenCell> cells, size_t &i, TSpan<const uint32_t> text, size_t &j) noexcept;
+    static Boolean next(TStringView text, size_t &bytes, size_t &width) noexcept;
+    static Boolean next(TStringView text, size_t &bytes) noexcept;
+    static void wseek(TStringView text, size_t &index, size_t &remainder, int count) noexcept;
 
 private:
 
 #ifndef __BORLANDC__
     struct mbstat_r { int length, width; };
-    static mbstat_r mbstat(TStringView text);
-    static int mblen(TStringView text);
+    static mbstat_r mbstat(TStringView text) noexcept;
+    static int mblen(TStringView text) noexcept;
     struct eat_r { int ok, width, length; };
-    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TStringView, size_t);
-    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TSpan<const uint32_t>, size_t);
+    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TStringView, size_t) noexcept;
+    static eat_r eat_internal(TSpan<TScreenCell>, size_t, TSpan<const uint32_t>, size_t) noexcept;
 #endif // __BORLANDC__
 
 };
@@ -127,7 +127,7 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
 
 #else
 
-inline size_t TText::next(TStringView text)
+inline size_t TText::next(TStringView text) noexcept
 // Measures the length in bytes of the first multibyte character in 'text'.
 // If the sequence is not valid UTF-8, length is 1.
 {
@@ -139,7 +139,7 @@ inline size_t TText::next(TStringView text)
     return 0;
 }
 
-inline size_t TText::prev(TStringView text, size_t index)
+inline size_t TText::prev(TStringView text, size_t index) noexcept
 // Measures the length in bytes of the character in 'text' right before position 'index'.
 // If 'index' > 0 and that position is not preceded by a valid UTF-8 sequence, length is 1.
 {
@@ -159,7 +159,7 @@ inline size_t TText::prev(TStringView text, size_t index)
     return 0;
 }
 
-inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder)
+inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder) noexcept
 // Seeks a string by an amount of display columns ('count'). If that amount
 // partially overlaps a multi-column character, the whole character is included,
 // unless 'incRemainder' is False.
@@ -172,7 +172,7 @@ inline size_t TText::wseek(TStringView text, int count, Boolean incRemainder)
     return index;
 }
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text) noexcept
 // Tries to fill all the cells in the 'cells' span with characters from 'text'.
 // Preserves the attributes of filled cells.
 // Returns the number of cells filled, which will be smaller than cells.size()
@@ -185,7 +185,7 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text)
 }
 
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr) noexcept
 // Same as above, but sets the attributes of filled cells to 'attr'.
 {
     size_t w = 0, b = 0;
@@ -196,13 +196,13 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr
     return w;
 }
 
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, uchar attr)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, uchar attr) noexcept
 {
     return TText::fill(cells, text, TColorAttr {attr});
 }
 
 template<class Func>
-inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func)
+inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func) noexcept
 // Similar to the above, but gives total control over every iterated color attribute
 // through the 'func' callback. 'func' takes a TColorAttr& by parameter.
 // A possible use case for this is if you need to modify the color attributes
@@ -221,7 +221,7 @@ inline size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&fun
 }
 
 inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
-                           TStringView text, size_t &j )
+                           TStringView text, size_t &j ) noexcept
 // Reads a single character from a multibyte-encoded string, and writes it into
 // a screen cell.
 //
@@ -252,7 +252,7 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
 }
 
 inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
-                           TSpan<const uint32_t> text, size_t &j )
+                           TSpan<const uint32_t> text, size_t &j ) noexcept
 // Same as above, but 'text' is an array of UTF-32 codepoints.
 {
     auto result = eat_internal(cells, i, text, j);
@@ -261,7 +261,7 @@ inline Boolean TText::eat( TSpan<TScreenCell> cells, size_t &i,
     return result.ok;
 }
 
-inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
+inline Boolean TText::next(TStringView text, size_t &index, size_t &width) noexcept
 // Measures the length and width of the character starting at '&text[index]'.
 //
 // * text: input text.
@@ -290,7 +290,7 @@ inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
     return false;
 }
 
-inline Boolean TText::next(TStringView text, size_t &index)
+inline Boolean TText::next(TStringView text, size_t &index) noexcept
 // Measures the length of the character starting at '&text[index]'.
 //
 // * text: input text.
@@ -308,7 +308,7 @@ inline Boolean TText::next(TStringView text, size_t &index)
     return false;
 }
 
-inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count)
+inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count) noexcept
 // Seeks a string by an amount of display columns. If that amount overlaps a multi-column
 // character, 'index' is left pointing to the next character and 'remainder' is set to
 // the number of extra seeked columns.

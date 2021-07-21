@@ -103,7 +103,7 @@ class TDialog : public TWindow
 
 public:
 
-    TDialog( const TRect& bounds, TStringView aTitle );
+    TDialog( const TRect& bounds, TStringView aTitle ) noexcept;
 
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
@@ -116,7 +116,7 @@ private:
 
 protected:
 
-    TDialog( StreamableInit );
+    TDialog( StreamableInit ) noexcept;
 
 public:
 
@@ -159,7 +159,7 @@ class TInputLine : public TView
 
 public:
 
-    TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid = 0 );
+    TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid = 0 ) noexcept;
     ~TInputLine();
 
     virtual ushort dataSize();
@@ -210,7 +210,7 @@ private:
 
 protected:
 
-    TInputLine( StreamableInit );
+    TInputLine( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -263,7 +263,7 @@ public:
              TStringView aTitle,
              ushort aCommand,
              ushort aFlags
-           );
+           ) noexcept;
     ~TButton();
 
     virtual void draw();
@@ -296,7 +296,7 @@ private:
 
 protected:
 
-    TButton( StreamableInit ): TView( streamableInit ) {};
+    TButton( StreamableInit ) noexcept : TView( streamableInit ) {};
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -328,7 +328,7 @@ class TSItem
 
 public:
 
-    TSItem( TStringView aValue, TSItem *aNext )
+    TSItem( TStringView aValue, TSItem *aNext ) noexcept
         { value = newStr(aValue); next = aNext; }
     ~TSItem() { delete[] (char *) value; }
 
@@ -363,7 +363,7 @@ class TCluster : public TView
 
 public:
 
-    TCluster( const TRect& bounds, TSItem *aStrings );
+    TCluster( const TRect& bounds, TSItem *aStrings ) noexcept;
     ~TCluster();
 
     virtual ushort dataSize();
@@ -401,7 +401,7 @@ private:
 
 protected:
 
-    TCluster( StreamableInit );
+    TCluster( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -448,7 +448,7 @@ class TRadioButtons : public TCluster
 
 public:
 
-    TRadioButtons( const TRect& bounds, TSItem *aStrings );
+    TRadioButtons( const TRect& bounds, TSItem *aStrings ) noexcept;
 
     virtual void draw();
     virtual Boolean mark( int item );
@@ -464,7 +464,7 @@ private:
 
 protected:
 
-    TRadioButtons( StreamableInit );
+    TRadioButtons( StreamableInit ) noexcept;
 
 public:
 
@@ -483,7 +483,7 @@ inline opstream& operator << ( opstream& os, TRadioButtons& cl )
 inline opstream& operator << ( opstream& os, TRadioButtons* cl )
     { return os << (TStreamable *)cl; }
 
-inline TRadioButtons::TRadioButtons( const TRect& bounds, TSItem *aStrings ) :
+inline TRadioButtons::TRadioButtons( const TRect& bounds, TSItem *aStrings ) noexcept :
     TCluster( bounds, aStrings )
 {
 }
@@ -512,7 +512,7 @@ class TCheckBoxes : public TCluster
 
 public:
 
-    TCheckBoxes( const TRect& bounds, TSItem *aStrings);
+    TCheckBoxes( const TRect& bounds, TSItem *aStrings) noexcept;
 
     virtual void draw();
 
@@ -528,7 +528,7 @@ private:
 
 protected:
 
-    TCheckBoxes( StreamableInit );
+    TCheckBoxes( StreamableInit ) noexcept;
 
 public:
 
@@ -547,7 +547,7 @@ inline opstream& operator << ( opstream& os, TCheckBoxes& cl )
 inline opstream& operator << ( opstream& os, TCheckBoxes* cl )
     { return os << (TStreamable *)cl; }
 
-inline TCheckBoxes::TCheckBoxes( const TRect& bounds, TSItem *aStrings) :
+inline TCheckBoxes::TCheckBoxes( const TRect& bounds, TSItem *aStrings) noexcept :
     TCluster( bounds, aStrings )
 {
 }
@@ -579,7 +579,7 @@ class _FAR TSItem;
 class TMultiCheckBoxes : public TCluster
 {
 public:
-    TMultiCheckBoxes(TRect&, TSItem*, uchar, ushort, const char*);
+    TMultiCheckBoxes(TRect&, TSItem*, uchar, ushort, const char*) noexcept;
     ~TMultiCheckBoxes();
     virtual ushort dataSize();
     virtual void draw();
@@ -598,7 +598,7 @@ private:
 
 protected:
 
-    TMultiCheckBoxes( StreamableInit );
+    TMultiCheckBoxes( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -639,7 +639,7 @@ class TListBox : public TListViewer
 
 public:
 
-    TListBox( const TRect& bounds, ushort aNumCols, TScrollBar *aScrollBar );
+    TListBox( const TRect& bounds, ushort aNumCols, TScrollBar *aScrollBar ) noexcept;
     ~TListBox();
 
     virtual ushort dataSize();
@@ -659,7 +659,7 @@ protected:
 
     TCollection *items;
 
-    TListBox( StreamableInit );
+    TListBox( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -705,7 +705,7 @@ class TStaticText : public TView
 
 public:
 
-    TStaticText( const TRect& bounds, TStringView aText );
+    TStaticText( const TRect& bounds, TStringView aText ) noexcept;
     ~TStaticText();
 
     virtual void draw();
@@ -723,7 +723,7 @@ private:
 
 protected:
 
-    TStaticText( StreamableInit );
+    TStaticText( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -763,7 +763,7 @@ class TParamText : public TStaticText
 {
 
 public:
-    TParamText( const TRect& bounds );
+    TParamText( const TRect& bounds ) noexcept;
     ~TParamText();
 
     virtual void getText( char *str );
@@ -781,7 +781,7 @@ private:
 
 protected:
 
-    TParamText( StreamableInit );
+    TParamText( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -827,7 +827,7 @@ class TLabel : public TStaticText
 
 public:
 
-    TLabel( const TRect& bounds, TStringView aText, TView *aLink );
+    TLabel( const TRect& bounds, TStringView aText, TView *aLink ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -847,7 +847,7 @@ private:
 
 protected:
 
-    TLabel( StreamableInit );
+    TLabel( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -897,12 +897,12 @@ public:
                     TScrollBar *aHScrollBar,
                     TScrollBar *aVScrollBar,
                     ushort aHistoryId
-                  );
+                  ) noexcept;
 
     virtual TPalette& getPalette() const;
     virtual void getText( char *dest, short item, short maxLen );
     virtual void handleEvent( TEvent& event );
-    int historyWidth();
+    int historyWidth() noexcept;
 
 protected:
 
@@ -925,7 +925,7 @@ class THistInit
 
 public:
 
-    THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) );
+    THistInit( TListViewer *(*cListViewer)( TRect, TWindow *, ushort ) ) noexcept;
 
 protected:
 
@@ -951,7 +951,7 @@ class THistoryWindow : public TWindow, public virtual THistInit
 
 public:
 
-    THistoryWindow( const TRect& bounds, ushort historyId );
+    THistoryWindow( const TRect& bounds, ushort historyId ) noexcept;
 
     virtual TPalette& getPalette() const;
     virtual void getSelection( char *dest );
@@ -978,7 +978,7 @@ class THistory : public TView
 
 public:
 
-    THistory( const TRect& bounds, TInputLine *aLink, ushort aHistoryId );
+    THistory( const TRect& bounds, TInputLine *aLink, ushort aHistoryId ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -1001,7 +1001,7 @@ private:
 
 protected:
 
-    THistory( StreamableInit );
+    THistory( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 

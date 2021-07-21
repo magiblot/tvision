@@ -48,65 +48,65 @@ class THardwareInfo
 
 public:
 
-    THardwareInfo();
+    THardwareInfo() noexcept;
 #ifndef __BORLANDC__
     enum { eventQSize = 24 };
     static TEvent eventQ[eventQSize];
     static size_t eventCount;
-    static void flushScreen();
+    static void flushScreen() noexcept;
 #endif
 
-    static ulong getTickCount();
+    static ulong getTickCount() noexcept;
 
 #if defined( __FLAT__ )
 
     enum ConsoleType { cnInput = 0, cnOutput = 1, cnStartup = 2 };
     enum PlatformType { plDPMI32 = 1, plWinNT = 2, plOS2 = 4 };
 
-    static PlatformType getPlatform();
+    static PlatformType getPlatform() noexcept;
 
 // Caret functions.
 
-    static void setCaretSize( ushort size );
-    static ushort getCaretSize();
-    static void setCaretPosition( ushort x, ushort y );
-    static BOOL isCaretVisible();
+    static void setCaretSize( ushort size ) noexcept;
+    static ushort getCaretSize() noexcept;
+    static void setCaretPosition( ushort x, ushort y ) noexcept;
+    static BOOL isCaretVisible() noexcept;
 
 // Screen functions.
 
-    static ushort getScreenRows();
-    static ushort getScreenCols();
-    static ushort getScreenMode();
-    static void setScreenMode( ushort mode );
-    static void clearScreen( ushort w, ushort h );
-    static void screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len );
-    static TScreenCell *allocateScreenBuffer();
-    static void freeScreenBuffer( TScreenCell *buffer );
-    static void resizeScreenBuffer( TScreenCell *&buffer );
-    static void reloadScreenInfo();
-    static void setUpConsole();
-    static void restoreConsole();
+    static ushort getScreenRows() noexcept;
+    static ushort getScreenCols() noexcept;
+    static ushort getScreenMode() noexcept;
+    static void setScreenMode( ushort mode ) noexcept;
+    static void clearScreen( ushort w, ushort h ) noexcept;
+    static void screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len ) noexcept;
+    static TScreenCell *allocateScreenBuffer() noexcept;
+    static void freeScreenBuffer( TScreenCell *buffer ) noexcept;
+    static void resizeScreenBuffer( TScreenCell *&buffer ) noexcept;
+    static void reloadScreenInfo() noexcept;
+    static void setUpConsole() noexcept;
+    static void restoreConsole() noexcept;
 
 // Mouse functions.
 
-    static DWORD getButtonCount();
-    static void cursorOn();
-    static void cursorOff();
+    static DWORD getButtonCount() noexcept;
+    static void cursorOn() noexcept;
+    static void cursorOff() noexcept;
 
 // Event functions.
 
-    static BOOL getMouseEvent( MouseEventType& event );
-    static BOOL getKeyEvent( TEvent& event, Boolean blocking=True );
-    static void clearPendingEvent();
+    static BOOL getMouseEvent( MouseEventType& event ) noexcept;
+    static BOOL getKeyEvent( TEvent& event, Boolean blocking=True ) noexcept;
+    static void clearPendingEvent() noexcept;
 #ifndef __BORLANDC__
-    static BOOL getPendingEvent( TEvent &event, ushort mask );
-    static void readEvents( Boolean blocking );
+    static BOOL getPendingEvent( TEvent &event, ushort mask ) noexcept;
+    static void readEvents( Boolean blocking ) noexcept;
 #endif
 
 // System functions.
 
-    static BOOL setCtrlBrkHandler( BOOL install );
-    static BOOL setCritErrorHandler( BOOL install );
+    static BOOL setCtrlBrkHandler( BOOL install ) noexcept;
+    static BOOL setCritErrorHandler( BOOL install ) noexcept;
 
     static const ushort NormalCvt[89];
     static const ushort ShiftCvt[89];
@@ -115,7 +115,7 @@ public:
 
 private:
 
-    static BOOL __stdcall ctrlBreakHandler( DWORD dwCtrlType );
+    static BOOL __stdcall ctrlBreakHandler( DWORD dwCtrlType ) noexcept;
 
     static BOOL insertState;
     static PlatformType platform;
@@ -155,7 +155,7 @@ private:
 
 #if defined( __FLAT__ )
 
-inline THardwareInfo::PlatformType THardwareInfo::getPlatform()
+inline THardwareInfo::PlatformType THardwareInfo::getPlatform() noexcept
 {
     return platform;
 }
@@ -163,12 +163,12 @@ inline THardwareInfo::PlatformType THardwareInfo::getPlatform()
 #ifdef __BORLANDC__
 // Caret functions.
 
-inline ushort THardwareInfo::getCaretSize()
+inline ushort THardwareInfo::getCaretSize() noexcept
 {
     return crInfo.dwSize;
 }
 
-inline BOOL THardwareInfo::isCaretVisible()
+inline BOOL THardwareInfo::isCaretVisible() noexcept
 {
     return crInfo.bVisible;
 }
@@ -176,18 +176,18 @@ inline BOOL THardwareInfo::isCaretVisible()
 
 // Screen functions.
 
-inline ushort THardwareInfo::getScreenRows()
+inline ushort THardwareInfo::getScreenRows() noexcept
 {
     return sbInfo.dwSize.Y;
 }
 
-inline ushort THardwareInfo::getScreenCols()
+inline ushort THardwareInfo::getScreenCols() noexcept
 {
     return sbInfo.dwSize.X;
 }
 
 #pragma option -w-inl
-inline void THardwareInfo::clearScreen( ushort w, ushort h )
+inline void THardwareInfo::clearScreen( ushort w, ushort h ) noexcept
 {
     COORD coord = { 0, 0 };
     DWORD read;
@@ -198,7 +198,7 @@ inline void THardwareInfo::clearScreen( ushort w, ushort h )
 #pragma option -w+inl
 #endif // __BORLANDC__
 
-inline TScreenCell *THardwareInfo::allocateScreenBuffer()
+inline TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept
 {
     short x = getScreenCols(), y = getScreenRows();
 
@@ -213,7 +213,7 @@ inline TScreenCell *THardwareInfo::allocateScreenBuffer()
 #endif
 }
 
-inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer )
+inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer ) noexcept
 {
 #ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
@@ -222,7 +222,7 @@ inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer )
 #endif
 }
 
-inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer )
+inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer ) noexcept
 {
     freeScreenBuffer(buffer);
     buffer = allocateScreenBuffer();
@@ -252,7 +252,7 @@ inline void THardwareInfo::cursorOff()
 
 // Event functions.
 
-inline void THardwareInfo::clearPendingEvent()
+inline void THardwareInfo::clearPendingEvent() noexcept
 {
     pendingEvent = 0;
 }
@@ -260,7 +260,7 @@ inline void THardwareInfo::clearPendingEvent()
 
 // System functions.
 
-inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
+inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install ) noexcept
 {
 #ifdef _WIN32
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
@@ -275,7 +275,7 @@ inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install )
 #endif
 }
 
-inline BOOL THardwareInfo::setCritErrorHandler( BOOL install )
+inline BOOL THardwareInfo::setCritErrorHandler( BOOL install ) noexcept
 {
     return TRUE;        // Handled by NT or DPMI32..
 }

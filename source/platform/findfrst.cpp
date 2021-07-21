@@ -6,7 +6,7 @@
 FindFirstRec::RecList FindFirstRec::recList;
 
 FindFirstRec* FindFirstRec::allocate(struct find_t *fileinfo, unsigned attrib,
-                                     const char *pathname)
+                                     const char *pathname) noexcept
 {
     // The findfirst interface based on DOS call 0x4E doesn't provide a
     // findclose function. The strategy here is the same as in Borland's RTL:
@@ -46,7 +46,7 @@ FindFirstRec* FindFirstRec::allocate(struct find_t *fileinfo, unsigned attrib,
         return 0;
 }
 
-FindFirstRec* FindFirstRec::get(struct find_t *fileinfo)
+FindFirstRec* FindFirstRec::get(struct find_t *fileinfo) noexcept
 {
     // Return the FindFirstRec instance pointed to by fileinfo.
     std::lock_guard<std::mutex> lock(recList);
@@ -58,7 +58,7 @@ FindFirstRec* FindFirstRec::get(struct find_t *fileinfo)
 
 #ifndef _WIN32
 
-bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
+bool FindFirstRec::setParameters(unsigned attrib, const char *pathname) noexcept
 {
     if (!dirStream)
     {
@@ -69,7 +69,7 @@ bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
     return false;
 }
 
-bool FindFirstRec::next()
+bool FindFirstRec::next() noexcept
 {
     struct dirent *e;
     bool found = false;
@@ -79,20 +79,20 @@ bool FindFirstRec::next()
     return found;
 }
 
-bool FindFirstRec::open()
+bool FindFirstRec::open() noexcept
 {
     if (!dirStream)
         return (dirStream = opendir(searchDir.c_str()));
     return false;
 }
 
-void FindFirstRec::close()
+void FindFirstRec::close() noexcept
 {
     if (dirStream)
         closedir(dirStream), dirStream = 0;
 }
 
-bool FindFirstRec::setPath(const char* pathname)
+bool FindFirstRec::setPath(const char* pathname) noexcept
 {
     // Reject NULL or empty pathnames.
     if (pathname && *pathname)
@@ -128,7 +128,7 @@ bool FindFirstRec::setPath(const char* pathname)
     return false;
 }
 
-bool FindFirstRec::matchEntry(struct dirent* e)
+bool FindFirstRec::matchEntry(struct dirent* e) noexcept
 {
     struct stat st;
     if (wildcardMatch(wildcard.c_str(), e->d_name) &&
@@ -148,7 +148,7 @@ bool FindFirstRec::matchEntry(struct dirent* e)
     return false;
 }
 
-bool FindFirstRec::attrMatch(unsigned attrib)
+bool FindFirstRec::attrMatch(unsigned attrib) noexcept
 {
     // Behaviour from the original _dos_findnext: 'if requested attribute
     // word includes hidden, system, or subdirectory bits, return
@@ -156,7 +156,7 @@ bool FindFirstRec::attrMatch(unsigned attrib)
     return !(attrib & SPECIAL_BITS) || (searchAttr & attrib & SPECIAL_BITS);
 }
 
-bool FindFirstRec::wildcardMatch(char const *wildcard, char const *filename)
+bool FindFirstRec::wildcardMatch(char const *wildcard, char const *filename) noexcept
 {
     // https://stackoverflow.com/a/3300547
     for (; *wildcard != '\0'; ++wildcard)
@@ -182,7 +182,7 @@ bool FindFirstRec::wildcardMatch(char const *wildcard, char const *filename)
     return *filename == '\0';
 }
 
-unsigned FindFirstRec::cvtAttr(const struct stat *st, const char* filename)
+unsigned FindFirstRec::cvtAttr(const struct stat *st, const char* filename) noexcept
 {
     // Returns file attributes in find_t format.
     unsigned attr = 0; // _A_NORMAL
@@ -197,7 +197,7 @@ unsigned FindFirstRec::cvtAttr(const struct stat *st, const char* filename)
     return attr;
 }
 
-void FindFirstRec::cvtTime(const struct stat *st, struct find_t *fileinfo)
+void FindFirstRec::cvtTime(const struct stat *st, struct find_t *fileinfo) noexcept
 {
     // Updates fileinfo with the times in st.
     struct FatDate {
@@ -222,7 +222,7 @@ void FindFirstRec::cvtTime(const struct stat *st, struct find_t *fileinfo)
 
 #else
 
-bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
+bool FindFirstRec::setParameters(unsigned attrib, const char *pathname) noexcept
 {
     if (hFindFile != INVALID_HANDLE_VALUE)
         close();
@@ -231,7 +231,7 @@ bool FindFirstRec::setParameters(unsigned attrib, const char *pathname)
     return open();
 }
 
-bool FindFirstRec::next()
+bool FindFirstRec::next() noexcept
 {
     WIN32_FIND_DATAW findData;
     while (true)
@@ -269,25 +269,25 @@ bool FindFirstRec::next()
     }
 }
 
-bool FindFirstRec::open()
+bool FindFirstRec::open() noexcept
 {
     return true;
 }
 
-void FindFirstRec::close()
+void FindFirstRec::close() noexcept
 {
     if (hFindFile != INVALID_HANDLE_VALUE)
         FindClose(hFindFile), hFindFile = INVALID_HANDLE_VALUE;
 }
 
-bool FindFirstRec::attrMatch(unsigned attrib)
+bool FindFirstRec::attrMatch(unsigned attrib) noexcept
 {
     return ((searchAttr & _A_VOLID) && (attrib & _A_VOLID))
         || !(attrib & SPECIAL_BITS)
         || (searchAttr & attrib & SPECIAL_BITS);
 }
 
-unsigned FindFirstRec::cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename)
+unsigned FindFirstRec::cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* filename) noexcept
 {
     unsigned attr = findData->dwFileAttributes;
     if (filename[0] == L'.')
@@ -295,7 +295,7 @@ unsigned FindFirstRec::cvtAttr(const WIN32_FIND_DATAW *findData, const wchar_t* 
     return attr;
 }
 
-void FindFirstRec::cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo)
+void FindFirstRec::cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *fileinfo) noexcept
 {
     FILETIME localTime;
     FileTimeToLocalFileTime(&findData->ftLastWriteTime, &localTime);

@@ -88,24 +88,24 @@ class THWMouse
 
 protected:
 
-    THWMouse();
-    THWMouse( const THWMouse& ) {};
+    THWMouse() noexcept;
+    THWMouse( const THWMouse& ) noexcept {};
     ~THWMouse();
 public:
-    static void show();
-    static void hide();
+    static void show() noexcept;
+    static void hide() noexcept;
 protected:
-    static void setRange( ushort, ushort );
-    static void getEvent( MouseEventType& );
-    static Boolean present();
+    static void setRange( ushort, ushort ) noexcept;
+    static void getEvent( MouseEventType& ) noexcept;
+    static Boolean present() noexcept;
 
 #if !defined( __FLAT__ )
     static void registerHandler( unsigned, void (_FAR *)() );
 #endif
 
-    static void suspend();
-    static void resume();
-    static void inhibit();
+    static void suspend() noexcept;
+    static void resume() noexcept;
+    static void inhibit() noexcept;
 
 protected:
 
@@ -118,12 +118,12 @@ private:
 
 };
 
-inline Boolean THWMouse::present()
+inline Boolean THWMouse::present() noexcept
 {
     return Boolean( buttonCount != 0 );
 }
 
-inline void THWMouse::inhibit()
+inline void THWMouse::inhibit() noexcept
 {
     noMouse = True;
 }
@@ -133,46 +133,46 @@ class TMouse : public THWMouse
 
 public:
 
-    TMouse();
+    TMouse() noexcept;
     ~TMouse();
 
-    static void show();
-    static void hide();
+    static void show() noexcept;
+    static void hide() noexcept;
 
-    static void setRange( ushort, ushort );
-    static void getEvent( MouseEventType& );
-    static Boolean present();
+    static void setRange( ushort, ushort ) noexcept;
+    static void getEvent( MouseEventType& ) noexcept;
+    static Boolean present() noexcept;
 
 #if !defined( __FLAT__ )
     static void registerHandler( unsigned, void (_FAR *)() );
 #endif
 
-    static void suspend() { THWMouse::suspend(); }
-    static void resume() { THWMouse::resume(); }
+    static void suspend() noexcept { THWMouse::suspend(); }
+    static void resume() noexcept { THWMouse::resume(); }
 
 };
 
-inline void TMouse::show()
+inline void TMouse::show() noexcept
 {
     THWMouse::show();
 }
 
-inline void TMouse::hide()
+inline void TMouse::hide() noexcept
 {
     THWMouse::hide();
 }
 
-inline void TMouse::setRange( ushort rx, ushort ry )
+inline void TMouse::setRange( ushort rx, ushort ry ) noexcept
 {
     THWMouse::setRange( rx, ry );
 }
 
-inline void TMouse::getEvent( MouseEventType& me )
+inline void TMouse::getEvent( MouseEventType& me ) noexcept
 {
     THWMouse::getEvent( me );
 }
 
-inline Boolean TMouse::present()
+inline Boolean TMouse::present() noexcept
 {
     return THWMouse::present();
 }
@@ -232,8 +232,8 @@ struct TEvent
         KeyDownEvent keyDown;
         MessageEvent message;
     };
-    void getMouseEvent();
-    void getKeyEvent(Boolean blocking=True);
+    void getMouseEvent() noexcept;
+    void getKeyEvent(Boolean blocking=True) noexcept;
 
 };
 
@@ -242,15 +242,21 @@ struct TEvent
 #if defined( Uses_TEventQueue ) && !defined( __TEventQueue )
 #define __TEventQueue
 
+#ifndef __BORLANDC__
+class TTimer;
+template <class T>
+class TArc;
+#endif
+
 class TEventQueue
 {
 public:
-    TEventQueue();
+    TEventQueue() noexcept;
     ~TEventQueue();
 
-    static void getMouseEvent( TEvent& );
-    static void suspend();
-    static void resume();
+    static void getMouseEvent( TEvent& ) noexcept;
+    static void suspend() noexcept;
+    static void resume() noexcept;
 
     friend class TView;
     friend class TProgram;
@@ -259,10 +265,14 @@ public:
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
 
+#ifndef __BORLANDC__
+    static void addTimer( const TArc<TTimer>& ) noexcept;
+#endif
+
 private:
 
     static TMouse *mouse;
-    static Boolean getMouseState( TEvent& );
+    static Boolean getMouseState( TEvent& ) noexcept;
 
 #if !defined( __FLAT__ )
 #if !defined( __DPMI16__ )
@@ -273,7 +283,7 @@ private:
     static void __MOUSEHUGE mouseInt();
 #endif
 
-    static void setLast( TEvent& );
+    static void setLast( TEvent& ) noexcept;
 
     static MouseEventType _NEAR lastMouse;
 public:
@@ -301,7 +311,7 @@ private:
 
 };
 
-inline void TEvent::getMouseEvent()
+inline void TEvent::getMouseEvent() noexcept
 {
     TEventQueue::getMouseEvent( *this );
 }
@@ -330,16 +340,16 @@ public:
         smChanged   = 0x1000
         };
 
-    static void clearScreen( uchar, uchar );
+    static void clearScreen( uchar, uchar ) noexcept;
 
-    static void setCursorType( ushort );
-    static ushort getCursorType();
+    static void setCursorType( ushort ) noexcept;
+    static ushort getCursorType() noexcept;
 
-    static ushort getRows();
-    static ushort getCols();
+    static ushort getRows() noexcept;
+    static ushort getCols() noexcept;
 
-    static void setCrtMode( ushort );
-    static ushort getCrtMode();
+    static void setCrtMode( ushort ) noexcept;
+    static ushort getCrtMode() noexcept;
 
 #if !defined( __FLAT__ )
     static int isEGAorVGA();
@@ -347,8 +357,8 @@ public:
 
 protected:
 
-    TDisplay() { updateIntlChars(); };
-    TDisplay( const TDisplay& ) { updateIntlChars(); };
+    TDisplay() noexcept { updateIntlChars(); };
+    TDisplay( const TDisplay& ) noexcept { updateIntlChars(); };
     ~TDisplay() {};
 
 private:
@@ -357,7 +367,7 @@ private:
     static void videoInt();
 #endif
 
-    static void updateIntlChars();
+    static void updateIntlChars() noexcept;
 
 };
 
@@ -366,12 +376,12 @@ class TScreen : public TDisplay
 
 public:
 
-    TScreen();
+    TScreen() noexcept;
     ~TScreen();
 
-    static void setVideoMode( ushort mode );
-    static void clearScreen();
-    static void flushScreen();
+    static void setVideoMode( ushort mode ) noexcept;
+    static void clearScreen() noexcept;
+    static void flushScreen() noexcept;
 
     static ushort _NEAR startupMode;
     static ushort _NEAR startupCursor;
@@ -384,16 +394,16 @@ public:
     static ushort _NEAR cursorLines;
     static Boolean _NEAR clearOnSuspend;
 
-    static void setCrtData();
-    static ushort fixCrtMode( ushort );
+    static void setCrtData() noexcept;
+    static ushort fixCrtMode( ushort ) noexcept;
 
-    static void suspend();
-    static void resume();
+    static void suspend() noexcept;
+    static void resume() noexcept;
 
 };
 
 #ifdef __BORLANDC__
-inline void TScreen::flushScreen()
+inline void TScreen::flushScreen() noexcept
 {
 }
 #endif
@@ -416,13 +426,13 @@ class TSystemError
 
 public:
 
-    TSystemError();
+    TSystemError() noexcept;
     ~TSystemError();
 
     static Boolean _NEAR ctrlBreakHit;
 
-    static void suspend();
-    static void resume();
+    static void suspend() noexcept;
+    static void resume() noexcept;
 
 #if !defined( __FLAT__ )
     static short ( _FAR *sysErrorFunc )( short, uchar );

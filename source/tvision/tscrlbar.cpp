@@ -36,7 +36,7 @@
 
 #define cpScrollBar  "\x04\x05\x05"
 
-TScrollBar::TScrollBar( const TRect& bounds ) :
+TScrollBar::TScrollBar( const TRect& bounds ) noexcept :
     TView( bounds ),
     value( 0 ),
     minVal( 0 ),
@@ -62,7 +62,7 @@ void TScrollBar::draw()
     drawPos(getPos());
 }
 
-void TScrollBar::drawPos( int pos )
+void TScrollBar::drawPos( int pos ) noexcept
 {
     TDrawBuffer b;
 
@@ -86,7 +86,7 @@ TPalette& TScrollBar::getPalette() const
     return palette;
 }
 
-int TScrollBar::getPos()
+int TScrollBar::getPos() noexcept
 {
     int r = maxVal - minVal;
     if( r == 0 )
@@ -95,7 +95,7 @@ int TScrollBar::getPos()
         return  int(( ((long(value - minVal) * (getSize() - 3)) + (r >> 1)) / r) + 1);
 }
 
-int TScrollBar::getSize()
+int TScrollBar::getSize() noexcept
 {
     int s;
 
@@ -111,7 +111,7 @@ static TPoint mouse;
 static int p, s;
 static TRect extent;
 
-int TScrollBar::getPartCode()
+int TScrollBar::getPartCode() noexcept
 {
     int part= - 1;
     if( extent.contains(mouse) )
@@ -299,7 +299,7 @@ void TScrollBar::setParams( int aValue,
                             int aMax,
                             int aPgStep,
                             int aArStep
-                          )
+                          ) noexcept
 {
     int  sValue;
 
@@ -320,17 +320,17 @@ void TScrollBar::setParams( int aValue,
     arStep = aArStep;
 }
 
-void TScrollBar::setRange( int aMin, int aMax )
+void TScrollBar::setRange( int aMin, int aMax ) noexcept
 {
     setParams( value, aMin, aMax, pgStep, arStep );
 }
 
-void TScrollBar::setStep( int aPgStep, int aArStep )
+void TScrollBar::setStep( int aPgStep, int aArStep ) noexcept
 {
     setParams( value, minVal, maxVal, aPgStep, aArStep );
 }
 
-void TScrollBar::setValue( int aValue )
+void TScrollBar::setValue( int aValue ) noexcept
 {
     setParams( aValue, minVal, maxVal, pgStep, arStep );
 }
@@ -357,7 +357,7 @@ TStreamable *TScrollBar::build()
     return new TScrollBar( streamableInit );
 }
 
-TScrollBar::TScrollBar( StreamableInit ) : TView( streamableInit )
+TScrollBar::TScrollBar( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

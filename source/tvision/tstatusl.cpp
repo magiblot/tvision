@@ -28,7 +28,7 @@
 
 #define cpStatusLine "\x02\x03\x04\x05\x06\x07"
 
-TStatusLine::TStatusLine( const TRect& bounds, TStatusDef& aDefs ) :
+TStatusLine::TStatusLine( const TRect& bounds, TStatusDef& aDefs ) noexcept :
     TView( bounds ),
     defs( &aDefs )
 {
@@ -116,7 +116,7 @@ void TStatusLine::drawSelect( TStatusItem *selected )
     writeLine( 0, 0, size.x, 1, b );
 }
 
-void TStatusLine::findItems()
+void TStatusLine::findItems() noexcept
 {
     TStatusDef *p = defs;
     while( p != 0 && ( helpCtx < p->min || helpCtx > p->max ) )
@@ -306,7 +306,7 @@ TStreamable *TStatusLine::build()
     return new TStatusLine( streamableInit );
 }
 
-TStatusLine::TStatusLine( StreamableInit ) : TView( streamableInit )
+TStatusLine::TStatusLine( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

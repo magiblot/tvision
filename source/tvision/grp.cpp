@@ -15,7 +15,7 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
-TView *TGroup::at( short index )
+TView *TGroup::at( short index ) noexcept
 {
     TView *temp = last;
     while( index-- > 0 )
@@ -53,7 +53,7 @@ void TGroup::forEach( void (*func)(TView*, void *), void *args )
 
 }
 
-short TGroup::indexOf( TView *p )
+short TGroup::indexOf( TView *p ) noexcept
 {
     if( last == 0 )
         return 0;

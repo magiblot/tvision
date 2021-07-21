@@ -28,16 +28,16 @@
 
 class _FAR TRect;
 
-ushort messageBox( TStringView msg, ushort aOptions );
-ushort messageBox( unsigned aOptions, const char *msg, ... );
+ushort messageBox( TStringView msg, ushort aOptions ) noexcept;
+ushort messageBox( unsigned aOptions, const char *msg, ... ) noexcept;
 
-ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions );
-ushort messageBoxRect( const TRect &r, ushort aOptions, const char *msg, ... );
+ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions ) noexcept;
+ushort messageBoxRect( const TRect &r, ushort aOptions, const char *msg, ... ) noexcept;
 
-ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit );
+ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit ) noexcept;
 
 ushort inputBoxRect( const TRect &bounds, TStringView title,
-                     TStringView aLabel, char *s, uchar limit );
+                     TStringView aLabel, char *s, uchar limit ) noexcept;
 
 const int
 

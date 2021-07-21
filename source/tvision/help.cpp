@@ -64,7 +64,7 @@
 // THelpViewer
 
 THelpViewer::THelpViewer( const TRect& bounds, TScrollBar* aHScrollBar,
-    TScrollBar* aVScrollBar, THelpFile *aHelpFile, ushort context )
+    TScrollBar* aVScrollBar, THelpFile *aHelpFile, ushort context ) noexcept
     : TScroller( bounds, aHScrollBar, aVScrollBar )
 {
     options = (options | ofSelectable);
@@ -268,7 +268,7 @@ void THelpViewer::handleEvent( TEvent& event )
 
 // THelpWindow
 
-THelpWindow::THelpWindow( THelpFile *hFile, ushort context ):
+THelpWindow::THelpWindow( THelpFile *hFile, ushort context ) noexcept :
        TWindowInit( &THelpWindow::initFrame ),
        TWindow( TRect(0,0,50,18), helpWinTitle, wnNoNumber )
 {

@@ -128,7 +128,7 @@ class TStreamableClass
 
 public:
 
-    TStreamableClass( const char *n, BUILDER b, int d );
+    TStreamableClass( const char *n, BUILDER b, int d ) noexcept;
 
 private:
 
@@ -158,7 +158,7 @@ class TStreamableTypes : private TNSSortedCollection
 
 public:
 
-    TStreamableTypes();
+    TStreamableTypes() noexcept;
     ~TStreamableTypes();
 
     void registerType( const TStreamableClass * );
@@ -202,7 +202,7 @@ public:
 
 private:
 
-    TPWrittenObjects();
+    TPWrittenObjects() noexcept;
     ~TPWrittenObjects();
 
     void registerObject( const void *adr );
@@ -230,7 +230,7 @@ class TPWObj
 
 private:
 
-    TPWObj( const void *adr, P_id_type id );
+    TPWObj( const void *adr, P_id_type id ) noexcept;
 
     const void *address;
     P_id_type ident;
@@ -265,7 +265,7 @@ public:
 
 private:
 
-    TPReadObjects();
+    TPReadObjects() noexcept;
     ~TPReadObjects();
 
     void registerObject( const void *adr );
@@ -307,38 +307,38 @@ public:
     enum StreamableError { peNotRegistered, peInvalidType };
     enum PointerTypes { ptNull, ptIndexed, ptObject };
 
-    _Cdecl pstream( streambuf _FAR * );
+    _Cdecl pstream( streambuf _FAR * ) noexcept;
     virtual _Cdecl ~pstream();
 
     typedef int openmode;
     typedef int seekdir;
 
-    int _Cdecl rdstate() const;
-    int _Cdecl eof() const;
-    int _Cdecl fail() const;
-    int _Cdecl bad() const;
-    int _Cdecl good() const;
-    void _Cdecl clear( int = 0 );
-    _Cdecl operator void *() const;
-    int _Cdecl operator ! () const;
+    int _Cdecl rdstate() const noexcept;
+    int _Cdecl eof() const noexcept;
+    int _Cdecl fail() const noexcept;
+    int _Cdecl bad() const noexcept;
+    int _Cdecl good() const noexcept;
+    void _Cdecl clear( int = 0 ) noexcept;
+    _Cdecl operator void *() const noexcept;
+    int _Cdecl operator ! () const noexcept;
 
-    streambuf _FAR * _Cdecl rdbuf() const;
+    streambuf _FAR * _Cdecl rdbuf() const noexcept;
 
-    static void initTypes();
+    static void initTypes() noexcept;
 
-    void _Cdecl error( StreamableError );
-    void _Cdecl error( StreamableError, const TStreamable& );
-    static void registerType( TStreamableClass *ts );
+    void _Cdecl error( StreamableError ) noexcept;
+    void _Cdecl error( StreamableError, const TStreamable& ) noexcept;
+    static void registerType( TStreamableClass *ts ) noexcept;
 
 protected:
 
-    _Cdecl pstream();
+    _Cdecl pstream() noexcept;
 
     streambuf _FAR *bp;
     int state;
 
-    void _Cdecl init( streambuf _FAR * );
-    void _Cdecl setstate( int );
+    void _Cdecl init( streambuf _FAR * ) noexcept;
+    void _Cdecl setstate( int ) noexcept;
 
     static TStreamableTypes * _NEAR types;
 
@@ -369,7 +369,7 @@ class ipstream : virtual public pstream
 
 public:
 
-    _Cdecl ipstream( streambuf _FAR * );
+    _Cdecl ipstream( streambuf _FAR * ) noexcept;
     _Cdecl ~ipstream();
 
     streampos _Cdecl tellg();
@@ -387,7 +387,7 @@ public:
 
 protected:
 
-    _Cdecl ipstream();
+    _Cdecl ipstream() noexcept;
 
     const TStreamableClass _FAR * _Cdecl readPrefix();
     void _FAR * _Cdecl readData( const TStreamableClass _FAR *,
@@ -429,7 +429,7 @@ class opstream : virtual public pstream
 
 public:
 
-    _Cdecl opstream( streambuf _FAR * );
+    _Cdecl opstream( streambuf _FAR * ) noexcept;
     _Cdecl ~opstream();
 
     streampos _Cdecl tellp();
@@ -448,7 +448,7 @@ public:
 
 protected:
 
-    _Cdecl opstream();
+    _Cdecl opstream() noexcept;
 
     void _Cdecl writePrefix( const TStreamable& );
     void _Cdecl writeData( TStreamable& );
@@ -486,12 +486,12 @@ class iopstream : public ipstream, public opstream
 
 public:
 
-    _Cdecl iopstream( streambuf _FAR * );
+    _Cdecl iopstream( streambuf _FAR * ) noexcept;
     _Cdecl ~iopstream();
 
 protected:
 
-    _Cdecl iopstream();
+    _Cdecl iopstream() noexcept;
 
 };
 
@@ -522,13 +522,13 @@ class fpbase : virtual public pstream
 
 public:
 
-    _Cdecl fpbase();
+    _Cdecl fpbase() noexcept;
     _Cdecl fpbase( const char _FAR *, pstream::openmode);
     _Cdecl ~fpbase();
 
     void _Cdecl open( const char _FAR *, pstream::openmode);
     void _Cdecl close();
-    filebuf _FAR * _Cdecl rdbuf();
+    filebuf _FAR * _Cdecl rdbuf() noexcept;
 
 private:
 
@@ -559,13 +559,13 @@ class ifpstream : public fpbase, public ipstream
 
 public:
 
-    _Cdecl ifpstream();
+    _Cdecl ifpstream() noexcept;
     _Cdecl ifpstream( const char _FAR *,
                       pstream::openmode = ios::in
                     );
     _Cdecl ~ifpstream();
 
-    filebuf _FAR * _Cdecl rdbuf();
+    filebuf _FAR * _Cdecl rdbuf() noexcept;
     void _Cdecl open( const char _FAR *,
                       pstream::openmode = ios::in
                     );
@@ -596,13 +596,13 @@ class ofpstream : public fpbase, public opstream
 
 public:
 
-    _Cdecl ofpstream();
+    _Cdecl ofpstream() noexcept;
     _Cdecl ofpstream( const char _FAR *,
                       pstream::openmode = ios::out
                     );
     _Cdecl ~ofpstream();
 
-    filebuf _FAR * _Cdecl rdbuf();
+    filebuf _FAR * _Cdecl rdbuf() noexcept;
     void _Cdecl open( const char _FAR *,
                       pstream::openmode = ios::out
                     );
@@ -633,11 +633,11 @@ class fpstream : public fpbase, public iopstream
 
 public:
 
-    _Cdecl fpstream();
+    _Cdecl fpstream() noexcept;
     _Cdecl fpstream( const char _FAR *, pstream::openmode);
     _Cdecl ~fpstream();
 
-    filebuf _FAR * _Cdecl rdbuf();
+    filebuf _FAR * _Cdecl rdbuf() noexcept;
     void _Cdecl open( const char _FAR *, pstream::openmode);
 
 };

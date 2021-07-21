@@ -18,14 +18,14 @@
 
 #define cpSurfaceView "\x01"
 
-TDrawSurface::TDrawSurface() :
+TDrawSurface::TDrawSurface() noexcept :
     dataLength(0),
     data(0)
 {
     size.x = size.y = 0;
 }
 
-TDrawSurface::TDrawSurface(TPoint aSize) :
+TDrawSurface::TDrawSurface(TPoint aSize) noexcept :
     dataLength(0),
     data(0)
 {
@@ -75,7 +75,7 @@ void TDrawSurface::clear()
 }
 
 TSurfaceView::TSurfaceView( const TRect &bounds,
-                            const TDrawSurface _FAR *aSurface ) :
+                            const TDrawSurface _FAR *aSurface ) noexcept :
     TView(bounds),
     surface(aSurface)
 {

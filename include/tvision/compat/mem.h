@@ -20,10 +20,10 @@
 #include "_defs.h"
 #include "_null.h"
 
-#include <cstddef>
-#include <cstring>
+#include <stddef.h>
+#include <string.h>
 
-inline void movmem(const void *__src, void *__dest, unsigned __length)
+inline void movmem(const void *__src, void *__dest, unsigned __length) noexcept
 {
     memmove(__dest, __src, __length);
 }

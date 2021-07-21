@@ -21,7 +21,7 @@
 
 #define cpBackground "\x01"      // background palette
 
-TBackground::TBackground( const TRect& bounds, char aPattern ) :
+TBackground::TBackground( const TRect& bounds, char aPattern ) noexcept :
     TView(bounds),
     pattern( aPattern )
 {
@@ -44,7 +44,7 @@ TPalette& TBackground::getPalette() const
 
 #if !defined(NO_STREAMABLE)
 
-TBackground::TBackground( StreamableInit ) : TView( streamableInit )
+TBackground::TBackground( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

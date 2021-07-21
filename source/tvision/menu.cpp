@@ -23,12 +23,12 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TSubMenu::TSubMenu( TStringView nm, ushort key, ushort helpCtx ) :
+TSubMenu::TSubMenu( TStringView nm, ushort key, ushort helpCtx ) noexcept :
     TMenuItem( nm, 0, key, helpCtx )
 {
 }
 
-TSubMenu& operator + ( TSubMenu& s, TMenuItem& i )
+TSubMenu& operator + ( TSubMenu& s, TMenuItem& i ) noexcept
 {
     TSubMenu *sub = &s;
     while( sub->next != 0 )
@@ -46,7 +46,7 @@ TSubMenu& operator + ( TSubMenu& s, TMenuItem& i )
     return s;
 }
 
-TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 )
+TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 ) noexcept
 {
     TMenuItem *cur = &s1;
     while( cur->next != 0 )
@@ -55,7 +55,7 @@ TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 )
     return s1;
 }
 
-TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 )
+TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 ) noexcept
 {
     TMenuItem *cur = &i1;
     while( cur->next != 0 )
@@ -64,7 +64,7 @@ TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 )
     return i1;
 }
 
-TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 )
+TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 ) noexcept
 {
     TStatusDef *def = &s1;
     while( def->next != 0 )
@@ -81,7 +81,7 @@ TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 )
     return s1;
 }
 
-TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 )
+TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 ) noexcept
 {
     TStatusDef *cur = &s1;
     while( cur->next != 0 )

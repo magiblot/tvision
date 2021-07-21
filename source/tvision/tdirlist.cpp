@@ -32,7 +32,7 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) :
+TDirListBox::TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) noexcept :
     TListBox( bounds, 1, aScrollBar ),
     cur( 0 )
 {

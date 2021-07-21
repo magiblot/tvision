@@ -62,17 +62,20 @@ btoa_lut_t btoa_lut = init_btoa_lut();
 
 #include <strings.h>
 
-int stricmp( const char *s1, const char *s2 ) {
+int stricmp( const char *s1, const char *s2 ) noexcept
+{
     return strcasecmp(s1, s2);
 }
 
-int strnicmp( const char *s1, const char *s2, size_t maxlen ) {
+int strnicmp( const char *s1, const char *s2, size_t maxlen ) noexcept
+{
     return strncasecmp(s1, s2, maxlen);
 }
 
 #include <cctype>
 
-char *strupr(char *s) {
+char *strupr(char *s) noexcept
+{
     char* p = s;
     while ((*p = toupper(*p)))
         p++;
@@ -85,28 +88,34 @@ char *strupr(char *s) {
 
 #include <cstdio>
 
-static char printfFmt(int radix) {
-    switch (radix) {
+static inline char printfFmt(int radix)
+{
+    switch (radix)
+    {
         case 8: return 'o';
         case 16: return 'x';
         default: return 'd';
     }
 }
 
-char *itoa( int value, char *buffer, int radix ) {
+char *itoa( int value, char *buffer, int radix ) noexcept
+{
     char format[] = {'%', printfFmt(radix), '\0'};
     sprintf(buffer, format, value);
     return buffer;
 }
 
-char *ltoa( long value, char *buffer, int radix ) {
+char *ltoa( long value, char *buffer, int radix ) noexcept
+{
     char format[] = {'%', 'l', printfFmt(radix), '\0'};
     sprintf(buffer, format, value);
     return buffer;
 }
 
-char *ultoa( unsigned long value, char *buffer, int radix ) {
-    if (radix == 10) {
+char *ultoa( unsigned long value, char *buffer, int radix ) noexcept
+{
+    if (radix == 10)
+    {
         char format[] = "%lu";
         sprintf(buffer, format, value);
         return buffer;

@@ -35,7 +35,7 @@ class TObject
 
 public:
 
-    virtual ~TObject();
+    virtual ~TObject() {}
 
     static void destroy( TObject * );
     virtual void shutDown();
@@ -61,7 +61,7 @@ class TNSCollection : public TObject
 
 public:
 
-    TNSCollection( ccIndex aLimit, ccIndex aDelta );
+    TNSCollection( ccIndex aLimit, ccIndex aDelta ) noexcept;
     ~TNSCollection();
 
     virtual void shutDown();
@@ -94,7 +94,7 @@ public:
 
 protected:
 
-    TNSCollection();
+    TNSCollection() noexcept;
 
     void **items;
     ccIndex count;
@@ -118,7 +118,7 @@ class TNSSortedCollection: public virtual TNSCollection
 
 public:
 
-    TNSSortedCollection( ccIndex aLimit, ccIndex aDelta) :
+    TNSSortedCollection( ccIndex aLimit, ccIndex aDelta) noexcept :
         TNSCollection( aLimit, aDelta ), duplicates(False)
             { delta = aDelta; setLimit( aLimit ); }
 
@@ -132,7 +132,7 @@ public:
 
 protected:
 
-    TNSSortedCollection() : duplicates(False) {}
+    TNSSortedCollection() noexcept : duplicates(False) {}
 
 private:
 

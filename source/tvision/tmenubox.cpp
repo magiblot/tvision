@@ -61,7 +61,7 @@ static TRect getRect( const TRect& bounds, TMenu *aMenu )
 
 TMenuBox::TMenuBox( const TRect& bounds,
                     TMenu *aMenu,
-                    TMenuView *aParentMenu) :
+                    TMenuView *aParentMenu ) noexcept :
     TMenuView( getRect( bounds, aMenu ), aMenu, aParentMenu )
 {
     state |= sfShadow;
@@ -142,7 +142,7 @@ TStreamable *TMenuBox::build()
     return new TMenuBox( streamableInit );
 }
 
-TMenuBox::TMenuBox( StreamableInit ) : TMenuView( streamableInit )
+TMenuBox::TMenuBox( StreamableInit ) noexcept : TMenuView( streamableInit )
 {
 }
 

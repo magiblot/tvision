@@ -37,7 +37,7 @@ TStreamable *TCheckBoxes::build()
     return new TCheckBoxes( streamableInit );
 }
 
-TCheckBoxes::TCheckBoxes( StreamableInit ) : TCluster( streamableInit )
+TCheckBoxes::TCheckBoxes( StreamableInit ) noexcept : TCluster( streamableInit )
 {
 }
 

@@ -88,7 +88,7 @@ TStreamableClass RHelpTopic( THelpTopic::name,
                                   __DELTA(THelpTopic)
                                 );
 
-THelpTopic::THelpTopic() : TObject()
+THelpTopic::THelpTopic() noexcept : TObject()
 {
     paragraphs = 0;
     numRefs = 0;
@@ -138,7 +138,7 @@ void THelpTopic::readCrossRefs( ipstream& s )
         }
 }
 
-void THelpTopic::disposeParagraphs()
+void THelpTopic::disposeParagraphs() noexcept
 {
     TParagraph *p, *t;
 
@@ -165,7 +165,7 @@ THelpTopic::~THelpTopic()
        }
 }
 
-void THelpTopic::addCrossRef( TCrossRef ref )
+void THelpTopic::addCrossRef( TCrossRef ref ) noexcept
 {
     TCrossRef *p;
     TCrossRef *crossRefPtr;
@@ -184,7 +184,7 @@ void THelpTopic::addCrossRef( TCrossRef ref )
 }
 
 
-void THelpTopic::addParagraph( TParagraph *p )
+void THelpTopic::addParagraph( TParagraph *p ) noexcept
 {
     TParagraph  *pp, *back;
 
@@ -205,7 +205,7 @@ void THelpTopic::addParagraph( TParagraph *p )
 }
 
 void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
-                              int& ref )
+                              int& ref ) noexcept
 {
     int curOffset, offset, paraOffset;
     TParagraph *p;
@@ -242,7 +242,7 @@ void THelpTopic::getCrossRef( int i, TPoint& loc, uchar& length,
         } while (True);
 }
 
-TStringView THelpTopic::getLine( int line )
+TStringView THelpTopic::getLine( int line ) noexcept
 {
     int offset, i;
     TParagraph *p;
@@ -280,12 +280,12 @@ TStringView THelpTopic::getLine( int line )
     return TStringView();
 }
 
-int THelpTopic::getNumCrossRefs()
+int THelpTopic::getNumCrossRefs() noexcept
 {
     return numRefs;
 }
 
-int THelpTopic::numLines()
+int THelpTopic::numLines() noexcept
 {
     int offset, lines;
     TParagraph *p;
@@ -306,7 +306,7 @@ int THelpTopic::numLines()
     return lines;
 }
 
-void THelpTopic::setCrossRef( int i, TCrossRef& ref )
+void THelpTopic::setCrossRef( int i, TCrossRef& ref ) noexcept
 {
     TCrossRef *crossRefPtr;
 
@@ -318,7 +318,7 @@ void THelpTopic::setCrossRef( int i, TCrossRef& ref )
 }
 
 
-void THelpTopic::setNumCrossRefs( int i )
+void THelpTopic::setNumCrossRefs( int i ) noexcept
 {
     TCrossRef  *p, *crossRefPtr;
 
@@ -340,7 +340,7 @@ void THelpTopic::setNumCrossRefs( int i )
 }
 
 
-void THelpTopic::setWidth( int aWidth )
+void THelpTopic::setWidth( int aWidth ) noexcept
 {
     width = aWidth;
 }
@@ -388,7 +388,7 @@ void THelpTopic::writeCrossRefs( opstream& s )
             }
 }
 
-Boolean isBlank( char ch )
+Boolean isBlank( char ch ) noexcept
 {
     if (isspace((uchar)ch))
         return True;
@@ -396,7 +396,7 @@ Boolean isBlank( char ch )
         return False;
 }
 
-static int scan( char *p, int offset, int size, char c)
+static int scan( char *p, int offset, int size, char c) noexcept
 {
     char *temp1, *temp2;
 
@@ -413,12 +413,12 @@ static int scan( char *p, int offset, int size, char c)
         }
 }
 
-static int widthToPos(const char *text, int offset, int size, int width)
+static int widthToPos(const char *text, int offset, int size, int width) noexcept
 {
     return offset + TText::wseek(TStringView(&text[offset], size), width, False);
 }
 
-TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap )
+TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap ) noexcept
 {
     int i;
 
@@ -507,13 +507,13 @@ THelpIndex::~THelpIndex()
 }
 
 
-THelpIndex::THelpIndex(void): TObject ()
+THelpIndex::THelpIndex(void) noexcept : TObject ()
 {
     size = 0;
     index = 0;
 }
 
-int32_t THelpIndex::position(int i)
+int32_t THelpIndex::position(int i) noexcept
 {
     int32_t *indexArrayPtr;
 
@@ -555,7 +555,7 @@ void THelpIndex::add( int i, int32_t val )
 
 // THelpFile
 
-THelpFile::THelpFile( iopstream&  s )
+THelpFile::THelpFile( iopstream &s )
 {
     int32_t magic;
     int32_t size;

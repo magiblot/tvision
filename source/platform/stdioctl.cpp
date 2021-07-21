@@ -8,7 +8,7 @@
 
 StdioCtl StdioCtl::instance;
 
-void StdioCtl::setUp()
+void StdioCtl::setUp() noexcept
 {
     ttyfd = -1;
     infile = outfile = nullptr;
@@ -35,7 +35,7 @@ void StdioCtl::setUp()
     }
 }
 
-void StdioCtl::tearDown()
+void StdioCtl::tearDown() noexcept
 {
     if (ttyfd != -1)
     {
@@ -74,7 +74,7 @@ namespace stdioctl
 
 StdioCtl StdioCtl::instance;
 
-void StdioCtl::setUp()
+void StdioCtl::setUp() noexcept
 {
     // The console can be accessed in two ways: through GetStdHandle() or through
     // CreateFile(). GetStdHandle() will be unable to return a console handle
@@ -180,7 +180,7 @@ void StdioCtl::setUp()
     SetConsoleActiveScreenBuffer(cn[activeOutput].handle);
 }
 
-void StdioCtl::tearDown()
+void StdioCtl::tearDown() noexcept
 {
     using namespace stdioctl;
     if (isValid(cn[startupOutput].handle))

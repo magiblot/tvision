@@ -8,7 +8,7 @@ std::mutex WinWidth::m;
 // Order matters! This relies on the above variables being initialized.
 WinWidth thread_local WinWidth::state;
 
-WinWidth::WinWidth()
+WinWidth::WinWidth() noexcept
 {
     auto &&lock = std::lock_guard<std::mutex>(m);
     states.push_back(this);
@@ -29,14 +29,14 @@ WinWidth::~WinWidth()
     tearDown();
 }
 
-void WinWidth::clearState()
+void WinWidth::clearState() noexcept
 {
     auto &&lock = std::lock_guard<std::mutex>(m);
     for (auto *state : states)
         state->tearDown();
 }
 
-void WinWidth::setUp()
+void WinWidth::setUp() noexcept
 {
     if (valid(cnHandle))
         tearDown();
@@ -50,7 +50,7 @@ void WinWidth::setUp()
     SetConsoleCursorInfo(cnHandle, &info);
 }
 
-void WinWidth::tearDown()
+void WinWidth::tearDown() noexcept
 {
     if (cnHandle != INVALID_HANDLE_VALUE)
         CloseHandle(cnHandle);
@@ -58,7 +58,7 @@ void WinWidth::tearDown()
     results.clear();
 }
 
-int WinWidth::calcWidth(TStringView mbc)
+int WinWidth::calcWidth(TStringView mbc) noexcept
 {
     if (!valid(cnHandle))
         setUp();

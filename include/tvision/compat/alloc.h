@@ -5,7 +5,7 @@
 #ifndef TVISION_COMPAT_ALLOC_H
 #define TVISION_COMPAT_ALLOC_H
 
-#include <cstdlib>
+#include <stdlib.h>
 
 #endif // TVISION_COMPAT_ALLOC_H
 

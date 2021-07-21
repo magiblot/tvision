@@ -43,22 +43,22 @@ inline constexpr const T& max( const T& a, const T& b )
 }
 #endif  // __MINMAX_DEFINED
 
-void fexpand( char *rpath );
-void fexpand( char *rpath, const char *relativeTo );
+void fexpand( char *rpath ) noexcept;
+void fexpand( char *rpath, const char *relativeTo ) noexcept;
 
-char hotKey( const char *s );
-ushort ctrlToArrow( ushort );
-char getAltChar( ushort keyCode );
-ushort getAltCode( char ch );
-char getCtrlChar(ushort);
-ushort getCtrlCode(uchar);
+char hotKey( const char *s ) noexcept;
+ushort ctrlToArrow( ushort ) noexcept;
+char getAltChar( ushort keyCode ) noexcept;
+ushort getAltCode( char ch ) noexcept;
+char getCtrlChar(ushort) noexcept;
+ushort getCtrlCode(uchar) noexcept;
 
-ushort historyCount( uchar id );
-const char *historyStr( uchar id, int index );
-void historyAdd( uchar id, TStringView );
+ushort historyCount( uchar id ) noexcept;
+const char *historyStr( uchar id, int index ) noexcept;
+void historyAdd( uchar id, TStringView ) noexcept;
 
-int cstrlen( TStringView );
-int strwidth( TStringView );
+int cstrlen( TStringView ) noexcept;
+int strwidth( TStringView ) noexcept;
 
 class _FAR TView;
 void *message( TView *receiver, ushort what, ushort command, void *infoPtr );
@@ -69,29 +69,29 @@ class _FAR TMenu;
 class _FAR TMenuItem;
 ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup * = 0);
 
-Boolean lowMemory();
+Boolean lowMemory() noexcept;
 
-char *newStr( TStringView );
+char *newStr( TStringView ) noexcept;
 
-Boolean driveValid( char drive );
-Boolean isDir( const char *str );
-Boolean pathValid( const char *path );
-Boolean validFileName( const char *fileName );
-void getCurDir( char *dir, char drive=-1 );
-Boolean getHomeDir( char *drive, char *dir );
-Boolean isWild( const char *f );
+Boolean driveValid( char drive ) noexcept;
+Boolean isDir( const char *str ) noexcept;
+Boolean pathValid( const char *path ) noexcept;
+Boolean validFileName( const char *fileName ) noexcept;
+void getCurDir( char *dir, char drive=-1 ) noexcept;
+Boolean getHomeDir( char *drive, char *dir ) noexcept;
+Boolean isWild( const char *f ) noexcept;
 
-size_t strnzcpy( char *dest, TStringView src, size_t n );
-size_t strnzcat( char *dest, TStringView src, size_t n );
+size_t strnzcpy( char *dest, TStringView src, size_t n ) noexcept;
+size_t strnzcat( char *dest, TStringView src, size_t n ) noexcept;
 
 #if !defined( __BORLANDC__ ) && !defined( _WIN32 )
 
-int stricmp( const char *s1, const char *s2 );
-int strnicmp( const char *s1, const char *s2, size_t maxlen );
-char *strupr(char *s);
-char *itoa( int value, char *buffer, int radix );
-char *ltoa( long value, char *buffer, int radix );
-char *ultoa( ulong value, char *buffer, int radix );
+int stricmp( const char *s1, const char *s2 ) noexcept;
+int strnicmp( const char *s1, const char *s2, size_t maxlen ) noexcept;
+char *strupr(char *s) noexcept;
+char *itoa( int value, char *buffer, int radix ) noexcept;
+char *ltoa( long value, char *buffer, int radix ) noexcept;
+char *ultoa( ulong value, char *buffer, int radix ) noexcept;
 
 #endif
 

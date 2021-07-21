@@ -36,7 +36,7 @@
 
 TScroller::TScroller( const TRect& bounds,
                       TScrollBar *aHScrollBar,
-                      TScrollBar *aVScrollBar) :
+                      TScrollBar *aVScrollBar) noexcept :
     TView( bounds ),
     drawLock( 0 ),
     drawFlag( False ),
@@ -65,7 +65,7 @@ void TScroller::changeBounds( const TRect& bounds )
     drawView();
 }
 
-void TScroller::checkDraw()
+void TScroller::checkDraw() noexcept
 {
     if( drawLock == 0 && drawFlag != False )
         {
@@ -117,7 +117,7 @@ void TScroller::scrollDraw()
         }
 }
 
-void TScroller::scrollTo( int x, int y )
+void TScroller::scrollTo( int x, int y ) noexcept
 {
     drawLock++;
     if( hScrollBar != 0 )
@@ -128,7 +128,7 @@ void TScroller::scrollTo( int x, int y )
     checkDraw();
 }
 
-void TScroller::setLimit( int x, int y )
+void TScroller::setLimit( int x, int y ) noexcept
 {
     limit.x = x;
     limit.y = y;
@@ -194,7 +194,7 @@ TStreamable *TScroller::build()
     return new TScroller( streamableInit );
 }
 
-TScroller::TScroller( StreamableInit ) : TView( streamableInit )
+TScroller::TScroller( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

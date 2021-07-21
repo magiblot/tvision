@@ -72,22 +72,22 @@ inline HistRec::HistRec( uchar nId, TStringView nStr ) noexcept :
 }
 
 
-inline HistRec *advance( HistRec *ptr, size_t s )
+inline HistRec *advance( HistRec *ptr, size_t s ) noexcept
 {
     return (HistRec *)((char *)ptr + s);
 }
 
-inline HistRec *backup( HistRec *ptr, size_t s )
+inline HistRec *backup( HistRec *ptr, size_t s ) noexcept
 {
     return (HistRec *)((char *)ptr - s);
 }
 
-inline HistRec *next( HistRec *ptr )
+inline HistRec *next( HistRec *ptr ) noexcept
 {
     return advance( ptr, ptr->len );
 }
 
-inline HistRec *prev( HistRec *ptr )
+inline HistRec *prev( HistRec *ptr ) noexcept
 {
     return backup( ptr, ptr->len );
 }
@@ -99,7 +99,7 @@ static HistRec *curRec;
 static HistRec *historyBlock;
 static HistRec *lastRec;
 
-void advanceStringPointer()
+void advanceStringPointer() noexcept
 {
     curRec = next( curRec );
     while( curRec < lastRec && curRec->id != curId )
@@ -108,7 +108,7 @@ void advanceStringPointer()
         curRec = 0;
 }
 
-void deleteString()
+void deleteString() noexcept
 {
     size_t len = curRec->len;
     HistRec *n = next( curRec );
@@ -120,7 +120,7 @@ void deleteString()
     lastRec = backup( lastRec, len );
 }
 
-void insertString( uchar id, TStringView str )
+void insertString( uchar id, TStringView str ) noexcept
 {
     ushort len = str.size() + 3;
     while( len > historySize - ( (char *)lastRec - (char *)historyBlock ) )
@@ -139,13 +139,13 @@ void insertString( uchar id, TStringView str )
     lastRec = next( lastRec );
 }
 
-void startId( uchar id )
+void startId( uchar id ) noexcept
 {
     curId = id;
     curRec = historyBlock;
 }
 
-ushort historyCount( uchar id )
+ushort historyCount( uchar id ) noexcept
 {
     startId( id );
     ushort count =  0;
@@ -158,7 +158,7 @@ ushort historyCount( uchar id )
     return count;
 }
 
-void historyAdd( uchar id, TStringView str )
+void historyAdd( uchar id, TStringView str ) noexcept
 {
     if( str.empty() )
         return;
@@ -173,7 +173,7 @@ void historyAdd( uchar id, TStringView str )
     insertString( id, str );
 }
 
-const char *historyStr( uchar id, int index )
+const char *historyStr( uchar id, int index ) noexcept
 {
     startId( id );
     for( short i = 0; i <= index; i++ )
@@ -184,19 +184,19 @@ const char *historyStr( uchar id, int index )
         return 0;
 }
 
-void clearHistory()
+void clearHistory() noexcept
 {
     new (historyBlock) HistRec( 0, "" );
     lastRec = next( historyBlock );
 }
 
-void initHistory()
+void initHistory() noexcept
 {
     historyBlock = (HistRec *) ::calloc(historySize, 1);
     clearHistory();
 }
 
-void doneHistory()
+void doneHistory() noexcept
 {
     ::free(historyBlock);
 }

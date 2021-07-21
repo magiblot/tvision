@@ -27,12 +27,12 @@
 uchar _NEAR THWMouse::buttonCount = 0;
 Boolean _NEAR THWMouse::handlerInstalled = False;
 
-THWMouse::THWMouse()
+THWMouse::THWMouse() noexcept
 {
     resume();
 }
 
-void THWMouse::resume()
+void THWMouse::resume() noexcept
 {
 #if defined( __FLAT__ )
     buttonCount = THardwareInfo::getButtonCount();
@@ -62,7 +62,7 @@ THWMouse::~THWMouse()
     suspend();
 }
 
-void THWMouse::suspend()
+void THWMouse::suspend() noexcept
 {
 #if defined(__FLAT__)
     hide();
@@ -82,7 +82,7 @@ void THWMouse::suspend()
 
 #pragma warn -asc
 
-void THWMouse::show()
+void THWMouse::show() noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::cursorOn();
@@ -101,7 +101,7 @@ void THWMouse::show()
 #endif
 }
 
-void THWMouse::hide()
+void THWMouse::hide() noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::cursorOff();
@@ -122,7 +122,7 @@ void THWMouse::hide()
 #pragma warn .asc
 
 #pragma argsused
-void THWMouse::setRange( ushort rx, ushort ry )
+void THWMouse::setRange( ushort rx, ushort ry ) noexcept
 {
 #if !defined( __FLAT__ )
     if( buttonCount != 0 )
@@ -142,7 +142,7 @@ void THWMouse::setRange( ushort rx, ushort ry )
 #endif
 }
 
-void THWMouse::getEvent( MouseEventType& me )
+void THWMouse::getEvent( MouseEventType& me ) noexcept
 {
 #if defined( __FLAT__ )
     me.buttons = 0;
@@ -178,7 +178,7 @@ void THWMouse::registerHandler( unsigned mask, void (_FAR *func)() )
 }
 #endif
 
-TMouse::TMouse()
+TMouse::TMouse() noexcept
 {
 //    show();
 }

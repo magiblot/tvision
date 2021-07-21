@@ -41,7 +41,7 @@ extern TPoint shadowSize;
 TProgInit::TProgInit( TStatusLine *(*cStatusLine)( TRect ),
                             TMenuBar *(*cMenuBar)( TRect ),
                             TDeskTop *(*cDeskTop )( TRect )
-                          ) :
+                          ) noexcept :
     createStatusLine( cStatusLine ),
     createMenuBar( cMenuBar ),
     createDeskTop( cDeskTop )
@@ -49,7 +49,7 @@ TProgInit::TProgInit( TStatusLine *(*cStatusLine)( TRect ),
 }
 
 
-TProgram::TProgram() :
+TProgram::TProgram() noexcept :
     TProgInit( &TProgram::initStatusLine,
                   &TProgram::initMenuBar,
                   &TProgram::initDeskTop
@@ -307,7 +307,7 @@ void TProgram::setScreenMode( ushort mode )
     TEventQueue::mouse->show(); //ShowMouse();
 }
 
-TView* TProgram::validView(TView* p)
+TView* TProgram::validView(TView* p) noexcept
 {
     if( p == 0 )
         return 0;

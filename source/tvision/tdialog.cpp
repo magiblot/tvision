@@ -22,7 +22,7 @@
 //   lobyte = bit mask
 
 
-TDialog::TDialog( const TRect& bounds, TStringView aTitle ) :
+TDialog::TDialog( const TRect& bounds, TStringView aTitle ) noexcept :
     TWindowInit( &TDialog::initFrame ),
     TWindow( bounds, aTitle, wnNoNumber )
 {
@@ -107,7 +107,7 @@ TStreamable *TDialog::build()
     return new TDialog( streamableInit );
 }
 
-TDialog::TDialog( StreamableInit ) :
+TDialog::TDialog( StreamableInit ) noexcept :
     TWindowInit( 0 ),
     TWindow( streamableInit )
 {

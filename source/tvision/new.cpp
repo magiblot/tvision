@@ -43,7 +43,7 @@ TBufListEntry::TBufListEntry( void*& o, size_t sz ) noexcept :
         next->prev = this;
 }
 
-void TBufListEntry::destroy()
+void TBufListEntry::destroy() noexcept
 {
     owner = 0;
     if( prev == 0 )
@@ -70,7 +70,7 @@ void TBufListEntry::operator delete( void *b ) noexcept
     free( b );
 }
 
-Boolean TBufListEntry::freeHead()
+Boolean TBufListEntry::freeHead() noexcept
 {
     if( bufList == 0 )
         return False;
@@ -87,7 +87,7 @@ int _NEAR TVMemMgr::inited = 0;
 
 TVMemMgr memMgr;
 
-TVMemMgr::TVMemMgr()
+TVMemMgr::TVMemMgr() noexcept
 {
     if( !inited )
         resizeSafetyPool();
@@ -99,7 +99,7 @@ TVMemMgr::~TVMemMgr()
     inited = 0;
 }
 
-void TVMemMgr::resizeSafetyPool( size_t sz )
+void TVMemMgr::resizeSafetyPool( size_t sz ) noexcept
 {
     inited = 1;
     free( safetyPool );
@@ -110,12 +110,12 @@ void TVMemMgr::resizeSafetyPool( size_t sz )
     safetyPoolSize = sz;
 }
 
-int TVMemMgr::safetyPoolExhausted()
+int TVMemMgr::safetyPoolExhausted() noexcept
 {
     return inited && (safetyPool == 0);
 }
 
-void TVMemMgr::allocateDiscardable( void *&adr, size_t sz )
+void TVMemMgr::allocateDiscardable( void *&adr, size_t sz ) noexcept
 {
     if( safetyPoolExhausted() )
         adr = 0;
@@ -129,7 +129,7 @@ void TVMemMgr::allocateDiscardable( void *&adr, size_t sz )
         }
 }
 
-void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz )
+void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz ) noexcept
 {
     if( !sz )
         {
@@ -170,7 +170,7 @@ void TVMemMgr::reallocateDiscardable( void *&adr, size_t sz )
         }
 }
 
-void TVMemMgr::freeDiscardable( void *block )
+void TVMemMgr::freeDiscardable( void *block ) noexcept
 {
     if (block)
         ((TBufListEntry *)((char *)block - sizeof(TBufListEntry)))->destroy();

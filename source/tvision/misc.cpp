@@ -36,12 +36,12 @@ void *message( TView *receiver, ushort what, ushort command, void *infoPtr)
         return 0;
 }
 
-Boolean lowMemory()
+Boolean lowMemory() noexcept
 {
     return Boolean(TVMemMgr::safetyPoolExhausted());
 }
 
-size_t strnzcpy( char *dest, TStringView src, size_t size )
+size_t strnzcpy( char *dest, TStringView src, size_t size ) noexcept
 {
     // Same as strlcpy. 'size' is the size of the 'dest' buffer,
     // which is always made null-terminated unless 'size' is zero.
@@ -59,7 +59,7 @@ size_t strnzcpy( char *dest, TStringView src, size_t size )
     return 0;
 }
 
-size_t strnzcat( char *dest, TStringView src, size_t size )
+size_t strnzcat( char *dest, TStringView src, size_t size ) noexcept
 {
     // Similar to strlcpy, except that 'dest' is always left null-terminated,
     // and the return value is the length of 'dest'.

@@ -32,7 +32,7 @@
 TListViewer::TListViewer( const TRect& bounds,
                           ushort aNumCols,
                           TScrollBar *aHScrollBar,
-                          TScrollBar *aVScrollBar) :
+                          TScrollBar *aVScrollBar) noexcept :
     TView( bounds ),
     numCols( aNumCols ),
     topItem( 0 ),
@@ -134,7 +134,7 @@ void TListViewer::draw()
                 {
                 if (indent < 255)
                     {
-                    char text[256] = {0};
+                    char text[256];
                     getText( text, item, 255 );
                     b.moveStr( curCol+1, text, color, colWidth, indent );
                     }
@@ -423,7 +423,7 @@ TStreamable *TListViewer::build()
     return new TListViewer( streamableInit );
 }
 
-TListViewer::TListViewer( StreamableInit ) : TView( streamableInit )
+TListViewer::TListViewer( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

@@ -64,7 +64,7 @@ static void checkIDE()
 }
 #endif
 
-TSystemError::TSystemError()
+TSystemError::TSystemError() noexcept
 {
 #if !defined(__FLAT__)
     inIDE = False;
@@ -86,12 +86,12 @@ TSystemError::~TSystemError()
 }
 
 #if defined( __FLAT__ )             // 16-bit version is in SYSINT.ASM
-void TSystemError::resume()
+void TSystemError::resume() noexcept
 {
     THardwareInfo::setCtrlBrkHandler( TRUE );
 }
 
-void TSystemError::suspend()
+void TSystemError::suspend() noexcept
 {
     THardwareInfo::setCtrlBrkHandler( FALSE );
 }

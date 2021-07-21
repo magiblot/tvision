@@ -59,7 +59,7 @@ MouseEventType _NEAR TEventQueue::downMouse;
 
 TMouse *TEventQueue::mouse;
 
-TEventQueue::TEventQueue()
+TEventQueue::TEventQueue() noexcept
 {
     static TMouse mouse;
     this->mouse = &mouse;
@@ -67,7 +67,7 @@ TEventQueue::TEventQueue()
 }
 
 
-void TEventQueue::resume()
+void TEventQueue::resume() noexcept
 {
     if( mouse->present() == False )
         mouse->resume();
@@ -88,7 +88,7 @@ void TEventQueue::resume()
 }
 
 
-void TEventQueue::suspend()
+void TEventQueue::suspend() noexcept
 {
     mouse->suspend();
 }
@@ -99,7 +99,7 @@ TEventQueue::~TEventQueue()
 }
 
 
-void TEventQueue::getMouseEvent( TEvent & ev)
+void TEventQueue::getMouseEvent( TEvent & ev) noexcept
 {
     if( mouseEvents == True )
         {
@@ -200,7 +200,7 @@ void TEventQueue::getMouseEvent( TEvent & ev)
 }
 
 
-Boolean TEventQueue::getMouseState( TEvent & ev )
+Boolean TEventQueue::getMouseState( TEvent & ev ) noexcept
 {
 #if defined( __FLAT__ )
     ev.what = evNothing;
@@ -286,7 +286,7 @@ I   POP DS
 #endif
 
 #pragma argsused
-void TEvent::getKeyEvent(Boolean blocking)
+void TEvent::getKeyEvent(Boolean blocking) noexcept
 {
 #if defined( __FLAT__ )
     if( THardwareInfo::getKeyEvent( *this, blocking ) )

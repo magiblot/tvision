@@ -11,7 +11,7 @@
 #endif
 
 unsigned _dos_findfirst( const char *pathname, unsigned attrib,
-                         struct find_t *fileinfo )
+                         struct find_t *fileinfo ) noexcept
 {
     // The original findfirst sets errno on failure. We don't do this for now.
     FindFirstRec *r;
@@ -20,7 +20,7 @@ unsigned _dos_findfirst( const char *pathname, unsigned attrib,
     return -1;
 }
 
-unsigned _dos_findnext(struct find_t *fileinfo)
+unsigned _dos_findnext(struct find_t *fileinfo) noexcept
 {
     FindFirstRec *r;
     if ((r = FindFirstRec::get(fileinfo)) && r->next())
@@ -28,18 +28,18 @@ unsigned _dos_findnext(struct find_t *fileinfo)
     return -1;
 }
 
-int findfirst(const char *pathname, struct ffblk *ffblk, int attrib)
+int findfirst(const char *pathname, struct ffblk *ffblk, int attrib) noexcept
 {
     return _dos_findfirst(pathname, attrib, (struct find_t *) ffblk);
 }
 
-int findnext(struct ffblk *ffblk)
+int findnext(struct ffblk *ffblk) noexcept
 {
     return _dos_findnext((struct find_t *) ffblk);
 }
 
 void fnmerge( char *pathP, const char *driveP, const char *dirP,
-              const char *nameP, const char *extP )
+              const char *nameP, const char *extP ) noexcept
 {
     // fnmerge is often used before accessing files, so producing a
     // UNIX-formatted path fixes most cases of filesystem access.
@@ -72,7 +72,7 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
 #endif
 }
 
-static bool CopyComponent(char* dstP, const char* startP, const char* endP, size_t MAX)
+static bool CopyComponent(char* dstP, const char* startP, const char* endP, size_t MAX) noexcept
 {
     // Copies a path component of length endP-startP into dstP.
     // If the component is empty, returns false and does nothing.
@@ -86,7 +86,7 @@ static bool CopyComponent(char* dstP, const char* startP, const char* endP, size
     return false;
 }
 
-int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP)
+int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP) noexcept
 {
     int flags = 0;
     if (driveP)
@@ -152,7 +152,8 @@ int fnsplit(const char *pathP, char *driveP, char *dirP, char *nameP, char *extP
     return flags;
 }
 
-int getdisk() {
+int getdisk() noexcept
+{
 #ifdef _WIN32
     return _getdrive() - 1;
 #else
@@ -161,7 +162,7 @@ int getdisk() {
 #endif
 }
 
-int setdisk(int drive)
+int setdisk(int drive) noexcept
 {
 #ifdef _WIN32
     _chdrive(drive - 1);
@@ -171,7 +172,7 @@ int setdisk(int drive)
 #endif
 }
 
-int getcurdir(int drive, char *direc)
+int getcurdir(int drive, char *direc) noexcept
 {
     // direc is an array of length MAXDIR where the null-terminated directory
     // name will be placed, without drive specification nor leading backslash.

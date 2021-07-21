@@ -33,7 +33,7 @@
 /*      or original key code if no correspondence exists                  */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
-ushort ctrlToArrow(ushort keyCode)
+ushort ctrlToArrow(ushort keyCode) noexcept
 {
 
 const uchar ctrlCodes[] =
@@ -73,7 +73,7 @@ const ushort arrowCodes[] =
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-int cstrlen( TStringView text )
+int cstrlen( TStringView text ) noexcept
 {
 #ifdef __BORLANDC__
     const char _FAR *limit = &text[text.size()];
@@ -111,7 +111,7 @@ int cstrlen( TStringView text )
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-int strwidth( TStringView text )
+int strwidth( TStringView text ) noexcept
 {
 #ifdef __BORLANDC__
     return text.size();

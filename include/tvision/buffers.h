@@ -33,7 +33,7 @@ private:
 #if __cplusplus >= 201103L
     TBufListEntry(const TBufListEntry &) = default;
 #endif
-    void destroy();
+    void destroy() noexcept;
 
     void *operator new( size_t, size_t ) noexcept;
     void *operator new( size_t ) noexcept;
@@ -45,7 +45,7 @@ private:
     size_t sz;
 
     static TBufListEntry *_NEAR bufList;
-    static Boolean freeHead();
+    static Boolean freeHead() noexcept;
 
     friend class TVMemMgr;
     friend void *operator new( size_t );
@@ -58,22 +58,22 @@ class TVMemMgr
 
 public:
 
-    TVMemMgr();
+    TVMemMgr() noexcept;
     ~TVMemMgr();
 
-    static void resizeSafetyPool( size_t = DEFAULT_SAFETY_POOL_SIZE );
-    static int safetyPoolExhausted();
+    static void resizeSafetyPool( size_t = DEFAULT_SAFETY_POOL_SIZE ) noexcept;
+    static int safetyPoolExhausted() noexcept;
 
-    static void allocateDiscardable( void *&, size_t );
-    static void reallocateDiscardable( void *&, size_t );
-    static void freeDiscardable( void * );
+    static void allocateDiscardable( void *&, size_t ) noexcept;
+    static void reallocateDiscardable( void *&, size_t ) noexcept;
+    static void freeDiscardable( void * ) noexcept;
 
 private:
 
     static void * _NEAR safetyPool;
     static size_t _NEAR safetyPoolSize;
     static int _NEAR inited;
-    static int initMemMgr();
+    static int initMemMgr() noexcept;
 
 };
 

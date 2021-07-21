@@ -120,7 +120,7 @@ class TIndicator : public TView
 
 public:
 
-    TIndicator( const TRect& );
+    TIndicator( const TRect& ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -142,7 +142,7 @@ private:
 
 protected:
 
-    TIndicator( StreamableInit );
+    TIndicator( StreamableInit ) noexcept;
 
 public:
 
@@ -180,7 +180,7 @@ public:
 
     friend void genRefs();
 
-    TEditor( const TRect&, TScrollBar *, TScrollBar *, TIndicator *, uint );
+    TEditor( const TRect&, TScrollBar *, TScrollBar *, TIndicator *, uint ) noexcept;
     virtual ~TEditor();
 
     virtual void shutDown();
@@ -299,7 +299,7 @@ private:
 
 protected:
 
-    TEditor( StreamableInit );
+    TEditor( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -338,7 +338,7 @@ class TMemo : public TEditor
 
 public:
 
-    TMemo( const TRect&, TScrollBar *, TScrollBar *, TIndicator *, ushort );
+    TMemo( const TRect&, TScrollBar *, TScrollBar *, TIndicator *, ushort ) noexcept;
     virtual void getData( void *rec );
     virtual void setData( void *rec );
     virtual ushort dataSize();
@@ -352,7 +352,7 @@ private:
 
 protected:
 
-    TMemo( StreamableInit );
+    TMemo( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -399,14 +399,14 @@ public:
                  TScrollBar *,
                  TIndicator *,
                  TStringView
-               );
+               ) noexcept;
     virtual void doneBuffer();
     virtual void handleEvent( TEvent& );
     virtual void initBuffer();
-    Boolean loadFile();
-    Boolean save();
-    Boolean saveAs();
-    Boolean saveFile();
+    Boolean loadFile() noexcept;
+    Boolean save() noexcept;
+    Boolean saveAs() noexcept;
+    Boolean saveFile() noexcept;
     virtual Boolean setBufSize( uint );
     virtual void shutDown();
     virtual void updateCommands();
@@ -421,7 +421,7 @@ private:
 
 protected:
 
-    TFileEditor( StreamableInit );
+    TFileEditor( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -455,7 +455,7 @@ class TEditWindow : public TWindow
 
 public:
 
-    TEditWindow( const TRect&, TStringView, int );
+    TEditWindow( const TRect&, TStringView, int ) noexcept;
     virtual void close();
     virtual const char *getTitle( short );
     virtual void handleEvent( TEvent& );
@@ -473,7 +473,7 @@ private:
 
 protected:
 
-    TEditWindow( StreamableInit );
+    TEditWindow( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -506,9 +506,9 @@ inline opstream& operator << ( opstream& os, TEditWindow* cl )
 
 struct TFindDialogRec
 {
-    TFindDialogRec( const char *str, ushort flgs )
+    TFindDialogRec( const char *str, ushort flgs ) noexcept
         {
-        strcpy( find, str );
+        strnzcpy( find, str, sizeof(find) );
         options = flgs;
         }
     char find[maxFindStrLen];
@@ -526,10 +526,10 @@ struct TFindDialogRec
 
 struct TReplaceDialogRec
 {
-    TReplaceDialogRec( const char *str, const char *rep, ushort flgs )
+    TReplaceDialogRec( const char *str, const char *rep, ushort flgs ) noexcept
         {
-        strcpy( find, str );
-        strcpy( replace, rep );
+        strnzcpy( find, str, sizeof(find) );
+        strnzcpy( replace, rep, sizeof(replace) );
         options = flgs;
         }
     char find[maxFindStrLen];

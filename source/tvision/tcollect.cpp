@@ -30,7 +30,7 @@
 #include <alloc.h>
 #endif  // __ALLOC_H
 
-TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) :
+TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) noexcept :
     items( 0 ),
     count( 0 ),
     limit( 0 ),
@@ -40,7 +40,7 @@ TNSCollection::TNSCollection( ccIndex aLimit, ccIndex aDelta ) :
     setLimit( aLimit );
 }
 
-TNSCollection::TNSCollection() :
+TNSCollection::TNSCollection() noexcept :
     items( 0 ),
     count( 0 ),
     limit( 0 ),
@@ -249,7 +249,7 @@ void *TCollection::read( ipstream& is )
 }
 
 
-TCollection::TCollection( StreamableInit )
+TCollection::TCollection( StreamableInit ) noexcept
 {
 }
 

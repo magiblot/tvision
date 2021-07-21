@@ -30,7 +30,7 @@
 
 #include <dos.h>
 
-static unsigned getCodePage()
+static unsigned getCodePage() noexcept
 {
 #if defined( __BORLANDC__ )
 #if !defined(__FLAT__)
@@ -53,7 +53,7 @@ static unsigned getCodePage()
 #endif
 }
 
-void TDisplay::updateIntlChars()
+void TDisplay::updateIntlChars() noexcept
 {
     if(getCodePage() != 437 )
         TFrame::frameChars[30] = '\xCD';

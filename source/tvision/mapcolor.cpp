@@ -17,7 +17,7 @@
 #define Uses_TGroup
 #include <tvision/tv.h>
 
-TColorAttr TView::mapColor( uchar index )
+TColorAttr TView::mapColor( uchar index ) noexcept
 {
     TColorAttr color = index;
     if( color == 0 )

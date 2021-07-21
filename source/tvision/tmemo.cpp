@@ -26,7 +26,7 @@ TMemo::TMemo( const TRect& bounds,
                   TScrollBar *aHScrollBar,
                   TScrollBar *aVScrollBar,
                   TIndicator *aIndicator,
-                  ushort aBufSize ) :
+                  ushort aBufSize ) noexcept :
     TEditor( bounds, aHScrollBar, aVScrollBar, aIndicator, aBufSize )
 {
 }
@@ -98,7 +98,7 @@ TStreamable *TMemo::build()
     return new TMemo( streamableInit );
 }
 
-TMemo::TMemo( StreamableInit ) : TEditor( streamableInit )
+TMemo::TMemo( StreamableInit ) noexcept : TEditor( streamableInit )
 {
 }
 

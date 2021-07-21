@@ -180,7 +180,7 @@ TEditor::TEditor( const TRect& bounds,
                   TScrollBar *aHScrollBar,
                   TScrollBar *aVScrollBar,
                   TIndicator *aIndicator,
-                  uint aBufSize ) :
+                  uint aBufSize ) noexcept :
     TView( bounds ),
     hScrollBar( aHScrollBar ),
     vScrollBar( aVScrollBar ),

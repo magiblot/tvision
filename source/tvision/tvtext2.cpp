@@ -37,7 +37,7 @@ static const char altCodes2[] = "1234567890-=";
 
 #pragma warn -rng
 
-char getAltChar(ushort keyCode)
+char getAltChar(ushort keyCode) noexcept
 {
     if ((keyCode & 0xff) == 0)
         {
@@ -56,7 +56,7 @@ char getAltChar(ushort keyCode)
     return 0;
 }
 
-ushort getAltCode(char c)
+ushort getAltCode(char c) noexcept
 {
     if( c == 0 )
         return 0;
@@ -81,7 +81,7 @@ ushort getAltCode(char c)
 inline uchar lo(ushort w) { return w & 0xff; }
 inline uchar hi(ushort w) { return w >> 8; }
 
-char getCtrlChar(ushort keyCode)
+char getCtrlChar(ushort keyCode) noexcept
 {
     if ( (lo(keyCode)!= 0) && (lo(keyCode) <= ('Z'-'A'+1)))
         return lo(keyCode) + 'A' - 1;
@@ -89,7 +89,7 @@ char getCtrlChar(ushort keyCode)
         return 0;
 }
 
-ushort getCtrlCode(uchar ch)
+ushort getCtrlCode(uchar ch) noexcept
 {
 	return getAltCode(ch)|(((('a'<=ch)&&(ch<='z'))?(ch&~0x20):ch)-'A'+1);
 

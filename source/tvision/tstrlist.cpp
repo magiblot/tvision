@@ -29,12 +29,12 @@
 
 const int MAXKEYS = 16;
 
-TStrIndexRec::TStrIndexRec() :
+TStrIndexRec::TStrIndexRec() noexcept :
     count(0)
 {
 }
 
-TStrListMaker::TStrListMaker( ushort aStrSize, ushort aIndexSize ) :
+TStrListMaker::TStrListMaker( ushort aStrSize, ushort aIndexSize ) noexcept :
     strPos( 0 ),
     strSize( aStrSize ),
     strings( new char[aStrSize] ),
@@ -81,7 +81,7 @@ void TStrListMaker::put( ushort key, char *str )
 
 #if !defined(NO_STREAMABLE)
 
-TStringList::TStringList( StreamableInit ) :
+TStringList::TStringList( StreamableInit ) noexcept :
     basePos(0),
     indexSize(0),
     index(0)

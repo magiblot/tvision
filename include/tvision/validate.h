@@ -40,7 +40,7 @@ enum TVTransfer {vtDataSize, vtSetData, vtGetData};
 class TValidator : public TObject, public TStreamable
 {
 public:
-    TValidator();
+    TValidator() noexcept;
     virtual void error();
     virtual Boolean isValidInput(char* s, Boolean suppressFill);
     virtual Boolean isValid(const char* s);
@@ -51,7 +51,7 @@ public:
     ushort options;
 
 protected:
-    TValidator( StreamableInit );
+    TValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os );
     virtual void* read( ipstream& is );
 
@@ -92,7 +92,7 @@ public:
 
 
 protected:
-    TPXPictureValidator( StreamableInit );
+    TPXPictureValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os );
     virtual void* read( ipstream& is );
 
@@ -142,14 +142,14 @@ class TFilterValidator : public TValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TFilterValidator(TStringView aValidChars);
+    TFilterValidator(TStringView aValidChars) noexcept;
     ~TFilterValidator();
     virtual void error();
     virtual Boolean isValidInput(char* s, Boolean suppressFill);
     virtual Boolean isValid(const char* s);
 
 protected:
-    TFilterValidator( StreamableInit );
+    TFilterValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os);
     virtual void* read( ipstream& is );
 
@@ -190,7 +190,7 @@ class TRangeValidator : public TFilterValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TRangeValidator(long aMin, long aMax);
+    TRangeValidator(long aMin, long aMax) noexcept;
     virtual void error();
     virtual Boolean isValid(const char* s);
     virtual ushort transfer(char* s, void* buffer, TVTransfer flag);
@@ -199,7 +199,7 @@ protected:
     long min;
     long max;
 
-    TRangeValidator( StreamableInit );
+    TRangeValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os );
     virtual void* read( ipstream& is );
 
@@ -232,13 +232,13 @@ inline opstream& operator << ( opstream& os, TRangeValidator* v )
 class TLookupValidator : public TValidator
 {
 public:
-    TLookupValidator() {};
+    TLookupValidator() noexcept {};
     virtual Boolean isValid(const char* s);
     virtual Boolean lookup(const char* s);
     static TStreamable *build();
     static const char * const _NEAR name;
 protected:
-    TLookupValidator( StreamableInit );
+    TLookupValidator( StreamableInit ) noexcept;
 private:
     virtual const char *streamableName() const  {return name;};
 };
@@ -267,13 +267,13 @@ class TStringLookupValidator : public TLookupValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TStringLookupValidator(TStringCollection* aStrings);
+    TStringLookupValidator(TStringCollection* aStrings) noexcept;
     ~TStringLookupValidator();
     virtual void error();
     virtual Boolean lookup(const char* s);
 
 protected:
-    TStringLookupValidator( StreamableInit );
+    TStringLookupValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os );
     virtual void* read( ipstream& is );
 

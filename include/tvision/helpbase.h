@@ -29,7 +29,7 @@ class TParagraph
 
 public:
 
-    TParagraph() {}
+    TParagraph() noexcept {}
     TParagraph *next;
     Boolean wrap;
     ushort size;
@@ -44,7 +44,7 @@ class TCrossRef
 
 public:
 
-    TCrossRef() {}
+    TCrossRef() noexcept {}
     int ref;
     int offset;
     uchar length;
@@ -59,19 +59,19 @@ class THelpTopic: public TObject, public TStreamable
 
 public:
 
-    THelpTopic();
-    THelpTopic( StreamableInit ) {};
+    THelpTopic() noexcept;
+    THelpTopic( StreamableInit ) noexcept {};
     virtual ~THelpTopic();
 
-    void addCrossRef( TCrossRef ref );
-    void addParagraph( TParagraph *p );
-    void getCrossRef( int i, TPoint& loc, uchar& length, int& ref );
-    TStringView getLine( int line );
-    int getNumCrossRefs();
-    int numLines();
-    void setCrossRef( int i, TCrossRef& ref );
-    void setNumCrossRefs( int i );
-    void setWidth( int aWidth );
+    void addCrossRef( TCrossRef ref ) noexcept;
+    void addParagraph( TParagraph *p ) noexcept;
+    void getCrossRef( int i, TPoint& loc, uchar& length, int& ref ) noexcept;
+    TStringView getLine( int line ) noexcept;
+    int getNumCrossRefs() noexcept;
+    int numLines() noexcept;
+    void setCrossRef( int i, TCrossRef& ref ) noexcept;
+    void setNumCrossRefs( int i ) noexcept;
+    void setWidth( int aWidth ) noexcept;
 
     TParagraph *paragraphs;
 
@@ -80,13 +80,13 @@ public:
 
 private:
 
-    TStringView wrapText( char *text, int size, int& offset, Boolean wrap );
+    TStringView wrapText( char *text, int size, int& offset, Boolean wrap ) noexcept;
     void readParagraphs( ipstream& s );
     void readCrossRefs( ipstream& s );
     void writeParagraphs( opstream& s );
     void writeCrossRefs( opstream& s );
-    void disposeParagraphs();
-    const char *streamableName() const
+    void disposeParagraphs() noexcept;
+    virtual const char *streamableName() const
         { return name; }
     int width;
     int lastOffset;
@@ -123,11 +123,11 @@ class THelpIndex : public TObject, public TStreamable
 public:
 
 
-    THelpIndex();
-    THelpIndex( StreamableInit ) {};
+    THelpIndex() noexcept;
+    THelpIndex( StreamableInit ) noexcept {};
     virtual ~THelpIndex();
 
-    int32_t position( int );
+    int32_t position( int ) noexcept;
     void add( int, int32_t );
 
     ushort size;
@@ -135,7 +135,7 @@ public:
 
 private:
 
-    const char *streamableName() const
+    virtual const char *streamableName() const
         { return name; }
 
 protected:

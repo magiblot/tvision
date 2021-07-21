@@ -13,7 +13,7 @@
 class CpTranslator
 {
 
-    CpTranslator();
+    CpTranslator() noexcept;
     static CpTranslator instance;
 
     struct CpTable
@@ -24,20 +24,20 @@ class CpTranslator
 
         CpTable( TStringView cp,
                  const TStringView toUtf8[256],
-                 const std::array<uint32_t, 256> &toUtf8Int );
+                 const std::array<uint32_t, 256> &toUtf8Int ) noexcept;
     };
-    
+
     static const CpTable tables[2];
     static const CpTable *activeTable;
 
-    static void useTable(const CpTable *table)
+    static void useTable(const CpTable *table) noexcept
     {
         activeTable = table;
     }
 
 public:
 
-    static void use(TStringView cp)
+    static void use(TStringView cp) noexcept
     {
         for (const CpTable &t : tables)
             if (t.cp == cp)
@@ -48,14 +48,14 @@ public:
         useTable(&tables[0]);
     }
 
-    static uint32_t toUtf8Int(unsigned char c)
+    static uint32_t toUtf8Int(unsigned char c) noexcept
     {
         return activeTable->toUtf8Int[c];
     }
 
-    static char fromUtf8(TStringView s);
+    static char fromUtf8(TStringView s) noexcept;
 
-    static char printableFromUtf8(TStringView s)
+    static char printableFromUtf8(TStringView s) noexcept
     {
         uchar c = fromUtf8(s);
         if (c < ' ')

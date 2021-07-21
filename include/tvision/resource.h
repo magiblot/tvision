@@ -27,7 +27,7 @@ class TStringCollection : public TSortedCollection
 
 public:
 
-    TStringCollection( short aLimit, short aDelta );
+    TStringCollection( short aLimit, short aDelta ) noexcept;
 
 private:
 
@@ -41,7 +41,7 @@ private:
 
 protected:
 
-    TStringCollection( StreamableInit ) : TSortedCollection ( streamableInit ) {};
+    TStringCollection( StreamableInit ) noexcept : TSortedCollection ( streamableInit ) {};
 
 public:
 
@@ -83,8 +83,8 @@ class TResourceCollection: public TStringCollection
 
 public:
 
-    TResourceCollection( StreamableInit) : TStringCollection( streamableInit ) {};
-    TResourceCollection( short aLimit, short aDelta );
+    TResourceCollection( StreamableInit) noexcept : TStringCollection( streamableInit ) {};
+    TResourceCollection( short aLimit, short aDelta ) noexcept;
 
     virtual void *keyOf( void *item );
 
@@ -156,7 +156,7 @@ class TStrIndexRec
 
 public:
 
-    TStrIndexRec();
+    TStrIndexRec() noexcept;
 
     ushort key;
     ushort count;
@@ -192,7 +192,7 @@ private:
 
 protected:
 
-    TStringList( StreamableInit );
+    TStringList( StreamableInit ) noexcept;
     virtual void write( opstream& ) {}
     virtual void *read( ipstream& );
 
@@ -224,7 +224,7 @@ class TStrListMaker : public TObject, public TStreamable
 
 public:
 
-    TStrListMaker( ushort aStrSize, ushort aIndexSize );
+    TStrListMaker( ushort aStrSize, ushort aIndexSize ) noexcept;
     ~TStrListMaker();
 
     void put( ushort key, char *str );
@@ -245,7 +245,7 @@ private:
 
 protected:
 
-    TStrListMaker( StreamableInit );
+    TStrListMaker( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& ) { return 0; }
 

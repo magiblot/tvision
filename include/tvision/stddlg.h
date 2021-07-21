@@ -72,7 +72,7 @@ class TFileInputLine : public TInputLine
 
 public:
 
-    TFileInputLine( const TRect& bounds, short aMaxLen );
+    TFileInputLine( const TRect& bounds, short aMaxLen ) noexcept;
 
     virtual void handleEvent( TEvent& event );
 
@@ -83,7 +83,7 @@ private:
 
 protected:
 
-    TFileInputLine( StreamableInit );
+    TFileInputLine( StreamableInit ) noexcept;
 
 public:
 
@@ -114,7 +114,7 @@ class TFileCollection: public TSortedCollection
 
 public:
 
-    TFileCollection( ccIndex aLimit, ccIndex aDelta) :
+    TFileCollection( ccIndex aLimit, ccIndex aDelta) noexcept :
         TSortedCollection( aLimit, aDelta ) {}
 
     TSearchRec *at( ccIndex index )
@@ -151,7 +151,7 @@ private:
 
 protected:
 
-    TFileCollection( StreamableInit ) : TSortedCollection ( streamableInit ) {}
+    TFileCollection( StreamableInit ) noexcept : TSortedCollection ( streamableInit ) {}
 
 public:
 
@@ -198,7 +198,7 @@ public:
     TSortedListBox( const TRect& bounds,
                     ushort aNumCols,
                     TScrollBar *aScrollBar
-                  );
+                  ) noexcept;
 
     virtual void handleEvent( TEvent& event );
     void newList( TSortedCollection *aList );
@@ -220,7 +220,7 @@ private:
 
 protected:
 
-    TSortedListBox( StreamableInit ) : TListBox ( streamableInit ) {}
+    TSortedListBox( StreamableInit ) noexcept : TListBox ( streamableInit ) {}
     virtual void *read( ipstream& );
 
 public:
@@ -261,7 +261,7 @@ public:
 
     TFileList( const TRect& bounds,
                TScrollBar *aScrollBar
-             );
+             ) noexcept;
     ~TFileList();
 
     virtual void focusItem( short item );
@@ -288,7 +288,7 @@ private:
 
 protected:
 
-    TFileList( StreamableInit ) : TSortedListBox ( streamableInit ) {}
+    TFileList( StreamableInit ) noexcept : TSortedListBox ( streamableInit ) {}
 
 public:
 
@@ -331,7 +331,7 @@ class TFileInfoPane : public TView
 
 public:
 
-    TFileInfoPane( const TRect& bounds );
+    TFileInfoPane( const TRect& bounds ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -350,7 +350,7 @@ private:
 
 protected:
 
-    TFileInfoPane( StreamableInit ) : TView ( streamableInit ) {}
+    TFileInfoPane( StreamableInit ) noexcept : TView ( streamableInit ) {}
 
 public:
 
@@ -400,11 +400,11 @@ class TFileDialog : public TDialog
 public:
 
     TFileDialog( TStringView aWildCard, TStringView aTitle,
-                 TStringView inputName, ushort aOptions, uchar histId );
+                 TStringView inputName, ushort aOptions, uchar histId ) noexcept;
     ~TFileDialog();
 
     virtual void getData( void *rec );
-    void getFileName( char *s );
+    void getFileName( char *s ) noexcept;
     virtual void handleEvent( TEvent& event );
     virtual void setData( void *rec );
     virtual Boolean valid( ushort command );
@@ -437,7 +437,7 @@ private:
 
 protected:
 
-    TFileDialog( StreamableInit ) :
+    TFileDialog( StreamableInit ) noexcept :
         TWindowInit( TFileDialog::initFrame ), TDialog ( streamableInit ) {}
     virtual void write( opstream& );
     virtual void *read( ipstream& );
@@ -470,7 +470,7 @@ class TDirEntry
 
 public:
 
-    TDirEntry( TStringView, TStringView );
+    TDirEntry( TStringView, TStringView ) noexcept;
     ~TDirEntry();
     char *dir() { return directory; }
     char *text() { return displayText; }
@@ -482,7 +482,7 @@ private:
 
 };
 
-inline TDirEntry::TDirEntry( TStringView txt, TStringView dir ) :
+inline TDirEntry::TDirEntry( TStringView txt, TStringView dir ) noexcept :
     displayText( newStr( txt ) ), directory( newStr( dir ) )
 {
 }
@@ -505,7 +505,7 @@ class TDirCollection : public TCollection
 
 public:
 
-    TDirCollection( ccIndex aLimit, ccIndex aDelta) :
+    TDirCollection( ccIndex aLimit, ccIndex aDelta) noexcept :
         TCollection( aLimit, aDelta ) {}
 
     TDirEntry *at( ccIndex index )
@@ -539,7 +539,7 @@ private:
 
 protected:
 
-    TDirCollection( StreamableInit ) : TCollection ( streamableInit ) {}
+    TDirCollection( StreamableInit ) noexcept : TCollection ( streamableInit ) {}
 
 public:
 
@@ -588,7 +588,7 @@ class TDirListBox : public TListBox
 
 public:
 
-    TDirListBox( const TRect& bounds, TScrollBar *aScrollBar );
+    TDirListBox( const TRect& bounds, TScrollBar *aScrollBar ) noexcept;
     ~TDirListBox();
 
     virtual void getText( char *, short, short );
@@ -620,7 +620,7 @@ private:
 
 protected:
 
-    TDirListBox( StreamableInit ): TListBox( streamableInit ) {}
+    TDirListBox( StreamableInit ) noexcept : TListBox( streamableInit ) {}
 
 public:
 
@@ -666,7 +666,7 @@ public:
 
     friend class TDirListBox;
 
-    TChDirDialog( ushort aOptions, ushort histId );
+    TChDirDialog( ushort aOptions, ushort histId ) noexcept;
     virtual ushort dataSize();
     virtual void getData( void *rec );
     virtual void handleEvent( TEvent& );
@@ -698,7 +698,7 @@ private:
 
 protected:
 
-    TChDirDialog( StreamableInit ) :
+    TChDirDialog( StreamableInit ) noexcept :
         TWindowInit( TChDirDialog::initFrame ), TDialog( streamableInit ) {}
     virtual void write( opstream& );
     virtual void *read( ipstream& );

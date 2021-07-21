@@ -37,7 +37,7 @@ static inline Boolean uppercase(char c)
 
 // TValidator
 
-TValidator::TValidator()
+TValidator::TValidator() noexcept
 {
   status = 0;
   options = 0;
@@ -46,7 +46,7 @@ TValidator::TValidator()
 #if !defined(NO_STREAMABLE)
 
 #pragma argsused
-TValidator::TValidator( StreamableInit s)
+TValidator::TValidator( StreamableInit s) noexcept
 {
 }
 
@@ -117,7 +117,7 @@ TPXPictureValidator::TPXPictureValidator(TStringView aPic, Boolean autoFill)
 
 #if !defined(NO_STREAMABLE)
 
-TPXPictureValidator::TPXPictureValidator( StreamableInit s) : TValidator(s)
+TPXPictureValidator::TPXPictureValidator( StreamableInit s) noexcept : TValidator(s)
 {
 }
 
@@ -603,14 +603,14 @@ TPicResult TPXPictureValidator::picture(char* input, Boolean autoFill)
 
 // TFilterValidator
 
-TFilterValidator::TFilterValidator(TStringView aValidChars)
+TFilterValidator::TFilterValidator(TStringView aValidChars) noexcept
 {
   validChars = newStr(aValidChars);
 }
 
 #if !defined(NO_STREAMABLE)
 
-TFilterValidator::TFilterValidator( StreamableInit s) : TValidator(s)
+TFilterValidator::TFilterValidator( StreamableInit s) noexcept : TValidator(s)
 {
 }
 
@@ -655,7 +655,7 @@ void TFilterValidator::error()
 
 // TRangeValidator
 
-TRangeValidator::TRangeValidator( long aMin, long aMax ):
+TRangeValidator::TRangeValidator( long aMin, long aMax ) noexcept :
     TFilterValidator( 0 ),
     min(aMin),
     max(aMax)
@@ -668,7 +668,7 @@ TRangeValidator::TRangeValidator( long aMin, long aMax ):
 
 #if !defined(NO_STREAMABLE)
 
-TRangeValidator::TRangeValidator( StreamableInit s) : TFilterValidator(s)
+TRangeValidator::TRangeValidator( StreamableInit s) noexcept : TFilterValidator(s)
 {
 }
 
@@ -733,7 +733,7 @@ ushort TRangeValidator::transfer(char* s, void* buffer, TVTransfer flag)
 
 #if !defined(NO_STREAMABLE)
 
-TLookupValidator::TLookupValidator( StreamableInit s) : TValidator(s)
+TLookupValidator::TLookupValidator( StreamableInit s) noexcept : TValidator(s)
 {
 }
 
@@ -751,7 +751,7 @@ Boolean TLookupValidator::lookup(const char* s)
 
 // TStringLookupValidator
 
-TStringLookupValidator::TStringLookupValidator(TStringCollection* aStrings)
+TStringLookupValidator::TStringLookupValidator(TStringCollection* aStrings) noexcept
 {
   strings = aStrings;
 }
@@ -772,7 +772,7 @@ void* TStringLookupValidator::read( ipstream& is )
   return this;
 }
 
-TStringLookupValidator::TStringLookupValidator( StreamableInit s) : 
+TStringLookupValidator::TStringLookupValidator( StreamableInit s) noexcept :
         TLookupValidator(s)
 {
 }

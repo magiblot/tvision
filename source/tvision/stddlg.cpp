@@ -66,7 +66,7 @@
 
 #define cpInfoPane "\x1E"
 
-TFileInputLine::TFileInputLine( const TRect& bounds, short aMaxLen ) :
+TFileInputLine::TFileInputLine( const TRect& bounds, short aMaxLen ) noexcept :
     TInputLine( bounds, aMaxLen )
 {
     eventMask |= evBroadcast;
@@ -93,7 +93,7 @@ void TFileInputLine::handleEvent( TEvent& event )
 
 TSortedListBox::TSortedListBox( const TRect& bounds,
                                 ushort aNumCols,
-                                TScrollBar *aScrollBar) :
+                                TScrollBar *aScrollBar) noexcept :
     TListBox(bounds, aNumCols, aScrollBar),
     shiftState( 0 ),
     searchPos( -1 )
@@ -212,7 +212,7 @@ TStreamable *TSortedListBox::build()
 
 #endif
 
-TFileInfoPane::TFileInfoPane( const TRect& bounds ) :
+TFileInfoPane::TFileInfoPane( const TRect& bounds ) noexcept :
     TView(bounds)
 {
     eventMask |= evBroadcast;

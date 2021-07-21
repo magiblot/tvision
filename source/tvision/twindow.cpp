@@ -29,7 +29,7 @@
 
 const TPoint minWinSize = {16, 6};
 
-TWindowInit::TWindowInit( TFrame *(*cFrame)( TRect ) ) :
+TWindowInit::TWindowInit( TFrame *(*cFrame)( TRect ) ) noexcept :
     createFrame( cFrame )
 {
 }
@@ -37,7 +37,7 @@ TWindowInit::TWindowInit( TFrame *(*cFrame)( TRect ) ) :
 TWindow::TWindow( const TRect& bounds,
                   TStringView aTitle,
                   short aNumber
-                ) :
+                ) noexcept :
     TWindowInit( &TWindow::initFrame ),
     TGroup( bounds ),
     flags( wfMove | wfGrow | wfClose | wfZoom ),
@@ -194,7 +194,7 @@ void TWindow::setState( ushort aState, Boolean enable )
         }
 }
 
-TScrollBar *TWindow::standardScrollBar( ushort aOptions )
+TScrollBar *TWindow::standardScrollBar( ushort aOptions ) noexcept
 {
     TRect r = getExtent();
     if( (aOptions & sbVertical) != 0 )
@@ -253,7 +253,7 @@ TStreamable *TWindow::build()
     return new TWindow( streamableInit );
 }
 
-TWindow::TWindow( StreamableInit ) :
+TWindow::TWindow( StreamableInit ) noexcept :
     TWindowInit( 0 ),
     TGroup( streamableInit )
 {

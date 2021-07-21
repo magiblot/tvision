@@ -32,7 +32,7 @@ TScreenCell * _NEAR TScreen::screenBuffer;
 ushort _NEAR TScreen::cursorLines = 0;
 Boolean _NEAR TScreen::clearOnSuspend = True;
 
-ushort TDisplay::getCursorType()
+ushort TDisplay::getCursorType() noexcept
 {
 #if defined( __FLAT__ )
     return THardwareInfo::getCaretSize();
@@ -76,7 +76,7 @@ int TDisplay::isEGAorVGA(void)
 }
 #endif
 
-void TDisplay::setCursorType( ushort ct )
+void TDisplay::setCursorType( ushort ct ) noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::setCaretSize( ct & 0xFF );
@@ -109,7 +109,7 @@ void TDisplay::setCursorType( ushort ct )
 #endif
 }
 
-void TDisplay::clearScreen( uchar w, uchar h )
+void TDisplay::clearScreen( uchar w, uchar h ) noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::clearScreen( w, h );
@@ -140,7 +140,7 @@ I   POP     BP
 
 #pragma warn .asc
 
-ushort TDisplay::getRows()
+ushort TDisplay::getRows() noexcept
 {
 #if defined( __FLAT__ )
     return THardwareInfo::getScreenRows();
@@ -155,7 +155,7 @@ ushort TDisplay::getRows()
 #endif
 }
 
-ushort TDisplay::getCols()
+ushort TDisplay::getCols() noexcept
 {
 #if defined( __FLAT__ )
     return THardwareInfo::getScreenCols();
@@ -166,7 +166,7 @@ ushort TDisplay::getCols()
 #endif
 }
 
-ushort TDisplay::getCrtMode()
+ushort TDisplay::getCrtMode() noexcept
 {
 #if defined( __FLAT__ )
     return THardwareInfo::getScreenMode();
@@ -181,7 +181,7 @@ ushort TDisplay::getCrtMode()
 }
 
 #pragma argsused
-void TDisplay::setCrtMode( ushort mode )
+void TDisplay::setCrtMode( ushort mode ) noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::setScreenMode( mode );
@@ -217,7 +217,7 @@ void TDisplay::setCrtMode( ushort mode )
 #endif
 }
 
-TScreen::TScreen()
+TScreen::TScreen() noexcept
 {
 #if defined(__FLAT__)
     THardwareInfo::setUpConsole();
@@ -232,7 +232,7 @@ TScreen::TScreen()
     setCrtData();
 }
 
-void TScreen::resume()
+void TScreen::resume() noexcept
 {
 #if defined(__FLAT__)
     THardwareInfo::setUpConsole();
@@ -252,7 +252,7 @@ TScreen::~TScreen()
 #endif
 }
 
-void TScreen::suspend()
+void TScreen::suspend() noexcept
 {
     if( startupMode != screenMode )
         setCrtMode( startupMode );
@@ -266,7 +266,7 @@ void TScreen::suspend()
 
 #pragma argsused
 
-ushort TScreen::fixCrtMode( ushort mode )
+ushort TScreen::fixCrtMode( ushort mode ) noexcept
 {
 #ifdef __BORLANDC__
 #if defined( __FLAT__ )
@@ -285,7 +285,7 @@ ushort TScreen::fixCrtMode( ushort mode )
     return mode;
 }
 
-void TScreen::setCrtData()
+void TScreen::setCrtData() noexcept
 {
     screenMode = getCrtMode();
     screenWidth = getCols();
@@ -310,19 +310,19 @@ void TScreen::setCrtData()
     setCursorType( 0 );
 }
 
-void TScreen::clearScreen()
+void TScreen::clearScreen() noexcept
 {
     TDisplay::clearScreen( screenWidth, screenHeight );
 }
 
 #ifndef __BORLANDC__ // Otherwise in system.h
-void TScreen::flushScreen()
+void TScreen::flushScreen() noexcept
 {
     THardwareInfo::flushScreen();
 }
 #endif
 
-void TScreen::setVideoMode( ushort mode )
+void TScreen::setVideoMode( ushort mode ) noexcept
 {
     if ( mode != smChanged )
         setCrtMode( fixCrtMode( mode ) );

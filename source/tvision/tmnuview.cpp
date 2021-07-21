@@ -44,7 +44,7 @@ TMenuItem::TMenuItem(   TStringView aName,
                         ushort aHelpCtx,
                         TStringView p,
                         TMenuItem *aNext
-             )
+                    ) noexcept
 {
     name = newStr( aName );
     command = aCommand;
@@ -63,7 +63,7 @@ TMenuItem::TMenuItem( TStringView aName,
                       TMenu *aSubMenu,
                       ushort aHelpCtx,
                       TMenuItem *aNext
-                    )
+                    ) noexcept
 {
     name = newStr( aName );
     command = 0;
@@ -650,7 +650,7 @@ TStreamable *TMenuView::build()
     return new TMenuView( streamableInit );
 }
 
-TMenuView::TMenuView( StreamableInit ) : TView( streamableInit )
+TMenuView::TMenuView( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

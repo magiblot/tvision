@@ -672,7 +672,7 @@ TStreamable *TEditor::build()
     return new TEditor( streamableInit );
 }
 
-TEditor::TEditor( StreamableInit ) : TView( streamableInit )
+TEditor::TEditor( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

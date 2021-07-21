@@ -61,7 +61,7 @@ static const char *Titles[] =
     MsgBoxText::confirmText
 };
 
-ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions )
+ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions ) noexcept
 {
     TDialog *dialog;
     short i, x, buttonCount;
@@ -105,7 +105,7 @@ ushort messageBoxRect( const TRect &r, TStringView msg, ushort aOptions )
 ushort messageBoxRect( const TRect &r,
                        ushort aOptions,
                        const char *fmt,
-                       ... )
+                       ... ) noexcept
 {
     va_list argptr;
     va_start( argptr, fmt );
@@ -135,12 +135,12 @@ static TRect makeRect(TStringView text)
     return r;
 }
 
-ushort messageBox( TStringView msg, ushort aOptions )
+ushort messageBox( TStringView msg, ushort aOptions ) noexcept
 {
     return messageBoxRect( makeRect(msg), msg, aOptions );
 }
 
-ushort messageBox( unsigned aOptions, const char *fmt, ... )
+ushort messageBox( unsigned aOptions, const char *fmt, ... ) noexcept
 {
     va_list argptr;
     va_start( argptr, fmt );
@@ -157,7 +157,7 @@ ushort messageBox( unsigned aOptions, const char *fmt, ... )
     return messageBoxRect( makeRect(msg), msg, aOptions );
 }
 
-ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit )
+ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit ) noexcept
 {
     TRect r(0, 0, 60, 8);
     r.move((TProgram::deskTop->size.x - r.b.x) / 2,
@@ -169,7 +169,7 @@ ushort inputBoxRect( const TRect &bounds,
                      TStringView Title,
                      TStringView aLabel,
                      char *s,
-                     uchar limit )
+                     uchar limit ) noexcept
 {
     TDialog *dialog;
     TView* control;

@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-TStaticInit::TStaticInit()
+TStaticInit::TStaticInit() noexcept
 {
     // Construct on first use
     static THardwareInfo hwInfoManager;
@@ -38,7 +38,7 @@ TStaticInit::TStaticInit()
 void initHistory();
 void doneHistory();
 
-TApplication::TApplication() :
+TApplication::TApplication() noexcept :
     TProgInit( &TApplication::initStatusLine,
                   &TApplication::initMenuBar,
                   &TApplication::initDeskTop

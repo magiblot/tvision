@@ -26,7 +26,7 @@
 
 TListBox::TListBox( const TRect& bounds,
                     ushort aNumCols,
-                    TScrollBar *aScrollBar ) :
+                    TScrollBar *aScrollBar ) noexcept :
     TListViewer(bounds, aNumCols, 0, aScrollBar),
     items( 0 )
 {
@@ -101,7 +101,7 @@ TStreamable *TListBox::build()
     return new TListBox( streamableInit );
 }
 
-TListBox::TListBox( StreamableInit ) : TListViewer( streamableInit )
+TListBox::TListBox( StreamableInit ) noexcept : TListViewer( streamableInit )
 {
 }
 

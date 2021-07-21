@@ -19,7 +19,7 @@
 #ifndef TVISION_COMPAT__NULL_H
 #define TVISION_COMPAT__NULL_H
 
-#include <cstddef>
+#include <stddef.h>
 
 #endif // TVISION_COMPAT__NULL_H
 

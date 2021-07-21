@@ -60,7 +60,7 @@ extern "C" char _FAR * _CType _FARFUNC strupr(char _FAR *__s);
 
 
 TFileList::TFileList( const TRect& bounds,
-                      TScrollBar *aScrollBar) :
+                      TScrollBar *aScrollBar) noexcept :
     TSortedListBox( bounds, 2, aScrollBar )
 {
 }
@@ -262,7 +262,7 @@ inline static void skip( char *&src, char k )
 
 #pragma warn .inl
 
-void squeeze( char *path )
+void squeeze( char *path ) noexcept
 {
     char *dest = path;
     char *src = path;
@@ -331,7 +331,7 @@ static inline int getPathDrive( const char *path )
 
 #pragma warn .inl
 
-Boolean getHomeDir( char *drive, char *dir )
+Boolean getHomeDir( char *drive, char *dir ) noexcept
 {
 #ifdef _WIN32
     const char *homedrive = getenv( "HOMEDRIVE" );
@@ -353,14 +353,14 @@ Boolean getHomeDir( char *drive, char *dir )
     return False;
 }
 
-void fexpand( char *rpath )
+void fexpand( char *rpath ) noexcept
 {
     char curpath[MAXPATH];
     getCurDir( curpath, getPathDrive(rpath) );
     fexpand( rpath, curpath );
 }
 
-void fexpand( char *rpath, const char *relativeTo )
+void fexpand( char *rpath, const char *relativeTo ) noexcept
 {
     char path[MAXPATH];
     char drive[MAXDRIVE];

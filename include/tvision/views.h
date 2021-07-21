@@ -204,36 +204,36 @@ class TCommandSet
 
 public:
 
-    TCommandSet();
-    TCommandSet( const TCommandSet& );
+    TCommandSet() noexcept;
+    TCommandSet( const TCommandSet& ) noexcept;
 
-    Boolean has( int cmd );
+    Boolean has( int cmd ) noexcept;
 
-    void disableCmd( int cmd );
-    void enableCmd( int cmd );
-    void operator += ( int cmd );
-    void operator -= ( int cmd );
+    void disableCmd( int cmd ) noexcept;
+    void enableCmd( int cmd ) noexcept;
+    void operator += ( int cmd ) noexcept;
+    void operator -= ( int cmd ) noexcept;
 
-    void disableCmd( const TCommandSet& );
-    void enableCmd( const TCommandSet& );
-    void operator += ( const TCommandSet& );
-    void operator -= ( const TCommandSet& );
+    void disableCmd( const TCommandSet& ) noexcept;
+    void enableCmd( const TCommandSet& ) noexcept;
+    void operator += ( const TCommandSet& ) noexcept;
+    void operator -= ( const TCommandSet& ) noexcept;
 
-    Boolean isEmpty();
+    Boolean isEmpty() noexcept;
 
-    TCommandSet& operator &= ( const TCommandSet& );
-    TCommandSet& operator |= ( const TCommandSet& );
+    TCommandSet& operator &= ( const TCommandSet& ) noexcept;
+    TCommandSet& operator |= ( const TCommandSet& ) noexcept;
 
-    friend TCommandSet operator & ( const TCommandSet&, const TCommandSet& );
-    friend TCommandSet operator | ( const TCommandSet&, const TCommandSet& );
+    friend TCommandSet operator & ( const TCommandSet&, const TCommandSet& ) noexcept;
+    friend TCommandSet operator | ( const TCommandSet&, const TCommandSet& ) noexcept;
 
-    friend int operator == ( const TCommandSet& tc1, const TCommandSet& tc2 );
-    friend int operator != ( const TCommandSet& tc1, const TCommandSet& tc2 );
+    friend int operator == ( const TCommandSet& tc1, const TCommandSet& tc2 ) noexcept;
+    friend int operator != ( const TCommandSet& tc1, const TCommandSet& tc2 ) noexcept;
 
 private:
 
-    int loc( int );
-    int mask( int );
+    int loc( int ) noexcept;
+    int mask( int ) noexcept;
 
     static int _NEAR masks[8];
 
@@ -241,37 +241,37 @@ private:
 
 };
 
-inline void TCommandSet::operator += ( int cmd )
+inline void TCommandSet::operator += ( int cmd ) noexcept
 {
     enableCmd( cmd );
 }
 
-inline void TCommandSet::operator -= ( int cmd )
+inline void TCommandSet::operator -= ( int cmd ) noexcept
 {
     disableCmd( cmd );
 }
 
-inline void TCommandSet::operator += ( const TCommandSet& tc )
+inline void TCommandSet::operator += ( const TCommandSet& tc ) noexcept
 {
     enableCmd( tc );
 }
 
-inline void TCommandSet::operator -= ( const TCommandSet& tc )
+inline void TCommandSet::operator -= ( const TCommandSet& tc ) noexcept
 {
     disableCmd( tc );
 }
 
-inline int operator != ( const TCommandSet& tc1, const TCommandSet& tc2 )
+inline int operator != ( const TCommandSet& tc1, const TCommandSet& tc2 ) noexcept
 {
     return !operator == ( tc1, tc2 );
 }
 
-inline int TCommandSet::loc( int cmd )
+inline int TCommandSet::loc( int cmd ) noexcept
 {
     return cmd / 8;
 }
 
-inline int TCommandSet::mask( int cmd )
+inline int TCommandSet::mask( int cmd ) noexcept
 {
     return masks[ cmd & 0x07 ];
 }
@@ -286,27 +286,27 @@ class TPalette
 
 public:
 
-    TPalette( const char *, ushort );
+    TPalette( const char *, ushort ) noexcept;
 #ifndef __BORLANDC__
-    TPalette( const TColorAttr *, ushort );
+    TPalette( const TColorAttr *, ushort ) noexcept;
     template <size_t N>
-    TPalette( const TColorAttr (&array) [N] ) :
+    TPalette( const TColorAttr (&array) [N] ) noexcept :
         TPalette(array, (ushort) N)
     {
     }
 #endif
-    TPalette( const TPalette& );
+    TPalette( const TPalette& ) noexcept;
     ~TPalette();
 
-    TPalette& operator = ( const TPalette& );
+    TPalette& operator = ( const TPalette& ) noexcept;
 
-    TColorAttr& operator[]( int ) const;
+    TColorAttr& operator[]( int ) const noexcept;
 
     TColorAttr *data;
 
 };
 
-inline TColorAttr& TPalette::operator[]( int index ) const
+inline TColorAttr& TPalette::operator[]( int index ) const noexcept
 {
     return data[index];
 }
@@ -338,15 +338,15 @@ public:
     enum phaseType { phFocused, phPreProcess, phPostProcess };
     enum selectMode{ normalSelect, enterSelect, leaveSelect };
 
-    TView( const TRect& bounds );
+    TView( const TRect& bounds ) noexcept;
     ~TView();
 
     virtual void sizeLimits( TPoint& min, TPoint& max );
-    TRect getBounds() const;
-    TRect getExtent() const;
-    TRect getClipRect() const;
-    Boolean mouseInView( TPoint mouse );
-    Boolean containsMouse( TEvent& event );
+    TRect getBounds() const noexcept;
+    TRect getExtent() const noexcept;
+    TRect getClipRect() const noexcept;
+    Boolean mouseInView( TPoint mouse ) noexcept;
+    Boolean containsMouse( TEvent& event ) noexcept;
 
     void locate( TRect& bounds );
     virtual void dragView( TEvent& event, uchar mode,   //  temporary fix
@@ -355,7 +355,7 @@ public:
     virtual void changeBounds( const TRect& bounds );
     void growTo( short x, short y );
     void moveTo( short x, short y );
-    void setBounds( const TRect& bounds );
+    void setBounds( const TRect& bounds ) noexcept;
 
     virtual ushort getHelpCtx();
 
@@ -364,8 +364,8 @@ public:
     void hide();
     void show();
     virtual void draw();
-    void drawView();
-    Boolean exposed();
+    void drawView() noexcept;
+    Boolean exposed() noexcept;
     Boolean focus();
     void hideCursor();
     void drawHide( TView *lastView );
@@ -381,33 +381,33 @@ public:
     void blockCursor();
     void normalCursor();
     virtual void resetCursor();
-    void setCursor( int x, int y );
+    void setCursor( int x, int y ) noexcept;
     void showCursor();
-    void drawCursor();
+    void drawCursor() noexcept;
 
-    void clearEvent( TEvent& event );
+    void clearEvent( TEvent& event ) noexcept;
     Boolean eventAvail();
     virtual void getEvent( TEvent& event );
     virtual void handleEvent( TEvent& event );
     virtual void putEvent( TEvent& event );
 
-    static Boolean commandEnabled( ushort command );
-    static void disableCommands( TCommandSet& commands );
-    static void enableCommands( TCommandSet& commands );
-    static void disableCommand( ushort command );
-    static void enableCommand( ushort command );
-    static void getCommands( TCommandSet& commands );
-    static void setCommands( TCommandSet& commands );
-    static void setCmdState( TCommandSet& commands, Boolean enable);
+    static Boolean commandEnabled( ushort command ) noexcept;
+    static void disableCommands( TCommandSet& commands ) noexcept;
+    static void enableCommands( TCommandSet& commands ) noexcept;
+    static void disableCommand( ushort command ) noexcept;
+    static void enableCommand( ushort command ) noexcept;
+    static void getCommands( TCommandSet& commands ) noexcept;
+    static void setCommands( TCommandSet& commands ) noexcept;
+    static void setCmdState( TCommandSet& commands, Boolean enable ) noexcept;
 
     virtual void endModal( ushort command );
     virtual ushort execute();
 
-    TAttrPair getColor( ushort color );
+    TAttrPair getColor( ushort color ) noexcept;
     virtual TPalette& getPalette() const;
-    virtual TColorAttr mapColor( uchar );
+    virtual TColorAttr mapColor( uchar ) noexcept;
 
-    Boolean getState( ushort aState ) const;
+    Boolean getState( ushort aState ) const noexcept;
     void select();
     virtual void setState( ushort aState, Boolean enable );
 
@@ -415,27 +415,27 @@ public:
     Boolean mouseEvent( TEvent& event, ushort mask );
     virtual Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
 
-    TPoint makeGlobal( TPoint source );
-    TPoint makeLocal( TPoint source );
+    TPoint makeGlobal( TPoint source ) noexcept;
+    TPoint makeLocal( TPoint source ) noexcept;
 
-    TView *nextView();
-    TView *prevView();
-    TView *prev();
+    TView *nextView() noexcept;
+    TView *prevView() noexcept;
+    TView *prev() noexcept;
     TView *next;
 
     void makeFirst();
     void putInFrontOf( TView *Target );
-    TView *TopView();
+    TView *TopView() noexcept;
 
-    void writeBuf(  short x, short y, short w, short h, const void _FAR* b );
-    void writeBuf(  short x, short y, short w, short h, const TDrawBuffer& b );
-    void writeChar( short x, short y, char c, uchar color, short count );
-    void writeLine( short x, short y, short w, short h, const TDrawBuffer& b );
-    void writeLine( short x, short y, short w, short h, const void _FAR *b );
-    void writeStr( short x, short y, const char *str, uchar color );
+    void writeBuf(  short x, short y, short w, short h, const void _FAR* b ) noexcept;
+    void writeBuf(  short x, short y, short w, short h, const TDrawBuffer& b ) noexcept;
+    void writeChar( short x, short y, char c, uchar color, short count ) noexcept;
+    void writeLine( short x, short y, short w, short h, const TDrawBuffer& b ) noexcept;
+    void writeLine( short x, short y, short w, short h, const void _FAR *b ) noexcept;
+    void writeStr( short x, short y, const char *str, uchar color ) noexcept;
 #ifndef __BORLANDC__
-    void writeBuf(  short x, short y, short w, short h, const TScreenCell *b );
-    void writeLine( short x, short y, short w, short h, const TScreenCell *b );
+    void writeBuf(  short x, short y, short w, short h, const TScreenCell *b ) noexcept;
+    void writeLine( short x, short y, short w, short h, const TScreenCell *b ) noexcept;
 #endif
 
     TPoint size;
@@ -467,11 +467,11 @@ private:
                    TPoint maxSize,
                    uchar mode
                  );
-    void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState );
+    void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState ) noexcept;
     static void writeView( write_args );
-    void writeView( short x, short y, short count, const void _FAR* b );
+    void writeView( short x, short y, short count, const void _FAR* b ) noexcept;
 #ifndef __BORLANDC__
-    void writeView( short x, short y, short count, const TScreenCell* b );
+    void writeView( short x, short y, short count, const TScreenCell* b ) noexcept;
 #endif
 
     TPoint resizeBalance;
@@ -481,7 +481,7 @@ private:
 
 protected:
 
-    TView( StreamableInit );
+    TView( StreamableInit ) noexcept;
 
 public:
 
@@ -506,13 +506,13 @@ inline opstream& operator << ( opstream& os, TView* cl )
     { return os << (TStreamable *)cl; }
 
 inline void TView::writeBuf( short x, short y, short w, short h,
-                             const TDrawBuffer& b )
+                             const TDrawBuffer& b ) noexcept
 {
     writeBuf( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
 }
 
 inline void TView::writeLine( short x, short y, short w, short h,
-                              const TDrawBuffer& b )
+                              const TDrawBuffer& b ) noexcept
 {
     writeLine( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
 }
@@ -542,7 +542,7 @@ class TFrame : public TView
 
 public:
 
-    TFrame( const TRect& bounds );
+    TFrame( const TRect& bounds ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -568,7 +568,7 @@ private:
 
 protected:
 
-    TFrame( StreamableInit );
+    TFrame( StreamableInit ) noexcept;
 
 public:
 
@@ -611,7 +611,7 @@ class TScrollBar : public TView
 
 public:
 
-    TScrollBar( const TRect& bounds );
+    TScrollBar( const TRect& bounds ) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;
@@ -619,14 +619,14 @@ public:
     virtual void scrollDraw();
     virtual int scrollStep( int part );
     void setParams( int aValue, int aMin, int aMax,
-                    int aPgStep, int aArStep );
-    void setRange( int aMin, int aMax );
-    void setStep( int aPgStep, int aArStep );
-    void setValue( int aValue );
+                    int aPgStep, int aArStep ) noexcept;
+    void setRange( int aMin, int aMax ) noexcept;
+    void setStep( int aPgStep, int aArStep ) noexcept;
+    void setValue( int aValue ) noexcept;
 
-    void drawPos( int pos );
-    int getPos();
-    int getSize();
+    void drawPos( int pos ) noexcept;
+    int getPos() noexcept;
+    int getSize() noexcept;
 
     int value;
 
@@ -638,7 +638,7 @@ public:
 
 private:
 
-    int getPartCode(void);
+    int getPartCode(void) noexcept;
 
     static TScrollChars _NEAR vChars;
     static TScrollChars _NEAR hChars;
@@ -648,7 +648,7 @@ private:
 
 protected:
 
-    TScrollBar( StreamableInit );
+    TScrollBar( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -694,16 +694,16 @@ public:
     TScroller( const TRect& bounds,
                TScrollBar *aHScrollBar,
                TScrollBar *aVScrollBar
-             );
+             ) noexcept;
 
     virtual void changeBounds( const TRect& bounds );
     virtual TPalette& getPalette() const;
     virtual void handleEvent( TEvent& event );
     virtual void scrollDraw();
-    void scrollTo( int x, int y );
-    void setLimit( int x, int y );
+    void scrollTo( int x, int y ) noexcept;
+    void setLimit( int x, int y ) noexcept;
     virtual void setState( ushort aState, Boolean enable );
-    void checkDraw();
+    void checkDraw() noexcept;
     virtual void shutDown();
     TPoint delta;
 
@@ -724,7 +724,7 @@ private:
 
 protected:
 
-    TScroller( StreamableInit );
+    TScroller( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -765,7 +765,7 @@ public:
                  ushort aNumCols,
                  TScrollBar *aHScrollBar,
                  TScrollBar *aVScrollBar
-               );
+               ) noexcept;
 
     virtual void changeBounds( const TRect& bounds );
     virtual void draw();
@@ -795,7 +795,7 @@ private:
 
 protected:
 
-    TListViewer( StreamableInit );
+    TListViewer( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -830,38 +830,37 @@ public:
 
     friend void genRefs();
 
-    TGroup( const TRect& bounds );
+    TGroup( const TRect& bounds ) noexcept;
     ~TGroup();
 
     virtual void shutDown();
 
-    ushort execView( TView *p );
+    ushort execView( TView *p ) noexcept;
     virtual ushort execute();
     virtual void awaken();
 
-    void insertView( TView *p, TView *Target );
+    void insertView( TView *p, TView *Target ) noexcept;
     void remove( TView *p );
-    void removeView( TView *p );
+    void removeView( TView *p ) noexcept;
     void resetCurrent();
     void setCurrent( TView *p, selectMode mode );
     void selectNext( Boolean forwards );
     TView *firstThat( Boolean (*func)( TView *, void * ), void *args );
     Boolean focusNext(Boolean forwards);
     void forEach( void (*func)( TView *, void * ), void *args );
-    void insert( TView *p );
+    void insert( TView *p ) noexcept;
     void insertBefore( TView *p, TView *Target );
     TView *current;
-    TView *at( short index );
-    TView *firstMatch( ushort aState, ushort aOptions );
-    short indexOf( TView *p );
-    Boolean matches( TView *p );
-    TView *first();
+    TView *at( short index ) noexcept;
+    TView *firstMatch( ushort aState, ushort aOptions ) noexcept;
+    short indexOf( TView *p ) noexcept;
+    TView *first() noexcept;
 
     virtual void setState( ushort aState, Boolean enable );
 
     virtual void handleEvent( TEvent& event );
 
-    void drawSubViews( TView *p, TView *bottom );
+    void drawSubViews( TView *p, TView *bottom ) noexcept;
 
     virtual void changeBounds( const TRect& bounds );
 
@@ -870,9 +869,9 @@ public:
     virtual void setData( void *rec );
 
     virtual void draw();
-    void redraw();
-    void lock();
-    void unlock();
+    void redraw() noexcept;
+    void lock() noexcept;
+    void unlock() noexcept;
     virtual void resetCursor();
 
     virtual void endModal( ushort command );
@@ -883,8 +882,8 @@ public:
 
     virtual Boolean valid( ushort command );
 
-    void freeBuffer();
-    void getBuffer();
+    void freeBuffer() noexcept;
+    void getBuffer() noexcept;
 
     TView *last;
 
@@ -897,17 +896,16 @@ public:
 
 private:
 
-    Boolean invalid( TView *p, ushort command );
     void focusView( TView *p, Boolean enable );
     void selectView( TView *p, Boolean enable );
-    TView* findNext(Boolean forwards);
+    TView* findNext(Boolean forwards) noexcept;
 
     virtual const char *streamableName() const
         { return name; }
 
 protected:
 
-    TGroup( StreamableInit );
+    TGroup( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -949,7 +947,7 @@ class TWindowInit
 
 public:
 
-    TWindowInit( TFrame *(*cFrame)( TRect ) );
+    TWindowInit( TFrame *(*cFrame)( TRect ) ) noexcept;
 
 protected:
 
@@ -979,7 +977,7 @@ public:
     TWindow( const TRect& bounds,
              TStringView aTitle,
              short aNumber
-           );
+           ) noexcept;
     ~TWindow();
 
     virtual void close();
@@ -989,7 +987,7 @@ public:
     static TFrame *initFrame( TRect );
     virtual void setState( ushort aState, Boolean enable );
     virtual void sizeLimits( TPoint& min, TPoint& max );
-    TScrollBar *standardScrollBar( ushort aOptions );
+    TScrollBar *standardScrollBar( ushort aOptions ) noexcept;
     virtual void zoom();
     virtual void shutDown();
 
@@ -1007,7 +1005,7 @@ private:
 
 protected:
 
-    TWindow( StreamableInit );
+    TWindow( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 

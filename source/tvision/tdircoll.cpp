@@ -32,7 +32,7 @@
 
 #pragma warn -asc
 
-Boolean driveValid( char drive )
+Boolean driveValid( char drive ) noexcept
 {
 #ifdef _WIN32
 #if !defined( __FLAT__ )
@@ -69,7 +69,7 @@ I       XCHG    AX, CX      // Put the return value into AX
 
 #pragma warn .asc
 
-Boolean isDir( const char *str )
+Boolean isDir( const char *str ) noexcept
 {
     ffblk ff;
     return Boolean( findfirst( str, &ff, FA_DIREC ) == 0 &&
@@ -78,7 +78,7 @@ Boolean isDir( const char *str )
 
 #define isSeparator(c) (c == '\\' || c == '/')
 
-Boolean pathValid( const char *path )
+Boolean pathValid( const char *path ) noexcept
 {
     char expPath[MAXPATH];
     strnzcpy( expPath, path, MAXPATH );
@@ -97,7 +97,7 @@ Boolean pathValid( const char *path )
     return isDir( expPath );
 }
 
-Boolean validFileName( const char *fileName )
+Boolean validFileName( const char *fileName ) noexcept
 {
 #ifndef __FLAT__
     static const char * const illegalChars = ";,=+<>|\"[] \\";
@@ -122,7 +122,7 @@ Boolean validFileName( const char *fileName )
     return True;
 }
 
-void getCurDir( char *dir, char drive )
+void getCurDir( char *dir, char drive ) noexcept
 {
     dir[0] = (char) ((0 <= drive && drive <= 'Z' - 'A' ? drive : getdisk()) + 'A');
     dir[1] = ':';
@@ -133,7 +133,7 @@ void getCurDir( char *dir, char drive )
         strnzcat( dir, "\\", MAXPATH );
 }
 
-Boolean isWild( const char *f )
+Boolean isWild( const char *f ) noexcept
 {
     return Boolean( strpbrk( f, "?*" ) != 0 );
 }

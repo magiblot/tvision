@@ -48,7 +48,7 @@ TStreamable *TRadioButtons::build()
     return new TRadioButtons( streamableInit );
 }
 
-TRadioButtons::TRadioButtons( StreamableInit ) : TCluster( streamableInit )
+TRadioButtons::TRadioButtons( StreamableInit ) noexcept : TCluster( streamableInit )
 {
 }
 

@@ -22,8 +22,8 @@ public:
 
     TPoint size;
 
-    TDrawSurface();
-    TDrawSurface(TPoint aSize);
+    TDrawSurface() noexcept;
+    TDrawSurface(TPoint aSize) noexcept;
     ~TDrawSurface();
 
     void resize(TPoint aSize);
@@ -78,7 +78,7 @@ public:
     const TDrawSurface _FAR *surface;
     TPoint delta;
 
-    TSurfaceView(const TRect &bounds, const TDrawSurface _FAR *aSurface=0);
+    TSurfaceView(const TRect &bounds, const TDrawSurface _FAR *aSurface=0) noexcept;
 
     virtual void draw();
     virtual TPalette& getPalette() const;

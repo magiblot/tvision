@@ -39,7 +39,7 @@ Boolean _NEAR TView::commandSetChanged = False;
 
 extern TView *TheTopView;
 
-static TCommandSet initCommands()
+static TCommandSet initCommands() noexcept
 {
     TCommandSet temp;
     for( int i = 0; i < 256; i++ )
@@ -54,7 +54,7 @@ static TCommandSet initCommands()
 
 TCommandSet _NEAR TView::curCommandSet = initCommands();
 
-TView::TView( const TRect& bounds) :
+TView::TView( const TRect& bounds) noexcept :
     next( 0 ), options( 0 ), eventMask( evMouseDown | evKeyDown | evCommand ),
     state( sfVisible ), growMode( 0 ), dragMode( dmLimitLoY ),
     helpCtx( hcNoContext ), owner( 0 )
@@ -89,7 +89,7 @@ static inline int range( int val, int min, int max )
         return val;
 }
 
-static int balancedRange( int val, int min, int max, int &balance)
+static int balancedRange( int val, int min, int max, int &balance) noexcept
 {
     // Fit val into the range, but keep track of the remainders,
     // and apply them back when possible. This allows views to recover
@@ -164,13 +164,13 @@ void TView::changeBounds( const TRect& bounds )
     drawView();
 }
 
-void TView::clearEvent( TEvent& event )
+void TView::clearEvent( TEvent& event ) noexcept
 {
     event.what = evNothing;
     event.message.infoPtr = this;
 }
 
-Boolean TView::commandEnabled( ushort command )
+Boolean TView::commandEnabled( ushort command ) noexcept
 {
     return Boolean((command > 255) || curCommandSet.has(command));
 }
@@ -180,14 +180,14 @@ ushort TView::dataSize()
     return 0;
 }
 
-void TView::disableCommands( TCommandSet& commands )
+void TView::disableCommands( TCommandSet& commands ) noexcept
 {
     commandSetChanged = Boolean( commandSetChanged ||
                                 !(curCommandSet & commands).isEmpty());
     curCommandSet.disableCmd(commands);
 }
 
-void TView::disableCommand( ushort command )
+void TView::disableCommand( ushort command ) noexcept
 {
     commandSetChanged = Boolean( commandSetChanged ||
                                  curCommandSet.has(command) );
@@ -220,7 +220,7 @@ void TView::moveGrow( TPoint p,
     locate(r);
 }
 
-void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState )
+void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState ) noexcept
 {
     if( (mode & dmDragMove) != 0 && (ctrlState & kbShift) == 0 )
         p += delta;
@@ -364,7 +364,7 @@ void TView::draw()
     writeLine( 0, 0, size.x, size.y, b );
 }
 
-void TView::drawCursor()
+void TView::drawCursor() noexcept
 {
     if( (state & sfFocused) != 0 )
         resetCursor();
@@ -398,7 +398,7 @@ void TView::drawUnderView( Boolean doShadow, TView* lastView )
     drawUnderRect( r, lastView );
 }
 
-void TView::drawView()
+void TView::drawView() noexcept
 {
     if (exposed())
         {
@@ -407,14 +407,14 @@ void TView::drawView()
         }
 }
 
-void TView::enableCommands( TCommandSet& commands )
+void TView::enableCommands( TCommandSet& commands ) noexcept
 {
     commandSetChanged = Boolean( commandSetChanged ||
                                 ((curCommandSet&commands) != commands) );
     curCommandSet += commands;
 }
 
-void TView::enableCommand( ushort command )
+void TView::enableCommand( ushort command ) noexcept
 {
     commandSetChanged = Boolean( commandSetChanged ||
                                  !curCommandSet.has( command ) );
@@ -436,7 +436,7 @@ Boolean  TView::eventAvail()
     return Boolean( event.what != evNothing );
 }
 
-TRect TView::getBounds() const
+TRect TView::getBounds() const noexcept
 {
     return TRect( origin, origin+size );
 }
@@ -469,7 +469,7 @@ Boolean TView::focus()
     return result;
 }
 
-TRect TView::getClipRect() const
+TRect TView::getClipRect() const noexcept
 {
     TRect clip = getBounds();
     if( owner != 0 )
@@ -478,7 +478,7 @@ TRect TView::getClipRect() const
     return clip;
 }
 
-TAttrPair TView::getColor( ushort color )
+TAttrPair TView::getColor( ushort color ) noexcept
 {
     TAttrPair colorPair = color >> 8;
 
@@ -490,7 +490,7 @@ TAttrPair TView::getColor( ushort color )
     return colorPair;
 }
 
-void TView::getCommands( TCommandSet& commands )
+void TView::getCommands( TCommandSet& commands ) noexcept
 {
     commands = curCommandSet;
 }
@@ -505,7 +505,7 @@ void TView::getEvent( TEvent& event )
         owner->getEvent(event);
 }
 
-TRect TView::getExtent() const
+TRect TView::getExtent() const noexcept
 {
     return TRect( 0, 0, size.x, size.y );
 }
@@ -524,7 +524,7 @@ TPalette& TView::getPalette() const
     return palette;
 }
 
-Boolean TView::getState( ushort aState ) const
+Boolean TView::getState( ushort aState ) const noexcept
 {
     return Boolean( (state & aState) == aState );
 }
@@ -590,7 +590,7 @@ void TView::makeFirst()
     putInFrontOf(owner->first());
 }
 
-TPoint TView::makeGlobal( TPoint source )
+TPoint TView::makeGlobal( TPoint source ) noexcept
 {
     TPoint temp = source + origin;
     TView *cur = this;
@@ -602,7 +602,7 @@ TPoint TView::makeGlobal( TPoint source )
     return temp;
 }
 
-TPoint TView::makeLocal( TPoint source )
+TPoint TView::makeLocal( TPoint source ) noexcept
 {
     TPoint temp = source - origin;
     TView* cur = this;
@@ -623,7 +623,7 @@ Boolean TView::mouseEvent(TEvent& event, ushort mask)
     return Boolean(event.what != evMouseUp);
 }
 
-Boolean TView::mouseInView(TPoint mouse)
+Boolean TView::mouseInView(TPoint mouse) noexcept
 {
      mouse = makeLocal( mouse );
      TRect r = getExtent();
@@ -636,7 +636,7 @@ void TView::moveTo( short x, short y )
      locate(r);
 }
 
-TView *TView::nextView()
+TView *TView::nextView() noexcept
 {
     if( this == owner->last )
         return 0;
@@ -649,7 +649,7 @@ void TView::normalCursor()
     setState(sfCursorIns, False);
 }
 
-TView *TView::prev()
+TView *TView::prev() noexcept
 {
     TView* res = this;
     while( res->next != this )
@@ -657,7 +657,7 @@ TView *TView::prev()
     return res;
 }
 
-TView *TView::prevView()
+TView *TView::prevView() noexcept
 {
     if( this == owner->first() )
         return 0;
@@ -716,13 +716,13 @@ void TView::select()
         owner->setCurrent( this, normalSelect );
 }
 
-void TView::setBounds( const TRect& bounds )
+void TView::setBounds( const TRect& bounds ) noexcept
 {
     origin = bounds.a;
     size = bounds.b - bounds.a;
 }
 
-void TView::setCmdState(TCommandSet& commands, Boolean enable)
+void TView::setCmdState(TCommandSet& commands, Boolean enable) noexcept
 {
     if (enable)
         enableCommands(commands);
@@ -730,14 +730,14 @@ void TView::setCmdState(TCommandSet& commands, Boolean enable)
         disableCommands(commands);
 }
 
-void TView::setCommands( TCommandSet& commands )
+void TView::setCommands( TCommandSet& commands ) noexcept
 {
     commandSetChanged = Boolean( commandSetChanged ||
                                 (curCommandSet != commands ));
     curCommandSet = commands;
 }
 
-void TView::setCursor( int x, int y )
+void TView::setCursor( int x, int y ) noexcept
 {
     cursor.x = x;
     cursor.y = y;
@@ -815,7 +815,7 @@ Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length )
     return False;
 }
 
-TView* TView::TopView()
+TView* TView::TopView() noexcept
 {
     if( TheTopView != 0 )
         return TheTopView;
@@ -833,7 +833,7 @@ Boolean TView::valid( ushort )
     return True;
 }
 
-Boolean TView::containsMouse( TEvent& event )
+Boolean TView::containsMouse( TEvent& event ) noexcept
 {
     return Boolean( (state & sfVisible) != 0 &&
                     mouseInView( event.mouse.where )
@@ -876,7 +876,7 @@ TStreamable *TView::build()
     return new TView( streamableInit );
 }
 
-TView::TView( StreamableInit )
+TView::TView( StreamableInit ) noexcept
 {
 }
 

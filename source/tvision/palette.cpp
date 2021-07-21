@@ -20,7 +20,7 @@
 #endif  // __MEM_H
 
 
-TPalette::TPalette( const char* d, ushort len ) :
+TPalette::TPalette( const char* d, ushort len ) noexcept :
     data( new TColorAttr[ len+1 ] )
 {
     data[0] = len;
@@ -29,7 +29,7 @@ TPalette::TPalette( const char* d, ushort len ) :
 }
 
 #ifndef __BORLANDC__
-TPalette::TPalette( const TColorAttr* d, ushort len ) :
+TPalette::TPalette( const TColorAttr* d, ushort len ) noexcept :
     data( new TColorAttr[ len+1 ] )
 {
     data[0] = len;
@@ -37,7 +37,7 @@ TPalette::TPalette( const TColorAttr* d, ushort len ) :
 }
 #endif
 
-TPalette::TPalette( const TPalette& tp ) :
+TPalette::TPalette( const TPalette& tp ) noexcept :
     data( new TColorAttr[ tp.data[0] + 1 ] )
 {
     memcpy( data, tp.data, (tp.data[0] + 1)*sizeof(TColorAttr) );
@@ -48,7 +48,7 @@ TPalette::~TPalette()
     delete[] data;
 }
 
-TPalette& TPalette::operator = ( const TPalette& tp )
+TPalette& TPalette::operator = ( const TPalette& tp ) noexcept
 {
     if( data != tp.data )
         {

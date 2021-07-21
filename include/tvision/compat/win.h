@@ -177,7 +177,7 @@ extern "C" {
 
 extern "C" {
 
-    DWORD GetTickCount(void);
+    DWORD GetTickCount(void) noexcept;
 
 }
 

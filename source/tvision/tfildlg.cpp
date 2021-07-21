@@ -57,7 +57,7 @@ TFileDialog::TFileDialog( TStringView aWildCard,
                           TStringView inputName,
                           ushort aOptions,
                           uchar histId
-                        ) :
+                        ) noexcept :
     TWindowInit( &TFileDialog::initFrame ),
     TDialog( TRect( 15, 1, 64, 20 ), aTitle ),
     directory( newStr("") )
@@ -195,7 +195,7 @@ void TFileDialog::sizeLimits( TPoint& min, TPoint& max )
 
 /* 'src' is cast to unsigned char * so that isspace sign extends it
    correctly. */
-static void trim( char *dest, const char *src )
+static void trim( char *dest, const char *src ) noexcept
 {
 #ifndef __FLAT__
     while( *src != EOS && isspace( * (const unsigned char *) src ) )
@@ -210,7 +210,7 @@ static void trim( char *dest, const char *src )
     *dest = EOS;
 }
 
-void TFileDialog::getFileName( char *s )
+void TFileDialog::getFileName( char *s ) noexcept
 {
     char buf[2*MAXPATH];
     char drive[MAXDRIVE];
@@ -288,9 +288,10 @@ Boolean TFileDialog::checkDirectory( const char *str )
         return True;
     else
         {
-        char buf[256] = {0};
+        char buf[256];
         ostrstream os( buf, sizeof( buf )-1 );
         os << invalidDriveText << ": '" << str << "'" << ends;
+        buf[sizeof( buf )-1] = '\0';
         messageBox( buf, mfError | mfOKButton );
         fileName->select();
         return False;
@@ -347,9 +348,10 @@ char ext[MAXEXT];
                 return True;
             else
                 {
-                char buf[256] = {0};
+                char buf[256];
                 ostrstream os( buf, sizeof( buf )-1 );
                 os << invalidFileText << ": '" << fName << "'" << ends;
+                buf[sizeof( buf )-1] = '\0';
                 messageBox( buf, mfError | mfOKButton );
                 return False;
                 }

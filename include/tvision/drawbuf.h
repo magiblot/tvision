@@ -31,26 +31,26 @@ class TDrawBuffer
 
 public:
 
-    void moveChar( ushort indent, char c, TColorAttr attr, ushort count );
-    ushort moveStr( ushort indent, TStringView str, TColorAttr attr );
-    ushort moveStr( ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0 );
-    ushort moveCStr( ushort indent, TStringView str, TAttrPair attrs );
-    void moveBuf( ushort indent, const void _FAR *source, TColorAttr attr, ushort count );
-    void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count );
+    void moveChar( ushort indent, char c, TColorAttr attr, ushort count ) noexcept;
+    ushort moveStr( ushort indent, TStringView str, TColorAttr attr ) noexcept;
+    ushort moveStr( ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0 ) noexcept;
+    ushort moveCStr( ushort indent, TStringView str, TAttrPair attrs ) noexcept;
+    void moveBuf( ushort indent, const void _FAR *source, TColorAttr attr, ushort count ) noexcept;
+    void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count ) noexcept;
 
-    void putAttribute( ushort indent, TColorAttr attr );
-    void putChar( ushort indent, uchar c );
-    size_t length() const;
+    void putAttribute( ushort indent, TColorAttr attr ) noexcept;
+    void putChar( ushort indent, uchar c ) noexcept;
+    size_t length() const noexcept;
 
 #ifdef __FLAT__
-    TDrawBuffer();
+    TDrawBuffer() noexcept;
     ~TDrawBuffer();
 #endif
 
 protected:
 
 #ifdef __FLAT__
-    static TSpan<TScreenCell> allocData();
+    static TSpan<TScreenCell> allocData() noexcept;
 
     const TSpan<TScreenCell> data;
 #else
@@ -62,19 +62,19 @@ protected:
 #define loByte(w)    (((uchar *)&w)[0])
 #define hiByte(w)    (((uchar *)&w)[1])
 
-inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr )
+inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr ) noexcept
 {
     if (indent < length())
         ::setAttr(data[indent], attr);
 }
 
-inline void TDrawBuffer::putChar( ushort indent, uchar c )
+inline void TDrawBuffer::putChar( ushort indent, uchar c ) noexcept
 {
     if (indent < length())
         ::setChar(data[indent], c);
 }
 
-inline size_t TDrawBuffer::length() const
+inline size_t TDrawBuffer::length() const noexcept
 {
 #ifdef __FLAT__
     return data.size();

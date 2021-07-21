@@ -37,7 +37,7 @@ class THelpViewer : public TScroller
 {
 public:
 
-    THelpViewer( const TRect&, TScrollBar*, TScrollBar*, THelpFile*, ushort );
+    THelpViewer( const TRect&, TScrollBar*, TScrollBar*, THelpFile*, ushort ) noexcept;
     ~THelpViewer();
 
     virtual void changeBounds( const TRect& );
@@ -61,7 +61,7 @@ class THelpWindow : public TWindow
 
 public:
 
-    THelpWindow( THelpFile*, ushort );
+    THelpWindow( THelpFile*, ushort ) noexcept;
 
     virtual TPalette& getPalette() const;
 };

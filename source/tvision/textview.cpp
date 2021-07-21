@@ -28,7 +28,7 @@
 TTextDevice::TTextDevice( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,
-                          ushort aBufSize ) :
+                          ushort aBufSize ) noexcept :
     TScroller(bounds,aHScrollBar,aVScrollBar)
 {
     // Borland's streambuf::sputn is wrong and never invokes overflow().
@@ -82,7 +82,7 @@ int TTextDevice::sync()
 TTerminal::TTerminal( const TRect& bounds,
                       TScrollBar *aHScrollBar,
                       TScrollBar *aVScrollBar,
-                      ushort aBufSize ) :
+                      ushort aBufSize ) noexcept :
     TTextDevice(bounds, aHScrollBar, aVScrollBar),
     queFront( 0 ),
     queBack( 0 )

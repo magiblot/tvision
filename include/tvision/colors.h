@@ -185,7 +185,7 @@ namespace detail
     template <class T, size_t N>
     struct constarray;
 
-    uint8_t RGBtoXTerm16(TColorRGB);
+    uint8_t RGBtoXTerm16(TColorRGB) noexcept;
     extern const constarray<uint8_t, 256> XTerm256toXTerm16LUT;
     extern const constarray<uint32_t, 256> XTerm256toRGBLUT;
 }

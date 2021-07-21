@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <cstring>
 
-inline constexpr uint Utf8BytesLeft(char first_byte)
+inline constexpr uint Utf8BytesLeft(char first_byte) noexcept
 {
     // https://en.wikipedia.org/wiki/UTF-8
     return (first_byte & 0b11100000) == 0b11000000 ? 1 : \
@@ -16,7 +16,7 @@ inline constexpr uint Utf8BytesLeft(char first_byte)
 }
 
 template<size_t N>
-inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N])
+inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) noexcept
 {
     using namespace detail;
     std::array<uint32_t, N> result {};
@@ -25,7 +25,8 @@ inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N])
     return result;
 }
 
-inline constexpr uint32_t utf8To32(TStringView s) {
+inline constexpr uint32_t utf8To32(TStringView s) noexcept
+{
     // Precondition: s is a valid UTF-8 sequence.
     switch (s.size()) {
         case 1:
@@ -40,7 +41,8 @@ inline constexpr uint32_t utf8To32(TStringView s) {
     return 0;
 }
 
-inline size_t utf32To8(uint32_t u, char utf8[4]) {
+inline size_t utf32To8(uint32_t u, char utf8[4]) noexcept
+{
     union {
         uint8_t asChars[4] {0};
         uint32_t asInt;

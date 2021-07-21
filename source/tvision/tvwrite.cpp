@@ -35,28 +35,28 @@ struct TVWrite {
     TView *Target;
     int edx, esi;
 
-    void L0( TView *, short, short, short, const void _FAR* );
-    void L10( TView * );
-    void L20( TView * );
-    void L30( TView * );
-    void L40( TView * );
-    void L50( TGroup * );
+    void L0( TView *, short, short, short, const void _FAR* ) noexcept;
+    void L10( TView * ) noexcept;
+    void L20( TView * ) noexcept;
+    void L30( TView * ) noexcept;
+    void L40( TView * ) noexcept;
+    void L50( TGroup * ) noexcept;
 #ifdef __BORLANDC__
     void copyShort( ushort *, const ushort * );
     void copyShort2CharInfo( ushort *, const ushort * );
 #else
-    void copyCell( TScreenCell *, const TScreenCell * );
-    void copyShort2Cell( TScreenCell *, const ushort * );
+    void copyCell( TScreenCell *, const TScreenCell * ) noexcept;
+    void copyShort2Cell( TScreenCell *, const ushort * ) noexcept;
 
     bool bufIsShort;
 
-    TVWrite(bool b=true) :
+    TVWrite(bool b=true) noexcept :
         bufIsShort(b)
     {
     }
 #endif
 
-    static TColorAttr applyShadow(TColorAttr attr)
+    static TColorAttr applyShadow(TColorAttr attr) noexcept
     {
 #ifdef __BORLANDC__
         // Because we can't know if the cell has already been shadowed,
@@ -84,19 +84,19 @@ struct TVWrite {
 
 };
 
-void TView::writeView( short x, short y, short count, const void _FAR* b )
+void TView::writeView( short x, short y, short count, const void _FAR* b ) noexcept
 {
     TVWrite().L0(this, x, y, count, b);
 }
 
 #ifndef __BORLANDC__
-void TView::writeView( short x, short y, short count, const TScreenCell* b )
+void TView::writeView( short x, short y, short count, const TScreenCell* b ) noexcept
 {
     TVWrite(false).L0(this, x, y, count, b);
 }
 #endif
 
-void TVWrite::L0( TView *dest, short x, short y, short count, const void _FAR* b )
+void TVWrite::L0( TView *dest, short x, short y, short count, const void _FAR* b ) noexcept
 {
     X = x; Y = y; Count = count; Buffer = b;
     wOffset = X;
@@ -113,7 +113,7 @@ void TVWrite::L0( TView *dest, short x, short y, short count, const void _FAR* b
     }
 }
 
-void TVWrite::L10( TView *dest )
+void TVWrite::L10( TView *dest ) noexcept
 {
     TGroup *owner = dest->owner;
     if ((dest->state & sfVisible) && owner)
@@ -135,7 +135,7 @@ void TVWrite::L10( TView *dest )
     }
 }
 
-void TVWrite::L20( TView *dest )
+void TVWrite::L20( TView *dest ) noexcept
 {
     TView *next = dest->next;
     if (next == Target)
@@ -191,7 +191,7 @@ void TVWrite::L20( TView *dest )
     }
 }
 
-void TVWrite::L30( TView *dest )
+void TVWrite::L30( TView *dest ) noexcept
 {
     TView *_Target = Target;
     int _wOffset = wOffset, _esi = esi, _edx = edx,
@@ -205,7 +205,7 @@ void TVWrite::L30( TView *dest )
     X = esi;
 }
 
-void TVWrite::L40( TView *dest )
+void TVWrite::L40( TView *dest ) noexcept
 {
     TGroup *owner = dest->owner;
     if (owner->buffer)
@@ -223,7 +223,7 @@ void TVWrite::L40( TView *dest )
         L10(owner);
 }
 
-void TVWrite::L50( TGroup *owner )
+void TVWrite::L50( TGroup *owner ) noexcept
 {
     TScreenCell *dst = &owner->buffer[Y*owner->size.x + X];
 #ifdef __BORLANDC__
@@ -294,7 +294,7 @@ void TVWrite::copyShort2CharInfo( ushort *dst, const ushort *src )
 }
 
 #else
-void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
+void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src) noexcept
 {
     int i;
     if (edx == 0)
@@ -308,7 +308,7 @@ void TVWrite::copyCell(TScreenCell *dst, const TScreenCell *src)
         }
 }
 
-void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
+void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src ) noexcept
 {
     int i;
     if (edx == 0)
@@ -327,7 +327,7 @@ void TVWrite::copyShort2Cell( TScreenCell *dst, const ushort *src )
         }
 }
 
-void TView::writeBuf( short x, short y, short w, short h, const TScreenCell* b )
+void TView::writeBuf( short x, short y, short w, short h, const TScreenCell* b ) noexcept
 {
     while (h-- > 0)
     {
@@ -338,7 +338,7 @@ void TView::writeBuf( short x, short y, short w, short h, const TScreenCell* b )
 
 #endif // __BORLANDC__
 
-void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b )
+void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b ) noexcept
 {
     while (h-- > 0)
     {
@@ -347,7 +347,7 @@ void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b )
     }
 }
 
-void TView::writeChar( short x, short y, char c, uchar color, short count )
+void TView::writeChar( short x, short y, char c, uchar color, short count ) noexcept
 {
     if (count > 0)
     {
@@ -362,7 +362,7 @@ void TView::writeChar( short x, short y, char c, uchar color, short count )
     }
 }
 
-void TView::writeLine( short x, short y, short w, short h, const void _FAR *b )
+void TView::writeLine( short x, short y, short w, short h, const void _FAR *b ) noexcept
 {
     while (h-- > 0)
     {
@@ -371,7 +371,7 @@ void TView::writeLine( short x, short y, short w, short h, const void _FAR *b )
 }
 
 #ifndef __BORLANDC__
-void TView::writeLine( short x, short y, short w, short h, const TScreenCell *b )
+void TView::writeLine( short x, short y, short w, short h, const TScreenCell *b ) noexcept
 {
     while (h-- > 0)
     {
@@ -380,7 +380,7 @@ void TView::writeLine( short x, short y, short w, short h, const TScreenCell *b 
 }
 #endif
 
-void TView::writeStr( short x, short y, const char *str, uchar color )
+void TView::writeStr( short x, short y, const char *str, uchar color ) noexcept
 {
     if (str != 0)
     {

@@ -38,7 +38,7 @@
 
 THistory::THistory( const TRect& bounds,
                     TInputLine *aLink,
-                    ushort aHistoryId) :
+                    ushort aHistoryId ) noexcept :
     TView(bounds),
     link( aLink ),
     historyId( aHistoryId )
@@ -154,7 +154,7 @@ TStreamable *THistory::build()
     return new THistory( streamableInit );
 }
 
-THistory::THistory( StreamableInit ) : TView( streamableInit )
+THistory::THistory( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

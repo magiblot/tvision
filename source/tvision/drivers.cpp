@@ -51,7 +51,7 @@
 /*------------------------------------------------------------------------*/
 
 void TDrawBuffer::moveBuf( ushort indent, const void _FAR *source,
-                           TColorAttr attr, ushort count )
+                           TColorAttr attr, ushort count ) noexcept
 
 {
 #if !defined( __FLAT__ )
@@ -114,7 +114,7 @@ __5:
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count )
+void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count ) noexcept
 {
     if (indent < length())
         memcpy(&data[indent], source, min(count, length() - indent)*sizeof(TScreenCell));
@@ -145,7 +145,7 @@ void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-void TDrawBuffer::moveChar( ushort indent, char c, TColorAttr attr, ushort count )
+void TDrawBuffer::moveChar( ushort indent, char c, TColorAttr attr, ushort count ) noexcept
 {
 #if !defined( __FLAT__ )
 I   MOV     CX,count
@@ -224,7 +224,7 @@ __4:
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs )
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) noexcept
 {
 #ifdef __BORLANDC__
     register ushort *dest = &data[indent];
@@ -294,7 +294,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs )
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr )
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) noexcept
 {
     if (indent < length())
         {
@@ -352,7 +352,7 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr )
 /*------------------------------------------------------------------------*/
 
 ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
-                             ushort width, ushort begin )
+                             ushort width, ushort begin ) noexcept
 {
 #ifdef __BORLANDC__
     if (begin < str.size())
@@ -381,13 +381,13 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
 }
 
 #ifdef __FLAT__
-TSpan<TScreenCell> TDrawBuffer::allocData()
+TSpan<TScreenCell> TDrawBuffer::allocData() noexcept
 {
     size_t len = max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
     return TSpan<TScreenCell>(new TScreenCell[len], len);
 }
 
-TDrawBuffer::TDrawBuffer() :
+TDrawBuffer::TDrawBuffer() noexcept :
     // This makes it possible to create TDrawBuffers for big screen widths.
     // This does not work nor is necessary in non-Flat builds.
     // Some views assume that width > height when drawing themselves (e.g. TScrollBar).

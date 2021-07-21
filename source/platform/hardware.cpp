@@ -24,7 +24,7 @@ size_t THardwareInfo::eventCount = 0;
 
 static bool alwaysFlush;
 
-THardwareInfo::THardwareInfo()
+THardwareInfo::THardwareInfo() noexcept
 {
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
@@ -37,28 +37,28 @@ THardwareInfo::THardwareInfo()
 static constexpr PlatformStrategy* &platf = PlatformStrategy::instance;
 static constexpr NullPlatform* nullPlatf = &NullPlatform::instance;
 
-void THardwareInfo::setCaretSize( ushort size ) { platf->setCaretSize(size); }
-void THardwareInfo::setCaretPosition( ushort x, ushort y ) { platf->setCaretPosition(x, y); }
-ushort THardwareInfo::getCaretSize() { return platf->getCaretSize(); }
-BOOL THardwareInfo::isCaretVisible() { return platf->isCaretVisible(); }
-ushort THardwareInfo::getScreenRows() { return platf->getScreenRows(); }
-ushort THardwareInfo::getScreenCols() { return platf->getScreenCols(); }
-ushort THardwareInfo::getScreenMode() { return platf->getScreenMode(); }
-void THardwareInfo::setScreenMode( ushort mode ) {}
-void THardwareInfo::clearScreen( ushort w, ushort h ) { platf->clearScreen(); }
-void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len )
+void THardwareInfo::setCaretSize( ushort size ) noexcept { platf->setCaretSize(size); }
+void THardwareInfo::setCaretPosition( ushort x, ushort y ) noexcept { platf->setCaretPosition(x, y); }
+ushort THardwareInfo::getCaretSize() noexcept { return platf->getCaretSize(); }
+BOOL THardwareInfo::isCaretVisible() noexcept { return platf->isCaretVisible(); }
+ushort THardwareInfo::getScreenRows() noexcept { return platf->getScreenRows(); }
+ushort THardwareInfo::getScreenCols() noexcept { return platf->getScreenCols(); }
+ushort THardwareInfo::getScreenMode() noexcept { return platf->getScreenMode(); }
+void THardwareInfo::setScreenMode( ushort mode ) noexcept {}
+void THardwareInfo::clearScreen( ushort w, ushort h ) noexcept { platf->clearScreen(); }
+void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len ) noexcept
 {
     platf->screenWrite(x, y, buf, len);
     if (alwaysFlush)
         flushScreen();
 }
-void THardwareInfo::reloadScreenInfo() { platf->reloadScreenInfo(); }
-DWORD THardwareInfo::getButtonCount() { return platf->getButtonCount(); }
-void THardwareInfo::cursorOn() { platf->cursorOn(); }
-void THardwareInfo::cursorOff() { platf->cursorOff(); }
-void THardwareInfo::flushScreen() { platf->flushScreen(); }
+void THardwareInfo::reloadScreenInfo() noexcept { platf->reloadScreenInfo(); }
+DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount(); }
+void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
+void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }
+void THardwareInfo::flushScreen() noexcept { platf->flushScreen(); }
 
-void THardwareInfo::setUpConsole()
+void THardwareInfo::setUpConsole() noexcept
 {
     // Set up input/output control.
     // At least with the ncurses implementation, display must be initialized
@@ -87,7 +87,7 @@ void THardwareInfo::setUpConsole()
     }
 }
 
-void THardwareInfo::restoreConsole()
+void THardwareInfo::restoreConsole() noexcept
 {
     // Tear down input/output control by deleting the platform strategy.
     if (platf != nullPlatf)
@@ -97,7 +97,7 @@ void THardwareInfo::restoreConsole()
     }
 }
 
-BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask)
+BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask) noexcept
 {
     for (size_t i = 0; i < eventCount; ++i)
         if (eventQ[i].what & mask)
@@ -111,7 +111,7 @@ BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask)
     return False;
 }
 
-BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
+BOOL THardwareInfo::getMouseEvent( MouseEventType& event ) noexcept
 {
     TEvent ev;
     if (getPendingEvent(ev, evMouse))
@@ -122,7 +122,7 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
     return False;
 }
 
-BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
+BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking ) noexcept
 {
     readEvents(blocking);
     if (getPendingEvent(event, ~evMouse))
@@ -141,7 +141,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
     return False;
 }
 
-void THardwareInfo::readEvents(Boolean blocking)
+void THardwareInfo::readEvents(Boolean blocking) noexcept
 {
     // Do not read any more events until the queue is empty.
     if (!eventCount)
@@ -163,7 +163,7 @@ void THardwareInfo::readEvents(Boolean blocking)
 
 #ifndef _WIN32
 
-extern "C" DWORD GetTickCount(void)
+extern "C" DWORD GetTickCount(void) noexcept
 {
     // This effectively gives a system time reference in milliseconds.
     // steady_clock is best suited for measuring intervals.

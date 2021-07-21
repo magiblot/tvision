@@ -26,32 +26,32 @@ class TPoint
 
 public:
 
-    TPoint& operator+=( const TPoint& adder );
-    TPoint& operator-=( const TPoint& subber );
-    friend TPoint operator - ( const TPoint& one, const TPoint& two);
-    friend TPoint operator + ( const TPoint& one, const TPoint& two);
-    friend int operator == ( const TPoint& one, const TPoint& two);
-    friend int operator != ( const TPoint& one, const TPoint& two);
+    TPoint& operator+=( const TPoint& adder ) noexcept;
+    TPoint& operator-=( const TPoint& subber ) noexcept;
+    friend TPoint operator - ( const TPoint& one, const TPoint& two) noexcept;
+    friend TPoint operator + ( const TPoint& one, const TPoint& two) noexcept;
+    friend int operator == ( const TPoint& one, const TPoint& two) noexcept;
+    friend int operator != ( const TPoint& one, const TPoint& two) noexcept;
 
     int x,y;
 
 };
 
-inline TPoint& TPoint::operator += ( const TPoint& adder )
+inline TPoint& TPoint::operator += ( const TPoint& adder ) noexcept
 {
     x += adder.x;
     y += adder.y;
     return *this;
 }
 
-inline TPoint& TPoint::operator -= ( const TPoint& subber )
+inline TPoint& TPoint::operator -= ( const TPoint& subber ) noexcept
 {
     x -= subber.x;
     y -= subber.y;
     return *this;
 }
 
-inline TPoint operator - ( const TPoint& one, const TPoint& two )
+inline TPoint operator - ( const TPoint& one, const TPoint& two ) noexcept
 {
     TPoint result;
     result.x = one.x - two.x;
@@ -59,7 +59,7 @@ inline TPoint operator - ( const TPoint& one, const TPoint& two )
     return result;
 }
 
-inline TPoint operator + ( const TPoint& one, const TPoint& two )
+inline TPoint operator + ( const TPoint& one, const TPoint& two ) noexcept
 {
     TPoint result;
     result.x = one.x + two.x;
@@ -67,12 +67,12 @@ inline TPoint operator + ( const TPoint& one, const TPoint& two )
     return result;
 }
 
-inline int operator == ( const TPoint& one, const TPoint& two )
+inline int operator == ( const TPoint& one, const TPoint& two ) noexcept
 {
     return one.x == two.x && one.y == two.y;
 }
 
-inline int operator!= ( const TPoint& one, const TPoint& two )
+inline int operator!= ( const TPoint& one, const TPoint& two ) noexcept
 {
     return one.x != two.x || one.y != two.y;
 }
@@ -97,24 +97,24 @@ class TRect
 
 public:
 
-    TRect( int ax, int ay, int bx, int by );
-    TRect( TPoint p1, TPoint p2 );
-    TRect();
+    TRect( int ax, int ay, int bx, int by ) noexcept;
+    TRect( TPoint p1, TPoint p2 ) noexcept;
+    TRect() noexcept {}
 
-    TRect& move( int aDX, int aDY );
-    TRect& grow( int aDX, int aDY );
-    TRect& intersect( const TRect& r );
-    TRect& Union( const TRect& r );
-    Boolean contains( const TPoint& p ) const;
-    Boolean operator == ( const TRect& r ) const;
-    Boolean operator != ( const TRect& r ) const;
-    Boolean isEmpty();
+    TRect& move( int aDX, int aDY ) noexcept;
+    TRect& grow( int aDX, int aDY ) noexcept;
+    TRect& intersect( const TRect& r ) noexcept;
+    TRect& Union( const TRect& r ) noexcept;
+    Boolean contains( const TPoint& p ) const noexcept;
+    Boolean operator == ( const TRect& r ) const noexcept;
+    Boolean operator != ( const TRect& r ) const noexcept;
+    Boolean isEmpty() noexcept;
 
     TPoint a, b;
 
 };
 
-inline TRect::TRect( int ax, int ay, int bx, int by)
+inline TRect::TRect( int ax, int ay, int bx, int by) noexcept
 {
     a.x = ax;
     a.y = ay;
@@ -122,17 +122,13 @@ inline TRect::TRect( int ax, int ay, int bx, int by)
     b.y = by;
 }
 
-inline TRect::TRect( TPoint p1, TPoint p2 )
+inline TRect::TRect( TPoint p1, TPoint p2 ) noexcept
 {
     a = p1;
     b = p2;
 }
 
-inline TRect::TRect()
-{
-}
-
-inline TRect& TRect::move( int aDX, int aDY )
+inline TRect& TRect::move( int aDX, int aDY ) noexcept
 {
     a.x += aDX;
     a.y += aDY;
@@ -141,7 +137,7 @@ inline TRect& TRect::move( int aDX, int aDY )
     return *this;
 }
 
-inline TRect& TRect::grow( int aDX, int aDY )
+inline TRect& TRect::grow( int aDX, int aDY ) noexcept
 {
     a.x -= aDX;
     a.y -= aDY;
@@ -150,7 +146,7 @@ inline TRect& TRect::grow( int aDX, int aDY )
     return *this;
 }
 
-inline TRect& TRect::intersect( const TRect& r )
+inline TRect& TRect::intersect( const TRect& r ) noexcept
 {
     a.x = max( a.x, r.a.x );
     a.y = max( a.y, r.a.y );
@@ -161,7 +157,7 @@ inline TRect& TRect::intersect( const TRect& r )
     return *this;
 }
 
-inline TRect& TRect::Union( const TRect& r )
+inline TRect& TRect::Union( const TRect& r ) noexcept
 {
     a.x = min( a.x, r.a.x );
     a.y = min( a.y, r.a.y );
@@ -170,24 +166,24 @@ inline TRect& TRect::Union( const TRect& r )
     return *this;
 }
 
-inline Boolean TRect::contains( const TPoint& p ) const
+inline Boolean TRect::contains( const TPoint& p ) const noexcept
 {
     return Boolean(
         p.x >= a.x && p.x < b.x && p.y >= a.y && p.y < b.y
         );
 }
 
-inline Boolean TRect::operator == ( const TRect& r) const
+inline Boolean TRect::operator == ( const TRect& r) const noexcept
 {
     return Boolean( a == r.a && b == r.b );
 }
 
-inline Boolean TRect::operator != ( const TRect& r ) const
+inline Boolean TRect::operator != ( const TRect& r ) const noexcept
 {
     return Boolean( !(*this == r) );
 }
 
-inline Boolean TRect::isEmpty()
+inline Boolean TRect::isEmpty() noexcept
 {
     return Boolean( a.x >= b.x || a.y >= b.y );
 }
@@ -212,7 +208,7 @@ class TCollection : public virtual TNSCollection, public TStreamable
 
 public:
 
-    TCollection( ccIndex aLimit, ccIndex aDelta )
+    TCollection( ccIndex aLimit, ccIndex aDelta ) noexcept
         { delta = aDelta; setLimit( aLimit ); }
 
 private:
@@ -226,7 +222,7 @@ private:
 
 protected:
 
-    TCollection( StreamableInit );
+    TCollection( StreamableInit ) noexcept;
     virtual void *read( ipstream& );
     virtual void write( opstream& );
 
@@ -256,7 +252,7 @@ class TSortedCollection : public TNSSortedCollection, public TCollection
 
 public:
 
-    TSortedCollection( ccIndex aLimit, ccIndex aDelta) :
+    TSortedCollection( ccIndex aLimit, ccIndex aDelta) noexcept :
         TCollection( aLimit, aDelta ) {}
 
 private:
@@ -270,7 +266,7 @@ private:
 
 protected:
 
-    TSortedCollection( StreamableInit );
+    TSortedCollection( StreamableInit ) noexcept;
     virtual void *read( ipstream& );
     virtual void write( opstream& );
 

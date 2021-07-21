@@ -8,13 +8,13 @@
 
 // path_dos2unix: replaces '\' with '/' and removes drive letter.
 
-inline void path_dos2unix(std::string &s, bool drive=true) {
+inline void path_dos2unix(std::string &s, bool drive=true) noexcept {
     std::replace(s.begin(), s.end(), '\\', '/');
     if (drive && s.size() > 1 && s[1] == ':' && isalpha(s[0]))
         s = s.substr(2);
 }
 
-inline void path_dos2unix(char *c, bool drive=true) {
+inline void path_dos2unix(char *c, bool drive=true) noexcept {
     char *d = c;
     while ((d = strchr(d, '\\')))
         *d = '/';
@@ -24,11 +24,11 @@ inline void path_dos2unix(char *c, bool drive=true) {
 
 // path_unix2dos: replaces '/' with '\'.
 
-inline void path_unix2dos(std::string &s) {
+inline void path_unix2dos(std::string &s) noexcept {
     std::replace(s.begin(), s.end(), '/', '\\');
 }
 
-inline void path_unix2dos(char *c) {
+inline void path_unix2dos(char *c) noexcept {
     while ((c = strchr(c, '/')))
         *c = '\\';
 }

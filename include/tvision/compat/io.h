@@ -30,7 +30,7 @@ struct  ftime   {
 #include <unistd.h>
 #include <sys/stat.h>
 
-inline off_t filelength( int fd )
+inline off_t filelength( int fd ) noexcept
 {
     struct stat s;
     if ( fstat( fd, &s ) == (off_t) -1 )

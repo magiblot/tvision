@@ -24,7 +24,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TMenuBar::TMenuBar( const TRect& bounds, TMenu *aMenu ) :
+TMenuBar::TMenuBar( const TRect& bounds, TMenu *aMenu ) noexcept :
     TMenuView( bounds )
 {
     menu = aMenu;
@@ -32,7 +32,7 @@ TMenuBar::TMenuBar( const TRect& bounds, TMenu *aMenu ) :
     options |= ofPreProcess;
 }
 
-TMenuBar::TMenuBar( const TRect& bounds, TSubMenu& aMenu ) :
+TMenuBar::TMenuBar( const TRect& bounds, TSubMenu& aMenu ) noexcept :
     TMenuView( bounds )
 {
     menu = new TMenu( aMenu );
@@ -113,7 +113,7 @@ TStreamable *TMenuBar::build()
     return new TMenuBar( streamableInit );
 }
 
-TMenuBar::TMenuBar( StreamableInit ) : TMenuView( streamableInit )
+TMenuBar::TMenuBar( StreamableInit ) noexcept : TMenuView( streamableInit )
 {
 }
 

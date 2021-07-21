@@ -24,11 +24,11 @@ class _FAR TMenuItem;
 class _FAR TStatusDef;
 class _FAR TStatusItem;
 
-TSubMenu& operator + ( TSubMenu& s, TMenuItem& i );
-TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 );
-TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 );
-TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 );
-TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 );
+TSubMenu& operator + ( TSubMenu& s, TMenuItem& i ) noexcept;
+TSubMenu& operator + ( TSubMenu& s1, TSubMenu& s2 ) noexcept;
+TMenuItem& operator + ( TMenuItem& i1, TMenuItem& i2 ) noexcept;
+TStatusDef& operator + ( TStatusDef& s1, TStatusItem& s2 ) noexcept;
+TStatusDef& operator + ( TStatusDef& s1, TStatusDef& s2 ) noexcept;
 
 #if defined( Uses_TMenuItem ) && !defined( __TMenuItem )
 #define __TMenuItem
@@ -46,17 +46,17 @@ public:
                ushort aHelpCtx = hcNoContext,
                TStringView p = 0,
                TMenuItem *aNext = 0
-             );
+             ) noexcept;
     TMenuItem( TStringView aName,
                ushort aKeyCode,
                TMenu *aSubMenu,
                ushort aHelpCtx = hcNoContext,
                TMenuItem *aNext = 0
-             );
+             ) noexcept;
 
     ~TMenuItem();
 
-    void append( TMenuItem *aNext );
+    void append( TMenuItem *aNext ) noexcept;
 
     TMenuItem *next;
     const char *name;
@@ -71,12 +71,12 @@ public:
         };
 };
 
-inline void TMenuItem::append( TMenuItem *aNext )
+inline void TMenuItem::append( TMenuItem *aNext ) noexcept
 {
     next = aNext;
 }
 
-inline TMenuItem &newLine()
+inline TMenuItem &newLine() noexcept
 {
     return *new TMenuItem( 0, 0, 0, hcNoContext, 0, 0 );
 }
@@ -91,7 +91,7 @@ class TSubMenu : public TMenuItem
 
 public:
 
-    TSubMenu( TStringView nm, ushort key, ushort helpCtx = hcNoContext );
+    TSubMenu( TStringView nm, ushort key, ushort helpCtx = hcNoContext ) noexcept;
 
 };
 
@@ -105,10 +105,10 @@ class TMenu
 
 public:
 
-    TMenu() : items(0), deflt(0) {};
-    TMenu( TMenuItem& itemList )
+    TMenu() noexcept : items(0), deflt(0) {};
+    TMenu( TMenuItem& itemList ) noexcept
         { items = &itemList; deflt = &itemList; }
-    TMenu( TMenuItem& itemList, TMenuItem& TheDefault )
+    TMenu( TMenuItem& itemList, TMenuItem& TheDefault ) noexcept
         { items = &itemList; deflt = &TheDefault; }
     ~TMenu();
 
@@ -143,8 +143,8 @@ class TMenuView : public TView
 
 public:
 
-    TMenuView( const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0 );
-    TMenuView( const TRect& bounds );
+    TMenuView( const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0 ) noexcept;
+    TMenuView( const TRect& bounds ) noexcept;
 
     virtual ushort execute();
     TMenuItem *findItem( char ch );
@@ -188,7 +188,7 @@ private:
 
 protected:
 
-    TMenuView( StreamableInit );
+    TMenuView( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 
@@ -212,14 +212,14 @@ inline opstream& operator << ( opstream& os, TMenuView* cl )
 inline TMenuView::TMenuView( const TRect& bounds,
                              TMenu *aMenu,
                              TMenuView *aParent
-                           ) :
+                           ) noexcept :
     TView(bounds), parentMenu( aParent ), menu( aMenu ), current( 0 ),
     putClickEventOnExit( True )
 {
     eventMask |= evBroadcast;
 }
 
-inline TMenuView::TMenuView( const TRect& bounds ) :
+inline TMenuView::TMenuView( const TRect& bounds ) noexcept :
     TView(bounds), parentMenu(0), menu(0), current(0),
     putClickEventOnExit( True )
 {
@@ -251,8 +251,8 @@ class TMenuBar : public TMenuView
 
 public:
 
-    TMenuBar( const TRect& bounds, TMenu *aMenu );
-    TMenuBar( const TRect& bounds, TSubMenu &aMenu );
+    TMenuBar( const TRect& bounds, TMenu *aMenu ) noexcept;
+    TMenuBar( const TRect& bounds, TSubMenu &aMenu ) noexcept;
     ~TMenuBar();
 
     virtual void draw();
@@ -265,7 +265,7 @@ private:
 
 protected:
 
-    TMenuBar( StreamableInit );
+    TMenuBar( StreamableInit ) noexcept;
 
 public:
 
@@ -311,7 +311,7 @@ class TMenuBox : public TMenuView
 
 public:
 
-    TMenuBox( const TRect& bounds, TMenu *aMenu, TMenuView *aParentMenu);
+    TMenuBox( const TRect& bounds, TMenu *aMenu, TMenuView *aParentMenu) noexcept;
 
     virtual void draw();
     virtual TRect getItemRect( TMenuItem *item );
@@ -327,7 +327,7 @@ private:
 
 protected:
 
-    TMenuBox( StreamableInit );
+    TMenuBox( StreamableInit ) noexcept;
 
 public:
 
@@ -370,13 +370,13 @@ class TMenuPopup : public TMenuBox
 
 public:
 
-    TMenuPopup(const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0);
+    TMenuPopup(const TRect& bounds, TMenu *aMenu, TMenuView *aParent = 0) noexcept;
     virtual ushort execute();
     virtual void handleEvent(TEvent&);
 
 protected:
 
-    TMenuPopup( StreamableInit );
+    TMenuPopup( StreamableInit ) noexcept;
 
 public:
 
@@ -403,7 +403,7 @@ public:
                  ushort key,
                  ushort cmd,
                  TStatusItem *aNext = 0
-                );
+                ) noexcept;
     ~TStatusItem();
 
     TStatusItem *next;
@@ -417,7 +417,7 @@ inline TStatusItem::TStatusItem( TStringView aText,
                                  ushort key,
                                  ushort cmd,
                                  TStatusItem *aNext
-                                ) :
+                                ) noexcept :
      next( aNext ), text( newStr(aText) ), keyCode( key ), command( cmd )
 {
 }
@@ -441,7 +441,7 @@ public:
                 ushort aMax,
                 TStatusItem *someItems = 0,
                 TStatusDef *aNext = 0
-              );
+              ) noexcept;
 
     TStatusDef *next;
     ushort min;
@@ -453,7 +453,7 @@ inline TStatusDef::TStatusDef( ushort aMin,
                                ushort aMax,
                                TStatusItem *someItems,
                                TStatusDef *aNext
-                             ) :
+                             ) noexcept :
     next( aNext ), min( aMin ), max( aMax ), items( someItems )
 {
 }
@@ -484,7 +484,7 @@ class TStatusLine : public TView
 
 public:
 
-    TStatusLine( const TRect& bounds, TStatusDef& aDefs );
+    TStatusLine( const TRect& bounds, TStatusDef& aDefs ) noexcept;
     ~TStatusLine();
 
     virtual void draw();
@@ -501,7 +501,7 @@ protected:
 private:
 
     void drawSelect( TStatusItem *selected );
-    void findItems();
+    void findItems() noexcept;
     TStatusItem *itemMouseIsIn( TPoint );
     void disposeItems( TStatusItem *item );
 
@@ -518,7 +518,7 @@ private:
 
 protected:
 
-    TStatusLine( StreamableInit );
+    TStatusLine( StreamableInit ) noexcept;
     virtual void write( opstream& );
     virtual void *read( ipstream& );
 

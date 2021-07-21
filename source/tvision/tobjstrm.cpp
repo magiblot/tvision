@@ -90,7 +90,7 @@ const uchar nullStringLen = UCHAR_MAX;
 
 TStreamableClass* volatile fLink::forceLink;
 
-TStreamableClass::TStreamableClass( const char *n, BUILDER b, int d ) :
+TStreamableClass::TStreamableClass( const char *n, BUILDER b, int d ) noexcept :
     name( n ),
     build( b ),
     delta( d )
@@ -99,7 +99,7 @@ TStreamableClass::TStreamableClass( const char *n, BUILDER b, int d ) :
     pstream::registerType( this );
 }
 
-TStreamableTypes::TStreamableTypes() : TNSSortedCollection( 5, 5 )
+TStreamableTypes::TStreamableTypes() noexcept : TNSSortedCollection( 5, 5 )
 {
 }
 
@@ -136,7 +136,7 @@ int TStreamableTypes::compare( void *d1, void *d2 )
     return strcmp( (char *)d1, (char *)d2 );
 }
 
-TPWrittenObjects::TPWrittenObjects() : TNSSortedCollection( 5, 5 ), curId( 0 )
+TPWrittenObjects::TPWrittenObjects() noexcept : TNSSortedCollection( 5, 5 ), curId( 0 )
 {
 }
 
@@ -174,11 +174,11 @@ int TPWrittenObjects::compare( void *o1, void *o2 )
         return 1;
 }
 
-TPWObj::TPWObj( const void *adr, P_id_type id ) : address( adr ), ident( id )
+TPWObj::TPWObj( const void *adr, P_id_type id ) noexcept : address( adr ), ident( id )
 {
 }
 
-TPReadObjects::TPReadObjects() : TNSCollection( 5, 5 ), curId( 0 )
+TPReadObjects::TPReadObjects() noexcept : TNSCollection( 5, 5 ), curId( 0 )
 {
 }
 
@@ -205,7 +205,7 @@ const void *TPReadObjects::find( P_id_type id )
     return at( id );
 }
 
-pstream::pstream( streambuf _FAR *sb )
+pstream::pstream( streambuf _FAR *sb ) noexcept
 {
     init( sb );
 }
@@ -214,23 +214,23 @@ pstream::~pstream()
 {
 }
 
-void pstream::initTypes()
+void pstream::initTypes() noexcept
 {
     if( types == 0 )
         types = new TStreamableTypes;
 }
 
-int pstream::rdstate() const
+int pstream::rdstate() const noexcept
 {
     return state;
 }
 
-int pstream::eof() const
+int pstream::eof() const noexcept
 {
     return state & ios::eofbit;
 }
 
-int pstream::fail() const
+int pstream::fail() const noexcept
 {
     return state & (ios::failbit | ios::badbit
 #ifdef __BORLANDC__
@@ -239,7 +239,7 @@ int pstream::fail() const
     );
 }
 
-int pstream::bad() const
+int pstream::bad() const noexcept
 {
     return state & (ios::badbit
 #ifdef __BORLANDC__
@@ -248,12 +248,12 @@ int pstream::bad() const
     );
 }
 
-int pstream::good() const
+int pstream::good() const noexcept
 {
     return state == 0;
 }
 
-void pstream::clear( int i )
+void pstream::clear( int i ) noexcept
 {
     state = (i & 0xFF)
 #ifdef __BORLANDC__
@@ -262,52 +262,52 @@ void pstream::clear( int i )
     ;
 }
 
-void pstream::registerType( TStreamableClass *ts )
+void pstream::registerType( TStreamableClass *ts ) noexcept
 {
     types->registerType( ts );
 }
 
-pstream::operator void _FAR *() const
+pstream::operator void _FAR *() const noexcept
 {
     return fail() ? 0 : (void *)this;
 }
 
-int pstream::operator! () const
+int pstream::operator! () const noexcept
 {
     return fail();
 }
 
-streambuf _FAR * pstream::rdbuf() const
+streambuf _FAR * pstream::rdbuf() const noexcept
 {
     return bp;
 }
 
-pstream::pstream()
+pstream::pstream() noexcept
 {
 }
 
-void pstream::error( StreamableError )
-{
-    abort();
-}
-
-void pstream::error( StreamableError, const TStreamable& )
+void pstream::error( StreamableError ) noexcept
 {
     abort();
 }
 
-void pstream::init( streambuf *sbp )
+void pstream::error( StreamableError, const TStreamable& ) noexcept
+{
+    abort();
+}
+
+void pstream::init( streambuf *sbp ) noexcept
 {
     state = 0;
     bp = sbp;
 }
 
-void pstream::setstate( int b )
+void pstream::setstate( int b ) noexcept
 {
     state |= (b&0xFF);
 }
 
-ipstream::ipstream( streambuf _FAR *sb )
+ipstream::ipstream( streambuf _FAR *sb ) noexcept
 {
     pstream::init( sb );
 }
@@ -500,7 +500,7 @@ ipstream& operator >> ( ipstream& ps, void *&t )
     return ps;
 }
 
-ipstream::ipstream()
+ipstream::ipstream() noexcept
 {
 }
 
@@ -554,12 +554,12 @@ void ipstream::registerObject( const void *adr )
     objs.registerObject( adr );
 }
 
-opstream::opstream()
+opstream::opstream() noexcept
 {
     objs = new TPWrittenObjects;
 }
 
-opstream::opstream( streambuf * sb )
+opstream::opstream( streambuf * sb ) noexcept
 {
     objs = new TPWrittenObjects;
     pstream::init( sb );
@@ -774,7 +774,7 @@ void opstream::registerObject( const void *adr )
     objs->registerObject( adr );
 }
 
-iopstream::iopstream( streambuf * sb )
+iopstream::iopstream( streambuf * sb ) noexcept
 {
     pstream::init( sb );
 }
@@ -783,11 +783,11 @@ iopstream::~iopstream()
 {
 }
 
-iopstream::iopstream()
+iopstream::iopstream() noexcept
 {
 }
 
-fpbase::fpbase()
+fpbase::fpbase() noexcept
 {
     pstream::init( &buf );
 }
@@ -820,12 +820,12 @@ void fpbase::close()
         setstate(ios::failbit);
 }
 
-filebuf *fpbase::rdbuf()
+filebuf *fpbase::rdbuf() noexcept
 {
     return &buf;
 }
 
-ifpstream::ifpstream()
+ifpstream::ifpstream() noexcept
 {
 }
 
@@ -838,7 +838,7 @@ ifpstream::~ifpstream()
 {
 }
 
-filebuf *ifpstream::rdbuf()
+filebuf *ifpstream::rdbuf() noexcept
 {
     return fpbase::rdbuf();
 }
@@ -848,7 +848,7 @@ void ifpstream::open( const char _FAR *name, pstream::openmode omode)
     fpbase::open( name, omode | ios::in | ios::binary);
 }
 
-ofpstream::ofpstream()
+ofpstream::ofpstream() noexcept
 {
 }
 
@@ -861,7 +861,7 @@ ofpstream::~ofpstream()
 {
 }
 
-filebuf *ofpstream::rdbuf()
+filebuf *ofpstream::rdbuf() noexcept
 {
     return fpbase::rdbuf();
 }
@@ -871,7 +871,7 @@ void ofpstream::open( const char _FAR *name, pstream::openmode omode)
     fpbase::open( name, omode | ios::out | ios::binary);
 }
 
-fpstream::fpstream()
+fpstream::fpstream() noexcept
 {
 }
 
@@ -884,7 +884,7 @@ fpstream::~fpstream()
 {
 }
 
-filebuf *fpstream::rdbuf()
+filebuf *fpstream::rdbuf() noexcept
 {
     return fpbase::rdbuf();
 }

@@ -50,7 +50,7 @@ TFileEditor::TFileEditor( const TRect& bounds,
                           TScrollBar *aVScrollBar,
                           TIndicator *aIndicator,
                           TStringView aFileName
-                        ) :
+                        ) noexcept :
     TEditor( bounds, aHScrollBar, aVScrollBar, aIndicator, 0 )
 {
     if( aFileName.empty() )
@@ -98,7 +98,7 @@ void TFileEditor::initBuffer()
     buffer = new char[bufSize];
 }
 
-Boolean TFileEditor::loadFile()
+Boolean TFileEditor::loadFile() noexcept
 {
     ifstream f( fileName, ios::in | ios::binary );
     if( !f )
@@ -141,7 +141,7 @@ Boolean TFileEditor::loadFile()
         }
 }
 
-Boolean TFileEditor::save()
+Boolean TFileEditor::save() noexcept
 {
     if( *fileName == EOS )
         return saveAs();
@@ -149,7 +149,7 @@ Boolean TFileEditor::save()
         return saveFile();
 }
 
-Boolean TFileEditor::saveAs()
+Boolean TFileEditor::saveAs() noexcept
 {
     Boolean res = False;
     if( editorDialog( edSaveAs, fileName ) != cmCancel )
@@ -163,7 +163,7 @@ Boolean TFileEditor::saveAs()
     return res;
 }
 
-static void writeBlock( ofstream& f, char *buf, uint len )
+static void writeBlock( ofstream& f, char *buf, uint len ) noexcept
 {
     while( len > 0 )
         {
@@ -174,7 +174,7 @@ static void writeBlock( ofstream& f, char *buf, uint len )
         }
 }
 
-Boolean TFileEditor::saveFile()
+Boolean TFileEditor::saveFile() noexcept
 {
     char drive[MAXDRIVE];
     char dir[MAXDIR];
@@ -320,7 +320,7 @@ TStreamable *TFileEditor::build()
     return new TFileEditor( streamableInit );
 }
 
-TFileEditor::TFileEditor( StreamableInit ) : TEditor( streamableInit )
+TFileEditor::TFileEditor( StreamableInit ) noexcept : TEditor( streamableInit )
 {
 }
 

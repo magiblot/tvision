@@ -18,7 +18,7 @@
 #define Uses_opstream
 #include <tvision/tv.h>
 
-TResourceCollection::TResourceCollection( short aLimit, short aDelta) :
+TResourceCollection::TResourceCollection( short aLimit, short aDelta) noexcept :
     TStringCollection( aLimit, aDelta)
 {
 }

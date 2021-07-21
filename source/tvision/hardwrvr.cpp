@@ -367,14 +367,14 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
 
 #endif  // __BORLANDC__
 
-ulong THardwareInfo::getTickCount()
+ulong THardwareInfo::getTickCount() noexcept
 {
     // To change units from ms to clock ticks.
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.
     return GetTickCount() / 55;
 }
 
-BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType )
+BOOL __stdcall THardwareInfo::ctrlBreakHandler( DWORD dwCtrlType ) noexcept
 {
     if( dwCtrlType == CTRL_C_EVENT || dwCtrlType == CTRL_BREAK_EVENT )
         {

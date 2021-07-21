@@ -21,7 +21,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TStringCollection::TStringCollection( short aLimit, short aDelta ) :
+TStringCollection::TStringCollection( short aLimit, short aDelta ) noexcept :
     TSortedCollection(aLimit, aDelta)
 {
 }

@@ -37,7 +37,7 @@
 
 const int CONTROL_Y = 25;
 
-char hotKey( const char *s )
+char hotKey( const char *s ) noexcept
 {
     char *p;
 
@@ -49,7 +49,7 @@ char hotKey( const char *s )
 
 #define cpInputLine "\x13\x13\x14\x15"
 
-TInputLine::TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid ) :
+TInputLine::TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid ) noexcept :
     TView(bounds),
     data( new char[aMaxLen] ),
     maxLen( aMaxLen-1 ),
@@ -474,7 +474,7 @@ TStreamable *TInputLine::build()
     return new TInputLine( streamableInit );
 }
 
-TInputLine::TInputLine( StreamableInit ) : TView( streamableInit )
+TInputLine::TInputLine( StreamableInit ) noexcept : TView( streamableInit )
 {
 }
 

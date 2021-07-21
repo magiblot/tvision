@@ -31,7 +31,7 @@ const TPoint minEditWinSize = {24, 6};
 TEditWindow::TEditWindow( const TRect& bounds,
                           TStringView fileName,
                           int aNumber
-                        ) :
+                        ) noexcept :
     TWindowInit( &TEditWindow::initFrame ),
     TWindow( bounds, 0, aNumber )
 {
@@ -114,7 +114,7 @@ TStreamable *TEditWindow::build()
     return new TEditWindow( streamableInit );
 }
 
-TEditWindow::TEditWindow( StreamableInit ) :
+TEditWindow::TEditWindow( StreamableInit ) noexcept :
     TWindowInit( 0 ),
     TWindow( streamableInit )
 {

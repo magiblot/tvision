@@ -29,7 +29,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TParamText::TParamText( const TRect& bounds ) :
+TParamText::TParamText( const TRect& bounds ) noexcept :
     TStaticText(bounds, 0 ),
     str( new char [256] )
 {
@@ -90,7 +90,7 @@ TStreamable *TParamText::build()
     return new TParamText( streamableInit );
 }
 
-TParamText::TParamText( StreamableInit ) : TStaticText( streamableInit )
+TParamText::TParamText( StreamableInit ) noexcept : TStaticText( streamableInit )
 {
 }
 
