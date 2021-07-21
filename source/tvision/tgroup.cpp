@@ -288,7 +288,7 @@ void TGroup::getBuffer() noexcept
     if( (state & sfExposed) != 0 )
         if( (options & ofBuffered) != 0 )
             {
-            size_t sz = size.x * size.y * sizeof(TScreenCell);
+            int sz = max(size.x * size.y * sizeof(TScreenCell), 0);
             TVMemMgr::reallocateDiscardable( (void *&)buffer, sz );
 #ifndef __BORLANDC__
             // An uninitialized screen buffer is harmless in MS-DOS, since the worst
