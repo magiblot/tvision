@@ -19,21 +19,20 @@
 
 TColorAttr TView::mapColor( uchar index ) noexcept
 {
-    TColorAttr color = index;
+    TPalette& p = getPalette();
+    TColorAttr color;
+    if( p[0] != 0 )
+        {
+        if( 0 < index && index <= p[0] )
+            color = p[index];
+        else
+            return errorAttr;
+        }
+    else
+        color = index;
     if( color == 0 )
         return errorAttr;
-    TView *cur = this;
-    do  {
-        TPalette& p = cur->getPalette();
-        if( p[0] != 0 )
-            {
-            if( color > p[0] )
-                return errorAttr;
-            color = p[color];
-            if( color == 0 )
-                return errorAttr;
-            }
-        cur = cur->owner;
-        } while( cur != 0 );
+    if( owner )
+        return owner->mapColor(color);
     return color;
 }
