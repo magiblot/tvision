@@ -1069,7 +1069,7 @@ So, in general, there are three ways to use extended colors in views:
 
 ```c++
 // The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.
-TColorAttr TMyScrollBar::mapColor(uchar index)
+TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
 {
     // In this example the values are hardcoded,
     // but they could be stored elsewhere if desired.
