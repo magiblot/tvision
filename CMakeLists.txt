@@ -96,7 +96,6 @@ function(tv_set_warnings target)
             /wd4244 # Possible data loss in type conversion
             /wd4250 # Inheritance via dominance
             /wd4267 # Possible data loss in conversion from size_t to other type
-            /wd4996 # Usage of deprecated symbol
         )
     else()
         target_compile_options(${target} PRIVATE
