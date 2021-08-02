@@ -321,7 +321,7 @@ inline void TText::wseek(TStringView text, size_t &index, size_t &remainder, int
         while (index < text.size()) {
             size_t width = 0;
             TText::next(text, index, width);
-            count -= width;
+            count -= (int) width;
             if (count <= 0) {
                 // Immediately return when the requested width is exceeded.
                 remainder = -count;
