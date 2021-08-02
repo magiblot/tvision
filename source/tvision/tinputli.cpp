@@ -359,7 +359,7 @@ void TInputLine::handleEvent( TEvent& event )
                     default:
                         // The event text may contain null characters, but 'data' is null-terminated,
                         // so rely on strlen to measure the text length.
-                        strnzcpy( keyText, event.keyDown.asText(), sizeof( keyText ) );
+                        strnzcpy( keyText, event.keyDown.getText(), sizeof( keyText ) );
                         if( (len = strlen(keyText)) != 0 )
                             {
                             deleteSelect();

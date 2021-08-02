@@ -357,7 +357,7 @@ Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length)
 {
     if( event.what == evKeyDown )
         {
-        TStringView text = event.keyDown.textLength         ? event.keyDown.asText()
+        TStringView text = event.keyDown.textLength         ? event.keyDown.getText()
                          : event.keyDown.keyCode == kbEnter ? TStringView("\n")
                          : event.keyDown.keyCode == kbTab   ? TStringView("\t")
                                                             : TStringView();

@@ -201,12 +201,13 @@ struct KeyDownEvent
     char text[4];
     uchar textLength;
 
-    TStringView asText() const
-    {
-        return TStringView(text, textLength);
-    }
-
+    inline TStringView getText() const;
 };
+
+inline TStringView KeyDownEvent::getText() const
+{
+    return TStringView(text, textLength);
+}
 
 struct MessageEvent
 {

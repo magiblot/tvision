@@ -226,7 +226,7 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
         ev.what = evKeyDown;
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
         if (ev.keyDown.textLength) {
-            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.asText());
+            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
             if (KeyEventW.wVirtualKeyCode == VK_MENU)
                 // This is enabled when pasting certain characters, and it confuses
                 // applications. Clear it.

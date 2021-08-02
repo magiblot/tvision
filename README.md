@@ -454,7 +454,7 @@ Unicode support consists in two new fields in `ev.keyDown` (which is a `struct K
 
 Note that the `text` field may contain garbage or uninitialized data from position `textLength` on.
 
-You can also get a `TStringView` out of a `KeyDownEvent` with the `asText()` method.
+You can also get a `TStringView` out of a `KeyDownEvent` with the `getText()` method.
 
 So a Unicode character can be retrieved from `TEvent` in the following way:
 
@@ -462,8 +462,8 @@ So a Unicode character can be retrieved from `TEvent` in the following way:
 switch (ev.keyDown.keyCode) {
     // ...
     default: {
-        std::string_view s {ev.keyDown.asText()};
-        processText(s);
+        std::string_view sv = ev.keyDown.getText();
+        processText(sv);
     }
 }
 ```

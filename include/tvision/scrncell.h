@@ -68,7 +68,7 @@ struct TCellChar
 
     inline bool isWideCharTrail() const;
     inline void appendZeroWidth(TStringView text);
-    inline TStringView asText() const;
+    inline TStringView getText() const;
     inline size_t size() const;
 
     inline uint8_t& operator[](size_t i);
@@ -123,7 +123,7 @@ inline void TCellChar::appendZeroWidth(TStringView text)
         memcpy(&_text[sz], text.data(), text.size());
 }
 
-inline TStringView TCellChar::asText() const
+inline TStringView TCellChar::getText() const
 {
     return {(const char *) _text, size()};
 }

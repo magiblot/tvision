@@ -364,7 +364,7 @@ inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,
     else if (x != last.x + 1)
         disp.lowlevelMoveCursorX(x, y);
 
-    disp.lowlevelWriteChars(Char.asText(), Attr);
+    disp.lowlevelWriteChars(Char.getText(), Attr);
     last = {x + wide, y};
 }
 
