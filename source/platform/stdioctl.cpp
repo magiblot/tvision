@@ -12,8 +12,19 @@ void StdioCtl::setUp() noexcept
 {
     ttyfd = -1;
     infile = outfile = nullptr;
-    if (!getEnv<const char*>("TVISION_USE_STDIO"))
-        ttyfd = ::open("/dev/tty", O_RDWR);
+    if (getEnv<TStringView>("TVISION_USE_STDIO").empty())
+    {
+        // /dev/tty always points to the console but it doesn't play nicely
+        // with poll() on macOS, so prefer using the one pointed out by ttyname.
+        for (int fd : {0, 1, 2})
+            if (auto *name = ::ttyname(fd))
+                if ((ttyfd = ::open(name, O_RDWR)) != -1)
+                    break;
+#ifndef __APPLE__
+        if (ttyfd == -1)
+            ttyfd = ::open("/dev/tty", O_RDWR);
+#endif
+    }
 
     if (ttyfd != -1)
     {
