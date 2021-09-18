@@ -49,6 +49,7 @@ class THardwareInfo
 public:
 
     THardwareInfo() noexcept;
+    ~THardwareInfo();
 #ifndef __BORLANDC__
     enum { eventQSize = 24 };
     static TEvent eventQ[eventQSize];

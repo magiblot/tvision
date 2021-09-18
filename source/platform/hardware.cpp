@@ -33,6 +33,11 @@ THardwareInfo::THardwareInfo() noexcept
 #endif
 }
 
+THardwareInfo::~THardwareInfo()
+{
+    restoreConsole();
+}
+
 // For brevity.
 static constexpr PlatformStrategy* &platf = PlatformStrategy::instance;
 static constexpr NullPlatform* nullPlatf = &NullPlatform::instance;

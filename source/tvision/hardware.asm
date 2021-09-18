@@ -18,6 +18,7 @@
 
 IFNDEF __FLAT__
         PUBLIC  @THardwareInfo@$bctr$qv
+        PUBLIC  @THardwareInfo@$bdtr$qv
         PUBLIC  @THardwareInfo@getBiosEquipmentFlag$qi
         PUBLIC  @THardwareInfo@getBiosSelector$qv
 
@@ -78,6 +79,9 @@ IFNDEF __FLAT__
         RET
 @THardwareInfo@$bctr$qv  ENDP
 
+@THardwareInfo@$bdtr$qv  PROC    FAR
+        RET
+@THardwareInfo@$bdtr$qv  ENDP
 
 @THardwareInfo@getBiosEquipmentFlag$qi   PROC FAR
         PUSH    DS

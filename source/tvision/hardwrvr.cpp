@@ -155,6 +155,12 @@ THardwareInfo::THardwareInfo()
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
 }
 
+THardwareInfo::~THardwareInfo()
+{
+    restoreConsole();
+    CloseHandle( consoleHandle[cnOutput] );
+}
+
 void THardwareInfo::reloadScreenInfo()
 {
     // Update sbInfo with the current screen buffer info.
