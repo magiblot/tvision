@@ -6,21 +6,20 @@
 
 #include <internal/buffdisp.h>
 
-class ScreenCursor {
-
+class ScreenCursor
+{
 public:
 
-
-    ScreenCursor();
+    ScreenCursor() noexcept;
     ~ScreenCursor();
 
-    void show();
-    void hide();
-    bool isVisible() const;
-    void setPos(const TPoint &p);
-    const TPoint& getPos() const;
-    void apply(TColorAttr &attr);
-    void restore(TColorAttr &attr) const;
+    void show() noexcept;
+    void hide() noexcept;
+    bool isVisible() const noexcept;
+    void setPos(const TPoint &p) noexcept;
+    const TPoint& getPos() const noexcept;
+    void apply(TColorAttr &attr) noexcept;
+    void restore(TColorAttr &attr) const noexcept;
 
 protected:
 
@@ -28,11 +27,10 @@ protected:
     bool visible;
     TColorAttr backup;
 
-    virtual void draw(TColorAttr &attr) const = 0;
-
+    virtual void draw(TColorAttr &attr) const noexcept = 0;
 };
 
-inline ScreenCursor::ScreenCursor() :
+inline ScreenCursor::ScreenCursor() noexcept :
     pos({-1, -1}),
     visible(false),
     backup(0)
@@ -45,60 +43,54 @@ inline ScreenCursor::~ScreenCursor()
     BufferedDisplay::removeCursor(this);
 }
 
-inline void ScreenCursor::show()
+inline void ScreenCursor::show() noexcept
 {
     if (!visible)
         BufferedDisplay::changeCursor();
     visible = true;
 }
 
-inline void ScreenCursor::hide()
+inline void ScreenCursor::hide() noexcept
 {
     visible = false;
 }
 
-inline bool ScreenCursor::isVisible() const
+inline bool ScreenCursor::isVisible() const noexcept
 {
     return visible;
 }
 
-inline void ScreenCursor::setPos(const TPoint &p)
+inline void ScreenCursor::setPos(const TPoint &p) noexcept
 {
     if (visible && p != pos)
         BufferedDisplay::changeCursor();
     pos = p;
 }
 
-inline const TPoint& ScreenCursor::getPos() const
+inline const TPoint& ScreenCursor::getPos() const noexcept
 {
     return pos;
 }
 
-inline void ScreenCursor::apply(TColorAttr &attr)
+inline void ScreenCursor::apply(TColorAttr &attr) noexcept
 {
     backup = attr;
     draw(attr);
 }
 
-inline void ScreenCursor::restore(TColorAttr &attr) const
+inline void ScreenCursor::restore(TColorAttr &attr) const noexcept
 {
     attr = backup;
 }
 
-class ReverseScreenCursor : public ScreenCursor {
-
-protected:
-
-    void draw(TColorAttr &attr) const override;
-
+class ReverseScreenCursor : public ScreenCursor
+{
+    void draw(TColorAttr &attr) const noexcept override;
 };
 
-class NegativeScreenCursor : public ScreenCursor {
-
-protected:
-
-    void draw(TColorAttr &attr) const override;
-
+class NegativeScreenCursor : public ScreenCursor
+{
+    void draw(TColorAttr &attr) const noexcept override;
 };
 
 #endif

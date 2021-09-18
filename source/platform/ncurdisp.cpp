@@ -11,7 +11,7 @@
 #include <ncurses.h>
 #include <clocale>
 
-NcursesDisplay::NcursesDisplay() :
+NcursesDisplay::NcursesDisplay() noexcept :
     definedPairs(0),
     usesNcursesDraw(false)
 {
@@ -43,7 +43,7 @@ NcursesDisplay::~NcursesDisplay()
     delscreen(term);
 }
 
-void NcursesDisplay::reloadScreenInfo()
+void NcursesDisplay::reloadScreenInfo() noexcept
 {
     TPoint size = TermIO::Unix::getSize();
     // When Ncurses is not used for drawing (e.g. AnsiDisplay<NcursesDisplay>),
@@ -57,30 +57,30 @@ void NcursesDisplay::reloadScreenInfo()
     TerminalDisplay::reloadScreenInfo();
 }
 
-TPoint NcursesDisplay::getScreenSize()
+TPoint NcursesDisplay::getScreenSize() noexcept
 {
     int y, x;
     getmaxyx(stdscr, y, x);
     return {max(x, 0), max(y, 0)};
 }
 
-int NcursesDisplay::getCaretSize()
+int NcursesDisplay::getCaretSize() noexcept
 {
     int size = curs_set(0);
     curs_set(size);
     return size <= 0 ? 0 : size == 1 ? 1 : 100;
 }
 
-int NcursesDisplay::getColorCount()
+int NcursesDisplay::getColorCount() noexcept
 {
     return COLORS;
 }
 
-void NcursesDisplay::clearScreen() { flushScreen(); wclear(stdscr); lowlevelFlush(); }
-void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) { wmove(stdscr, y, x); }
-void NcursesDisplay::lowlevelFlush() { wrefresh(stdscr); }
+void NcursesDisplay::clearScreen() noexcept { flushScreen(); wclear(stdscr); lowlevelFlush(); }
+void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) noexcept { wmove(stdscr, y, x); }
+void NcursesDisplay::lowlevelFlush() noexcept { wrefresh(stdscr); }
 
-void NcursesDisplay::lowlevelCursorSize(int size)
+void NcursesDisplay::lowlevelCursorSize(int size) noexcept
 {
 /* The caret is the keyboard cursor. If size is 0, the caret is hidden. The
  * other possible values are from 1 to 100, theoretically, and represent the
@@ -125,7 +125,7 @@ void NcursesDisplay::lowlevelCursorSize(int size)
  * terminals with limited color support. For instance, the example linked above
  * doesn't work on the linux console because it doesn't take this approach. */
 
-void NcursesDisplay::lowlevelWriteChars(TStringView chars, TColorAttr attr)
+void NcursesDisplay::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept
 {
     usesNcursesDraw = true;
     // Translate and apply text attributes.
@@ -136,7 +136,7 @@ void NcursesDisplay::lowlevelWriteChars(TStringView chars, TColorAttr attr)
     wattroff(stdscr, curses_attr);
 }
 
-uint NcursesDisplay::translateAttributes(TColorAttr attr)
+uint NcursesDisplay::translateAttributes(TColorAttr attr) noexcept
 {
     /* To understand the bit masks, please read:
      * https://docs.microsoft.com/en-us/windows/console/char-info-str
@@ -152,7 +152,7 @@ uint NcursesDisplay::translateAttributes(TColorAttr attr)
     return fgIntense*A_BOLD | (hasColors ? getColorPair(pairKey) : 0);
 }
 
-uint NcursesDisplay::getColorPair(uchar pairKey)
+uint NcursesDisplay::getColorPair(uchar pairKey) noexcept
 {
     /* Color pairs are defined as they are used, counting from one, in order
      * not to make any assumptions on the amount of color pairs supported by

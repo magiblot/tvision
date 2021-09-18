@@ -13,7 +13,7 @@
 #include <internal/terminal.h>
 #include <clocale>
 
-Win32ConsoleStrategy* Win32ConsoleStrategy::create()
+Win32ConsoleStrategy* Win32ConsoleStrategy::create() noexcept
 {
     UINT cpInput, cpOutput;
     std::unique_ptr<DisplayStrategy> display;
@@ -29,7 +29,7 @@ Win32ConsoleStrategy* Win32ConsoleStrategy::create()
 
 Win32ConsoleStrategy::Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
                                             DisplayStrategy *display,
-                                            InputStrategy *input ) :
+                                            InputStrategy *input ) noexcept :
     PlatformStrategy(display, input),
     cpInput(cpInput),
     cpOutput(cpOutput)
@@ -44,7 +44,7 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
 
 bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
                                         std::unique_ptr<DisplayStrategy> &display,
-                                        std::unique_ptr<InputStrategy> &input )
+                                        std::unique_ptr<InputStrategy> &input ) noexcept
 {
     StdioCtl::instance.setUp();
     // Set the input mode.
@@ -124,7 +124,7 @@ bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
     return true;
 }
 
-void Win32ConsoleStrategy::restoreConsole()
+void Win32ConsoleStrategy::restoreConsole() noexcept
 {
     // Restore the startup codepages and screen buffer.
     SetConsoleCP(cpInput);
@@ -133,14 +133,14 @@ void Win32ConsoleStrategy::restoreConsole()
     StdioCtl::instance.tearDown();
 }
 
-void Win32ConsoleStrategy::resetConsole()
+void Win32ConsoleStrategy::resetConsole() noexcept
 {
     // Attach the application to a new console with no data loss.
     restoreConsole();
     initConsole(cpInput, cpOutput, display, input);
 }
 
-bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev)
+bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev) noexcept
 {
     DWORD events = 0;
     if (!GetNumberOfConsoleInputEvents(StdioCtl::in(), &events))
@@ -165,34 +165,34 @@ bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev)
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 
-Win32Input::Win32Input() :
+Win32Input::Win32Input() noexcept :
     insertState(true),
     surrogate(0)
 {
 }
 
-int Win32Input::getButtonCount()
+int Win32Input::getButtonCount() noexcept
 {
     DWORD num;
     GetNumberOfConsoleMouseButtons(&num);
     return num;
 }
 
-void Win32Input::cursorOn()
+void Win32Input::cursorOn() noexcept
 {
     DWORD consoleMode = 0;
     GetConsoleMode(StdioCtl::in(), &consoleMode);
     SetConsoleMode(StdioCtl::in(), consoleMode | ENABLE_MOUSE_INPUT);
 }
 
-void Win32Input::cursorOff()
+void Win32Input::cursorOff() noexcept
 {
     DWORD consoleMode = 0;
     GetConsoleMode(StdioCtl::in(), &consoleMode);
     SetConsoleMode(StdioCtl::in(), consoleMode & ~ENABLE_MOUSE_INPUT);
 }
 
-bool Win32Input::getEvent(TEvent &ev)
+bool Win32Input::getEvent(TEvent &ev) noexcept
 {
     INPUT_RECORD irBufferW = {};
     DWORD ok = 0;
@@ -220,7 +220,7 @@ bool Win32Input::getEvent(TEvent &ev)
 }
 
 bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
-                              TEvent &ev )
+                              TEvent &ev ) noexcept
 {
     if (getUnicodeEvent(KeyEventW, ev)) {
         ev.what = evKeyDown;
@@ -271,7 +271,7 @@ bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
     return false;
 }
 
-bool Win32Input::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev)
+bool Win32Input::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
 // Returns true unless the event contains a UTF-16 surrogate,
 // in which case we need the next event.
 {
@@ -300,7 +300,7 @@ bool Win32Input::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev)
     return true;
 }
 
-bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev)
+bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev) noexcept
 {
     ev.what = evMouse;
     ev.mouse.where.x = MouseEvent.dwMousePosition.X;
@@ -324,13 +324,13 @@ bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev)
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
-Win32Display::Win32Display() :
+Win32Display::Win32Display() noexcept :
     dwSize {},
     lastAttr('\x00')
 {
 }
 
-void Win32Display::reloadScreenInfo()
+void Win32Display::reloadScreenInfo() noexcept
 {
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
     // Set the buffer size to the viewport size so that the scrollbars
@@ -350,19 +350,19 @@ void Win32Display::reloadScreenInfo()
     TerminalDisplay::reloadScreenInfo();
 }
 
-TPoint Win32Display::getScreenSize()
+TPoint Win32Display::getScreenSize() noexcept
 {
     return {dwSize.X, dwSize.Y};
 }
 
-int Win32Display::getCaretSize()
+int Win32Display::getCaretSize() noexcept
 {
     CONSOLE_CURSOR_INFO crInfo {};
     GetConsoleCursorInfo(StdioCtl::out(), &crInfo);
     return crInfo.bVisible ? crInfo.dwSize : 0;
 }
 
-int Win32Display::getColorCount()
+int Win32Display::getColorCount() noexcept
 {
     // Conhost has had high color support for some time:
     // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
@@ -373,7 +373,7 @@ int Win32Display::getColorCount()
     return 16;
 }
 
-void Win32Display::lowlevelCursorSize(int size)
+void Win32Display::lowlevelCursorSize(int size) noexcept
 {
     CONSOLE_CURSOR_INFO crInfo;
     if (size) {
@@ -386,7 +386,7 @@ void Win32Display::lowlevelCursorSize(int size)
     SetConsoleCursorInfo(StdioCtl::out(), &crInfo);
 }
 
-void Win32Display::clearScreen()
+void Win32Display::clearScreen() noexcept
 {
     COORD coord = {0, 0};
     DWORD length = dwSize.X * dwSize.Y;
@@ -399,7 +399,7 @@ void Win32Display::clearScreen()
 
 // Fallback display support with rudimentary buffering.
 
-void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr)
+void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept
 {
     uchar bios = attr.toBIOS();
     if (bios != lastAttr)
@@ -411,13 +411,13 @@ void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr)
     buf.insert(buf.end(), chars.data(), chars.data()+chars.size());
 }
 
-void Win32Display::lowlevelMoveCursor(uint x, uint y)
+void Win32Display::lowlevelMoveCursor(uint x, uint y) noexcept
 {
     lowlevelFlush();
     SetConsoleCursorPosition(StdioCtl::out(), {(short) x, (short) y});
 }
 
-void Win32Display::lowlevelFlush()
+void Win32Display::lowlevelFlush() noexcept
 {
     TermIO::consoleWrite(buf.data(), buf.size());
     buf.resize(0);

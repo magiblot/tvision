@@ -9,14 +9,14 @@
 
 class TSignalHandler {
 
-    static void SigHandler(int s, siginfo_t* si, ucontext_t* context);
-    static struct sigaction& oldAction(int s);
-    static void printSignalMsg(int s, siginfo_t* si, ucontext_t* context);
-    static void clearStdin();
+    static void SigHandler(int s, siginfo_t* si, ucontext_t* context) noexcept;
+    static struct sigaction& oldAction(int s) noexcept;
+    static void printSignalMsg(int s, siginfo_t* si, ucontext_t* context) noexcept;
+    static void clearStdin() noexcept;
 
 public:
 
-    TSignalHandler();
+    TSignalHandler() noexcept;
     ~TSignalHandler();
 
 };

@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-TSignalHandler::TSignalHandler()
+TSignalHandler::TSignalHandler() noexcept
 {
     struct sigaction sa = {};
     sa.sa_flags = SA_SIGINFO;
@@ -25,7 +25,7 @@ TSignalHandler::~TSignalHandler()
     sigaction(SIGILL, &oldAction(SIGILL), 0);
 }
 
-void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
+void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context) noexcept
 {
     // Save and disable the handler, to avoid recursion if something goes wrong.
     struct sigaction sa;
@@ -60,13 +60,13 @@ void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context)
         sigaction(s, &sa, 0);
 }
 
-struct sigaction& TSignalHandler::oldAction(int s)
+struct sigaction& TSignalHandler::oldAction(int s) noexcept
 {
     static struct sigaction oldsegv, oldill;
     return s == SIGSEGV ? oldsegv : oldill;
 }
 
-void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context)
+void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context) noexcept
 {
     if (s == SIGSEGV)
         printf("\r\nOops, a segmentation fault (SIGSEGV) was caught!"
@@ -77,7 +77,7 @@ void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context)
            "\r\n");
 }
 
-void TSignalHandler::clearStdin()
+void TSignalHandler::clearStdin() noexcept
 {
     int flags = fcntl(0, F_GETFL), i;
     fcntl(0, F_SETFL, O_NONBLOCK);

@@ -19,7 +19,7 @@ class constexpr_map
 public:
 
     constexpr
-    constexpr_map(const std::pair<Key, Value> (&init) [N]) :
+    constexpr_map(const std::pair<Key, Value> (&init) [N]) noexcept :
         keys {},
         values {}
     {
@@ -30,7 +30,8 @@ public:
     }
 
     constexpr
-    Value operator[](const Key &key) const {
+    Value operator[](const Key &key) const noexcept
+    {
         for (size_t i = 0; i < N; ++i)
             if (keys[i] == key)
                 return values[i];
@@ -54,7 +55,7 @@ public:
     template<size_t N>
     constexpr
     static constexpr_map<Key, Value, N>
-    from_array(const std::pair<Key, Value> (&init) [N])
+    from_array(const std::pair<Key, Value> (&init) [N]) noexcept
     {
         return constexpr_map<Key, Value, N>(init);
     }
@@ -72,7 +73,7 @@ public:
 
     using super::super;
 
-    Value operator[](const Key &key) const
+    Value operator[](const Key &key) const noexcept
     {
         auto it = super::find(key);
         if (it == super::end())
@@ -123,12 +124,12 @@ class const_unordered_map<uint64_t, Value> : public const_unordered_map_base<uin
 
         using super::super;
 
-        constexpr StringAsIntPair(TStringView s, const Value &v) :
+        constexpr StringAsIntPair(TStringView s, const Value &v) noexcept :
             super(detail::string_as_int<uint64_t>(s), v)
         {
         }
 
-        constexpr StringAsIntPair(TStringView s, Value &&v) :
+        constexpr StringAsIntPair(TStringView s, Value &&v) noexcept :
             super(detail::string_as_int<uint64_t>(s), std::move(v))
         {
         }
@@ -139,7 +140,7 @@ public:
 
     using super::super;
 
-    static const_unordered_map with_string_keys(std::initializer_list<StringAsIntPair> init)
+    static const_unordered_map with_string_keys(std::initializer_list<StringAsIntPair> init) noexcept
     {
         return const_unordered_map(
             static_cast<const typename super::value_type *>(init.begin()),
@@ -147,7 +148,7 @@ public:
         );
     }
 
-    Value operator[](TStringView key) const
+    Value operator[](TStringView key) const noexcept
     {
         return super::operator[](detail::string_as_int<uint64_t>(key));
     }

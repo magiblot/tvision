@@ -13,7 +13,7 @@
 #include <memory>
 #include <gpm.h>
 
-GpmInput::GpmInput() :
+GpmInput::GpmInput() noexcept :
     buttonState(0)
 {
     // Let coordinates begin at zero instead of one.
@@ -48,12 +48,12 @@ GpmInput::~GpmInput()
     }
 }
 
-int GpmInput::getButtonCount()
+int GpmInput::getButtonCount() noexcept
 {
     return gpm_fd < 0 ? 0 : 2;
 }
 
-void GpmInput::fitEvent(Gpm_Event &gpmEvent)
+void GpmInput::fitEvent(Gpm_Event &gpmEvent) noexcept
 {
     short &x = gpmEvent.x, &y = gpmEvent.y;
     x = std::min<short>(std::max<short>(x, 0), TScreen::screenWidth - 1);
@@ -76,7 +76,7 @@ static constexpr GpmMbFlag gpmButtonFlags[] =
     {GPM_B_MIDDLE, mbMiddleButton},
 };
 
-bool GpmInput::getEvent(TEvent &ev)
+bool GpmInput::getEvent(TEvent &ev) noexcept
 {
     Gpm_Event gpmEvent;
     if (Gpm_GetEvent(&gpmEvent) == 1)

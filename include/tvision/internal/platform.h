@@ -25,7 +25,7 @@ public:
     // internal structs when the display properties change. But
     // 'DisplayStrategy::reloadScreenInfo()' must be invoked eventually.
 
-    virtual void reloadScreenInfo()
+    virtual void reloadScreenInfo() noexcept
     {
         size = getScreenSize();
         caretSize = getCaretSize();
@@ -36,24 +36,24 @@ protected:
     // These functions are meant to be overriden by inheritors. Their only
     // responsibility should be to return updated values.
 
-    virtual TPoint getScreenSize() { return size; }
+    virtual TPoint getScreenSize() noexcept { return size; }
 
     // 'getCaretSize()' must return a value in the range 0 to 100. Zero means
     // the caret is not visible. Note that PlatformStrategy::getCaretSize()
     // adjusts this to the range 1 to 100, because that's what the original
     // THardwareInfo::getCaretSize() did, and what TScreen expects.
 
-    virtual int getCaretSize() { return caretSize; }
+    virtual int getCaretSize() noexcept { return caretSize; }
 
 public:
 
-    bool isCaretVisible() { return caretSize != 0; }
-    virtual void clearScreen() {}
-    virtual void setCaretPosition(int x, int y) {}
-    virtual ushort getScreenMode() { return 0; }
-    virtual void setCaretSize(int size) {}
-    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) {}
-    virtual void flushScreen() {}
+    bool isCaretVisible() noexcept { return caretSize != 0; }
+    virtual void clearScreen() noexcept {}
+    virtual void setCaretPosition(int x, int y) noexcept {}
+    virtual ushort getScreenMode() noexcept { return 0; }
+    virtual void setCaretSize(int size) noexcept {}
+    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept {}
+    virtual void flushScreen() noexcept {}
 
 };
 
@@ -64,10 +64,10 @@ class InputStrategy {
 public:
 
     virtual ~InputStrategy() {}
-    virtual bool getEvent(TEvent &ev) { return false; }
-    virtual int getButtonCount() { return 0; }
-    virtual void cursorOn() {}
-    virtual void cursorOff() {}
+    virtual bool getEvent(TEvent &ev) noexcept { return false; }
+    virtual int getButtonCount() noexcept { return 0; }
+    virtual void cursorOn() noexcept {}
+    virtual void cursorOff() noexcept {}
 
 };
 
@@ -80,8 +80,8 @@ protected:
 
 public:
 
-    PlatformStrategy() {}
-    PlatformStrategy( DisplayStrategy *d, InputStrategy *i ) :
+    PlatformStrategy() noexcept {}
+    PlatformStrategy( DisplayStrategy *d, InputStrategy *i ) noexcept :
         display(d),
         input(i)
     {
@@ -90,23 +90,23 @@ public:
 
     virtual ~PlatformStrategy() {}
 
-    virtual bool waitForEvent(long ms, TEvent &ev) { return false; }
-    virtual int getButtonCount() { return input ? input->getButtonCount() : 0; }
-    virtual void cursorOn() { if (input) input->cursorOn(); }
-    virtual void cursorOff() { if (input) input->cursorOff(); }
+    virtual bool waitForEvent(long ms, TEvent &ev) noexcept { return false; }
+    virtual int getButtonCount() noexcept { return input ? input->getButtonCount() : 0; }
+    virtual void cursorOn() noexcept { if (input) input->cursorOn(); }
+    virtual void cursorOff() noexcept { if (input) input->cursorOff(); }
 
-    virtual int getCaretSize() { return min(max(display->caretSize, 1), 100); }
-    virtual bool isCaretVisible() { return display->isCaretVisible(); }
-    virtual void clearScreen() { display->clearScreen(); }
-    virtual int getScreenRows() { return display->size.y; }
-    virtual int getScreenCols() { return display->size.x; }
-    virtual void setCaretPosition(int x, int y) { display->setCaretPosition(x, y); }
-    virtual ushort getScreenMode() { return display->getScreenMode(); }
-    virtual void setCaretSize(int size) { display->setCaretSize(size); }
-    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) { display->screenWrite(x, y, buf, len); }
-    virtual void flushScreen() { display->flushScreen(); }
-    virtual void reloadScreenInfo() { display->reloadScreenInfo(); }
-    virtual int charWidth(TStringView mbc, char32_t wc) { return 1; }
+    virtual int getCaretSize() noexcept { return min(max(display->caretSize, 1), 100); }
+    virtual bool isCaretVisible() noexcept { return display->isCaretVisible(); }
+    virtual void clearScreen() noexcept { display->clearScreen(); }
+    virtual int getScreenRows() noexcept { return display->size.y; }
+    virtual int getScreenCols() noexcept { return display->size.x; }
+    virtual void setCaretPosition(int x, int y) noexcept { display->setCaretPosition(x, y); }
+    virtual ushort getScreenMode() noexcept { return display->getScreenMode(); }
+    virtual void setCaretSize(int size) noexcept { display->setCaretSize(size); }
+    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept { display->screenWrite(x, y, buf, len); }
+    virtual void flushScreen() noexcept { display->flushScreen(); }
+    virtual void reloadScreenInfo() noexcept { display->reloadScreenInfo(); }
+    virtual int charWidth(TStringView mbc, char32_t wc) noexcept { return 1; }
 
     static PlatformStrategy *instance; // hardware.cpp
 
@@ -119,20 +119,20 @@ class NullPlatform : public PlatformStrategy {
 
 public:
 
-    int getButtonCount() override { return 0; }
-    void cursorOn() override {}
-    void cursorOff() override {}
+    int getButtonCount() noexcept override { return 0; }
+    void cursorOn() noexcept override {}
+    void cursorOff() noexcept override {}
 
-    int getCaretSize() override { return 0; }
-    bool isCaretVisible() override { return false; }
-    void clearScreen() override {}
-    int getScreenRows() override { return 0; }
-    int getScreenCols() override { return 0; }
-    void setCaretPosition(int x, int y) override {}
-    ushort getScreenMode() override { return 0; }
-    void setCaretSize(int size) override {}
-    void screenWrite(int x, int y, TScreenCell *buf, int len) override {}
-    void flushScreen() override {}
+    int getCaretSize() noexcept override { return 0; }
+    bool isCaretVisible() noexcept override { return false; }
+    void clearScreen() noexcept override {}
+    int getScreenRows() noexcept override { return 0; }
+    int getScreenCols() noexcept override { return 0; }
+    void setCaretPosition(int x, int y) noexcept override {}
+    ushort getScreenMode() noexcept override { return 0; }
+    void setCaretSize(int size) noexcept override {}
+    void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept override {}
+    void flushScreen() noexcept override {}
 
     static NullPlatform instance; // hardware.cpp
 
@@ -157,7 +157,7 @@ public:
     static void deleteListener(FdInputStrategy*);
     static bool waitForEvent(int ms, TEvent &ev);
     void overrideEventGetter(std::function<bool (TEvent&)>&&);
-    virtual bool hasPendingEvents() { return false; }
+    virtual bool hasPendingEvents() noexcept { return false; }
 
 };
 
@@ -167,12 +167,12 @@ public:
 
     using PlatformStrategy::PlatformStrategy;
 
-    bool waitForEvent(long ms, TEvent &ev) override
+    bool waitForEvent(long ms, TEvent &ev) noexcept override
     {
         return FdInputStrategy::waitForEvent(ms, ev);
     }
 
-    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 
 };
 

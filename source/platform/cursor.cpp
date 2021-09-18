@@ -1,11 +1,11 @@
 #include <internal/cursor.h>
 
-void ReverseScreenCursor::draw(TColorAttr &attr) const
+void ReverseScreenCursor::draw(TColorAttr &attr) const noexcept
 {
     attr = reverseAttribute(attr);
 }
 
-void NegativeScreenCursor::draw(TColorAttr &attr) const
+void NegativeScreenCursor::draw(TColorAttr &attr) const noexcept
 {
     auto fg = ::getFore(attr),
          bg = ::getBack(attr);

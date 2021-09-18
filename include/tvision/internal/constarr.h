@@ -14,12 +14,12 @@ struct constarray
 {
     T elems[N];
 
-    constexpr T& operator[](size_t i)
+    constexpr T& operator[](size_t i) noexcept
     {
         return elems[i];
     }
 
-    constexpr const T& operator[](size_t i) const
+    constexpr const T& operator[](size_t i) const noexcept
     {
         return elems[i];
     }

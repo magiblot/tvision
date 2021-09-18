@@ -22,31 +22,31 @@ class NcursesInput : public FdInputStrategy, SigwinchAware {
     int buttonCount;
     bool mouseEnabled;
 
-    static int getch_nb();
-    void detectAlt(int keys[4], bool &Alt);
-    void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys);
-    void readUtf8Char(int keys[4], int &num_keys);
+    static int getch_nb() noexcept;
+    void detectAlt(int keys[4], bool &Alt) noexcept;
+    void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys) noexcept;
+    void readUtf8Char(int keys[4], int &num_keys) noexcept;
 
-    bool parseCursesMouse(TEvent&);
+    bool parseCursesMouse(TEvent&) noexcept;
 
     class NcGetChBuf : public GetChBuf
     {
 
     protected:
 
-        int do_getch() override;
-        bool do_ungetch(int) override;
+        int do_getch() noexcept override;
+        bool do_ungetch(int) noexcept override;
 
     };
 
 public:
 
-    NcursesInput(bool mouse = true);
+    NcursesInput(bool mouse = true) noexcept;
     ~NcursesInput();
 
-    bool getEvent(TEvent &ev);
-    int getButtonCount();
-    bool hasPendingEvents();
+    bool getEvent(TEvent &ev) noexcept;
+    int getButtonCount() noexcept;
+    bool hasPendingEvents() noexcept;
 
 };
 

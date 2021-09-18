@@ -246,7 +246,7 @@ static const auto fromCursesHighKey =
     { "kc2",        {{kbDown},          0}},
 });
 
-NcursesInput::NcursesInput(bool mouse) :
+NcursesInput::NcursesInput(bool mouse) noexcept :
     mstate({}),
     buttonCount(0),
     mouseEnabled(mouse)
@@ -289,12 +289,12 @@ NcursesInput::~NcursesInput()
     TermIO::kittyKeysOff();
 }
 
-int NcursesInput::getButtonCount()
+int NcursesInput::getButtonCount() noexcept
 {
     return buttonCount;
 }
 
-int NcursesInput::getch_nb()
+int NcursesInput::getch_nb() noexcept
 {
     wtimeout(stdscr, 0);
     int k = wgetch(stdscr);
@@ -302,18 +302,18 @@ int NcursesInput::getch_nb()
     return k;
 }
 
-int NcursesInput::NcGetChBuf::do_getch()
+int NcursesInput::NcGetChBuf::do_getch() noexcept
 {
     int k = wgetch(stdscr);
     return k != ERR ? k : -1;
 }
 
-bool NcursesInput::NcGetChBuf::do_ungetch(int k)
+bool NcursesInput::NcGetChBuf::do_ungetch(int k) noexcept
 {
     return ungetch(k) != ERR;
 }
 
-bool NcursesInput::hasPendingEvents()
+bool NcursesInput::hasPendingEvents() noexcept
 {
     int k = getch_nb();
     if (k != ERR)
@@ -324,7 +324,7 @@ bool NcursesInput::hasPendingEvents()
     return false;
 }
 
-bool NcursesInput::getEvent(TEvent &ev)
+bool NcursesInput::getEvent(TEvent &ev) noexcept
 {
     if (winchEvent(ev))
         return true;
@@ -381,7 +381,7 @@ bool NcursesInput::getEvent(TEvent &ev)
     return false;
 }
 
-void NcursesInput::detectAlt(int keys[4], bool &Alt)
+void NcursesInput::detectAlt(int keys[4], bool &Alt) noexcept
 {
 /* Alt+Key combinations begin with the character ESC. To tell the difference,
  * we check if another character has been received. If it has, we consider this
@@ -395,7 +395,7 @@ void NcursesInput::detectAlt(int keys[4], bool &Alt)
     }
 }
 
-void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
+void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys) noexcept
 {
     // Read any possible remaining bytes.
     readUtf8Char(keys, num_keys);
@@ -410,7 +410,7 @@ void NcursesInput::parsePrintableChar(TEvent &ev, int keys[4], int &num_keys)
         ev.keyDown.keyCode = kbNoKey;
 }
 
-void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
+void NcursesInput::readUtf8Char(int keys[4], int &num_keys) noexcept
 {
 /* Unicode characters are sent by the terminal byte by byte. To read one, we
  * have to predict the number of bytes it is composed of, then read as many. */
@@ -423,7 +423,7 @@ void NcursesInput::readUtf8Char(int keys[4], int &num_keys)
         }
 }
 
-bool NcursesInput::parseCursesMouse(TEvent &ev)
+bool NcursesInput::parseCursesMouse(TEvent &ev) noexcept
 {
     MEVENT mevent;
     if (getmouse(&mevent) == OK)

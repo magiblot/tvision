@@ -22,21 +22,21 @@ class GetChBuf
 
 protected:
 
-    virtual int do_getch() = 0;
-    virtual bool do_ungetch(int) = 0;
+    virtual int do_getch() noexcept = 0;
+    virtual bool do_ungetch(int) noexcept = 0;
 
 public:
 
-    int get(bool keepErr);
-    int last(size_t i);
-    void unget();
-    void reject();
-    bool getNum(uint &);
-    bool getInt(int &);
+    int get(bool keepErr) noexcept;
+    int last(size_t i) noexcept;
+    void unget() noexcept;
+    void reject() noexcept;
+    bool getNum(uint &) noexcept;
+    bool getInt(int &) noexcept;
 
 };
 
-inline int GetChBuf::get(bool keepErr=false)
+inline int GetChBuf::get(bool keepErr=false) noexcept
 {
     if (size < maxSize)
     {
@@ -48,21 +48,21 @@ inline int GetChBuf::get(bool keepErr=false)
     return -1;
 }
 
-inline int GetChBuf::last(size_t i=0)
+inline int GetChBuf::last(size_t i=0) noexcept
 {
     if (i < size)
         return keys[size - 1 - i];
     return -1;
 }
 
-inline void GetChBuf::unget()
+inline void GetChBuf::unget() noexcept
 {
     int k;
     if (size && (k = keys[--size]) != -1)
         do_ungetch(k);
 }
 
-inline void GetChBuf::reject()
+inline void GetChBuf::reject() noexcept
 {
     while (size)
         unget();
@@ -71,7 +71,7 @@ inline void GetChBuf::reject()
 // getNum, getInt: INVARIANT: the last non-digit read key (or -1)
 // can be accessed with 'last()' and can also be ungetted.
 
-inline bool GetChBuf::getNum(uint &result)
+inline bool GetChBuf::getNum(uint &result) noexcept
 {
     uint num = 0, digits = 0;
     int k;
@@ -85,7 +85,7 @@ inline bool GetChBuf::getNum(uint &result)
     return false;
 }
 
-inline bool GetChBuf::getInt(int &result)
+inline bool GetChBuf::getInt(int &result) noexcept
 {
     int num = 0, digits = 0, sign = 1;
     int k = get(true);
@@ -119,7 +119,7 @@ struct CSIData
     uint sep[maxLength];
     uint length;
 
-    bool readFrom(GetChBuf &buf)
+    bool readFrom(GetChBuf &buf) noexcept
     {
         length = 0;
         for (uint i = 0; i < maxLength; ++i)
@@ -134,7 +134,7 @@ struct CSIData
         return false;
     }
 
-    uint terminator() const
+    uint terminator() const noexcept
     {
         return length ? sep[length - 1] : 0;
     }
@@ -143,41 +143,41 @@ struct CSIData
 namespace TermIO
 {
 
-    void mouseOn();
-    void mouseOff();
-    void kittyKeysOn();
-    void kittyKeysOff();
+    void mouseOn() noexcept;
+    void mouseOff() noexcept;
+    void kittyKeysOn() noexcept;
+    void kittyKeysOff() noexcept;
 
-    ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&);
-    ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&);
-    ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&);
-    ParseResult parseCSIKey(const CSIData &csi, TEvent&);
-    ParseResult parseFKeyA(GetChBuf&, TEvent&);
-    ParseResult parseSS3Key(GetChBuf&, TEvent&);
-    ParseResult parseArrowKeyA(GetChBuf&, TEvent&);
-    ParseResult parseFixTermKey(const CSIData &csi, TEvent&);
+    ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&) noexcept;
+    ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&) noexcept;
+    ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&) noexcept;
+    ParseResult parseCSIKey(const CSIData &csi, TEvent&) noexcept;
+    ParseResult parseFKeyA(GetChBuf&, TEvent&) noexcept;
+    ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
+    ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
+    ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
 
-    bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm);
-    void setAltModifier(KeyDownEvent &keyDown);
+    bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept;
+    void setAltModifier(KeyDownEvent &keyDown) noexcept;
 
 #ifdef _TV_UNIX
     namespace Unix
     {
-        void consoleWrite(const void *data, size_t bytes);
-        TPoint getSize();
+        void consoleWrite(const void *data, size_t bytes) noexcept;
+        TPoint getSize() noexcept;
     }
     namespace Impl = Unix;
 #elif defined(_WIN32)
     namespace Win32
     {
-        void consoleWrite(const void *data, size_t bytes);
+        void consoleWrite(const void *data, size_t bytes) noexcept;
     }
     namespace Impl = Win32;
 #endif // _TV_UNIX
 
-    bool isLinuxConsole();
+    bool isLinuxConsole() noexcept;
 
-    inline void consoleWrite(const void *data, size_t bytes)
+    inline void consoleWrite(const void *data, size_t bytes) noexcept
     {
         Impl::consoleWrite(data, bytes);
     }

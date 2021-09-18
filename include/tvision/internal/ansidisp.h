@@ -26,39 +26,37 @@ struct TermColor
     // GCC has issues optimizing the initialization of this struct.
     // So do bit-casting manually.
 
-    TermColor& operator=(uint32_t val)
+    TermColor& operator=(uint32_t val) noexcept
     {
         memcpy(this, &val, sizeof(*this));
         return *this;
         static_assert(sizeof(*this) == 4, "");
     }
-    operator uint32_t() const
+    operator uint32_t() const noexcept
     {
         uint32_t val;
         memcpy(&val, this, sizeof(*this));
         return val;
     }
-    TermColor(uint8_t aIdx, TermColorTypes aType)
+    TermColor(uint8_t aIdx, TermColorTypes aType) noexcept
     {
         *this = aIdx | (uint32_t(aType) << 24);
     }
-    TermColor(TColorRGB c, TermColorTypes aType)
+    TermColor(TColorRGB c, TermColorTypes aType) noexcept
     {
         *this = uint32_t(c) | (uint32_t(aType) << 24);
     }
-    TermColor(TermColorTypes aType)
+    TermColor(TermColorTypes aType) noexcept
     {
         *this = uint32_t(aType) << 24;
     }
 
 };
 
-using attrstyle_t = TColorAttr::Style;
-
 struct TermAttr
 {
     TermColor fg, bg;
-    attrstyle_t style;
+    TColorAttr::Style style;
 };
 
 /* AnsiDisplay is a simple diplay backend which prints characters and ANSI
@@ -79,21 +77,21 @@ class AnsiDisplayBase {
     std::vector<char> buf;
     TermAttr lastAttr {};
 
-    void bufWrite(TStringView s);
-    void bufWriteCSI1(uint a, char F);
-    void bufWriteCSI2(uint a, uint b, char F);
+    void bufWrite(TStringView s) noexcept;
+    void bufWriteCSI1(uint a, char F) noexcept;
+    void bufWriteCSI2(uint a, uint b, char F) noexcept;
 
 protected:
 
     ~AnsiDisplayBase();
 
-    void clearAttributes();
-    void clearScreen();
+    void clearAttributes() noexcept;
+    void clearScreen() noexcept;
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr, const TermCap &);
-    void lowlevelMoveCursor(uint x, uint y);
-    void lowlevelMoveCursorX(uint x, uint y);
-    void lowlevelFlush();
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr, const TermCap &) noexcept;
+    void lowlevelMoveCursor(uint x, uint y) noexcept;
+    void lowlevelMoveCursorX(uint x, uint y) noexcept;
+    void lowlevelFlush() noexcept;
 
 };
 
@@ -110,18 +108,21 @@ class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
 public:
 
     template <typename ...Args>
-    AnsiDisplay(Args&& ...args) :
+    AnsiDisplay(Args&& ...args) noexcept :
         DisplayBase(args...)
     {
     }
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr) override
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override
         { AnsiDisplayBase::lowlevelWriteChars(chars, attr, TerminalDisplay::termcap); }
-    void lowlevelMoveCursor(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
-    void lowlevelMoveCursorX(uint x, uint y) override { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
-    void lowlevelFlush() override { AnsiDisplayBase::lowlevelFlush(); }
+    void lowlevelMoveCursor(uint x, uint y) noexcept override
+        { AnsiDisplayBase::lowlevelMoveCursor(x, y); }
+    void lowlevelMoveCursorX(uint x, uint y) noexcept override
+        { AnsiDisplayBase::lowlevelMoveCursorX(x, y); }
+    void lowlevelFlush() noexcept override
+        { AnsiDisplayBase::lowlevelFlush(); }
 
-    void reloadScreenInfo() override
+    void reloadScreenInfo() noexcept override
     {
         DisplayBase::reloadScreenInfo();
         clearAttributes();

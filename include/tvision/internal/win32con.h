@@ -18,21 +18,21 @@ class Win32ConsoleStrategy : public PlatformStrategy
 
     Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
                           DisplayStrategy *display,
-                          InputStrategy *input );
+                          InputStrategy *input ) noexcept;
     ~Win32ConsoleStrategy();
 
     static bool initConsole( UINT &cpInput, UINT &cpOutput,
                              std::unique_ptr<DisplayStrategy> &display,
-                             std::unique_ptr<InputStrategy> &input );
-    void restoreConsole();
-    void resetConsole();
+                             std::unique_ptr<InputStrategy> &input ) noexcept;
+    void restoreConsole() noexcept;
+    void resetConsole() noexcept;
 
 public:
 
-    static Win32ConsoleStrategy *create();
+    static Win32ConsoleStrategy *create() noexcept;
 
-    bool waitForEvent(long ms, TEvent &ev) override;
-    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    bool waitForEvent(long ms, TEvent &ev) noexcept override;
+    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 };
 
 class Win32Input : public InputStrategy
@@ -41,18 +41,18 @@ class Win32Input : public InputStrategy
     bool insertState;
     ushort surrogate;
 
-    bool getKeyEvent(KEY_EVENT_RECORD, TEvent &ev);
-    bool getUnicodeEvent(KEY_EVENT_RECORD, TEvent &ev);
-    bool getMouseEvent(MOUSE_EVENT_RECORD, TEvent &ev);
+    bool getKeyEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
+    bool getUnicodeEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
+    bool getMouseEvent(MOUSE_EVENT_RECORD, TEvent &ev) noexcept;
 
 public:
 
-    Win32Input();
+    Win32Input() noexcept;
 
-    int getButtonCount() override;
-    void cursorOn() override;
-    void cursorOff() override;
-    bool getEvent(TEvent &ev);
+    int getButtonCount() noexcept override;
+    void cursorOn() noexcept override;
+    void cursorOff() noexcept override;
+    bool getEvent(TEvent &ev) noexcept;
 
 };
 
@@ -65,21 +65,21 @@ class Win32Display : public TerminalDisplay
 
 public:
 
-    Win32Display();
+    Win32Display() noexcept;
 
-    void reloadScreenInfo() override;
-    TPoint getScreenSize() override;
-    int getCaretSize() override;
-    int getColorCount() override;
+    void reloadScreenInfo() noexcept override;
+    TPoint getScreenSize() noexcept override;
+    int getCaretSize() noexcept override;
+    int getColorCount() noexcept override;
 
-    void clearScreen() override;
+    void clearScreen() noexcept override;
 
 protected:
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr) override;
-    void lowlevelMoveCursor(uint x, uint y) override;
-    void lowlevelCursorSize(int size) override;
-    void lowlevelFlush() override;
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override;
+    void lowlevelMoveCursor(uint x, uint y) noexcept override;
+    void lowlevelCursorSize(int size) noexcept override;
+    void lowlevelFlush() noexcept override;
 
 };
 

@@ -109,7 +109,7 @@ namespace terminp
     };
 
     static inline void setModifier( KeyDownEvent &keyDown, ushort mod,
-                                    const const_unordered_map<ushort, ushort> &keyMap )
+                                    const const_unordered_map<ushort, ushort> &keyMap ) noexcept
     {
         keyDown.controlKeyState |= mod;
         keyDown.textLength = 0;
@@ -121,22 +121,22 @@ namespace terminp
             keyDown.keyCode = keyCode;
     }
 
-    static void setShiftModifier(KeyDownEvent &keyDown)
+    static void setShiftModifier(KeyDownEvent &keyDown) noexcept
     {
         setModifier(keyDown, kbShift, ShiftKeyCode);
     }
 
-    static void setCtrlModifier(KeyDownEvent &keyDown)
+    static void setCtrlModifier(KeyDownEvent &keyDown) noexcept
     {
         setModifier(keyDown, kbCtrlShift, CtrlKeyCode);
     }
 
-    static void setAltModifier(KeyDownEvent &keyDown)
+    static void setAltModifier(KeyDownEvent &keyDown) noexcept
     {
         setModifier(keyDown, kbAltShift, AltKeyCode);
     }
 
-    static KeyDownEvent keyWithModifiers(ushort keyCode, ulong mods)
+    static KeyDownEvent keyWithModifiers(ushort keyCode, ulong mods) noexcept
     {
         KeyDownEvent keyDown {{keyCode}, mods};
         if (mods & kbShift) setShiftModifier(keyDown);
@@ -147,7 +147,7 @@ namespace terminp
 
     const uint XTermModDefault = 1;
 
-    static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods)
+    static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
     {
         mods -= XTermModDefault;
         ulong tvmods =
@@ -158,17 +158,17 @@ namespace terminp
         return keyWithModifiers(keyCode, tvmods);
     }
 
-    static bool isAlpha(uint32_t ascii)
+    static bool isAlpha(uint32_t ascii) noexcept
     {
         return ' ' <= ascii && ascii < 127;
     };
 
-    static bool isPrivate(uint32_t codepoint)
+    static bool isPrivate(uint32_t codepoint) noexcept
     {
         return 57344 <= codepoint && codepoint <= 63743;
     };
 
-    static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown)
+    static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexcept
     {
 
         ushort keyCode = 0;
@@ -208,7 +208,7 @@ namespace terminp
         return keyDown.keyCode != 0 || keyDown.textLength != 0;
     }
 
-    static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown)
+    static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown) noexcept
     {
         ushort keyCode = 0;
         switch (letter)
@@ -260,7 +260,7 @@ namespace terminp
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
 
-void TermIO::mouseOn()
+void TermIO::mouseOn() noexcept
 {
     TStringView seq = "\x1B[?1001s" // Save old highlight mouse reporting.
                       "\x1B[?1000h" // Enable mouse reporting.
@@ -270,7 +270,7 @@ void TermIO::mouseOn()
     consoleWrite(seq.data(), seq.size());
 }
 
-void TermIO::mouseOff()
+void TermIO::mouseOff() noexcept
 {
     TStringView seq = "\x1B[?1006l" // Disable SGR extended mouse reporting.
                       "\x1B[?1002l" // Disable mouse drag reporting.
@@ -280,20 +280,20 @@ void TermIO::mouseOff()
     consoleWrite(seq.data(), seq.size());
 }
 
-void TermIO::kittyKeysOn()
+void TermIO::kittyKeysOn() noexcept
 {
     // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
     TStringView seq = "\x1B[>1u"; // Disambiguate escape codes.
     consoleWrite(seq.data(), seq.size());
 }
 
-void TermIO::kittyKeysOff()
+void TermIO::kittyKeysOff() noexcept
 {
     TStringView seq = "\x1B[<u";
     consoleWrite(seq.data(), seq.size());
 }
 
-bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm)
+bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept
 {
     // Some terminal emulators send a mouse event every pixel the graphical
     // mouse cursor moves over the window. Filter out those unnecessary
@@ -312,12 +312,12 @@ bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &ne
     return false;
 }
 
-void TermIO::setAltModifier(KeyDownEvent &keyDown)
+void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
 {
     terminp::setAltModifier(keyDown);
 }
 
-ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm)
+ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // Pre: "\x1B" has just been read.
 {
     ParseResult res = Rejected;
@@ -364,7 +364,7 @@ const ushort
     mmAlt = 0x08,
     mmCtrl = 0x10;
 
-ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
+ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // Pre: "\x1B[M" has just been read.
 // The complete sequence looks like "\x1B[Mabc", where:
 // * 'a' is the button number plus 32.
@@ -416,7 +416,7 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
     return acceptMouseEvent(ev, oldm, newm) ? Accepted : Ignored;
 }
 
-ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
+ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Extended-coordinates
 // Pre: "\x1B[<" has just been read.
 // The complete sequence looks like "\x1B[<a;b;cM" or "\x1B[<a;b;cm", where:
@@ -478,7 +478,7 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm)
 // Shift F1-4 on Konsole and F1-4 on Putty. It's easier than fixing the
 // application or updating the terminal database.
 
-ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
+ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev) noexcept
 // https://invisible-island.net/xterm/xterm-function-keys.html
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 {
@@ -575,7 +575,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev)
     return Accepted;
 }
 
-ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev)
+ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev) noexcept
 // https://invisible-island.net/xterm/xterm-function-keys.html
 // Pre: "\x1BO" has just been read.
 // Konsole, IntelliJ.
@@ -589,7 +589,7 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev)
     return Accepted;
 }
 
-ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev)
+ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
 // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
 // http://www.leonerd.org.uk/hacks/fixterms/
 {
@@ -612,7 +612,7 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev)
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-TPoint TermIO::Unix::getSize()
+TPoint TermIO::Unix::getSize() noexcept
 {
     struct winsize w;
     for (int fd : {StdioCtl::in(), StdioCtl::out()})
@@ -630,7 +630,7 @@ TPoint TermIO::Unix::getSize()
     return {0, 0};
 }
 
-void TermIO::Unix::consoleWrite(const void *data, size_t bytes)
+void TermIO::Unix::consoleWrite(const void *data, size_t bytes) noexcept
 {
     fflush(StdioCtl::fout());
     int rr = ::write(StdioCtl::out(), data, bytes);
@@ -639,7 +639,7 @@ void TermIO::Unix::consoleWrite(const void *data, size_t bytes)
 
 #elif defined(_WIN32)
 
-void TermIO::Win32::consoleWrite(const void *data, size_t bytes)
+void TermIO::Win32::consoleWrite(const void *data, size_t bytes) noexcept
 {
     // Writing 0 bytes causes the cursor to become invisible for some time
     // in old versions of the Windows console.
@@ -649,7 +649,7 @@ void TermIO::Win32::consoleWrite(const void *data, size_t bytes)
 
 #endif // _TV_UNIX
 
-bool TermIO::isLinuxConsole()
+bool TermIO::isLinuxConsole() noexcept
 {
 #ifdef __linux__
     /* This is the same function used to get the Shift/Ctrl/Alt modifiers

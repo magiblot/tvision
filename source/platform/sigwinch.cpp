@@ -14,7 +14,7 @@ int SigwinchAware::fd[2] = {-1, -1};
 void (*SigwinchAware::oldHandler) (int);
 bool SigwinchAware::hit = false;
 
-bool SigwinchAware::push()
+bool SigwinchAware::push() noexcept
 {
     if (!hit)
     {
@@ -27,7 +27,7 @@ bool SigwinchAware::push()
     return false;
 }
 
-bool SigwinchAware::pop()
+bool SigwinchAware::pop() noexcept
 {
     if (hit)
     {
@@ -40,7 +40,7 @@ bool SigwinchAware::pop()
     return false;
 }
 
-void SigwinchAware::handler(int)
+void SigwinchAware::handler(int) noexcept
 {
     // Write something to the pipe, so that it is seen as ready to read by
     // FdInputStrategy.
@@ -50,7 +50,7 @@ void SigwinchAware::handler(int)
     // will have to be done manually after winchEvent().
 }
 
-SigwinchAware::SigwinchAware()
+SigwinchAware::SigwinchAware() noexcept
 {
     static bool firstTime = true;
     if (firstTime)
@@ -74,7 +74,7 @@ SigwinchAware::SigwinchAware()
     }
 }
 
-bool SigwinchAware::winchEvent(TEvent &ev)
+bool SigwinchAware::winchEvent(TEvent &ev) noexcept
 {
     if (pop())
     {
@@ -85,7 +85,7 @@ bool SigwinchAware::winchEvent(TEvent &ev)
     return false;
 }
 
-int SigwinchAware::winchFd()
+int SigwinchAware::winchFd() noexcept
 {
     return fd[0];
 }

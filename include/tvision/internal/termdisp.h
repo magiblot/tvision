@@ -36,11 +36,11 @@ protected:
 
     TermCap termcap {};
 
-    void reloadScreenInfo() override;
-    virtual int getColorCount();
-    virtual TermCap getCapabilities();
+    void reloadScreenInfo() noexcept override;
+    virtual int getColorCount() noexcept;
+    virtual TermCap getCapabilities() noexcept;
 
-    ushort getScreenMode() override;
+    ushort getScreenMode() noexcept override;
 
 };
 

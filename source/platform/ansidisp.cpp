@@ -10,12 +10,12 @@ AnsiDisplayBase::~AnsiDisplayBase()
     lowlevelFlush();
 }
 
-void AnsiDisplayBase::bufWrite(TStringView s)
+void AnsiDisplayBase::bufWrite(TStringView s) noexcept
 {
     buf.insert(buf.end(), s.data(), s.data()+s.size());
 }
 
-void AnsiDisplayBase::bufWriteCSI1(uint a, char F)
+void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
 {
     using namespace detail;
     // CSI a F
@@ -26,7 +26,7 @@ void AnsiDisplayBase::bufWriteCSI1(uint a, char F)
     bufWrite({s, size_t(p - s)});
 }
 
-void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F)
+void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
 {
     using namespace detail;
     // CSI a ; b F
@@ -39,13 +39,13 @@ void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F)
     bufWrite({s, size_t(p - s)});
 }
 
-void AnsiDisplayBase::clearAttributes()
+void AnsiDisplayBase::clearAttributes() noexcept
 {
     bufWrite(CSI "0m");
     lastAttr = {};
 }
 
-void AnsiDisplayBase::clearScreen()
+void AnsiDisplayBase::clearScreen() noexcept
 {
     bufWrite(CSI "2J");
 }
@@ -53,12 +53,12 @@ void AnsiDisplayBase::clearScreen()
 namespace ansidisp
 {
 
-static size_t convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*);
+static size_t convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*) noexcept;
 
 }
 
 void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
-                                          const TermCap &termcap )
+                                          const TermCap &termcap ) noexcept
 {
     using namespace ansidisp;
     char s[256];
@@ -67,20 +67,21 @@ void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
     bufWrite(chars);
 }
 
-void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint)
+void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint) noexcept
 {
     // Optimized case where the cursor only moves horizontally.
     bufWriteCSI1(x + 1, 'G');
 }
 
-void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y)
+void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y) noexcept
 {
     // Make dumps readable.
 //     bufWrite("\r");
     bufWriteCSI2(y + 1, x + 1, 'H');
 }
 
-void AnsiDisplayBase::lowlevelFlush() {
+void AnsiDisplayBase::lowlevelFlush() noexcept
+{
     TermIO::consoleWrite(buf.data(), buf.size());
     buf.resize(0);
 }
@@ -91,12 +92,12 @@ void AnsiDisplayBase::lowlevelFlush() {
 namespace ansidisp
 {
 
-static void convertColor(TColorDesired, TermColor &, attrstyle_t &, const TermCap &, bool);
-static size_t writeAttributes(const TermAttr &, const TermAttr &, char *buf);
-static size_t writeColor(TermColor, bool, char * const);
+static void convertColor(TColorDesired, TermColor &, TColorAttr::Style &, const TermCap &, bool) noexcept;
+static size_t writeAttributes(const TermAttr &, const TermAttr &, char *buf) noexcept;
+static size_t writeColor(TermColor, bool, char * const) noexcept;
 
 static inline size_t convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
-                                        const TermCap &termcap, char *buf )
+                                        const TermCap &termcap, char *buf ) noexcept
 {
     using namespace ansidisp;
     TermAttr attr {};
@@ -122,11 +123,11 @@ static inline size_t convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
 struct alignas(8) colorconv_r
 {
     TermColor color;
-    attrstyle_t extraStyle;
+    TColorAttr::Style extraStyle;
     uint8_t unused[2];
 
     colorconv_r() = default;
-    colorconv_r(TermColor aColor, attrstyle_t aExtraFlags=0)
+    colorconv_r(TermColor aColor, TColorAttr::Style aExtraFlags=0) noexcept
     {
         uint64_t val = aColor | (uint64_t(aExtraFlags) << 32);
         memcpy(this, &val, 8);
@@ -134,37 +135,43 @@ struct alignas(8) colorconv_r
     }
 };
 
-static colorconv_r convertNoColor(TColorDesired, const TermCap &, bool);
-static colorconv_r convertIndexed8(TColorDesired color, const TermCap &, bool);
-static colorconv_r convertIndexed16(TColorDesired, const TermCap &, bool);
-static colorconv_r convertIndexed256(TColorDesired, const TermCap &, bool);
-static colorconv_r convertDirect(TColorDesired, const TermCap &, bool);
+static colorconv_r convertNoColor(TColorDesired, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed8(TColorDesired color, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed16(TColorDesired, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed256(TColorDesired, const TermCap &, bool) noexcept;
+static colorconv_r convertDirect(TColorDesired, const TermCap &, bool) noexcept;
 
-static constexpr decltype(&convertNoColor) colorConverters[TermCapColorCount] =
+// C++ doesn't allow creating an array of noexcept function pointers directly...
+struct ColorConverter
 {
-    &convertNoColor,
-    &convertIndexed8,
-    &convertIndexed16,
-    &convertIndexed256,
-    &convertDirect,
+    colorconv_r (&apply) (TColorDesired, const TermCap &, bool) noexcept;
+};
+
+static constexpr ColorConverter colorConverters[TermCapColorCount] =
+{
+    {convertNoColor},
+    {convertIndexed8},
+    {convertIndexed16},
+    {convertIndexed256},
+    {convertDirect},
 };
 
 static inline void convertColor( TColorDesired c,
-                                 TermColor &resultColor, attrstyle_t &resultStyle,
-                                 const TermCap &termcap, bool isFg )
+                                 TermColor &resultColor, TColorAttr::Style &resultStyle,
+                                 const TermCap &termcap, bool isFg ) noexcept
 {
-    auto cnv = (*colorConverters[termcap.colors])(c, termcap, isFg);
+    auto cnv = colorConverters[termcap.colors].apply(c, termcap, isFg);
     resultColor = cnv.color;
     resultStyle |= cnv.extraStyle;
 }
 
-static inline void push(char *&p, TStringView text)
+static inline void push(char *&p, TStringView text) noexcept
 {
     memcpy(p, text.data(), text.size());
     p += text.size();
 }
 
-static inline void push(char *&p, bool b, const char *s1, const char *s2)
+static inline void push(char *&p, bool b, const char *s1, const char *s2) noexcept
 {
     // Use the ternary on the invocation and not on the argument because
     // some compilers are unable to optimize out strlen and memcpy otherwise.
@@ -172,7 +179,7 @@ static inline void push(char *&p, bool b, const char *s1, const char *s2)
 }
 
 static inline void writeFlag( char *&p, TermAttr attr, TermAttr lastAttr,
-                              ushort mask, const char * const OnOff[2] )
+                              ushort mask, const char * const OnOff[2] ) noexcept
 {
     if ((attr.style & mask) != (lastAttr.style & mask))
     {
@@ -192,7 +199,7 @@ static constexpr c_str
     strikeOnOff[2] =    { "9", "29"};
 
 static inline size_t writeAttributes( const TermAttr &attr,
-                                      const TermAttr &lastAttr, char *buf )
+                                      const TermAttr &lastAttr, char *buf ) noexcept
 {
     TStringView header = CSI;
     char *p = buf;
@@ -225,7 +232,7 @@ static inline size_t writeAttributes( const TermAttr &attr,
     return w - buf;
 }
 
-static size_t writeColor(TermColor color, bool isFg, char * const s)
+static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
 {
     using namespace detail;
     char *p = s;
@@ -266,7 +273,7 @@ static size_t writeColor(TermColor color, bool isFg, char * const s)
 
 // Color conversion functions
 
-static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isFg)
+static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isFg) noexcept
 {
     colorconv_r cnv {{TermColor::NoColor}};
     // Mimic the mono palettes with styles.
@@ -287,7 +294,7 @@ static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isF
 }
 
 static colorconv_r convertIndexed8( TColorDesired color,
-                                    const TermCap &termcap, bool isFg )
+                                    const TermCap &termcap, bool isFg ) noexcept
 {
     auto cnv = convertIndexed16(color, termcap, isFg);
     if ( cnv.color.type == TermColor::Indexed &&
@@ -309,7 +316,7 @@ static colorconv_r convertIndexed8( TColorDesired color,
 }
 
 static colorconv_r convertIndexed16( TColorDesired color,
-                                     const TermCap &, bool )
+                                     const TermCap &, bool ) noexcept
 {
     if (color.isBIOS())
     {
@@ -332,7 +339,7 @@ static colorconv_r convertIndexed16( TColorDesired color,
 }
 
 static colorconv_r convertIndexed256( TColorDesired color,
-                                      const TermCap &termcap, bool isFg )
+                                      const TermCap &termcap, bool isFg ) noexcept
 {
     if (color.isXTerm())
     {
@@ -348,7 +355,7 @@ static colorconv_r convertIndexed256( TColorDesired color,
 }
 
 static colorconv_r convertDirect( TColorDesired color,
-                                  const TermCap &termcap, bool isFg )
+                                  const TermCap &termcap, bool isFg ) noexcept
 {
     if (color.isRGB())
     {

@@ -49,7 +49,7 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
 });
 
 LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy *d,
-                                            FdInputStrategy *i ) :
+                                            FdInputStrategy *i ) noexcept :
     UnixPlatformStrategy(d, i),
     gpm(new GpmInput())
 {
@@ -62,12 +62,12 @@ LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy *d,
         });
 }
 
-int LinuxConsoleStrategy::getButtonCount()
+int LinuxConsoleStrategy::getButtonCount() noexcept
 {
     return gpm->getButtonCount();
 }
 
-bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
+bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev) noexcept
 {
     /* The keyboard event getter is usually unaware of key modifiers in the
      * console, so we add them on top of the previous translation. */
@@ -86,7 +86,7 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev)
     return false;
 }
 
-ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode)
+ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode) noexcept
 {
     ushort result = 0;
     if ((controlKeyState & kbAltShift) && (result = keyCodeWithAlt[keyCode]))
@@ -98,7 +98,7 @@ ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort 
     return result;
 }
 
-void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key)
+void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key) noexcept
 {
     char res = 6;
     ulong actualModifiers = 0;

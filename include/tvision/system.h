@@ -243,12 +243,6 @@ struct TEvent
 #if defined( Uses_TEventQueue ) && !defined( __TEventQueue )
 #define __TEventQueue
 
-#ifndef __BORLANDC__
-class TTimer;
-template <class T>
-class TArc;
-#endif
-
 class TEventQueue
 {
 public:
@@ -265,10 +259,6 @@ public:
 
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
-
-#ifndef __BORLANDC__
-    static void addTimer( const TArc<TTimer>& ) noexcept;
-#endif
 
 private:
 

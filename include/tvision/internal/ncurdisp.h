@@ -18,28 +18,28 @@ class NcursesDisplay : public TerminalDisplay {
 
     bool usesNcursesDraw;
 
-    void getCaretPosition(int &x, int &y);
-    uint translateAttributes(TColorAttr attr);
-    uint getColorPair(uchar pairKey);
+    void getCaretPosition(int &x, int &y) noexcept;
+    uint translateAttributes(TColorAttr attr) noexcept;
+    uint getColorPair(uchar pairKey) noexcept;
 
 public:
 
-    NcursesDisplay();
+    NcursesDisplay() noexcept;
     ~NcursesDisplay();
 
-    void reloadScreenInfo() override;
-    TPoint getScreenSize() override;
-    int getCaretSize() override;
-    int getColorCount() override;
+    void reloadScreenInfo() noexcept override;
+    TPoint getScreenSize() noexcept override;
+    int getCaretSize() noexcept override;
+    int getColorCount() noexcept override;
 
-    void clearScreen() override;
+    void clearScreen() noexcept override;
 
 protected:
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr) override;
-    void lowlevelMoveCursor(uint x, uint y) override;
-    void lowlevelCursorSize(int size) override;
-    void lowlevelFlush() override;
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override;
+    void lowlevelMoveCursor(uint x, uint y) noexcept override;
+    void lowlevelCursorSize(int size) noexcept override;
+    void lowlevelFlush() noexcept override;
 
 };
 

@@ -16,16 +16,16 @@ class LinuxConsoleStrategy : public UnixPlatformStrategy {
 
     std::unique_ptr<GpmInput> gpm;
 
-    bool patchKeyEvent(TEvent &ev);
-    static ushort keyCodeWithModifiers(ulong, ushort);
-    static void applyKeyboardModifiers(KeyDownEvent &key);
+    bool patchKeyEvent(TEvent &ev) noexcept;
+    static ushort keyCodeWithModifiers(ulong, ushort) noexcept;
+    static void applyKeyboardModifiers(KeyDownEvent &key) noexcept;
 
 public:
 
-    LinuxConsoleStrategy(DisplayStrategy *, FdInputStrategy *);
+    LinuxConsoleStrategy(DisplayStrategy *, FdInputStrategy *) noexcept;
 
-    int getButtonCount() override;
-    int charWidth(TStringView mbc, char32_t wc) override; // ttext.cpp
+    int getButtonCount() noexcept override;
+    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 
 };
 

@@ -5,18 +5,18 @@
 #include <internal/terminal.h>
 #include <internal/getenv.h>
 
-void TerminalDisplay::reloadScreenInfo()
+void TerminalDisplay::reloadScreenInfo() noexcept
 {
     BufferedDisplay::reloadScreenInfo();
     termcap = getCapabilities();
 }
 
-int TerminalDisplay::getColorCount()
+int TerminalDisplay::getColorCount() noexcept
 {
     return 0;
 }
 
-TermCap TerminalDisplay::getCapabilities()
+TermCap TerminalDisplay::getCapabilities() noexcept
 {
     TermCap termcap {};
     auto colorterm = getEnv<TStringView>("COLORTERM");
@@ -46,7 +46,7 @@ TermCap TerminalDisplay::getCapabilities()
     return termcap;
 }
 
-ushort TerminalDisplay::getScreenMode()
+ushort TerminalDisplay::getScreenMode() noexcept
 {
     if (termcap.colors == NoColor)
         return TDisplay::smMono;

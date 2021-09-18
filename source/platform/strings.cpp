@@ -6,7 +6,7 @@ namespace detail
 {
 
 static constexpr
-size_t _fast_utoa(uint32_t value, char *buffer)
+size_t _fast_utoa(uint32_t value, char *buffer) noexcept
 {
     // Copyright(c) 2014-2016 Milo Yip (https://github.com/miloyip/itoa-benchmark)
     size_t digits =
@@ -30,7 +30,7 @@ size_t _fast_utoa(uint32_t value, char *buffer)
     return digits;
 }
 
-size_t fast_utoa(uint32_t value, char *buffer)
+size_t fast_utoa(uint32_t value, char *buffer) noexcept
 {
     return _fast_utoa(value, buffer);
 }
@@ -45,7 +45,7 @@ size_t fast_utoa(uint32_t value, char *buffer)
 #endif
 
 static BTOA_CONSTEXPR
-btoa_lut_t init_btoa_lut()
+btoa_lut_t init_btoa_lut() noexcept
 {
     btoa_lut_t res {};
     for (uint32_t i = 0; i < 256; ++i)

@@ -11,7 +11,7 @@ namespace detail
 {
 
 template<class Int>
-inline constexpr Int string_as_int(TStringView s)
+inline constexpr Int string_as_int(TStringView s) noexcept
 {
     Int res = 0;
     for (size_t i = 0; i < std::min(s.size(), sizeof(res)); ++i)
@@ -21,7 +21,7 @@ inline constexpr Int string_as_int(TStringView s)
 }
 
 // NOTE: 'buffer' is not left null-terminated.
-size_t fast_utoa(uint32_t value, char *buffer);
+size_t fast_utoa(uint32_t value, char *buffer) noexcept;
 
 template <class T, size_t N>
 struct constarray;
@@ -35,7 +35,7 @@ struct alignas(4) btoa_lut_elem_t
 using btoa_lut_t = constarray<btoa_lut_elem_t, 256>;
 
 // NOTE: 'buffer' is not left null-terminated.
-inline size_t fast_btoa(uint8_t value, char *buffer)
+inline size_t fast_btoa(uint8_t value, char *buffer) noexcept
 {
     extern const btoa_lut_t btoa_lut;
     const auto &lut = (btoa_lut_elem_t (&) [256]) btoa_lut;

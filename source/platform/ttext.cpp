@@ -99,14 +99,14 @@ TText::mbstat_r TText::mbstat(TStringView text) noexcept
 }
 
 #ifdef _TV_UNIX
-int UnixPlatformStrategy::charWidth(TStringView, char32_t wc)
+int UnixPlatformStrategy::charWidth(TStringView, char32_t wc) noexcept
 {
     return wcwidth(wc);
 }
 #endif // _TV_UNIX
 
 #ifdef __linux__
-int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc)
+int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
 {
     // The Linux Console does not support zero-width characters. It assumes
     // all characters are either single or double-width. Additionally, the
@@ -130,7 +130,7 @@ int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc)
 #endif // __linux__
 
 #ifdef _WIN32
-int Win32ConsoleStrategy::charWidth(TStringView mbc, char32_t)
+int Win32ConsoleStrategy::charWidth(TStringView mbc, char32_t) noexcept
 {
     return WinWidth::mbcwidth(mbc);
 }

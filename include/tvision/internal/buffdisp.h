@@ -47,58 +47,58 @@ class BufferedDisplay : public DisplayStrategy {
     static constexpr int defaultMaxFrameDrops = 4;
     static constexpr int defaultFPS = 60;
 
-    bool inBounds(int x, int y) const;
+    bool inBounds(int x, int y) const noexcept;
 
-    void resizeBuffer();
-    void setDirty(int x, int y, int len);
-    void validateCell(TScreenCell &cell) const;
+    void resizeBuffer() noexcept;
+    void setDirty(int x, int y, int len) noexcept;
+    void validateCell(TScreenCell &cell) const noexcept;
 
     std::vector<ScreenCursor*> cursors;
-    void drawCursors();
-    void undrawCursors();
+    void drawCursors() noexcept;
+    void undrawCursors() noexcept;
 
-    bool needsFlush() const;
-    bool timeToFlush();
+    bool needsFlush() const noexcept;
+    bool timeToFlush() noexcept;
 
 public:
 
-    static void addCursor(ScreenCursor *cursor);
-    static void removeCursor(ScreenCursor *cursor);
-    static void changeCursor();
+    static void addCursor(ScreenCursor *cursor) noexcept;
+    static void removeCursor(ScreenCursor *cursor) noexcept;
+    static void changeCursor() noexcept;
 
 protected:
 
-    BufferedDisplay();
+    BufferedDisplay() noexcept;
     ~BufferedDisplay();
 
-    void setCaretSize(int size) override;
-    void setCaretPosition(int x, int y) override;
-    void screenWrite(int x, int y, TScreenCell *buf, int len) override;
-    void flushScreen() override;
-    void reloadScreenInfo() override;
+    void setCaretSize(int size) noexcept override;
+    void setCaretPosition(int x, int y) noexcept override;
+    void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept override;
+    void flushScreen() noexcept override;
+    void reloadScreenInfo() noexcept override;
 
-    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) = 0;
-    virtual void lowlevelMoveCursor(uint x, uint y) = 0;
-    virtual void lowlevelMoveCursorX(uint x, uint y) { lowlevelMoveCursor(x, y); }
-    virtual void lowlevelCursorSize(int size) = 0;
-    virtual void lowlevelFlush() {};
+    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept = 0;
+    virtual void lowlevelMoveCursor(uint x, uint y) noexcept = 0;
+    virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
+    virtual void lowlevelCursorSize(int size) noexcept = 0;
+    virtual void lowlevelFlush() noexcept {};
 
 };
 
-inline bool BufferedDisplay::inBounds(int x, int y) const
+inline bool BufferedDisplay::inBounds(int x, int y) const noexcept
 {
     return 0 <= x && x < size.x &&
            0 <= y && y < size.y;
 }
 
-inline void BufferedDisplay::addCursor(ScreenCursor *cursor)
+inline void BufferedDisplay::addCursor(ScreenCursor *cursor) noexcept
 {
     auto &cursors = instance->cursors;
     if (std::find(cursors.begin(), cursors.end(), cursor) == cursors.end())
         cursors.push_back(cursor);
 }
 
-inline void BufferedDisplay::removeCursor(ScreenCursor *cursor)
+inline void BufferedDisplay::removeCursor(ScreenCursor *cursor) noexcept
 {
     changeCursor();
     auto &cursors = instance->cursors;
@@ -107,7 +107,7 @@ inline void BufferedDisplay::removeCursor(ScreenCursor *cursor)
         cursors.erase(it);
 }
 
-inline void BufferedDisplay::changeCursor()
+inline void BufferedDisplay::changeCursor() noexcept
 {
     instance->caretMoved = true;
 }

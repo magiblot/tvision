@@ -17,14 +17,14 @@ class GpmInput : public FdInputStrategy {
     NegativeScreenCursor cursor;
     uchar buttonState;
 
-    static void fitEvent(Gpm_Event&);
+    static void fitEvent(Gpm_Event&) noexcept;
 
 public:
 
-    GpmInput();
+    GpmInput() noexcept;
     ~GpmInput();
-    bool getEvent(TEvent &ev);
-    int getButtonCount();
+    bool getEvent(TEvent &ev) noexcept;
+    int getButtonCount() noexcept;
 
 };
 
