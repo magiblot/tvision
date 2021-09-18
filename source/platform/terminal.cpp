@@ -630,7 +630,7 @@ TPoint TermIO::Unix::getSize() noexcept
     return {0, 0};
 }
 
-void TermIO::Unix::consoleWrite(const void *data, size_t bytes) noexcept
+void TermIO::consoleWrite(const char *data, size_t bytes) noexcept
 {
     fflush(StdioCtl::fout());
     int rr = ::write(StdioCtl::out(), data, bytes);
@@ -639,7 +639,7 @@ void TermIO::Unix::consoleWrite(const void *data, size_t bytes) noexcept
 
 #elif defined(_WIN32)
 
-void TermIO::Win32::consoleWrite(const void *data, size_t bytes) noexcept
+void TermIO::consoleWrite(const char *data, size_t bytes) noexcept
 {
     // Writing 0 bytes causes the cursor to become invisible for some time
     // in old versions of the Windows console.

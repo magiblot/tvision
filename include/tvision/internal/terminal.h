@@ -163,24 +163,12 @@ namespace TermIO
 #ifdef _TV_UNIX
     namespace Unix
     {
-        void consoleWrite(const void *data, size_t bytes) noexcept;
         TPoint getSize() noexcept;
     }
-    namespace Impl = Unix;
-#elif defined(_WIN32)
-    namespace Win32
-    {
-        void consoleWrite(const void *data, size_t bytes) noexcept;
-    }
-    namespace Impl = Win32;
 #endif // _TV_UNIX
 
+    void consoleWrite(const char *data, size_t bytes) noexcept;
     bool isLinuxConsole() noexcept;
-
-    inline void consoleWrite(const void *data, size_t bytes) noexcept
-    {
-        Impl::consoleWrite(data, bytes);
-    }
 
 }
 
