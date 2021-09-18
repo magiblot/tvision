@@ -92,8 +92,9 @@ void THardwareInfo::restoreConsole() noexcept
     // Tear down input/output control by deleting the platform strategy.
     if (platf != nullPlatf)
     {
-        delete platf;
+        auto *p = platf;
         platf = nullPlatf;
+        delete p;
     }
 }
 
