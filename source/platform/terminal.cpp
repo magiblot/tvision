@@ -633,8 +633,11 @@ TPoint TermIO::Unix::getSize() noexcept
 void TermIO::consoleWrite(const char *data, size_t bytes) noexcept
 {
     fflush(StdioCtl::fout());
-    int rr = ::write(StdioCtl::out(), data, bytes);
-    (void) rr;
+    size_t written = 0;
+    int r;
+    while ( 0 <= (r = ::write(StdioCtl::out(), data + written, bytes - written)) &&
+            (written += r) < bytes )
+        ;
 }
 
 #elif defined(_WIN32)
