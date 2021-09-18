@@ -33,8 +33,6 @@ BufferedDisplay::BufferedDisplay() noexcept :
     limitFPS = (fps > 0);
     if (limitFPS)
         flushDelay = microseconds((int) 1e6/fps);
-    maxFrameDrops = max(0, getEnv<int>("TVISION_MAX_FRAMEDROPS", defaultMaxFrameDrops));
-    frameDrops = 0;
     // Initialize variables.
     screenTouched = true;
     caretMoved = false;
@@ -104,16 +102,10 @@ bool BufferedDisplay::timeToFlush() noexcept
     if (limitFPS)
     {
         auto now = steady_clock::now();
-        if (frameDrops == maxFrameDrops || ((now - lastFlush) >= flushDelay))
-        {
+        if (now - lastFlush >= flushDelay)
             lastFlush = now;
-            frameDrops = 0;
-        }
         else
-        {
-            ++frameDrops;
             return false;
-        }
     }
     return true;
 }

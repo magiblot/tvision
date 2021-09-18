@@ -38,13 +38,10 @@ class BufferedDisplay : public DisplayStrategy {
     int newCaretSize;
 
     bool limitFPS;
-    int frameDrops;
-    int maxFrameDrops;
     std::chrono::microseconds flushDelay;
     std::chrono::time_point<std::chrono::steady_clock> lastFlush;
 
     static BufferedDisplay *instance;
-    static constexpr int defaultMaxFrameDrops = 4;
     static constexpr int defaultFPS = 60;
 
     bool inBounds(int x, int y) const noexcept;
