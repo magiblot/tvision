@@ -291,29 +291,32 @@ void TEvent::getKeyEvent(Boolean blocking) noexcept
 #if defined( __FLAT__ )
     if( THardwareInfo::getKeyEvent( *this, blocking ) )
     {
-        // Need to handle special case of Alt-Space, Ctrl-Ins, Shift-Ins,
-        // Ctrl-Del, Shift-Del
-
-        switch( keyDown.keyCode )
+        if( what == evKeyDown )
         {
-        case ' ':
-            if( keyDown.controlKeyState & kbAltShift )
-                keyDown.keyCode = kbAltSpace;
-            break;
+            // Need to handle special case of Alt-Space, Ctrl-Ins, Shift-Ins,
+            // Ctrl-Del, Shift-Del
 
-        case kbDel:
-            if( keyDown.controlKeyState & kbCtrlShift )
-                keyDown.keyCode = kbCtrlDel;
-            else if( keyDown.controlKeyState & kbShift )
-                keyDown.keyCode = kbShiftDel;
-            break;
+            switch( keyDown.keyCode )
+            {
+            case ' ':
+                if( keyDown.controlKeyState & kbAltShift )
+                    keyDown.keyCode = kbAltSpace;
+                break;
 
-        case kbIns:
-            if( keyDown.controlKeyState & kbCtrlShift )
-                keyDown.keyCode = kbCtrlIns;
-            else if( keyDown.controlKeyState & kbShift )
-                keyDown.keyCode = kbShiftIns;
-            break;
+            case kbDel:
+                if( keyDown.controlKeyState & kbCtrlShift )
+                    keyDown.keyCode = kbCtrlDel;
+                else if( keyDown.controlKeyState & kbShift )
+                    keyDown.keyCode = kbShiftDel;
+                break;
+
+            case kbIns:
+                if( keyDown.controlKeyState & kbCtrlShift )
+                    keyDown.keyCode = kbCtrlIns;
+                else if( keyDown.controlKeyState & kbShift )
+                    keyDown.keyCode = kbShiftIns;
+                break;
+            }
         }
     }
     else
