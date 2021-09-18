@@ -136,7 +136,7 @@ namespace terminp
         setModifier(keyDown, kbAltShift, AltKeyCode);
     }
 
-    static KeyDownEvent keyWithModifiers(ushort keyCode, ulong mods) noexcept
+    static KeyDownEvent keyWithModifiers(ushort keyCode, ushort mods) noexcept
     {
         KeyDownEvent keyDown {{keyCode}, mods};
         if (mods & kbShift) setShiftModifier(keyDown);
@@ -150,7 +150,7 @@ namespace terminp
     static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
     {
         mods -= XTermModDefault;
-        ulong tvmods =
+        ushort tvmods =
             (kbShift & -(mods & 1))
             | (kbAltShift & -(mods & 2))
             | (kbCtrlShift & -(mods & 4))
