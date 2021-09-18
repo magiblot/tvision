@@ -90,7 +90,7 @@ public:
 
     virtual ~PlatformStrategy() {}
 
-    virtual bool waitForEvent(long ms, TEvent &ev) noexcept { return false; }
+    virtual bool waitForEvent(long ms, TEvent &ev) noexcept = 0;
     virtual int getButtonCount() noexcept { return input ? input->getButtonCount() : 0; }
     virtual void cursorOn() noexcept { if (input) input->cursorOn(); }
     virtual void cursorOff() noexcept { if (input) input->cursorOff(); }
@@ -106,9 +106,9 @@ public:
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept { display->screenWrite(x, y, buf, len); }
     virtual void flushScreen() noexcept { display->flushScreen(); }
     virtual void reloadScreenInfo() noexcept { display->reloadScreenInfo(); }
-    virtual int charWidth(TStringView mbc, char32_t wc) noexcept { return 1; }
+    virtual int charWidth(TStringView mbc, char32_t wc) noexcept = 0;
 
-    static PlatformStrategy *instance; // hardware.cpp
+    static PlatformStrategy *instance;
 
 };
 
@@ -119,6 +119,7 @@ class NullPlatform : public PlatformStrategy {
 
 public:
 
+    bool waitForEvent(long ms, TEvent &ev) noexcept override { return false; }
     int getButtonCount() noexcept override { return 0; }
     void cursorOn() noexcept override {}
     void cursorOff() noexcept override {}
@@ -133,8 +134,10 @@ public:
     void setCaretSize(int size) noexcept override {}
     void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept override {}
     void flushScreen() noexcept override {}
+    void reloadScreenInfo() noexcept override {}
+    int charWidth(TStringView mbc, char32_t wc) noexcept override { return 1; }
 
-    static NullPlatform instance; // hardware.cpp
+    static NullPlatform instance;
 
 };
 
