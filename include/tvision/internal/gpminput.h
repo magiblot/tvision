@@ -1,5 +1,5 @@
-#ifndef GPMINPUT_H
-#define GPMINPUT_H
+#ifndef TVISION_GPMINPUT_H
+#define TVISION_GPMINPUT_H
 
 #include <internal/platform.h>
 
@@ -12,26 +12,30 @@
 #include <internal/cursor.h>
 #include <gpm.h>
 
-class GpmInput : public FdInputStrategy {
-
+class GpmInput : public InputStrategy
+{
     NegativeScreenCursor cursor;
     uchar buttonState;
 
     static void fitEvent(Gpm_Event&) noexcept;
+    GpmInput() noexcept;
 
 public:
 
-    GpmInput() noexcept;
+    static GpmInput *create() noexcept;
     ~GpmInput();
     bool getEvent(TEvent &ev) noexcept;
     int getButtonCount() noexcept;
-
 };
 
 #else
 
-class GpmInput : public FdInputStrategy {};
+class GpmInput : public InputStrategy
+{
+public:
+    static GpmInput *create() noexcept { return nullptr; }
+};
 
 #endif // HAVE_GPM
 
-#endif
+#endif // TVISION_GPMINPUT_H

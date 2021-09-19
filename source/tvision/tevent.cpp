@@ -34,7 +34,6 @@
 
 #endif
 
-
 #if !defined( __FLAT__ )
 TEvent _NEAR TEventQueue::eventQueue[ eventQSize ] = { {0} };
 TEvent * _NEAR TEventQueue::eventQHead = TEventQueue::eventQueue;
@@ -58,6 +57,8 @@ MouseEventType _NEAR TEventQueue::curMouse;
 MouseEventType _NEAR TEventQueue::downMouse;
 
 TMouse *TEventQueue::mouse;
+
+int _NEAR TEventQueue::eventTimeoutMs = 20; // 50 wake-ups per second.
 
 TEventQueue::TEventQueue() noexcept
 {
@@ -285,11 +286,10 @@ I   POP DS
 }
 #endif
 
-#pragma argsused
-void TEvent::getKeyEvent(Boolean blocking) noexcept
+void TEvent::getKeyEvent() noexcept
 {
 #if defined( __FLAT__ )
-    if( THardwareInfo::getKeyEvent( *this, blocking ) )
+    if( THardwareInfo::getKeyEvent( *this ) )
     {
         if( what == evKeyDown )
         {
@@ -354,5 +354,12 @@ I   INT 16h;
         else
             keyDown.textLength = 0;
         }
+#endif
+}
+
+void TEventQueue::sleepUntilEvent() noexcept
+{
+#if defined( __FLAT__ )
+    THardwareInfo::waitForEvents(eventTimeoutMs);
 #endif
 }

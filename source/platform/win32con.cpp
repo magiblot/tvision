@@ -34,6 +34,7 @@ Win32ConsoleStrategy::Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
     cpInput(cpInput),
     cpOutput(cpOutput)
 {
+    waiter.addSource(*input);
 }
 
 Win32ConsoleStrategy::~Win32ConsoleStrategy()
@@ -67,8 +68,6 @@ bool Win32ConsoleStrategy::initConsole( UINT &cpInput, UINT &cpOutput,
         // Try enabling VT sequences.
         consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
         consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-        // On Wine, SetConsoleMode succeeds even if VT sequences are not supported.
-        // So check whether the flag has actually been set.
         SetConsoleMode(StdioCtl::out(), consoleMode);
         GetConsoleMode(StdioCtl::out(), &consoleMode);
         supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
@@ -131,6 +130,7 @@ void Win32ConsoleStrategy::restoreConsole() noexcept
     SetConsoleOutputCP(cpOutput);
     WinWidth::clearState();
     StdioCtl::instance.tearDown();
+    waiter.removeSource(*input);
 }
 
 void Win32ConsoleStrategy::resetConsole() noexcept
@@ -138,34 +138,28 @@ void Win32ConsoleStrategy::resetConsole() noexcept
     // Attach the application to a new console with no data loss.
     restoreConsole();
     initConsole(cpInput, cpOutput, display, input);
+    waiter.addSource(*input);
 }
 
-bool Win32ConsoleStrategy::waitForEvent(long ms, TEvent &ev) noexcept
+bool Win32ConsoleStrategy::getEvent(TEvent &ev) noexcept
+{
+    return waiter.getEvent(ev);
+}
+
+void Win32ConsoleStrategy::waitForEvents(int ms) noexcept
 {
     DWORD events = 0;
     if (!GetNumberOfConsoleInputEvents(StdioCtl::in(), &events))
-    {
         // The console likely crashed.
         resetConsole();
-    }
-    if (!events && WaitForSingleObject(StdioCtl::in(), ms) == WAIT_OBJECT_0)
-    {
-        GetNumberOfConsoleInputEvents(StdioCtl::in(), &events);
-    }
-    // getEvent() often return false due to discarded events. But this
-    // function should not return false if there are pending events, as that
-    // defeats the event queue in THardwareInfo.
-    while (events--)
-        if (input->getEvent(ev))
-            return true;
-    return false;
-
+    waiter.waitForEvents(ms);
 }
 
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 
 Win32Input::Win32Input() noexcept :
+    InputStrategy(StdioCtl::in()),
     insertState(true),
     surrogate(0)
 {
@@ -194,33 +188,48 @@ void Win32Input::cursorOff() noexcept
 
 bool Win32Input::getEvent(TEvent &ev) noexcept
 {
-    INPUT_RECORD irBufferW = {};
-    DWORD ok = 0;
-    if (ReadConsoleInputW(StdioCtl::in(), &irBufferW, 1, &ok) && ok)
+    // ReadConsoleInput can sleep the process, so we first check the number
+    // of available input events.
+    DWORD events;
+    if (!GetNumberOfConsoleInputEvents(StdioCtl::in(), &events))
+        return false;
+    // getEvent(ir, ev) often returns false due to discarded events. But this
+    // function should not return false if there are pending events, as that
+    // defeats the event queue in THardwareInfo.
+    while (events--)
     {
-        switch (irBufferW.EventType)
-        {
-        case KEY_EVENT:
-            if ( irBufferW.Event.KeyEvent.bKeyDown || // KeyDown
-                (irBufferW.Event.KeyEvent.wVirtualKeyCode == VK_MENU && // Pasted surrogate character
-                 irBufferW.Event.KeyEvent.uChar.UnicodeChar) )
-                return getKeyEvent( irBufferW.Event.KeyEvent,
-                                    ev);
-            break;
-        case MOUSE_EVENT:
-            return getMouseEvent(irBufferW.Event.MouseEvent, ev);
-        case WINDOW_BUFFER_SIZE_EVENT:
-            ev.what = evCommand;
-            ev.message.command = cmScreenChanged;
-            ev.message.infoPtr = 0;
-            return True;
-        }
+        INPUT_RECORD ir;
+        DWORD ok;
+        if (!ReadConsoleInputW(StdioCtl::in(), &ir, 1, &ok) || !ok)
+            return false;
+        if (getEvent(ir, ev))
+            return true;
     }
     return false;
 }
 
-bool Win32Input::getKeyEvent( KEY_EVENT_RECORD KeyEventW,
-                              TEvent &ev ) noexcept
+bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
+{
+    switch (ir.EventType)
+    {
+    case KEY_EVENT:
+        if ( ir.Event.KeyEvent.bKeyDown || // KeyDown
+             (ir.Event.KeyEvent.wVirtualKeyCode == VK_MENU && // Pasted surrogate character
+                ir.Event.KeyEvent.uChar.UnicodeChar) )
+            return getKeyEvent(ir.Event.KeyEvent, ev);
+        break;
+    case MOUSE_EVENT:
+        return getMouseEvent(ir.Event.MouseEvent, ev);
+    case WINDOW_BUFFER_SIZE_EVENT:
+        ev.what = evCommand;
+        ev.message.command = cmScreenChanged;
+        ev.message.infoPtr = 0;
+        return True;
+    }
+    return false;
+}
+
+bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
 {
     if (getUnicodeEvent(KeyEventW, ev)) {
         ev.what = evKeyDown;

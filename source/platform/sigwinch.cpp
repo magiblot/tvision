@@ -5,89 +5,54 @@
 #ifdef _TV_UNIX
 
 #include <internal/sigwinch.h>
-#include <internal/stdioctl.h>
-#include <signal.h>
-#include <unistd.h>
-#include <fcntl.h>
 
-int SigwinchAware::fd[2] = {-1, -1};
-void (*SigwinchAware::oldHandler) (int);
-bool SigwinchAware::hit = false;
+SigwinchHandler *SigwinchHandler::instance {nullptr};
 
-bool SigwinchAware::push() noexcept
+void SigwinchHandler::handleSignal(int) noexcept
 {
-    if (!hit)
-    {
-        hit = true;
-        char c = 0;
-        int rr = ::write(fd[1], &c, sizeof(char));
-        (void) rr;
-        return true;
-    }
-    return false;
-}
-
-bool SigwinchAware::pop() noexcept
-{
-    if (hit)
-    {
-        char c;
-        int rr = ::read(fd[0], &c, sizeof(char));
-        (void) rr;
-        hit = false;
-        return true;
-    }
-    return false;
-}
-
-void SigwinchAware::handler(int) noexcept
-{
-    // Write something to the pipe, so that it is seen as ready to read by
-    // FdInputStrategy.
-    push();
+    if (instance)
+        instance->eventSource.signal();
     // Don't call the previous SIGWINCH handler. Unfortunately, Ncurses
-    // clears the screen when doing so. Whichever processing was necessary
-    // will have to be done manually after winchEvent().
+    // clears the screen when doing so and causes blinking.
 }
 
-SigwinchAware::SigwinchAware() noexcept
+bool SigwinchHandler::getEvent(void *, TEvent &ev) noexcept
 {
-    static bool firstTime = true;
-    if (firstTime)
+    ev.what = evCommand;
+    ev.message.command = cmScreenChanged;
+    return true;
+}
+
+inline SigwinchHandler::SigwinchHandler( SysManualEvent::Handle handle,
+                                         const struct sigaction &aOldSa ) noexcept :
+    eventSource(handle, &getEvent, nullptr),
+    oldSa(aOldSa)
+{
+    instance = this;
+}
+
+SigwinchHandler *SigwinchHandler::create() noexcept
+{
+    if (!instance)
     {
-        firstTime = false;
-        // Make the pipe non-blocking, so that read() never gets stuck.
-        int rr = pipe(fd);
-        (void) rr;
-        for (int d : fd)
-        {
-            int flags = fcntl(d, F_GETFL);
-            fcntl(d, F_SETFL, flags | O_NONBLOCK);
-        }
-        // Set the SIGWINCH handler, and save the previous one.
-        struct sigaction sa, oldsa;
-        sa.sa_handler = handler;
+        struct sigaction sa, oldSa;
+        sa.sa_handler = &handleSignal;
         sa.sa_flags = SA_RESTART;
-        sigfillset(&sa.sa_mask);
-        sigaction(SIGWINCH, &sa, &oldsa);
-        oldHandler = oldsa.sa_handler;
+        if (sigfillset(&sa.sa_mask) != -1 && sigaction(SIGWINCH, &sa, &oldSa) != -1)
+        {
+            SysManualEvent::Handle handle;
+            if (SysManualEvent::createHandle(handle))
+                return new SigwinchHandler(handle, oldSa);
+            sigaction(SIGWINCH, &oldSa, nullptr);
+        }
     }
+    return nullptr;
 }
 
-bool SigwinchAware::winchEvent(TEvent &ev) noexcept
+SigwinchHandler::~SigwinchHandler()
 {
-    if (pop())
-    {
-        ev.what = evCommand;
-        ev.message.command = cmScreenChanged;
-        return true;
-    }
-    return false;
-}
-
-int SigwinchAware::winchFd() noexcept
-{
-    return fd[0];
+    sigaction(SIGWINCH, &oldSa, nullptr);
+    instance = nullptr;
 }
 
 #endif // _TV_UNIX

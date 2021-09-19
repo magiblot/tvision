@@ -1,31 +1,39 @@
-#ifndef SIGWINCH_H
-#define SIGWINCH_H
+#ifndef TVISION_SIGWINCH_H
+#define TVISION_SIGWINCH_H
 
 #include <tvision/tv.h>
 
 #ifdef _TV_UNIX
+#include <internal/events.h>
+#include <signal.h>
 
 struct TEvent;
 
-class SigwinchAware {
+class SigwinchHandler
+{
+    WakeUpEventSource eventSource;
+    struct sigaction oldSa;
 
-    static int fd[2];
-    static void handler(int s) noexcept;
-    static void (*oldHandler)(int);
+    static SigwinchHandler *instance;
+    static void handleSignal(int) noexcept;
+    static bool getEvent(void *, TEvent &) noexcept;
 
-    static bool hit;
-    static bool push() noexcept;
-    static bool pop() noexcept;
+    SigwinchHandler( SysManualEvent::Handle handle,
+                     const struct sigaction &aOldSa ) noexcept;
 
-protected:
+public:
 
-    SigwinchAware() noexcept;
+    static SigwinchHandler *create() noexcept;
+    ~SigwinchHandler();
 
-    static bool winchEvent(TEvent &ev) noexcept;
-    static int winchFd() noexcept;
-
+    EventSource &getEventSource() noexcept;
 };
+
+inline EventSource &SigwinchHandler::getEventSource() noexcept
+{
+    return eventSource;
+}
 
 #endif // _TV_UNIX
 
-#endif // SIGWINCH_H
+#endif // TVISION_SIGWINCH_H

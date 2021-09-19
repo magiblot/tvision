@@ -1,5 +1,5 @@
-#ifndef NCURSINP_H
-#define NCURSINP_H
+#ifndef TVISION_NCURSINP_H
+#define TVISION_NCURSINP_H
 
 #include <internal/platform.h>
 
@@ -13,8 +13,8 @@
 #include <internal/sigwinch.h>
 #include <internal/terminal.h>
 
-class NcursesInput : public FdInputStrategy, SigwinchAware {
-
+class NcursesInput : public InputStrategy
+{
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeout = 5 };
 
@@ -47,13 +47,8 @@ public:
     bool getEvent(TEvent &ev) noexcept;
     int getButtonCount() noexcept;
     bool hasPendingEvents() noexcept;
-
 };
-
-#else
-
-class NcursesInput : public InputStrategy {};
 
 #endif // HAVE_NCURSES
 
-#endif
+#endif // TVISION_NCURSINP_H

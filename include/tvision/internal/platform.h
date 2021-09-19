@@ -3,11 +3,9 @@
 
 #define Uses_TPoint
 #include <tvision/tv.h>
+#include <internal/events.h>
 #include <memory>
-#include <functional>
-#include <queue>
-#include <vector>
-#include <cstddef>
+#include <stddef.h>
 
 class DisplayStrategy {
 
@@ -59,16 +57,20 @@ public:
 
 struct TEvent;
 
-class InputStrategy {
-
+class InputStrategy : public EventSource
+{
 public:
+
+    InputStrategy(SysHandle aHandle) noexcept :
+        EventSource(aHandle)
+    {
+    }
 
     virtual ~InputStrategy() {}
     virtual bool getEvent(TEvent &ev) noexcept { return false; }
     virtual int getButtonCount() noexcept { return 0; }
     virtual void cursorOn() noexcept {}
     virtual void cursorOff() noexcept {}
-
 };
 
 class PlatformStrategy {
@@ -90,7 +92,8 @@ public:
 
     virtual ~PlatformStrategy() {}
 
-    virtual bool waitForEvent(long ms, TEvent &ev) noexcept = 0;
+    virtual bool getEvent(TEvent &ev) noexcept = 0;
+    virtual void waitForEvents(int ms) noexcept = 0;
     virtual int getButtonCount() noexcept { return input ? input->getButtonCount() : 0; }
     virtual void cursorOn() noexcept { if (input) input->cursorOn(); }
     virtual void cursorOff() noexcept { if (input) input->cursorOff(); }
@@ -119,7 +122,8 @@ class NullPlatform : public PlatformStrategy {
 
 public:
 
-    bool waitForEvent(long ms, TEvent &ev) noexcept override { return false; }
+    bool getEvent (TEvent &) noexcept override { return false; }
+    void waitForEvents(int ms) noexcept override {}
     int getButtonCount() noexcept override { return 0; }
     void cursorOn() noexcept override {}
     void cursorOff() noexcept override {}
@@ -142,41 +146,40 @@ public:
 };
 
 #ifdef _TV_UNIX
-struct pollfd;
 
-class FdInputStrategy : public InputStrategy {
+#include <internal/sigwinch.h>
 
-    std::function<bool (TEvent&)> eventGetter;
-    static std::vector<FdInputStrategy*> listeners;
-    static std::vector<struct pollfd> fds;
-    static std::queue<size_t> ready;
+class UnixPlatformStrategy : public PlatformStrategy
+{
+    std::unique_ptr<SigwinchHandler> sigwinch;
 
-public:
+protected:
 
-    FdInputStrategy();
-    ~FdInputStrategy();
-
-    static void addListener(FdInputStrategy*, int);
-    static void deleteListener(FdInputStrategy*);
-    static bool waitForEvent(int ms, TEvent &ev);
-    void overrideEventGetter(std::function<bool (TEvent&)>&&);
-    virtual bool hasPendingEvents() noexcept { return false; }
-
-};
-
-class UnixPlatformStrategy : public PlatformStrategy {
+    EventWaiter waiter;
 
 public:
 
-    using PlatformStrategy::PlatformStrategy;
-
-    bool waitForEvent(long ms, TEvent &ev) noexcept override
+    UnixPlatformStrategy(DisplayStrategy &d, InputStrategy &i) noexcept :
+        PlatformStrategy(&d, &i),
+        sigwinch(SigwinchHandler::create())
     {
-        return FdInputStrategy::waitForEvent(ms, ev);
+        waiter.addSource(i);
+        if (sigwinch)
+            waiter.addSource(sigwinch->getEventSource());
     }
 
-    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
+    bool getEvent(TEvent &ev) noexcept override
+    {
+        return waiter.getEvent(ev);
+    }
 
+    void waitForEvents(int ms) noexcept override
+    {
+        waiter.waitForEvents(ms);
+    }
+
+
+    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 };
 
 #endif // _TV_UNIX

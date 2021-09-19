@@ -247,6 +247,7 @@ static const auto fromCursesHighKey =
 });
 
 NcursesInput::NcursesInput(bool mouse) noexcept :
+    InputStrategy(StdioCtl::in()),
     mstate({}),
     buttonCount(0),
     mouseEnabled(mouse)
@@ -277,9 +278,6 @@ NcursesInput::NcursesInput(bool mouse) noexcept :
         buttonCount = 2;
         TermIO::mouseOn();
     }
-
-    addListener(this, StdioCtl::in());
-    addListener(this, winchFd());
 }
 
 NcursesInput::~NcursesInput()
@@ -326,13 +324,10 @@ bool NcursesInput::hasPendingEvents() noexcept
 
 bool NcursesInput::getEvent(TEvent &ev) noexcept
 {
-    if (winchEvent(ev))
-        return true;
-
     int k = wgetch(stdscr);
 
     if (k == KEY_RESIZE)
-        return false; // Handled above.
+        return false; // Should be handled elsewhere.
 
     if (k == KEY_MOUSE)
         return parseCursesMouse(ev);

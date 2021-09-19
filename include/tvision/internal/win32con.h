@@ -11,9 +11,9 @@
 class Win32Input;
 class Win32Display;
 
-class Win32ConsoleStrategy : public PlatformStrategy
+class Win32ConsoleStrategy final : public PlatformStrategy
 {
-
+    EventWaiter waiter;
     UINT cpInput, cpOutput;
 
     Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
@@ -31,7 +31,9 @@ public:
 
     static Win32ConsoleStrategy *create() noexcept;
 
-    bool waitForEvent(long ms, TEvent &ev) noexcept override;
+    bool getEvent(TEvent &ev) noexcept override;
+    void waitForEvents(int ms) noexcept override;
+
     int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 };
 
@@ -41,6 +43,7 @@ class Win32Input : public InputStrategy
     bool insertState;
     ushort surrogate;
 
+    bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;
     bool getKeyEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
     bool getUnicodeEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
     bool getMouseEvent(MOUSE_EVENT_RECORD, TEvent &ev) noexcept;

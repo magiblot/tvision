@@ -48,7 +48,6 @@ TProgInit::TProgInit( TStatusLine *(*cStatusLine)( TRect ),
 {
 }
 
-
 TProgram::TProgram() noexcept :
     TProgInit( &TProgram::initStatusLine,
                   &TProgram::initMenuBar,
@@ -76,7 +75,6 @@ TProgram::TProgram() noexcept :
         (menuBar = createMenuBar( getExtent() )) != 0
       )
         insert(menuBar);
-
 }
 
 TProgram::~TProgram()
@@ -129,6 +127,7 @@ void TProgram::getEvent(TEvent& event)
         }
     else
         {
+        TEventQueue::sleepUntilEvent();
         event.getMouseEvent();
         if( event.what == evNothing )
             {
@@ -342,10 +341,10 @@ Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
             }
         else
             {
-            event.getKeyEvent(False);
+            event.getKeyEvent();
 #ifdef __BORLANDC__ // keyUp events are not discarded, we need to try twice.
             if( event.what == evNothing )
-                event.getKeyEvent(False);
+                event.getKeyEvent();
 #endif
             }
         } while( readTextEvent( event, dest, length ) );

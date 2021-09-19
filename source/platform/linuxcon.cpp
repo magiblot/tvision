@@ -3,6 +3,7 @@
 #include <internal/linuxcon.h>
 #include <internal/constmap.h>
 #include <internal/stdioctl.h>
+#include <internal/gpminput.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
 #include <sys/ioctl.h>
@@ -48,30 +49,35 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
     { kbRight,      kbAltRight      },
 });
 
-LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy *d,
-                                            FdInputStrategy *i ) noexcept :
+LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &d,
+                                            InputStrategy &i ) noexcept :
     UnixPlatformStrategy(d, i),
-    gpm(new GpmInput())
+    inputWrap(i),
+    gpm(GpmInput::create())
 {
-    /* The FdInputStrategy instance which reads key events is stored in
-     * the 'input' attribute of PlatformStrategy, while the GpmInput instance
-     * is stored in the 'gpm' attribute of this class. */
-    if (input)
-        ((FdInputStrategy &) *input).overrideEventGetter([&] (TEvent &ev) {
-            return patchKeyEvent(ev);
-        });
+    waiter.removeSource(i);
+    waiter.addSource(inputWrap);
+    if (gpm)
+        waiter.addSource(*gpm);
+}
+
+LinuxConsoleStrategy::~LinuxConsoleStrategy()
+{
+    waiter.removeSource(inputWrap);
+    if (gpm)
+        waiter.removeSource(*gpm);
 }
 
 int LinuxConsoleStrategy::getButtonCount() noexcept
 {
-    return gpm->getButtonCount();
+    return gpm ? gpm->getButtonCount() : 0;
 }
 
-bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev) noexcept
+bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
 {
     /* The keyboard event getter is usually unaware of key modifiers in the
      * console, so we add them on top of the previous translation. */
-    if (input->getEvent(ev))
+    if (wrapped.getEvent(ev))
     {
         applyKeyboardModifiers(ev.keyDown);
         ushort keyCode = keyCodeWithModifiers(ev.keyDown.controlKeyState, ev.keyDown.keyCode);
@@ -86,7 +92,12 @@ bool LinuxConsoleStrategy::patchKeyEvent(TEvent &ev) noexcept
     return false;
 }
 
-ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode) noexcept
+bool LinuxConsoleInput::hasPendingEvents() noexcept
+{
+    return wrapped.hasPendingEvents();
+}
+
+ushort LinuxConsoleInput::keyCodeWithModifiers(ulong controlKeyState, ushort keyCode) noexcept
 {
     ushort result = 0;
     if ((controlKeyState & kbAltShift) && (result = keyCodeWithAlt[keyCode]))
@@ -98,7 +109,7 @@ ushort LinuxConsoleStrategy::keyCodeWithModifiers(ulong controlKeyState, ushort 
     return result;
 }
 
-void LinuxConsoleStrategy::applyKeyboardModifiers(KeyDownEvent &key) noexcept
+void LinuxConsoleInput::applyKeyboardModifiers(KeyDownEvent &key) noexcept
 {
     char res = 6;
     ulong actualModifiers = 0;

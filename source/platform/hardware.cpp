@@ -82,12 +82,12 @@ void THardwareInfo::setUpConsole() noexcept
             disp = new NcursesDisplay();
         else
             disp = new AnsiDisplay<NcursesDisplay>();
+#ifdef __linux__
         if (TermIO::isLinuxConsole())
-            platf = new LinuxConsoleStrategy( disp,
-                                              new NcursesInput(false) );
+            platf = new LinuxConsoleStrategy(*disp, *new NcursesInput(false));
         else
-            platf = new UnixPlatformStrategy( disp,
-                                              new NcursesInput() );
+#endif // __linux__
+            platf = new UnixPlatformStrategy(*disp, *new NcursesInput());
 #endif
     }
 }
@@ -103,10 +103,10 @@ void THardwareInfo::restoreConsole() noexcept
     }
 }
 
-BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask) noexcept
+BOOL THardwareInfo::getPendingEvent(TEvent &event, Boolean mouse) noexcept
 {
     for (size_t i = 0; i < eventCount; ++i)
-        if (eventQ[i].what & mask)
+        if (!!(eventQ[i].what & evMouse) == mouse)
         {
             event = eventQ[i];
             for (; i + 1 < eventCount; ++i)
@@ -120,7 +120,7 @@ BOOL THardwareInfo::getPendingEvent(TEvent &event, ushort mask) noexcept
 BOOL THardwareInfo::getMouseEvent( MouseEventType& event ) noexcept
 {
     TEvent ev;
-    if (getPendingEvent(ev, evMouse))
+    if (getPendingEvent(ev, True))
     {
         event = ev.mouse;
         return True;
@@ -128,42 +128,39 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event ) noexcept
     return False;
 }
 
-BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking ) noexcept
+BOOL THardwareInfo::getKeyEvent( TEvent& event ) noexcept
 {
-    readEvents(blocking);
-    if (getPendingEvent(event, ~evMouse))
+    readEvents();
+    if (getPendingEvent(event, False))
     {
         if (event.what & evKeyboard)
         {
-            // Set/Reset insert flag.
-            if( event.keyDown.keyCode == kbIns )
+            if (event.keyDown.keyCode == kbIns)
                 insertState = !insertState;
-            if( insertState )
+            if (insertState)
                 event.keyDown.controlKeyState |= kbInsState;
-            return True;
         }
         return event.what != evNothing;
     }
     return False;
 }
 
-void THardwareInfo::readEvents(Boolean blocking) noexcept
+void THardwareInfo::readEvents() noexcept
 {
     // Do not read any more events until the queue is empty.
     if (!eventCount)
+        while (eventCount < eventQSize && platf->getEvent(eventQ[eventCount]))
+            ++eventCount;
+}
+
+void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
+{
+    if (!eventCount)
     {
         // Flush the screen once for every time all events have been processed,
-        // only for blocking requests.
-        if (blocking)
-            THardwareInfo::flushScreen();
-        TEvent event;
-        // Non-blocking read.
-        while ( eventCount < eventQSize &&
-                platf->waitForEvent(0, event) )
-            eventQ[eventCount++] = event;
-        // Blocking read.
-        if (blocking && !eventCount && platf->waitForEvent(eventTimeoutMs, event))
-            eventQ[eventCount++] = event;
+        // only when blocking for events.
+        flushScreen();
+        platf->waitForEvents(timeoutMs);
     }
 }
 

@@ -13,8 +13,7 @@
 #include <memory>
 #include <gpm.h>
 
-GpmInput::GpmInput() noexcept :
-    buttonState(0)
+GpmInput *GpmInput::create() noexcept
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
@@ -34,7 +33,15 @@ GpmInput::GpmInput() noexcept :
         Gpm_Open(&conn, 0);
         if (term) setenv("TERM", term.get(), 1);
     }
-    addListener(this, gpm_fd);
+    if (gpm_fd != -1)
+        return new GpmInput;
+    return nullptr;
+}
+
+GpmInput::GpmInput() noexcept :
+    InputStrategy(gpm_fd),
+    buttonState(0)
+{
 }
 
 GpmInput::~GpmInput()

@@ -32,7 +32,6 @@ DWORD THardwareInfo::pendingEvent;
 INPUT_RECORD THardwareInfo::irBuffer;
 CONSOLE_CURSOR_INFO THardwareInfo::crInfo;
 CONSOLE_SCREEN_BUFFER_INFO THardwareInfo::sbInfo;
-int THardwareInfo::eventTimeoutMs = 50; // 20 FPS
 
 const ushort THardwareInfo::NormalCvt[89] = {
          0,      0,      0,      0,      0,      0,      0,      0,
@@ -301,12 +300,11 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
     return False;
 }
 
-BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
+BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
     if( !pendingEvent )
         {
-        // Don't do busy polling. Wait for a timeout instead.
-        pendingEvent = (WAIT_OBJECT_0 == WaitForSingleObject(consoleHandle[cnInput], blocking ? eventTimeoutMs : 0));
+        GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
         if( pendingEvent )
             ReadConsoleInput( consoleHandle[cnInput], &irBuffer, 1, &pendingEvent );
         }
@@ -369,6 +367,12 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event, Boolean blocking )
         }
 
     return False;
+}
+
+void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
+{
+    if (!pendingEvent)
+        WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );
 }
 
 #endif  // __BORLANDC__

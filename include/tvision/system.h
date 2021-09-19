@@ -234,7 +234,7 @@ struct TEvent
         MessageEvent message;
     };
     void getMouseEvent() noexcept;
-    void getKeyEvent(Boolean blocking=True) noexcept;
+    void getKeyEvent() noexcept;
 
 };
 
@@ -259,6 +259,10 @@ public:
 
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
+
+    static void sleepUntilEvent() noexcept;
+
+    static int _NEAR eventTimeoutMs;
 
 private:
 

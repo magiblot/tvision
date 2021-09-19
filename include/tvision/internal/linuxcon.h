@@ -1,5 +1,5 @@
-#ifndef LINUXCON_H
-#define LINUXCON_H
+#ifndef TVISION_LINUXCON_H
+#define TVISION_LINUXCON_H
 
 #include <internal/platform.h>
 
@@ -9,32 +9,43 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/gpminput.h>
 #include <memory>
 
-class LinuxConsoleStrategy : public UnixPlatformStrategy {
+class GpmInput;
 
-    std::unique_ptr<GpmInput> gpm;
-
-    bool patchKeyEvent(TEvent &ev) noexcept;
-    static ushort keyCodeWithModifiers(ulong, ushort) noexcept;
-    static void applyKeyboardModifiers(KeyDownEvent &key) noexcept;
+class LinuxConsoleInput : public EventSource
+{
+    EventSource &wrapped;
 
 public:
 
-    LinuxConsoleStrategy(DisplayStrategy *, FdInputStrategy *) noexcept;
+    LinuxConsoleInput(EventSource &src) noexcept :
+        EventSource(src.handle),
+        wrapped(src)
+    {
+    }
+
+    bool getEvent(TEvent &ev) noexcept override;
+    bool hasPendingEvents() noexcept override;
+
+    static ushort keyCodeWithModifiers(ulong, ushort) noexcept;
+    static void applyKeyboardModifiers(KeyDownEvent &key) noexcept;
+};
+
+class LinuxConsoleStrategy : public UnixPlatformStrategy
+{
+    LinuxConsoleInput inputWrap;
+    std::unique_ptr<GpmInput> gpm;
+
+public:
+
+    LinuxConsoleStrategy(DisplayStrategy &, InputStrategy &) noexcept;
+    ~LinuxConsoleStrategy();
 
     int getButtonCount() noexcept override;
     int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
-
-};
-
-#else
-
-class LinuxConsoleStrategy : public PlatformStrategy {
-    using PlatformStrategy::PlatformStrategy;
 };
 
 #endif // __linux__
 
-#endif // LINUXCON_H
+#endif // TVISION_LINUXCON_H

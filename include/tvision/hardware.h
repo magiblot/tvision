@@ -55,6 +55,8 @@ public:
     static TEvent eventQ[eventQSize];
     static size_t eventCount;
     static void flushScreen() noexcept;
+    static BOOL getPendingEvent(TEvent &event, Boolean mouse) noexcept;
+    static void readEvents() noexcept;
 #endif
 
     static ulong getTickCount() noexcept;
@@ -97,12 +99,9 @@ public:
 // Event functions.
 
     static BOOL getMouseEvent( MouseEventType& event ) noexcept;
-    static BOOL getKeyEvent( TEvent& event, Boolean blocking=True ) noexcept;
+    static BOOL getKeyEvent( TEvent& event ) noexcept;
     static void clearPendingEvent() noexcept;
-#ifndef __BORLANDC__
-    static BOOL getPendingEvent( TEvent &event, ushort mask ) noexcept;
-    static void readEvents( Boolean blocking ) noexcept;
-#endif
+    static void waitForEvents( int timeoutMs ) noexcept;
 
 // System functions.
 
