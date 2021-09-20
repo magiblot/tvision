@@ -35,6 +35,7 @@ void StdioCtl::setUp() noexcept
         outfile = ::fdopen(ttyfd, "w");
         files[1] = outfile;
         files[2] = outfile;
+        fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
     }
     else
     {

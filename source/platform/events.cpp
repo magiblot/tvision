@@ -17,7 +17,11 @@ using std::chrono::steady_clock;
 bool SysManualEvent::createHandle(int (&fds)[2]) noexcept
 {
     if (pipe(fds) != -1)
+    {
+        for (int fd : fds)
+            fcntl(fd, F_SETFD, FD_CLOEXEC);
         return true;
+    }
     return false;
 }
 
