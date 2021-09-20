@@ -4,6 +4,7 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 #include <atomic>
+#include <memory>
 #include <vector>
 
 #ifdef _TV_UNIX
@@ -141,6 +142,7 @@ class EventWaiter
 {
     std::vector<EventSource *> sources;
     PollData pd;
+    std::unique_ptr<WakeUpEventSource> wakeUp {nullptr};
     TEvent readyEvent;
     bool readyEventPresent {false};
 
@@ -151,11 +153,14 @@ class EventWaiter
 
 public:
 
+    EventWaiter() noexcept;
+
     void addSource(EventSource &) noexcept;
     void removeSource(EventSource &) noexcept;
 
     bool getEvent(TEvent &ev) noexcept;
     void waitForEvents(int ms) noexcept;
+    void stopEventWait() noexcept;
 };
 
 #endif // TVISION_EVENTS_H

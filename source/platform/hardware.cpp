@@ -164,6 +164,11 @@ void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
     }
 }
 
+void THardwareInfo::stopEventWait() noexcept
+{
+    platf->stopEventWait();
+}
+
 #ifndef _WIN32
 
 extern "C" DWORD GetTickCount(void) noexcept

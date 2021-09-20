@@ -94,6 +94,7 @@ public:
 
     virtual bool getEvent(TEvent &ev) noexcept = 0;
     virtual void waitForEvents(int ms) noexcept = 0;
+    virtual void stopEventWait() noexcept = 0;
     virtual int getButtonCount() noexcept { return input ? input->getButtonCount() : 0; }
     virtual void cursorOn() noexcept { if (input) input->cursorOn(); }
     virtual void cursorOff() noexcept { if (input) input->cursorOff(); }
@@ -124,6 +125,7 @@ public:
 
     bool getEvent (TEvent &) noexcept override { return false; }
     void waitForEvents(int ms) noexcept override {}
+    void stopEventWait() noexcept override {}
     int getButtonCount() noexcept override { return 0; }
     void cursorOn() noexcept override {}
     void cursorOff() noexcept override {}
@@ -178,6 +180,10 @@ public:
         waiter.waitForEvents(ms);
     }
 
+    void stopEventWait() noexcept override
+    {
+        waiter.stopEventWait();
+    }
 
     int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 };

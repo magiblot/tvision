@@ -155,6 +155,11 @@ void Win32ConsoleStrategy::waitForEvents(int ms) noexcept
     waiter.waitForEvents(ms);
 }
 
+void Win32ConsoleStrategy::stopEventWait() noexcept
+{
+    waiter.stopEventWait();
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 

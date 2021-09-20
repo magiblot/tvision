@@ -102,6 +102,7 @@ public:
     static BOOL getKeyEvent( TEvent& event ) noexcept;
     static void clearPendingEvent() noexcept;
     static void waitForEvents( int timeoutMs ) noexcept;
+    static void stopEventWait() noexcept;
 
 // System functions.
 

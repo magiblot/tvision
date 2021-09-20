@@ -163,6 +163,16 @@ static void pollHandles(PollData &pd, int ms) noexcept
 
 #endif // _TV_UNIX
 
+EventWaiter::EventWaiter() noexcept
+{
+    SysManualEvent::Handle handle;
+    if (SysManualEvent::createHandle(handle))
+    {
+        wakeUp.reset(new WakeUpEventSource(handle, nullptr, nullptr));
+        addSource(*wakeUp);
+    }
+}
+
 void EventWaiter::addSource(EventSource &src) noexcept
 {
     sources.push_back(&src);
@@ -247,4 +257,10 @@ void EventWaiter::waitForEvents(int ms) noexcept
         pollSources(ms < 0 ? -1 : pollDelayMs(now, end));
         now = steady_clock::now();
     }
+}
+
+void EventWaiter::stopEventWait() noexcept
+{
+    if (wakeUp)
+        wakeUp->signal();
 }

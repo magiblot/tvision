@@ -261,6 +261,7 @@ public:
     static Boolean _NEAR mouseReverse;
 
     static void sleepUntilEvent() noexcept;
+    static void wakeUp() noexcept;
 
     static int _NEAR eventTimeoutMs;
 

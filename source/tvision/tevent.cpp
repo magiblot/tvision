@@ -363,3 +363,11 @@ void TEventQueue::sleepUntilEvent() noexcept
     THardwareInfo::waitForEvents(eventTimeoutMs);
 #endif
 }
+
+void TEventQueue::wakeUp() noexcept
+{
+#if defined( __FLAT__ )
+    THardwareInfo::stopEventWait();
+#endif
+}
+

@@ -375,6 +375,10 @@ void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
         WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );
 }
 
+void THardwareInfo::stopEventWait() noexcept
+{
+}
+
 #endif  // __BORLANDC__
 
 ulong THardwareInfo::getTickCount() noexcept

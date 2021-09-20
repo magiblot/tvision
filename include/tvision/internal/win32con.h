@@ -33,6 +33,7 @@ public:
 
     bool getEvent(TEvent &ev) noexcept override;
     void waitForEvents(int ms) noexcept override;
+    void stopEventWait() noexcept override;
 
     int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
 };
