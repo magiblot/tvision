@@ -20,8 +20,7 @@ inline constexpr Int string_as_int(TStringView s) noexcept
     return res;
 }
 
-// NOTE: 'buffer' is not left null-terminated.
-size_t fast_utoa(uint32_t value, char *buffer) noexcept;
+char *fast_utoa(uint32_t value, char *buffer) noexcept;
 
 template <class T, size_t N>
 struct constarray;
@@ -34,8 +33,7 @@ struct alignas(4) btoa_lut_elem_t
 
 using btoa_lut_t = constarray<btoa_lut_elem_t, 256>;
 
-// NOTE: 'buffer' is not left null-terminated.
-inline size_t fast_btoa(uint8_t value, char *buffer) noexcept
+inline char *fast_btoa(uint8_t value, char *buffer) noexcept
 {
     extern const btoa_lut_t btoa_lut;
     const auto &lut = (btoa_lut_elem_t (&) [256]) btoa_lut;
@@ -44,7 +42,7 @@ inline size_t fast_btoa(uint8_t value, char *buffer) noexcept
     uint32_t asInt;
     memcpy(&asInt, &lut[value], 4);
     memcpy(buffer, &asInt, 4);
-    return asInt >> 24;
+    return buffer + (asInt >> 24);
     static_assert(sizeof(btoa_lut_elem_t) == 4, "");
 }
 

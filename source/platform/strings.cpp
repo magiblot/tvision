@@ -30,9 +30,9 @@ size_t _fast_utoa(uint32_t value, char *buffer) noexcept
     return digits;
 }
 
-size_t fast_utoa(uint32_t value, char *buffer) noexcept
+char *fast_utoa(uint32_t value, char *buffer) noexcept
 {
-    return _fast_utoa(value, buffer);
+    return buffer + _fast_utoa(value, buffer);
 }
 
 // Several versions of GCC crash when generating the table below at compile time.

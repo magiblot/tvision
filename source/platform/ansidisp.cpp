@@ -59,7 +59,7 @@ inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
     // CSI a F
     buf.reserve(32);
     buf.push(CSI);
-    buf.tail += fast_utoa(a, buf.tail);
+    buf.tail = fast_utoa(a, buf.tail);
     buf.push(F);
 }
 
@@ -69,9 +69,9 @@ inline void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
     // CSI a ; b F
     buf.reserve(32);
     buf.push(CSI);
-    buf.tail += fast_utoa(a, buf.tail);
+    buf.tail = fast_utoa(a, buf.tail);
     buf.push(';');
-    buf.tail += fast_utoa(b, buf.tail);
+    buf.tail = fast_utoa(b, buf.tail);
     buf.push(F);
 }
 
@@ -91,7 +91,7 @@ void AnsiDisplayBase::clearScreen() noexcept
 namespace ansidisp
 {
 
-static size_t convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*) noexcept;
+static char *convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*) noexcept;
 
 }
 
@@ -100,7 +100,7 @@ void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
 {
     using namespace ansidisp;
     buf.reserve(256);
-    buf.tail += convertAttributes(attr, lastAttr, termcap, buf.tail);
+    buf.tail = convertAttributes(attr, lastAttr, termcap, buf.tail);
     buf.push(chars);
 }
 
@@ -130,11 +130,11 @@ namespace ansidisp
 {
 
 static void convertColor(TColorDesired, TermColor &, TColorAttr::Style &, const TermCap &, bool) noexcept;
-static size_t writeAttributes(const TermAttr &, const TermAttr &, char *buf) noexcept;
-static size_t writeColor(TermColor, bool, char * const) noexcept;
+static char *writeAttributes(const TermAttr &, const TermAttr &, char *) noexcept;
+static char *writeColor(TermColor, bool, char *) noexcept;
 
-static inline size_t convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
-                                        const TermCap &termcap, char *buf ) noexcept
+static inline char *convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
+                                       const TermCap &termcap, char *buf ) noexcept
 {
     using namespace ansidisp;
     TermAttr attr {};
@@ -148,11 +148,11 @@ static inline size_t convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
     if (termcap.quirks & qfNoUnderline)
         attr.style &= ~slUnderline;
 
-    size_t length = writeAttributes(attr, lastAttr, buf);
+    char *p = writeAttributes(attr, lastAttr, buf);
 
     lastAttr = attr;
 
-    return length;
+    return p;
 }
 
 // colorconv_r: return value of the color conversion funcions.
@@ -235,10 +235,9 @@ static constexpr c_str
     reverseOnOff[2] =   { "7", "27"},
     strikeOnOff[2] =    { "9", "29"};
 
-static inline size_t writeAttributes( const TermAttr &attr,
-                                      const TermAttr &lastAttr, char *buf ) noexcept
+static inline char *writeAttributes( const TermAttr &attr,
+                                     const TermAttr &lastAttr, char *p ) noexcept
 {
-    char *p = buf;
     push(p, CSI);
 
     writeFlag(p, attr, lastAttr, slBold, boldOnOff);
@@ -249,15 +248,15 @@ static inline size_t writeAttributes( const TermAttr &attr,
     writeFlag(p, attr, lastAttr, slStrike, strikeOnOff);
 
     if (attr.fg != lastAttr.fg)
-        p += writeColor(attr.fg, true, p);
+        p = writeColor(attr.fg, true, p);
     if (attr.bg != lastAttr.bg)
-        p += writeColor(attr.bg, false, p);
+        p = writeColor(attr.bg, false, p);
 
     if (p[-1] == ';')
         p[-1] = 'm';
     else
         p -= strlen(CSI);
-    return p - buf;
+    return p;
 }
 
 static inline void splitSGR(char *&p)
@@ -269,12 +268,11 @@ static inline void splitSGR(char *&p)
     }
 }
 
-static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
+static char *writeColor(TermColor color, bool isFg, char *p) noexcept
 {
     // RGB and XTerm256 colors get a separate SGR sequence because some
     // terminal emulators may otherwise have trouble processing them.
     using namespace detail;
-    char *p = s;
     switch (color.type)
     {
         case TermColor::Default:
@@ -286,7 +284,7 @@ static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
                 // <38,48>;5;i;
                 splitSGR(p);
                 push(p, isFg, "38;5;", "48;5;");
-                p += fast_btoa(color.idx, p);
+                p = fast_btoa(color.idx, p);
                 push(p, ";");
                 splitSGR(p);
             }
@@ -294,10 +292,10 @@ static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
             {
                 if (color.idx >= 8)
                     // <90-97,100-107>;
-                    p += fast_btoa(color.idx - 8 + (isFg ? 90 : 100), p);
+                    p = fast_btoa(color.idx - 8 + (isFg ? 90 : 100), p);
                 else
                     // <30-37,40-47>;
-                    p += fast_btoa(color.idx + (isFg ? 30 : 40), p);
+                    p = fast_btoa(color.idx + (isFg ? 30 : 40), p);
                 push(p, ";");
             }
             break;
@@ -307,7 +305,7 @@ static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
             push(p, isFg, "38;2;", "48;2;");
             for (int i = 2; i >= 0; --i)
             {
-                p += fast_btoa(color.bgr[i], p);
+                p = fast_btoa(color.bgr[i], p);
                 push(p, ";");
             }
             splitSGR(p);
@@ -315,7 +313,7 @@ static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
         case TermColor::NoColor:
             break;
     }
-    return p - s;
+    return p;
 }
 
 // Color conversion functions
