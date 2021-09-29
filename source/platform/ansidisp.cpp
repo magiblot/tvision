@@ -238,15 +238,8 @@ static constexpr c_str
 static inline size_t writeAttributes( const TermAttr &attr,
                                       const TermAttr &lastAttr, char *buf ) noexcept
 {
-    TStringView header = CSI;
     char *p = buf;
-    push(p, header);
-    char *w = buf,
-         *h = p;
-    // INVARIANT:
-    // h points after the last CSI.
-    // w points after the last character that should be printed.
-    // p points after the last character written into buf.
+    push(p, CSI);
 
     writeFlag(p, attr, lastAttr, slBold, boldOnOff);
     writeFlag(p, attr, lastAttr, slItalic, italicOnOff);
@@ -260,17 +253,26 @@ static inline size_t writeAttributes( const TermAttr &attr,
     if (attr.bg != lastAttr.bg)
         p += writeColor(attr.bg, false, p);
 
-    if (p != h)
-    {
-        *(p - 1) = 'm';
-        w = p;
-    }
+    if (p[-1] == ';')
+        p[-1] = 'm';
+    else
+        p -= strlen(CSI);
+    return p - buf;
+}
 
-    return w - buf;
+static inline void splitSGR(char *&p)
+{
+    if (p[-1] == ';')
+    {
+        p[-1] = 'm';
+        push(p, CSI);
+    }
 }
 
 static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
 {
+    // RGB and XTerm256 colors get a separate SGR sequence because some
+    // terminal emulators may otherwise have trouble processing them.
     using namespace detail;
     char *p = s;
     switch (color.type)
@@ -282,25 +284,33 @@ static size_t writeColor(TermColor color, bool isFg, char * const s) noexcept
             if (color.idx >= 16)
             {
                 // <38,48>;5;i;
+                splitSGR(p);
                 push(p, isFg, "38;5;", "48;5;");
                 p += fast_btoa(color.idx, p);
+                push(p, ";");
+                splitSGR(p);
             }
-            else if (color.idx >= 8)
-                // <90-97,100-107>;
-                p += fast_btoa(color.idx - 8 + (isFg ? 90 : 100), p);
             else
-                // <30-37,40-47>;
-                p += fast_btoa(color.idx + (isFg ? 30 : 40), p);
-            push(p, ";");
+            {
+                if (color.idx >= 8)
+                    // <90-97,100-107>;
+                    p += fast_btoa(color.idx - 8 + (isFg ? 90 : 100), p);
+                else
+                    // <30-37,40-47>;
+                    p += fast_btoa(color.idx + (isFg ? 30 : 40), p);
+                push(p, ";");
+            }
             break;
         case TermColor::RGB:
             // <38,48>;2;r;g;b;
+            splitSGR(p);
             push(p, isFg, "38;2;", "48;2;");
             for (int i = 2; i >= 0; --i)
             {
                 p += fast_btoa(color.bgr[i], p);
                 push(p, ";");
             }
+            splitSGR(p);
             break;
         case TermColor::NoColor:
             break;
