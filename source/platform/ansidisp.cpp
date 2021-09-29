@@ -4,50 +4,88 @@
 
 #define CSI "\x1B["
 
+inline AnsiDisplayBase::Buffer::~Buffer()
+{
+    free(head);
+}
+
+inline char *AnsiDisplayBase::Buffer::data() noexcept
+{
+    return head;
+}
+
+inline size_t AnsiDisplayBase::Buffer::size() const noexcept
+{
+    return tail - head;
+}
+
+inline void AnsiDisplayBase::Buffer::clear() noexcept
+{
+    tail = head;
+}
+
+inline void AnsiDisplayBase::Buffer::push(TStringView s) noexcept
+{
+    memcpy(tail, s.data(), s.size());
+    tail += s.size();
+}
+
+inline void AnsiDisplayBase::Buffer::push(char c) noexcept
+{
+    *tail++ = c;
+}
+
+inline void AnsiDisplayBase::Buffer::reserve(size_t extraCapacity) noexcept
+{
+    size_t oldSize = size();
+    if (oldSize + extraCapacity > capacity)
+    {
+        capacity = max<size_t>(4096, 2*capacity);
+        if (!(head = (char *) realloc(head, capacity)))
+            abort();
+        tail = head + oldSize;
+    }
+}
+
 AnsiDisplayBase::~AnsiDisplayBase()
 {
     clearAttributes();
     lowlevelFlush();
 }
 
-void AnsiDisplayBase::bufWrite(TStringView s) noexcept
-{
-    buf.insert(buf.end(), s.data(), s.data()+s.size());
-}
-
-void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
+inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
 {
     using namespace detail;
     // CSI a F
-    char s[32] = CSI;
-    char *p = s + sizeof(CSI) - 1;
-    p += fast_utoa(a, p);
-    *p++ = F;
-    bufWrite({s, size_t(p - s)});
+    buf.reserve(32);
+    buf.push(CSI);
+    buf.tail += fast_utoa(a, buf.tail);
+    buf.push(F);
 }
 
-void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
+inline void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
 {
     using namespace detail;
     // CSI a ; b F
-    char s[32] = CSI;
-    char *p = s + sizeof(CSI) - 1;
-    p += fast_utoa(a, p);
-    *p++ = ';';
-    p += fast_utoa(b, p);
-    *p++ = F;
-    bufWrite({s, size_t(p - s)});
+    buf.reserve(32);
+    buf.push(CSI);
+    buf.tail += fast_utoa(a, buf.tail);
+    buf.push(';');
+    buf.tail += fast_utoa(b, buf.tail);
+    buf.push(F);
 }
 
 void AnsiDisplayBase::clearAttributes() noexcept
 {
-    bufWrite(CSI "0m");
+    buf.reserve(4);
+    buf.push(CSI "0m");
     lastAttr = {};
 }
 
 void AnsiDisplayBase::clearScreen() noexcept
 {
-    bufWrite(CSI "2J");
+    buf.reserve(4);
+    buf.push(CSI "2J");
 }
 
 namespace ansidisp
@@ -61,10 +99,9 @@ void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
                                           const TermCap &termcap ) noexcept
 {
     using namespace ansidisp;
-    char s[256];
-    size_t l = convertAttributes(attr, lastAttr, termcap, s);
-    bufWrite({s, l});
-    bufWrite(chars);
+    buf.reserve(256);
+    buf.tail += convertAttributes(attr, lastAttr, termcap, buf.tail);
+    buf.push(chars);
 }
 
 void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint) noexcept
@@ -83,7 +120,7 @@ void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y) noexcept
 void AnsiDisplayBase::lowlevelFlush() noexcept
 {
     TermIO::consoleWrite(buf.data(), buf.size());
-    buf.resize(0);
+    buf.clear();
 }
 
 //////////////////////////////////////////////////////////////////////////

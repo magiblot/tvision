@@ -5,7 +5,6 @@
 #include <tvision/tv.h>
 
 #include <internal/termdisp.h>
-#include <vector>
 
 // TermColor represents a color that is to be printed to screen
 // using certain ANSI escape sequences.
@@ -72,12 +71,27 @@ struct TermAttr
  * with input strategies which depend on a certain display strategy,
  * as is the case of NcursesInput and NcursesDisplay. */
 
-class AnsiDisplayBase {
+class AnsiDisplayBase
+{
+    class Buffer
+    {
+        char *head {nullptr};
+        size_t capacity {0};
+    public:
+        char *tail {nullptr};
 
-    std::vector<char> buf;
+        ~Buffer();
+        char *data() noexcept;
+        size_t size() const noexcept;
+        void clear() noexcept;
+        void push(TStringView) noexcept;
+        void push(char) noexcept;
+        void reserve(size_t) noexcept;
+    };
+
+    Buffer buf;
     TermAttr lastAttr {};
 
-    void bufWrite(TStringView s) noexcept;
     void bufWriteCSI1(uint a, char F) noexcept;
     void bufWriteCSI2(uint a, uint b, char F) noexcept;
 
