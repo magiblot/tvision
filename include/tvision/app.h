@@ -285,6 +285,7 @@ public:
     static TMenuBar * _NEAR menuBar;
     static TDeskTop * _NEAR deskTop;
     static int _NEAR appPalette;
+    static int _NEAR appEventTimeout;
 
 protected:
 

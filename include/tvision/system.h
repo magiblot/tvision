@@ -225,7 +225,6 @@ struct MessageEvent
 
 struct TEvent
 {
-
     ushort what;
     union
     {
@@ -233,9 +232,11 @@ struct TEvent
         KeyDownEvent keyDown;
         MessageEvent message;
     };
+
     void getMouseEvent() noexcept;
     void getKeyEvent() noexcept;
-
+    static void waitEvent(int timeoutMs) noexcept;
+    static void putNothing() noexcept;
 };
 
 #endif  // Uses_TEvent
@@ -259,11 +260,6 @@ public:
 
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
-
-    static void sleepUntilEvent() noexcept;
-    static void wakeUp() noexcept;
-
-    static int _NEAR eventTimeoutMs;
 
 private:
 

@@ -34,6 +34,7 @@ TMenuBar * _NEAR TProgram::menuBar = 0;
 TDeskTop * _NEAR TProgram::deskTop = 0;
 TProgram * _NEAR TProgram::application = 0;
 int _NEAR TProgram::appPalette = apColor;
+int _NEAR TProgram::appEventTimeout = 20; // 50 wake-ups per second.
 TEvent _NEAR TProgram::pending;
 
 extern TPoint shadowSize;
@@ -127,7 +128,7 @@ void TProgram::getEvent(TEvent& event)
         }
     else
         {
-        TEventQueue::sleepUntilEvent();
+        TEvent::waitEvent(appEventTimeout);
         event.getMouseEvent();
         if( event.what == evNothing )
             {

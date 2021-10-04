@@ -58,8 +58,6 @@ MouseEventType _NEAR TEventQueue::downMouse;
 
 TMouse *TEventQueue::mouse;
 
-int _NEAR TEventQueue::eventTimeoutMs = 20; // 50 wake-ups per second.
-
 TEventQueue::TEventQueue() noexcept
 {
     static TMouse mouse;
@@ -357,14 +355,14 @@ I   INT 16h;
 #endif
 }
 
-void TEventQueue::sleepUntilEvent() noexcept
+void TEvent::waitEvent(int timeoutMs) noexcept
 {
 #if defined( __FLAT__ )
-    THardwareInfo::waitForEvents(eventTimeoutMs);
+    THardwareInfo::waitForEvents(timeoutMs);
 #endif
 }
 
-void TEventQueue::wakeUp() noexcept
+void TEvent::putNothing() noexcept
 {
 #if defined( __FLAT__ )
     THardwareInfo::stopEventWait();
