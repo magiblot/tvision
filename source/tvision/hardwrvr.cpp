@@ -108,15 +108,17 @@ ushort THardwareInfo::biosSel;
 
 #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
 
+static void *GetKernel32Proc(const char *name)
+{
+    HMODULE mod = GetModuleHandle("KERNEL32");
+    return mod != 0 ? GetProcAddress(mod, name) : 0;
+};
+
 // Constructor for 16-bit version is in HARDWARE.ASM
 
 THardwareInfo::THardwareInfo()
 {
-    HMODULE mod;
-
-    if( (mod = GetModuleHandle( "KERNEL32" )) != 0 &&
-         GetProcAddress( mod, "Borland32" ) != 0
-      )
+    if( GetKernel32Proc("Borland32") != 0 )
         platform = plDPMI32;
     else
         platform = plWinNT;
@@ -162,25 +164,25 @@ THardwareInfo::~THardwareInfo()
 
 void THardwareInfo::reloadScreenInfo()
 {
-    // Update sbInfo with the current screen buffer info.
     GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 }
 
 void THardwareInfo::setUpConsole()
 {
-    // SetConsoleActiveScreenBuffer depends on Kernel32.dll.
-    // It can't be executed in DOS mode.
-    if( platform == plWinNT )
+    // SetConsoleActiveScreenBuffer is not available on DPMI32.
+    void *proc = GetKernel32Proc("SetConsoleActiveScreenBuffer");
+    if( proc != 0 )
         {
-        SetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
+        ((BOOL WINAPI(*)(HANDLE)) proc)( consoleHandle[cnOutput] );
         reloadScreenInfo();
         }
 }
 
 void THardwareInfo::restoreConsole()
 {
-    if( platform == plWinNT )
-        SetConsoleActiveScreenBuffer( consoleHandle[cnStartup] );
+    void *proc = GetKernel32Proc("SetConsoleActiveScreenBuffer");
+    if( proc != 0 )
+        ((BOOL WINAPI(*)(HANDLE)) proc)( consoleHandle[cnStartup] );
 }
 
 ushort THardwareInfo::getScreenMode()

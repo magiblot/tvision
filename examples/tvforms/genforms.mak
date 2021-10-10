@@ -35,7 +35,7 @@ TVSUFFIX = d
 
 !if $d(DOS32)
 CC      = bcc32
-TVLIB   = tv32$(TVSUFFIX).lib import32.lib
+TVLIB   = tv32$(TVSUFFIX).lib
 CCFLAGS = -WX -I$(INCPATH) -L$(LIBPATH)
 !else
 CC      = bcc

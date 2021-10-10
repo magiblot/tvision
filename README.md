@@ -209,36 +209,6 @@ This will compile the library into a `LIB` directory next to `project`, and will
 
 I'm sorry, the root makefile assumes it is executed from the `project` directory. You can still run the original makefiles directly (in `source/tvision` and `examples/*`) if you want to use different settings.
 
-The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp`) from this project's root is:
-
-```sh
-# 16-bit, real mode DOS.
-BCC.EXE -ml -Iinclude hello.cpp lib/tv.lib
-
-# 32-bit, native Win32 application.
-BCC32.EXE -WC -Iinclude hello.cpp lib/tv32.lib
-
-# 32-bit, protected mode DOS (DPMI32).
-BCC32.EXE -WX -Iinclude hello.cpp lib/tv32.lib import32.lib
-```
-
-Note the extra `import32.lib` when using `-WX`. This file is provided by Borland C++, so it will be found as long as the compiler is configured properly (i.e. libraries and headers are looked up in `$(BCROOT)\LIB` and `$(BCROOT)\INCLUDE` by default). If you don't link against this file, you will get the following error:
-
-```
-Linker Error: Unresolved External 'SetConsoleActiveScreenBuffer' referenced from module hardwrvr.cpp
-```
-
-Additionally, you may get a warning like this one when running DPMI32 applications on an actual DOS environment:
-
-```
-32loader error: 'C:\HELLO.EXE'
-    Invalid import references:
-       - module 'kernel32.dll' entrypoint 'SetConsoleActiveScreenBuffer'
-    Do you want to attempt running this program (Y/N)?
-```
-
-But don't worry, you can ignore them.
-
 <div id="build-cmake"></div>
 
 ### Turbo Vision as a CMake dependency (not Borland C++)
