@@ -42,7 +42,7 @@ The original location of this project is https://github.com/magiblot/tvision.
 
 A lot has changed since Borland created Turbo Vision in the early 90's. Many GUI tools today separate appearance specification from behaviour specification, use safer or dynamic languages which do not segfault on error, and support either parallel or asynchronous programming, or both.
 
-Turbo Vision does none of that, but it certainly overcomes many of the issues programmers still face today when writing terminal applications:
+Turbo Vision does not excel at any of those, but it certainly overcomes many of the issues programmers still face today when writing terminal applications:
 
 1. Forget about terminal capabilities and direct terminal I/O. When writing a Turbo Vision application, all you have to care about is what you want your application to behave and look like—there is no need to add workarounds in your code. Turbo Vision tries its best to produce the same results on all environments. For example: in order to get a bright background color on the Linux console, the *blink* attribute has to be set. Turbo Vision does this for you.
 
@@ -274,7 +274,7 @@ If you choose the CMake build system for your application, there are two main wa
     target_link_libraries(my_application tvision::tvision)
     ```
 
-* Have Turbo Vision in a submodule in your repository, and import it with `add_subdirectory`:
+* Have Turbo Vision in a submodule in your repository and import it with `add_subdirectory`:
 
 
     ```cmake
@@ -290,83 +290,79 @@ In either case, `<tvision/tv.h>` will be available in your application's include
 
 ### Modern platforms (not Borland C++)
 
-* UTF-8 support both in terminal I/O and the API. You can try Unicode support out in the `tvedit` and `tvdemo` applications.
-* True Color.
-* Implementation of some Borland C++ RTL functions: `findfirst`, `findnext`, `fnsplit`, `_dos_findfirst`, `_dos_findnext`, `getdisk`, `setdisk`, `getcurdir`, `filelength`.
-* Accepts both Unix and Windows-style file paths in 'Open File' dialogs.
-* Compatibility with 32-bit help files.
-
-### Linux
-
-* Ncurses-based terminal support.
-* Mouse and key modifiers support on the Linux console.
-* Overall better display performance than SET's or Sergio Sigala's ports.
+* UTF-8 support. You can try it out in the `tvedit` application.
+* 24-bit color support (up from the original 16 colors).
+* 'Open File' dialogs accepts both Unix and Windows-style file paths and can expand `~/` into `$HOME`.
 * Redirection of `stdin`/`stdout`/`stderr` does not interfere with terminal I/O.
+* Compatibility with 32-bit help files.
 
 There are a few environment variables that affect the behaviour of all Turbo Vision applications:
 
-* `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ncurses` and `ansi`. Default is `ansi`, which is a custom strategy that avoids redundant buffering and UTF-8 to wide char conversions. If you have issues, you may try `ncurses` instead.
-* `TVISION_MAX_FPS`: limit of times screen changes are drawn to the terminal, default `60`. This helps keeping the draw performance reasonable. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to THardwareInfo::screenWrite (useful for debugging).
-* `TVISION_ESCDELAY`: the delay of time, in milliseconds, that should be waited after receiving an ESC key press. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination.
-* `TVISION_CODEPAGE`: the character set used internally by Turbo Vision to translate *extended ASCII* into Unicode. Only `437` and `850` are supported at the moment, although adding more costs as little as adding an array of translations in `source/platform/tables.cpp`.
-* `TVISION_USE_STDIO`: if defined, terminal I/O is performed through `stdin`/`stdout`, so that it can be redirected from the shell. By default, Turbo Vision performs terminal I/O through `/dev/tty`, allowing the user to redirect `stdin`, `stdout` and `stderr` for their needs, without affecting the application's stability.
+* `TVISION_MAX_FPS`: maximum refresh rate, default `60`. This can help keep smoothness in terminal emulators with unefficient handling of box-drawing characters. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to `THardwareInfo::screenWrite` (useful when debugging).
+
+* `TVISION_CODEPAGE`: the character set used internally by Turbo Vision to translate *extended ASCII* into Unicode. Valid values at the moment are `437` and `850`, with `437` being the default, although adding more takes very little effort.
+
+### Unix
+
+* Ncurses-based terminal support.
+* Extensive mouse and keyboard support:
+    * Support for X10 and SGR mouse encodings.
+    * Support for Xterm's [*modifyOtherKeys*](https://invisible-island.net/xterm/manpage/xterm.html#VT100-Widget-Resources:modifyOtherKeys).
+    * Support for Paul Evans' [*fixterms*](http://www.leonerd.org.uk/hacks/fixterms/) and Kitty's [keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/).
+    * Support for key modifiers (via `TIOCLINUX`) and mouse (via GPM) in the Linux console.
+
+The following environment variables are also taken into account:
+
+* `TERM`: Ncurses uses it to determine terminal capabilities. It is set automatically by the terminal emulator.
+* `COLORTERM`: when set to `truecolor` or `24bit`, Turbo Vision will assume the terminal emulator supports 24-bit color. It is set automatically by terminal emulators that support it.
+* `TVISION_ESCDELAY`: the number of milliseconds to wait after receiving an ESC key press, default `10`. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination. Using a larger value is useful when the terminal doesn't support the Alt key.
+* `TVISION_USE_STDIO`: when not empty, terminal I/O is performed through `stdin`/`stdout`, so that it can be redirected from the shell. By default, Turbo Vision performs terminal I/O through `/dev/tty`, allowing the user to redirect `stdin`, `stdout` and `stderr` for their needs, without affecting the application's stability.
 
     For example, the following will leave `out.txt` empty:
 
     ```sh
-    ./tvdemo | tee out.txt
+    tvdemo | tee out.txt
     ```
 
     While the following will dump all the escape sequences and text printed by the application into `out.txt`:
 
     ```sh
-    TVISION_USE_STDIO= ./tvdemo | tee out.txt
+    TVISION_USE_STDIO=1 tvdemo | tee out.txt
     ```
+* `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ansi` and `ncurses`, with `ansi` being the default. The Ncurses library is used in either case, with the difference that `ncurses` uses Ncurses' own draw methods and is limited to 16 colors, while `ansi` supports 24-bit color and avoids redundant buffering and UTF-8 to wide char conversions.
 
 ### Windows
 
-* Only compatible with the Win32 Console API.
-* Applications fit the console window size instead of the buffer size (no scrollbars are visible).
-* The console buffer is restored when exiting or suspending Turbo Vision.
-* `kbCtrlC`, Shift+Arrow, `kbShiftTab` and AltGr key combinations work properly.
-* No busy polling for events (i.e. no 100% CPU consumption on idle, which is how it originally was).
+* Only compatible with the Win32 Console API. On terminal emulators that don't support this, Turbo Vision will automatically pop up a separate console window.
+* Applications fit the console window size instead of the buffer size (no scrollbars are visible) and the console buffer is restored when exiting or suspending Turbo Vision.
 
 The following are not available when compiling with Borland C++:
 
 * The console's codepage is set to UTF-8 on startup and restored on exit.
-* Microsoft's C runtime functions are set automatically to UTF-8 mode, so you do not need to use the `wchar_t` variants.
+* Microsoft's C runtime functions are set automatically to UTF-8 mode, so you as a developer don't need to use the `wchar_t` variants.
 * If the console crashes, a new one is allocated automatically.
 
-**Note:** Turbo Vision writes UTF-8 text directly to the Windows console. If the console is set in legacy mode and the bitmap font is being used, Unicode characters will not be displayed properly ([photo](https://user-images.githubusercontent.com/20713561/91917174-7a1f4600-ecbf-11ea-8c7a-2ec80d31d2ca.png)).
+**Note:** Turbo Vision writes UTF-8 text directly to the Windows console. If the console is set in legacy mode and the bitmap font is being used, Unicode characters will not be displayed properly ([photo](https://user-images.githubusercontent.com/20713561/91917174-7a1f4600-ecbf-11ea-8c7a-2ec80d31d2ca.png)). To avoid this, Turbo Vision detects this situation and tries to change the console font to `Consolas` or `Lucida Console`.
 
 ### All platforms
 
-* Middle mouse button support (`mbMiddleButton`), even on DOS.
-* Horizontal and vertical mouse wheel support (`evMouseWheel`), even on DOS.
-* Arbitrary screen size support (with up to 65535 rows or columns).
-* Notably improved memory safety.
-* Graceful handling of screen resize events.
-* Windows can be resized also from their bottom left corner.
+The following are new features not available in Borland's release of Turbo Vision or in previous open source ports (Sigala, SET):
+
+* Middle mouse button and mouse wheel support.
+* Arbitrary screen size support (up to 32767 rows or columns) and graceful handling of screen resize events.
+* Windows can be resized from their bottom left corner.
 * Windows can be dragged from empty areas with the middle mouse button.
-* Support for `kbCtrlUp` and `kbCtrlDown` key codes (which don't work on 16-bit DOS, don't ask me why). They can be used to move windows faster with the keyboard (as `kbCtrlLeft` and `kbCtrlRight` already did).
-* Improved usability of menus: they can be closed by clicking again on them, even submenus.
-* Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They are responsive by default to mouse wheel events.
-* Views don't lose their sizes when extremely resized.
+* Improved usability of menus: they can be closed by clicking again on the parent menu item.
+* Improved usability of scrollbars: dragging them also scrolls the page. Clicking on an empty area of the scrollbar moves the thumb right under the cursor. They respond by default to mouse wheel events.
 * `TInputLine`s no longer scroll the text display on focus/unfocus, allowing relevant text to stay visible.
-* Support for LF line endings in `tvdemo` and `tvedit`. `tvedit` preserves the line ending on file save but all newly created files use CRLF by default.
-* `tvedit`: context menu on right click.
-* `tvedit`: drag scroll with middle mouse button.
-* `tvedit`: delete whole word with `kbCtrlBack` and `kbCtrlDel` (note to Linux users: they might not work on terminal emulators, but they do work on the console).
-* `tvedit`: smart Home key (toggles between beginning of line and beginning of indented text).
-* `tvedit`: support for files bigger than 64 KiB on 32-bit or 64-bit builds.
+* Support for LF line endings in `TFileViewer` (`tvdemo`) and `TEditor` (`tvedit`). `TEditor` preserves the line ending on file save but all newly created files use CRLF by default.
+* `TEditor`: context menu on right click.
+* `TEditor`: drag scroll with middle mouse button.
+* `TEditor`: delete whole words with `kbCtrlBack` and `kbCtrlDel`.
+* `TEditor`: the Home key toggles between beginning of line and beginning of indented text.
+* `TEditor`: support for files bigger than 64 KiB on 32-bit or 64-bit builds.
 * `tvdemo`: event viewer applet useful for event debugging.
 * `tvdemo`: option to change the background pattern.
-
-## Not implemented
-
-### Linux
-
-* `evMouseAuto`.
 
 <div id="apichanges"></div>
 
@@ -376,27 +372,25 @@ The following are not available when compiling with Borland C++:
 * `TDrawBuffer` is no longer a fixed-length array. The equivalent of `sizeof(TDrawBuffer)/sizeof(ushort)` is the `.length()` method.
 * `TTextDevice` is now buffered, so if you were using `otstream` you may have to send `std::flush` or `std::endl` through it for `do_sputn` to be invoked.
 * `TApplication` now provides `dosShell()`, `cascade()` and `tile()`, and handles `cmDosShell`, `cmCascade` and `cmTile` by default. These functions can be customized by overriding `getTileRect()` and `writeShellMsg()`. This is the same behaviour as in the Pascal version.
+* Mouse wheel support: new mouse event `evMouseWheel`. The wheel direction is specified in the new field `event.mouse.wheel`, whose possible values are `mwUp`, `mwDown`, `mwLeft` or `mwRight`.
+* Middle mouse button support: new mouse button flag `mbMiddleButton`.
 * The `buttons` field in `evMouseUp` events is no longer empty. It now indicates which button was released.
 * Triple-click support: new mouse event flag `meTripleClick`.
-* `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void`, so that they can be chained.
+* `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void` so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
 * New function `ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver=0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.
 * New virtual method `TMenuItem& TEditor::initContextMenu(TPoint p)` that determines the entries of the right-click context menu in `TEditor`.
 * `fexpand` can now take a second parameter `relativeTo`.
-* New class `TStringView`, which is a clone of `std::string_view`. You shouldn't need it unless you are programming in Borland C++, which has no `std::string_view`.
-* Many methods which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
-* New class `TSpan<T>`, a generic (and non-const) version of `TStringView`, inspired by `std::span`.
+* New class `TStringView`, inspired by `std::string_view`.
+    * Many functions which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
+* New class `TSpan<T>`, inspired by `std::span`.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
-* New method `TView::textEvent` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
+* New method `TVMemMgr::reallocateDiscardable()` which can be used along `allocateDiscardable` and `freeDiscardable`.
+* New method `TView::textEvent()` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
 * Unicode support, see [Unicode](#unicode).
 * True Color support, see [extended colors](#color).
-
-### Changes that you probably won't care about
-
-I don't want extensions to be left undocumented, so I'll write them down just for the record.
-
-* `TEvent::getKeyEvent()` now takes a `blocking` parameter which is `True` by default, making it possible to query input events in a non-blocking way.
-* New method `TVMemMgr::reallocateDiscardable` which can be used along `allocateDiscardable` and `freeDiscardable`.
+* New method `static void TEvent::waitEvent(int timeoutMs)` which may block for up to `timeoutMs` milliseconds waiting for input events. If it blocks, it has the side effect of flushing screen updates. It is invoked by `TProgram::getEvent()` with `static int TProgram::appEventTimeout` (default `20`) as argument so that the event loop doesn't consume 100% CPU.
+* New method `static void TEvent::putNothing()` which puts an `evNothing` event into the event queue and causes `TEvent::waitEvent()` not to block until an `evNothing` is returned by `TEvent::getKeyEvent()`. This will usually cause the main thread to wake up from `TEvent::waitEvent()` and to invoke `TApplication::idle()` immediately. This method is thread-safe, so it can be used to unblock the event loop from any other thread.
 
 ## Screenshots
 
@@ -480,7 +474,7 @@ KeyDownEvent {
         }
     },
     .controlKeyState = 0x200 (kbInsState),
-    .text = {'\xC3', '\xB1', '\x00', '\x00'}, // In UTF-8
+    .text = {'\xC3', '\xB1'}, // In UTF-8
     .textLength = 2
 }
 ```
@@ -495,7 +489,7 @@ KeyDownEvent {
         }
     },
     .controlKeyState = 0x200 (kbInsState),
-    .text = {'\xE2', '\x82', '\xAC', '\x00'}, // In UTF-8
+    .text = {'\xE2', '\x82', '\xAC'}, // In UTF-8
     .textLength = 3
 }
 ```
@@ -510,7 +504,7 @@ KeyDownEvent {
         }
     },
     .controlKeyState = 0x20C (kbCtrlShift | kbInsState),
-    .text = {'\x00', '\x00', '\x00', '\x00'},
+    .text = {},
     .textLength = 0
 }
 ```
@@ -605,6 +599,7 @@ template <class Func>
 size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
 #endif
 bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
+bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TSpan<uint32_t> text, size_t &j);
 bool TText::next(TStringView text, size_t &index, size_t &width);
 bool TText::next(TStringView text, size_t &index);
 void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
@@ -667,7 +662,7 @@ writeBuf( 0, i, size.x, 1, b );
 ```
 All it does is move part of a string in `fileLines` into `b`, which is a `TDrawBuffer`. `delta` is a `TPoint` representing the scroll offset in the text view, and `i` is the index of the visible line being processed. `c` is the text color. A few issues are present:
 
-* `TDrawBuffer::moveStr(ushort, const char *, TColorAttr)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and become garbage when displayed.
+* `TDrawBuffer::moveStr(ushort, const char *, TColorAttr)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and be displayed as garbage.
 * `delta.x` is the first visible column. With multibyte-encoded text, it is no longer true that such column begins at position `delta.x` in the string.
 
 Below is a corrected version of the code above that handles Unicode properly:
@@ -720,7 +715,7 @@ Use cases where Unicode is not supported (not an exhaustive list):
 
 # Clipboard interaction
 
-Turbo Vision does not support accessing the system clipboard. So, in order to paste text into a Turbo Vision application, the user has to do so through the terminal emulator. Turbo Vision will then receive the text through standard input.
+The Turbo Vision API offers no integration with the system clipboard. As a developer you can still access it by other means (e.g. via [libclipboard](https://github.com/jtanx/libclipboard)). But unless you do that, the only way for a user to paste text into your application is to do so through the terminal emulator.
 
 Unfortunately, each character is processed as a separate `evKeyDown` event. If the user pastes 5000 characters, the application will execute the same operations as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen, etcetera. As you can imagine, this is far from optimal.
 
@@ -742,23 +737,18 @@ It is intended to be used as follows:
 
 ```c++
 // 'ev' is a TEvent, and 'ev.what' equals 'evKeyDown'.
-switch (ev.keyDown.keyCode) {
-    // Other cases we may want to check.
-    // ...
-    default:
-        // Does the event contain text?
-        if (ev.keyDown.textLength) {
-            char buf[512];
-            size_t length;
-            // Fill 'buf' with text from the input queue,
-            // including the text in 'ev'.
-            while (textEvent(ev, buf, length)) {
-                // Process 'length' bytes of text in 'buf'.
-                // ...
-            }
-            // 'textEvent()' clears 'ev' after reading it the first time.
-            // That is, by this point, 'ev.what' is 'evNothing'.
-        }
+// If the event contains text...
+if (ev.keyDown.textLength) {
+    char buf[512];
+    size_t length;
+    // Fill 'buf' with text from the input queue,
+    // including the text in 'ev'.
+    while (textEvent(ev, buf, length)) {
+        // Process 'length' bytes of text in 'buf'.
+        // ...
+    }
+    // 'textEvent()' clears 'ev' after reading it the first time
+    // (by this point, 'ev.what' is 'evNothing').
 }
 ```
 
@@ -779,23 +769,23 @@ Although Turbo Vision applications are likely to be ran in a terminal emulator, 
 
 For example: color support varies among terminals. If the programmer uses a color format not supported by the terminal emulator, Turbo Vision will quantize it to what the terminal can display. The following images represent the quantization of a 24-bit RGB picture to 256, 16 and 8 color palettes:
 
-| `COLORTERM=truecolor` (original) | `TERM=xterm-256color`|
+| 24-bit color (original) | 256 colors |
 |:-:|:-:|
 |![mpv-shot0005](https://user-images.githubusercontent.com/20713561/111095336-7c4f4080-853d-11eb-8331-798898a2af68.png)|![mpv-shot0002](https://user-images.githubusercontent.com/20713561/111095333-7b1e1380-853d-11eb-8c4d-989fe24d0498.png)|
 
-| `TERM=xterm-16color` | `TERM=xterm` (bold as bright) |
+| 16 colors | 8 colors (bold as bright) |
 |:-:|:-:|
 |![mpv-shot0003](https://user-images.githubusercontent.com/20713561/111095334-7bb6aa00-853d-11eb-9a3f-e7decc0bac7d.png)|![mpv-shot0004](https://user-images.githubusercontent.com/20713561/111095335-7bb6aa00-853d-11eb-9098-38d6f6c3c1da.png)|
 
 Extended color support basically comes down to the following:
 * Turbo Vision has originally used [BIOS color attributes](https://en.wikipedia.org/wiki/BIOS_color_attributes) stored in an `uchar`. `ushort` is used to represent attribute pairs. This is still the case when using Borland C++.
-* In modern platforms there is a new type named `TColorAttr` which replaces `uchar`. It specifies a foreground and background colors and a style. Colors can be specified in different formats (BIOS color attributes, 24-bit RGB...). Styles are the typical ones (bold, italic, underline...). There's also `TAttrPair`, which replaces `ushort`.
-* The `TDrawBuffer` methods, which used to take `uchar` or `ushort` parameters to specify color attributes, now take `TColorAttr` or `TAttrPair`.
+* In modern platforms a new type `TColorAttr` has been added which replaces `uchar`. It specifies a foreground and background color and a style. Colors can be specified in different formats (BIOS color attributes, 24-bit RGB...). Styles are the typical ones (bold, italic, underline...). There's also `TAttrPair`, which replaces `ushort`.
+* `TDrawBuffer`'s methods, which used to take `uchar` or `ushort` parameters to specify color attributes, now take `TColorAttr` or `TAttrPair`.
 * `TPalette`, which used to contain an array of `uchar`, now contains an array of `TColorAttr`. The `TView::mapColor` method also returns `TColorAttr` instead of `uchar`.
 * `TView::mapColor` has been made virtual so that the palette system can be bypassed without having to rewrite any `draw` methods.
 * `TColorAttr` and `TAttrPair` can be initialized with and casted into `uchar` and `ushort` in a way such that legacy code still compiles out-of-the-box without any change in functionality.
 
-Below is a more detailed explanation aimed at programmers.
+Below is a more detailed explanation aimed at developers.
 
 <details>
 <summary>API reference of extended color support (<i>click to expand</i>).</summary>
@@ -1083,6 +1073,16 @@ TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
 }
 ```
 
+## Display capabilities
+
+`TScreen::screenMode` exposes some information about the display's color support:
+
+* If `(TScreen::screenMode & 0xFF) == TDisplay::smMono`, the display is monocolor (only relevant in DOS).
+* If `(TScreen::screenMode & 0xFF) == TDisplay::smBW80`, the display is grayscale (only relevant in DOS).
+* If `(TScreen::screenMode & 0xFF) == TDisplay::smCO80`, the display supports at least 16 colors.
+    * If `TScreen::screenMode & TDisplay::smColor256`, the display supports at least 256 colors.
+    * If `TScreen::screenMode & TDisplay::smColorHigh`, the display supports even more colors (e.g. 24-bit color). `TDisplay::smColor256` is also set in this case.
+
 ## Backward-compatibility
 
 The types defined previously represent concepts that are also important when developing for Borland C++:
@@ -1164,3 +1164,4 @@ The code above still works just like it did originally. It's only non-BIOS color
 
 Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is, minimizing the risk of increasing code complexity or introducing bugs.
 </details>
+</br>
