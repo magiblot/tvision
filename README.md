@@ -377,6 +377,7 @@ If you know of any Turbo Vision applications whose source code has not been lost
 If your application is based on this project and you'd like it to appear in the following list, just let me know.
 
 * [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
+* [tvterm](https://github.com/magiblot/tvterm) by [magiblot](https://github.com/magiblot), a proof-of-concept terminal emulator.
 * [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly), a programming language for creating console applications.
 
 <div id="unicode"></div>
