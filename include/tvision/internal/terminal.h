@@ -145,8 +145,8 @@ namespace TermIO
 
     void mouseOn() noexcept;
     void mouseOff() noexcept;
-    void kittyKeysOn() noexcept;
-    void kittyKeysOff() noexcept;
+    void keyModsOn() noexcept;
+    void keyModsOff() noexcept;
 
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&) noexcept;

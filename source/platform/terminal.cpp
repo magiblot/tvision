@@ -280,16 +280,24 @@ void TermIO::mouseOff() noexcept
     consoleWrite(seq.data(), seq.size());
 }
 
-void TermIO::kittyKeysOn() noexcept
+void TermIO::keyModsOn() noexcept
 {
+    // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
     // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
-    TStringView seq = "\x1B[>1u"; // Disambiguate escape codes.
+    TStringView seq = "\x1B[?1036s" // Save metaSendsEscape (XTerm).
+                      "\x1B[?1036h" // Enable metaSendsEscape (XTerm).
+                      "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
+                      "\x1B[>1u"    // Disambiguate escape codes (Kitty).
+                    ;
     consoleWrite(seq.data(), seq.size());
 }
 
-void TermIO::kittyKeysOff() noexcept
+void TermIO::keyModsOff() noexcept
 {
-    TStringView seq = "\x1B[<u";
+    TStringView seq = "\x1B[<u"     // Restore previous keyboard mode (Kitty).
+                      "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
+                      "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
+                    ;
     consoleWrite(seq.data(), seq.size());
 }
 

@@ -269,7 +269,7 @@ NcursesInput::NcursesInput(bool mouse) noexcept :
      * special key sequences, I believe. */
     set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
-    TermIO::kittyKeysOn();
+    TermIO::keyModsOn();
     if (mouseEnabled)
     {
         mstate.where = {-1, -1};
@@ -284,7 +284,7 @@ NcursesInput::~NcursesInput()
 {
     if (mouseEnabled)
         TermIO::mouseOff();
-    TermIO::kittyKeysOff();
+    TermIO::keyModsOff();
 }
 
 int NcursesInput::getButtonCount() noexcept
