@@ -2,67 +2,52 @@
 #define TVISION_STDIOCTL_H
 
 #include <tvision/tv.h>
-#include <cstdio>
+#include <stdio.h>
 
-#ifdef _TV_UNIX
-
-class StdioCtl {
-
-    int fds[3];
-    FILE *files[3];
-    int ttyfd;
-    FILE *infile, *outfile;
-
-    StdioCtl() { setUp(); }
-    ~StdioCtl() { tearDown(); }
-
-    void setUp() noexcept;
-    void tearDown() noexcept;
-
-    static StdioCtl instance;
-
-public:
-
-    static int in() { return instance.fds[0]; }
-    static int out() { return instance.fds[1]; }
-    static int err() { return instance.fds[2]; }
-    static FILE *fin() { return instance.files[0]; }
-    static FILE *fout() { return instance.files[1]; }
-    static FILE *ferr() { return instance.files[2]; }
-
-};
-
-#elif defined(_WIN32)
-
+#ifdef _WIN32
 #include <tvision/compat/win.h>
+#endif
 
-class StdioCtl
+class StdioCtl final
 {
-
-    friend class Win32ConsoleStrategy;
-
-    enum { input = 0, activeOutput = 1, startupOutput = 2 };
-
+#ifdef _WIN32
+    enum { input = 0, startupOutput = 1, alternateOutput = 2 };
     struct
     {
         HANDLE handle {INVALID_HANDLE_VALUE};
         bool owning {false};
     } cn[3];
+    bool ownsConsole {false};
+    uint8_t activeOutput {startupOutput};
+#else
+    int ttyfd {-1};
+    int fds[2] {-1, -1};
+    FILE *infile {nullptr};
+    FILE *outfile {nullptr};
+#endif // _WIN32
 
-    bool ownsConsole {};
-
-    void setUp() noexcept;
-    void tearDown() noexcept;
-
-    static StdioCtl instance;
 
 public:
 
-    static HANDLE in() { return instance.cn[input].handle; }
-    static HANDLE out() { return instance.cn[activeOutput].handle; }
+    StdioCtl() noexcept;
+    ~StdioCtl();
 
+    void write(const char *data, size_t bytes) const noexcept;
+
+#ifdef _WIN32
+    HANDLE in() const noexcept { return cn[input].handle; }
+    HANDLE out() const noexcept { return cn[activeOutput].handle; }
+    void useAlternateScreenBuffer() noexcept;
+    void useStartupScreenBuffer() noexcept;
+#else
+    int in() const noexcept { return fds[0]; }
+    int out() const noexcept { return fds[1]; }
+    FILE *fin() const noexcept { return infile; }
+    FILE *fout() const noexcept { return outfile; }
+#ifdef __linux__
+    bool isLinuxConsole() const noexcept;
+#endif
+#endif // _WIN32
 };
-
-#endif // _TV_UNIX
 
 #endif // TVISION_STDIOCTL_H

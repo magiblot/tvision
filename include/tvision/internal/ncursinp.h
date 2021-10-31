@@ -13,11 +13,14 @@
 #include <internal/sigwinch.h>
 #include <internal/terminal.h>
 
+class NcursesDisplay;
+
 class NcursesInput : public InputStrategy
 {
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeout = 5 };
 
+    const StdioCtl &io;
     MouseState mstate;
     int buttonCount;
     bool mouseEnabled;
@@ -41,7 +44,8 @@ class NcursesInput : public InputStrategy
 
 public:
 
-    NcursesInput(bool mouse = true) noexcept;
+    // Lifetimes of 'io' and 'display' must exceed that of 'this'.
+    NcursesInput(const StdioCtl &io, NcursesDisplay &display, bool mouse) noexcept;
     ~NcursesInput();
 
     bool getEvent(TEvent &ev) noexcept;

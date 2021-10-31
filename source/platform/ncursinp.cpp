@@ -9,9 +9,9 @@
 #include <internal/ncursinp.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
+#include <internal/stdioctl.h>
 #include <internal/codepage.h>
 #include <internal/constmap.h>
-#include <internal/stdioctl.h>
 #include <string>
 
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
@@ -246,8 +246,9 @@ static const auto fromCursesHighKey =
     { "kc2",        {{kbDown},          0}},
 });
 
-NcursesInput::NcursesInput(bool mouse) noexcept :
-    InputStrategy(StdioCtl::in()),
+NcursesInput::NcursesInput(const StdioCtl &aIo, NcursesDisplay &, bool mouse) noexcept :
+    InputStrategy(aIo.in()),
+    io(aIo),
     mstate({}),
     buttonCount(0),
     mouseEnabled(mouse)
@@ -269,22 +270,22 @@ NcursesInput::NcursesInput(bool mouse) noexcept :
      * special key sequences, I believe. */
     set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
-    TermIO::keyModsOn();
+    TermIO::keyModsOn(io);
     if (mouseEnabled)
     {
         mstate.where = {-1, -1};
         // The button count is not really important. Turbo Vision only checks
         // whether it is non-zero.
         buttonCount = 2;
-        TermIO::mouseOn();
+        TermIO::mouseOn(io);
     }
 }
 
 NcursesInput::~NcursesInput()
 {
     if (mouseEnabled)
-        TermIO::mouseOff();
-    TermIO::keyModsOff();
+        TermIO::mouseOff(io);
+    TermIO::keyModsOff(io);
 }
 
 int NcursesInput::getButtonCount() noexcept

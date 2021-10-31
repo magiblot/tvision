@@ -260,27 +260,27 @@ namespace terminp
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
 
-void TermIO::mouseOn() noexcept
+void TermIO::mouseOn(const StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B[?1001s" // Save old highlight mouse reporting.
                       "\x1B[?1000h" // Enable mouse reporting.
                       "\x1B[?1002h" // Enable mouse drag reporting.
                       "\x1B[?1006h" // Enable SGR extended mouse reporting.
                     ;
-    consoleWrite(seq.data(), seq.size());
+    io.write(seq.data(), seq.size());
 }
 
-void TermIO::mouseOff() noexcept
+void TermIO::mouseOff(const StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B[?1006l" // Disable SGR extended mouse reporting.
                       "\x1B[?1002l" // Disable mouse drag reporting.
                       "\x1B[?1000l" // Disable mouse reporting.
                       "\x1B[?1001r" // Restore old highlight mouse reporting.
                     ;
-    consoleWrite(seq.data(), seq.size());
+    io.write(seq.data(), seq.size());
 }
 
-void TermIO::keyModsOn() noexcept
+void TermIO::keyModsOn(const StdioCtl &io) noexcept
 {
     // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
     // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
@@ -289,16 +289,16 @@ void TermIO::keyModsOn() noexcept
                       "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
                       "\x1B[>1u"    // Disambiguate escape codes (Kitty).
                     ;
-    consoleWrite(seq.data(), seq.size());
+    io.write(seq.data(), seq.size());
 }
 
-void TermIO::keyModsOff() noexcept
+void TermIO::keyModsOff(const StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B[<u"     // Restore previous keyboard mode (Kitty).
                       "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
                     ;
-    consoleWrite(seq.data(), seq.size());
+    io.write(seq.data(), seq.size());
 }
 
 bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept
@@ -620,10 +620,10 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-TPoint TermIO::Unix::getSize() noexcept
+TPoint TermIO::Unix::getSize(const StdioCtl &io) noexcept
 {
     struct winsize w;
-    for (int fd : {StdioCtl::in(), StdioCtl::out()})
+    for (int fd : {io.in(), io.out()})
     {
         if (ioctl(fd, TIOCGWINSZ, &w) != -1)
         {
@@ -637,40 +637,4 @@ TPoint TermIO::Unix::getSize() noexcept
     }
     return {0, 0};
 }
-
-void TermIO::consoleWrite(const char *data, size_t bytes) noexcept
-{
-    fflush(StdioCtl::fout());
-    size_t written = 0;
-    int r;
-    while ( 0 <= (r = ::write(StdioCtl::out(), data + written, bytes - written)) &&
-            (written += r) < bytes )
-        ;
-}
-
-#elif defined(_WIN32)
-
-void TermIO::consoleWrite(const char *data, size_t bytes) noexcept
-{
-    // Writing 0 bytes causes the cursor to become invisible for some time
-    // in old versions of the Windows console.
-    if (bytes != 0)
-        WriteConsole(StdioCtl::out(), data, bytes, nullptr, nullptr);
-}
-
 #endif // _TV_UNIX
-
-bool TermIO::isLinuxConsole() noexcept
-{
-#ifdef __linux__
-    /* This is the same function used to get the Shift/Ctrl/Alt modifiers
-     * on the console. It fails if stdin is not a console file descriptor. */
-    for (int fd : {StdioCtl::in(), StdioCtl::out()})
-    {
-        char subcode[] = {6, 0}; // Null-terminate so that valgrind doesn't complain.
-        if (ioctl(fd, TIOCLINUX, subcode) != -1)
-            return true;
-    }
-#endif
-    return false;
-}

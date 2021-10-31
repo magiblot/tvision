@@ -7,42 +7,44 @@
 
 #include <tvision/tv.h>
 #include <tvision/compat/win.h>
+#include <internal/stdioctl.h>
 
 class Win32Input;
 class Win32Display;
 
-class Win32ConsoleStrategy final : public PlatformStrategy
+class Win32ConsoleStrategy final : public ConsoleStrategy
 {
-    EventWaiter waiter;
+    StdioCtl &io;
     UINT cpInput, cpOutput;
 
-    Win32ConsoleStrategy( UINT cpInput, UINT cpOutput,
-                          DisplayStrategy *display,
-                          InputStrategy *input ) noexcept;
+
+    Win32ConsoleStrategy( StdioCtl &aIo,
+                          UINT cpInput, UINT cpOutput,
+                          DisplayStrategy &aDisplay,
+                          InputStrategy &aInput ) noexcept :
+        ConsoleStrategy(aDisplay, aInput),
+        io(aIo),
+        cpInput(cpInput),
+        cpOutput(cpOutput)
+    {
+    }
+
     ~Win32ConsoleStrategy();
 
-    static bool initConsole( UINT &cpInput, UINT &cpOutput,
-                             std::unique_ptr<DisplayStrategy> &display,
-                             std::unique_ptr<InputStrategy> &input ) noexcept;
-    void restoreConsole() noexcept;
-    void resetConsole() noexcept;
+    bool isAlive() noexcept override;
+    void forEachSource(void *, void (&)(void *, EventSource &)) noexcept override;
 
 public:
 
-    static Win32ConsoleStrategy *create() noexcept;
-
-    bool getEvent(TEvent &ev) noexcept override;
-    void waitForEvents(int ms) noexcept override;
-    void stopEventWait() noexcept override;
-
-    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
+    static Win32ConsoleStrategy &create(StdioCtl &io) noexcept;
+    static int charWidth(TStringView, char32_t) noexcept;
 };
 
-class Win32Input : public InputStrategy
+class Win32Input final : public InputStrategy
 {
-
-    bool insertState;
-    ushort surrogate;
+    const StdioCtl &io;
+    bool insertState {true};
+    ushort surrogate {0};
 
     bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;
     bool getKeyEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
@@ -51,31 +53,37 @@ class Win32Input : public InputStrategy
 
 public:
 
-    Win32Input() noexcept;
+    // The lifetime of 'aIo' must exceed that of 'this'.
+    Win32Input(const StdioCtl &aIo) noexcept :
+        InputStrategy(aIo.in()),
+        io(aIo)
+    {
+    }
 
     int getButtonCount() noexcept override;
     void cursorOn() noexcept override;
     void cursorOff() noexcept override;
-    bool getEvent(TEvent &ev) noexcept;
-
+    bool getEvent(TEvent &ev) noexcept override;
 };
 
 class Win32Display : public TerminalDisplay
 {
-
-    COORD dwSize;
-    uchar lastAttr;
+    COORD dwSize {};
+    uchar lastAttr {'\x00'};
     std::vector<char> buf;
 
 public:
 
-    Win32Display() noexcept;
+    // The lifetime of 'aIo' must exceed that of 'this'.
+    Win32Display(const StdioCtl &aIo) noexcept :
+        TerminalDisplay(aIo)
+    {
+    }
 
     void reloadScreenInfo() noexcept override;
     TPoint getScreenSize() noexcept override;
     int getCaretSize() noexcept override;
     int getColorCount() noexcept override;
-
     void clearScreen() noexcept override;
 
 protected:
@@ -84,7 +92,6 @@ protected:
     void lowlevelMoveCursor(uint x, uint y) noexcept override;
     void lowlevelCursorSize(int size) noexcept override;
     void lowlevelFlush() noexcept override;
-
 };
 
 #endif // _WIN32

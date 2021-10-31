@@ -6,24 +6,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-StdioCtl StdioCtl::instance;
-
-void StdioCtl::setUp() noexcept
+StdioCtl::StdioCtl() noexcept
 {
-    ttyfd = -1;
-    infile = outfile = nullptr;
     if (getEnv<TStringView>("TVISION_USE_STDIO").empty())
     {
-        // /dev/tty always points to the console but it doesn't play nicely
-        // with poll() on macOS, so prefer using the one pointed out by ttyname.
         for (int fd : {0, 1, 2})
             if (auto *name = ::ttyname(fd))
                 if ((ttyfd = ::open(name, O_RDWR)) != -1)
                     break;
-#ifndef __APPLE__
+        // Last resort, although this may lead to 100% CPU usage because
+        // /dev/tty is not supported by macOS's poll(),
         if (ttyfd == -1)
             ttyfd = ::open("/dev/tty", O_RDWR);
-#endif
     }
 
     if (ttyfd != -1)
@@ -31,23 +25,19 @@ void StdioCtl::setUp() noexcept
         for (auto &fd : fds)
             fd = ttyfd;
         infile = ::fdopen(ttyfd, "r");
-        files[0] = infile;
         outfile = ::fdopen(ttyfd, "w");
-        files[1] = outfile;
-        files[2] = outfile;
         fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
     }
     else
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 2; ++i)
             fds[i] = i;
-        files[0] = stdin;
-        files[1] = stdout;
-        files[2] = stderr;
+        infile = stdin;
+        outfile = stdout;
     }
 }
 
-void StdioCtl::tearDown() noexcept
+StdioCtl::~StdioCtl()
 {
     if (ttyfd != -1)
     {
@@ -56,17 +46,40 @@ void StdioCtl::tearDown() noexcept
         ::close(ttyfd);
         ::fclose(infile);
         ::fclose(outfile);
-        ttyfd = -1;
-        infile = outfile = nullptr;
-        for (int i = 0; i < 3; ++i)
-        {
-            fds[i] = -1;
-            files[i] = nullptr;
-        }
     }
 }
 
+void StdioCtl::write(const char *data, size_t bytes) const noexcept
+{
+    fflush(fout());
+    size_t written = 0;
+    int r;
+    while ( 0 <= (r = ::write(out(), data + written, bytes - written)) &&
+            (written += r) < bytes )
+        ;
+}
+
+#ifdef __linux
+#include <sys/ioctl.h>
+
+bool StdioCtl::isLinuxConsole() const noexcept
+{
+    // This is the same function used to get the Shift/Ctrl/Alt modifiers
+    // on the console. It only succeeds if a console file descriptor is used.
+    for (int fd : {in(), out()})
+    {
+        char subcode = 6;
+        if (ioctl(fd, TIOCLINUX, &subcode) != -1)
+            return true;
+    }
+    return false;
+}
+
+#endif // __linux__
+
 #elif defined(_WIN32)
+
+#include <stdio.h>
 
 namespace stdioctl
 {
@@ -84,9 +97,7 @@ namespace stdioctl
 
 } // namespace stdioctl
 
-StdioCtl StdioCtl::instance;
-
-void StdioCtl::setUp() noexcept
+StdioCtl::StdioCtl() noexcept
 {
     // The console can be accessed in two ways: through GetStdHandle() or through
     // CreateFile(). GetStdHandle() will be unable to return a console handle
@@ -123,8 +134,6 @@ void StdioCtl::setUp() noexcept
     // we can free it when tearing down. If we don't, weird things may happen.
 
     using namespace stdioctl;
-    tearDown();
-
     static constexpr struct { DWORD std; int index; } channels[] =
     {
         {STD_INPUT_HANDLE, input},
@@ -172,13 +181,13 @@ void StdioCtl::setUp() noexcept
             0);
         cn[startupOutput].owning = true;
     }
-    cn[activeOutput].handle = CreateConsoleScreenBuffer(
+    cn[alternateOutput].handle = CreateConsoleScreenBuffer(
         GENERIC_READ | GENERIC_WRITE,
         0,
         nullptr,
         CONSOLE_TEXTMODE_BUFFER,
         nullptr);
-    cn[activeOutput].owning = true;
+    cn[alternateOutput].owning = true;
     {
         CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
         GetConsoleScreenBufferInfo(cn[startupOutput].handle, &sbInfo);
@@ -187,28 +196,44 @@ void StdioCtl::setUp() noexcept
         // are not compliant (e.g. Wine).
         sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
         sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
-        SetConsoleScreenBufferSize(cn[activeOutput].handle, sbInfo.dwSize);
+        SetConsoleScreenBufferSize(cn[alternateOutput].handle, sbInfo.dwSize);
     }
-    SetConsoleActiveScreenBuffer(cn[activeOutput].handle);
+    for (auto &c : cn)
+        if (!isValid(c.handle))
+        {
+            fputs("Error: cannot get a console.\n", stderr);
+            exit(1);
+        }
 }
 
-void StdioCtl::tearDown() noexcept
+StdioCtl::~StdioCtl()
 {
-    using namespace stdioctl;
-    if (isValid(cn[startupOutput].handle))
-        SetConsoleActiveScreenBuffer(cn[startupOutput].handle);
+    useStartupScreenBuffer();
     for (auto &c : cn)
-        if (isValid(c.handle))
-        {
-            if (c.owning)
-                CloseHandle(c.handle);
-            c.handle = INVALID_HANDLE_VALUE;
-        }
+        if (c.owning)
+            CloseHandle(c.handle);
     if (ownsConsole)
-    {
         FreeConsole();
-        ownsConsole = false;
-    }
+}
+
+void StdioCtl::useAlternateScreenBuffer() noexcept
+{
+    SetConsoleActiveScreenBuffer(cn[alternateOutput].handle);
+    activeOutput = alternateOutput;
+}
+
+void StdioCtl::useStartupScreenBuffer() noexcept
+{
+    SetConsoleActiveScreenBuffer(cn[startupOutput].handle);
+    activeOutput = startupOutput;
+}
+
+void StdioCtl::write(const char *data, size_t bytes) const noexcept
+{
+    // Writing 0 bytes causes the cursor to become invisible for a short time
+    // in old versions of the Windows console.
+    if (bytes != 0)
+        WriteConsole(out(), data, bytes, nullptr, nullptr);
 }
 
 #endif // _TV_UNIX

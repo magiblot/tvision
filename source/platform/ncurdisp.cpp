@@ -4,24 +4,21 @@
 #include <tvision/tv.h>
 
 #include <internal/ncurdisp.h>
-#include <internal/codepage.h>
 #include <internal/stdioctl.h>
 #include <internal/terminal.h>
-#include <iostream.h>
+#include <stdio.h>
 #include <ncurses.h>
-#include <clocale>
 
-NcursesDisplay::NcursesDisplay() noexcept :
+NcursesDisplay::NcursesDisplay(const StdioCtl &aIo) noexcept :
+    TerminalDisplay(aIo),
     definedPairs(0),
     usesNcursesDraw(false)
 {
-    // Allow printing UTF-8 text.
-    setlocale(LC_ALL, "");
     // Start curses mode.
-    term = newterm(nullptr, StdioCtl::fout(), StdioCtl::fin());
+    term = newterm(nullptr, io.fout(), io.fin());
     if (!term)
     {
-        cerr << "Cannot initialize Ncurses: 'newterm' failed." << endl;
+        fputs("Cannot initialize Ncurses: 'newterm' failed.\n", stderr);
         exit(1);
     }
     // Enable colors if the terminal supports it.
@@ -45,7 +42,7 @@ NcursesDisplay::~NcursesDisplay()
 
 void NcursesDisplay::reloadScreenInfo() noexcept
 {
-    TPoint size = TermIO::Unix::getSize();
+    TPoint size = TermIO::Unix::getSize(io);
     // When Ncurses is not used for drawing (e.g. AnsiDisplay<NcursesDisplay>),
     // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
     // However, when Ncurses is used for drawing, 'resizeterm' is necessary, as

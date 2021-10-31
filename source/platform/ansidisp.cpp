@@ -1,5 +1,5 @@
 #include <internal/ansidisp.h>
-#include <internal/terminal.h>
+#include <internal/stdioctl.h>
 #include <internal/strings.h>
 
 #define CSI "\x1B["
@@ -119,7 +119,7 @@ void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y) noexcept
 
 void AnsiDisplayBase::lowlevelFlush() noexcept
 {
-    TermIO::consoleWrite(buf.data(), buf.size());
+    io.write(buf.data(), buf.size());
     buf.clear();
 }
 

@@ -35,12 +35,10 @@ THardwareInfo::THardwareInfo() noexcept
 
 THardwareInfo::~THardwareInfo()
 {
-    restoreConsole();
 }
 
 // For brevity.
-static constexpr PlatformStrategy* &platf = PlatformStrategy::instance;
-static constexpr NullPlatform* nullPlatf = &NullPlatform::instance;
+static constexpr Platform *platf = &Platform::instance;
 
 void THardwareInfo::setCaretSize( ushort size ) noexcept { platf->setCaretSize(size); }
 void THardwareInfo::setCaretPosition( ushort x, ushort y ) noexcept { platf->setCaretPosition(x, y); }
@@ -62,46 +60,8 @@ DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount();
 void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
 void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }
 void THardwareInfo::flushScreen() noexcept { platf->flushScreen(); }
-
-void THardwareInfo::setUpConsole() noexcept
-{
-    // Set up input/output control.
-    // At least with the ncurses implementation, display must be initialized
-    // before input.
-    if (platf == nullPlatf)
-    {
-#ifdef _WIN32
-        if (!(platf = Win32ConsoleStrategy::create()))
-        {
-            cerr << "Error: cannot get a console." << endl;
-            ExitProcess(1);
-        }
-#else
-        DisplayStrategy *disp;
-        if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
-            disp = new NcursesDisplay();
-        else
-            disp = new AnsiDisplay<NcursesDisplay>();
-#ifdef __linux__
-        if (TermIO::isLinuxConsole())
-            platf = new LinuxConsoleStrategy(*disp, *new NcursesInput(false));
-        else
-#endif // __linux__
-            platf = new UnixPlatformStrategy(*disp, *new NcursesInput());
-#endif
-    }
-}
-
-void THardwareInfo::restoreConsole() noexcept
-{
-    // Tear down input/output control by deleting the platform strategy.
-    if (platf != nullPlatf)
-    {
-        auto *p = platf;
-        platf = nullPlatf;
-        delete p;
-    }
-}
+void THardwareInfo::setUpConsole() noexcept { platf->setUpConsole(); }
+void THardwareInfo::restoreConsole() noexcept { platf->restoreConsole(); }
 
 BOOL THardwareInfo::getPendingEvent(TEvent &event, Boolean mouse) noexcept
 {

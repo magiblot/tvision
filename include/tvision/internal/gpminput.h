@@ -12,7 +12,7 @@
 #include <internal/cursor.h>
 #include <gpm.h>
 
-class GpmInput : public InputStrategy
+class GpmInput final : public InputStrategy
 {
     NegativeScreenCursor cursor;
     uchar buttonState;

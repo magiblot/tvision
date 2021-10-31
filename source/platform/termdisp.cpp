@@ -2,7 +2,7 @@
 #include <tvision/tv.h>
 
 #include <internal/termdisp.h>
-#include <internal/terminal.h>
+#include <internal/linuxcon.h>
 #include <internal/getenv.h>
 
 void TerminalDisplay::reloadScreenInfo() noexcept
@@ -35,9 +35,12 @@ TermCap TerminalDisplay::getCapabilities() noexcept
         {
             termcap.colors = Indexed8;
             termcap.quirks |= qfBoldIsBright;
-            if (TermIO::isLinuxConsole())
+#ifdef __linux__
+            if (io.isLinuxConsole())
                 termcap.quirks |= qfBlinkIsBright | qfNoItalic | qfNoUnderline;
-            else if (getEnv<TStringView>("TERM") == "xterm")
+            else
+#endif // __linux__
+            if (getEnv<TStringView>("TERM") == "xterm")
                 // Let's assume all terminals disguising themselves as 'xterm'
                 // support at least 16 colors.
                 termcap.colors = Indexed16;

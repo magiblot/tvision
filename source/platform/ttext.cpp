@@ -75,7 +75,7 @@ namespace ttext
 
     static int charWidth(TStringView mbc, char32_t wc) noexcept
     {
-        return PlatformStrategy::instance->charWidth(mbc, wc);
+        return Platform::charWidth(mbc, wc);
     }
 
 }
@@ -99,7 +99,7 @@ TText::mbstat_r TText::mbstat(TStringView text) noexcept
 }
 
 #ifdef _TV_UNIX
-int UnixPlatformStrategy::charWidth(TStringView, char32_t wc) noexcept
+int UnixConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
 {
     return wcwidth(wc);
 }

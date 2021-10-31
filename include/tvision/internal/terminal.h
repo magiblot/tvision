@@ -5,6 +5,8 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+class StdioCtl;
+
 struct MouseState
 {
     TPoint where;
@@ -140,13 +142,15 @@ struct CSIData
     }
 };
 
+class StdioCtl;
+
 namespace TermIO
 {
 
-    void mouseOn() noexcept;
-    void mouseOff() noexcept;
-    void keyModsOn() noexcept;
-    void keyModsOff() noexcept;
+    void mouseOn(const StdioCtl &) noexcept;
+    void mouseOff(const StdioCtl &) noexcept;
+    void keyModsOn(const StdioCtl &) noexcept;
+    void keyModsOff(const StdioCtl &) noexcept;
 
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&) noexcept;
@@ -163,12 +167,9 @@ namespace TermIO
 #ifdef _TV_UNIX
     namespace Unix
     {
-        TPoint getSize() noexcept;
+        TPoint getSize(const StdioCtl &) noexcept;
     }
 #endif // _TV_UNIX
-
-    void consoleWrite(const char *data, size_t bytes) noexcept;
-    bool isLinuxConsole() noexcept;
 
 }
 

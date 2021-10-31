@@ -31,8 +31,14 @@ struct TermCap
 
 class TerminalDisplay : public BufferedDisplay
 {
+public:
+    const StdioCtl &io;
 
-protected:
+    // The lifetime of 'aIo' exceeds that of 'this'.
+    TerminalDisplay(const StdioCtl &aIo) noexcept :
+        io(aIo)
+    {
+    }
 
     TermCap termcap {};
 
@@ -41,7 +47,6 @@ protected:
     virtual TermCap getCapabilities() noexcept;
 
     ushort getScreenMode() noexcept override;
-
 };
 
 #endif // TVISION_TERMDISP_H

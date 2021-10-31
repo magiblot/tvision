@@ -3,12 +3,11 @@
 
 #define Uses_TPoint
 #include <tvision/tv.h>
+#include <internal/stdioctl.h>
 #include <internal/events.h>
-#include <memory>
-#include <stddef.h>
 
-class DisplayStrategy {
-
+class DisplayStrategy
+{
 public:
 
     virtual ~DisplayStrategy() {}
@@ -37,22 +36,18 @@ protected:
     virtual TPoint getScreenSize() noexcept { return size; }
 
     // 'getCaretSize()' must return a value in the range 0 to 100. Zero means
-    // the caret is not visible. Note that PlatformStrategy::getCaretSize()
-    // adjusts this to the range 1 to 100, because that's what the original
-    // THardwareInfo::getCaretSize() did, and what TScreen expects.
+    // the caret is not visible.
 
     virtual int getCaretSize() noexcept { return caretSize; }
 
 public:
 
-    bool isCaretVisible() noexcept { return caretSize != 0; }
     virtual void clearScreen() noexcept {}
     virtual void setCaretPosition(int x, int y) noexcept {}
     virtual ushort getScreenMode() noexcept { return 0; }
     virtual void setCaretSize(int size) noexcept {}
     virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept {}
     virtual void flushScreen() noexcept {}
-
 };
 
 struct TEvent;
@@ -73,121 +68,70 @@ public:
     virtual void cursorOff() noexcept {}
 };
 
-class PlatformStrategy {
-
-protected:
-
-    std::unique_ptr<DisplayStrategy> display;
-    std::unique_ptr<InputStrategy> input;
-
-public:
-
-    PlatformStrategy() noexcept {}
-    PlatformStrategy( DisplayStrategy *d, InputStrategy *i ) noexcept :
-        display(d),
-        input(i)
-    {
-        if (display) display->reloadScreenInfo();
-    }
-
-    virtual ~PlatformStrategy() {}
-
-    virtual bool getEvent(TEvent &ev) noexcept = 0;
-    virtual void waitForEvents(int ms) noexcept = 0;
-    virtual void stopEventWait() noexcept = 0;
-    virtual int getButtonCount() noexcept { return input ? input->getButtonCount() : 0; }
-    virtual void cursorOn() noexcept { if (input) input->cursorOn(); }
-    virtual void cursorOff() noexcept { if (input) input->cursorOff(); }
-
-    virtual int getCaretSize() noexcept { return min(max(display->caretSize, 1), 100); }
-    virtual bool isCaretVisible() noexcept { return display->isCaretVisible(); }
-    virtual void clearScreen() noexcept { display->clearScreen(); }
-    virtual int getScreenRows() noexcept { return display->size.y; }
-    virtual int getScreenCols() noexcept { return display->size.x; }
-    virtual void setCaretPosition(int x, int y) noexcept { display->setCaretPosition(x, y); }
-    virtual ushort getScreenMode() noexcept { return display->getScreenMode(); }
-    virtual void setCaretSize(int size) noexcept { display->setCaretSize(size); }
-    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept { display->screenWrite(x, y, buf, len); }
-    virtual void flushScreen() noexcept { display->flushScreen(); }
-    virtual void reloadScreenInfo() noexcept { display->reloadScreenInfo(); }
-    virtual int charWidth(TStringView mbc, char32_t wc) noexcept = 0;
-
-    static PlatformStrategy *instance;
-
-};
-
-class NullPlatform : public PlatformStrategy {
-
-    NullPlatform() = default;
-    ~NullPlatform() = default;
-
-public:
-
-    bool getEvent (TEvent &) noexcept override { return false; }
-    void waitForEvents(int ms) noexcept override {}
-    void stopEventWait() noexcept override {}
-    int getButtonCount() noexcept override { return 0; }
-    void cursorOn() noexcept override {}
-    void cursorOff() noexcept override {}
-
-    int getCaretSize() noexcept override { return 0; }
-    bool isCaretVisible() noexcept override { return false; }
-    void clearScreen() noexcept override {}
-    int getScreenRows() noexcept override { return 0; }
-    int getScreenCols() noexcept override { return 0; }
-    void setCaretPosition(int x, int y) noexcept override {}
-    ushort getScreenMode() noexcept override { return 0; }
-    void setCaretSize(int size) noexcept override {}
-    void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept override {}
-    void flushScreen() noexcept override {}
-    void reloadScreenInfo() noexcept override {}
-    int charWidth(TStringView mbc, char32_t wc) noexcept override { return 1; }
-
-    static NullPlatform instance;
-
-};
-
-#ifdef _TV_UNIX
-
-#include <internal/sigwinch.h>
-
-class UnixPlatformStrategy : public PlatformStrategy
+struct ConsoleStrategy
 {
-    std::unique_ptr<SigwinchHandler> sigwinch;
+    DisplayStrategy &display;
+    InputStrategy &input;
 
-protected:
+    ConsoleStrategy(DisplayStrategy &aDisplay, InputStrategy &aInput) noexcept :
+        display(aDisplay),
+        input(aInput)
+    {
+    }
 
+    virtual ~ConsoleStrategy() {}
+    virtual bool isAlive() noexcept { return true; }
+    virtual void forEachSource(void *, void (&)(void *, EventSource &)) noexcept {}
+};
+
+class Platform
+{
+    StdioCtl io;
     EventWaiter waiter;
+    DisplayStrategy dummyDisplay;
+    InputStrategy dummyInput {(SysHandle) 0};
+    ConsoleStrategy dummyConsole {dummyDisplay, dummyInput};
+    // Invariant: 'console' is either a non-owning reference to 'dummyConsole'
+    // or an owning reference to a heap-allocated ConsoleStrategy object.
+    ConsoleStrategy *console {&dummyConsole};
+
+    Platform() noexcept;
+    ~Platform();
+
+    void checkConsole() noexcept;
+    ConsoleStrategy &createConsole() noexcept;
+
+    static int errorCharWidth(TStringView, char32_t) noexcept;
 
 public:
 
-    UnixPlatformStrategy(DisplayStrategy &d, InputStrategy &i) noexcept :
-        PlatformStrategy(&d, &i),
-        sigwinch(SigwinchHandler::create())
-    {
-        waiter.addSource(i);
-        if (sigwinch)
-            waiter.addSource(sigwinch->getEventSource());
-    }
+    static Platform instance;
+    static int (*charWidth)(TStringView, char32_t) noexcept;
 
-    bool getEvent(TEvent &ev) noexcept override
-    {
-        return waiter.getEvent(ev);
-    }
+    void setUpConsole() noexcept;
+    void restoreConsole() noexcept;
 
-    void waitForEvents(int ms) noexcept override
-    {
-        waiter.waitForEvents(ms);
-    }
+    bool getEvent(TEvent &ev) noexcept { return waiter.getEvent(ev); }
+    void waitForEvents(int ms) noexcept { checkConsole(); waiter.waitForEvents(ms); }
+    void stopEventWait() noexcept { waiter.stopEventWait(); }
 
-    void stopEventWait() noexcept override
-    {
-        waiter.stopEventWait();
-    }
+    int getButtonCount() noexcept { return console->input.getButtonCount(); }
+    void cursorOn() noexcept { console->input.cursorOn(); }
+    void cursorOff() noexcept { console->input.cursorOff(); }
 
-    int charWidth(TStringView mbc, char32_t wc) noexcept override; // ttext.cpp
+    // Adjust the caret size to the range 1 to 100 because that's what the original
+    // THardwareInfo::getCaretSize() did and what TScreen expects.
+    int getCaretSize() noexcept { return min(max(console->display.caretSize, 1), 100); }
+    bool isCaretVisible() noexcept { return console->display.caretSize > 0; }
+    void clearScreen() noexcept { console->display.clearScreen(); }
+    int getScreenRows() noexcept { return console->display.size.y; }
+    int getScreenCols() noexcept { return console->display.size.x; }
+    void setCaretPosition(int x, int y) noexcept { console->display.setCaretPosition(x, y); }
+    ushort getScreenMode() noexcept { return console->display.getScreenMode(); }
+    void setCaretSize(int size) noexcept { console->display.setCaretSize(size); }
+    void screenWrite(int x, int y, TScreenCell *b, int l) noexcept { console->display.screenWrite(x, y, b, l); }
+    void flushScreen() noexcept { console->display.flushScreen(); }
+    void reloadScreenInfo() noexcept { console->display.reloadScreenInfo(); }
 };
-
-#endif // _TV_UNIX
 
 #endif // PLATFORM_H

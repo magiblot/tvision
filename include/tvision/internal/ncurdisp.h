@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <ncurses.h>
 
-class NcursesDisplay : public TerminalDisplay {
-
+class NcursesDisplay : public TerminalDisplay
+{
     SCREEN *term;
 
     bool hasColors;
@@ -24,7 +24,8 @@ class NcursesDisplay : public TerminalDisplay {
 
 public:
 
-    NcursesDisplay() noexcept;
+    // The lifetime of 'aIo' exceeds that of 'this'.
+    NcursesDisplay(const StdioCtl &io) noexcept;
     ~NcursesDisplay();
 
     void reloadScreenInfo() noexcept override;
@@ -40,7 +41,6 @@ protected:
     void lowlevelMoveCursor(uint x, uint y) noexcept override;
     void lowlevelCursorSize(int size) noexcept override;
     void lowlevelFlush() noexcept override;
-
 };
 
 #else

@@ -89,6 +89,7 @@ class AnsiDisplayBase
         void reserve(size_t) noexcept;
     };
 
+    const StdioCtl &io;
     Buffer buf;
     TermAttr lastAttr {};
 
@@ -96,6 +97,11 @@ class AnsiDisplayBase
     void bufWriteCSI2(uint a, uint b, char F) noexcept;
 
 protected:
+
+    AnsiDisplayBase(const StdioCtl &aIo) noexcept :
+        io(aIo)
+    {
+    }
 
     ~AnsiDisplayBase();
 
@@ -106,25 +112,22 @@ protected:
     void lowlevelMoveCursor(uint x, uint y) noexcept;
     void lowlevelMoveCursorX(uint x, uint y) noexcept;
     void lowlevelFlush() noexcept;
-
 };
 
 template<class DisplayBase>
-class AnsiDisplay : public DisplayBase, public AnsiDisplayBase {
-
-    void assertBaseClassBuffered()
-    {
-        static_assert(std::is_base_of<TerminalDisplay, DisplayBase>::value,
-            "The base class of AnsiDisplay must be a derived of TerminalDisplay."
-        );
-    }
+class AnsiDisplay : public DisplayBase, public AnsiDisplayBase
+{
 
 public:
 
     template <typename ...Args>
     AnsiDisplay(Args&& ...args) noexcept :
-        DisplayBase(args...)
+        DisplayBase(static_cast<Args&&>(args)...),
+        AnsiDisplayBase(TerminalDisplay::io)
     {
+        static_assert(std::is_base_of<TerminalDisplay, DisplayBase>::value,
+            "The base class of AnsiDisplay must be a derived of TerminalDisplay."
+        );
     }
 
     void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override
