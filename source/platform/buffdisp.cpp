@@ -2,6 +2,7 @@
 #include <tvision/tv.h>
 
 #include <internal/buffdisp.h>
+#include <internal/platform.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/cursor.h>
@@ -45,9 +46,12 @@ BufferedDisplay::~BufferedDisplay()
     instance = 0;
 }
 
-void BufferedDisplay::reloadScreenInfo() noexcept
+void BufferedDisplay::reloadScreenInfo(DisplayStrategy &display) noexcept
 {
-    DisplayStrategy::reloadScreenInfo();
+    display.reloadScreenInfo();
+    size = display.getScreenSize();
+    caretSize = display.getCaretSize();
+    screenMode = display.getScreenMode();
     resizeBuffer();
 }
 
@@ -61,6 +65,13 @@ void BufferedDisplay::resizeBuffer() noexcept
 
     rowDamage.resize(0);
     rowDamage.resize(size.y, {INT_MAX, INT_MIN});
+}
+
+void BufferedDisplay::clearScreen(DisplayStrategy &display) noexcept
+{
+    display.clearScreen();
+    display.lowlevelFlush();
+    resizeBuffer();
 }
 
 void BufferedDisplay::setCaretSize(int size) noexcept
@@ -156,24 +167,24 @@ bool BufferedDisplay::needsFlush() const noexcept
 namespace buffdisp {
 namespace {
 
-    void flushScreenAlgorithm(BufferedDisplay &) noexcept;
+void flushScreenAlgorithm(BufferedDisplay &, DisplayStrategy &) noexcept;
 
 }
 }
 
-void BufferedDisplay::flushScreen() noexcept
+void BufferedDisplay::flushScreen(DisplayStrategy &display) noexcept
 {
     using namespace buffdisp;
     if (needsFlush() && timeToFlush())
     {
         drawCursors();
-        flushScreenAlgorithm(*this);
+        flushScreenAlgorithm(*this, display);
         if (caretPosition.x != -1)
-            lowlevelMoveCursor(caretPosition.x, caretPosition.y);
+            display.lowlevelMoveCursor(caretPosition.x, caretPosition.y);
         undrawCursors();
         if (caretSize != newCaretSize)
-            lowlevelCursorSize(newCaretSize);
-        lowlevelFlush();
+            display.lowlevelCursorSize(newCaretSize);
+        display.lowlevelFlush();
         screenTouched = false;
         caretMoved = false;
         caretSize = newCaretSize;
@@ -204,18 +215,13 @@ namespace {
 
 struct FlushScreenAlgorithm
 {
-
     BufferedDisplay &disp;
+    DisplayStrategy &display;
     TPoint size;
     TPoint last;
     int x, y, rowOffs;
     TScreenCell *cell;
     BufferedDisplay::Range damage;
-
-    FlushScreenAlgorithm(BufferedDisplay &disp) noexcept :
-        disp(disp)
-    {
-    }
 
     const TScreenCell &cellAt(int x) const noexcept;
     void getCell() noexcept;
@@ -231,7 +237,6 @@ struct FlushScreenAlgorithm
     void commitDirty() noexcept;
     void handleWideCharSpill() noexcept;
     void handleTrail() noexcept;
-
 };
 
 inline bool isTrail(const TScreenCell &cell) noexcept
@@ -275,9 +280,9 @@ inline bool FlushScreenAlgorithm::wideCanOverlap() const noexcept
     return disp.wideOverlapping;
 }
 
-inline void flushScreenAlgorithm(BufferedDisplay &disp) noexcept
+inline void flushScreenAlgorithm(BufferedDisplay &disp, DisplayStrategy &display) noexcept
 {
-    FlushScreenAlgorithm(disp).run();
+    FlushScreenAlgorithm {disp, display}.run();
 }
 
 inline void FlushScreenAlgorithm::run() noexcept
@@ -352,11 +357,11 @@ inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,
     // That is, the hardware cursor is located at {last.x + 1, last.y}.
 
     if (y != last.y)
-        disp.lowlevelMoveCursor(x, y);
+        display.lowlevelMoveCursor(x, y);
     else if (x != last.x + 1)
-        disp.lowlevelMoveCursorX(x, y);
+        display.lowlevelMoveCursorX(x, y);
 
-    disp.lowlevelWriteChars(Char.getText(), Attr);
+    display.lowlevelWriteChars(Char.getText(), Attr);
     last = {x + wide, y};
 }
 

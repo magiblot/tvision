@@ -73,7 +73,7 @@ int NcursesDisplay::getColorCount() noexcept
     return COLORS;
 }
 
-void NcursesDisplay::clearScreen() noexcept { flushScreen(); wclear(stdscr); lowlevelFlush(); }
+void NcursesDisplay::clearScreen() noexcept { wclear(stdscr); }
 void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) noexcept { wmove(stdscr, y, x); }
 void NcursesDisplay::lowlevelFlush() noexcept { wrefresh(stdscr); }
 

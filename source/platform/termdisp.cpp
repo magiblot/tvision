@@ -7,7 +7,6 @@
 
 void TerminalDisplay::reloadScreenInfo() noexcept
 {
-    BufferedDisplay::reloadScreenInfo();
     termcap = getCapabilities();
 }
 

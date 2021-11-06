@@ -4,6 +4,7 @@
 #define Uses_TPoint
 #include <tvision/tv.h>
 #include <internal/stdioctl.h>
+#include <internal/buffdisp.h>
 #include <internal/events.h>
 #include <atomic>
 
@@ -13,42 +14,16 @@ public:
 
     virtual ~DisplayStrategy() {}
 
-    // Invariant: these variables are is in sync with the actual screen state
-    // after 'DisplayStrategy::reloadScreenInfo()' has been invoked.
-
-    TPoint size {};
-    int caretSize {};
-
-    // This function can be overriden by inheritors in order to update
-    // internal structs when the display properties change. But
-    // 'DisplayStrategy::reloadScreenInfo()' must be invoked eventually.
-
-    virtual void reloadScreenInfo() noexcept
-    {
-        size = getScreenSize();
-        caretSize = getCaretSize();
-    }
-
-protected:
-
-    // These functions are meant to be overriden by inheritors. Their only
-    // responsibility should be to return updated values.
-
-    virtual TPoint getScreenSize() noexcept { return size; }
-
-    // 'getCaretSize()' must return a value in the range 0 to 100. Zero means
-    // the caret is not visible.
-
-    virtual int getCaretSize() noexcept { return caretSize; }
-
-public:
-
+    virtual TPoint getScreenSize() noexcept { return {}; }
+    virtual int getCaretSize() noexcept { return 0; } // Range [0, 100].
     virtual void clearScreen() noexcept {}
-    virtual void setCaretPosition(int x, int y) noexcept {}
     virtual ushort getScreenMode() noexcept { return 0; }
-    virtual void setCaretSize(int size) noexcept {}
-    virtual void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept {}
-    virtual void flushScreen() noexcept {}
+    virtual void reloadScreenInfo() noexcept {}
+    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept {}
+    virtual void lowlevelMoveCursor(uint x, uint y) noexcept {};
+    virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
+    virtual void lowlevelCursorSize(int size) noexcept {};
+    virtual void lowlevelFlush() noexcept {};
 };
 
 struct TEvent;
@@ -144,6 +119,7 @@ class Platform
 {
     StdioCtl io;
     EventWaiter waiter;
+    BufferedDisplay displayBuf;
     DisplayStrategy dummyDisplay;
     InputStrategy dummyInput {(SysHandle) 0};
     ConsoleStrategy dummyConsole {dummyDisplay, dummyInput};
@@ -181,28 +157,20 @@ public:
 
     // Adjust the caret size to the range 1 to 100 because that's what the original
     // THardwareInfo::getCaretSize() does and what TScreen expects.
-    int getCaretSize() noexcept
-        { return min(max(console.lock([] (auto *c) { return c->display.caretSize; }), 1), 100); }
-    bool isCaretVisible() noexcept
-        { return console.lock([] (auto *c) { return c->display.caretSize; }) > 0; }
+    int getCaretSize() noexcept { return min(max(displayBuf.caretSize, 1), 100); }
+    bool isCaretVisible() noexcept { return displayBuf.caretSize > 0; }
     void clearScreen() noexcept
-        { console.lock([] (auto *c) { c->display.clearScreen(); }); }
-    int getScreenRows() noexcept
-        { return console.lock([] (auto *c) { return c->display.size.y; }); }
-    int getScreenCols() noexcept
-        { return console.lock([] (auto *c) { return c->display.size.x; }); }
-    void setCaretPosition(int x, int y) noexcept
-        { console.lock([&] (auto *c) { c->display.setCaretPosition(x, y); }); }
-    ushort getScreenMode() noexcept
-        { return console.lock([] (auto *c) { return c->display.getScreenMode(); }); }
-    void setCaretSize(int size) noexcept
-        { console.lock([&] (auto *c) { c->display.setCaretSize(size); }); }
-    void screenWrite(int x, int y, TScreenCell *b, int l) noexcept
-        { console.lock([&] (auto *c) { c->display.screenWrite(x, y, b, l); }); }
+        { console.lock([&] (auto *c) { displayBuf.clearScreen(c->display); }); }
+    int getScreenRows() noexcept { return displayBuf.size.y; }
+    int getScreenCols() noexcept { return displayBuf.size.x; }
+    void setCaretPosition(int x, int y) noexcept { displayBuf.setCaretPosition(x, y); }
+    ushort getScreenMode() noexcept { return displayBuf.screenMode; }
+    void setCaretSize(int size) noexcept { displayBuf.setCaretSize(size); }
+    void screenWrite(int x, int y, TScreenCell *b, int l) noexcept { displayBuf.screenWrite(x, y, b, l); }
     void flushScreen() noexcept
-        { console.lock([] (auto *c) { c->display.flushScreen(); }); }
+        { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     void reloadScreenInfo() noexcept
-        { console.lock([] (auto *c) { c->display.reloadScreenInfo(); }); }
+        { console.lock([&] (auto *c) { displayBuf.reloadScreenInfo(c->display); }); }
 };
 
 #endif // PLATFORM_H

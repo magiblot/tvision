@@ -4,23 +4,23 @@
 #define Uses_TPoint
 #include <tvision/tv.h>
 
-#include <internal/platform.h>
-#include <algorithm>
 #include <vector>
 #include <chrono>
 
 class ScreenCursor;
+class DisplayStrategy;
 
 namespace buffdisp {
 namespace {
 
-    struct FlushScreenAlgorithm;
+struct FlushScreenAlgorithm;
 
 }
 }
 
-class BufferedDisplay : public DisplayStrategy {
 
+class BufferedDisplay
+{
     friend buffdisp::FlushScreenAlgorithm;
 
     struct Range {
@@ -59,27 +59,23 @@ class BufferedDisplay : public DisplayStrategy {
 
 public:
 
-    static void addCursor(ScreenCursor *cursor) noexcept;
-    static void removeCursor(ScreenCursor *cursor) noexcept;
-    static void changeCursor() noexcept;
-
-protected:
+    TPoint size {};
+    int caretSize {};
+    ushort screenMode {};
 
     BufferedDisplay() noexcept;
     ~BufferedDisplay();
 
-    void setCaretSize(int size) noexcept override;
-    void setCaretPosition(int x, int y) noexcept override;
-    void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept override;
-    void flushScreen() noexcept override;
-    void reloadScreenInfo() noexcept override;
+    void setCaretSize(int size) noexcept;
+    void setCaretPosition(int x, int y) noexcept;
+    void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept;
+    void clearScreen(DisplayStrategy &) noexcept;
+    void flushScreen(DisplayStrategy &) noexcept;
+    void reloadScreenInfo(DisplayStrategy &) noexcept;
 
-    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept = 0;
-    virtual void lowlevelMoveCursor(uint x, uint y) noexcept = 0;
-    virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
-    virtual void lowlevelCursorSize(int size) noexcept = 0;
-    virtual void lowlevelFlush() noexcept {};
-
+    static void addCursor(ScreenCursor *cursor) noexcept;
+    static void removeCursor(ScreenCursor *cursor) noexcept;
+    static void changeCursor() noexcept;
 };
 
 inline bool BufferedDisplay::inBounds(int x, int y) const noexcept
@@ -91,17 +87,19 @@ inline bool BufferedDisplay::inBounds(int x, int y) const noexcept
 inline void BufferedDisplay::addCursor(ScreenCursor *cursor) noexcept
 {
     auto &cursors = instance->cursors;
-    if (std::find(cursors.begin(), cursors.end(), cursor) == cursors.end())
-        cursors.push_back(cursor);
+    for (auto it = cursors.begin(); it != cursors.end(); ++it)
+        if (*it == cursor)
+            return;
+    cursors.push_back(cursor);
 }
 
 inline void BufferedDisplay::removeCursor(ScreenCursor *cursor) noexcept
 {
     changeCursor();
     auto &cursors = instance->cursors;
-    auto &&it = std::find(cursors.begin(), cursors.end(), cursor);
-    if (it != cursors.end())
-        cursors.erase(it);
+    for (auto it = cursors.begin(); it != cursors.end(); ++it)
+        if (*it == cursor)
+            return (void) cursors.erase(it);
 }
 
 inline void BufferedDisplay::changeCursor() noexcept

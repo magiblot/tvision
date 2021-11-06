@@ -64,8 +64,7 @@ struct TermAttr
  * AnsiDisplay implements only a subset of DisplayStrategy's pure virtual
  * functions, so it depends on another implementation from which it inherits,
  * which is the template parameter. In particular, AnsiDisplay implements the
- * lowlevel<*> functions from the BufferedDisplay interface. Thus, the base
- * class must also be a derived of BufferedDisplay.
+ * lowlevel<*> functions.
  *
  * This templated inheritance also makes it possible to combine this class
  * with input strategies which depend on a certain display strategy,

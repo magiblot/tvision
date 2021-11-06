@@ -1,7 +1,7 @@
 #ifndef TVISION_TERMDISP_H
 #define TVISION_TERMDISP_H
 
-#include <internal/buffdisp.h>
+#include <internal/platform.h>
 
 // Terminal quirk flags.
 
@@ -27,9 +27,9 @@ struct TermCap
     uint quirks;
 };
 
-// TerminalDisplay is a BufferedDisplay with knowledge of terminal capabilities.
+// TerminalDisplay is a DisplayStrategy with knowledge of terminal capabilities.
 
-class TerminalDisplay : public BufferedDisplay
+class TerminalDisplay : public DisplayStrategy
 {
 public:
     const StdioCtl &io;
