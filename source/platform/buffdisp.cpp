@@ -18,15 +18,11 @@ BufferedDisplay *BufferedDisplay::instance = 0;
 
 BufferedDisplay::BufferedDisplay() noexcept :
     // This could be checked at runtime, but for now this is as much as I know.
-    // Replace with space if terminal treats all characters one column wide.
-    widePlaceholder(TCellChar::wideCharTrail)
 #ifdef _WIN32
-    , wideOverlapping(false)
+    wideOverlapping(false)
 #else
-    , wideOverlapping(true)
+    wideOverlapping(true)
 #endif
-    , flushDelay()
-    , lastFlush()
 {
     instance = this;
     // Check if FPS shall be limited.
@@ -34,11 +30,6 @@ BufferedDisplay::BufferedDisplay() noexcept :
     limitFPS = (fps > 0);
     if (limitFPS)
         flushDelay = microseconds((int) 1e6/fps);
-    // Initialize variables.
-    screenTouched = true;
-    caretMoved = false;
-    caretPosition = {-1, -1};
-    newCaretSize = 0;
 }
 
 BufferedDisplay::~BufferedDisplay()
@@ -203,8 +194,6 @@ inline void BufferedDisplay::validateCell(TScreenCell &cell) const noexcept
             // Translate from codepage as fallback.
             ch = CpTranslator::toUtf8Int(c);
     }
-    else if (ch.isWideCharTrail())
-        ch = widePlaceholder;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -226,7 +215,6 @@ struct FlushScreenAlgorithm
     const TScreenCell &cellAt(int x) const noexcept;
     void getCell() noexcept;
     bool cellDirty() const noexcept;
-    bool wideCanSpill() const noexcept;
     bool wideCanOverlap() const noexcept;
 
     void run() noexcept;
@@ -270,11 +258,6 @@ inline void FlushScreenAlgorithm::commitDirty() noexcept
     disp.flushBuffer[cell - &disp.buffer[0]] = *cell;
 }
 
-inline bool FlushScreenAlgorithm::wideCanSpill() const noexcept
-{
-    return disp.widePlaceholder == TCellChar::wideCharTrail;
-}
-
 inline bool FlushScreenAlgorithm::wideCanOverlap() const noexcept
 {
     return disp.wideOverlapping;
@@ -298,7 +281,7 @@ inline void FlushScreenAlgorithm::run() noexcept
             x = damage.begin;
             // Check for a wide character before the first draw position
             // if overlapping is not allowed.
-            bool wideSpillBefore = wideCanSpill() && !wideCanOverlap() && 0 < x && isWide(cellAt(x-1));
+            bool wideSpillBefore = !wideCanOverlap() && 0 < x && isWide(cellAt(x-1));
             for (; x <= damage.end; ++x)
             {
                 getCell();
@@ -311,7 +294,7 @@ inline void FlushScreenAlgorithm::run() noexcept
                     commitDirty();
                     processCell();
                 } else
-                    wideSpillBefore = wideCanSpill() && !wideCanOverlap() && isWide(*cell);
+                    wideSpillBefore = !wideCanOverlap() && isWide(*cell);
             }
             if (x < size.x) {
                 getCell();
@@ -327,14 +310,12 @@ inline void FlushScreenAlgorithm::run() noexcept
 
 inline void FlushScreenAlgorithm::processCell() noexcept
 {
-    if (wideCanSpill()) {
-        if (isWide(*cell)) {
-            handleWideCharSpill();
-            return;
-        } else if (isTrail(*cell)) {
-            handleTrail();
-            return;
-        }
+    if (isWide(*cell)) {
+        handleWideCharSpill();
+        return;
+    } else if (isTrail(*cell)) {
+        handleTrail();
+        return;
     }
     writeCell();
 }

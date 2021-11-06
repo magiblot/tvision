@@ -29,17 +29,16 @@ class BufferedDisplay
 
     std::vector<TScreenCell> buffer, flushBuffer;
     std::vector<Range> rowDamage;
-    bool screenTouched;
 
-    const uint widePlaceholder;
     const bool wideOverlapping;
-    bool caretMoved;
-    TPoint caretPosition;
-    int newCaretSize;
+    bool screenTouched {true};
+    bool caretMoved {false};
+    TPoint caretPosition {-1, -1};
+    int newCaretSize {0};
 
     bool limitFPS;
-    std::chrono::microseconds flushDelay;
-    std::chrono::time_point<std::chrono::steady_clock> lastFlush;
+    std::chrono::microseconds flushDelay {};
+    std::chrono::time_point<std::chrono::steady_clock> lastFlush {};
 
     static BufferedDisplay *instance;
     static constexpr int defaultFPS = 60;
