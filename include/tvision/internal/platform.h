@@ -5,6 +5,7 @@
 #include <tvision/tv.h>
 #include <internal/stdioctl.h>
 #include <internal/events.h>
+#include <atomic>
 
 class DisplayStrategy
 {
@@ -84,6 +85,61 @@ struct ConsoleStrategy
     virtual void forEachSource(void *, void (&)(void *, EventSource &)) noexcept {}
 };
 
+using ThreadId = const void *;
+
+class ThisThread
+{
+    static thread_local constexpr struct {} idBase {};
+
+public:
+
+    static const void *id() noexcept { return &idBase; }
+};
+
+#if ATOMIC_POINTER_LOCK_FREE < 2
+#warning The code below assumes that atomic pointers are lock-free, but they are not.
+#endif
+
+template <class T>
+struct SignalThreadSafe
+{
+    T t;
+    std::atomic<ThreadId> lockingThread {nullptr};
+
+    using Self = SignalThreadSafe;
+
+    struct Lock
+    {
+        Self *self;
+        Lock(Self *aSelf) noexcept : self(aSelf)
+        {
+            ThreadId zero = nullptr;
+            // Use a spin lock because regular mutexes are not signal-safe.
+            if (self)
+                while (self->lockingThread.compare_exchange_weak(zero, ThisThread::id()))
+                    ;
+        }
+        ~Lock()
+        {
+            if (self)
+                self->lockingThread = nullptr;
+        }
+    };
+
+    template <class Func>
+    // 'func' takes a 'T &' by parameter.
+    auto lock(Func &&func) noexcept
+    {
+        Lock lk {lockedByThisThread() ? nullptr : this};
+        return func(t);
+    }
+
+    bool lockedByThisThread() const noexcept
+    {
+        return lockingThread == ThisThread::id();
+    }
+};
+
 class Platform
 {
     StdioCtl io;
@@ -91,9 +147,9 @@ class Platform
     DisplayStrategy dummyDisplay;
     InputStrategy dummyInput {(SysHandle) 0};
     ConsoleStrategy dummyConsole {dummyDisplay, dummyInput};
-    // Invariant: 'console' is either a non-owning reference to 'dummyConsole'
+    // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
     // or an owning reference to a heap-allocated ConsoleStrategy object.
-    ConsoleStrategy *console {&dummyConsole};
+    SignalThreadSafe<ConsoleStrategy *> console {&dummyConsole};
 
     Platform() noexcept;
     ~Platform();
@@ -102,6 +158,7 @@ class Platform
     ConsoleStrategy &createConsole() noexcept;
 
     static int errorCharWidth(TStringView, char32_t) noexcept;
+    static void signalCallback(bool) noexcept;
 
 public:
 
@@ -115,23 +172,37 @@ public:
     void waitForEvents(int ms) noexcept { checkConsole(); waiter.waitForEvents(ms); }
     void stopEventWait() noexcept { waiter.stopEventWait(); }
 
-    int getButtonCount() noexcept { return console->input.getButtonCount(); }
-    void cursorOn() noexcept { console->input.cursorOn(); }
-    void cursorOff() noexcept { console->input.cursorOff(); }
+    int getButtonCount() noexcept
+        { return console.lock([] (auto *c) { return c->input.getButtonCount(); }); }
+    void cursorOn() noexcept
+        { console.lock([] (auto *c) { c->input.cursorOn(); }); }
+    void cursorOff() noexcept
+        { console.lock([] (auto *c) { c->input.cursorOff(); }); }
 
     // Adjust the caret size to the range 1 to 100 because that's what the original
-    // THardwareInfo::getCaretSize() did and what TScreen expects.
-    int getCaretSize() noexcept { return min(max(console->display.caretSize, 1), 100); }
-    bool isCaretVisible() noexcept { return console->display.caretSize > 0; }
-    void clearScreen() noexcept { console->display.clearScreen(); }
-    int getScreenRows() noexcept { return console->display.size.y; }
-    int getScreenCols() noexcept { return console->display.size.x; }
-    void setCaretPosition(int x, int y) noexcept { console->display.setCaretPosition(x, y); }
-    ushort getScreenMode() noexcept { return console->display.getScreenMode(); }
-    void setCaretSize(int size) noexcept { console->display.setCaretSize(size); }
-    void screenWrite(int x, int y, TScreenCell *b, int l) noexcept { console->display.screenWrite(x, y, b, l); }
-    void flushScreen() noexcept { console->display.flushScreen(); }
-    void reloadScreenInfo() noexcept { console->display.reloadScreenInfo(); }
+    // THardwareInfo::getCaretSize() does and what TScreen expects.
+    int getCaretSize() noexcept
+        { return min(max(console.lock([] (auto *c) { return c->display.caretSize; }), 1), 100); }
+    bool isCaretVisible() noexcept
+        { return console.lock([] (auto *c) { return c->display.caretSize; }) > 0; }
+    void clearScreen() noexcept
+        { console.lock([] (auto *c) { c->display.clearScreen(); }); }
+    int getScreenRows() noexcept
+        { return console.lock([] (auto *c) { return c->display.size.y; }); }
+    int getScreenCols() noexcept
+        { return console.lock([] (auto *c) { return c->display.size.x; }); }
+    void setCaretPosition(int x, int y) noexcept
+        { console.lock([&] (auto *c) { c->display.setCaretPosition(x, y); }); }
+    ushort getScreenMode() noexcept
+        { return console.lock([] (auto *c) { return c->display.getScreenMode(); }); }
+    void setCaretSize(int size) noexcept
+        { console.lock([&] (auto *c) { c->display.setCaretSize(size); }); }
+    void screenWrite(int x, int y, TScreenCell *b, int l) noexcept
+        { console.lock([&] (auto *c) { c->display.screenWrite(x, y, b, l); }); }
+    void flushScreen() noexcept
+        { console.lock([] (auto *c) { c->display.flushScreen(); }); }
+    void reloadScreenInfo() noexcept
+        { console.lock([] (auto *c) { c->display.reloadScreenInfo(); }); }
 };
 
 #endif // PLATFORM_H

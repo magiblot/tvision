@@ -2,8 +2,11 @@
 #include <internal/unixcon.h>
 #include <internal/linuxcon.h>
 #include <internal/win32con.h>
+#include <internal/sighandl.h>
 #include <locale.h>
 #include <stdio.h>
+
+thread_local constexpr decltype(ThisThread::idBase) ThisThread::idBase;
 
 // This is used by TText. It is a global function pointer (instead of a
 // Platform instance method) so that it can be still used after
@@ -45,14 +48,16 @@ void Platform::restoreConsole() noexcept
     auto &doRemove = *[] (void *self, EventSource &source) {
         ((Platform *) self)->waiter.removeSource(source);
     };
-    if (console != &dummyConsole)
-    {
-        flushScreen();
-        auto *c = console;
-        console = &dummyConsole;
-        c->forEachSource(this, doRemove);
-        delete c;
-    }
+    console.lock([&] (auto *&c) {
+        if (c != &dummyConsole)
+        {
+            flushScreen();
+            c->forEachSource(this, doRemove);
+            SignalHandler::disable();
+            delete c;
+            c = &dummyConsole;
+        }
+    });
 }
 
 // The remaining methods are in platfcon.cpp.

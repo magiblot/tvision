@@ -5,6 +5,7 @@
 #include <internal/ncurdisp.h>
 #include <internal/ansidisp.h>
 #include <internal/ncursinp.h>
+#include <internal/sighandl.h>
 #include <internal/getenv.h>
 
 // These methods are defined in a separate transaction unit so that the
@@ -34,20 +35,37 @@ void Platform::setUpConsole() noexcept
     auto &doAdd = *[] (void *self, EventSource &source) {
         ((Platform *) self)->waiter.addSource(source);
     };
-    if (console == &dummyConsole)
-    {
-        console = &createConsole();
-        console->forEachSource(this, doAdd);
-        reloadScreenInfo();
-    }
+    console.lock([&] (auto *&c) {
+        if (c == &dummyConsole)
+        {
+            c = &createConsole();
+            SignalHandler::enable(signalCallback);
+            c->forEachSource(this, doAdd);
+            reloadScreenInfo();
+        }
+    });
 }
 
 void Platform::checkConsole() noexcept
 {
-    if (!console->isAlive())
+    console.lock([&] (auto *c) {
+        if (!c->isAlive())
+        {
+            // The console likely crashed (Windows).
+            restoreConsole();
+            setUpConsole();
+        }
+    });
+}
+
+void Platform::signalCallback(bool enter) noexcept
+{
+    if (!instance.console.lockedByThisThread())
     {
-        // The console likely crashed (Windows).
-        restoreConsole();
-        setUpConsole();
+        // FIXME: these are not signal safe!
+        if (enter)
+            instance.restoreConsole();
+        else
+            instance.setUpConsole();
     }
 }

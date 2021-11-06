@@ -1,88 +1,124 @@
-#define Uses_TProgram
-#include <tvision/tv.h>
+#include <internal/sighandl.h>
 
 #ifdef _TV_UNIX
 
-#include <internal/sighandl.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <cctype>
-#include <cstdlib>
-#include <cstdio>
+std::atomic<SignalHandlerCallback *> SignalHandler::callback {nullptr};
+const int SignalHandler::handledSignals[HandledSignalCount] =
+    { SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE, SIGSEGV, SIGTERM, SIGTSTP };
 
-TSignalHandler::TSignalHandler() noexcept
+static bool operator==(const struct sigaction &a, const struct sigaction &b) noexcept
 {
-    struct sigaction sa = {};
-    sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = (void (*) (int, siginfo_t*, void*)) SigHandler;
-    sigaction(SIGSEGV, &sa, &oldAction(SIGSEGV));
-    sigaction(SIGILL, &sa, &oldAction(SIGILL));
+    constexpr int knownFlags =
+        SA_NOCLDSTOP | SA_NOCLDWAIT | SA_SIGINFO | SA_ONSTACK | SA_RESTART |
+        SA_NODEFER | SA_RESETHAND;
+    return ((a.sa_flags & knownFlags) == (b.sa_flags & knownFlags)) &&
+        ((a.sa_flags & SA_SIGINFO) ? a.sa_sigaction == b.sa_sigaction
+                                   : a.sa_handler == b.sa_handler);
 }
 
-TSignalHandler::~TSignalHandler()
+void SignalHandler::enable(SignalHandlerCallback &aCallback) noexcept
 {
-    sigaction(SIGSEGV, &oldAction(SIGSEGV), 0);
-    sigaction(SIGILL, &oldAction(SIGILL), 0);
+    if (!callback)
+    {
+        struct sigaction sa = makeHandlerAction();
+        for (int signo : handledSignals)
+            sigaction(signo, &sa, &getHandlerInfo(signo).action);
+        callback = &aCallback;
+    }
 }
 
-void TSignalHandler::SigHandler(int s, siginfo_t* si, ucontext_t* context) noexcept
+void SignalHandler::disable() noexcept
 {
-    // Save and disable the handler, to avoid recursion if something goes wrong.
-    struct sigaction sa;
-    sigaction(s, &oldAction(s), &sa);
-    bool restoreHandler = true;
-
-    TProgram::application->suspend();
-    printSignalMsg(s, si, context);
-
-    constexpr char DFLT = 'e', AGAIN = '\0';
-    char c;
-    do {
-        printf("(E)xit, (S)uspend, (D)ie? (default: E) ");
-        fflush(stdout);
-        clearStdin();
-        c = (read(0, &c, 1) > 0) ? tolower(c) : DFLT;
-        clearStdin();
-        if (c == 'e' || c == '\n')
-            exit(1);
-        else if (c == 's')
-            raise(SIGTSTP); // Suspend process.
-        else if (c == 'd')
-            restoreHandler = false;
-        else
-            c = AGAIN;
-    } while (c == AGAIN);
-
-    TProgram::application->resume();
-    TProgram::application->redraw();
-
-    if (restoreHandler)
-        sigaction(s, &sa, 0);
+    if (callback)
+    {
+        callback = nullptr;
+        for (int signo : handledSignals)
+        {
+            auto &handlerInfo = getHandlerInfo(signo);
+            struct sigaction sa = {};
+            sigaction(signo, nullptr, &sa);
+            // Restore the previous handler only if ours is still installed.
+            if (sa == makeHandlerAction())
+                sigaction(signo, &handlerInfo.action, nullptr);
+            handlerInfo.action = makeDefaultAction();
+        }
+    }
 }
 
-struct sigaction& TSignalHandler::oldAction(int s) noexcept
+SignalHandler::HandlerInfo &SignalHandler::getHandlerInfo(int signo) noexcept
 {
-    static struct sigaction oldsegv, oldill;
-    return s == SIGSEGV ? oldsegv : oldill;
+    static HandlerInfo infos[HandledSignalCount];
+    switch (signo)
+    {
+        case SIGINT:    return infos[SigInt];
+        case SIGQUIT:   return infos[SigQuit];
+        case SIGILL:    return infos[SigIll];
+        case SIGABRT:   return infos[SigAbrt];
+        case SIGFPE:    return infos[SigFpe];
+        case SIGSEGV:   return infos[SigSegv];
+        case SIGTERM:   return infos[SigTerm];
+        case SIGTSTP:   return infos[SigTstp];
+        default:        abort();
+    }
 }
 
-void TSignalHandler::printSignalMsg(int s, siginfo_t* si, ucontext_t* context) noexcept
+void SignalHandler::handleSignal(int signo, siginfo_t *info, void *context)
 {
-    if (s == SIGSEGV)
-        printf("\r\nOops, a segmentation fault (SIGSEGV) was caught!"
-               "\r\nDereferenced address: %p", si->si_addr);
+    // In a multi-threaded application the signal handler may be changed from
+    // another thread while this one is running, but there's nothing we can do
+    // about it.
+    auto &handlerInfo = getHandlerInfo(signo);
+    struct sigaction currentAction {};
+    SignalHandlerCallback *callback;
+    if ((callback = SignalHandler::callback) && handlerInfo.running.exchange(true) == false)
+    {
+        struct sigaction nextAction = handlerInfo.action;
+        sigaction(signo, nullptr, &currentAction);
+        callback(true);
+        sigaction(signo, &nextAction, nullptr);
+        if (invokeHandlerOrDefault(signo, nextAction, info, context))
+            return;
+        callback(false);
+        sigaction(signo, &currentAction, nullptr);
+        handlerInfo.running = false;
+    }
     else
-        printf("\r\nOops, an illegal instruction (SIGILL) was caught!");
-    printf("\r\nWhat would you like to do?"
-           "\r\n");
+    {
+        // Just invoke the default handler.
+        struct sigaction sa = makeDefaultAction();
+        sigaction(signo, &sa, &currentAction);
+        if (invokeDefault(signo, info))
+            return;
+        sigaction(signo, &currentAction, nullptr);
+    }
 }
 
-void TSignalHandler::clearStdin() noexcept
+bool SignalHandler::invokeHandlerOrDefault( int signo, struct sigaction &action,
+                                            siginfo_t *info, void *context ) noexcept
 {
-    int flags = fcntl(0, F_GETFL), i;
-    fcntl(0, F_SETFL, O_NONBLOCK);
-    while (read(0, &i, sizeof(i)) > 0);
-    fcntl(0, F_SETFL, flags);
+    // If the handler is a custom one, invoke it directly.
+    if (action.sa_flags & SA_SIGINFO && action.sa_sigaction)
+        action.sa_sigaction(signo, info, context);
+    else if (!(action.sa_flags & SA_SIGINFO) && action.sa_handler)
+        action.sa_handler(signo);
+    else
+        return invokeDefault(signo, info);
+    return false;
+}
+
+bool SignalHandler::invokeDefault(int signo, siginfo_t *info) noexcept
+{
+    // In some cases the signal will be raised again after leaving the handler.
+    if ((signo == SIGILL || signo == SIGFPE || signo == SIGSEGV) && info->si_code > 0)
+        return true;
+    // Otherwise, raise the signal manually.
+    sigset_t mask, oldMask;
+    sigemptyset(&mask);
+    sigaddset(&mask, signo);
+    sigprocmask(SIG_UNBLOCK, &mask, &oldMask);
+    raise(signo);
+    sigprocmask(SIG_SETMASK, &oldMask, nullptr);
+    return false;
 }
 
 #endif // _TV_UNIX

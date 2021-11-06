@@ -280,6 +280,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
     * Support for Xterm's [*modifyOtherKeys*](https://invisible-island.net/xterm/manpage/xterm.html#VT100-Widget-Resources:modifyOtherKeys).
     * Support for Paul Evans' [*fixterms*](http://www.leonerd.org.uk/hacks/fixterms/) and Kitty's [keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/).
     * Support for key modifiers (via `TIOCLINUX`) and mouse (via GPM) in the Linux console.
+* Custom signal handler that restores the terminal state before the program crashes.
 
 The following environment variables are also taken into account:
 

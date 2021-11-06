@@ -5,13 +5,6 @@
 #include <tvision/tv.h>
 
 #include <internal/platform.h>
-#include <internal/win32con.h>
-#include <internal/ncurdisp.h>
-#include <internal/ncursinp.h>
-#include <internal/ansidisp.h>
-#include <internal/linuxcon.h>
-#include <internal/sighandl.h>
-#include <internal/terminal.h>
 #include <internal/getenv.h>
 #include <iostream.h>
 #include <chrono>
@@ -28,9 +21,6 @@ THardwareInfo::THardwareInfo() noexcept
 {
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
-#ifdef _TV_UNIX
-    static TSignalHandler h;
-#endif
 }
 
 THardwareInfo::~THardwareInfo()
