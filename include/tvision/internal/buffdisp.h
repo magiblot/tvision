@@ -60,7 +60,6 @@ public:
 
     TPoint size {};
     int caretSize {};
-    ushort screenMode {};
 
     BufferedDisplay() noexcept;
     ~BufferedDisplay();
@@ -70,7 +69,7 @@ public:
     void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept;
     void clearScreen(DisplayStrategy &) noexcept;
     void flushScreen(DisplayStrategy &) noexcept;
-    void reloadScreenInfo(DisplayStrategy &) noexcept;
+    TScreenCell *reloadScreenInfo(DisplayStrategy &) noexcept;
 
     static void addCursor(ScreenCursor *cursor) noexcept;
     static void removeCursor(ScreenCursor *cursor) noexcept;

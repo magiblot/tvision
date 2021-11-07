@@ -51,7 +51,6 @@ void NcursesDisplay::reloadScreenInfo() noexcept
         resizeterm(size.y, size.x);
     else
         resize_term(size.y, size.x);
-    TerminalDisplay::reloadScreenInfo();
 }
 
 TPoint NcursesDisplay::getScreenSize() noexcept

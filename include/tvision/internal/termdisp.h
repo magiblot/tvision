@@ -31,8 +31,14 @@ struct TermCap
 
 class TerminalDisplay : public DisplayStrategy
 {
-public:
+    TermCap getCapabilities() noexcept;
+
+protected:
+
     const StdioCtl &io;
+    TermCap termcap {getCapabilities()};
+
+public:
 
     // The lifetime of 'aIo' exceeds that of 'this'.
     TerminalDisplay(const StdioCtl &aIo) noexcept :
@@ -40,11 +46,7 @@ public:
     {
     }
 
-    TermCap termcap {};
-
-    void reloadScreenInfo() noexcept override;
     virtual int getColorCount() noexcept;
-    virtual TermCap getCapabilities() noexcept;
 
     ushort getScreenMode() noexcept override;
 };

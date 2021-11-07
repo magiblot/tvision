@@ -85,8 +85,6 @@ public:
     static void screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len ) noexcept;
     static TScreenCell *allocateScreenBuffer() noexcept;
     static void freeScreenBuffer( TScreenCell *buffer ) noexcept;
-    static void resizeScreenBuffer( TScreenCell *&buffer ) noexcept;
-    static void reloadScreenInfo() noexcept;
     static void setUpConsole() noexcept;
     static void restoreConsole() noexcept;
 
@@ -197,41 +195,28 @@ inline void THardwareInfo::clearScreen( ushort w, ushort h ) noexcept
     FillConsoleOutputCharacterA( consoleHandle[cnOutput], ' ', w*h, coord, &read );
 }
 #pragma option -w+inl
-#endif // __BORLANDC__
 
 inline TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept
 {
-    short x = getScreenCols(), y = getScreenRows();
+    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
+    short x = sbInfo.dwSize.X, y = sbInfo.dwSize.Y;
 
     if( x < 80 )        // Make sure we allocate at least enough for
         x = 80;         //   a 80x50 screen.
     if( y < 50 )
         y = 50;
-#ifdef __BORLANDC__
+
     return (TScreenCell *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
-#else
-    return new TScreenCell[x * y];
-#endif
 }
 
 inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer ) noexcept
 {
-#ifdef __BORLANDC__
     VirtualFree( buffer, 0, MEM_RELEASE );
-#else
-    delete[] buffer;
-#endif
 }
 
-inline void THardwareInfo::resizeScreenBuffer( TScreenCell *&buffer ) noexcept
-{
-    freeScreenBuffer(buffer);
-    buffer = allocateScreenBuffer();
-}
 
 // Mouse functions.
 
-#ifdef __BORLANDC__
 inline DWORD THardwareInfo::getButtonCount()
 {
     DWORD num;
@@ -248,7 +233,7 @@ inline void THardwareInfo::cursorOff()
 {
     SetConsoleMode( consoleHandle[cnInput], consoleMode & ~ENABLE_MOUSE_INPUT );
 }
-#endif
+#endif // __BORLANDC__
 
 
 // Event functions.

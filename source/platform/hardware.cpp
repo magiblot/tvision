@@ -45,7 +45,8 @@ void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len
     if (alwaysFlush)
         flushScreen();
 }
-void THardwareInfo::reloadScreenInfo() noexcept { platf->reloadScreenInfo(); }
+TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept { return platf->reloadScreenInfo(); }
+void THardwareInfo::freeScreenBuffer( TScreenCell *buffer ) noexcept {}
 DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount(); }
 void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
 void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }

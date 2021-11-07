@@ -40,7 +40,7 @@ inline void AnsiDisplayBase::Buffer::reserve(size_t extraCapacity) noexcept
     size_t oldSize = size();
     if (oldSize + extraCapacity > capacity)
     {
-        capacity = max<size_t>(4096, 2*capacity);
+        capacity = max<size_t>(max<size_t>(4096, 2*capacity), capacity + extraCapacity);
         if (!(head = (char *) realloc(head, capacity)))
             abort();
         tail = head + oldSize;
@@ -112,8 +112,8 @@ void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint) noexcept
 
 void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y) noexcept
 {
-    // Make dumps readable.
-//     bufWrite("\r");
+    buf.reserve(32);
+//     buf.push('\r'); // Make dumps readable.
     bufWriteCSI2(y + 1, x + 1, 'H');
 }
 

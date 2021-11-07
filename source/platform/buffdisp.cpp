@@ -37,13 +37,13 @@ BufferedDisplay::~BufferedDisplay()
     instance = 0;
 }
 
-void BufferedDisplay::reloadScreenInfo(DisplayStrategy &display) noexcept
+TScreenCell *BufferedDisplay::reloadScreenInfo(DisplayStrategy &display) noexcept
 {
     display.reloadScreenInfo();
     size = display.getScreenSize();
     caretSize = display.getCaretSize();
-    screenMode = display.getScreenMode();
     resizeBuffer();
+    return buffer.data();
 }
 
 void BufferedDisplay::resizeBuffer() noexcept
@@ -81,7 +81,10 @@ void BufferedDisplay::screenWrite(int x, int y, TScreenCell *buf, int len) noexc
     if (inBounds(x, y) && len)
     {
         len = min(len, size.x - x);
-        memcpy(&buffer[y*size.x + x], buf, len*sizeof(TScreenCell));
+        // Since 'buffer' is used as 'TScreen::screenBuffer' and is written to
+        // directly, we can avoid a copy operation in most cases.
+        if (buf < buffer.data() || buf >= buffer.data() + buffer.size())
+            memcpy(&buffer[y*size.x + x], buf, len*sizeof(TScreenCell));
 
         setDirty(x, y, len);
         screenTouched = true;

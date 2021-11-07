@@ -162,11 +162,6 @@ THardwareInfo::~THardwareInfo()
     CloseHandle( consoleHandle[cnOutput] );
 }
 
-void THardwareInfo::reloadScreenInfo()
-{
-    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
-}
-
 void THardwareInfo::setUpConsole()
 {
     // SetConsoleActiveScreenBuffer is not available on DPMI32.
@@ -174,7 +169,7 @@ void THardwareInfo::setUpConsole()
     if( proc != 0 )
         {
         ((BOOL WINAPI(*)(HANDLE)) proc)( consoleHandle[cnOutput] );
-        reloadScreenInfo();
+        GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
         }
 }
 
@@ -234,7 +229,7 @@ void THardwareInfo::setScreenMode( ushort mode )
         SetConsoleScreenBufferSize( consoleHandle[cnOutput], newSize );
         }
 
-    reloadScreenInfo();
+    GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
 }
 
 void THardwareInfo::setCaretPosition( ushort x, ushort y )

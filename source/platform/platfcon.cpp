@@ -41,7 +41,6 @@ void Platform::setUpConsole() noexcept
             c = &createConsole();
             SignalHandler::enable(signalCallback);
             c->forEachSource(this, doAdd);
-            reloadScreenInfo();
         }
     });
 }

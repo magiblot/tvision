@@ -164,13 +164,15 @@ public:
     int getScreenRows() noexcept { return displayBuf.size.y; }
     int getScreenCols() noexcept { return displayBuf.size.x; }
     void setCaretPosition(int x, int y) noexcept { displayBuf.setCaretPosition(x, y); }
-    ushort getScreenMode() noexcept { return displayBuf.screenMode; }
+    ushort getScreenMode() noexcept
+        { return console.lock([] (auto *c) { return c->display.getScreenMode(); }); }
     void setCaretSize(int size) noexcept { displayBuf.setCaretSize(size); }
     void screenWrite(int x, int y, TScreenCell *b, int l) noexcept { displayBuf.screenWrite(x, y, b, l); }
     void flushScreen() noexcept
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
-    void reloadScreenInfo() noexcept
-        { console.lock([&] (auto *c) { displayBuf.reloadScreenInfo(c->display); }); }
+    TScreenCell *reloadScreenInfo() noexcept
+        { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
+
 };
 
 #endif // PLATFORM_H
