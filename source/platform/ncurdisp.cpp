@@ -5,7 +5,6 @@
 
 #include <internal/ncurdisp.h>
 #include <internal/stdioctl.h>
-#include <internal/terminal.h>
 #include <stdio.h>
 #include <ncurses.h>
 
@@ -42,7 +41,7 @@ NcursesDisplay::~NcursesDisplay()
 
 void NcursesDisplay::reloadScreenInfo() noexcept
 {
-    TPoint size = TermIO::Unix::getSize(io);
+    TPoint size = io.getSize();
     // When Ncurses is not used for drawing (e.g. AnsiDisplay<NcursesDisplay>),
     // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
     // However, when Ncurses is used for drawing, 'resizeterm' is necessary, as

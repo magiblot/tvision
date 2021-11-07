@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 
 StdioCtl::StdioCtl() noexcept
 {
@@ -59,8 +60,25 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
         ;
 }
 
+TPoint StdioCtl::getSize() const noexcept
+{
+    struct winsize w;
+    for (int fd : {in(), out()})
+    {
+        if (ioctl(fd, TIOCGWINSZ, &w) != -1)
+        {
+            int env_col = getEnv<int>("COLUMNS", INT_MAX);
+            int env_row = getEnv<int>("LINES", INT_MAX);
+            return {
+                min(max(w.ws_col, 0), max(env_col, 0)),
+                min(max(w.ws_row, 0), max(env_row, 0)),
+            };
+        }
+    }
+    return {0, 0};
+}
+
 #ifdef __linux
-#include <sys/ioctl.h>
 
 bool StdioCtl::isLinuxConsole() const noexcept
 {
@@ -234,6 +252,18 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
     // in old versions of the Windows console.
     if (bytes != 0)
         WriteConsole(out(), data, bytes, nullptr, nullptr);
+}
+
+TPoint StdioCtl::getSize() const noexcept
+{
+    CONSOLE_SCREEN_BUFFER_INFO sbInfo;
+    auto &srWindow = sbInfo.srWindow;
+    if (GetConsoleScreenBufferInfo(out(), &sbInfo))
+        return {
+            max(srWindow.Right - srWindow.Left + 1, 0),
+            max(srWindow.Bottom - srWindow.Top + 1, 0),
+        };
+    return {0, 0};
 }
 
 #endif // _TV_UNIX

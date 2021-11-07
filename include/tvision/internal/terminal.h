@@ -142,8 +142,6 @@ struct CSIData
     }
 };
 
-class StdioCtl;
-
 namespace TermIO
 {
 
@@ -163,13 +161,6 @@ namespace TermIO
 
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept;
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
-
-#ifdef _TV_UNIX
-    namespace Unix
-    {
-        TPoint getSize(const StdioCtl &) noexcept;
-    }
-#endif // _TV_UNIX
 
 }
 

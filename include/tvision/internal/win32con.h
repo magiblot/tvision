@@ -68,7 +68,7 @@ public:
 
 class Win32Display : public TerminalDisplay
 {
-    COORD dwSize {};
+    TPoint size {};
     uchar lastAttr {'\x00'};
     std::vector<char> buf;
 

@@ -57,6 +57,30 @@ void Platform::checkConsole() noexcept
     });
 }
 
+bool Platform::sizeChanged(TEvent &ev) noexcept
+{
+    TPoint size = io.getSize();
+    if (size != lastSize)
+    {
+        lastSize = size;
+        ev.what = evCommand;
+        ev.message.command = cmScreenChanged;
+        return true;
+    }
+    return false;
+}
+
+bool Platform::getEvent(TEvent &ev) noexcept
+{
+    if (waiter.getEvent(ev))
+    {
+        if (ev.what == evCommand && ev.message.command == cmScreenChanged)
+            lastSize = io.getSize();
+        return true;
+    }
+    return sizeChanged(ev);
+}
+
 void Platform::signalCallback(bool enter) noexcept
 {
     if (!instance.console.lockedByThisThread())

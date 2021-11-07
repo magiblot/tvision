@@ -615,26 +615,3 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     }
     return Ignored;
 }
-
-#ifdef _TV_UNIX
-#include <unistd.h>
-#include <sys/ioctl.h>
-
-TPoint TermIO::Unix::getSize(const StdioCtl &io) noexcept
-{
-    struct winsize w;
-    for (int fd : {io.in(), io.out()})
-    {
-        if (ioctl(fd, TIOCGWINSZ, &w) != -1)
-        {
-            int env_col = getEnv<int>("COLUMNS", INT_MAX);
-            int env_row = getEnv<int>("LINES", INT_MAX);
-            return {
-                min(max(w.ws_col, 0), max(env_col, 0)),
-                min(max(w.ws_row, 0), max(env_row, 0)),
-            };
-        }
-    }
-    return {0, 0};
-}
-#endif // _TV_UNIX

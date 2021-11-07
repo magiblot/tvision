@@ -33,6 +33,7 @@ public:
     ~StdioCtl();
 
     void write(const char *data, size_t bytes) const noexcept;
+    TPoint getSize() const noexcept;
 
 #ifdef _WIN32
     HANDLE in() const noexcept { return cn[input].handle; }

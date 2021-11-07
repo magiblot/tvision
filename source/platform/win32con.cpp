@@ -283,27 +283,23 @@ bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev) noexce
 
 void Win32Display::reloadScreenInfo() noexcept
 {
-    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
+    size = io.getSize();
     // Set the buffer size to the viewport size so that the scrollbars
     // do not become visible after resizing.
+    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
     GetConsoleScreenBufferInfo(io.out(), &sbInfo);
-    sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
-    sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
     // Set the cursor temporally to (0, 0) to prevent the console from crashing due to a bug.
     auto curPos = sbInfo.dwCursorPosition;
     SetConsoleCursorPosition(io.out(), {0, 0});
     // Resize the buffer.
-    SetConsoleScreenBufferSize(io.out(), sbInfo.dwSize);
+    SetConsoleScreenBufferSize(io.out(), {(short) size.x, (short) size.y});
     // Restore the cursor position (it does not matter if it is out of bounds).
     SetConsoleCursorPosition(io.out(), curPos);
-    // Update internal state.
-    dwSize = sbInfo.dwSize;
-    TerminalDisplay::reloadScreenInfo();
 }
 
 TPoint Win32Display::getScreenSize() noexcept
 {
-    return {dwSize.X, dwSize.Y};
+    return size;
 }
 
 int Win32Display::getCaretSize() noexcept
@@ -340,7 +336,7 @@ void Win32Display::lowlevelCursorSize(int size) noexcept
 void Win32Display::clearScreen() noexcept
 {
     COORD coord = {0, 0};
-    DWORD length = dwSize.X * dwSize.Y;
+    DWORD length = size.x * size.y;
     BYTE attr = 0x07;
     DWORD read;
     FillConsoleOutputAttribute(io.out(), attr, length, coord, &read);

@@ -126,11 +126,13 @@ class Platform
     // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
     // or an owning reference to a heap-allocated ConsoleStrategy object.
     SignalThreadSafe<ConsoleStrategy *> console {&dummyConsole};
+    TPoint lastSize {};
 
     Platform() noexcept;
     ~Platform();
 
     void checkConsole() noexcept;
+    bool sizeChanged(TEvent &ev) noexcept;
     ConsoleStrategy &createConsole() noexcept;
 
     static int errorCharWidth(TStringView, char32_t) noexcept;
@@ -144,7 +146,7 @@ public:
     void setUpConsole() noexcept;
     void restoreConsole() noexcept;
 
-    bool getEvent(TEvent &ev) noexcept { return waiter.getEvent(ev); }
+    bool getEvent(TEvent &ev) noexcept;
     void waitForEvents(int ms) noexcept { checkConsole(); waiter.waitForEvents(ms); }
     void stopEventWait() noexcept { waiter.stopEventWait(); }
 
@@ -171,7 +173,11 @@ public:
     void flushScreen() noexcept
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     TScreenCell *reloadScreenInfo() noexcept
-        { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
+    {
+        auto *buffer = console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); });
+        lastSize = displayBuf.size;
+        return buffer;
+    }
 
 };
 
