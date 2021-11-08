@@ -199,13 +199,13 @@ StdioCtl::StdioCtl() noexcept
             0);
         cn[startupOutput].owning = true;
     }
-    cn[alternateOutput].handle = CreateConsoleScreenBuffer(
+    cn[activeOutput].handle = CreateConsoleScreenBuffer(
         GENERIC_READ | GENERIC_WRITE,
         0,
         nullptr,
         CONSOLE_TEXTMODE_BUFFER,
         nullptr);
-    cn[alternateOutput].owning = true;
+    cn[activeOutput].owning = true;
     {
         CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
         GetConsoleScreenBufferInfo(cn[startupOutput].handle, &sbInfo);
@@ -214,8 +214,9 @@ StdioCtl::StdioCtl() noexcept
         // are not compliant (e.g. Wine).
         sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
         sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
-        SetConsoleScreenBufferSize(cn[alternateOutput].handle, sbInfo.dwSize);
+        SetConsoleScreenBufferSize(cn[activeOutput].handle, sbInfo.dwSize);
     }
+    SetConsoleActiveScreenBuffer(cn[activeOutput].handle);
     for (auto &c : cn)
         if (!isValid(c.handle))
         {
@@ -226,24 +227,12 @@ StdioCtl::StdioCtl() noexcept
 
 StdioCtl::~StdioCtl()
 {
-    useStartupScreenBuffer();
+    SetConsoleActiveScreenBuffer(cn[startupOutput].handle);
     for (auto &c : cn)
         if (c.owning)
             CloseHandle(c.handle);
     if (ownsConsole)
         FreeConsole();
-}
-
-void StdioCtl::useAlternateScreenBuffer() noexcept
-{
-    SetConsoleActiveScreenBuffer(cn[alternateOutput].handle);
-    activeOutput = alternateOutput;
-}
-
-void StdioCtl::useStartupScreenBuffer() noexcept
-{
-    SetConsoleActiveScreenBuffer(cn[startupOutput].handle);
-    activeOutput = startupOutput;
 }
 
 void StdioCtl::write(const char *data, size_t bytes) const noexcept

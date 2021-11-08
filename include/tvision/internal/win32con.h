@@ -14,11 +14,11 @@ class Win32Display;
 
 class Win32ConsoleStrategy final : public ConsoleStrategy
 {
-    StdioCtl &io;
+    const StdioCtl &io;
     UINT cpInput, cpOutput;
 
 
-    Win32ConsoleStrategy( StdioCtl &aIo,
+    Win32ConsoleStrategy( const StdioCtl &aIo,
                           UINT cpInput, UINT cpOutput,
                           DisplayStrategy &aDisplay,
                           InputStrategy &aInput ) noexcept :
@@ -36,7 +36,7 @@ class Win32ConsoleStrategy final : public ConsoleStrategy
 
 public:
 
-    static Win32ConsoleStrategy &create(StdioCtl &io) noexcept;
+    static Win32ConsoleStrategy &create() noexcept;
     static int charWidth(TStringView, char32_t) noexcept;
 };
 

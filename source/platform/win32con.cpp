@@ -13,9 +13,9 @@
 #include <internal/terminal.h>
 #include <locale.h>
 
-Win32ConsoleStrategy &Win32ConsoleStrategy::create(StdioCtl &io) noexcept
+Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
-    io.useAlternateScreenBuffer();
+    auto &io = *new StdioCtl;
     WinWidth::reset();
     // Set the input mode.
     {
@@ -96,7 +96,7 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
     delete &input;
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
-    io.useStartupScreenBuffer();
+    delete &io;
 }
 
 bool Win32ConsoleStrategy::isAlive() noexcept

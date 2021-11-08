@@ -52,3 +52,8 @@ ushort TerminalDisplay::getScreenMode() noexcept
         return mode;
     }
 }
+
+TPoint TerminalDisplay::actualScreenSize() noexcept
+{
+    return io.getSize();
+}

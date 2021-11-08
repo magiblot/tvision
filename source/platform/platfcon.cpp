@@ -15,7 +15,7 @@
 ConsoleStrategy &Platform::createConsole() noexcept
 {
 #ifdef _WIN32
-    return Win32ConsoleStrategy::create(io);
+    return Win32ConsoleStrategy::create();
 #else
     NcursesDisplay *display;
     if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
@@ -59,7 +59,7 @@ void Platform::checkConsole() noexcept
 
 bool Platform::sizeChanged(TEvent &ev) noexcept
 {
-    TPoint size = io.getSize();
+    TPoint size = actualScreenSize();
     if (size != lastSize)
     {
         lastSize = size;
@@ -75,7 +75,7 @@ bool Platform::getEvent(TEvent &ev) noexcept
     if (waiter.getEvent(ev))
     {
         if (ev.what == evCommand && ev.message.command == cmScreenChanged)
-            lastSize = io.getSize();
+            lastSize = actualScreenSize();
         return true;
     }
     return sizeChanged(ev);

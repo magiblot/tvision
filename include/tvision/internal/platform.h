@@ -24,6 +24,7 @@ public:
     virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
     virtual void lowlevelCursorSize(int size) noexcept {};
     virtual void lowlevelFlush() noexcept {};
+    virtual TPoint actualScreenSize() noexcept { return {}; }
 };
 
 struct TEvent;
@@ -117,7 +118,9 @@ struct SignalThreadSafe
 
 class Platform
 {
+#ifdef _TV_UNIX
     StdioCtl io;
+#endif
     EventWaiter waiter;
     BufferedDisplay displayBuf;
     DisplayStrategy dummyDisplay;
@@ -137,6 +140,9 @@ class Platform
 
     static int errorCharWidth(TStringView, char32_t) noexcept;
     static void signalCallback(bool) noexcept;
+
+    TPoint actualScreenSize() noexcept
+        { return console.lock([] (auto *c) { return c->display.actualScreenSize(); }); }
 
 public:
 

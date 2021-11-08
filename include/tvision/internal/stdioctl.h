@@ -11,14 +11,13 @@
 class StdioCtl final
 {
 #ifdef _WIN32
-    enum { input = 0, startupOutput = 1, alternateOutput = 2 };
+    enum { input = 0, startupOutput = 1, activeOutput = 2 };
     struct
     {
         HANDLE handle {INVALID_HANDLE_VALUE};
         bool owning {false};
     } cn[3];
     bool ownsConsole {false};
-    uint8_t activeOutput {startupOutput};
 #else
     int ttyfd {-1};
     int fds[2] {-1, -1};

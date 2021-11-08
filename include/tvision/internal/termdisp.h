@@ -54,6 +54,7 @@ public:
 
     virtual int getColorCount() noexcept = 0;
     ushort getScreenMode() noexcept override;
+    TPoint actualScreenSize() noexcept override final;
 };
 
 #endif // TVISION_TERMDISP_H
