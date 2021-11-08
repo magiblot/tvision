@@ -41,7 +41,11 @@ class BufferedDisplay
     std::chrono::time_point<std::chrono::steady_clock> lastFlush {};
 
     static BufferedDisplay *instance;
+#ifdef _WIN32
+    static constexpr int defaultFPS = 120; // Just 60 feels notably slower on Windows, I don't know why.
+#else
     static constexpr int defaultFPS = 60;
+#endif
 
     bool inBounds(int x, int y) const noexcept;
 
