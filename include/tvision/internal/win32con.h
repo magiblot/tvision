@@ -78,6 +78,7 @@ public:
     Win32Display(const StdioCtl &aIo) noexcept :
         TerminalDisplay(aIo)
     {
+        initCapabilities();
     }
 
     void reloadScreenInfo() noexcept override;

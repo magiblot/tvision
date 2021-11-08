@@ -5,11 +5,6 @@
 #include <internal/linuxcon.h>
 #include <internal/getenv.h>
 
-int TerminalDisplay::getColorCount() noexcept
-{
-    return 0;
-}
-
 TermCap TerminalDisplay::getCapabilities() noexcept
 {
     TermCap termcap {};

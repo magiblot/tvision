@@ -36,7 +36,13 @@ class TerminalDisplay : public DisplayStrategy
 protected:
 
     const StdioCtl &io;
-    TermCap termcap {getCapabilities()};
+    TermCap termcap;
+
+    // The subclass must invoke this in the constructor.
+    void initCapabilities() noexcept
+    {
+        termcap = getCapabilities();
+    }
 
 public:
 
@@ -46,8 +52,7 @@ public:
     {
     }
 
-    virtual int getColorCount() noexcept;
-
+    virtual int getColorCount() noexcept = 0;
     ushort getScreenMode() noexcept override;
 };
 
