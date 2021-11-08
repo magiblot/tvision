@@ -32,22 +32,22 @@ ConsoleStrategy &Platform::createConsole() noexcept
 
 void Platform::setUpConsole() noexcept
 {
-    auto &doAdd = *[] (void *self, EventSource &source) {
+    auto doAdd = [] (void *self, EventSource &source) {
         ((Platform *) self)->waiter.addSource(source);
     };
-    console.lock([&] (auto *&c) {
+    console.lock([&] (ConsoleStrategy *&c) {
         if (c == &dummyConsole)
         {
             c = &createConsole();
             SignalHandler::enable(signalCallback);
-            c->forEachSource(this, doAdd);
+            c->forEachSource(this, *(void (*)(void *, EventSource &)) doAdd);
         }
     });
 }
 
 void Platform::checkConsole() noexcept
 {
-    console.lock([&] (auto *c) {
+    console.lock([&] (ConsoleStrategy *c) {
         if (!c->isAlive())
         {
             // The console likely crashed (Windows).

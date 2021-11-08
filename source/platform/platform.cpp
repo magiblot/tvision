@@ -6,8 +6,6 @@
 #include <locale.h>
 #include <stdio.h>
 
-thread_local constexpr decltype(ThisThread::idBase) ThisThread::idBase;
-
 // This is used by TText. It is a global function pointer (instead of a
 // Platform instance method) so that it can be still used after
 // Platform::instance has been destroyed.
@@ -45,14 +43,14 @@ Platform::~Platform()
 
 void Platform::restoreConsole() noexcept
 {
-    auto &doRemove = *[] (void *self, EventSource &source) {
+    auto doRemove = [] (void *self, EventSource &source) {
         ((Platform *) self)->waiter.removeSource(source);
     };
-    console.lock([&] (auto *&c) {
+    console.lock([&] (ConsoleStrategy *&c) {
         if (c != &dummyConsole)
         {
             flushScreen();
-            c->forEachSource(this, doRemove);
+            c->forEachSource(this, *(void (*)(void *, EventSource &)) doRemove);
             SignalHandler::disable();
             delete c;
             c = &dummyConsole;

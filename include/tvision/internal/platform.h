@@ -62,13 +62,13 @@ struct ConsoleStrategy
 
 using ThreadId = const void *;
 
-class ThisThread
+struct ThisThread
 {
-    static thread_local constexpr struct {} idBase {};
-
-public:
-
-    static const void *id() noexcept { return &idBase; }
+    static const void *id() noexcept
+    {
+        static thread_local struct {} idBase;
+        return &idBase;
+    }
 };
 
 #if ATOMIC_POINTER_LOCK_FREE < 2
