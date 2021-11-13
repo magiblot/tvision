@@ -53,7 +53,7 @@ public:
 
     void forEachSource(void *, void (&)(void *, EventSource &)) noexcept override;
 
-    static int charWidth(TStringView, char32_t) noexcept;
+    static int charWidth(uint32_t) noexcept;
 };
 
 #endif // __linux__

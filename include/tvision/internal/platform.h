@@ -138,7 +138,7 @@ class Platform
     bool sizeChanged(TEvent &ev) noexcept;
     ConsoleStrategy &createConsole() noexcept;
 
-    static int errorCharWidth(TStringView, char32_t) noexcept;
+    static int errorCharWidth(uint32_t) noexcept;
     static void signalCallback(bool) noexcept;
 
     TPoint actualScreenSize() noexcept
@@ -147,7 +147,7 @@ class Platform
 public:
 
     static Platform instance;
-    static int (*charWidth)(TStringView, char32_t) noexcept;
+    static int (*charWidth)(uint32_t) noexcept;
 
     void setUpConsole() noexcept;
     void restoreConsole() noexcept;

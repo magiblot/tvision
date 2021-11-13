@@ -32,7 +32,7 @@ public:
     // Deletes 'display' and 'input'.
     ~UnixConsoleStrategy();
 
-    static int charWidth(TStringView, char32_t) noexcept;
+    static int charWidth(uint32_t) noexcept;
 };
 
 #endif // _TV_UNIX

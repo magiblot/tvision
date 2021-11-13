@@ -37,7 +37,7 @@ class Win32ConsoleStrategy final : public ConsoleStrategy
 public:
 
     static Win32ConsoleStrategy &create() noexcept;
-    static int charWidth(TStringView, char32_t) noexcept;
+    static int charWidth(uint32_t) noexcept;
 };
 
 class Win32Input final : public InputStrategy

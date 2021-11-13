@@ -9,9 +9,9 @@
 // This is used by TText. It is a global function pointer (instead of a
 // Platform instance method) so that it can be still used after
 // Platform::instance has been destroyed.
-int (*Platform::charWidth)(TStringView, char32_t) noexcept = &Platform::errorCharWidth;
+int (*Platform::charWidth)(uint32_t) noexcept = &Platform::errorCharWidth;
 
-int Platform::errorCharWidth(TStringView, char32_t) noexcept
+int Platform::errorCharWidth(uint32_t) noexcept
 {
     fputs( "Cannot measure character widths before the platform module is "
            "loaded.\nAvoid invoking TText methods during static initialization.\n",

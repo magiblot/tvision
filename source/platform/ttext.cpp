@@ -73,11 +73,6 @@ namespace ttext
         return -1;
     }
 
-    static int charWidth(TStringView mbc, char32_t wc) noexcept
-    {
-        return Platform::charWidth(mbc, wc);
-    }
-
 }
 
 int TText::mblen(TStringView text) noexcept
@@ -94,19 +89,19 @@ TText::mbstat_r TText::mbstat(TStringView text) noexcept
     int length = mbtowc(wc, text);
     int width = -1;
     if (length > 1)
-        width = charWidth({&text[0], (size_t) length}, wc);
+        width = Platform::charWidth(wc);
     return {length, width};
 }
 
 #ifdef _TV_UNIX
-int UnixConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
+int UnixConsoleStrategy::charWidth(uint32_t wc) noexcept
 {
     return wcwidth(wc);
 }
 #endif // _TV_UNIX
 
 #ifdef __linux__
-int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
+int LinuxConsoleStrategy::charWidth(uint32_t wc) noexcept
 {
     // The Linux Console does not support zero-width characters. It assumes
     // all characters are either single or double-width. Additionally, the
@@ -130,7 +125,7 @@ int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
 #endif // __linux__
 
 #ifdef _WIN32
-int Win32ConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
+int Win32ConsoleStrategy::charWidth(uint32_t wc) noexcept
 {
     return WinWidth::width(wc);
 }
@@ -221,7 +216,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
         char utf8[4] = {};
         size_t length = utf32To8(textU32[j], utf8);
         TStringView textU8(utf8, length);
-        int width = charWidth(textU8, textU32[j]);
+        int width = Platform::charWidth(textU32[j]);
         if (width < 0)
         {
             if (i < cells.size())
