@@ -130,9 +130,9 @@ int LinuxConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
 #endif // __linux__
 
 #ifdef _WIN32
-int Win32ConsoleStrategy::charWidth(TStringView mbc, char32_t) noexcept
+int Win32ConsoleStrategy::charWidth(TStringView, char32_t wc) noexcept
 {
-    return WinWidth::mbcwidth(mbc);
+    return WinWidth::width(wc);
 }
 #endif // _WIN32
 

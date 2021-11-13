@@ -24,7 +24,7 @@ class WinWidth
     HANDLE cnHandle {INVALID_HANDLE_VALUE};
     size_t currentReset {lastReset};
 
-    int calcWidth(TStringView) noexcept;
+    int calcWidth(uint32_t) noexcept;
     void setUp() noexcept;
     void tearDown() noexcept;
 
@@ -32,16 +32,13 @@ class WinWidth
 
 public:
 
-    static int mbcwidth(TStringView) noexcept;
+    static int width(uint32_t) noexcept;
     static void reset() noexcept;
 };
 
-inline int WinWidth::mbcwidth(TStringView mbc) noexcept
-// At most 4 characters will be read from 'mbc', because it is expected to
-// contain exactly one UTF-8 sequence. The result won't be what you expect
-// if you pass a longer string.
+inline int WinWidth::width(uint32_t wc) noexcept
 {
-    return localInstance.calcWidth(mbc);
+    return localInstance.calcWidth(wc);
 }
 
 inline void WinWidth::reset() noexcept

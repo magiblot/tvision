@@ -71,4 +71,20 @@ inline size_t utf32To8(uint32_t u, char utf8[4]) noexcept
     }
 }
 
+inline int utf32To16(uint32_t u32, uint16_t u16[2]) noexcept
+{
+    if (u32 <= 0xFFFF && (u32 < 0xD800 || 0xDFFF < u32))
+    {
+        u16[0] = uint16_t(u32);
+        return 1;
+    }
+    else if (u32 < 0x10FFFF) // Two surrogates.
+    {
+        u16[0] = uint16_t(((u32 - 0x10000) >> 10) + 0xD800);
+        u16[1] = uint16_t(((u32 - 0x10000) & 0x3FF) + 0xDC00);
+        return 2;
+    }
+    return -1;
+}
+
 #endif // TVISION_UTF8_H

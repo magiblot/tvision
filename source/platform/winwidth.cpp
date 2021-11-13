@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
 #include <internal/winwidth.h>
+#include <internal/utf8.h>
 
 std::atomic<size_t> WinWidth::lastReset {0};
 WinWidth thread_local WinWidth::localInstance;
@@ -37,32 +38,43 @@ void WinWidth::tearDown() noexcept
     results.clear();
 }
 
-int WinWidth::calcWidth(TStringView mbc) noexcept
+int WinWidth::calcWidth(uint32_t u32) noexcept
 {
     setUp();
-    uint32_t key = 0;
-    memcpy(&key, mbc.data(), min<size_t>(mbc.size(), sizeof(key)));
-    auto it = results.find(key);
+    auto it = results.find(u32);
     if (it == results.end())
     {
-        short res = -1;
+        char res = -1;
         if (cnHandle != INVALID_HANDLE_VALUE)
         {
-            SetConsoleCursorPosition(cnHandle, {0, 0});
-            // I have seen WriteConsole return error despite the text being
-            // printed... so don't check the return value.
-            WriteConsole(cnHandle, mbc.data(), mbc.size(), 0, 0);
-            CONSOLE_SCREEN_BUFFER_INFO sbInfo;
-            // If something is actually wrong, this will fail for sure.
-            if (GetConsoleScreenBufferInfo(cnHandle, &sbInfo))
-                res = sbInfo.dwCursorPosition.X;
+            uint16_t u16[3]; int len;
+            if ((len = utf32To16(u32, u16)) > 0)
+            {
+                // We print an additional character so that we can distinguish
+                // actual double-width characters from the ones affected by
+                // https://github.com/microsoft/terminal/issues/11756.
+                u16[len] = '#';
+                SetConsoleCursorPosition(cnHandle, {0, 0});
+                WriteConsoleW(cnHandle, (wchar_t *) u16, len + 1, 0, 0);
+                CONSOLE_SCREEN_BUFFER_INFO sbInfo;
+                if ( GetConsoleScreenBufferInfo(cnHandle, &sbInfo) &&
+                     (res = sbInfo.dwCursorPosition.X - 1) > 1 )
+                {
+                    COORD coord {1, sbInfo.dwCursorPosition.Y};
+                    DWORD count = 0; wchar_t charAfter;
+                    ReadConsoleOutputCharacterW(cnHandle, &charAfter, 1, coord, &count);
+                    if (count == 1 && charAfter == '#')
+                        res = -1;
+                }
+            }
             // Memoize the result.
-            results.emplace(key, res);
+            results.emplace(u32, res);
         }
         return res;
     }
     else
         return it->second;
+    static_assert(sizeof(uint16_t) == sizeof(wchar_t), "");
 }
 
 #endif // _WIN32
