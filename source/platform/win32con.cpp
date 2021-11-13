@@ -16,7 +16,6 @@
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
     auto &io = *new StdioCtl;
-    WinWidth::reset();
     // Set the input mode.
     {
         DWORD consoleMode = 0;
@@ -84,6 +83,7 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
             }
         }
     }
+    WinWidth::reset();
     auto &display = supportsVT ? *new AnsiDisplay<Win32Display>(io)
                                : *new Win32Display(io);
     auto &input = *new Win32Input(io);
@@ -139,19 +139,20 @@ bool Win32Input::getEvent(TEvent &ev) noexcept
     // ReadConsoleInput can sleep the process, so we first check the number
     // of available input events.
     DWORD events;
-    if (!GetNumberOfConsoleInputEvents(io.in(), &events))
-        return false;
-    // getEvent(ir, ev) often returns false due to discarded events. But this
-    // function should not return false if there are pending events, as that
-    // defeats the event queue in THardwareInfo.
-    while (events--)
+    while (GetNumberOfConsoleInputEvents(io.in(), &events) && events)
     {
-        INPUT_RECORD ir;
-        DWORD ok;
-        if (!ReadConsoleInputW(io.in(), &ir, 1, &ok) || !ok)
-            return false;
-        if (getEvent(ir, ev))
-            return true;
+        // getEvent(ir, ev) often returns false due to discarded events. But this
+        // function should not return false if there are pending events, as that
+        // defeats the event queue in THardwareInfo.
+        while (events--)
+        {
+            INPUT_RECORD ir;
+            DWORD ok;
+            if (!ReadConsoleInputW(io.in(), &ir, 1, &ok) || !ok)
+                return false;
+            if (getEvent(ir, ev))
+                return true;
+        }
     }
     return false;
 }
@@ -194,8 +195,13 @@ bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
                 // make the whole keyCode zero to avoid side effects.
                 ev.keyDown.keyCode = kbNoKey;
             }
-        } else
+        } else {
             ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
+            if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
+                 ev.keyDown.keyCode == 0x3800 )
+                // Discard standalone Shift, Ctrl, Alt keys.
+                ev.keyDown.keyCode = kbNoKey;
+        }
         ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
         // Convert NT style virtual scan codes to PC BIOS codes.
         if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&

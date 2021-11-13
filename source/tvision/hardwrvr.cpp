@@ -315,6 +315,13 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
             event.keyDown.charScan.charCode = irBuffer.Event.KeyEvent.uChar.AsciiChar;
             event.keyDown.controlKeyState = irBuffer.Event.KeyEvent.dwControlKeyState;
 
+            if( event.keyDown.keyCode == 0x2A00 || event.keyDown.keyCode == 0x1D00 ||
+                event.keyDown.keyCode == 0x3800 )
+                {
+                // Discard standalone Shift, Ctrl, Alt keys.
+                event.keyDown.keyCode = kbNoKey;
+                }
+
             /* Convert NT style virtual scan codes to PC BIOS codes.
              */
             if( (event.keyDown.controlKeyState & kbCtrlShift) &&
