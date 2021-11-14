@@ -24,7 +24,7 @@ public:
     virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
     virtual void lowlevelCursorSize(int size) noexcept {};
     virtual void lowlevelFlush() noexcept {};
-    virtual TPoint actualScreenSize() noexcept { return {}; }
+    virtual bool screenChanged() noexcept { return false; }
 };
 
 struct TEvent;
@@ -129,7 +129,6 @@ class Platform
     // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
     // or an owning reference to a heap-allocated ConsoleStrategy object.
     SignalThreadSafe<ConsoleStrategy *> console {&dummyConsole};
-    TPoint lastSize {};
 
     Platform() noexcept;
     ~Platform();
@@ -141,8 +140,8 @@ class Platform
     static int errorCharWidth(uint32_t) noexcept;
     static void signalCallback(bool) noexcept;
 
-    TPoint actualScreenSize() noexcept
-        { return console.lock([] (auto *c) { return c->display.actualScreenSize(); }); }
+    bool screenChanged() noexcept
+        { return console.lock([] (auto *c) { return c->display.screenChanged(); }); }
 
 public:
 
@@ -179,12 +178,7 @@ public:
     void flushScreen() noexcept
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     TScreenCell *reloadScreenInfo() noexcept
-    {
-        auto *buffer = console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); });
-        lastSize = displayBuf.size;
-        return buffer;
-    }
-
+        { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
 };
 
 #endif // PLATFORM_H

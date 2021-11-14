@@ -71,6 +71,7 @@ class Win32Display : public TerminalDisplay
     TPoint size {};
     uchar lastAttr {'\x00'};
     std::vector<char> buf;
+    CONSOLE_FONT_INFO lastFontInfo {};
 
 public:
 
@@ -86,6 +87,7 @@ public:
     int getCaretSize() noexcept override;
     int getColorCount() noexcept override;
     void clearScreen() noexcept override;
+    bool screenChanged() noexcept override;
 
 protected:
 

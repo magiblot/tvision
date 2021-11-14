@@ -57,28 +57,18 @@ void Platform::checkConsole() noexcept
     });
 }
 
-bool Platform::sizeChanged(TEvent &ev) noexcept
+bool Platform::getEvent(TEvent &ev) noexcept
 {
-    TPoint size = actualScreenSize();
-    if (size != lastSize)
+    if ( waiter.getEvent(ev)
+         && (ev.what != evCommand || ev.message.command != cmScreenChanged) )
+        return true;
+    if (screenChanged())
     {
-        lastSize = size;
         ev.what = evCommand;
         ev.message.command = cmScreenChanged;
         return true;
     }
     return false;
-}
-
-bool Platform::getEvent(TEvent &ev) noexcept
-{
-    if (waiter.getEvent(ev))
-    {
-        if (ev.what == evCommand && ev.message.command == cmScreenChanged)
-            lastSize = actualScreenSize();
-        return true;
-    }
-    return sizeChanged(ev);
 }
 
 void Platform::signalCallback(bool enter) noexcept

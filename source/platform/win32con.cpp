@@ -303,6 +303,20 @@ void Win32Display::reloadScreenInfo() noexcept
     SetConsoleCursorPosition(io.out(), curPos);
 }
 
+bool Win32Display::screenChanged() noexcept
+{
+    bool changed = TerminalDisplay::screenChanged();
+    CONSOLE_FONT_INFO fontInfo;
+    if ( GetCurrentConsoleFont(io.out(), FALSE, &fontInfo)
+         && memcmp(&fontInfo, &lastFontInfo, sizeof(fontInfo)) != 0 )
+    {
+        changed = true;
+        WinWidth::reset();
+        lastFontInfo = fontInfo;
+    }
+    return changed;
+}
+
 TPoint Win32Display::getScreenSize() noexcept
 {
     return size;

@@ -32,6 +32,7 @@ struct TermCap
 class TerminalDisplay : public DisplayStrategy
 {
     TermCap getCapabilities() noexcept;
+    TPoint lastSize {};
 
 protected:
 
@@ -54,7 +55,7 @@ public:
 
     virtual int getColorCount() noexcept = 0;
     ushort getScreenMode() noexcept override;
-    TPoint actualScreenSize() noexcept override final;
+    bool screenChanged() noexcept override;
 };
 
 #endif // TVISION_TERMDISP_H
