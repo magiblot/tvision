@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#if __has_include(<linux/kd.h>)
+#   include <linux/kd.h>
+#endif
 
 StdioCtl::StdioCtl() noexcept
 {
@@ -80,6 +83,17 @@ TPoint StdioCtl::getSize() const noexcept
 
 TPoint StdioCtl::getFontSize() const noexcept
 {
+#ifdef KDFONTOP
+    struct console_font_op cfo {};
+    cfo.op = KD_FONT_OP_GET;
+    cfo.width = cfo.height = 32;
+    for (int fd : {in(), out()})
+        if (ioctl(fd, KDFONTOP, &cfo) != -1)
+            return {
+                max(cfo.width, 0),
+                max(cfo.height, 0),
+            };
+#endif
     struct winsize w;
     for (int fd : {in(), out()})
         if (ioctl(fd, TIOCGWINSZ, &w) != -1)
