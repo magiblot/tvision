@@ -78,6 +78,18 @@ TPoint StdioCtl::getSize() const noexcept
     return {0, 0};
 }
 
+TPoint StdioCtl::getFontSize() const noexcept
+{
+    struct winsize w;
+    for (int fd : {in(), out()})
+        if (ioctl(fd, TIOCGWINSZ, &w) != -1)
+            return {
+                w.ws_xpixel / max(w.ws_col, 1),
+                w.ws_ypixel / max(w.ws_row, 1),
+            };
+    return {0, 0};
+}
+
 #ifdef __linux
 
 bool StdioCtl::isLinuxConsole() const noexcept
@@ -251,6 +263,17 @@ TPoint StdioCtl::getSize() const noexcept
         return {
             max(srWindow.Right - srWindow.Left + 1, 0),
             max(srWindow.Bottom - srWindow.Top + 1, 0),
+        };
+    return {0, 0};
+}
+
+TPoint StdioCtl::getFontSize() const noexcept
+{
+    CONSOLE_FONT_INFO fontInfo;
+    if (GetCurrentConsoleFont(out(), FALSE, &fontInfo))
+        return {
+            fontInfo.dwFontSize.X,
+            fontInfo.dwFontSize.Y,
         };
     return {0, 0};
 }

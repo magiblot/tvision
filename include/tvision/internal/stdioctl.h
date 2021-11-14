@@ -33,12 +33,11 @@ public:
 
     void write(const char *data, size_t bytes) const noexcept;
     TPoint getSize() const noexcept;
+    TPoint getFontSize() const noexcept;
 
 #ifdef _WIN32
     HANDLE in() const noexcept { return cn[input].handle; }
     HANDLE out() const noexcept { return cn[activeOutput].handle; }
-    void useAlternateScreenBuffer() noexcept;
-    void useStartupScreenBuffer() noexcept;
 #else
     int in() const noexcept { return fds[0]; }
     int out() const noexcept { return fds[1]; }
