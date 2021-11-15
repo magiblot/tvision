@@ -214,9 +214,13 @@ void TVWrite::L40( TView *dest ) noexcept
             L50(owner);
         else
         {
+#ifdef __BORLANDC__
             THWMouse::hide();
+#endif
             L50(owner);
+#ifdef __BORLANDC__
             THWMouse::show();
+#endif
         }
     }
     if (owner->lockFlag == 0)
