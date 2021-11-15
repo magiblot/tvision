@@ -162,7 +162,7 @@ inline bool TCellChar::operator!=(const TCellChar &other) const
 // with text.
 //
 // Considerations:
-// * 'wide' indicates the width of the text in 'ch' minus one. In practice,
+// * '_wide' indicates the width of the text in '_ch' minus one. In practice,
 //   the only possible character widths are 0, 1 and 2, and the text in a
 //   TCellChar is at least one column wide. So 'wide' will be either 0 or 1.
 // * In order for a double-width character to be displayed entirely, its cell
@@ -174,13 +174,15 @@ struct TScreenCell
 {
 
     TColorAttr attr;
-    TCellChar ch;
-    uint8_t wide;
+    TCellChar _ch;
+    uint8_t _wide;
     uint8_t _unused[3];
 
     TScreenCell() = default;
     inline TScreenCell(ushort bios);
     TV_TRIVIALLY_ASSIGNABLE(TScreenCell)
+
+    inline bool isWide() const;
 
     inline bool operator==(const TScreenCell &other) const;
     inline bool operator!=(const TScreenCell &other) const;
@@ -197,8 +199,13 @@ inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &at
 inline TScreenCell::TScreenCell(ushort bios)
 {
     memset(this, 0, sizeof(*this));
-    ch = uchar(bios);
+    _ch = uchar(bios);
     attr = uchar(bios >> 8);
+}
+
+inline bool TScreenCell::isWide() const
+{
+    return _wide;
 }
 
 inline bool TScreenCell::operator==(const TScreenCell &other) const
@@ -223,19 +230,19 @@ inline void setAttr(TScreenCell &cell, const TColorAttr &attr)
 
 inline const TCellChar &getChar(const TScreenCell &cell)
 {
-    return cell.ch;
+    return cell._ch;
 }
 
 inline void setChar(TScreenCell &cell, const TCellChar &ch, bool wide)
 {
-    cell.ch = ch;
-    cell.wide = wide;
+    cell._ch = ch;
+    cell._wide = wide;
 }
 
 inline void setChar(TScreenCell &cell, TStringView text, bool wide)
 {
-    cell.ch = text;
-    cell.wide = wide;
+    cell._ch = text;
+    cell._wide = wide;
 }
 
 inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &attr, bool wide)

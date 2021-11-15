@@ -101,27 +101,6 @@ __5:
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
-/*  TDrawBuffer::moveBuf (2)                                              */
-/*                                                                        */
-/*  arguments:                                                            */
-/*                                                                        */
-/*      indent - character position within the buffer where the data      */
-/*               is to go                                                 */
-/*                                                                        */
-/*      source - far pointer to an array of character/attribute pairs     */
-/*                                                                        */
-/*      count   - number of character/attribute pairs to move             */
-/*                                                                        */
-/*------------------------------------------------------------------------*/
-
-void TDrawBuffer::moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count ) noexcept
-{
-    if (indent < length())
-        memcpy(&data[indent], source, min(count, length() - indent)*sizeof(TScreenCell));
-}
-
-/*------------------------------------------------------------------------*/
-/*                                                                        */
 /*  TDrawBuffer::moveChar                                                 */
 /*                                                                        */
 /*  arguments:                                                            */
@@ -262,13 +241,8 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
             toggle = 1 - toggle;
             ++j;
             }
-        else
-            {
-            if (i < length())
-                ::setAttr(data[i], curAttr);
-            if (!TText::eat(data, i, str, j))
-                break;
-            }
+        else if (!TText::drawOne(data, i, str, j, curAttr))
+            break;
     return i - indent;
 #endif
 }
@@ -296,9 +270,9 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 
 ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) noexcept
 {
+#ifdef __BORLANDC__
     if (indent < length())
         {
-#ifdef __BORLANDC__
         register ushort *dest = &data[indent];
         register uchar _FAR *s = (uchar _FAR *) str.data();
         ushort count = min(str.size(), length() - indent);
@@ -314,16 +288,14 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
             for (; remain; --remain, ++s, ++dest)
                 *(uchar *)dest = *s;
         return count;
-#else
-        return TText::fill(data.subspan(indent), str,
-            [attr] (TColorAttr &dstAttr) {
-                if (attr != 0)
-                    dstAttr = attr;
-            }
-        );
-#endif
         }
     return 0;
+#else
+    if (attr != 0)
+        return TText::drawStr(data, indent, str, 0, attr);
+    else
+        return TText::drawStr(data, indent, str, 0);
+#endif
 }
 
 /*------------------------------------------------------------------------*/
@@ -359,24 +331,10 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
         return moveStr(indent, str.substr(begin, width), attr);
     return 0;
 #else
-    size_t s = 0, remainder = 0;
-    TText::wseek(str, s, remainder, begin);
-    if (remainder < width)
-        {
-        if (remainder)
-            moveChar(indent, ' ', attr, remainder);
-        size_t d = indent + remainder;
-        if (d < length())
-            {
-            return remainder + TText::fill(data.subspan(d, width - remainder), str.substr(s),
-                [attr] (TColorAttr &dstAttr) {
-                    if (attr != 0)
-                        dstAttr = attr;
-                }
-            );
-            }
-        }
-    return 0;
+    if (attr != 0)
+        return TText::drawStr(data.subspan(0, indent + width), indent, str, begin, attr);
+    else
+        return TText::drawStr(data.subspan(0, indent + width), indent, str, begin);
 #endif
 }
 
@@ -399,7 +357,8 @@ TDrawBuffer::TDrawBuffer() noexcept :
 #endif
 }
 
-TDrawBuffer::~TDrawBuffer() {
+TDrawBuffer::~TDrawBuffer()
+{
     delete[] data.data();
 }
 #endif

@@ -9,6 +9,9 @@
 #include <internal/utf8.h>
 #include <wchar.h>
 
+namespace ttext
+{
+
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 
@@ -49,49 +52,68 @@ uint32_t decode_utf8(uint32_t* state, uint32_t* codep, uint8_t byte) noexcept
     return *state;
 }
 
-namespace ttext
+static inline
+uint32_t decode_utf8(uint32_t* state, uint8_t byte) noexcept
 {
+    uint32_t type = utf8d[byte];
+    *state = utf8d[256 + *state + type];
+    return *state;
+}
 
-    static int mbtowc(char32_t &wc, TStringView text) noexcept
-    // Returns n >= 1 if 'text' begins with a UTF-8 multibyte character that's
-    // 'n' bytes long, -1 otherwise.
-    {
-        uint32_t state = 0;
-        uint32_t codep = 0;
-        for (size_t i = 0; i < text.size(); ++i)
+static int mbtowc(uint32_t &wc, TStringView text) noexcept
+// Pre: text.size() > 0.
+// Returns n >= 1 if 'text' begins with a UTF-8 multibyte character that's
+// 'n' bytes long, -1 otherwise.
+{
+    uint32_t state = 0;
+    uint32_t codep = 0;
+    for (size_t i = 0; i < text.size(); ++i)
+        switch (decode_utf8(&state, &codep, text[i]))
         {
-            switch (decode_utf8(&state, &codep, text[i]))
-            {
-                case UTF8_ACCEPT:
-                    return (wc = codep), i + 1;
-                case UTF8_REJECT:
-                    return -1;
-                default:
-                    break;
-            }
+            case UTF8_ACCEPT:
+                return (wc = codep), i + 1;
+            case UTF8_REJECT:
+                return -1;
+            default:
+                break;
         }
-        return -1;
-    }
-
+    return -1;
 }
 
-int TText::mblen(TStringView text) noexcept
+static int mblen(TStringView text) noexcept
+// Pre: text.size() > 0.
+// Returns n >= 1 if 'text' begins with a UTF-8 multibyte character that's
+// 'n' bytes long, -1 otherwise.
 {
-    using namespace ttext;
-    char32_t wc;
-    return mbtowc(wc, text);
+    uint32_t state = 0;
+    for (size_t i = 0; i < text.size(); ++i)
+        switch (decode_utf8(&state, text[i]))
+        {
+            case UTF8_ACCEPT:
+                return i + 1;
+            case UTF8_REJECT:
+                return -1;
+            default:
+                break;
+        }
+    return -1;
 }
 
-TText::mbstat_r TText::mbstat(TStringView text) noexcept
+struct mbstat_r { int length; int width; };
+
+static mbstat_r mbstat(TStringView text) noexcept
+// Pre: 'text.size() > 0'.
 {
-    using namespace ttext;
-    char32_t wc;
+    uint32_t wc;
     int length = mbtowc(wc, text);
-    int width = -1;
+    int width = 1;
     if (length > 1)
         width = Platform::charWidth(wc);
     return {length, width};
 }
+
+} // namespace ttext
+
 
 #ifdef _TV_UNIX
 int UnixConsoleStrategy::charWidth(uint32_t wc) noexcept
@@ -131,26 +153,121 @@ int Win32ConsoleStrategy::charWidth(uint32_t wc) noexcept
 }
 #endif // _WIN32
 
+size_t TText::width(TStringView text) noexcept
+{
+    size_t i = 0, width = 0;
+    while (TText::next(text, i, width));
+    return width;
+}
+
+size_t TText::next(TStringView text) noexcept
+{
+    if (text.size())
+        return max(ttext::mblen(text), 1);
+    return 0;
+}
+
+TText::Lw TText::nextImpl(TStringView text) noexcept
+{
+    if (text.size())
+    {
+        auto mb = ttext::mbstat(text);
+        if (mb.length <= 1)
+            return {1, 1};
+        return {
+            size_t(mb.length),
+            size_t(mb.width ? max(mb.width, 1) : 0),
+        };
+    }
+    return {0, 0};
+}
+
+TText::Lw TText::nextImpl(TSpan<const uint32_t> text) noexcept
+{
+    if (text.size())
+    {
+        int width = Platform::charWidth(text[0]);
+        return {
+            1,
+            size_t(width ? max(width, 1) : 0)
+        };
+    }
+    return {0, 0};
+}
+
+size_t TText::prev(TStringView text, size_t index) noexcept
+{
+    if (index)
+    {
+        // Try reading backwards character by character, until a valid
+        // character is found. This tolerates invalid characters.
+        size_t lead = min<size_t>(index, 4);
+        for (size_t i = 1; i <= lead; ++i)
+        {
+            int len = ttext::mblen({&text[index - i], i});
+            if (len > 0)
+                return size_t(len) == i ? i : 1;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+template <class Text>
+inline TText::Lw TText::scrollImplT(Text text, int count, Boolean includeIncomplete) noexcept
+{
+    if (count > 0)
+    {
+        size_t i = 0, w = 0;
+        while (true)
+        {
+            size_t i2 = i, w2 = w;
+            if (!TText::next(text, i, w) || w == (size_t) count)
+                break;
+            if (w > (size_t) count)
+            {
+                if (!includeIncomplete)
+                    i = i2, w = w2;
+                break;
+            }
+        }
+        return {i, w};
+    }
+    return {0, 0};
+}
+
+TText::Lw TText::scrollImpl(TStringView text, int count, Boolean includeIncomplete) noexcept
+
+{
+    return scrollImplT(text, count, includeIncomplete);
+}
+
+TText::Lw TText::scrollImpl(TSpan<const uint32_t> text, int count, Boolean includeIncomplete) noexcept
+
+{
+    return scrollImplT(text, count, includeIncomplete);
+}
+
 namespace ttext
 {
 
-    static inline bool isZWJ(TStringView mbc)
-    // We want to avoid printing certain characters which are usually represented
-    // differently by different terminal applications or which can combine different
-    // characters together, changing the width of a whole string.
-    {
-        return mbc == "\xE2\x80\x8D"; // U+200D ZERO WIDTH JOINER.
-    }
+static inline bool isZWJ(TStringView mbc)
+// We want to avoid printing certain characters which are usually represented
+// differently by different terminal applications or which can combine different
+// characters together, changing the width of a whole string.
+{
+    return mbc == "\xE2\x80\x8D"; // U+200D ZERO WIDTH JOINER.
+}
 
 } // namespace ttext
 
-TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
-                                  TStringView text, size_t j ) noexcept
+TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
+                              TStringView text, size_t j ) noexcept
 {
     using namespace ttext;
     if (j < text.size())
     {
-        auto mb = TText::mbstat(text.substr(j));
+        auto mb = mbstat(text.substr(j));
         if (mb.length <= 1)
         {
             if (i < cells.size())
@@ -163,7 +280,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                     ::setChar(cells[i], ' ');
                 else
                     ::setChar(cells[i], text[j]);
-                return {true, 1, 1};
+                return {1, 1};
             }
         }
         else
@@ -173,7 +290,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                 if (i < cells.size())
                 {
                     ::setChar(cells[i], "�");
-                    return {true, 1, mb.length};
+                    return {(size_t) mb.length, 1};
                 }
             }
             else if (mb.width == 0)
@@ -183,10 +300,10 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                 if (i > 0 && !isZWJ(zwc))
                 {
                     size_t k = i;
-                    while (cells[--k].ch.isWideCharTrail() && k > 0);
-                    cells[k].ch.appendZeroWidth(zwc);
+                    while (cells[--k]._ch.isWideCharTrail() && k > 0);
+                    cells[k]._ch.appendZeroWidth(zwc);
                 }
-                return {true, 0, mb.length};
+                return {(size_t) mb.length, 0};
             }
             else
             {
@@ -199,16 +316,16 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                     int count = min(wide + 1, cells.size() - i);
                     for (int k = 1; k < count; ++k)
                         ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
-                    return {true, count, mb.length};
+                    return {(size_t) mb.length, (size_t) count};
                 }
             }
         }
     }
-    return {false, 0, 0};
+    return {0, 0};
 }
 
-TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
-                                  TSpan<const uint32_t> textU32, size_t j ) noexcept
+TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
+                              TSpan<const uint32_t> textU32, size_t j ) noexcept
 {
     using namespace ttext;
     if (j < textU32.size())
@@ -222,7 +339,7 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 ::setChar(cells[i], "�");
-                return {true, 1, 1};
+                return {1, 1};
             }
         }
         else if (textU32[j] != 0 && width == 0)
@@ -231,10 +348,10 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
             if (i > 0 && !isZWJ(textU8))
             {
                 size_t k = i;
-                while (cells[--k].ch.isWideCharTrail() && k > 0);
-                cells[k].ch.appendZeroWidth(textU8);
+                while (cells[--k]._ch.isWideCharTrail() && k > 0);
+                cells[k]._ch.appendZeroWidth(textU8);
             }
-            return {true, 0, 1};
+            return {1, 0};
         }
         else
         {
@@ -247,9 +364,9 @@ TText::eat_r TText::eat_internal( TSpan<TScreenCell> cells, size_t i,
                 int count = min(wide + 1, cells.size() - i);
                 for (int k = 1; k < count; ++k)
                     ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
-                return {true, count, 1};
+                return {1, (size_t) count};
             }
         }
     }
-    return {false, 0, 0};
+    return {0, 0};
 }

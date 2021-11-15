@@ -515,7 +515,7 @@ The usual way of writing to the screen is by using `TDrawBuffer`. A few methods 
 
 ```c++
 void TDrawBuffer::moveChar(ushort indent, char c, TColorAttr attr, ushort count);
-void TDrawBuffer::putChar(ushort indent, ushort c);
+void TDrawBuffer::putChar(ushort indent, char c);
 ```
 `c` is always interpreted as a character in the active codepage.
 
@@ -537,12 +537,7 @@ The return values are the number of display columns that were actually filled wi
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, TColorAttr attr, ushort count);
 ```
-This function's name is misleading. Even in its original implementation, `source` is treated as a string. So it is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
-
-```c++
-void TDrawBuffer::moveBuf(ushort indent, const TScreenCell *source, ushort count); // New
-```
-In case you happen to have an array of `TScreenCell`, this method allows you to copy them into a `TDrawBuffer`.
+The name of this function is misleading. Even in its original implementation, `source` is treated as a string. So it is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
 
 There are other useful Unicode-aware functions:
 
@@ -558,26 +553,17 @@ Returns the displayed length of `s`.
 
 On Borland C++, these methods assume a single-byte encoding and all characters being one column wide. This makes it possible to write encoding-agnostic `draw()` and `handleEvent()` methods that work on both platforms without a single `#ifdef`.
 
-The functions above depend on the following lower-level functions. You will need them if you want to fill `TScreenCell` objects with text manually. You may find complete descriptions in `<tvision/ttext.h>`.
+The functions above are implemented using the functions from the `TText` namespace, another API extension. You will have to use them directly if you want to fill `TScreenCell` objects with text manually. To give an example, below are some of the `TText` functions. You can find all of them with complete descriptions in `<tvision/ttext.h>`.
 
 ```c++
 size_t TText::next(TStringView text);
 size_t TText::prev(TStringView text, size_t index);
-size_t TText::wseek(TStringView text, int count, Boolean incRemainder=True);
-size_t TText::fill(TSpan<TScreenCell> cells, TStringView text);
-size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, TColorAttr attr);
-#ifndef __BORLANDC__
-template <class Func>
-size_t TText::fill(TSpan<TScreenCell> cells, TStringView text, Func &&func);
-#endif
-bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
-bool TText::eat(TSpan<TScreenCell> cells, size_t &i, TSpan<uint32_t> text, size_t &j);
-bool TText::next(TStringView text, size_t &index, size_t &width);
-bool TText::next(TStringView text, size_t &index);
-void TText::wseek(TStringView text, size_t &index, size_t &remainder, int count);
+void TText::drawChar(TSpan<TScreenCell> cells, char c);
+size_t TText::drawStr(TSpan<TScreenCell> cells, size_t indent, TStringView text, int textIndent);
+bool TText::drawOne(TSpan<TScreenCell> cells, size_t &i, TStringView text, size_t &j);
 ```
 
-For drawing `TScreenCell` buffers directly, the following methods are available:
+For drawing `TScreenCell` buffers into a view, the following methods are available:
 
 ```c++
 void TView::writeBuf(short x, short y, short w, short h, const TScreenCell *b); // New

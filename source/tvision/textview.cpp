@@ -199,11 +199,8 @@ void TTerminal::draw()
             memcpy( s+T, buffer, endLine );
             }
 
-            {
-            int x = TText::fill(b, TStringView(s, slen), color);
-            while (x < size.x)
-                ::setCell(b[x++], ' ', color);
-            }
+        int w = TText::drawStr(b, TStringView(s, slen), color);
+        TText::drawChar(b.subspan(w), ' ', color);
         writeBuf( 0, i, size.x, 1, b.data() );
         endLine = begLine;
         bufDec( endLine );

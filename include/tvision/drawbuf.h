@@ -36,7 +36,6 @@ public:
     ushort moveStr( ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0 ) noexcept;
     ushort moveCStr( ushort indent, TStringView str, TAttrPair attrs ) noexcept;
     void moveBuf( ushort indent, const void _FAR *source, TColorAttr attr, ushort count ) noexcept;
-    void moveBuf( ushort indent, const TScreenCell _FAR *source, ushort count ) noexcept;
 
     void putAttribute( ushort indent, TColorAttr attr ) noexcept;
     void putChar( ushort indent, uchar c ) noexcept;

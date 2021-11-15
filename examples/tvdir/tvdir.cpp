@@ -181,24 +181,32 @@ void TFilePane::draw() {
       if ((fileCount==0)&&(i==0))
         dBuf.moveStr( 2, "<no files>", getColor(0x0101) );
       if ((i+delta.y)<fileCount)
-        dBuf.moveStr( 2, files[i+delta.y], getColor(0x0101), (ushort) -1U, (short)delta.x );
+        dBuf.moveStr( 2, files[i+delta.y], getColor(0x0101), (short)size.x, (short)delta.x );
       writeLine( 0, i, (short)size.x, 1, dBuf );
     }
   }
 
-static void insertTextWidth(char *dst, TStringView src, int width, size_t dstSize)
-// Inserts 'width' columns of text from 'src' into 'dst'. If not enough characters
-// can be extracted from 'src', remaining columns are filled with spaces.
-{
-    size_t srcLen = TText::wseek(src, width, False);
-    size_t emptyLen = width - strwidth(TStringView(&src[0], srcLen));
-    size_t moveLen = srcLen + emptyLen;
-    size_t textLen = min(strlen(dst), dstSize-1-moveLen);
-    memmove(&dst[moveLen] , dst, textLen);
-    memcpy(dst, &src[0], srcLen);
-    for (size_t j = 0; j < emptyLen; ++j)
-      dst[srcLen + j] = ' ';
-    dst[moveLen+textLen] = '\0';
+static char *formatFileRow( char buf[128], const find_t &searchRec ) {
+    sprintf(buf, "  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",
+      searchRec.size,
+      ((searchRec.wr_date & 0x01E0) >> 5),
+      (searchRec.wr_date & 0x001F),
+      ((searchRec.wr_date >> 9)+1980)%100,
+      ((searchRec.wr_time & 0xF800) >> 11)%13,
+      ((searchRec.wr_time & 0x07E0) >> 5),
+      searchRec.attrib & FA_ARCH   ? 'a' : '\xFA',
+      searchRec.attrib & FA_RDONLY ? 'r' : '\xFA',
+      searchRec.attrib & FA_SYSTEM ? 's' : '\xFA',
+      searchRec.attrib & FA_HIDDEN ? 'h' : '\xFA');
+    size_t bufLen = strlen(buf) + 1;
+    size_t nameLen, nameWidth;
+    TText::scroll( searchRec.name, 18, False, nameLen, nameWidth );
+    size_t namePad = 18 - nameWidth;
+    char *row = new char[nameLen + namePad + bufLen];
+    memcpy( row, searchRec.name, nameLen );
+    memset( row + nameLen, ' ', namePad );
+    memcpy( row + nameLen + namePad, buf, bufLen );
+    return row;
 }
 
 void TFilePane::newDir( const char *path ) {
@@ -221,27 +229,14 @@ void TFilePane::newDir( const char *path ) {
     result = _dos_findfirst( searchPath, 0xff, &searchRec );
     i=0;
     while (result==0) {
-      if (!(searchRec.attrib & FA_DIREC)) {
-          sprintf(searchPath,"  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",
-                    searchRec.size,
-                    ((searchRec.wr_date & 0x01E0) >> 5),
-                    (searchRec.wr_date & 0x001F),
-                    ((searchRec.wr_date >> 9)+1980)%100,
-                    ((searchRec.wr_time & 0xF800) >> 11)%13,
-                    ((searchRec.wr_time & 0x07E0) >> 5),
-                    searchRec.attrib & FA_ARCH   ? 'a' : '\xFA',
-                    searchRec.attrib & FA_RDONLY ? 'r' : '\xFA',
-                    searchRec.attrib & FA_SYSTEM ? 's' : '\xFA',
-                    searchRec.attrib & FA_HIDDEN ? 'h' : '\xFA' );
-          insertTextWidth(searchPath, searchRec.name, 18, sizeof(searchPath));
-        files[i++] = newStr(searchPath);
-      }
+      if (!(searchRec.attrib & FA_DIREC))
+        files[i++] = formatFileRow( searchPath, searchRec );
       result=_dos_findnext( &searchRec );
     }
     if (fileCount==0)
       setLimit( 1, 1 );
     else
-      setLimit( strwidth(files[0]), fileCount );
+      setLimit( strwidth(files[0]) + 2, fileCount );
     drawView();
 }
 

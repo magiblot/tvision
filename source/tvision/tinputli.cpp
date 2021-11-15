@@ -155,8 +155,7 @@ int TInputLine::mousePos( TEvent& event )
     int pos = mouse.x + firstPos - 1;
     pos = max( pos, 0 );
     TStringView text = data;
-    pos = min( pos, strwidth(text) );
-    return TText::wseek(text, pos);
+    return TText::scroll(text, pos, False);
 }
 
 int TInputLine::displayedPos( int pos )

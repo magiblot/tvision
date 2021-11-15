@@ -413,41 +413,27 @@ static int scan( char *p, int offset, int size, char c) noexcept
         }
 }
 
-static int widthToPos(const char *text, int offset, int size, int width) noexcept
-{
-    return offset + TText::wseek(TStringView(&text[offset], size), width, False);
-}
-
 TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap ) noexcept
 {
-    int i;
-
-    i = scan(text, offset, size, '\n');
-    if (i + offset > size )
+    int i = scan(text, offset, size, '\n');
+    if( i + offset > size )
         i = size - offset;
-    if (wrap && strwidth(TStringView(&text[offset], i)) >= width)
+    if( wrap )
         {
-        i = widthToPos(text, offset, i, width);
-        if (i > size)
-            i = size;
-        else
+        size_t l, w;
+        TText::scroll(TStringView(&text[offset], i), width, False, l, w);
+        if( int(l) < i )
             {
-            while((i > offset) && !(isBlank(text[i])))
-                --i;
-            if( i == offset )
-                {
-                i = widthToPos(text, offset, i - offset, width);
-                while( (i < size) && !isBlank(text[i]) )
-                    ++i;
-                if( i < size )
-                    ++i;
-                }
-            else
-                ++i;
+            int j = l + offset;
+            int k = j;
+            while( (k > offset) && !(isBlank(text[k])) )
+                --k;
+            if( k == offset )
+                k = j;
+            if( k < size && isBlank(text[k]) )
+                ++k;
+            i = k - offset;
             }
-        if (i == offset)
-            i = widthToPos(text, offset, i - offset, width);
-        i -= offset;
         }
     TStringView str(&text[offset], i);
     if (str.size() && str.back() == '\n')

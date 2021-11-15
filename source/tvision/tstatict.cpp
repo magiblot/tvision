@@ -66,7 +66,7 @@ void TStaticText::draw()
                 ++p;
                 }
             i = p;
-            int last = i + TText::wseek(TStringView(&s[i], l-i), size.x, False);
+            int last = i + TText::scroll(TStringView(&s[i], l-i), size.x, False);
             do {
                 j = p;
                 while ((p < l) && (s[p] == ' '))

@@ -125,8 +125,8 @@ void BufferedDisplay::drawCursors() noexcept
             if (inBounds(x, y))
             {
                 auto *cell = &buffer[y*size.x + x];
-                if ( cell->ch.isWideCharTrail() &&
-                     x > 0 && (cell - 1)->wide )
+                if ( cell->_ch.isWideCharTrail() &&
+                     x > 0 && (cell - 1)->isWide() )
                     --cell, --x;
                 cursor->apply(cell->attr);
                 setDirty(x, y, 1);
@@ -144,8 +144,8 @@ void BufferedDisplay::undrawCursors() noexcept
             if (inBounds(x, y))
             {
                 auto *cell = &buffer[y*size.x + x];
-                if ( cell->ch.isWideCharTrail() &&
-                     x > 0 && (cell - 1)->wide )
+                if ( cell->_ch.isWideCharTrail() &&
+                     x > 0 && (cell - 1)->isWide() )
                     --cell, --x;
                 cursor->restore(cell->attr);
                 setDirty(x, y, 1);
@@ -187,7 +187,7 @@ void BufferedDisplay::flushScreen(DisplayStrategy &display) noexcept
 
 inline void BufferedDisplay::validateCell(TScreenCell &cell) const noexcept
 {
-    auto &ch = cell.ch;
+    auto &ch = cell._ch;
     if (!ch[1]) // size 1
     {
         uchar c = ch[0];
@@ -232,12 +232,12 @@ struct FlushScreenAlgorithm
 
 inline bool isTrail(const TScreenCell &cell) noexcept
 {
-    return __builtin_expect(cell.ch.isWideCharTrail(), 0);
+    return __builtin_expect(cell._ch.isWideCharTrail(), 0);
 }
 
 inline bool isWide(const TScreenCell &cell) noexcept
 {
-    return __builtin_expect(cell.wide, 0);
+    return __builtin_expect(cell.isWide(), 0);
 }
 
 inline const TScreenCell& FlushScreenAlgorithm::cellAt(int x) const noexcept
@@ -325,7 +325,7 @@ inline void FlushScreenAlgorithm::processCell() noexcept
 
 inline void FlushScreenAlgorithm::writeCell() noexcept
 {
-    writeCell(cell->ch, cell->attr, cell->wide);
+    writeCell(cell->_ch, cell->attr, cell->isWide());
 }
 
 inline void FlushScreenAlgorithm::writeSpace() noexcept
@@ -351,7 +351,7 @@ inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,
 
 void FlushScreenAlgorithm::handleWideCharSpill() noexcept
 {
-    uchar width = cell->wide;
+    uchar width = cell->isWide();
     const auto Attr = cell->attr;
     if (x + width < size.x)
         writeCell();
@@ -413,7 +413,7 @@ void FlushScreenAlgorithm::handleTrail() noexcept
         --x;
         getCell();
         // Check the character behind the placeholder.
-        if (cell->wide) {
+        if (cell->isWide()) {
             handleWideCharSpill();
             return;
         }

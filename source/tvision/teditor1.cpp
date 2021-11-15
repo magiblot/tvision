@@ -281,10 +281,8 @@ void TEditor::nextChar( TStringView s, uint &p, uint &width )
 Boolean TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
                              TStringView text, uint &p, TColorAttr color )
 {
-    if (width < cells.size())
-        ::setAttr(cells[width], color);
     size_t p_ = 0, w_ = width;
-    if (TText::eat(cells, w_, text, p_))
+    if (TText::drawOne(cells, w_, text, p_, color))
         {
         p += p_; width = w_;
         return True;

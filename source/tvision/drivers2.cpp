@@ -87,7 +87,8 @@ int cstrlen( TStringView text ) noexcept
     return len;
 #else
     size_t i = 0, width = 0;
-    while (i < text.size()) {
+    while (i < text.size())
+    {
         if (text[i] != '~')
             TText::next(text, i, width);
         else
@@ -113,12 +114,5 @@ int cstrlen( TStringView text ) noexcept
 
 int strwidth( TStringView text ) noexcept
 {
-#ifdef __BORLANDC__
-    return text.size();
-#else
-    size_t i = 0, width = 0;
-    while (i < text.size())
-        TText::next(text, i, width);
-    return width;
-#endif
+    return TText::width(text);
 }
