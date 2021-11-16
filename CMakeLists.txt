@@ -8,8 +8,10 @@
 # * TV_REDUCE_APP_SIZE (default OFF) to reduce executable size by asking the
 #   linker to strip out unused funcions and data. This affects the library's PUBLIC
 #   linker flags.
+# * TV_OPTIMIZE_BUILD (default ON) to build with Precompiled Headers (CMake 3.16
+#   or newer.
 # * TV_LIBRARY_UNITY_BUILD (default OFF) to reduce the build time of the main library
-#   (CMake 3.16 or newer).
+#   (CMake 3.16 or newer), at the cost of possibly increasing its size.
 # * TV_BUILD_AVSCOLOR (default OFF) to build an AviSynth plugin for testing the
 #   terminal color quantization (Unix only).
 
@@ -137,6 +139,12 @@ option(TV_LIBRARY_UNITY_BUILD "Use CMake's Unity Build" OFF)
 if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_LIBRARY_UNITY_BUILD)
     tv_message(WARNING "'TV_LIBRARY_UNITY_BUILD' requested but only available in CMake 3.16.0 or newer.")
     set(TV_LIBRARY_UNITY_BUILD OFF)
+endif()
+
+option(TV_OPTIMIZE_BUILD "Use CMake's Precompiled Headers" OFF)
+if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_OPTIMIZE_BUILD)
+    tv_message(WARNING "'TV_OPTIMIZE_BUILD' requested but only available in CMake 3.16.0 or newer.")
+    set(TV_OPTIMIZE_BUILD OFF)
 endif()
 
 option(TV_BUILD_AVSCOLOR "Build AviSynth TermColor plugin" OFF)

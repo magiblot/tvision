@@ -57,7 +57,7 @@ jobs:
       env:
         CC: clang
         CXX: clang++
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="-std=c++17"
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTV_OPTIMIZE_BUILD=OFF
 
     - name: Build
       shell: bash
