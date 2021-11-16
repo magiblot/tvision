@@ -105,7 +105,7 @@ opstream& _Cdecl operator << ( opstream&, long double );
 opstream& _Cdecl operator << ( opstream&, TStreamable& );
 opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
 
-#include <tvision/internal/iosfwd.h>
+#include <tvision/compat/iosfwd.h>
 class TStringView;
 ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
 

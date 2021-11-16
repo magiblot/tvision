@@ -8,8 +8,6 @@
 #include <unordered_map>
 #include <array>
 
-// tables.cpp
-
 class CpTranslator
 {
 

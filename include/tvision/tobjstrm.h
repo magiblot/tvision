@@ -288,8 +288,6 @@ private:
 #if defined( Uses_pstream ) && !defined( __pstream )
 #define __pstream
 
-#include <tvision/internal/iosfwd.h>
-
 #pragma option -Vo-
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
