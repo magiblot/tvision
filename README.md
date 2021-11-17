@@ -503,7 +503,7 @@ One of the issues of Unicode support is the existence of [multi-width](https://c
 * Multi-width characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
 * Zero-width characters overlay the previous character. For example, the sequence `में` consists of the single-width character `म` and the combining characters `े` and `ं`. In this case, three Unicode codepoints are fit into the same cell.
 
-    The `ZERO WIDTH JOINER` (`U+200D`) is always ommited, as it complicates things too much. For example, it can turn a string like `"👩👦"` (4 columns wide) into `"👩‍👦"` (2 columns wide). Not all terminal emulators respect the ZWJ, so, in order to produce predictable results, Turbo Vision will print both `"👩👦"` and `"👩‍👦"` as `👩👦`.
+    The `ZERO WIDTH JOINER` (`U+200D`) is always omitted, as it complicates things too much. For example, it can turn a string like `"👩👦"` (4 columns wide) into `"👩‍👦"` (2 columns wide). Not all terminal emulators respect the ZWJ, so, in order to produce predictable results, Turbo Vision will print both `"👩👦"` and `"👩‍👦"` as `👩👦`.
 * No notable graphical glitches will occur as long as your terminal emulator respects character widths as measured by `wcwidth`.
 
 Here is an example of such characters in the [Turbo](https://github.com/magiblot/turbo) text editor:

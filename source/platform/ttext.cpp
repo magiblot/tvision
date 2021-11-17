@@ -311,12 +311,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 {
                     bool wide = mb.width > 1;
                     ::setChar(cells[i], {&text[j], (size_t) mb.length}, wide);
-                    // Fill trailing cells.
-                    auto attr = ::getAttr(cells[i]);
-                    int count = min(wide + 1, cells.size() - i);
-                    for (int k = 1; k < count; ++k)
-                        ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
-                    return {(size_t) mb.length, (size_t) count};
+                    bool drawTrail = (wide && i + 1 < cells.size());
+                    if (drawTrail)
+                        ::setChar(cells[i + 1], TCellChar::wideCharTrail);
+                    return {(size_t) mb.length, size_t(1 + drawTrail)};
                 }
             }
         }
@@ -359,12 +357,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             {
                 bool wide = width > 1;
                 ::setChar(cells[i], textU8, wide);
-                // Fill trailing cells.
-                auto attr = ::getAttr(cells[i]);
-                int count = min(wide + 1, cells.size() - i);
-                for (int k = 1; k < count; ++k)
-                    ::setCell(cells[i + k], TCellChar::wideCharTrail, attr);
-                return {1, (size_t) count};
+                bool drawTrail = (wide && i + 1 < cells.size());
+                if (drawTrail)
+                    ::setChar(cells[i + 1], TCellChar::wideCharTrail);
+                return {1, size_t(1 + drawTrail)};
             }
         }
     }

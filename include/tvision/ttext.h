@@ -67,17 +67,18 @@ public:
     //
     // * cells: range of TScreenCells to write to.
     // * i (input/output parameter): index into 'cells'. Gets increased by
-    //   the display width of the text written into 'cells'.
+    //   the number of cells that have been updated.
     // * text: input text.
     // * j (input/output parameter): index into 'text'. Gets increased by
     //   the number of bytes read from 'text'.
-    // * (variant 2) attr: color attribute to set in each cell.
+    // * (variant 2) attr: color attribute to set in the cell.
     //
     // Returns false when 'i >= cells.size() && j >= text.size()'.
     // A screen cell may contain one printable character (of width 1 or more)
     // and several combining characters appended to it (of width 0).
     // When a zero-width character is found in 'text', it is combined with the
-    // previous cell, i.e. cells[i - 1], if 'i > 0'.
+    // previous cell, i.e. cells[i - 1], if 'i > 0'. In this case, 'i' is not
+    // increased and the color attribute is not set.
     static Boolean drawOne( TSpan<TScreenCell> cells, size_t &i,
                             TStringView text, size_t &j ) noexcept;
     static Boolean drawOne( TSpan<TScreenCell> cells, size_t &i,
@@ -432,11 +433,7 @@ inline size_t TText::drawStrExT( TSpan<TScreenCell> cells, size_t indent,
             transformAttr(cells[i++].attr);
         }
     }
-    do
-    {
-        if (i < cells.size())
-            transformAttr(cells[i].attr);
-    } while (TText::drawOne(cells, i, text, j));
+    while (TText::drawOneT(cells, i, text, j, (Func &&) transformAttr));
     return i - indent;
 }
 
@@ -444,9 +441,11 @@ template <class Text, class Func>
 inline Boolean TText::drawOneT( TSpan<TScreenCell> cells, size_t &i,
                                 Text text, size_t &j, Func &&transformAttr ) noexcept
 {
-    if (i < cells.size())
-        transformAttr(cells[i].attr);
     auto result = drawOneImpl(cells, i, text, j);
+    if (result.width)
+        transformAttr(cells[i].attr);
+    if (result.width > 1)
+        transformAttr(cells[i + 1].attr);
     i += result.width;
     j += result.length;
     return result.length != 0;
