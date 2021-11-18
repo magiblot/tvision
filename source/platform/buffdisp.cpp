@@ -195,7 +195,7 @@ inline void BufferedDisplay::validateCell(TScreenCell &cell) const noexcept
             ch[0] = ' ';
         else if (c < ' ' || 0x7F <= c)
             // Translate from codepage as fallback.
-            ch = CpTranslator::toUtf8Int(c);
+            ch.moveInt(CpTranslator::toUtf8Int(c));
     }
 }
 
@@ -330,7 +330,9 @@ inline void FlushScreenAlgorithm::writeCell() noexcept
 
 inline void FlushScreenAlgorithm::writeSpace() noexcept
 {
-    writeCell(' ', cell->attr, 0);
+    TCellChar ch;
+    ch.moveInt(' ');
+    writeCell(ch, cell->attr, 0);
 }
 
 inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,

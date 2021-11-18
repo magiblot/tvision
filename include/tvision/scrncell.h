@@ -53,106 +53,111 @@ inline void setCell(TScreenCell &cell, TCellChar ch, TColorAttr attr)
 
 struct TCellChar
 {
+    enum : uint8_t { fWide = 0x1, fTrail = 0x2 };
 
-    uint8_t _text[12];
-
-    enum WideCharTrail : uint32_t { wideCharTrail=(uint32_t)-2 };
+    char _text[15];
+    uint8_t _flags;
 
     TCellChar() = default;
-    inline TCellChar(WideCharTrail);
-    inline TCellChar(char ch);
-    inline TCellChar(uchar ch);
-    inline TCellChar(uint32_t ch);
-    inline TCellChar(TStringView text);
-    TV_TRIVIALLY_ASSIGNABLE(TCellChar)
+    inline void moveChar(char ch);
+    inline void moveInt(uint32_t mbc, bool wide=false);
+    inline void moveStr(TStringView mbc, bool wide=false);
+    inline void moveWideCharTrail();
 
-    inline bool isWideCharTrail() const;
-    inline void appendZeroWidth(TStringView text);
-    inline TStringView getText() const;
-    inline size_t size() const;
+    constexpr inline bool isWide() const;
+    constexpr inline bool isWideCharTrail() const;
+    constexpr inline void appendZeroWidth(TStringView mbc);
+    constexpr inline TStringView getText() const;
+    constexpr inline size_t size() const;
 
-    inline uint8_t& operator[](size_t i);
-    inline const uint8_t& operator[](size_t i) const;
-    inline bool operator==(const TCellChar &other) const;
-    inline bool operator!=(const TCellChar &other) const;
-
+    constexpr inline char& operator[](size_t i);
+    constexpr inline const char& operator[](size_t i) const;
 };
 
-inline TCellChar::TCellChar(WideCharTrail)
+inline void TCellChar::moveChar(char ch)
 {
-    *this = (uint32_t) wideCharTrail;
+    moveInt((uchar) ch);
 }
 
-inline TCellChar::TCellChar(char ch)
-{
-    *this = (uchar) ch;
-}
-
-inline TCellChar::TCellChar(uchar ch)
+inline void TCellChar::moveInt(uint32_t mbc, bool wide)
 {
     memset(this, 0, sizeof(*this));
-    memcpy(_text, &ch, sizeof(ch));
+    // CAUTION: Assumes Little Endian.
+    memcpy(_text, &mbc, sizeof(mbc));
+    _flags = -wide & fWide;
 }
 
-inline TCellChar::TCellChar(uint32_t ch)
+inline void TCellChar::moveStr(TStringView mbc, bool wide)
+{
+    static_assert(sizeof(_text) >= 4, "");
+    if (mbc.size() <= 4)
+    {
+        memset(this, 0, sizeof(*this));
+        switch (mbc.size())
+        {
+            case 4: _text[3] = mbc[3];
+            case 3: _text[2] = mbc[2];
+            case 2: _text[1] = mbc[1];
+            case 1: _text[0] = mbc[0];
+        }
+        _flags |= -wide & fWide;
+    }
+}
+
+inline void TCellChar::moveWideCharTrail()
 {
     memset(this, 0, sizeof(*this));
-    memcpy(_text, &ch, sizeof(ch));
+    _flags = fTrail;
 }
 
-inline TCellChar::TCellChar(TStringView text)
+constexpr inline bool TCellChar::isWide() const
 {
-    memset(this, 0, sizeof(*this));
-    if (text.size() <= sizeof(_text))
-        memcpy(_text, text.data(), text.size());
+    return _flags & fWide;
 }
 
-inline bool TCellChar::isWideCharTrail() const
+constexpr inline bool TCellChar::isWideCharTrail() const
 {
-    uint32_t ch;
-    memcpy(&ch, _text, sizeof(ch));
-    return ch == wideCharTrail;
+    return _flags & fTrail;
 }
 
-inline void TCellChar::appendZeroWidth(TStringView text)
+constexpr inline void TCellChar::appendZeroWidth(TStringView mbc)
+// Pre: !isWideCharTrail();
 {
-    if (!_text[0])
-        _text[0] = ' ';
     size_t sz = size();
-    if (text.size() <= sizeof(_text) - sz)
-        memcpy(&_text[sz], text.data(), text.size());
+    if (mbc.size() <= sizeof(_text) - sz)
+    {
+        if (!mbc[0])
+            _text[0] = ' ';
+        switch (mbc.size())
+        {
+            case 4: _text[sz + 3] = mbc[3];
+            case 3: _text[sz + 2] = mbc[2];
+            case 2: _text[sz + 1] = mbc[1];
+            case 1: _text[sz] = mbc[0];
+        }
+    }
 }
 
-inline TStringView TCellChar::getText() const
+constexpr inline TStringView TCellChar::getText() const
 {
-    return {(const char *) _text, size()};
+    return {_text, size()};
 }
 
-inline size_t TCellChar::size() const
+constexpr inline size_t TCellChar::size() const
 {
     size_t i = 0;
     while (++i < sizeof(_text) && _text[i]);
     return i;
 }
 
-inline uint8_t& TCellChar::operator[](size_t i)
+constexpr inline char& TCellChar::operator[](size_t i)
 {
     return _text[i];
 }
 
-inline const uint8_t& TCellChar::operator[](size_t i) const
+constexpr inline const char& TCellChar::operator[](size_t i) const
 {
     return _text[i];
-}
-
-inline bool TCellChar::operator==(const TCellChar &other) const
-{
-    return memcmp(this, &other, sizeof(*this)) == 0;
-}
-
-inline bool TCellChar::operator!=(const TCellChar &other) const
-{
-    return !(*this == other);
 }
 
 //// TScreenCell
@@ -172,40 +177,34 @@ inline bool TCellChar::operator!=(const TCellChar &other) const
 
 struct TScreenCell
 {
-
     TColorAttr attr;
     TCellChar _ch;
-    uint8_t _wide;
-    uint8_t _unused[3];
 
     TScreenCell() = default;
     inline TScreenCell(ushort bios);
     TV_TRIVIALLY_ASSIGNABLE(TScreenCell)
 
-    inline bool isWide() const;
+    constexpr inline bool isWide() const;
 
     inline bool operator==(const TScreenCell &other) const;
     inline bool operator!=(const TScreenCell &other) const;
-
 };
 
 inline const TColorAttr &getAttr(const TScreenCell &cell);
 inline void setAttr(TScreenCell &cell, const TColorAttr &attr);
-inline const TCellChar &getChar(const TScreenCell &cell);
-inline void setChar(TScreenCell &cell, const TCellChar &ch, bool wide=0);
-inline void setChar(TScreenCell &cell, TStringView text, bool wide=0);
-inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &attr, bool wide=0);
+inline void setChar(TScreenCell &cell, char ch);
+inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr);
 
 inline TScreenCell::TScreenCell(ushort bios)
 {
     memset(this, 0, sizeof(*this));
-    _ch = uchar(bios);
+    _ch.moveChar(bios);
     attr = uchar(bios >> 8);
 }
 
-inline bool TScreenCell::isWide() const
+constexpr inline bool TScreenCell::isWide() const
 {
-    return _wide;
+    return _ch.isWide();
 }
 
 inline bool TScreenCell::operator==(const TScreenCell &other) const
@@ -228,27 +227,15 @@ inline void setAttr(TScreenCell &cell, const TColorAttr &attr)
     cell.attr = attr;
 }
 
-inline const TCellChar &getChar(const TScreenCell &cell)
+inline void setChar(TScreenCell &cell, char ch)
 {
-    return cell._ch;
+    cell._ch.moveChar(ch);
 }
 
-inline void setChar(TScreenCell &cell, const TCellChar &ch, bool wide)
-{
-    cell._ch = ch;
-    cell._wide = wide;
-}
-
-inline void setChar(TScreenCell &cell, TStringView text, bool wide)
-{
-    cell._ch = text;
-    cell._wide = wide;
-}
-
-inline void setCell(TScreenCell &cell, const TCellChar &ch, const TColorAttr &attr, bool wide)
+inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr)
 {
     memset(&cell, 0, sizeof(cell));
-    ::setChar(cell, ch, wide);
+    ::setChar(cell, ch);
     ::setAttr(cell, attr);
 }
 

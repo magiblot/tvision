@@ -272,14 +272,14 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         {
             if (i < cells.size())
             {
-                // This is redudant except if non-UTF-8 text is mixed with
-                // combining characters.
                 if (mb.length < 0)
-                    ::setChar(cells[i], CpTranslator::toUtf8Int(text[j]));
+                    // This would be unnecessary if it wasn't because we
+                    // might later try to append combining characters to this.
+                    cells[i]._ch.moveInt(CpTranslator::toUtf8Int(text[j]));
                 else if (text[j] == '\0')
-                    ::setChar(cells[i], ' ');
+                    cells[i]._ch.moveChar(' ');
                 else
-                    ::setChar(cells[i], text[j]);
+                    cells[i]._ch.moveChar(text[j]);
                 return {1, 1};
             }
         }
@@ -289,7 +289,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             {
                 if (i < cells.size())
                 {
-                    ::setChar(cells[i], "�");
+                    cells[i]._ch.moveStr("�");
                     return {(size_t) mb.length, 1};
                 }
             }
@@ -310,10 +310,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (i < cells.size())
                 {
                     bool wide = mb.width > 1;
-                    ::setChar(cells[i], {&text[j], (size_t) mb.length}, wide);
+                    cells[i]._ch.moveStr({&text[j], (size_t) mb.length}, wide);
                     bool drawTrail = (wide && i + 1 < cells.size());
                     if (drawTrail)
-                        ::setChar(cells[i + 1], TCellChar::wideCharTrail);
+                        cells[i + 1]._ch.moveWideCharTrail();
                     return {(size_t) mb.length, size_t(1 + drawTrail)};
                 }
             }
@@ -336,7 +336,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         {
             if (i < cells.size())
             {
-                ::setChar(cells[i], "�");
+                cells[i]._ch.moveStr("�");
                 return {1, 1};
             }
         }
@@ -356,10 +356,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 bool wide = width > 1;
-                ::setChar(cells[i], textU8, wide);
+                cells[i]._ch.moveStr(textU8, wide);
                 bool drawTrail = (wide && i + 1 < cells.size());
                 if (drawTrail)
-                    ::setChar(cells[i + 1], TCellChar::wideCharTrail);
+                    cells[i + 1]._ch.moveWideCharTrail();
                 return {1, size_t(1 + drawTrail)};
             }
         }
