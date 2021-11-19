@@ -50,7 +50,7 @@
 
 const ushort firstKeys[] =
 {
-    40,
+    41,
     kbCtrlA, cmSelectAll,
     kbCtrlC, cmPageDown,
     kbCtrlD, cmCharRight,
@@ -73,6 +73,7 @@ const ushort firstKeys[] =
     kbCtrlY, cmDelLine,
     kbLeft, cmCharLeft,
     kbRight, cmCharRight,
+    kbAltBack, cmDelWordLeft,
     kbCtrlBack, cmDelWordLeft,
     kbCtrlDel, cmDelWord,
     kbCtrlLeft, cmWordLeft,
