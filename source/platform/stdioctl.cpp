@@ -3,6 +3,7 @@
 
 #include <internal/stdioctl.h>
 #include <internal/getenv.h>
+#include <initializer_list>
 
 #ifdef _TV_UNIX
 
