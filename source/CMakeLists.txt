@@ -117,10 +117,14 @@ if (NOT WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_NCURSES)
     target_link_libraries(${PROJECT_NAME} PUBLIC ${NCURSESW})
 
-    # tinfow (comes with ncurses and is often provided as 'tinfo',
-    # but we need to link the 'w' version when both are available)
+    # tinfow, dependency of ncurses. Often provided as 'tinfo', but we also need
+    # to link the 'w' version when both are available.
     find_library(TINFOW tinfow)
+    if (NOT TINFOW)
+        find_library(TINFOW tinfo)
+    endif()
     if (TINFOW)
+        tv_message(STATUS "Found 'tinfow': ${TINFOW}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TINFOW})
     endif()
 
