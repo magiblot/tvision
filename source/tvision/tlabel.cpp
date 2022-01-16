@@ -89,9 +89,11 @@ void TLabel::handleEvent( TEvent& event )
     else if( event.what == evKeyDown )
         {
         char c = hotKey( text );
-        if( getAltCode(c) == event.keyDown.keyCode ||
+        if( event.keyDown.keyCode != 0 &&
+            ( getAltCode(c) == event.keyDown.keyCode ||
                 ( c != 0 && owner->phase == TGroup::phPostProcess &&
                 toupper(event.keyDown.charScan.charCode) ==  c )
+            )
           )
             focusLink(event);
         }

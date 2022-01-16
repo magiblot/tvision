@@ -261,12 +261,14 @@ void TCluster::handleEvent( TEvent& event )
                 for( int i = 0; i < strings->getCount(); i++ )
                     {
                     char c = hotKey( (char *)(strings->at(i)) );
-                    if( getAltCode(c) == event.keyDown.keyCode ||
-                        ( ( owner->phase == phPostProcess ||
-                            (state & sfFocused) != 0
-                          ) &&
-                          c != 0 &&
-                          toupper(event.keyDown.charScan.charCode) == c
+                    if( event.keyDown.keyCode != 0 &&
+                        ( getAltCode(c) == event.keyDown.keyCode ||
+                          ( ( owner->phase == phPostProcess ||
+                              (state & sfFocused) != 0
+                            ) &&
+                            c != 0 &&
+                            toupper(event.keyDown.charScan.charCode) == c
+                          )
                         )
                       )
                         {
