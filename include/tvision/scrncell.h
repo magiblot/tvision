@@ -84,7 +84,7 @@ inline void TCellChar::moveInt(uint32_t mbc, bool wide)
     memset(this, 0, sizeof(*this));
     // CAUTION: Assumes Little Endian.
     memcpy(_text, &mbc, sizeof(mbc));
-    _flags = -wide & fWide;
+    _flags = -int(wide) & fWide;
 }
 
 inline void TCellChar::moveStr(TStringView mbc, bool wide)
@@ -100,7 +100,7 @@ inline void TCellChar::moveStr(TStringView mbc, bool wide)
             case 2: _text[1] = mbc[1];
             case 1: _text[0] = mbc[0];
         }
-        _flags |= -wide & fWide;
+        _flags |= -int(wide) & fWide;
     }
 }
 
