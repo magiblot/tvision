@@ -198,7 +198,7 @@ bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
         } else {
             ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
             if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
-                 ev.keyDown.keyCode == 0x3800 )
+                 ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 )
                 // Discard standalone Shift, Ctrl, Alt keys.
                 ev.keyDown.keyCode = kbNoKey;
         }
