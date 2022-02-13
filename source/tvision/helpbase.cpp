@@ -401,7 +401,7 @@ static int scan( char *p, int offset, int size, char c) noexcept
     char *temp1, *temp2;
 
     temp1 = p + offset;
-    temp2 = strchr(temp1, c);
+    temp2 = (char *) memchr(temp1, c, strlen(temp1));
     if (temp2 == 0)
         return size;
     else

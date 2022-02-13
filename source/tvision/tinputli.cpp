@@ -260,7 +260,7 @@ void TInputLine::handleEvent( TEvent& event )
 {
     Boolean extendBlock;
     /* Home, Left Arrow, Right Arrow, End, Ctrl-Left Arrow, Ctrl-Right Arrow */
-    static char padKeys[] = {0x47,0x4b,0x4d,0x4f,0x73,0x74, 0};
+    static const char padKeys[] = {0x47,0x4b,0x4d,0x4f,0x73,0x74, 0};
     TView::handleEvent(event);
 
     char keyText[ sizeof( event.keyDown.text )+1 ];
@@ -300,7 +300,8 @@ void TInputLine::handleEvent( TEvent& event )
             case evKeyDown:
                 saveState();
                 event.keyDown.keyCode = ctrlToArrow(event.keyDown.keyCode);
-                if( strchr(padKeys, event.keyDown.charScan.scanCode ) &&
+                if( event.keyDown.keyCode != 0 &&
+                    strchr(padKeys, event.keyDown.charScan.scanCode) &&
                     (event.keyDown.controlKeyState & kbShift) != 0
                   )
                     {

@@ -44,7 +44,7 @@ uint iScan( const char *block, uint size, const char *str );
 
 static int getCharType( char ch )
 {
-    if( strchr("\t ", ch) )
+    if( strchr("\t \0", ch) )
         return 0;
     if( strchr("\n\r", ch) )
         return 1;
@@ -60,7 +60,7 @@ static inline Boolean isWordBoundary( char a, char b )
 
 static inline int isWordChar( int ch )
 {
-    return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) == 0;
+    return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~\0", ch) == 0;
 }
 
 #pragma warn -asc

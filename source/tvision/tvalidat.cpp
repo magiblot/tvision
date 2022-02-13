@@ -176,7 +176,7 @@ Boolean isLetter(char ch)
 
 Boolean isSpecial(char ch, const char* special)
 {
-    if (strchr(special, ch) != 0)
+    if (memchr(special, ch, strlen(special)) != 0)
         return True;
     else
         return False;
