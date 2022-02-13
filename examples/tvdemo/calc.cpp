@@ -152,6 +152,7 @@ void TCalcDisplay::clear()
     strcpy(number, "0");
     sign = ' ';
     operate = '=';
+    operand = 0;
 }
 
 
