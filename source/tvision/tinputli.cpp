@@ -49,17 +49,20 @@ char hotKey( const char *s ) noexcept
 
 #define cpInputLine "\x13\x13\x14\x15"
 
-TInputLine::TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid ) noexcept :
+TInputLine::TInputLine( const TRect& bounds, uint limit, TValidator *aValid, ushort limitMode ) noexcept :
     TView(bounds),
-    data( new char[aMaxLen] ),
-    maxLen( aMaxLen-1 ),
+    maxLen      ( (limitMode == ilMaxBytes) ? min(max(limit-1, 0), 255) : 255 ),
+    maxWidth    ( (limitMode == ilMaxWidth) ? limit : UINT_MAX ),
+    maxGraphemes( (limitMode == ilMaxGraphemes) ? limit : UINT_MAX ),
     curPos( 0 ),
     firstPos( 0 ),
     selStart( 0 ),
     selEnd( 0 ),
-    validator( aValid ),
-    oldData( new char[aMaxLen] )
+    validator( aValid )
 {
+    data = new char[maxLen + 1];
+    oldData = new char[maxLen + 1];
+
     state |= sfCursorVis;
     options |= ofSelectable | ofFirstClick;
     *data = EOS;
@@ -226,28 +229,25 @@ void TInputLine::restoreState()
 Boolean TInputLine::checkValid(Boolean noAutoFill)
 {
     int oldLen, newLen;
-    char *newData;
+    char newData[256];
 
     if (validator)
         {
         oldLen = strlen(data);
-        newData = new char[256];
         strcpy(newData, data);
         if (!validator->isValidInput(newData, noAutoFill))
             {
-                restoreState();
-                delete[] newData;
-                return False;
+            restoreState();
+            return False;
             }
         else
             {
             if (strlen(newData) > maxLen)
                 newData[maxLen] = 0;
-            strcpy(data,newData);
+            strcpy(data, newData);
             newLen = strlen(data);
             if ((curPos >= oldLen) && (newLen > oldLen))
                 curPos = newLen;
-            delete[] newData;
             return True;
             }
         }
@@ -368,7 +368,12 @@ void TInputLine::handleEvent( TEvent& event )
 
                             if( checkValid(True) )
                                 {
-                                if( strlen(data) + len <= maxLen )
+                                TTextMetrics dataMts = TText::measure(data);
+                                TTextMetrics keyMts = TText::measure(keyText);
+                                if( strlen(data) + len <= maxLen &&
+                                    dataMts.width + keyMts.width <= maxWidth &&
+                                    dataMts.graphemeCount + keyMts.graphemeCount <= maxGraphemes
+                                  )
                                     {
                                     if( firstPos > curPos )
                                         firstPos = curPos;

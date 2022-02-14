@@ -150,6 +150,11 @@ inline opstream& operator << ( opstream& os, TDialog* cl )
 #if defined( Uses_TInputLine ) && !defined( __TInputLine )
 #define __TInputLine
 
+const ushort
+    ilMaxBytes      = 0,
+    ilMaxWidth      = 1,
+    ilMaxGraphemes  = 2;
+
 class _FAR TRect;
 struct _FAR TEvent;
 class _FAR TValidator;
@@ -159,7 +164,7 @@ class TInputLine : public TView
 
 public:
 
-    TInputLine( const TRect& bounds, uint aMaxLen, TValidator *aValid = 0 ) noexcept;
+    TInputLine( const TRect& bounds, uint limit, TValidator *aValid = 0, ushort limitMode = ilMaxBytes ) noexcept;
     ~TInputLine();
 
     virtual ushort dataSize();
@@ -175,6 +180,8 @@ public:
 
     char* data;
     uint maxLen;
+    uint maxWidth;
+    uint maxGraphemes;
     int curPos;
     int firstPos;
     int selStart;

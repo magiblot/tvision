@@ -160,6 +160,22 @@ size_t TText::width(TStringView text) noexcept
     return width;
 }
 
+TTextMetrics TText::measure(TStringView text) noexcept
+{
+    TTextMetrics metrics {};
+    size_t i = 0;
+    while (true)
+    {
+        size_t width = 0;
+        if (!TText::next(text, i, width))
+            break;
+        metrics.width += width;
+        metrics.characterCount += 1;
+        metrics.graphemeCount += (width > 0);
+    }
+    return metrics;
+}
+
 size_t TText::next(TStringView text) noexcept
 {
     if (text.size())

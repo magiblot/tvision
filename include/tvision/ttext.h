@@ -9,12 +9,22 @@
 #if defined( Uses_TText ) && !defined( __TText )
 #define __TText
 
+struct TTextMetrics
+{
+    uint width;
+    uint characterCount;
+    uint graphemeCount; // Number of non-combining characters.
+};
+
 class TText
 {
 public:
 
     // Returns the width of 'text'.
     static size_t width(TStringView text) noexcept;
+
+    // Returns the width, the character count and the grapheme count of 'text'.
+    static TTextMetrics measure(TStringView text) noexcept;
 
     // Returns the length in bytes of the first character in 'text'.
     static size_t next(TStringView text) noexcept;
@@ -139,6 +149,16 @@ inline size_t TText::width(TStringView text)
 {
     return text.size();
 }
+
+#pragma warn -inl
+
+inline TTextMetrics TText::measure(TStringView text)
+{
+    TTextMetrics metrics = {text.size(), text.size(), text.size()};
+    return metrics;
+}
+
+#pragma warn .inl
 
 inline size_t TText::next(TStringView text)
 {
