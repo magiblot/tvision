@@ -329,7 +329,7 @@ The following are new features not available in Borland's release of Turbo Visio
 * Support for LF line endings in `TFileViewer` (`tvdemo`) and `TEditor` (`tvedit`). `TEditor` preserves the line ending on file save but all newly created files use CRLF by default.
 * `TEditor`: context menu on right click.
 * `TEditor`: drag scroll with middle mouse button.
-* `TEditor`: delete whole words with `kbAltBack`, `kbCtrlBack` and `kbCtrlDel`.
+* `TEditor`, `TInputLine`: delete whole words with `kbAltBack`, `kbCtrlBack` and `kbCtrlDel`.
 * `TEditor`: the Home key toggles between beginning of line and beginning of indented text.
 * `TEditor`: support for files bigger than 64 KiB on 32-bit or 64-bit builds.
 * `tvdemo`: event viewer applet useful for event debugging.

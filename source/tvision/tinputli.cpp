@@ -47,6 +47,26 @@ char hotKey( const char *s ) noexcept
         return 0;
 }
 
+static int prevWord(const char *s, int pos) noexcept
+{
+    for (int i = pos - 1; i >= 1; --i)
+        {
+        if( s[i] != ' ' && s[i - 1] == ' ' )
+            return i;
+        }
+    return 0;
+};
+
+static int nextWord(TStringView s, int pos) noexcept
+{
+    for (int i = pos; i < int(s.size()) - 1; ++i)
+        {
+        if( s[i] == ' ' && s[i + 1] != ' ' )
+            return i + 1;
+        }
+    return int(s.size());
+};
+
 #define cpInputLine "\x13\x13\x14\x15"
 
 TInputLine::TInputLine( const TRect& bounds, uint limit, TValidator *aValid, ushort limitMode ) noexcept :
@@ -166,7 +186,7 @@ int TInputLine::displayedPos( int pos )
     return strwidth( TStringView(data, pos) );
 }
 
-void  TInputLine::deleteSelect()
+void TInputLine::deleteSelect()
 {
     if( selStart < selEnd )
         {
@@ -320,10 +340,16 @@ void TInputLine::handleEvent( TEvent& event )
                 switch( event.keyDown.keyCode )
                     {
                     case kbLeft:
-                        curPos -= TText::prev(TStringView(data), curPos);
+                        curPos -= TText::prev(data, curPos);
                         break;
                     case kbRight:
-                        curPos += TText::next(TStringView(data+curPos));
+                        curPos += TText::next(data+curPos);
+                        break;
+                    case kbCtrlLeft:
+                        curPos = prevWord(data, curPos);
+                        break;
+                    case kbCtrlRight:
+                        curPos = nextWord(data, curPos);
                         break;
                     case kbHome:
                         curPos =  0;
@@ -332,19 +358,23 @@ void TInputLine::handleEvent( TEvent& event )
                         curPos = strlen(data);
                         break;
                     case kbBack:
-                        if ( selStart != selEnd )
+                        if( selStart == selEnd )
                             {
-                            deleteSelect();
-                            checkValid(True);
+                            selStart = curPos - TText::prev(data, curPos);
+                            selEnd = curPos;
                             }
-                        else if( curPos > 0 )
+                        deleteSelect();
+                        checkValid(True);
+                        break;
+                    case kbCtrlBack:
+                    case kbAltBack:
+                        if( selStart == selEnd )
                             {
-                            TStringView text = data;
-                            int len = TText::prev(text, curPos);
-                            memmove( data+curPos-len, data+curPos, text.size()-curPos+1 );
-                            curPos -= len;
-                            checkValid(True);
+                            selStart = prevWord(data, curPos);
+                            selEnd = curPos;
                             }
+                        deleteSelect();
+                        checkValid(True);
                         break;
                     case kbDel:
                         if( selStart == selEnd )
@@ -353,6 +383,14 @@ void TInputLine::handleEvent( TEvent& event )
                             deleteSelect();
                         checkValid(True);
                         break;
+                    case kbCtrlDel:
+                        if( selStart == selEnd )
+                            {
+                            selStart = curPos;
+                            selEnd = nextWord(data, curPos);
+                            }
+                        deleteSelect();
+                        checkValid(True);
                     case kbIns:
                         setState(sfCursorIns, Boolean(!(state & sfCursorIns)));
                         break;
@@ -384,7 +422,7 @@ void TInputLine::handleEvent( TEvent& event )
                                 checkValid(False);
                                 }
                             }
-                        else if( event.keyDown.charScan.charCode == CONTROL_Y)
+                        else if( event.keyDown.charScan.charCode == CONTROL_Y )
                             {
                             *data = EOS;
                             curPos = 0;
