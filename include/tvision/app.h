@@ -293,7 +293,7 @@ protected:
 
 private:
 
-    Boolean readTextEvent(TEvent &, TSpan<char>, size_t &);
+    Boolean readTextEvent(TEvent &, TSpan<char>, size_t &, Boolean);
 
     static const char * _NEAR exitText;
 

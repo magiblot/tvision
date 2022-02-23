@@ -333,7 +333,7 @@ Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
 // On exit, 'event.what' is evNothing.
 {
     length = 0;
-    readTextEvent( event, dest, length );
+    readTextEvent( event, dest, length, False );
     do  {
         if( pending.what != evNothing )
             {
@@ -348,12 +348,12 @@ Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
                 event.getKeyEvent();
 #endif
             }
-        } while( readTextEvent( event, dest, length ) );
+        } while( readTextEvent( event, dest, length, True ) );
 
     return length != 0;
 }
 
-Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length)
+Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length, Boolean keep)
 {
     if( event.what == evKeyDown )
         {
@@ -371,7 +371,7 @@ Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length)
             return True;
             }
         }
-    if( event.what != evNothing )
+    if( keep && event.what != evNothing )
         putEvent(event);
     clearEvent(event);
     return False;
