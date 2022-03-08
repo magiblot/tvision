@@ -286,13 +286,21 @@ pstream::pstream() noexcept
 {
 }
 
-void pstream::error( StreamableError ) noexcept
+void pstream::error( StreamableError e ) noexcept
 {
+    if( e == peInvalidType )
+        cerr << "pstream error: invalid type encountered" << endl;
+    else if( e == peNotRegistered )
+        cerr << "pstream error: type not registered" << endl;
     abort();
 }
 
-void pstream::error( StreamableError, const TStreamable& ) noexcept
+void pstream::error( StreamableError e, const TStreamable &t ) noexcept
 {
+    if( e == peNotRegistered )
+        cerr << "pstream error: type '" << t.streamableName() << "' not registered" << endl;
+    else
+        error( e );
     abort();
 }
 

@@ -78,6 +78,7 @@ struct fLink
 class TStreamable
 {
 
+    friend class pstream;
     friend class opstream;
     friend class ipstream;
 
@@ -323,14 +324,14 @@ public:
     streambuf _FAR * _Cdecl rdbuf() const noexcept;
 
     static void initTypes() noexcept;
-
-    void _Cdecl error( StreamableError ) noexcept;
-    void _Cdecl error( StreamableError, const TStreamable& ) noexcept;
     static void registerType( TStreamableClass *ts ) noexcept;
 
 protected:
 
     _Cdecl pstream() noexcept;
+
+    void _Cdecl error( StreamableError ) noexcept;
+    void _Cdecl error( StreamableError, const TStreamable& ) noexcept;
 
     streambuf _FAR *bp;
     int state;
