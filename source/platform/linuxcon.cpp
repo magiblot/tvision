@@ -49,11 +49,11 @@ static constexpr auto keyCodeWithAlt = constexpr_map<ushort, ushort>::from_array
     { kbRight,      kbAltRight      },
 });
 
-LinuxConsoleStrategy &LinuxConsoleStrategy::create( const StdioCtl &io,
+LinuxConsoleStrategy &LinuxConsoleStrategy::create( const StdioCtl &io, ScreenLifetime &scrl,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
 {
-    return *new LinuxConsoleStrategy(io, display, input, GpmInput::create());
+    return *new LinuxConsoleStrategy(io, scrl, display, input, GpmInput::create());
 }
 
 LinuxConsoleStrategy::~LinuxConsoleStrategy()

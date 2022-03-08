@@ -34,9 +34,10 @@ class LinuxConsoleStrategy : public UnixConsoleStrategy
 {
     LinuxConsoleInput wrapper;
 
-    LinuxConsoleStrategy( const StdioCtl &aIo, DisplayStrategy &aDisplay,
-                          InputStrategy &aInput, GpmInput *gpm ) noexcept :
-        UnixConsoleStrategy(aDisplay, gpm ? (InputStrategy &) *gpm : aInput),
+    LinuxConsoleStrategy( const StdioCtl &aIo, ScreenLifetime &aScrl,
+                          DisplayStrategy &aDisplay, InputStrategy &aInput,
+                          GpmInput *gpm ) noexcept :
+        UnixConsoleStrategy(aScrl, aDisplay, gpm ? (InputStrategy &) *gpm : aInput),
         wrapper(aIo, aInput)
     {
     }
@@ -46,7 +47,7 @@ public:
     // Pre: 'isLinuxConsole(io)' returns 'true'.
     // The lifetime of 'io' must exceed that of the returned object.
     // Takes ownership over 'display' and 'input'.
-    static LinuxConsoleStrategy &create( const StdioCtl &io,
+    static LinuxConsoleStrategy &create( const StdioCtl &io, ScreenLifetime &scrl,
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;
     ~LinuxConsoleStrategy();

@@ -6,8 +6,11 @@
 
 #include <internal/sigwinch.h>
 
+class ScreenLifetime;
+
 class UnixConsoleStrategy : public ConsoleStrategy
 {
+    ScreenLifetime &scrl;
     SigwinchHandler *sigwinch;
 
     void forEachSource(void *args, void (&action)(void *, EventSource &)) noexcept override;
@@ -23,8 +26,9 @@ protected:
 public:
 
     // Takes ownership over 'aDisplay' and 'aInput'.
-    UnixConsoleStrategy(DisplayStrategy &aDisplay, InputStrategy &aInput) noexcept :
+    UnixConsoleStrategy(ScreenLifetime &aScrl, DisplayStrategy &aDisplay, InputStrategy &aInput) noexcept :
         ConsoleStrategy(aDisplay, aInput),
+        scrl(aScrl),
         sigwinch(SigwinchHandler::create())
     {
     }

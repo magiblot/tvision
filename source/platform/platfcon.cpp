@@ -6,6 +6,7 @@
 #include <internal/ansidisp.h>
 #include <internal/ncursinp.h>
 #include <internal/sighandl.h>
+#include <internal/scrlife.h>
 #include <internal/getenv.h>
 
 // These methods are defined in a separate transaction unit so that the
@@ -17,6 +18,7 @@ ConsoleStrategy &Platform::createConsole() noexcept
 #ifdef _WIN32
     return Win32ConsoleStrategy::create();
 #else
+    ScreenLifetime &scrl = *new ScreenLifetime;
     NcursesDisplay *display;
     if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
         display = new NcursesDisplay(io);
@@ -24,9 +26,9 @@ ConsoleStrategy &Platform::createConsole() noexcept
         display = new AnsiDisplay<NcursesDisplay>(io);
 #ifdef __linux__
     if (io.isLinuxConsole())
-        return LinuxConsoleStrategy::create(io, *display, *new NcursesInput(io, *display, false));
+        return LinuxConsoleStrategy::create(io, scrl, *display, *new NcursesInput(io, *display, false));
 #endif // __linux__
-    return *new UnixConsoleStrategy(*display, *new NcursesInput(io, *display, true));
+    return *new UnixConsoleStrategy(scrl, *display, *new NcursesInput(io, *display, true));
 #endif // _WIN32
 }
 

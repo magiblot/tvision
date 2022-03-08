@@ -281,6 +281,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
     * Support for Paul Evans' [*fixterms*](http://www.leonerd.org.uk/hacks/fixterms/) and Kitty's [keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/).
     * Support for key modifiers (via `TIOCLINUX`) and mouse (via GPM) in the Linux console.
 * Custom signal handler that restores the terminal state before the program crashes.
+* When `stderr` is a tty, messages written to it are redirected to a buffer to prevent them from messing up the display and are eventually printed to the console when the application shuts down or is suspended.
 
 The following environment variables are also taken into account:
 
