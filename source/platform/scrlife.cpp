@@ -6,16 +6,16 @@
 #include <fcntl.h>
 #include <io.h>
 
-decltype(StderrRedirector::stderrBuffer) StderrRedirector::stderrBuffer alignas(4096);
+char StderrRedirector::stderrBuffer alignas(4096) [4096];
+const char StderrRedirector::truncationMsg[] = "\ntvision: Standard error truncated to 16 MiB.\n";
 
 StderrRedirector::StderrRedirector() noexcept
 {
     // Text written into standard error will mess up the display or simply
     // get lost since the application is using the alternate screen buffer,
     // with no scrollback.
-    // Redirect stderr to a temporary file so that the contents can be
+    // Make 'stderr' point to a temporary file so that the contents can be
     // dumped to the screen after restoring the screen buffer.
-
     int flags;
     FILE *file;
     if ( fileno(stderr) == STDERR_FILENO
@@ -52,7 +52,6 @@ static bool isSameFile(int fd1, int fd2)
 }
 
 static void copyFile(int from, int to, off_t size, char (&buf)[4096])
-// Not thread-safe.
 {
     ssize_t r, w;
     size_t left = size;
@@ -67,8 +66,8 @@ static void copyFile(int from, int to, off_t size, char (&buf)[4096])
 
 StderrRedirector::~StderrRedirector()
 {
-    // Restore 'stderr' to the default state as long as it still refers to
-    // the temporary file.
+    // Restore standard error to the default state as long as it still
+    // refers to the temporary file, then dump the temporary file to it.
     if (isSameFile(fileFd, STDERR_FILENO))
     {
         dup2(ttyFd, STDERR_FILENO);
@@ -86,10 +85,7 @@ StderrRedirector::~StderrRedirector()
             copyFile(fileFd, ttyFd, size, stderrBuffer);
 
             if (truncated)
-            {
-                const char *msg = "\ntvision: Standard error truncated to 16 MiB.\n";
-                write(ttyFd, msg, strlen(msg));
-            }
+                write(ttyFd, truncationMsg, sizeof(truncationMsg) - 1);
         }
     }
 
