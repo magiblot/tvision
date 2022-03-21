@@ -562,6 +562,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev) noexcept
                 case 21: keyCode = kbF10; break;
                 case 23: keyCode = kbF11; break;
                 case 24: keyCode = kbF12; break;
+                case 29: keyCode = kbNoKey; break; // Menu key (XTerm).
                 default: return Rejected;
             }
             ev.keyDown = keyWithXTermMods(keyCode, csi.val[1]);
