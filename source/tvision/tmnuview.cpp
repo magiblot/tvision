@@ -183,10 +183,7 @@ ushort TMenuView::execute()
     TEvent e;
     Boolean mouseActive;
 
-    if (menu)
-        current = menu->deflt;
-    else
-        return result;
+    current = menu->deflt;
 
     mouseActive = False;
     do  {
@@ -375,7 +372,7 @@ ushort TMenuView::execute()
                     r.b = owner->size;
                     if( size.y == 1 )
                         r.a.x--;
-                    target = topMenu()->newSubView(r, current->subMenu,this);
+                    target = topMenu()->newSubView(r, current->subMenu, this);
                     result = owner->execView(target);
                     destroy( target );
                     lastTargetItem = current;
@@ -462,7 +459,7 @@ Boolean TMenuView::updateMenu( TMenu *menu )
                 {
                 if( p->command == 0 )
                     {
-                    if( p->subMenu && updateMenu(p->subMenu) == True )
+                    if( updateMenu(p->subMenu) == True )
                         res = True;
                     }
                 else

@@ -24,7 +24,7 @@
 #endif  // __STRING_H
 
 TSubMenu::TSubMenu( TStringView nm, ushort key, ushort helpCtx ) noexcept :
-    TMenuItem( nm, 0, key, helpCtx )
+    TMenuItem( nm, key, new TMenu, helpCtx )
 {
 }
 
@@ -34,8 +34,11 @@ TSubMenu& operator + ( TSubMenu& s, TMenuItem& i ) noexcept
     while( sub->next != 0 )
         sub = (TSubMenu *)(sub->next);
 
-    if( sub->subMenu == 0 )
-        sub->subMenu = new TMenu( i );
+    if( sub->subMenu->items == 0 )
+        {
+        sub->subMenu->items = &i;
+        sub->subMenu->deflt = &i;
+        }
     else
         {
         TMenuItem *cur = sub->subMenu->items;
