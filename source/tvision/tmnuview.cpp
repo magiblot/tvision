@@ -172,6 +172,7 @@ enum menuAction { doNothing, doSelect, doReturn };
 ushort TMenuView::execute()
 {
     Boolean    autoSelect = False;
+    Boolean    firstEvent = True;
     menuAction action;
     char   ch;
     ushort result = 0;
@@ -202,9 +203,8 @@ ushort TMenuView::execute()
                     if( size.y == 1 )
                         autoSelect = (Boolean) (!current || lastTargetItem != current);
                     // A submenu will close if the MouseDown event takes place on the
-                    // parent menu, except when this submenu has just been opened and
-                    // still doesn't have a highlighted entry.
-                    else if ( (itemShown && mouseInOwner(e)) )
+                    // parent menu, except when this submenu has just been opened.
+                    else if( !firstEvent && mouseInOwner(e) )
                         action = doReturn;
                     }
                 else
@@ -389,6 +389,8 @@ ushort TMenuView::execute()
             }
         else
             result = 0;
+
+        firstEvent = False;
         } while( action != doReturn );
 
     if( e.what != evNothing &&
