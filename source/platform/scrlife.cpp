@@ -2,6 +2,8 @@
 
 #ifdef _TV_UNIX
 
+#include <initializer_list>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <io.h>
