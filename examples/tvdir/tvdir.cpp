@@ -243,7 +243,7 @@ void TFilePane::newDir( const char *path ) {
 void TFilePane::deleteFiles() {
     short i;
     for (i=0;i<fileCount;i++)
-      delete files[i];
+      delete[] files[i];
     delete[] files;
     fileCount=0;
 }

@@ -573,7 +573,7 @@ static Boolean countNode( TOutlineViewer* beingCounted, TNode* p, int level,
     len = strwidth(beingCounted->getText(p)) + strwidth(graph);
     if (updateMaxX < len)
       updateMaxX = len;
-    delete graph;
+    delete[] graph;
     return False;
 }
 
