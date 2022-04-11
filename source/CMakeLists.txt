@@ -175,7 +175,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/tvision" DESTINATION include)
 
 # Build optimization
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0" AND ${TV_OPTIMIZE_BUILD})
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0" AND TV_OPTIMIZE_BUILD)
     # Enable precompiled headers.
     target_precompile_headers(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/include/pch.h")
 

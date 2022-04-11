@@ -4,6 +4,7 @@
 #include <internal/win32con.h>
 #include <internal/sighandl.h>
 #include <locale.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 // This is used by TText. It is a global function pointer (instead of a

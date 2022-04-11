@@ -11,8 +11,10 @@ if (TV_BUILD_EXAMPLES)
     endfunction()
 
     function(tv_app_optimize app)
-        tv_app_enable_pch(${app})
-        tv_enable_unity(${app})
+        if (TV_OPTIMIZE_BUILD)
+            tv_app_enable_pch(${app})
+            tv_enable_unity(${app})
+        endif()
     endfunction()
 
     function(tv_app_common app)

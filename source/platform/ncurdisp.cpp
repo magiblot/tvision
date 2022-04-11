@@ -6,6 +6,7 @@
 #include <internal/ncurdisp.h>
 #include <internal/stdioctl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <ncurses.h>
 
 NcursesDisplay::NcursesDisplay(const StdioCtl &aIo) noexcept :
