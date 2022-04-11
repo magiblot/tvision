@@ -141,7 +141,7 @@ if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_LIBRARY_UNITY_BUILD)
     set(TV_LIBRARY_UNITY_BUILD OFF)
 endif()
 
-option(TV_OPTIMIZE_BUILD "Use CMake's Precompiled Headers" OFF)
+option(TV_OPTIMIZE_BUILD "Use CMake's Precompiled Headers" ON)
 if ((CMAKE_VERSION VERSION_LESS "3.16.0") AND TV_OPTIMIZE_BUILD)
     tv_message(WARNING "'TV_OPTIMIZE_BUILD' requested but only available in CMake 3.16.0 or newer.")
     set(TV_OPTIMIZE_BUILD OFF)
