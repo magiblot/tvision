@@ -15,9 +15,10 @@
  *
  */
 
+#if defined( __BORLANDC__ )
 #pragma warn -hid
-
 #pragma option -Vo-
+#endif
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
@@ -722,8 +723,9 @@ inline opstream& operator << ( opstream& os, TChDirDialog* cl )
 
 #endif  // Uses_TChDirDialog
 
+#if defined( __BORLANDC__ )
 #pragma option -Vo.
+#endif
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
 #endif
-

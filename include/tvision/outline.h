@@ -13,7 +13,9 @@
  *
  */
 
+#if defined( __BORLANDC__ )
 #pragma option -Vo-
+#endif
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
@@ -206,3 +208,10 @@ inline opstream& operator << ( opstream& os, TOutline* o )
     { return os << (TStreamable*)o; }
 
 #endif // Uses_TOutline
+
+#if defined( __BORLANDC__ )
+#pragma option -Vo.
+#endif
+#if defined( __BCOPT__ ) && !defined (__FLAT__)
+#pragma option -po.
+#endif

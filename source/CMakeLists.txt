@@ -30,7 +30,6 @@ tv_set_warnings(${PROJECT_NAME})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(${PROJECT_NAME} PUBLIC
-        /wd4068 # Unrecognized pragmas
         /permissive-
         /Zc:__cplusplus
         /Zc:externConstexpr
@@ -45,10 +44,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         )
     endif()
 else()
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wno-unknown-pragmas
-        -Wno-pragmas
-    )
     if (TV_REDUCE_APP_SIZE) # Implies CMake >= 3.13.0
         target_compile_options(${PROJECT_NAME} PRIVATE
             -fdata-sections -ffunction-sections

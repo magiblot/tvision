@@ -93,6 +93,7 @@ endfunction()
 function(tv_set_warnings target)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${target} PRIVATE
+            /wd4068 # Unrecognized pragmas
             /wd4146 # Unsigned despite minus sign
             /wd4166 # Illegal calling convention for constructor/destructor
             /wd4244 # Possible data loss in type conversion
@@ -103,6 +104,8 @@ function(tv_set_warnings target)
         target_compile_options(${target} PRIVATE
             -Wall
             -Wno-deprecated
+            -Wno-unknown-pragmas
+            -Wno-pragmas
         )
     endif()
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
