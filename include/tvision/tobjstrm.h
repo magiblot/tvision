@@ -107,7 +107,7 @@ protected:
 #if defined( Uses_TStreamableClass ) && !defined( __TStreamableClass )
 #define __TStreamableClass
 
-#include <tvision/compat/dos.h>
+#include <tvision/compat/borland/dos.h>
 #include <limits.h>
 #include <stddef.h>
 
@@ -517,7 +517,7 @@ protected:
 #define __fpbase
 
 #if !defined( __FSTREAM_H )
-#include <tvision/compat/fstream.h>
+#include <tvision/compat/borland/fstream.h>
 #endif  // __FSTREAM_H
 
 #if defined( __BORLANDC__ )

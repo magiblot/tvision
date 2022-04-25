@@ -6,11 +6,11 @@
 #include <atomic>
 #include <memory>
 #include <vector>
+#include <tvision/compat/windows/windows.h>
 
 #ifdef _TV_UNIX
 using SysHandle = int;
 #else
-#include <tvision/compat/win.h>
 using SysHandle = HANDLE;
 #endif
 

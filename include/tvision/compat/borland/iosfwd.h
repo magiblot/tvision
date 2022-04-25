@@ -3,6 +3,8 @@
 
 #ifdef __BORLANDC__
 
+#include <_defs.h>
+
 class _EXPCLASS ostream;
 class _EXPCLASS streambuf;
 typedef long streampos;

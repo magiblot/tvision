@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #ifdef _WIN32
-#include <tvision/compat/win.h>
+#include <tvision/compat/windows/windows.h>
 #endif
 
 class StdioCtl final

@@ -20,7 +20,7 @@
 #define _NEAR near
 #endif
 
-#include <tvision/compat/_defs.h>
+#include <tvision/compat/borland/_defs.h>
 
 #ifdef __BORLANDC__
 #define I   asm
@@ -105,7 +105,7 @@ opstream& _Cdecl operator << ( opstream&, long double );
 opstream& _Cdecl operator << ( opstream&, TStreamable& );
 opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
 
-#include <tvision/compat/iosfwd.h>
+#include <tvision/compat/borland/iosfwd.h>
 class TStringView;
 ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
 

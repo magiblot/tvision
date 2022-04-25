@@ -26,7 +26,7 @@
 #if defined( __FLAT__ )
 
 #if !defined( __WINDOWS_H )
-#include <tvision/compat/win.h>
+#include <tvision/compat/windows/windows.h>
 #endif
 
 #else

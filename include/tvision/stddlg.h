@@ -49,7 +49,7 @@ const int
 #define __TSearchRec
 
 #if !defined( __DIR_H )
-#include <tvision/compat/dir.h>
+#include <tvision/compat/borland/dir.h>
 #endif  // __DIR_H
 
 struct TSearchRec
@@ -388,7 +388,7 @@ const int
                                    // the dialog on a stream.
 
 #if !defined( __DIR_H )
-#include <tvision/compat/dir.h>
+#include <tvision/compat/borland/dir.h>
 #endif  // __DIR_H
 
 struct _FAR TEvent;
@@ -576,7 +576,7 @@ inline TDirEntry *TDirCollection::lastThat( ccTestFunc func, void *arg )
 #define __TDirListBox
 
 #if !defined( __DIR_H )
-#include <tvision/compat/dir.h>
+#include <tvision/compat/borland/dir.h>
 #endif  // __DIR_H
 
 class _FAR TRect;

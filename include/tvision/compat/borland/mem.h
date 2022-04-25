@@ -1,11 +1,3 @@
-/*  mem.h
-
-    Memory manipulation functions
-
-    Copyright (c) 1987, 1992 by Borland International
-    All Rights Reserved.
-*/
-
 #ifdef __BORLANDC__
 #include <mem.h>
 #else
@@ -23,9 +15,9 @@
 #include <stddef.h>
 #include <string.h>
 
-inline void movmem(const void *__src, void *__dest, unsigned __length) noexcept
+inline void movmem(const void *src, void *dest, unsigned length) noexcept
 {
-    memmove(__dest, __src, __length);
+    memmove(dest, src, length);
 }
 
 #endif // TVISION_COMPAT_MEM_H

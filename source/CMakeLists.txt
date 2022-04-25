@@ -13,18 +13,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     "$<INSTALL_INTERFACE:include>"
 )
 
-function(tv_add_private_includes target)
-    target_include_directories(${target} PRIVATE
-        "${PROJECT_SOURCE_DIR}/include/tvision"
-        "${PROJECT_SOURCE_DIR}/include/tvision/compat"
-    )
-    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-        target_include_directories(${target} PRIVATE
-            "${PROJECT_SOURCE_DIR}/include/tvision/compat/malloc"
-        )
-    endif()
-endfunction()
-
 tv_add_private_includes(${PROJECT_NAME})
 tv_set_warnings(${PROJECT_NAME})
 

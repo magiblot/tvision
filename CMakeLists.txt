@@ -81,7 +81,7 @@ endfunction()
 function(tv_add_private_includes target)
     target_include_directories(${target} PRIVATE
         "${PROJECT_SOURCE_DIR}/include/tvision"
-        "${PROJECT_SOURCE_DIR}/include/tvision/compat"
+        "${PROJECT_SOURCE_DIR}/include/tvision/compat/borland"
     )
     if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
         target_include_directories(${target} PRIVATE
