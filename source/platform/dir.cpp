@@ -13,6 +13,7 @@
 unsigned _dos_findfirst( const char *pathname, unsigned attrib,
                          struct find_t *fileinfo ) noexcept
 {
+    using namespace tvision;
     // The original findfirst sets errno on failure. We don't do this for now.
     FindFirstRec *r;
     if ((r = FindFirstRec::allocate(fileinfo, attrib, pathname)))
@@ -22,6 +23,7 @@ unsigned _dos_findfirst( const char *pathname, unsigned attrib,
 
 unsigned _dos_findnext(struct find_t *fileinfo) noexcept
 {
+    using namespace tvision;
     FindFirstRec *r;
     if ((r = FindFirstRec::get(fileinfo)) && r->next())
         return 0;
@@ -41,6 +43,7 @@ int findnext(struct ffblk *ffblk) noexcept
 void fnmerge( char *pathP, const char *driveP, const char *dirP,
               const char *nameP, const char *extP ) noexcept
 {
+    using namespace tvision;
     // fnmerge is often used before accessing files, so producing a
     // UNIX-formatted path fixes most cases of filesystem access.
     memset(pathP, 0, MAXPATH);
@@ -80,7 +83,7 @@ static bool CopyComponent(char* dstP, const char* startP, const char* endP, size
     {
         if (dstP)
             // This always adds a trailing '\0', thus the +1.
-            strnzcpy(dstP, startP, std::min<size_t>(MAX, endP-startP+1));
+            strnzcpy(dstP, startP, min<size_t>(MAX, endP-startP+1));
         return true;
     }
     return false;
@@ -177,6 +180,7 @@ int getcurdir(int drive, char *direc) noexcept
     // direc is an array of length MAXDIR where the null-terminated directory
     // name will be placed, without drive specification nor leading backslash.
     // Note that drive 0 is the 'default' drive, 1 is drive A, etc.
+    using namespace tvision;
     if (drive == 0 || drive-1 == getdisk())
     {
 #ifdef _WIN32

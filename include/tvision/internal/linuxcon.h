@@ -9,6 +9,9 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+namespace tvision
+{
+
 class GpmInput;
 
 struct LinuxConsoleInput : public EventSource
@@ -56,6 +59,8 @@ public:
 
     static int charWidth(uint32_t) noexcept;
 };
+
+} // namespace tvision
 
 #endif // __linux__
 

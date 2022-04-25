@@ -13,6 +13,9 @@
 #include <memory>
 #include <gpm.h>
 
+namespace tvision
+{
+
 GpmInput *GpmInput::create() noexcept
 {
     // Let coordinates begin at zero instead of one.
@@ -116,5 +119,7 @@ bool GpmInput::getEvent(TEvent &ev) noexcept
     }
     return false;
 }
+
+} // namespace tvision
 
 #endif // HAVE_GPM

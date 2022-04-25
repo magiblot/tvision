@@ -14,6 +14,9 @@
 #include <internal/constmap.h>
 #include <string>
 
+namespace tvision
+{
+
 /* Turbo Vision is designed to work with BIOS key codes. Mnemonics for some
  * key codes are defined in tkeys.h. Unless those are changed, it is
  * necessary to translate ncurses keys to key codes. */
@@ -471,5 +474,7 @@ bool NcursesInput::parseCursesMouse(TEvent &ev) noexcept
         return false;
     }
 }
+
+} // namespace tvision
 
 #endif // HAVE_NCURSES

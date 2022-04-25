@@ -3,6 +3,9 @@
 #include <internal/winwidth.h>
 #include <internal/utf8.h>
 
+namespace tvision
+{
+
 std::atomic<size_t> WinWidth::lastReset {0};
 WinWidth thread_local WinWidth::localInstance;
 
@@ -76,5 +79,7 @@ int WinWidth::calcWidth(uint32_t u32) noexcept
         return it->second;
     static_assert(sizeof(uint16_t) == sizeof(wchar_t), "");
 }
+
+} // namespace tvision
 
 #endif // _WIN32

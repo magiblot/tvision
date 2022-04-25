@@ -104,6 +104,7 @@ struct mbstat_r { int length; int width; };
 static mbstat_r mbstat(TStringView text) noexcept
 // Pre: 'text.size() > 0'.
 {
+    using namespace tvision;
     uint32_t wc;
     int length = mbtowc(wc, text);
     int width = 1;
@@ -114,6 +115,8 @@ static mbstat_r mbstat(TStringView text) noexcept
 
 } // namespace ttext
 
+namespace tvision
+{
 
 #ifdef _TV_UNIX
 int UnixConsoleStrategy::charWidth(uint32_t wc) noexcept
@@ -152,6 +155,8 @@ int Win32ConsoleStrategy::charWidth(uint32_t wc) noexcept
     return WinWidth::width(wc);
 }
 #endif // _WIN32
+
+} // namespace tvision
 
 size_t TText::width(TStringView text) noexcept
 {
@@ -200,6 +205,7 @@ TText::Lw TText::nextImpl(TStringView text) noexcept
 
 TText::Lw TText::nextImpl(TSpan<const uint32_t> text) noexcept
 {
+    using namespace tvision;
     if (text.size())
     {
         int width = Platform::charWidth(text[0]);
@@ -280,6 +286,7 @@ static inline bool isZWJ(TStringView mbc)
 TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                               TStringView text, size_t j ) noexcept
 {
+    using namespace tvision;
     using namespace ttext;
     if (j < text.size())
     {
@@ -341,6 +348,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
 TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                               TSpan<const uint32_t> textU32, size_t j ) noexcept
 {
+    using namespace tvision;
     using namespace ttext;
     if (j < textU32.size())
     {

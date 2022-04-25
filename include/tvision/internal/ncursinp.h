@@ -13,6 +13,9 @@
 #include <internal/sigwinch.h>
 #include <internal/terminal.h>
 
+namespace tvision
+{
+
 class NcursesDisplay;
 
 class NcursesInput : public InputStrategy
@@ -52,6 +55,8 @@ public:
     int getButtonCount() noexcept;
     bool hasPendingEvents() noexcept;
 };
+
+} // namespace tvision
 
 #endif // HAVE_NCURSES
 

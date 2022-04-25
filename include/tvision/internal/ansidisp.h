@@ -1,10 +1,13 @@
-#ifndef ANSIDISP_H
-#define ANSIDISP_H
+#ifndef TVISION_ANSIDISP_H
+#define TVISION_ANSIDISP_H
 
 #define Uses_TScreenCell
 #include <tvision/tv.h>
 
 #include <internal/termdisp.h>
+
+namespace tvision
+{
 
 // TermColor represents a color that is to be printed to screen
 // using certain ANSI escape sequences.
@@ -146,4 +149,6 @@ public:
 
 };
 
-#endif // ANSIDISP_H
+} // namespace tvision
+
+#endif // TVISION_ANSIDISP_H

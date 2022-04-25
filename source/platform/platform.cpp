@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+namespace tvision
+{
+
 // This is used by TText. It is a global function pointer (instead of a
 // Platform instance method) so that it can be still used after
 // Platform::instance has been destroyed.
@@ -60,3 +63,5 @@ void Platform::restoreConsole() noexcept
 }
 
 // The remaining methods are in platfcon.cpp.
+
+} // namespace tvision

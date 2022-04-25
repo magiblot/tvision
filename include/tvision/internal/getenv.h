@@ -1,7 +1,10 @@
-#ifndef GETENV_H
-#define GETENV_H
+#ifndef TVISION_GETENV_H
+#define TVISION_GETENV_H
 
-#include <cstdlib>
+#include <stdlib.h>
+
+namespace tvision
+{
 
 template<typename T>
 inline T getEnv(const char* name, T def = T{}) noexcept
@@ -23,4 +26,6 @@ inline int getEnv<int>(const char* name, int def) noexcept
     return def;
 }
 
-#endif
+} // namespace tvision
+
+#endif // TVISION_GETENV_H

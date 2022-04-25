@@ -19,6 +19,7 @@ static bool alwaysFlush;
 
 THardwareInfo::THardwareInfo() noexcept
 {
+    using namespace tvision;
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
 }
@@ -28,7 +29,7 @@ THardwareInfo::~THardwareInfo()
 }
 
 // For brevity.
-static constexpr Platform *platf = &Platform::instance;
+static constexpr auto *platf = &tvision::Platform::instance;
 
 void THardwareInfo::setCaretSize( ushort size ) noexcept { platf->setCaretSize(size); }
 void THardwareInfo::setCaretPosition( ushort x, ushort y ) noexcept { platf->setCaretPosition(x, y); }

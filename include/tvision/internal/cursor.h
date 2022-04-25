@@ -1,10 +1,13 @@
-#ifndef CARET_H
-#define CARET_H
+#ifndef TVISION_CURSOR_H
+#define TVISION_CURSOR_H
 
 #define Uses_TColorAttr
 #include <tvision/tv.h>
 
 #include <internal/buffdisp.h>
+
+namespace tvision
+{
 
 class ScreenCursor
 {
@@ -93,4 +96,6 @@ class NegativeScreenCursor : public ScreenCursor
     void draw(TColorAttr &attr) const noexcept override;
 };
 
-#endif
+} // namespace tvision
+
+#endif // TVISION_CURSOR_H

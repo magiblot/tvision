@@ -7,6 +7,9 @@
 #include <fcntl.h>
 #include <io.h>
 
+namespace tvision
+{
+
 char StderrRedirector::stderrBuffer alignas(4096) [4096];
 const char StderrRedirector::truncationMsg[] = "\ntvision: Standard error truncated to 16 MiB.\n";
 
@@ -93,5 +96,7 @@ StderrRedirector::~StderrRedirector()
     for (int fd : {fileFd, ttyFd})
         close(fd);
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX

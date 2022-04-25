@@ -8,6 +8,9 @@
 #include <unordered_map>
 #include <array>
 
+namespace tvision
+{
+
 class CpTranslator
 {
 
@@ -62,5 +65,7 @@ public:
     }
 
 };
+
+} // namespace tvision
 
 #endif // TVISION_CODEPAGE_H

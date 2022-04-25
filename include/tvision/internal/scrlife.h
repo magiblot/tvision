@@ -5,6 +5,9 @@
 
 #ifdef _TV_UNIX
 
+namespace tvision
+{
+
 class StderrRedirector
 {
     enum { maxStderrSize = 16*1024*1024 };
@@ -25,6 +28,8 @@ class ScreenLifetime
 {
     StderrRedirector sr;
 };
+
+} // namespace tvision
 
 #endif // _TV_UNIX
 

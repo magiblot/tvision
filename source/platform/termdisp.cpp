@@ -5,6 +5,9 @@
 #include <internal/linuxcon.h>
 #include <internal/getenv.h>
 
+namespace tvision
+{
+
 TermCap TerminalDisplay::getCapabilities() noexcept
 {
     TermCap termcap {};
@@ -65,3 +68,5 @@ bool TerminalDisplay::screenChanged() noexcept
     lastSize = size;
     return changed;
 }
+
+} // namespace tvision

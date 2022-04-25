@@ -6,6 +6,9 @@
 
 #include <internal/sigwinch.h>
 
+namespace tvision
+{
+
 class ScreenLifetime;
 
 class UnixConsoleStrategy : public ConsoleStrategy
@@ -38,6 +41,8 @@ public:
 
     static int charWidth(uint32_t) noexcept;
 };
+
+} // namespace tvision
 
 #endif // _TV_UNIX
 

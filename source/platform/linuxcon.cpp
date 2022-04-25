@@ -8,7 +8,10 @@
 #include <linux/vt.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <cstring>
+#include <string.h>
+
+namespace tvision
+{
 
 /* There are cases, such as the linux console, where it is possible to
  * get the state of keyboard modifiers (Shift/Ctrl/Alt), but captured
@@ -126,5 +129,7 @@ void LinuxConsoleInput::applyKeyboardModifiers(const StdioCtl &io, KeyDownEvent 
         key.controlKeyState = actualModifiers;
     }
 }
+
+} // namespace tvision
 
 #endif // __linux__

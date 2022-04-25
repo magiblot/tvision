@@ -3,6 +3,9 @@
 
 #define SPECIAL_BITS (_A_SUBDIR|_A_HIDDEN|_A_SYSTEM)
 
+namespace tvision
+{
+
 FindFirstRec::RecList FindFirstRec::recList;
 
 FindFirstRec* FindFirstRec::allocate(struct find_t *fileinfo, unsigned attrib,
@@ -303,3 +306,5 @@ void FindFirstRec::cvtTime(const WIN32_FIND_DATAW *findData, struct find_t *file
 }
 
 #endif // _WIN32
+
+} // namespace tvision

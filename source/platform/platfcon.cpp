@@ -9,6 +9,9 @@
 #include <internal/scrlife.h>
 #include <internal/getenv.h>
 
+namespace tvision
+{
+
 // These methods are defined in a separate transaction unit so that the
 // Platform can be referenced by the application without having to link all the
 // console strategies.
@@ -84,3 +87,5 @@ void Platform::signalCallback(bool enter) noexcept
             instance.setUpConsole();
     }
 }
+
+} // namespace tvision

@@ -1,5 +1,5 @@
-#ifndef FINDFRST_H
-#define FINDFRST_H
+#ifndef TVISION_FINDFRST_H
+#define TVISION_FINDFRST_H
 
 #include <tvision/tv.h>
 #include <string>
@@ -12,6 +12,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #endif
+
+namespace tvision
+{
 
 // A class implementing the behaviour of findfirst and findnext.
 // allocate() assigns a FindFirstRec to the provided find_t struct and sets
@@ -79,4 +82,6 @@ private:
     } static recList;
 };
 
-#endif // FINDFRST_H
+} // namespace tvision
+
+#endif // TVISION_FINDFRST_H

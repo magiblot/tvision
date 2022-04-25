@@ -8,6 +8,9 @@
 #include <internal/getenv.h>
 #include <internal/utf8.h>
 
+namespace tvision
+{
+
 namespace terminp
 {
 
@@ -616,3 +619,5 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     }
     return Ignored;
 }
+
+} // namespace tvision

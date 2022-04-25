@@ -6,13 +6,19 @@ using std::chrono::nanoseconds;
 using std::chrono::duration_cast;
 using std::chrono::steady_clock;
 
+#ifdef _TV_UNIX
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#endif
+
+namespace tvision
+{
+
 /////////////////////////////////////////////////////////////////////////
 // SysManualEvent
 
 #ifdef _TV_UNIX
-
-#include <unistd.h>
-#include <fcntl.h>
 
 bool SysManualEvent::createHandle(int (&fds)[2]) noexcept
 {
@@ -113,7 +119,6 @@ bool WakeUpEventSource::getEvent(TEvent &ev) noexcept
 // EventWaiter
 
 #ifdef _TV_UNIX
-#include <sys/ioctl.h>
 
 static bool fdEmpty(int fd) noexcept
 {
@@ -268,3 +273,5 @@ void EventWaiter::stopEventWait() noexcept
     if (wakeUp)
         wakeUp->signal();
 }
+
+} // namespace tvision

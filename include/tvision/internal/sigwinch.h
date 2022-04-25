@@ -9,6 +9,9 @@
 
 struct TEvent;
 
+namespace tvision
+{
+
 class SigwinchHandler
 {
     WakeUpEventSource eventSource;
@@ -33,6 +36,8 @@ inline EventSource &SigwinchHandler::getEventSource() noexcept
 {
     return eventSource;
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX
 

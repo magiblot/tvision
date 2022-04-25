@@ -6,6 +6,9 @@
 
 #include <internal/sigwinch.h>
 
+namespace tvision
+{
+
 SigwinchHandler *SigwinchHandler::instance {nullptr};
 
 void SigwinchHandler::handleSignal(int) noexcept
@@ -54,5 +57,7 @@ SigwinchHandler::~SigwinchHandler()
     sigaction(SIGWINCH, &oldSa, nullptr);
     instance = nullptr;
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX

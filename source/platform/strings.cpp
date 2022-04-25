@@ -2,7 +2,7 @@
 #include <internal/constarr.h>
 #include <internal/strings.h>
 
-namespace detail
+namespace tvision
 {
 
 static constexpr
@@ -56,7 +56,7 @@ btoa_lut_t init_btoa_lut() noexcept
 extern BTOA_CONSTEXPR_VAR
 btoa_lut_t btoa_lut = init_btoa_lut();
 
-} // namespace detail
+} // namespace tvision
 
 #ifndef _MSC_VER
 

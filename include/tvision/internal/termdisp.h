@@ -3,6 +3,9 @@
 
 #include <internal/platform.h>
 
+namespace tvision
+{
+
 // Terminal quirk flags.
 
 const uint
@@ -57,5 +60,7 @@ public:
     ushort getScreenMode() noexcept override;
     bool screenChanged() noexcept override;
 };
+
+} // namespace tvision
 
 #endif // TVISION_TERMDISP_H

@@ -5,6 +5,9 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+namespace tvision
+{
+
 class StdioCtl;
 
 struct MouseState
@@ -163,5 +166,7 @@ namespace TermIO
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
 
 }
+
+} // namespace tvision
 
 #endif // TVISION_TERMINAL_H

@@ -14,6 +14,9 @@
 #   include <linux/kd.h>
 #endif
 
+namespace tvision
+{
+
 StdioCtl::StdioCtl() noexcept
 {
     if (getEnv<TStringView>("TVISION_USE_STDIO").empty())
@@ -125,9 +128,14 @@ bool StdioCtl::isLinuxConsole() const noexcept
 
 #endif // __linux__
 
+} // namespace tvision
+
 #elif defined(_WIN32)
 
 #include <stdio.h>
+
+namespace tvision
+{
 
 namespace stdioctl
 {
@@ -295,5 +303,7 @@ TPoint StdioCtl::getFontSize() const noexcept
         };
     return {0, 0};
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX

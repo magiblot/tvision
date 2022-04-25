@@ -1,5 +1,5 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#ifndef TVISION_PLATFORM_H
+#define TVISION_PLATFORM_H
 
 #define Uses_TPoint
 #define Uses_TColorAttr
@@ -8,6 +8,11 @@
 #include <internal/buffdisp.h>
 #include <internal/events.h>
 #include <atomic>
+
+struct TEvent;
+
+namespace tvision
+{
 
 class DisplayStrategy
 {
@@ -27,8 +32,6 @@ public:
     virtual void lowlevelFlush() noexcept {};
     virtual bool screenChanged() noexcept { return false; }
 };
-
-struct TEvent;
 
 class InputStrategy : public EventSource
 {
@@ -182,4 +185,6 @@ public:
         { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
 };
 
-#endif // PLATFORM_H
+} // namespace tvision
+
+#endif // TVISION_PLATFORM_H

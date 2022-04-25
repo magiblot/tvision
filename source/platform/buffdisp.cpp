@@ -14,6 +14,9 @@ using std::chrono::steady_clock;
 #define __builtin_expect(x, y) x
 #endif
 
+namespace tvision
+{
+
 BufferedDisplay *BufferedDisplay::instance = 0;
 
 BufferedDisplay::BufferedDisplay() noexcept :
@@ -158,17 +161,13 @@ bool BufferedDisplay::needsFlush() const noexcept
     return screenTouched || caretMoved || caretSize != newCaretSize;
 }
 
-namespace buffdisp {
-namespace {
-
+namespace
+{
 void flushScreenAlgorithm(BufferedDisplay &, DisplayStrategy &) noexcept;
-
-}
 }
 
 void BufferedDisplay::flushScreen(DisplayStrategy &display) noexcept
 {
-    using namespace buffdisp;
     if (needsFlush() && timeToFlush())
     {
         drawCursors();
@@ -202,8 +201,8 @@ inline void BufferedDisplay::validateCell(TScreenCell &cell) const noexcept
 //////////////////////////////////////////////////////////////////////////
 // FlushScreenAlgorithm
 
-namespace buffdisp {
-namespace {
+namespace
+{
 
 struct FlushScreenAlgorithm
 {
@@ -445,4 +444,5 @@ void FlushScreenAlgorithm::handleTrail() noexcept
 }
 
 } // namespace
-} // namespace buffdisp
+
+} // namespace tvision

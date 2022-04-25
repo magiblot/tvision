@@ -3,6 +3,9 @@
 
 #ifdef _TV_UNIX
 
+namespace tvision
+{
+
 std::atomic<SignalHandlerCallback *> SignalHandler::callback {nullptr};
 const int SignalHandler::handledSignals[HandledSignalCount] =
     { SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE, SIGSEGV, SIGTERM, SIGTSTP };
@@ -121,5 +124,7 @@ bool SignalHandler::invokeDefault(int signo, siginfo_t *info) noexcept
     sigprocmask(SIG_SETMASK, &oldMask, nullptr);
     return false;
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX

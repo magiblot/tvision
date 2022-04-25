@@ -3,12 +3,17 @@
 
 #include <tvision/tv.h>
 
+#ifdef _TV_UNIX
+#include <signal.h>
+#include <atomic>
+#endif
+
+namespace tvision
+{
+
 using SignalHandlerCallback = void(bool enter);
 
 #ifdef _TV_UNIX
-
-#include <signal.h>
-#include <atomic>
 
 class SignalHandler
 {
@@ -70,5 +75,7 @@ public:
 };
 
 #endif // _TV_UNIX
+
+} // namespace tvision
 
 #endif // TVISION_SIGHANDL_H

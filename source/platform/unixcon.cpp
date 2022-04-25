@@ -3,6 +3,9 @@
 
 #ifdef _TV_UNIX
 
+namespace tvision
+{
+
 UnixConsoleStrategy::~UnixConsoleStrategy()
 {
     delete sigwinch;
@@ -16,5 +19,7 @@ void UnixConsoleStrategy::forEachSource(void *args, void (&action)(void *, Event
     action(args, input);
     forEachPrivateSource(args, action);
 }
+
+} // namespace tvision
 
 #endif // _TV_UNIX

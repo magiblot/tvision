@@ -5,16 +5,14 @@
 #include <tvision/tv.h>
 #endif
 
-#include <algorithm>
-
-namespace detail
+namespace tvision
 {
 
 template<class Int>
 inline constexpr Int string_as_int(TStringView s) noexcept
 {
     Int res = 0;
-    for (size_t i = 0; i < std::min(s.size(), sizeof(res)); ++i)
+    for (size_t i = 0; i < min(s.size(), sizeof(res)); ++i)
         // CAUTION: Assumes Little Endian.
         res |= uint64_t(uint8_t(s[i])) << 8*i;
     return res;
@@ -46,6 +44,6 @@ inline char *fast_btoa(uint8_t value, char *buffer) noexcept
     static_assert(sizeof(btoa_lut_elem_t) == 4, "");
 }
 
-} // namespace detail
+} // namespace tvision
 
 #endif // TVISION_STRINGS_H

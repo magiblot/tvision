@@ -4,8 +4,11 @@
 #include <internal/strings.h>
 
 #include <array>
-#include <cstdint>
-#include <cstring>
+#include <stdint.h>
+#include <string.h>
+
+namespace tvision
+{
 
 inline constexpr uint Utf8BytesLeft(char first_byte) noexcept
 {
@@ -18,7 +21,6 @@ inline constexpr uint Utf8BytesLeft(char first_byte) noexcept
 template<size_t N>
 inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) noexcept
 {
-    using namespace detail;
     std::array<uint32_t, N> result {};
     for (size_t i = 0; i < N; ++i)
         result[i] = string_as_int<uint32_t>(utf8[i]);
@@ -86,5 +88,7 @@ inline int utf32To16(uint32_t u32, uint16_t u16[2]) noexcept
     }
     return -1;
 }
+
+} // namespace tvision
 
 #endif // TVISION_UTF8_H

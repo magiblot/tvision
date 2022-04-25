@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+namespace tvision
+{
+
 template <class Key, class Value, size_t N=(size_t)-1>
 class constexpr_map
 {
@@ -125,12 +128,12 @@ class const_unordered_map<uint64_t, Value> : public const_unordered_map_base<uin
         using super::super;
 
         constexpr StringAsIntPair(TStringView s, const Value &v) noexcept :
-            super(detail::string_as_int<uint64_t>(s), v)
+            super(string_as_int<uint64_t>(s), v)
         {
         }
 
         constexpr StringAsIntPair(TStringView s, Value &&v) noexcept :
-            super(detail::string_as_int<uint64_t>(s), std::move(v))
+            super(string_as_int<uint64_t>(s), std::move(v))
         {
         }
 
@@ -150,9 +153,11 @@ public:
 
     Value operator[](TStringView key) const noexcept
     {
-        return super::operator[](detail::string_as_int<uint64_t>(key));
+        return super::operator[](string_as_int<uint64_t>(key));
     }
 
 };
+
+} // namespace tvision
 
 #endif // TVISION_CONSTMAP_H

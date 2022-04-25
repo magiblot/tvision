@@ -7,6 +7,9 @@
 #include <internal/getenv.h>
 #include <internal/utf8.h>
 
+namespace tvision
+{
+
 /* The Turbo Vision library has all its characters encoded in code page 437.
  * While Unicode support is not added, it's better to just translate them
  * with a lookup table. The following table allows translating the characters
@@ -59,7 +62,6 @@ static const std::array<uint32_t, 256> cp850toUtf8Int = make_utf8int<256>(cp850t
 
 static std::unordered_map<uint32_t, char> initMap(const TStringView toUtf8[256]) noexcept
 {
-    using namespace detail;
     std::unordered_map<uint32_t, char> map;
     for (size_t i = 0; i < 256; ++i)
         map.emplace(string_as_int<uint32_t>(toUtf8[i]), char(i));
@@ -91,9 +93,10 @@ CpTranslator::CpTranslator() noexcept
 
 char CpTranslator::fromUtf8(TStringView s) noexcept
 {
-    using namespace detail;
     auto it = activeTable->fromUtf8.find(string_as_int<uint32_t>(s));
     if (it != activeTable->fromUtf8.end())
         return it->second;
     return 0;
 }
+
+} // namespace

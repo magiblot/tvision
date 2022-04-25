@@ -13,6 +13,9 @@
 #include <internal/terminal.h>
 #include <locale.h>
 
+namespace tvision
+{
+
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
     auto &io = *new StdioCtl;
@@ -389,4 +392,7 @@ void Win32Display::lowlevelFlush() noexcept
     io.write(buf.data(), buf.size());
     buf.resize(0);
 }
+
+} // namespace tvision
+
 #endif // _WIN32

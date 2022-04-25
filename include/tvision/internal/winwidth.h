@@ -8,6 +8,9 @@
 #include <atomic>
 #include <unordered_map>
 
+namespace tvision
+{
+
 class WinWidth
 {
     // Since there is no equivalent to wcwidth and the console API allows
@@ -45,6 +48,8 @@ inline void WinWidth::reset() noexcept
 {
     ++lastReset;
 }
+
+} // namespace tvision
 
 #endif // _WIN32
 

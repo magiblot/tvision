@@ -1,8 +1,12 @@
 #include <internal/ansidisp.h>
 #include <internal/stdioctl.h>
 #include <internal/strings.h>
+#include <stdlib.h>
 
 #define CSI "\x1B["
+
+namespace tvision
+{
 
 inline AnsiDisplayBase::Buffer::~Buffer()
 {
@@ -55,7 +59,6 @@ AnsiDisplayBase::~AnsiDisplayBase()
 
 inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
 {
-    using namespace detail;
     // CSI a F
     buf.reserve(32);
     buf.push(CSI);
@@ -65,7 +68,6 @@ inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
 
 inline void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
 {
-    using namespace detail;
     // CSI a ; b F
     buf.reserve(32);
     buf.push(CSI);
@@ -88,17 +90,11 @@ void AnsiDisplayBase::clearScreen() noexcept
     buf.push(CSI "2J");
 }
 
-namespace ansidisp
-{
-
 static char *convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*) noexcept;
-
-}
 
 void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
                                           const TermCap &termcap ) noexcept
 {
-    using namespace ansidisp;
     buf.reserve(256);
     buf.tail = convertAttributes(attr, lastAttr, termcap, buf.tail);
     buf.push(chars);
@@ -126,9 +122,6 @@ void AnsiDisplayBase::lowlevelFlush() noexcept
 //////////////////////////////////////////////////////////////////////////
 // Attribute conversion
 
-namespace ansidisp
-{
-
 static void convertColor(TColorDesired, TermColor &, TColorAttr::Style &, const TermCap &, bool) noexcept;
 static char *writeAttributes(const TermAttr &, const TermAttr &, char *) noexcept;
 static char *writeColor(TermColor, bool, char *) noexcept;
@@ -136,7 +129,6 @@ static char *writeColor(TermColor, bool, char *) noexcept;
 static inline char *convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
                                        const TermCap &termcap, char *buf ) noexcept
 {
-    using namespace ansidisp;
     TermAttr attr {};
     attr.style = ::getStyle(c);
 
@@ -272,7 +264,6 @@ static char *writeColor(TermColor color, bool isFg, char *p) noexcept
 {
     // RGB and XTerm256 colors get a separate SGR sequence because some
     // terminal emulators may otherwise have trouble processing them.
-    using namespace detail;
     switch (color.type)
     {
         case TermColor::Default:
@@ -410,4 +401,4 @@ static colorconv_r convertDirect( TColorDesired color,
     return convertIndexed256(color, termcap, isFg);
 }
 
-} // namespace ansidisp
+} // namespace tvision

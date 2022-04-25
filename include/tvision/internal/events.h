@@ -6,7 +6,15 @@
 #include <atomic>
 #include <memory>
 #include <vector>
+
+#ifdef _TV_UNIX
+#include <poll.h>
+#else
 #include <tvision/compat/windows/windows.h>
+#endif
+
+namespace tvision
+{
 
 #ifdef _TV_UNIX
 using SysHandle = int;
@@ -100,7 +108,6 @@ inline WakeUpEventSource::WakeUpEventSource( SysManualEvent::Handle aHandle,
 }
 
 #ifdef _TV_UNIX
-#include <poll.h>
 using PollItem = struct pollfd;
 static inline PollItem pollItem(SysHandle fd) noexcept { return {fd, POLLIN}; }
 #else
@@ -162,5 +169,7 @@ public:
     void waitForEvents(int ms) noexcept;
     void stopEventWait() noexcept;
 };
+
+} // namespace tvision
 
 #endif // TVISION_EVENTS_H

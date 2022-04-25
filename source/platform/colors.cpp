@@ -2,7 +2,7 @@
 #include <tvision/tv.h>
 #include <internal/constarr.h>
 
-namespace detail
+namespace tvision
 {
 
 //// RGB to XTerm16 conversion algorithm
@@ -165,9 +165,9 @@ constarray<uint8_t, 256> XTerm256toXTerm16LUT = initXTerm256toXTerm16LUT();
 extern constexpr
 constarray<uint32_t, 256> XTerm256toRGBLUT = initXTerm256toRGBLUT();
 
-uint8_t RGBtoXTerm16(TColorRGB c) noexcept
+uint8_t RGBtoXTerm16Impl(TColorRGB c) noexcept
 {
     return RGBtoXTerm16(c.r, c.g, c.b);
 }
 
-} // namespace detail
+} // namespace tvision

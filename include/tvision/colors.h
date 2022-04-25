@@ -180,12 +180,12 @@ inline TColorBIOS XTerm16toBIOS(uint8_t);
 inline TColorRGB XTerm256toRGB(uint8_t); // Only for indices 16..255.
 inline uint8_t XTerm256toXTerm16(uint8_t);
 
-namespace detail
+namespace tvision
 {
     template <class T, size_t N>
     struct constarray;
 
-    uint8_t RGBtoXTerm16(TColorRGB) noexcept;
+    uint8_t RGBtoXTerm16Impl(TColorRGB) noexcept;
     extern const constarray<uint8_t, 256> XTerm256toXTerm16LUT;
     extern const constarray<uint32_t, 256> XTerm256toRGBLUT;
 }
@@ -206,7 +206,8 @@ inline TColorBIOS RGBtoBIOS(TColorRGB c)
 
 inline uint8_t RGBtoXTerm16(TColorRGB c)
 {
-    return detail::RGBtoXTerm16(c);
+    using namespace tvision;
+    return RGBtoXTerm16Impl(c);
 }
 
 inline uint8_t RGBtoXTerm256(TColorRGB c)
@@ -273,13 +274,13 @@ inline TColorBIOS XTerm16toBIOS(uint8_t idx)
 
 inline uint8_t XTerm256toXTerm16(uint8_t idx)
 {
-    using namespace detail;
+    using namespace tvision;
     return ((const uint8_t (&) [256]) XTerm256toXTerm16LUT)[idx];
 }
 
 inline TColorRGB XTerm256toRGB(uint8_t idx)
 {
-    using namespace detail;
+    using namespace tvision;
     return ((const uint32_t (&) [256]) XTerm256toRGBLUT)[idx];
 }
 

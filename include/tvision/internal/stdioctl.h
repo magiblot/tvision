@@ -8,6 +8,9 @@
 #include <tvision/compat/windows/windows.h>
 #endif
 
+namespace tvision
+{
+
 class StdioCtl final
 {
 #ifdef _WIN32
@@ -48,5 +51,7 @@ public:
 #endif
 #endif // _WIN32
 };
+
+} //namespace tvision
 
 #endif // TVISION_STDIOCTL_H

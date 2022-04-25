@@ -1,5 +1,5 @@
-#ifndef BUFFDISP_H
-#define BUFFDISP_H
+#ifndef TVISION_BUFFDISP_H
+#define TVISION_BUFFDISP_H
 
 #define Uses_TPoint
 #include <tvision/tv.h>
@@ -7,21 +7,20 @@
 #include <vector>
 #include <chrono>
 
+namespace tvision
+{
+
 class ScreenCursor;
 class DisplayStrategy;
 
-namespace buffdisp {
-namespace {
-
+namespace
+{
 struct FlushScreenAlgorithm;
-
 }
-}
-
 
 class BufferedDisplay
 {
-    friend buffdisp::FlushScreenAlgorithm;
+    friend FlushScreenAlgorithm;
 
     struct Range {
         int begin, end;
@@ -109,4 +108,6 @@ inline void BufferedDisplay::changeCursor() noexcept
     instance->caretMoved = true;
 }
 
-#endif
+} // namespace tvision
+
+#endif // TVISION_BUFFDISP_H

@@ -1,5 +1,5 @@
-#ifndef NCURDISP_H
-#define NCURDISP_H
+#ifndef TVISION_NCURDISP_H
+#define TVISION_NCURDISP_H
 
 #include <internal/termdisp.h>
 
@@ -7,6 +7,9 @@
 
 #include <unordered_map>
 #include <ncurses.h>
+
+namespace tvision
+{
 
 class NcursesDisplay : public TerminalDisplay
 {
@@ -43,10 +46,17 @@ protected:
     void lowlevelFlush() noexcept override;
 };
 
+} // namespace tvision
+
 #else
+
+namespace tvision
+{
 
 class NcursesDisplay : public DisplayStrategy {};
 
+} // namespace tvision
+
 #endif // HAVE_NCURSES
 
-#endif
+#endif // TVISION_NCURDISP_H

@@ -6,7 +6,7 @@
 // std::array is not constexpr until C++17. So we make our own, which costs
 // nothing.
 
-namespace detail
+namespace tvision
 {
 
 template <class T, size_t N>
@@ -26,6 +26,6 @@ struct constarray
 
 };
 
-} // namespace detail
+} // namespace tvision
 
 #endif // TVISION_CONSTARR_H

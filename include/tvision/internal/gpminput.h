@@ -12,6 +12,9 @@
 #include <internal/cursor.h>
 #include <gpm.h>
 
+namespace tvision
+{
+
 class GpmInput final : public InputStrategy
 {
     NegativeScreenCursor cursor;
@@ -28,13 +31,20 @@ public:
     int getButtonCount() noexcept;
 };
 
+} // namespace tvision
+
 #else
+
+namespace tvision
+{
 
 class GpmInput : public InputStrategy
 {
 public:
     static GpmInput *create() noexcept { return nullptr; }
 };
+
+} // namespace tvision
 
 #endif // HAVE_GPM
 
