@@ -181,20 +181,41 @@ int getcurdir(int drive, char *direc) noexcept
     // name will be placed, without drive specification nor leading backslash.
     // Note that drive 0 is the 'default' drive, 1 is drive A, etc.
     using namespace tvision;
-    if (drive == 0 || drive-1 == getdisk())
-    {
 #ifdef _WIN32
-        constexpr int lead = 3;
+    enum { prefix = 3 }; // Drive + slash
+    char buf[MAXDIR + prefix];
+    DWORD size;
+
+    if (drive == 0)
+    {
+        size = GetCurrentDirectory(sizeof(buf), buf);
+        if (size == 0 || sizeof(buf) < size)
+            return -1;
+    }
+    else
+    {
+        const char envName[4] = {'=', char(drive - 1 + 'A'), ':', '\0'}; // e.g. '=C:'
+        if ( !(GetLogicalDrives() & (1 << (drive - 1))) ||
+             (size = GetEnvironmentVariable(envName, buf, sizeof(buf))) > sizeof(buf) )
+            return -1;
+    }
+
+    if (size <= prefix)
+        buf[prefix] = '\0';
+    strnzcpy(direc, buf + prefix, MAXDIR);
+    return 0;
 #else
-        constexpr int lead = 1;
-#endif
-        char buf[MAXDIR+lead];
-        if (getcwd(buf, MAXDIR+lead))
+    enum { prefix = 1 }; // Root slash
+    if (drive == 0 || drive - 1 == getdisk())
+    {
+        char buf[MAXDIR + prefix];
+        if (getcwd(buf, MAXDIR + prefix))
         {
             path_unix2dos(buf);
-            strnzcpy(direc, buf+lead, MAXDIR);
+            strnzcpy(direc, buf + prefix, MAXDIR);
             return 0;
         }
     }
     return -1;
+#endif
 }
