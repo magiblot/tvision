@@ -115,11 +115,8 @@ const P_id_type P_id_notFound = UINT_MAX;
 
 typedef TStreamable *(*BUILDER)();
 
-#ifndef __FLAT__
-#define __DELTA( d ) (FP_OFF((TStreamable *)(d *)1)-1)
-#else
-#define __DELTA( d ) ((int)((ptrdiff_t)(TStreamable*)(d*)1-1) )
-#endif
+// This is now computed at runtime by ipstream.
+#define __DELTA( d ) 0
 
 class TStreamableClass
 {
@@ -130,13 +127,12 @@ class TStreamableClass
 
 public:
 
-    TStreamableClass( const char *n, BUILDER b, int d ) noexcept;
+    TStreamableClass( const char *n, BUILDER b, int /* unused */ = 0 ) noexcept;
 
 private:
 
     const char *name;
     BUILDER build;
-    int delta;
 
 };
 

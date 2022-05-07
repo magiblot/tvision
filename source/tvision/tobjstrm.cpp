@@ -90,10 +90,9 @@ const uchar nullStringLen = UCHAR_MAX;
 
 TStreamableClass* volatile fLink::forceLink;
 
-TStreamableClass::TStreamableClass( const char *n, BUILDER b, int d ) noexcept :
+TStreamableClass::TStreamableClass( const char *n, BUILDER b, int ) noexcept :
     name( n ),
-    build( b ),
-    delta( d )
+    build( b )
 {
     pstream::initTypes();
     pstream::registerType( this );
@@ -186,8 +185,6 @@ TPReadObjects::~TPReadObjects()
 {
 }
 
-#pragma warn -aus
-
 void TPReadObjects::registerObject( const void *adr )
 {
     ccIndex loc = insert( (void *)adr );
@@ -197,8 +194,6 @@ void TPReadObjects::registerObject( const void *adr )
                                     // it does now...
     ++curId;
 }
-
-#pragma warn .aus
 
 const void *TPReadObjects::find( P_id_type id )
 {
@@ -512,8 +507,6 @@ ipstream::ipstream() noexcept
 {
 }
 
-#pragma warn -aus
-
 const TStreamableClass *ipstream::readPrefix()
 {
     char ch = readByte();
@@ -526,20 +519,16 @@ const TStreamableClass *ipstream::readPrefix()
     return types->lookup( name );
 }
 
-#pragma warn .aus
-
 void *ipstream::readData( const TStreamableClass *c, TStreamable *mem )
 {
     if( mem == 0 )
         mem = c->build();
-
-    registerObject( (char *)mem - c->delta );   // register the actual address
-                                        // of the object, not the address
-                                        // of the TStreamable sub-object
+    // Register the actual address of the object, not the address of the
+    // TStreamable sub-object, so that it is returned by subsequent calls
+    // to find().
+    registerObject( dynamic_cast<void *>(mem) );
     return mem->read( *this );
 }
-
-#pragma warn -aus
 
 void ipstream::readSuffix()
 {
@@ -547,10 +536,7 @@ void ipstream::readSuffix()
     assert( ch == ']' );    // don't combine this with the previous line!
     (void) ch;              // We must always do the write, even if we're
                             // not checking assertions
-
 }
-
-#pragma warn .aus
 
 const void *ipstream::find( P_id_type id )
 {
