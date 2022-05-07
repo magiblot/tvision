@@ -493,7 +493,7 @@ void TInputLine::setValidator( TValidator* aValid )
 void TInputLine::write( opstream& os )
 {
     TView::write( os );
-    os << maxLen << curPos << firstPos
+    os << maxLen << maxWidth << maxGraphemes << curPos << firstPos
        << selStart << selEnd;
     os.writeString( data);
     os << validator;
@@ -502,7 +502,7 @@ void TInputLine::write( opstream& os )
 void *TInputLine::read( ipstream& is )
 {
     TView::read( is );
-    is >> maxLen >> curPos >> firstPos
+    is >> maxLen >> maxWidth >> maxGraphemes >> curPos >> firstPos
        >> selStart >> selEnd;
     data = new char[maxLen + 1];
     oldData = new char[maxLen + 1];
