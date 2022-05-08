@@ -127,7 +127,7 @@ void TVDemo::getEvent(TEvent &event)
     static Boolean helpInUse = False;
 
     TApplication::getEvent(event);
-    TEventViewer::print(event);
+    printEvent(event);
     switch (event.what)
         {
         case evCommand:

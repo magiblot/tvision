@@ -45,7 +45,8 @@ private:
     void calendar();                  // Calendar
     void asciiTable();                // Ascii table
     void calculator();                // Calculator
-    void eventViewer();               // Event viewer
+    void eventViewer();
+    void printEvent(const TEvent &);
     void chBackground();              // Background pattern
     void openFile( const char *fileSpec );  // File Viewer
     void changeDir();                 // Change directory

@@ -1,71 +1,80 @@
 #define Uses_TEvent
 #define Uses_TKeys
 #define Uses_TFrame
-#define Uses_TDeskTop
-#define Uses_TProgram
+#define Uses_TTerminal
 #include <tvision/tv.h>
 #include <iostream.h>
 
+#include "tvcmds.h"
 #include "evntview.h"
 
-TEventViewer* TEventViewer::viewer = 0;
-
-TEventViewer* TEventViewer::toggle()
+const char * const TEventViewer::titles[2] =
 {
-    static const char *titleResumed = "Event Viewer",
-                      *titleStopped = "Event Viewer (Stopped)";
-    if (!viewer)
-    {
-        TRect bounds = TProgram::deskTop->getExtent();
-        viewer = new TEventViewer(bounds, titleResumed, 0x0F00);
-        return viewer;
-    }
-    else
-    {
-        viewer->resumed = Boolean(!viewer->resumed);
-        viewer->title = viewer->resumed ? titleResumed : titleStopped;
-        viewer->frame->drawView();
-        return 0;
-    }
+    "Event Viewer",
+    "Event Viewer (Stopped)",
+};
+
+void TEventViewer::toggle()
+{
+    stopped = Boolean(!stopped);
+    title = titles[stopped];
+    if (frame)
+        frame->drawView();
 }
 
 void TEventViewer::print(const TEvent &ev)
 {
-    if (ev.what != evNothing && viewer && viewer->resumed && viewer->out)
+    if (ev.what != evNothing && !stopped && out)
     {
-        viewer->lock();
-        *viewer->out << "Received event #" << ++viewer->eventCount << '\n';
-        printEvent(*viewer->out, ev);
-        *viewer->out << flush;
-        viewer->unlock();
+        lock();
+        *out << "Received event #" << ++eventCount << '\n';
+        printEvent(*out, ev);
+        *out << flush;
+        unlock();
     }
 }
 
-TEventViewer::TEventViewer( TRect bounds, const char *aTitle,
-                            ushort aBufSize ) :
-    TWindowInit( &TEventViewer::initFrame ),
-    TWindow(bounds, aTitle, wnNoNumber ),
-    interior(0), out(0), resumed(True), eventCount(0)
+TEventViewer::TEventViewer(const TRect &bounds, ushort aBufSize) :
+    TWindowInit(&initFrame),
+    TWindow(bounds, 0, wnNoNumber),
+    out(0),
+    stopped(False),
+    eventCount(0)
 {
-    bounds = getExtent();
-    bounds.grow( -1, -1 );
+    eventMask |= evBroadcast;
+    title = titles[0];
 
-    interior = new TTerminal( bounds, 0,
-                              standardScrollBar( sbVertical | sbHandleKeyboard ),
-                              aBufSize );
-    out = new otstream(interior);
-    insert( interior );
+    TRect r = getExtent();
+    r.grow(-1, -1);
+
+    TTerminal *interior = new TTerminal( r, 0,
+                                         standardScrollBar(sbVertical | sbHandleKeyboard),
+                                         aBufSize );
+    out = new ostream(interior);
+    insert(interior);
+}
+
+void TEventViewer::shutDown()
+{
+    delete out;
+    out = 0;
+    TWindow::shutDown();
 }
 
 TEventViewer::~TEventViewer()
 {
-    delete out;
-    title = 0; // Not heap-allocated.
-    viewer = 0;
-    out = 0;
+    title = 0; // So that TWindow doesn't delete it.
 }
 
-struct flagName {
+void TEventViewer::handleEvent(TEvent &ev)
+{
+    TWindow::handleEvent(ev);
+    if (ev.what == evBroadcast && ev.message.command == cmFndEventView)
+        clearEvent(ev);
+}
+
+struct flagName
+{
     ulong flag;
     const char* name;
 };

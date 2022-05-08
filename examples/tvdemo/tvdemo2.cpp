@@ -200,18 +200,21 @@ void TVDemo::calculator()
     }
 }
 
-
-//
-// Event Viewer function
-//
-
 void TVDemo::eventViewer()
 {
-    TEventViewer *viewer = (TEventViewer *) validView(TEventViewer::toggle());
-    if(viewer != 0)
-        deskTop->insert(viewer);
+    TEventViewer *viewer = (TEventViewer *) message(deskTop, evBroadcast, cmFndEventView, 0);
+    if( viewer != 0 )
+        viewer->toggle();
+    else
+        deskTop->insert(new TEventViewer(deskTop->getExtent(), 0x0F00));
 }
 
+void TVDemo::printEvent(const TEvent &event)
+{
+    TEventViewer *viewer = (TEventViewer *) message(deskTop, evBroadcast, cmFndEventView, 0);
+    if( viewer != 0 )
+        viewer->print(event);
+}
 
 //
 // Change Directory function
