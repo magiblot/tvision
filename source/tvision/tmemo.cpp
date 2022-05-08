@@ -20,6 +20,10 @@
 #define Uses_ipstream
 #include <tvision/tv.h>
 
+#if !defined( __IOSTREAM_H )
+#include <iostream.h>
+#endif  // __IOSTREAM_H
+
 #define cpMemo      "\x1A\x1B"
 
 TMemo::TMemo( const TRect& bounds,

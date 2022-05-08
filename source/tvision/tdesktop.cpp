@@ -21,9 +21,9 @@
 #define Uses_ipstream
 #include <tvision/tv.h>
 
-#ifndef __MATH_H
-#include <math.h>
-#endif
+#if !defined( __STDLIB_H )
+#include <stdlib.h>
+#endif  // __STDLIB_H
 
 TDeskInit::TDeskInit( TBackground *(*cBackground)( TRect ) ) noexcept :
     createBackground( cBackground )

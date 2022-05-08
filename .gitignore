@@ -9,6 +9,8 @@
 !project/**/
 !source/
 !source/**/
+!.github/
+!.github/**/
 
 !*.*
 *~/

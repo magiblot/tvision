@@ -27,6 +27,10 @@
 #include <mem.h>
 #endif  // __MEM_H
 
+#if !defined( __IOSTREAM_H )
+#include <iostream.h>
+#endif  // __IOSTREAM_H
+
 const int MAXKEYS = 16;
 
 TStrIndexRec::TStrIndexRec() noexcept :
