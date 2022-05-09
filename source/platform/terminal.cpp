@@ -328,6 +328,11 @@ void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
     terminp::setAltModifier(keyDown);
 }
 
+KeyDownEvent TermIO::keyWithModifiers(ushort keyCode, ushort mods) noexcept
+{
+    return terminp::keyWithModifiers(keyCode, mods);
+}
+
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // Pre: "\x1B" has just been read.
 {

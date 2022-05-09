@@ -29,8 +29,7 @@ struct LinuxConsoleInput : public EventSource
     bool getEvent(TEvent &ev) noexcept override;
     bool hasPendingEvents() noexcept override;
 
-    static ushort keyCodeWithModifiers(ulong, ushort) noexcept;
-    static void applyKeyboardModifiers(const StdioCtl &io, KeyDownEvent &key) noexcept;
+    static ushort getKeyboardModifiers(const StdioCtl &io) noexcept;
 };
 
 class LinuxConsoleStrategy : public UnixConsoleStrategy
@@ -47,9 +46,9 @@ class LinuxConsoleStrategy : public UnixConsoleStrategy
 
 public:
 
-    // Pre: 'isLinuxConsole(io)' returns 'true'.
+    // Pre: 'io.isLinuxConsole()' returns 'true'.
     // The lifetime of 'io' must exceed that of the returned object.
-    // Takes ownership over 'display' and 'input'.
+    // Takes ownership over 'scrl', 'display' and 'input'.
     static LinuxConsoleStrategy &create( const StdioCtl &io, ScreenLifetime &scrl,
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;
