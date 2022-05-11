@@ -149,7 +149,7 @@ void *TFileViewer::read(ipstream& is)
     fName = is.readString();
     fileName = 0;
     readFile(fName);
-    delete fName; 
+    delete[] fName;
     return this;
 }
 

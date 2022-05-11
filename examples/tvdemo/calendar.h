@@ -61,7 +61,7 @@ public:
 
     TCalendarWindow();
     TCalendarWindow( StreamableInit ) :
-        TWindowInit(&TCalendarWindow::initFrame), TWindow(streamableInit) { };
+        TWindowInit(0), TWindow(streamableInit) { };
 
 private:
 

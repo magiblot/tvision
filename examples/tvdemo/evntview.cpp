@@ -2,11 +2,53 @@
 #define Uses_TKeys
 #define Uses_TFrame
 #define Uses_TTerminal
+#define Uses_TScrollBar
+#define Uses_TStreamableClass
 #include <tvision/tv.h>
+__link(RWindow)
+
 #include <iostream.h>
+#include <iomanip.h>
 
 #include "tvcmds.h"
 #include "evntview.h"
+
+const char * const TEventViewer::name = "TEventViewer";
+
+TStreamable *TEventViewer::build()
+{
+    return new TEventViewer(streamableInit);
+}
+
+TStreamableClass REventViewer( TEventViewer::name,
+                               TEventViewer::build,
+                               __DELTA(TEventViewer)
+                             );
+
+void TEventViewer::write(opstream &os)
+{
+    // TTerminal does not override the TStreamable methods, so do not
+    // store it in the stream.
+    title = 0;
+    remove(scrollBar);
+    remove(interior);
+    TWindow::write(os);
+    title = titles[stopped];
+    insert(scrollBar);
+    insert(interior);
+
+    os << bufSize;
+}
+
+void *TEventViewer::read(ipstream &is)
+{
+    TWindow::read(is);
+
+    ushort aBufSize;
+    is >> aBufSize;
+    init(aBufSize);
+    return this;
+}
 
 const char * const TEventViewer::titles[2] =
 {
@@ -34,29 +76,34 @@ void TEventViewer::print(const TEvent &ev)
     }
 }
 
-TEventViewer::TEventViewer(const TRect &bounds, ushort aBufSize) :
+TEventViewer::TEventViewer(const TRect &bounds, ushort aBufSize) noexcept :
     TWindowInit(&initFrame),
-    TWindow(bounds, 0, wnNoNumber),
-    out(0),
-    stopped(False),
-    eventCount(0)
+    TWindow(bounds, 0, wnNoNumber)
 {
     eventMask |= evBroadcast;
-    title = titles[0];
+    init(aBufSize);
+}
 
-    TRect r = getExtent();
-    r.grow(-1, -1);
-
-    TTerminal *interior = new TTerminal( r, 0,
-                                         standardScrollBar(sbVertical | sbHandleKeyboard),
-                                         aBufSize );
-    out = new ostream(interior);
+void TEventViewer::init(ushort aBufSize)
+{
+    stopped = False;
+    eventCount = 0;
+    bufSize = aBufSize;
+    title = titles[stopped];
+    scrollBar = standardScrollBar(sbVertical | sbHandleKeyboard);
+    interior = new TTerminal( getExtent().grow(-1, -1),
+                              0,
+                              scrollBar,
+                              bufSize );
     insert(interior);
+    out = new ostream(interior);
 }
 
 void TEventViewer::shutDown()
 {
     delete out;
+    interior = 0;
+    scrollBar = 0;
     out = 0;
     TWindow::shutDown();
 }
