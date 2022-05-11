@@ -122,7 +122,7 @@ void TEventViewer::handleEvent(TEvent &ev)
 
 struct flagName
 {
-    ulong flag;
+    ushort flag;
     const char* name;
 };
 
@@ -233,11 +233,11 @@ static const flagName keyCodeFlags[] = {
     FNEND
 };
 
-static void decomposeFlag(ostream &out, ulong mask, const flagName *flags, Boolean overlap = True)
+static void decomposeFlag(ostream &out, ushort mask, const flagName *flags, Boolean overlap = True)
 {
     Boolean first = True;
-    ulong found = 0;
-    out << hex << "0x" << mask;
+    ushort found = 0;
+    out << hex << setfill('0') << "0x" << setw(4) << mask;
     for (; flags && flags->name; ++flags)
     {
         if (overlap ? (mask & flags->flag) : (mask == flags->flag))
@@ -259,7 +259,7 @@ static void decomposeFlag(ostream &out, ulong mask, const flagName *flags, Boole
     if (!first)
     {
         if (overlap && (found != mask))
-            out << " | 0x" << (mask & ~found);
+            out << " | 0x" << setw(4) << (mask & ~found);
         out << ")";
     }
     out << dec;
@@ -314,7 +314,7 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
             << hex
             << "    .text = {";
         Boolean first = True;
-        for (uchar i = 0; i < ev.keyDown.textLength; ++i)
+        for (int i = 0; i < ev.keyDown.textLength; ++i)
         {
             if (first)
                 first = False;
