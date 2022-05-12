@@ -223,11 +223,11 @@ void TReport::handleEvent(TEvent& event)
 {
     TView::handleEvent(event);
     if (event.what == evBroadcast)
-    {
+        {
         if (event.message.command == cmAsciiTableCmdBase + cmCharFocused)
             {
-        asciiChar = event.message.infoLong;
-        drawView();
+            asciiChar = event.message.infoByte;
+            drawView();
             }
         }
 }

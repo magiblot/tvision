@@ -70,7 +70,7 @@ public:
 
 private:
 
-    long asciiChar;
+    uchar asciiChar;
 
     virtual const char *streamableName() const
          { return name; }
