@@ -183,47 +183,60 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 
 bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
 {
-    if (getUnicodeEvent(KeyEventW, ev)) {
+    if (getUnicodeEvent(KeyEventW, ev))
+    {
         ev.what = evKeyDown;
         ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
-        if (ev.keyDown.textLength) {
+        ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
+        ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
+
+        if (ev.keyDown.textLength)
+        {
             ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
             if (KeyEventW.wVirtualKeyCode == VK_MENU)
                 // This is enabled when pasting certain characters, and it confuses
                 // applications. Clear it.
                 ev.keyDown.charScan.scanCode = 0;
-            if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ) {
+            if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ)
                 // If the character cannot be represented in the current codepage,
                 // or if it would accidentally trigger a Ctrl+Key combination,
                 // make the whole keyCode zero to avoid side effects.
                 ev.keyDown.keyCode = kbNoKey;
-            }
-        } else {
-            ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
-            if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
-                 ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 )
-                // Discard standalone Shift, Ctrl, Alt keys.
-                ev.keyDown.keyCode = kbNoKey;
         }
-        ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
-        // Convert NT style virtual scan codes to PC BIOS codes.
-        if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
-             (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr
+
+        if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
+             ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 ||
+             ev.keyDown.keyCode == 0x3A00 )
+            // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
+            ev.keyDown.keyCode = kbNoKey;
+        else if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
+                  (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
         {
             // When AltGr+Key does not produce a character, a
             // keyCode with unwanted effects may be read instead.
-            if (!ev.keyDown.charScan.charCode)
+            if (!ev.keyDown.textLength)
                 ev.keyDown.keyCode = kbNoKey;
-        } else if (KeyEventW.wVirtualScanCode < 89) {
+        }
+        else if (KeyEventW.wVirtualScanCode < 89)
+        {
+            // Convert NT style virtual scan codes to PC BIOS codes.
             uchar index = KeyEventW.wVirtualScanCode;
-            if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
-                ev.keyDown.keyCode = THardwareInfo::ShiftCvt[index];
+            ushort keyCode = 0;
+            if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
+                keyCode = THardwareInfo::AltCvt[index];
             else if ((ev.keyDown.controlKeyState & kbCtrlShift) && THardwareInfo::CtrlCvt[index])
-                ev.keyDown.keyCode = THardwareInfo::CtrlCvt[index];
-            else if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
-                ev.keyDown.keyCode = THardwareInfo::AltCvt[index];
-            else if (THardwareInfo::NormalCvt[index])
-                ev.keyDown.keyCode = THardwareInfo::NormalCvt[index];
+                keyCode = THardwareInfo::CtrlCvt[index];
+            else if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
+                keyCode = THardwareInfo::ShiftCvt[index];
+            else if ( !(ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
+                      THardwareInfo::NormalCvt[index] )
+                keyCode = THardwareInfo::NormalCvt[index];
+            if (keyCode != 0)
+            {
+                ev.keyDown.keyCode = keyCode;
+                if (ev.keyDown.charScan.charCode < ' ')
+                    ev.keyDown.textLength = 0;
+            }
         }
 
         // Set/reset insert flag.

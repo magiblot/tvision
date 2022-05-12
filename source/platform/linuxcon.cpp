@@ -42,21 +42,16 @@ bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
     // console, so we add them on top of the previous translation.
     if (input.getEvent(ev))
     {
-        ushort actualModifiers = getKeyboardModifiers(io);
-        if (ev.keyDown.textLength && !(actualModifiers & kbAltShift))
-            ev.keyDown.controlKeyState = actualModifiers & ~kbShift;
-        else
-        {
-            ushort keyCode = ev.keyDown.keyCode;
-            // Prevent Ctrl+H/Ctrl+I/Ctrl+J/Ctrl+M from being interpreted as
-            // Ctrl+Back/Ctrl+Tab/Ctrl+Enter.
-            if (keyCode == kbBack || keyCode == kbTab || keyCode == kbEnter)
-                actualModifiers &= ~kbCtrlShift;
-            // Special case for Ctrl+Back.
-            if (keyCode == 0x001F && (actualModifiers & kbCtrlShift))
-                keyCode = kbCtrlBack;
-            ev.keyDown = TermIO::keyWithModifiers(keyCode, actualModifiers);
-        }
+        auto &keyCode = ev.keyDown.keyCode;
+        ev.keyDown.controlKeyState = getKeyboardModifiers(io);
+        // Prevent Ctrl+H/Ctrl+I/Ctrl+J/Ctrl+M from being interpreted as
+        // Ctrl+Back/Ctrl+Tab/Ctrl+Enter.
+        if (keyCode == kbBack || keyCode == kbTab || keyCode == kbEnter)
+            ev.keyDown.controlKeyState &= ~kbCtrlShift;
+        // Special case for Ctrl+Back.
+        if (keyCode == 0x001F && (ev.keyDown.controlKeyState & kbCtrlShift))
+            keyCode = kbCtrlBack;
+        TermIO::fixKey(ev.keyDown);
         return true;
     }
     return false;

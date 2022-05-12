@@ -316,16 +316,12 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
             event.keyDown.controlKeyState = irBuffer.Event.KeyEvent.dwControlKeyState;
 
             if( event.keyDown.keyCode == 0x2A00 || event.keyDown.keyCode == 0x1D00 ||
-                event.keyDown.keyCode == 0x3800 )
-                {
-                // Discard standalone Shift, Ctrl, Alt keys.
+                event.keyDown.keyCode == 0x3600 || event.keyDown.keyCode == 0x3800 ||
+                event.keyDown.keyCode == 0x3A00 )
+                // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
                 event.keyDown.keyCode = kbNoKey;
-                }
-
-            /* Convert NT style virtual scan codes to PC BIOS codes.
-             */
-            if( (event.keyDown.controlKeyState & kbCtrlShift) &&
-                (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr
+            else if( (event.keyDown.controlKeyState & kbCtrlShift) &&
+                     (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
                 {
                 // When AltGr+Key does not produce a character, a
                 // keyCode with unwanted effects may be read instead.
@@ -334,14 +330,16 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
                 }
             else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
                 {
+                // Convert NT style virtual scan codes to PC BIOS codes.
                 uchar index = irBuffer.Event.KeyEvent.wVirtualScanCode;
-                if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
-                    event.keyDown.keyCode = ShiftCvt[index];
+                if ((event.keyDown.controlKeyState & kbAltShift) && AltCvt[index] != 0)
+                    event.keyDown.keyCode = AltCvt[index];
                 else if ((event.keyDown.controlKeyState & kbCtrlShift) && CtrlCvt[index] != 0)
                     event.keyDown.keyCode = CtrlCvt[index];
-                else if ((event.keyDown.controlKeyState & kbAltShift) && AltCvt[index] != 0)
-                    event.keyDown.keyCode = AltCvt[index];
-                else if ( NormalCvt[index] != 0 )
+                else if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
+                    event.keyDown.keyCode = ShiftCvt[index];
+                else if ( !(event.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
+                          NormalCvt[index] != 0 )
                     event.keyDown.keyCode = NormalCvt[index];
                 }
 

@@ -164,7 +164,7 @@ namespace TermIO
 
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept;
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
-    KeyDownEvent keyWithModifiers(ushort keyCode, ushort mods) noexcept;
+    void fixKey(KeyDownEvent &keyDown) noexcept;
 
 }
 

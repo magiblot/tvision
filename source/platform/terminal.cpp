@@ -76,7 +76,6 @@ namespace terminp
         { '1', kbAlt1 }, { '2', kbAlt2 }, { '3', kbAlt3 }, { '4', kbAlt4 },
         { '5', kbAlt5 }, { '6', kbAlt6 }, { '7', kbAlt7 }, { '8', kbAlt8 },
         { '9', kbAlt9 }, { '0', kbAlt0 },
-        { '-',         kbAltMinus  }, { '=',         kbAltEqual  },
         { ' ',         kbAltSpace  },
         { kbF1,        kbAltF1     }, { kbF2,        kbAltF2     },
         { kbF3,        kbAltF3     }, { kbF4,        kbAltF4     },
@@ -115,13 +114,16 @@ namespace terminp
                                     const const_unordered_map<ushort, ushort> &keyMap ) noexcept
     {
         keyDown.controlKeyState |= mod;
-        keyDown.textLength = 0;
-        char c = keyDown.charScan.charCode;
+        uchar c = keyDown.charScan.charCode;
         if (keyDown.charScan.scanCode == 0)
-            keyDown.charScan.charCode = ('a' <= c && c <= 'z') ? (c - 'a' + 'A') : c;
-        ushort keyCode = keyMap[keyDown.keyCode];
-        if (keyCode)
+            c = ('a' <= c && c <= 'z') ? (c - 'a' + 'A') : c;
+        ushort testKeyCode = keyDown.charScan.scanCode << 8 | c;
+        if (ushort keyCode = keyMap[testKeyCode])
+        {
             keyDown.keyCode = keyCode;
+            if (keyDown.charScan.charCode < ' ')
+                keyDown.textLength = 0;
+        }
     }
 
     static void setShiftModifier(KeyDownEvent &keyDown) noexcept
@@ -328,9 +330,12 @@ void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
     terminp::setAltModifier(keyDown);
 }
 
-KeyDownEvent TermIO::keyWithModifiers(ushort keyCode, ushort mods) noexcept
+void TermIO::fixKey(KeyDownEvent &keyDown) noexcept
 {
-    return terminp::keyWithModifiers(keyCode, mods);
+    using namespace terminp;
+    if (keyDown.controlKeyState & kbShift) setShiftModifier(keyDown);
+    if (keyDown.controlKeyState & kbCtrlShift) setCtrlModifier(keyDown);
+    if (keyDown.controlKeyState & kbAltShift) setAltModifier(keyDown);
 }
 
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
