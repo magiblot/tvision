@@ -55,7 +55,9 @@ namespace terminp
         { kbIns,       kbCtrlIns   }, { kbDel,       kbCtrlDel   },
         { kbHome,      kbCtrlHome  }, { kbEnd,       kbCtrlEnd   },
         { kbPgUp,      kbCtrlPgUp  }, { kbPgDn,      kbCtrlPgDn  },
+        { kbTab,       kbCtrlTab   },
         { kbShiftIns,  kbCtrlIns   }, { kbShiftDel,  kbCtrlDel   },
+        { kbShiftTab,  kbCtrlTab   },
     };
 
     static const const_unordered_map<ushort, ushort> AltKeyCode =
@@ -101,13 +103,16 @@ namespace terminp
         { kbIns,       kbAltIns    }, { kbDel,       kbAltDel    },
         { kbHome,      kbAltHome   }, { kbEnd,       kbAltEnd    },
         { kbPgUp,      kbAltPgUp   }, { kbPgDn,      kbAltPgDn   },
+        { kbTab,       kbAltTab    },
         { kbShiftIns,  kbAltIns    }, { kbShiftDel,  kbAltDel    },
+        { kbShiftTab,  kbAltTab    },
         { kbCtrlBack,  kbAltBack   },
         { kbCtrlDown,  kbAltDown   }, { kbCtrlUp,    kbAltUp     },
         { kbCtrlLeft,  kbAltLeft   }, { kbCtrlRight, kbAltRight  },
         { kbCtrlIns,   kbAltIns    }, { kbCtrlDel,   kbAltDel    },
         { kbCtrlHome,  kbAltHome   }, { kbCtrlEnd,   kbAltEnd    },
         { kbCtrlPgUp,  kbAltPgUp   }, { kbCtrlPgDn,  kbAltPgDn   },
+        { kbCtrlTab,   kbAltTab    },
     };
 
     static inline void setModifier( KeyDownEvent &keyDown, ushort mod,
