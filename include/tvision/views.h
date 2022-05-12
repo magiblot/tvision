@@ -469,7 +469,7 @@ private:
                    TPoint maxSize,
                    uchar mode
                  );
-    void change( uchar, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState ) noexcept;
+    void change( uchar, TPoint delta, TPoint& p, TPoint& s, ushort ctrlState ) noexcept;
     static void writeView( write_args );
     void writeView( short x, short y, short count, const void _FAR* b ) noexcept;
 #ifndef __BORLANDC__

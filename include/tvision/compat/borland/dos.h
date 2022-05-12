@@ -35,6 +35,7 @@
 #endif
 
 #include <errno.h>
+#include <stdint.h>
 
 #define FA_NORMAL   0x00        /* Normal file, no attributes */
 #define FA_RDONLY   0x01        /* Read only attribute */
@@ -57,9 +58,9 @@
 #ifndef _FFBLK_DEF
 #define _FFBLK_DEF
 struct  ffblk   {
-    long            ff_reserved;
-    long            ff_fsize;
-    unsigned long   ff_attrib;
+    int32_t         ff_reserved;
+    int32_t         ff_fsize;
+    uint32_t        ff_attrib;
     unsigned short  ff_ftime;
     unsigned short  ff_fdate;
     char            ff_name[256];
@@ -68,9 +69,9 @@ struct  ffblk   {
 
 /* The MSC find_t structure corresponds exactly to the ffblk structure */
 struct  find_t {
-    long            reserved;
-    long            size;              /* size of file */
-    unsigned long   attrib;            /* attribute byte for matched file */
+    int32_t         reserved;
+    int32_t         size;              /* size of file */
+    uint32_t        attrib;            /* attribute byte for matched file */
     unsigned short  wr_time;           /* time of last write to file */
     unsigned short  wr_date;           /* date of last write to file */
     char            name[256];         /* asciiz name of matched file */

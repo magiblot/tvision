@@ -383,7 +383,7 @@ void THardwareInfo::stopEventWait() noexcept
 
 #endif  // __BORLANDC__
 
-ulong THardwareInfo::getTickCount() noexcept
+uint32_t THardwareInfo::getTickCount() noexcept
 {
     // To change units from ms to clock ticks.
     //   X ms * 1s/1000ms * 18.2ticks/s = X/55 ticks, roughly.

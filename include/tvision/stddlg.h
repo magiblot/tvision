@@ -55,8 +55,8 @@ const int
 struct TSearchRec
 {
     uchar attr;
-    long time;
-    long size;
+    int32_t time;
+    int32_t size;
     char name[MAXFILE+MAXEXT-1];
 };
 

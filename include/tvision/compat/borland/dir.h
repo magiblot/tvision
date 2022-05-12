@@ -28,6 +28,8 @@
 
 #include "_defs.h"
 
+#include <stdint.h>
+
 #define WILDCARDS 0x01
 #define EXTENSION 0x02
 #define FILENAME  0x04
@@ -39,9 +41,9 @@
 #ifndef _FFBLK_DEF
 #define _FFBLK_DEF
 struct  ffblk   {
-    long            ff_reserved;
-    long            ff_fsize;
-    unsigned long   ff_attrib;
+    int32_t         ff_reserved;
+    int32_t         ff_fsize;
+    uint32_t        ff_attrib;
     unsigned short  ff_ftime;
     unsigned short  ff_fdate;
     char            ff_name[256];

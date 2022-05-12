@@ -61,7 +61,7 @@ public:
     static void readEvents() noexcept;
 #endif
 
-    static ulong getTickCount() noexcept;
+    static uint32_t getTickCount() noexcept;
 
 #if defined( __FLAT__ )
 
@@ -283,8 +283,8 @@ inline ushort *THardwareInfo::getColorAddr( ushort offset )
 inline ushort *THardwareInfo::getMonoAddr( ushort offset )
     { return (ushort *) MAKELONG( monoSel, offset ); }
 
-inline ulong THardwareInfo::getTickCount()
-    { return *(ulong *) MAKELONG( biosSel, 0x6C ); }
+inline uint32_t THardwareInfo::getTickCount()
+    { return *(uint32_t *) MAKELONG( biosSel, 0x6C ); }
 
 inline uchar THardwareInfo::getShiftState()
     { return *(uchar *) MAKELONG( biosSel, 0x17 ); }

@@ -16,6 +16,8 @@
 #include <windows.h>
 #else
 
+#include <stdint.h>
+
 // winnt.h
 extern "C" {
 
@@ -23,7 +25,7 @@ extern "C" {
     typedef PVOID HANDLE;
     typedef char CHAR;
     typedef short SHORT;
-    typedef long LONG;
+    typedef int32_t LONG;
     typedef wchar_t WCHAR;
 
 }
@@ -31,7 +33,7 @@ extern "C" {
 // windef.h
 extern "C" {
 
-    typedef unsigned long       DWORD;
+    typedef uint32_t            DWORD;
     typedef int                 BOOL;
     typedef unsigned char       BYTE;
     typedef unsigned short      WORD;

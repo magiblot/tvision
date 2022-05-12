@@ -217,7 +217,7 @@ struct MessageEvent
     union
         {
         void *infoPtr;
-        long infoLong;
+        int32_t infoLong;
         ushort infoWord;
         short infoInt;
         uchar infoByte;

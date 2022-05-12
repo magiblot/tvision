@@ -220,7 +220,7 @@ void TView::moveGrow( TPoint p,
     locate(r);
 }
 
-void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s, ulong ctrlState ) noexcept
+void TView::change( uchar mode, TPoint delta, TPoint& p, TPoint& s, ushort ctrlState ) noexcept
 {
     if( (mode & dmDragMove) != 0 && (ctrlState & kbShift) == 0 )
         p += delta;

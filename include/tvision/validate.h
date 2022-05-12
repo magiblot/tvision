@@ -190,14 +190,14 @@ class TRangeValidator : public TFilterValidator
     static const char * _NEAR errorMsg;
 
 public:
-    TRangeValidator(long aMin, long aMax) noexcept;
+    TRangeValidator(int32_t aMin, int32_t aMax) noexcept;
     virtual void error();
     virtual Boolean isValid(const char* s);
     virtual ushort transfer(char* s, void* buffer, TVTransfer flag);
 
 protected:
-    long min;
-    long max;
+    int32_t min;
+    int32_t max;
 
     TRangeValidator( StreamableInit ) noexcept;
     virtual void write( opstream& os );

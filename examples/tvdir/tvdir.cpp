@@ -188,7 +188,7 @@ void TFilePane::draw() {
 
 static char *formatFileRow( char buf[128], const find_t &searchRec ) {
     sprintf(buf, "  %8ld %2d-%02d-%02d  %2d:%02d  %c%c%c%c",
-      searchRec.size,
+      (long) searchRec.size,
       ((searchRec.wr_date & 0x01E0) >> 5),
       (searchRec.wr_date & 0x001F),
       ((searchRec.wr_date >> 9)+1980)%100,

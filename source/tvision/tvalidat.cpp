@@ -655,7 +655,7 @@ void TFilterValidator::error()
 
 // TRangeValidator
 
-TRangeValidator::TRangeValidator( long aMin, long aMax ) noexcept :
+TRangeValidator::TRangeValidator( int32_t aMin, int32_t aMax ) noexcept :
     TFilterValidator( 0 ),
     min(aMin),
     max(aMax)
