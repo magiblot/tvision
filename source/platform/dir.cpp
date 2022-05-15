@@ -183,27 +183,14 @@ int getcurdir(int drive, char *direc) noexcept
     using namespace tvision;
 #ifdef _WIN32
     enum { prefix = 3 }; // Drive + slash
-    char buf[MAXDIR + prefix];
-    DWORD size;
+    enum { bufLen = MAXDIR + prefix };
+    wchar_t buf[bufLen];
+    wchar_t drv[3] = {wchar_t((drive ? drive - 1 : getdisk()) + 'A'), ':', '\0'};
 
-    if (drive == 0)
-    {
-        size = GetCurrentDirectory(sizeof(buf), buf);
-        if (size == 0 || sizeof(buf) < size)
-            return -1;
-    }
-    else
-    {
-        const char envName[4] = {'=', char(drive - 1 + 'A'), ':', '\0'}; // e.g. '=C:'
-        if ( !(GetLogicalDrives() & (1 << (drive - 1))) ||
-             (size = GetEnvironmentVariable(envName, buf, sizeof(buf))) > sizeof(buf) )
-            return -1;
-    }
-
-    if (size <= prefix)
-        buf[prefix] = '\0';
-    strnzcpy(direc, buf + prefix, MAXDIR);
-    return 0;
+    if ( GetFullPathNameW(drv, bufLen, buf, nullptr) <= bufLen
+         && WideCharToMultiByte(CP_UTF8, 0, buf + prefix, -1, direc, MAXDIR, nullptr, nullptr) )
+        return 0;
+    return -1;
 #else
     enum { prefix = 1 }; // Root slash
     if (drive == 0 || drive - 1 == getdisk())
