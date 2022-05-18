@@ -198,7 +198,7 @@ inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr);
 inline TScreenCell::TScreenCell(ushort bios)
 {
     memset(this, 0, sizeof(*this));
-    _ch.moveChar(bios);
+    _ch.moveChar(char(bios));
     attr = uchar(bios >> 8);
 }
 
