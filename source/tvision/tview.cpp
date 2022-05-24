@@ -95,7 +95,7 @@ static int balancedRange( int val, int min, int max, int &balance) noexcept
     // and apply them back when possible. This allows views to recover
     // their original sizes.
     if( min > max )
-        min = max;
+        max = min;
     if( val < min )
         {
         balance += val - min;
@@ -114,7 +114,7 @@ static int balancedRange( int val, int min, int max, int &balance) noexcept
         }
 }
 
-static inline void fitToLimits( int a, int b, int min, int max, int &balance)
+static inline void fitToLimits( int a, int &b, int min, int max, int &balance)
 {
     b = a + balancedRange( b - a, min, max, balance );
 }
