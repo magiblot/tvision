@@ -38,6 +38,10 @@
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po-
 #endif
+#if defined( _MSC_VER )
+#pragma warning(push)
+#pragma warning(disable: 4250)
+#endif
 
 #if !defined( __FLAT__ )
 #if !defined ( __LARGE__ )
@@ -752,4 +756,7 @@
 #endif
 #if defined( __BCOPT__ ) && !defined (__FLAT__)
 #pragma option -po.
+#endif
+#if defined( _MSC_VER )
+#pragma warning(pop)
 #endif
