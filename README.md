@@ -28,6 +28,7 @@ The original location of this project is https://github.com/magiblot/tvision.
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
+    * [Vcpkg](#build-vcpkg)
     * [Turbo Vision as a CMake dependency](#build-cmake)
 * [Features](#features)
 * [API changes](#apichanges)
@@ -208,6 +209,22 @@ Where `<options>` can be:
 This will compile the library into a `LIB` directory next to `project`, and will compile executables for the demo applications in their respective `examples/*` directories.
 
 I'm sorry, the root makefile assumes it is executed from the `project` directory. You can still run the original makefiles directly (in `source/tvision` and `examples/*`) if you want to use different settings.
+
+<div id="build-vcpkg"></div>
+
+### Vcpkg
+
+Turbo Vision can be built and installed using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+```sh
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+./vcpkg install tvision
+```
+
+The `tvision` port in vcpkg is kept up to date by Microsoft team members and community contributors. If you find it to be out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) in the vcpkg repository.
 
 <div id="build-cmake"></div>
 
