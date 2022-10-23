@@ -86,9 +86,9 @@ int TDataCollection::compare( void *key1, void *key2 )
 
     if (keyType == stringKey)
         return stricmp((char*)key1, (char*) key2);
-    else 
+    else
         {
-        if (*(int32_t *)key1 < *(int32_t *)key2)
+        if (!key1 || !key2 || *(int32_t *)key1 < *(int32_t *)key2)
             return -1;
         else if (*(int32_t *)key1 == *(int32_t *)key2)
             return 0;
@@ -106,7 +106,7 @@ void TDataCollection::error( int code )
 void TDataCollection::freeItem( void *item )
 {
     if (item != NULL)
-        ::operator delete(item);
+        delete[] (char *) item;
 }
 
 void TDataCollection::setLimit( int aLimit )

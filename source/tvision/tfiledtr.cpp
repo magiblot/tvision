@@ -53,6 +53,9 @@ TFileEditor::TFileEditor( const TRect& bounds,
                         ) noexcept :
     TEditor( bounds, aHScrollBar, aVScrollBar, aIndicator, 0 )
 {
+    TEditor::doneBuffer();
+    initBuffer();
+
     if( aFileName.empty() )
         fileName[0] = EOS;
     else
@@ -66,7 +69,7 @@ TFileEditor::TFileEditor( const TRect& bounds,
 
 void TFileEditor::doneBuffer()
 {
-    delete[] buffer;
+    free(buffer);
 }
 
 void TFileEditor::handleEvent( TEvent& event )
@@ -95,7 +98,7 @@ void TFileEditor::handleEvent( TEvent& event )
 
 void TFileEditor::initBuffer()
 {
-    buffer = new char[bufSize];
+    buffer = (char *) malloc(bufSize);
 }
 
 Boolean TFileEditor::loadFile() noexcept
@@ -230,14 +233,14 @@ Boolean TFileEditor::setBufSize( uint newSize )
            NULL return value. */
         if( (buffer = (char *) malloc( newSize )) == 0 )
             {
-            delete temp;
+            free(temp);
             return False;
             }
         uint n = bufLen - curPtr + delCount;
         uint min = newSize < bufSize ? newSize : bufSize;
         memcpy( buffer, temp, min );
         memmove( &buffer[newSize - n], &temp[bufSize - n], n );
-        delete temp;
+        free(temp);
         bufSize = newSize;
         gapLen = bufSize - bufLen;
         }

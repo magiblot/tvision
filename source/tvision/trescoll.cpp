@@ -25,7 +25,7 @@ TResourceCollection::TResourceCollection( short aLimit, short aDelta) noexcept :
 
 void TResourceCollection::freeItem( void* item )
 {
-    delete ((TResourceItem*)item)->key;
+    delete[] ((TResourceItem*)item)->key;
     delete (TResourceItem*)item;
 }
 

@@ -411,7 +411,7 @@ void TEditor::deleteSelect()
 
 void TEditor::doneBuffer()
 {
-    delete buffer;
+    delete[] buffer;
 }
 
 void TEditor::doSearchReplace()

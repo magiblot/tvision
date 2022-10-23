@@ -125,7 +125,7 @@ void TFormApp::changeDir()
 void TFormApp::openListDialog()
 {
     TFileDialog *d;
-    char *fileName;
+    char fileName[MAXPATH];
     TDialog *listEditor;
     char errorMsg[MAXSIZE];
     extern Boolean fileExists( char *);
@@ -140,7 +140,6 @@ void TFormApp::openListDialog()
         {
         if (deskTop->execView(d) != cmCancel)
             {
-            fileName = new char[MAXPATH];
             d->getFileName(fileName);
             if (!fileExists(fileName))
                 {
@@ -157,7 +156,6 @@ void TFormApp::openListDialog()
                     deskTop->insert(validView(new TListDialog(fileName, name)));
                 else listEditor->select();
                 }
-            delete fileName;
             }
         destroy(d);
         }
@@ -193,7 +191,7 @@ void TFormApp::handleEvent(TEvent& event)
                 break;
 
             default:
-                return; 
+                return;
             }
         clearEvent(event);
         }

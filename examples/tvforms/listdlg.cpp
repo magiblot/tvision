@@ -84,6 +84,14 @@ TListKeyBox::TListKeyBox(const TRect& bounds, ushort aNumCols,
 {
 }
 
+void *TListKeyBox::getKey( const char *s )
+{
+    if (list()->keyType == stringKey)
+        return (void *) s;
+    else
+        return 0;
+}
+
 void TListKeyBox::getText( char *dest, short item, short maxLen )
 {
     switch (list()->keyType)
@@ -482,7 +490,7 @@ Boolean TListDialog::saveForm(TDialog *f)
     if ( (!(dataCollection->duplicates) && dataCollection->search(dataCollection->keyOf(p), i)) )
         if ( (((TForm*)f)->prevData == NULL) || (((TForm *)f)->prevData != dataCollection->at(i)) )
             {
-            ::operator delete(p);
+            delete[] (char *) p;
             messageBox("Duplicate keys are not allowed in this database. "
                        "Delete duplicate record before saving this form.",
                         mfError | mfOKButton);
@@ -500,7 +508,7 @@ Boolean TListDialog::saveForm(TDialog *f)
     dataCollection->insert(p);
     if (dataCollection->status != 0)
         {
-        ::operator delete(p);
+        delete[] (char *) p;
         TApplication::application->outOfMemory();
         return False;
         }

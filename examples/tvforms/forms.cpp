@@ -52,7 +52,7 @@ void TForm::write( opstream& os )
 
     TDialog::write( os );
     os << keyWidth;
-    
+
 }
 
 void *TForm::read( ipstream& is )
@@ -105,10 +105,10 @@ Boolean TForm::changed()
     else
         result = True;
 
-    ::operator delete(curData);
+    delete[] (char *) curData;
     if (newForm)
         {
-        ::operator delete(prevData);
+        delete[] (char *) prevData;
         prevData = NULL;
         }
     if (result)

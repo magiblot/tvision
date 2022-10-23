@@ -39,9 +39,10 @@ class TListKeyBox :  public TSortedListBox
 {
 
 public:
-    
+
     TListKeyBox( const TRect&, ushort, TScrollBar *);
 
+    virtual void *getKey( const char * );
     virtual void getText( char *, short, short );
     void newList( TDataCollection * );
     TDataCollection *list();
