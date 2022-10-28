@@ -25,8 +25,8 @@ const ushort
 //  Control keys
 //
 //  NOTE: these Control key definitions are intended only to provide
-//  mnemonic names for the ASCII control codes.  They cannot be used
-//  to define menu hotkeys, etc., which require scan codes.
+//  mnemonic names for the ASCII control codes. In 16-bit mode, they
+//  cannot be used to define menu hotkeys, etc., which require scan codes.
 
     kbCtrlA     = 0x0001,   kbCtrlB     = 0x0002,   kbCtrlC     = 0x0003,
     kbCtrlD     = 0x0004,   kbCtrlE     = 0x0005,   kbCtrlF     = 0x0006,
@@ -76,18 +76,19 @@ const ushort
     kbAlt4      = 0x7b00,   kbAlt5      = 0x7c00,   kbAlt6      = 0x7d00,
     kbAlt7      = 0x7e00,   kbAlt8      = 0x7f00,   kbAlt9      = 0x8000,
     kbAlt0      = 0x8100,   kbAltMinus  = 0x8200,   kbAltEqual  = 0x8300,
-    kbCtrlPgUp  = 0x8400,   kbAltBack   = 0x0800,   kbNoKey     = 0x0000,
-    kbCtrlUp    = 0x8D00,   kbCtrlDown  = 0x9100,   kbAltIns    = 0xA200,
-    kbAltDel    = 0xA300,   kbAltHome   = 0x9700,   kbAltEnd    = 0x9F00,
-    kbAltUp     = 0x9800,   kbAltDown   = 0xA000,   kbAltLeft   = 0x9B00,
-    kbAltRight  = 0x9D00,   kbAltPgUp   = 0x9900,   kbAltPgDn   = 0xA100,
-    kbCtrlTab   = 0x9400,   kbAltTab    = 0xA500,
+    kbCtrlPgUp  = 0x8400,   kbNoKey     = 0x0000,
 
-#if defined( __FLAT__ )
-    kbF11       = 0x8500,   kbF12       = 0x8600,   kbShiftF11  = 0x8700,
-    kbShiftF12  = 0x8800,   kbCtrlF11   = 0x8900,   kbCtrlF12   = 0x8A00,
-    kbAltF11    = 0x8B00,   kbAltF12    = 0x8C00,
-#endif
+// Additional extended key codes, usable in 32-bit mode
+
+    kbAltEsc    = 0x0100,   kbAltBack   = 0x0e00,   kbF11       = 0x8500,
+    kbF12       = 0x8600,   kbShiftF11  = 0x8700,   kbShiftF12  = 0x8800,
+    kbCtrlF11   = 0x8900,   kbCtrlF12   = 0x8a00,   kbAltF11    = 0x8b00,
+    kbAltF12    = 0x8c00,   kbCtrlUp    = 0x8d00,   kbCtrlDown  = 0x9100,
+    kbCtrlTab   = 0x9400,   kbAltHome   = 0x9700,   kbAltUp     = 0x9800,
+    kbAltPgUp   = 0x9900,   kbAltLeft   = 0x9b00,   kbAltRight  = 0x9d00,
+    kbAltEnd    = 0x9f00,   kbAltDown   = 0xa000,   kbAltPgDn   = 0xa100,
+    kbAltIns    = 0xa200,   kbAltDel    = 0xa300,   kbAltTab    = 0xa500,
+    kbAltEnter  = 0xa600,
 
 //  Keyboard state and shift masks
 
