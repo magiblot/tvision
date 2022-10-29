@@ -8,9 +8,9 @@ env:
 jobs:
   build-linux-gcc:
     name: Linux (GCC) (Unity)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Dependencies
       run: sudo apt -y install libncursesw5-dev libgpm-dev
@@ -25,12 +25,17 @@ jobs:
 
   build-linux-gcc5:
     name: Linux (GCC 5)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev g++-5
+      run: |
+        sudo tee --append /etc/apt/sources.list << EOF
+          deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
+        EOF
+        sudo apt -y update
+        sudo apt -y install libncursesw5-dev g++-5
 
     - name: Configure CMake
       shell: bash
@@ -45,9 +50,9 @@ jobs:
 
   build-linux-clang:
     name: Linux (Clang)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Dependencies
       run: sudo apt -y install libncursesw5-dev
@@ -57,7 +62,7 @@ jobs:
       env:
         CC: clang
         CXX: clang++
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTV_OPTIMIZE_BUILD=OFF -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTV_OPTIMIZE_BUILD=OFF
 
     - name: Build
       shell: bash
@@ -67,7 +72,7 @@ jobs:
     name: Windows (MSVC) (Win32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
       shell: bash
@@ -89,7 +94,7 @@ jobs:
     name: Windows (MSVC) (x64)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
       shell: bash
@@ -111,11 +116,11 @@ jobs:
     name: Windows (MinGW)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
       shell: bash
-      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="-static"
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="-static" -DTV_OPTIMIZE_BUILD=OFF
 
     - name: Build
       shell: bash
@@ -125,7 +130,7 @@ jobs:
     name: Windows (BCC32) (DPMI32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Build Tools
       shell: bash
@@ -152,9 +157,9 @@ jobs:
 
   build-macos-clang:
     name: MacOS (Clang)
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
       shell: bash
