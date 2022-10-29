@@ -57,6 +57,7 @@
 
 #define Uses_EventCodes
 #define Uses_ViewCommands
+#define __INC_TKEYS_H
 #define __INC_STDDLG_H
 
 #if defined( Uses_TApplication )

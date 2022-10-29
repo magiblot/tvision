@@ -72,7 +72,6 @@ const int meTripleClick = 0x10;
 
 #endif  // __EVENT_CODES
 
-
 #if defined( Uses_TEvent ) && !defined( __TEvent )
 #define __TEvent
 
@@ -203,12 +202,18 @@ struct KeyDownEvent
     char text[4];
     uchar textLength;
 
-    inline TStringView getText() const;
+    TStringView getText() const;
+    operator TKey() const;
 };
 
 inline TStringView KeyDownEvent::getText() const
 {
     return TStringView(text, textLength);
+}
+
+inline KeyDownEvent::operator TKey() const
+{
+    return TKey(keyCode, controlKeyState);
 }
 
 struct MessageEvent

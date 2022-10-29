@@ -183,7 +183,7 @@ void TStatusLine::handleEvent( TEvent& event )
                 {
                 for( TStatusItem *T = items; T != 0; T = T->next )
                     {
-                    if( event.keyDown.keyCode == T->keyCode &&
+                    if( TKey(event.keyDown) == T->keyCode &&
                         commandEnabled(T->command) )
                         {
                         event.what = evCommand;

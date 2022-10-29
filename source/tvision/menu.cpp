@@ -23,7 +23,7 @@
 #include <string.h>
 #endif  // __STRING_H
 
-TSubMenu::TSubMenu( TStringView nm, ushort key, ushort helpCtx ) noexcept :
+TSubMenu::TSubMenu( TStringView nm, TKey key, ushort helpCtx ) noexcept :
     TMenuItem( nm, key, new TMenu, helpCtx )
 {
 }

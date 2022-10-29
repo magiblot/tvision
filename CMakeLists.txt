@@ -14,6 +14,7 @@
 #   (CMake 3.16 or newer), at the cost of possibly increasing its size.
 # * TV_BUILD_AVSCOLOR (default OFF) to build an AviSynth plugin for testing the
 #   terminal color quantization (Unix only).
+# * TV_BUILD_TESTS (default OFF) to build and run tests.
 
 cmake_minimum_required (VERSION 3.5)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
@@ -157,6 +158,8 @@ if (MAY_USE_STATIC_RTL)
     tv_message_mp(STATUS "Link w/static RTL: ${TV_USE_STATIC_RTL}")
 endif()
 
+option(TV_BUILD_TESTS "Build and run tests" OFF)
+
 # Library
 
 add_subdirectory(source)
@@ -164,3 +167,7 @@ add_subdirectory(source)
 # Examples
 
 add_subdirectory(examples)
+
+# Test
+
+add_subdirectory(test)

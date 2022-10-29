@@ -40,7 +40,7 @@
 
 TMenuItem::TMenuItem(   TStringView aName,
                         ushort aCommand,
-                        ushort aKeyCode,
+                        TKey aKey,
                         ushort aHelpCtx,
                         TStringView p,
                         TMenuItem *aNext
@@ -49,7 +49,7 @@ TMenuItem::TMenuItem(   TStringView aName,
     name = newStr( aName );
     command = aCommand;
     disabled = Boolean(!TView::commandEnabled(command));
-    keyCode = aKeyCode;
+    keyCode = aKey;
     helpCtx = aHelpCtx;
     if( p.empty() )
         param = 0;
@@ -59,7 +59,7 @@ TMenuItem::TMenuItem(   TStringView aName,
 }
 
 TMenuItem::TMenuItem( TStringView aName,
-                      ushort aKeyCode,
+                      TKey aKey,
                       TMenu *aSubMenu,
                       ushort aHelpCtx,
                       TMenuItem *aNext
@@ -68,7 +68,7 @@ TMenuItem::TMenuItem( TStringView aName,
     name = newStr( aName );
     command = 0;
     disabled = Boolean(!TView::commandEnabled(command));
-    keyCode = aKeyCode;
+    keyCode = aKey;
     helpCtx = aHelpCtx;
     subMenu = aSubMenu;
     next = aNext;
@@ -314,7 +314,7 @@ ushort TMenuView::execute()
                         p = target->findItem(ch);
                         if( p == 0 )
                             {
-                            p = topMenu()->hotKey(e.keyDown.keyCode);
+                            p = topMenu()->hotKey(e.keyDown);
                             if( p != 0 && commandEnabled(p->command) )
                                 {
                                 result = p->command;
@@ -505,7 +505,7 @@ void TMenuView::handleEvent( TEvent& event )
                     do_a_select(event);
                 else
                     {
-                    TMenuItem *p = hotKey(event.keyDown.keyCode);
+                    TMenuItem *p = hotKey(event.keyDown);
                     if( p != 0 && commandEnabled(p->command))
                         {
                         event.what = evCommand;
@@ -531,7 +531,7 @@ void TMenuView::handleEvent( TEvent& event )
 }
 
 
-TMenuItem *TMenuView::findHotKey( TMenuItem *p, ushort keyCode )
+TMenuItem *TMenuView::findHotKey( TMenuItem *p, TKey key )
 {
 
     while( p != 0 )
@@ -541,12 +541,12 @@ TMenuItem *TMenuView::findHotKey( TMenuItem *p, ushort keyCode )
             if( p->command == 0 )
                 {
                 TMenuItem *T;
-                if( (T = findHotKey( p->subMenu->items, keyCode )) != 0 )
+                if( (T = findHotKey( p->subMenu->items, key )) != 0 )
                     return T;
                 }
             else if( !p->disabled &&
                      p->keyCode != kbNoKey &&
-                     p->keyCode == keyCode
+                     p->keyCode == key
                    )
                 return p;
             }
@@ -555,9 +555,9 @@ TMenuItem *TMenuView::findHotKey( TMenuItem *p, ushort keyCode )
     return 0;
 }
 
-TMenuItem *TMenuView::hotKey( ushort keyCode )
+TMenuItem *TMenuView::hotKey( TKey key )
 {
-    return findHotKey( menu->items, keyCode );
+    return findHotKey( menu->items, key );
 }
 
 TMenuView *TMenuView::newSubView( const TRect& bounds,

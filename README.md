@@ -395,6 +395,17 @@ The following are new features not available in Borland's release of Turbo Visio
     void printMouseWheelState(ostream &, ushort wheelState);
     void printMouseEventFlags(ostream &, ushort eventFlags);
     ```
+* New class `TKey` which can be used to define new key combinations (e.g. `Shift+Alt+Up`) by specifying a key code and a mask of key modifiers:
+    ```c++
+    auto kbShiftAltUp = TKey(kbUp, kbShift | kbAltShift);
+    assert(kbCtrlA == TKey('A', kbCtrlShift));
+    assert(TKey(kbCtrlTab, kbShift) == TKey(kbTab, kbShift | kbCtrlShift));
+    // Create menu hotkeys.
+    new TMenuItem("~R~estart", cmRestart, TKey(kbDel, kbCtrlShift | kbAltShift), hcNoContext, "Ctrl-Alt-Del")
+    // Examine KeyDown events:
+    if (event.keyDown == TKey(kbEnter, kbShift))
+        doStuff();
+    ```
 
 ## Screenshots
 
