@@ -84,6 +84,13 @@ Boolean isWild( const char *f ) noexcept;
 size_t strnzcpy( char *dest, TStringView src, size_t n ) noexcept;
 size_t strnzcat( char *dest, TStringView src, size_t n ) noexcept;
 
+void printKeyCode(ostream _FAR &, ushort keyCode);
+void printControlKeyState(ostream _FAR &, ushort controlKeyState);
+void printEventCode(ostream _FAR &, ushort eventCode);
+void printMouseButtonState(ostream _FAR &, ushort buttonState);
+void printMouseWheelState(ostream _FAR &, ushort wheelState);
+void printMouseEventFlags(ostream _FAR &, ushort eventFlags);
+
 #if !defined( __BORLANDC__ ) && !defined( _WIN32 )
 
 int stricmp( const char *s1, const char *s2 ) noexcept;

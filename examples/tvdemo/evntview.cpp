@@ -9,6 +9,7 @@ __link(RWindow)
 
 #include <iostream.h>
 #include <iomanip.h>
+#include <strstrea.h>
 
 #include "tvcmds.h"
 #include "evntview.h"
@@ -120,149 +121,16 @@ void TEventViewer::handleEvent(TEvent &ev)
         clearEvent(ev);
 }
 
-struct flagName
+static void printConstants(ostream &out, ushort value, void (_FAR &doPrint)(ostream _FAR &, ushort))
 {
-    ushort flag;
-    const char* name;
-};
-
-#define FN(x) { x, #x }
-#define FNEND { 0, 0 }
-
-static const flagName eventCodes [] = {
-    FN(evMouseDown),
-    FN(evMouseUp),
-    FN(evMouseMove),
-    FN(evMouseAuto),
-    FN(evMouseWheel),
-    FN(evKeyDown),
-    FN(evCommand),
-    FN(evBroadcast),
-    FNEND
-};
-
-static const flagName controlKeyFlags[] = {
-    FN(kbShift),
-    FN(kbCtrlShift),
-    FN(kbAltShift),
-    FN(kbScrollState),
-    FN(kbNumState),
-    FN(kbCapsState),
-    FN(kbInsState),
-    FNEND
-};
-
-static const flagName mouseEvFlags[] = {
-    FN(meMouseMoved),
-    FN(meDoubleClick),
-    FN(meTripleClick),
-    FNEND
-};
-
-static const flagName buttonFlags[] = {
-    FN(mbLeftButton),
-    FN(mbRightButton),
-    FN(mbMiddleButton),
-    FNEND
-};
-
-static const flagName wheelFlags[] = {
-    FN(mwUp),
-    FN(mwDown),
-    FN(mwLeft),
-    FN(mwRight),
-    FNEND
-};
-
-static const flagName keyCodeFlags[] = {
-    FN(kbCtrlA),    FN(kbCtrlB),    FN(kbCtrlC),
-    FN(kbCtrlD),    FN(kbCtrlE),    FN(kbCtrlF),
-    FN(kbCtrlG),    FN(kbCtrlH),    FN(kbCtrlI),
-    FN(kbCtrlJ),    FN(kbCtrlK),    FN(kbCtrlL),
-    FN(kbCtrlM),    FN(kbCtrlN),    FN(kbCtrlO),
-    FN(kbCtrlP),    FN(kbCtrlQ),    FN(kbCtrlR),
-    FN(kbCtrlS),    FN(kbCtrlT),    FN(kbCtrlU),
-    FN(kbCtrlV),    FN(kbCtrlW),    FN(kbCtrlX),
-    FN(kbCtrlY),    FN(kbCtrlZ),
-    FN(kbEsc),      FN(kbAltSpace), FN(kbCtrlIns),
-    FN(kbShiftIns), FN(kbCtrlDel),  FN(kbShiftDel),
-    FN(kbBack),     FN(kbCtrlBack), FN(kbShiftTab),
-    FN(kbTab),      FN(kbAltQ),     FN(kbAltW),
-    FN(kbAltE),     FN(kbAltR),     FN(kbAltT),
-    FN(kbAltY),     FN(kbAltU),     FN(kbAltI),
-    FN(kbAltO),     FN(kbAltP),     FN(kbCtrlEnter),
-    FN(kbEnter),    FN(kbAltA),     FN(kbAltS),
-    FN(kbAltD),     FN(kbAltF),     FN(kbAltG),
-    FN(kbAltH),     FN(kbAltJ),     FN(kbAltK),
-    FN(kbAltL),     FN(kbAltZ),     FN(kbAltX),
-    FN(kbAltC),     FN(kbAltV),     FN(kbAltB),
-    FN(kbAltN),     FN(kbAltM),     FN(kbF1),
-    FN(kbF2),       FN(kbF3),       FN(kbF4),
-    FN(kbF5),       FN(kbF6),       FN(kbF7),
-    FN(kbF8),       FN(kbF9),       FN(kbF10),
-    FN(kbHome),     FN(kbUp),       FN(kbPgUp),
-    FN(kbGrayMinus),FN(kbLeft),     FN(kbRight),
-    FN(kbGrayPlus), FN(kbEnd),      FN(kbDown),
-    FN(kbPgDn),     FN(kbIns),      FN(kbDel),
-    FN(kbShiftF1),  FN(kbShiftF2),  FN(kbShiftF3),
-    FN(kbShiftF4),  FN(kbShiftF5),  FN(kbShiftF6),
-    FN(kbShiftF7),  FN(kbShiftF8),  FN(kbShiftF9),
-    FN(kbShiftF10), FN(kbCtrlF1),   FN(kbCtrlF2),
-    FN(kbCtrlF3),   FN(kbCtrlF4),   FN(kbCtrlF5),
-    FN(kbCtrlF6),   FN(kbCtrlF7),   FN(kbCtrlF8),
-    FN(kbCtrlF9),   FN(kbCtrlF10),  FN(kbAltF1),
-    FN(kbAltF2),    FN(kbAltF3),    FN(kbAltF4),
-    FN(kbAltF5),    FN(kbAltF6),    FN(kbAltF7),
-    FN(kbAltF8),    FN(kbAltF9),    FN(kbAltF10),
-    FN(kbCtrlPrtSc),FN(kbCtrlLeft), FN(kbCtrlRight),
-    FN(kbCtrlEnd),  FN(kbCtrlPgDn), FN(kbCtrlHome),
-    FN(kbAlt1),     FN(kbAlt2),     FN(kbAlt3),
-    FN(kbAlt4),     FN(kbAlt5),     FN(kbAlt6),
-    FN(kbAlt7),     FN(kbAlt8),     FN(kbAlt9),
-    FN(kbAlt0),     FN(kbAltMinus), FN(kbAltEqual),
-    FN(kbCtrlPgUp), FN(kbAltBack),  FN(kbNoKey),
-    FN(kbCtrlUp),   FN(kbCtrlDown), FN(kbAltIns),
-    FN(kbAltDel),   FN(kbAltHome),  FN(kbAltEnd),
-    FN(kbAltUp),    FN(kbAltDown),  FN(kbAltLeft),
-    FN(kbAltRight), FN(kbAltPgUp),  FN(kbAltPgDn),
-    FN(kbCtrlTab),  FN(kbAltTab),
-#if defined( __FLAT__ )
-    FN(kbF11),      FN(kbF12),      FN(kbShiftF11),
-    FN(kbShiftF12), FN(kbCtrlF11),  FN(kbCtrlF12),
-    FN(kbAltF11),   FN(kbAltF12),
-#endif
-    FNEND
-};
-
-static void decomposeFlag(ostream &out, ushort mask, const flagName *flags, Boolean overlap = True)
-{
-    Boolean first = True;
-    ushort found = 0;
-    out << hex << setfill('0') << "0x" << setw(4) << mask;
-    for (; flags && flags->name; ++flags)
-    {
-        if (overlap ? (mask & flags->flag) : (mask == flags->flag))
-        {
-            if (first)
-            {
-                first = False;
-                out << " (";
-            }
-            else
-                out << " | ";
-            out << flags->name;
-            if (overlap)
-                found |= mask & flags->flag;
-            else
-                break;
-        }
-    }
-    if (!first)
-    {
-        if (overlap && (found != mask))
-            out << " | 0x" << setw(4) << (mask & ~found);
-        out << ")";
-    }
+    out << hex << setfill('0')
+        << "0x" << setw(4) << value;
+    char buf[256];
+    ostrstream os(buf, sizeof(buf));
+    doPrint(os, value);
+    os << ends;
+    if (buf[0] != '0')
+        out << " (" << buf << ")";
     out << dec;
 }
 
@@ -270,10 +138,8 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
 {
     out << "TEvent {\n"
         << "  .what = ";
-    if (ev.what == evNothing)
-        out << "evNothing,\n";
-    else
-        decomposeFlag(out, ev.what, eventCodes), out << ",\n";
+        printConstants(out, ev.what, printEventCode);
+        out << ",\n";
     if (ev.what & evMouse)
     {
         out << "  .mouse = MouseEventType {\n"
@@ -282,16 +148,16 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
             << "      .y = " << ev.mouse.where.y << "\n"
             << "    },\n"
             << "    .eventFlags = ";
-        decomposeFlag(out, ev.mouse.eventFlags, mouseEvFlags);
+        printConstants(out, ev.mouse.eventFlags, printMouseEventFlags);
         out << ",\n"
             << "    .controlKeyState = ";
-        decomposeFlag(out, ev.mouse.controlKeyState, controlKeyFlags);
+        printConstants(out, ev.mouse.controlKeyState, printControlKeyState);
         out << ",\n"
             << "    .buttons = ";
-        decomposeFlag(out, ev.mouse.buttons, buttonFlags);
+        printConstants(out, ev.mouse.buttons, printMouseButtonState);
         out << ",\n"
             << "    .wheel = ";
-        decomposeFlag(out, ev.mouse.wheel, wheelFlags);
+        printConstants(out, ev.mouse.wheel, printMouseWheelState);
         out << "\n"
             << "  }\n";
     }
@@ -300,7 +166,7 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
         char charCode = ev.keyDown.charScan.charCode;
         out << "  .keyDown = KeyDownEvent {\n"
             << "    .keyCode = ";
-        decomposeFlag(out, ev.keyDown.keyCode, keyCodeFlags, False);
+        printConstants(out, ev.keyDown.keyCode, printKeyCode);
         out << ",\n"
             << "    .charScan = CharScanType {\n"
             << "      .charCode = " << (int) (uchar) charCode;
@@ -310,7 +176,7 @@ void TEventViewer::printEvent(ostream &out, const TEvent &ev)
             << "      .scanCode = " << (int) (uchar) ev.keyDown.charScan.scanCode << "\n"
             << "    },\n"
             << "    .controlKeyState = ";
-        decomposeFlag(out, ev.keyDown.controlKeyState, controlKeyFlags);
+        printConstants(out, ev.keyDown.controlKeyState, printControlKeyState);
         out << ",\n"
             << hex
             << "    .text = {";

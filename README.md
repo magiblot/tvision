@@ -386,6 +386,15 @@ The following are new features not available in Borland's release of Turbo Visio
     * `ilMaxGraphemes`: the text can contain up to `limit` non-combining characters.
     
     In any case, the text in a `TInputLine` can never be more than 256 bytes long, including the null terminator.
+* New functions which allow getting the names of Turbo Vision's constants at runtime (e.g. `evCommand`, `kbShiftIns`, etc.):
+    ```c++
+    void printKeyCode(ostream &, ushort keyCode);
+    void printControlKeyState(ostream &, ushort controlKeyState);
+    void printEventCode(ostream &, ushort eventCode);
+    void printMouseButtonState(ostream &, ushort buttonState);
+    void printMouseWheelState(ostream &, ushort wheelState);
+    void printMouseEventFlags(ostream &, ushort eventFlags);
+    ```
 
 ## Screenshots
 
