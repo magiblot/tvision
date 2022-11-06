@@ -23,7 +23,7 @@ static std::ostream &operator<<(std::ostream &os, KeyCodeAndMods key)
     return os;
 }
 
-const ushort kb0 = 0x0b30, kbA = 0x1e61;
+const ushort kb0 = 0x0b30, kbA = 0x1e61, kbCtrlKpDiv = 0x3500;
 
 TEST(TKey, ShouldConstructProperly)
 {
@@ -118,6 +118,7 @@ TEST(TKey, ShouldConstructProperly)
         {{kbCtrlTab, kbLeftCtrl}, {kbTab, kbCtrlShift}},
         {{kbA, kbLeftCtrl}, {'A', kbCtrlShift}},
         {{kbA, kbRightCtrl}, {'A', kbCtrlShift}},
+        {{kbCtrlKpDiv}, {'/', kbCtrlShift}},
     };
 
     for (auto &testCase : testCases)
