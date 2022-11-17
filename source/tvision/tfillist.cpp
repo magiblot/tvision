@@ -294,17 +294,17 @@ void squeeze( char *path ) noexcept
     *dest = EOS;                // zero terminator
 }
 
-static inline Boolean isSep( char c )
+static inline int isSep( char c )
 {
     return c == '\\' || c == '/';
 }
 
-static inline Boolean isHomeExpand( const char *path )
+static inline int isHomeExpand( const char *path )
 {
     return path[0] == '~' && isSep( path[1] );
 }
 
-static inline Boolean isAbsolute( const char *path )
+static inline int isAbsolute( const char *path )
 {
     return isSep( path[0] ) || (path[0] && path[1] == ':' && isSep( path[2] ) );
 }

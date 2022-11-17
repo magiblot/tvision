@@ -350,7 +350,7 @@ Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
             }
         } while( readTextEvent( event, dest, length, True ) );
 
-    return length != 0;
+    return Boolean( length != 0 );
 }
 
 Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length, Boolean keep)

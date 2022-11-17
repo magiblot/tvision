@@ -72,7 +72,7 @@ public:
 
     constexpr Boolean empty() const
     {
-        return size() == 0;
+        return Boolean( size() == 0 );
     }
 
     constexpr T _FAR & operator[](size_t pos) const

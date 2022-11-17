@@ -30,7 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 
-static inline Boolean uppercase(char c)
+static inline char uppercase(char c)
 {
     return (('a' <= c) && (c <= 'z')) ? c + 'A'-'a' : c;
 }

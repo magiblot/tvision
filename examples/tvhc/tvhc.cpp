@@ -232,7 +232,7 @@ Boolean fExists(const char *fileName)
 //  Checks if line contains a comment.                                   //
 //-----------------------------------------------------------------------//
 
-Boolean isComment(const char *line)
+int isComment(const char *line)
 {
     return line[0] == ';';
 }

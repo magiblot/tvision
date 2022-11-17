@@ -53,7 +53,7 @@ static int getCharType( char ch )
     return 3;
 }
 
-static inline Boolean isWordBoundary( char a, char b )
+static inline int isWordBoundary( char a, char b )
 {
     return getCharType(a) != getCharType(b);
 }
@@ -556,9 +556,9 @@ void TEditor::startSelect()
 
 void TEditor::toggleEncoding()
 {
-    encSingleByte = !encSingleByte;
+    encSingleByte = Boolean( !encSingleByte );
     updateFlags |= ufView;
-    setSelect(selStart, selEnd, curPtr < selEnd);
+    setSelect(selStart, selEnd, Boolean( curPtr < selEnd ));
 }
 
 void TEditor::toggleInsMode()

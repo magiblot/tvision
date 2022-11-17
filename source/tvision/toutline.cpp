@@ -473,7 +473,7 @@ void TOutlineViewer::handleEvent(TEvent& event)
             graph = getGraph(focLevel,focLines,focFlags);
             if (mouse.x < strwidth(graph) )
             {
-              adjust(cur, !isExpanded(cur));
+              adjust(cur, Boolean( !isExpanded(cur) ));
               update();
               drawView();
             }

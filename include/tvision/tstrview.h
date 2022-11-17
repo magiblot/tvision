@@ -153,7 +153,7 @@ inline constexpr size_t TStringView::size() const
 
 inline constexpr Boolean TStringView::empty() const
 {
-    return size() == 0;
+    return Boolean( size() == 0 );
 }
 
 inline constexpr const char _FAR & TStringView::operator[](size_t pos) const
@@ -212,7 +212,7 @@ inline constexpr Boolean operator==(TStringView a, TStringView b)
 inline Boolean operator==(TStringView a, TStringView b)
 {
     if (a.size() == b.size())
-        return memcmp(a.data(), b.data(), b.size()) == 0;
+        return Boolean( memcmp(a.data(), b.data(), b.size()) == 0 );
     return False;
 }
 #endif
@@ -222,7 +222,7 @@ constexpr
 #endif
 inline Boolean operator!=(TStringView a, TStringView b)
 {
-    return !(a == b);
+    return Boolean( !(a == b) );
 }
 
 #if defined(TVISION_STL) && __cplusplus >= 201103L

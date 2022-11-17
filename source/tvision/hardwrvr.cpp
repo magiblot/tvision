@@ -283,7 +283,7 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
         event.controlKeyState = irBuffer.Event.MouseEvent.dwControlKeyState;
 
         // Rotation sense is represented by the sign of dwButtonState's high word
-        Boolean positive = !(irBuffer.Event.MouseEvent.dwButtonState & 0x80000000);
+        int positive = !(irBuffer.Event.MouseEvent.dwButtonState & 0x80000000);
         if( irBuffer.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED )
             event.wheel = positive ? mwUp : mwDown;
         else if( irBuffer.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED )

@@ -224,12 +224,12 @@ static const TKeyCodeLookupEntry
     kbCtrlBackEntry =   { kbBack,   kbCtrlShift },
     kbCtrlEnterEntry =  { kbEnter,  kbCtrlShift };
 
-static Boolean isPrintableCharacter(uchar charCode) noexcept
+static int isPrintableCharacter(uchar charCode) noexcept
 {
     return ' ' <= charCode && charCode != 0x7F && charCode != 0xFF;
 };
 
-static Boolean isKeypadCharacter(uchar scanCode) noexcept
+static int isKeypadCharacter(uchar scanCode) noexcept
 {
     return scanCode == 0x35 || scanCode == 0x37
         || scanCode == 0x4A || scanCode == 0x4E;

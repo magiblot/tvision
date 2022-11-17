@@ -195,12 +195,12 @@ inline constexpr TKey::TKey() noexcept :
 
 inline constexpr Boolean operator==(TKey a, TKey b) noexcept
 {
-    return (a.code | (a.mods << 16)) == (b.code | (b.mods << 16));
+    return Boolean( (a.code | (a.mods << 16)) == (b.code | (b.mods << 16)) );
 }
 
 inline constexpr Boolean operator!=(TKey a, TKey b) noexcept
 {
-    return !(a == b);
+    return Boolean( !(a == b) );
 }
 
 inline ipstream& operator >> ( ipstream& is, TKey& p )

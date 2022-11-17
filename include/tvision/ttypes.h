@@ -26,12 +26,12 @@
 #define I   asm
 #endif
 
-enum { False, True };
 
 #ifdef __BORLANDC__
-typedef int Boolean;
+enum Boolean { False, True };
 #else
 typedef bool Boolean;
+enum { False, True };
 #endif
 
 typedef unsigned short ushort;
