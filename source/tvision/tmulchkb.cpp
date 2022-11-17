@@ -69,19 +69,19 @@ void TMultiCheckBoxes::draw()
 
 ushort TMultiCheckBoxes::dataSize()
 {
-    return  sizeof(long);
+    return  sizeof(int32_t);
 }
 
 uchar TMultiCheckBoxes::multiMark(int item)
 {
     int flo = flags & 0xff;
     int fhi = (flags >> 8) * item;
-    return (long)((value & ((long)flo << fhi)) >> fhi);
+    return (int32_t)((value & ((int32_t)flo << fhi)) >> fhi);
 }
 
 void TMultiCheckBoxes::getData(void* p)
 {
-    *(unsigned long*)p = value;
+    *(uint32_t*)p = value;
     drawView();
 }
 
@@ -92,19 +92,19 @@ void TMultiCheckBoxes::press(int item)
     int flo = flags & 0xff;
     int fhi = (flags >> 8) * item;
 
-    curState = (short)((value & ((long)flo << fhi)) >> fhi);
+    curState = (short)((value & ((int32_t)flo << fhi)) >> fhi);
 
     curState++;
 
     if (curState >= selRange)
         curState = 0;
 
-    value = (long)((value & ~((long)flo << fhi)) | (curState << fhi));
+    value = (int32_t)((value & ~((int32_t)flo << fhi)) | (curState << fhi));
 }
 
 void TMultiCheckBoxes::setData(void* p)
 {
-    value = *(unsigned long*)p;
+    value = *(uint32_t*)p;
     drawView();
 }
 
