@@ -35,9 +35,13 @@ StdioCtl::StdioCtl() noexcept
     {
         for (auto &fd : fds)
             fd = ttyfd;
+        int ttyfd2 = dup(ttyfd);
+        if (ttyfd2 == -1)
+            ttyfd2 = ttyfd; // This is wrong, but aborting is worse.
         infile = ::fdopen(ttyfd, "r");
-        outfile = ::fdopen(ttyfd, "w");
+        outfile = ::fdopen(ttyfd2, "w");
         fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
+        fcntl(ttyfd2, F_SETFD, FD_CLOEXEC);
     }
     else
     {
@@ -52,9 +56,6 @@ StdioCtl::~StdioCtl()
 {
     if (ttyfd != -1)
     {
-        ::fflush(infile);
-        ::fflush(outfile);
-        ::close(ttyfd);
         ::fclose(infile);
         ::fclose(outfile);
     }
