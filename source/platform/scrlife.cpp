@@ -42,7 +42,8 @@ StderrRedirector::StderrRedirector() noexcept
         }
         else
             for (int fd : {fileFd, ttyFd})
-                close(fd);
+                if (fd != -1)
+                    close(fd);
     }
 }
 
@@ -94,7 +95,8 @@ StderrRedirector::~StderrRedirector()
     }
 
     for (int fd : {fileFd, ttyFd})
-        close(fd);
+        if (fd != -1)
+            close(fd);
 }
 
 } // namespace tvision
