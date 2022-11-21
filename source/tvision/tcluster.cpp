@@ -103,12 +103,12 @@ void TCluster::drawMultiBox( const char *icon, const char* marker)
             {
                 int col = column( cur );
 
-                if ( ((col+strlen((const char*)strings->at(cur))+5)
-                    < b.length()) &&  (col < size.x))
+                if ( ((col+cstrlen((const char*)strings->at(cur))+5)
+                    < (int) b.length()) &&  (col < size.x))
                 {
                     if(!buttonState( cur ))
                         color = cDis;
-                    else if( (cur == sel) && (state & sfSelected) != 0 )
+                    else if( (cur == sel) && (~state & (sfSelected | sfActive)) == 0 )
                         color = cSel;
                     else
                         color = cNorm;
@@ -327,7 +327,7 @@ void TCluster::setData(void * rec)
 void TCluster::setState( ushort aState, Boolean enable )
 {
     TView::setState( aState, enable );
-    if( aState == sfSelected )
+    if( aState & (sfSelected | sfActive) )
         drawView();
 }
 
