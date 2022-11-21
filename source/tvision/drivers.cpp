@@ -189,8 +189,7 @@ __4:
 /*      indent  - character position within the buffer where the data     */
 /*                is to go                                                */
 /*                                                                        */
-/*      str     - pointer to a 0-terminated string of characters to       */
-/*                be moved into the buffer                                */
+/*      str     - string of characters to be moved into the buffer        */
 /*                                                                        */
 /*      attrs   - pair of text attributes to be put into the buffer       */
 /*                with each character in the string.  Initially the       */
@@ -249,6 +248,64 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 
 /*------------------------------------------------------------------------*/
 /*                                                                        */
+/*  TDrawBuffer::moveCStr (2)                                             */
+/*                                                                        */
+/*  arguments:                                                            */
+/*                                                                        */
+/*      indent  - character position within the buffer where the data     */
+/*                is to go                                                */
+/*                                                                        */
+/*      str     - string of characters to be moved into the buffer        */
+/*                                                                        */
+/*      attrs   - pair of text attributes to be put into the buffer       */
+/*                with each character in the string.  Initially the       */
+/*                low byte is used, and a '~' in the string toggles       */
+/*                between the low byte and the high byte.                 */
+/*                                                                        */
+/*      width   - number of display columns to be copied from str.        */
+/*                                                                        */
+/*      begin   - initial display column in str where to start counting.  */
+/*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      actual number of display columns that were filled with text.      */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, ushort width, ushort begin ) noexcept
+{
+    size_t i = indent, j = 0, w = 0;
+    int toggle = 1;
+    TColorAttr curAttr = ((TColorAttr *) &attrs)[0];
+    TSpan<TScreenCell> span(&data[0], min(indent + width, length()));
+    while (j < str.size())
+        if (str[j] == '~')
+            {
+            curAttr = ((TColorAttr *) &attrs)[toggle];
+            toggle = 1 - toggle;
+            ++j;
+            }
+        else
+            {
+            if (begin <= w)
+                {
+                if (!TText::drawOne(span, i, str, j, curAttr))
+                    break;
+                }
+            else
+                {
+                if (!TText::next(str, j, w))
+                    break;
+                if (begin < w && i < span.size())
+                    // 'begin' is in the middle of a double-width character.
+                    ::setCell(span[i++], ' ', curAttr);
+                }
+            }
+    return i - indent;
+}
+
+/*------------------------------------------------------------------------*/
+/*                                                                        */
 /*  TDrawBuffer::moveStr                                                  */
 /*                                                                        */
 /*  arguments:                                                            */
@@ -256,8 +313,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*      indent  - character position within the buffer where the data     */
 /*                is to go                                                */
 /*                                                                        */
-/*      str     - pointer to a 0-terminated string of characters to       */
-/*                be moved into the buffer                                */
+/*      str     - string of characters to be moved into the buffer        */
 /*                                                                        */
 /*      attr    - text attribute to be put into the buffer with each      */
 /*                character in the string.                                */
@@ -307,8 +363,7 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
 /*      indent  - character position within the buffer where the data     */
 /*                is to go                                                */
 /*                                                                        */
-/*      str     - pointer to a 0-terminated string of characters to       */
-/*                be moved into the buffer                                */
+/*      str     - string of characters to be moved into the buffer        */
 /*                                                                        */
 /*      attr    - text attribute to be put into the buffer with each      */
 /*                character in the string.                                */

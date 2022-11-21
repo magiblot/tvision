@@ -50,9 +50,9 @@ Turbo Vision does not excel at any of those, but it certainly overcomes many of 
 2. Reuse what has already been done. Turbo Vision provides many widget classes (also known as *views*), including resizable, overlapping windows, pull-down menus, dialog boxes, buttons, scroll bars, input boxes, check boxes and radio buttons. You may use and extend these; but even if you prefer creating your own, Turbo Vision already handles event dispatching, display of fullwidth Unicode characters, etc.: you do not need to waste time rewriting any of that.
 
 3. Can you imagine writing a text-based interface that works both on Linux and Windows (and thus is cross-platform) out-of-the-box, with no `#ifdef`s? Turbo Vision makes this possible. First: Turbo Vision keeps on using `char` arrays instead of relying on the implementation-defined and platform-dependent `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as intended:
-```c++
+    ```c++
     std::ifstream f("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
-```
+    ```
 
 <div id="how-to"></div>
 
@@ -570,9 +570,10 @@ ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
 `str` is interpreted according to the rules exposed previously.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin=0); // New
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin = 0); // New
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin = 0); // New
 ```
-`str` is interpreted according to the rules exposed previously. However:
+`str` is interpreted according to the rules exposed previously, but:
 * `width` specifies the maximum number of display columns that should be read from `str`.
 * `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a multi-width character, the remaining positions in that character are filled with spaces.
 

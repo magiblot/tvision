@@ -271,9 +271,12 @@ inline Boolean TText::drawOne( TSpan<TScreenCell> cells, size_t &i,
                                TStringView text, size_t &j,
                                TColorAttr attr )
 {
-    if (i < cells.size())
-        ::setAttr(cells[i], attr);
-    return drawOne(cells, i, text, j);
+    if (i < cells.size() && j < text.size())
+    {
+        ::setCell(cells[i++], text[j++], attr);
+        return True;
+    }
+    return False;
 }
 
 #else
