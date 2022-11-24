@@ -18,27 +18,26 @@
 
 #include <stdint.h>
 
+extern "C"
+{
+
 // winnt.h
-extern "C" {
 
-    typedef void *PVOID;
-    typedef PVOID HANDLE;
-    typedef char CHAR;
-    typedef short SHORT;
-    typedef int32_t LONG;
-    typedef wchar_t WCHAR;
-
-}
+typedef void *PVOID;
+typedef PVOID HANDLE;
+typedef char CHAR;
+typedef short SHORT;
+typedef int32_t LONG;
+typedef wchar_t WCHAR;
 
 // windef.h
-extern "C" {
 
-    typedef uint32_t            DWORD;
-    typedef int                 BOOL;
-    typedef unsigned char       BYTE;
-    typedef unsigned short      WORD;
-    typedef int                 INT;
-    typedef unsigned int        UINT;
+typedef uint32_t            DWORD;
+typedef int                 BOOL;
+typedef unsigned char       BYTE;
+typedef unsigned short      WORD;
+typedef int                 INT;
+typedef unsigned int        UINT;
 
 #define MAX_PATH 260
 
@@ -54,34 +53,32 @@ extern "C" {
 #define TRUE 1
 #endif
 
-}
 
 // wincon.h
-extern "C" {
 
-    typedef struct _COORD {
-        SHORT X;
-        SHORT Y;
-    } COORD;
+typedef struct _COORD {
+    SHORT X;
+    SHORT Y;
+} COORD;
 
-    typedef struct _SMALL_RECT {
-        SHORT Left;
-        SHORT Top;
-        SHORT Right;
-        SHORT Bottom;
-    } SMALL_RECT;
+typedef struct _SMALL_RECT {
+    SHORT Left;
+    SHORT Top;
+    SHORT Right;
+    SHORT Bottom;
+} SMALL_RECT;
 
-    typedef struct _KEY_EVENT_RECORD {
-        BOOL bKeyDown;
-        WORD wRepeatCount;
-        WORD wVirtualKeyCode;
-        WORD wVirtualScanCode;
-        union {
-            WCHAR UnicodeChar;
-            CHAR   AsciiChar;
-        } uChar;
-        DWORD dwControlKeyState;
-    } KEY_EVENT_RECORD;
+typedef struct _KEY_EVENT_RECORD {
+    BOOL bKeyDown;
+    WORD wRepeatCount;
+    WORD wVirtualKeyCode;
+    WORD wVirtualScanCode;
+    union {
+        WCHAR UnicodeChar;
+        CHAR   AsciiChar;
+    } uChar;
+    DWORD dwControlKeyState;
+} KEY_EVENT_RECORD;
 
 //
 // ControlKeyState flags
@@ -97,38 +94,38 @@ extern "C" {
 #define CAPSLOCK_ON           0x0080 // the capslock light is on.
 #define ENHANCED_KEY          0x0100 // the key is enhanced.
 
-    typedef struct _MOUSE_EVENT_RECORD {
-        COORD dwMousePosition;
-        DWORD dwButtonState;
-        DWORD dwControlKeyState;
-        DWORD dwEventFlags;
-    } MOUSE_EVENT_RECORD;
+typedef struct _MOUSE_EVENT_RECORD {
+    COORD dwMousePosition;
+    DWORD dwButtonState;
+    DWORD dwControlKeyState;
+    DWORD dwEventFlags;
+} MOUSE_EVENT_RECORD;
 
 #define MOUSE_MOVED   0x0001
 #define DOUBLE_CLICK  0x0002
 
-    typedef struct _WINDOW_BUFFER_SIZE_RECORD {
-        COORD dwSize;
-    } WINDOW_BUFFER_SIZE_RECORD;
+typedef struct _WINDOW_BUFFER_SIZE_RECORD {
+    COORD dwSize;
+} WINDOW_BUFFER_SIZE_RECORD;
 
-    typedef struct _MENU_EVENT_RECORD {
-        UINT dwCommandId;
-    } MENU_EVENT_RECORD;
+typedef struct _MENU_EVENT_RECORD {
+    UINT dwCommandId;
+} MENU_EVENT_RECORD;
 
-    typedef struct _FOCUS_EVENT_RECORD {
-        BOOL bSetFocus;
-    } FOCUS_EVENT_RECORD;
+typedef struct _FOCUS_EVENT_RECORD {
+    BOOL bSetFocus;
+} FOCUS_EVENT_RECORD;
 
-    typedef struct _INPUT_RECORD {
-        WORD EventType;
-        union {
-            KEY_EVENT_RECORD KeyEvent;
-            MOUSE_EVENT_RECORD MouseEvent;
-            WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
-            MENU_EVENT_RECORD MenuEvent;
-            FOCUS_EVENT_RECORD FocusEvent;
-        } Event;
-    } INPUT_RECORD;
+typedef struct _INPUT_RECORD {
+    WORD EventType;
+    union {
+        KEY_EVENT_RECORD KeyEvent;
+        MOUSE_EVENT_RECORD MouseEvent;
+        WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
+        MENU_EVENT_RECORD MenuEvent;
+        FOCUS_EVENT_RECORD FocusEvent;
+    } Event;
+} INPUT_RECORD;
 
 //
 //  EventType flags:
@@ -136,13 +133,13 @@ extern "C" {
 
 #define MOUSE_EVENT       0x0002 // Event contains mouse event record
 
-    typedef struct _CHAR_INFO {
-        union {
-            WCHAR UnicodeChar;
-            CHAR   AsciiChar;
-        } Char;
-        WORD Attributes;
-    } CHAR_INFO;
+typedef struct _CHAR_INFO {
+    union {
+        WCHAR UnicodeChar;
+        CHAR   AsciiChar;
+    } Char;
+    WORD Attributes;
+} CHAR_INFO;
 
 //
 // Attributes flags:
@@ -157,31 +154,27 @@ extern "C" {
 #define BACKGROUND_RED       0x0040 // background color contains red.
 #define BACKGROUND_INTENSITY 0x0080 // background color is intensified.
 
-    typedef struct _CONSOLE_SCREEN_BUFFER_INFO {
-        COORD dwSize;
-        COORD dwCursorPosition;
-        WORD  wAttributes;
-        SMALL_RECT srWindow;
-        COORD dwMaximumWindowSize;
-    } CONSOLE_SCREEN_BUFFER_INFO;
+typedef struct _CONSOLE_SCREEN_BUFFER_INFO {
+    COORD dwSize;
+    COORD dwCursorPosition;
+    WORD  wAttributes;
+    SMALL_RECT srWindow;
+    COORD dwMaximumWindowSize;
+} CONSOLE_SCREEN_BUFFER_INFO;
 
-    typedef struct _CONSOLE_CURSOR_INFO {
-        DWORD  dwSize;
-        BOOL   bVisible;
-    } CONSOLE_CURSOR_INFO;
+typedef struct _CONSOLE_CURSOR_INFO {
+    DWORD  dwSize;
+    BOOL   bVisible;
+} CONSOLE_CURSOR_INFO;
 
 #define CTRL_C_EVENT        0
 #define CTRL_BREAK_EVENT    1
 
-}
-
 // winbase.h
 
-extern "C" {
+DWORD GetTickCount(void) noexcept;
 
-    DWORD GetTickCount(void) noexcept;
-
-}
+} // extern "C"
 
 #endif // __BORLANDC__ || _WIN32
 
