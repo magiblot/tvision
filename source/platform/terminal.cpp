@@ -491,7 +491,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) 
 
                 if (strncmp(osc_string, "f2l", 3) == 0) {
 
-                    std::string s = from_base64({(const uint8_t *) osc_string+3, osc_strlen - 3});
+                    std::string s = from_base64({(const uint8_t *) osc_string+3, osc_strlen - 4});
 
                     const char* out = s.c_str();
                     
