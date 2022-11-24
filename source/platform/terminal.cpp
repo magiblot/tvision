@@ -496,7 +496,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) 
                     const char* out = s.c_str();
                     
                     KEY_EVENT_RECORD kev {};
-                    if (strcmp(out + 14, "K") == 0 )
+                    if (strcmp(out + s.length() - 1, "K") == 0 )
                     {
                         kev.bKeyDown = 1;
                         memcpy(&kev.wRepeatCount,       out,        sizeof(kev.wRepeatCount));
