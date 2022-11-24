@@ -46,7 +46,6 @@ public:
 class Win32Input final : public InputStrategy
 {
     const StdioCtl &io;
-    bool insertState {true};
     ushort surrogate {0};
 
     bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;

@@ -239,12 +239,6 @@ bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
             }
         }
 
-        // Set/reset insert flag.
-        if (ev.keyDown.keyCode == kbIns)
-            insertState = !insertState;
-        if (insertState)
-            ev.keyDown.controlKeyState |= kbInsState;
-
         return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }
     return false;
