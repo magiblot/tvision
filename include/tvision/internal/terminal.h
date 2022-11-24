@@ -153,6 +153,9 @@ namespace TermIO
     void keyModsOn(const StdioCtl &) noexcept;
     void keyModsOff(const StdioCtl &) noexcept;
 
+    bool getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
+    bool getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
+
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&) noexcept;
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&) noexcept;

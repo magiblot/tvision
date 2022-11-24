@@ -1,4 +1,5 @@
 #define Uses_TKeys
+#define Uses_THardwareInfo
 #include <tvision/tv.h>
 
 #include <internal/terminal.h>
@@ -7,6 +8,8 @@
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
+#include <internal/base64.h>
+#include <windows.h>
 
 namespace tvision
 {
@@ -298,13 +301,15 @@ void TermIO::keyModsOn(const StdioCtl &io) noexcept
                       "\x1B[?1036h" // Enable metaSendsEscape (XTerm).
                       "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
                       "\x1B[>1u"    // Disambiguate escape codes (Kitty).
+                      "\x1B_far2l1\x07" // Enable far2l extended input.
                     ;
     io.write(seq.data(), seq.size());
 }
 
 void TermIO::keyModsOff(const StdioCtl &io) noexcept
 {
-    TStringView seq = "\x1B[<u"     // Restore previous keyboard mode (Kitty).
+    TStringView seq = "\x1B_far2l0\x07" // Disable far2l extended input.
+                      "\x1B[<u"     // Restore previous keyboard mode (Kitty).
                       "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
                     ;
@@ -343,12 +348,246 @@ void TermIO::fixKey(KeyDownEvent &keyDown) noexcept
     if (keyDown.controlKeyState & kbAltShift) setAltModifier(keyDown);
 }
 
+bool TermIO::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
+{
+    if (getUnicodeEvent(KeyEventW, ev))
+    {
+        ev.what = evKeyDown;
+        ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
+        ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
+        ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
+
+        if (ev.keyDown.textLength)
+        {
+            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
+            if (KeyEventW.wVirtualKeyCode == VK_MENU)
+                // This is enabled when pasting certain characters, and it confuses
+                // applications. Clear it.
+                ev.keyDown.charScan.scanCode = 0;
+            if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ)
+                // If the character cannot be represented in the current codepage,
+                // or if it would accidentally trigger a Ctrl+Key combination,
+                // make the whole keyCode zero to avoid side effects.
+                ev.keyDown.keyCode = kbNoKey;
+        }
+
+        if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
+             ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 ||
+             ev.keyDown.keyCode == 0x3A00 )
+            // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
+            ev.keyDown.keyCode = kbNoKey;
+        else if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
+                  (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
+        {
+            // When AltGr+Key does not produce a character, a
+            // keyCode with unwanted effects may be read instead.
+            if (!ev.keyDown.textLength)
+                ev.keyDown.keyCode = kbNoKey;
+        }
+        else if (KeyEventW.wVirtualScanCode < 89)
+        {
+            // Convert NT style virtual scan codes to PC BIOS codes.
+            uchar index = KeyEventW.wVirtualScanCode;
+            ushort keyCode = 0;
+            if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
+                keyCode = THardwareInfo::AltCvt[index];
+            else if ((ev.keyDown.controlKeyState & kbCtrlShift) && THardwareInfo::CtrlCvt[index])
+                keyCode = THardwareInfo::CtrlCvt[index];
+            else if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
+                keyCode = THardwareInfo::ShiftCvt[index];
+            else if ( !(ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
+                      THardwareInfo::NormalCvt[index] )
+                keyCode = THardwareInfo::NormalCvt[index];
+
+            if (keyCode != 0)
+            {
+                ev.keyDown.keyCode = keyCode;
+                if (ev.keyDown.charScan.charCode < ' ')
+                    ev.keyDown.textLength = 0;
+            }
+        }
+
+        return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
+    }
+    return false;
+}
+
+bool TermIO::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
+// Returns true unless the event contains a UTF-16 surrogate,
+// in which case we need the next event.
+{
+    // FIXME!
+    ushort surrogate {0};
+
+    ushort utf16[2] = {KeyEventW.uChar.UnicodeChar, 0};
+    ev.keyDown.textLength = 0;
+    // Do not treat non-printable characters as text.
+    if (' ' <= utf16[0] && utf16[0] != 0x7F) {
+        if (0xD800 <= utf16[0] && utf16[0] <= 0xDBFF) {
+            surrogate = utf16[0];
+            return false;
+        } else {
+            if (surrogate) {
+                if (0xDC00 <= utf16[0] && utf16[0] <= 0xDFFF) {
+                    utf16[1] = utf16[0];
+                    utf16[0] = surrogate;
+                }
+                surrogate = 0;
+            }
+
+            /*
+            ev.keyDown.textLength = WideCharToMultiByte(
+                CP_UTF8, 0,
+                (wchar_t*) utf16, utf16[1] ? 2 : 1,
+                ev.keyDown.text, sizeof(ev.keyDown.text),
+                nullptr, nullptr );
+            */
+            mbstate_t       mbstate;
+            size_t          countConverted;
+
+            wchar_t src = 0;
+            memcpy(&src, &utf16, 2);
+            char dst[6];
+
+            ::memset((void*)&mbstate, 0, sizeof(mbstate));
+            // FIXME? it may be UTF32 that comes from far2l, not UTF16
+            countConverted = wcrtomb(dst, src, &mbstate);
+
+            ev.keyDown.textLength = countConverted;
+
+            memcpy(&ev.keyDown.text, &dst, countConverted);
+            ev.keyDown.text[countConverted] = 0; // zero terminate
+
+            /*
+            FILE *fp = fopen("turbo.log", "ab");
+            fprintf(fp, ":* %i\n", (int)countConverted);
+            fprintf(fp, ":: %s\n", ev.keyDown.text);
+            fclose(fp);
+            */
+        }
+    }
+    return true;
+}
+
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // Pre: "\x1B" has just been read.
 {
+    size_t osc_strlen = 0;
+    static thread_local char osc_string[1048577];
+
     ParseResult res = Rejected;
     switch (buf.get())
     {
+        case '_':
+            {
+                // ***
+                do  {
+                    osc_string[osc_strlen] = buf.get();
+                    osc_strlen++;
+
+                } while (osc_string[osc_strlen-1] != '\x07');
+
+                osc_string[osc_strlen-1] = 0;
+
+                if (strncmp(osc_string, "f2l", 3) == 0) {
+
+                    std::string s = from_base64({(const uint8_t *) osc_string+3, osc_strlen - 3});
+
+                    const char* out = s.c_str();
+                    
+                    KEY_EVENT_RECORD kev {};
+                    if (strcmp(out + 14, "K") == 0 )
+                    {
+                        kev.bKeyDown = 1;
+                        memcpy(&kev.wRepeatCount,       out,        sizeof(kev.wRepeatCount));
+                        memcpy(&kev.wVirtualKeyCode,    out + 2,    sizeof(kev.wVirtualKeyCode));
+                        memcpy(&kev.wVirtualScanCode,   out + 4,    sizeof(kev.wVirtualScanCode));
+                        memcpy(&kev.dwControlKeyState,  out + 6,    sizeof(kev.dwControlKeyState));
+                        memcpy(&kev.uChar.UnicodeChar,  out + 10,   sizeof(kev.uChar.UnicodeChar));
+
+                        static const const_unordered_map<uint8_t, uint16_t> vktovsc =
+                        {
+                            {VK_BACK, kbBack},
+                            {VK_TAB, kbTab},
+                            {VK_RETURN, kbEnter},
+                            {VK_ESCAPE, kbEsc},
+                            {VK_PRIOR, kbPgUp},
+                            {VK_NEXT, kbPgDn},
+                            {VK_END, kbEnd},
+                            {VK_HOME, kbHome},
+                            {VK_LEFT, kbLeft},
+                            {VK_UP, kbUp},
+                            {VK_RIGHT, kbRight},
+                            {VK_DOWN, kbDown},
+                            {VK_INSERT, kbIns},
+                            {VK_DELETE, kbDel},
+                            {VK_NUMPAD0, '0'},
+                            {VK_NUMPAD1, '1'},
+                            {VK_NUMPAD2, '2'},
+                            {VK_NUMPAD3, '3'},
+                            {VK_NUMPAD4, '4'},
+                            {VK_NUMPAD5, '5'},
+                            {VK_NUMPAD6, '6'},
+                            {VK_NUMPAD7, '7'},
+                            {VK_NUMPAD8, '8'},
+                            {VK_NUMPAD9, '9'},
+                            {VK_MULTIPLY, '*'},
+                            {VK_ADD, '+'},
+                            {VK_SEPARATOR, '|'},
+                            {VK_SUBTRACT, '-'},
+                            {VK_DECIMAL, '.'},
+                            {VK_DIVIDE, '/'},
+                            {VK_F1, kbF1},
+                            {VK_F2, kbF2},
+                            {VK_F3, kbF3},
+                            {VK_F4, kbF4},
+                            {VK_F5, kbF5},
+                            {VK_F6, kbF6},
+                            {VK_F7, kbF7},
+                            {VK_F8, kbF8},
+                            {VK_F9, kbF9},
+                            {VK_F10, kbF10},
+                            {VK_F11, kbF11},
+                            {VK_F12, kbF12},
+                        };
+
+                        if (uint16_t keyCode = vktovsc[kev.wVirtualKeyCode])
+                        {
+                            kev.wVirtualScanCode = keyCode >> 8;
+                            kev.uChar.UnicodeChar = keyCode & 0xFF;
+                        }
+                        // Ctrl+alphanumeric fix for far2l tty backend
+                        if ( ((0x30 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x39) ||
+                              (0x41 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x5A)) &&
+                             kev.uChar.UnicodeChar == 0 )
+                        {
+                            kev.uChar.UnicodeChar = kev.wVirtualKeyCode;
+                        }
+
+                        bool b = getKeyEvent(kev, ev);
+
+
+                        fprintf(stderr, "[wVirtualKeyCode: 0x%x]\n", kev.wVirtualKeyCode);
+                        fprintf(stderr, "[wVirtualScanCode: 0x%x]\n", kev.wVirtualScanCode);
+                        fprintf(stderr, "[dwControlKeyState: 0x%x]\n", kev.dwControlKeyState);
+                        fprintf(stderr, "[uChar.UnicodeChar: 0x%x]\n", kev.uChar.UnicodeChar);
+                        fprintf(stderr, "[ev.keyDown.textLength: %d]\n", (int) ev.keyDown.textLength);
+                        fprintf(stderr, "[ev.keyDown.text: '%.*s']\n", (int) ev.keyDown.textLength, ev.keyDown.text);
+                        fprintf(stderr, "[ev.keyDown.keyCode: %i]\n", ev.keyDown.keyCode);
+                        fprintf(stderr, "\n");
+
+                        if (b)
+                        {
+                            fixKey(ev.keyDown);
+                            return Accepted;
+                        }
+                    }
+
+                }
+
+                return Ignored;
+            }
+
         case '[':
             switch (buf.get())
             {
