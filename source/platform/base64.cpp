@@ -26,36 +26,33 @@ static constexpr uint8_t b64d[256] =
     128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 };
 
-std::string from_base64(TSpan<const uint8_t> input)
+size_t from_base64(TStringView input, TSpan<uint8_t> output) noexcept
 {
-    const uint8_t *p = input.data();
-    size_t len = input.size();
-
-    bool pad = len > 0 && (len % 4 != 0 || p[len - 1] == '=');
-    size_t L = ((len + 3) / 4 - pad) * 4;
-    std::string str(3*((len+3)/4), '\0');
+    auto *p = (const uint8_t *) input.data();
+    size_t iLen = input.size();
+    bool hasPadding = iLen > 0 && (iLen % 4 != 0 || p[iLen - 1] == '=');
+    size_t npLen = ((iLen + 3) / 4 - hasPadding) * 4;
 
     size_t j = 0;
-    for (size_t i = 0; i < L; i += 4)
+    for (size_t i = 0; i < npLen; i += 4, j += 3)
     {
         uint32_t n = b64d[p[i]] << 18 | b64d[p[i + 1]] << 12 | b64d[p[i + 2]] << 6 | b64d[p[i + 3]];
-        str[j++] = n >> 16;
-        str[j++] = n >> 8 & 0xFF;
-        str[j++] = n & 0xFF;
+        output[j] = n >> 16;
+        output[j + 1] = n >> 8 & 0xFF;
+        output[j + 2] = n & 0xFF;
     }
-    if (pad)
+    if (hasPadding)
     {
-        uint32_t n = b64d[p[L]] << 18 | b64d[p[L + 1]] << 12;
-        str[j++] = n >> 16;
-        if (len > L + 2 && p[L + 2] != '=')
+        uint32_t n = b64d[p[npLen]] << 18 | b64d[p[npLen + 1]] << 12;
+        output[j++] = n >> 16;
+        if (npLen + 2 < iLen && p[npLen + 2] != '=')
         {
-            n |= b64d[p[L + 2]] << 6;
-            str[j++] = n >> 8 & 0xFF;
+            n |= b64d[p[npLen + 2]] << 6;
+            output[j++] = n >> 8 & 0xFF;
         }
     }
 
-    str.resize(j);
-    return str;
+    return j;
 }
 
 } // namespace tvision
