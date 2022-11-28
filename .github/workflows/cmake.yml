@@ -3,7 +3,7 @@ name: Build
 on: [push]
 
 env:
-  BUILD_TYPE: MinSizeRel
+  BUILD_TYPE: Release
 
 jobs:
   build-linux-gcc:
@@ -82,13 +82,21 @@ jobs:
       shell: bash
       run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+    - name: Upload Examples
+      uses: actions/upload-artifact@v3
       with:
         name: examples-x86
         path: |
           ${{env.BUILD_TYPE}}/tvdemo.exe
           ${{env.BUILD_TYPE}}/tvedit.exe
+          ${{env.BUILD_TYPE}}/tvhc.exe
+
+    - name: Upload Library
+      uses: actions/upload-artifact@v3
+      with:
+        name: library-x86
+        path: |
+          ${{env.BUILD_TYPE}}/tvision.lib
 
   build-windows-msvc64:
     name: Windows (MSVC) (x64)
@@ -104,13 +112,21 @@ jobs:
       shell: bash
       run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+    - name: Upload Examples
+      uses: actions/upload-artifact@v3
       with:
         name: examples-x64
         path: |
           ${{env.BUILD_TYPE}}/tvdemo.exe
           ${{env.BUILD_TYPE}}/tvedit.exe
+          ${{env.BUILD_TYPE}}/tvhc.exe
+
+    - name: Upload Library
+      uses: actions/upload-artifact@v3
+      with:
+        name: library-x64
+        path: |
+          ${{env.BUILD_TYPE}}/tvision.lib
 
   build-windows-mingw:
     name: Windows (MinGW)
@@ -147,13 +163,21 @@ jobs:
         cd project
         /c/bc45/bin/make.exe -DDOS32
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+    - name: Upload Examples
+      uses: actions/upload-artifact@v3
       with:
         name: examples-dos32
         path: |
           examples/tvdemo/tvdemo.EXE
           examples/tvedit/tvedit.EXE
+          examples/tvhc/tvhc.EXE
+
+    - name: Upload Library
+      uses: actions/upload-artifact@v3
+      with:
+        name: library-dos32
+        path: |
+          LIB/TV32.LIB
 
   build-macos-clang:
     name: MacOS (Clang)
