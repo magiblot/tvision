@@ -28,4 +28,23 @@ TEST(Base64, ShouldDecodeProperly)
     }
 }
 
+TEST(Base64, ShouldEncodeProperly)
+{
+    static constexpr TestCase<TStringView> testCases[] =
+    {
+        {""      , ""        },
+        {"f"     , "Zg=="    },
+        {"fo"    , "Zm8="    },
+        {"foo"   , "Zm9v"    },
+        {"foob"  , "Zm9vYg=="},
+        {"fooba" , "Zm9vYmE="},
+        {"foobar", "Zm9vYmFy"},
+    };
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = to_base64({(uint8_t *) testCase.input.data(), testCase.input.size()});
+        expectResultMatches(actual, testCase);
+    }
+}
+
 } // namespace tvision
