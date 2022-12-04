@@ -23,7 +23,7 @@ TEST(Base64, ShouldDecodeProperly)
     };
     for (auto &testCase : testCases)
     {
-        auto &&actual = from_base64(testCase.input);
+        auto &&actual = decodeBase64(testCase.input);
         expectResultMatches(actual, testCase);
     }
 }
@@ -42,7 +42,7 @@ TEST(Base64, ShouldEncodeProperly)
     };
     for (auto &testCase : testCases)
     {
-        auto &&actual = to_base64({(uint8_t *) testCase.input.data(), testCase.input.size()});
+        auto &&actual = encodeBase64({(uint8_t *) testCase.input.data(), testCase.input.size()});
         expectResultMatches(actual, testCase);
     }
 }

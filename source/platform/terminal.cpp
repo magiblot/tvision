@@ -803,7 +803,7 @@ ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, MouseState &) noe
     TStringView input {s, len};
 
     uint8_t out[3*k];
-    size_t outLen = from_base64(input, out);
+    size_t outLen = decodeBase64(input, out);
     if (outLen > 0)
     {
         if (out[outLen - 1] == 'K' && outLen - 1 == 14)

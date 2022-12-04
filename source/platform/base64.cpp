@@ -29,7 +29,7 @@ static constexpr uint8_t b64d[256] =
     128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 };
 
-size_t to_base64(TSpan<const uint8_t> input, TSpan<char> output) noexcept
+size_t encodeBase64(TSpan<const uint8_t> input, TSpan<char> output) noexcept
 {
     auto* p = (const uint8_t *) input.data();
     size_t iLen = input.size();
@@ -66,7 +66,7 @@ size_t to_base64(TSpan<const uint8_t> input, TSpan<char> output) noexcept
     return j;
 }
 
-size_t from_base64(TStringView input, TSpan<uint8_t> output) noexcept
+size_t decodeBase64(TStringView input, TSpan<uint8_t> output) noexcept
 {
     auto *p = (const uint8_t *) input.data();
     size_t iLen = input.size();

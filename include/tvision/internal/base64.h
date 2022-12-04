@@ -9,13 +9,13 @@ namespace tvision
 
 // Returns the number of bytes written into 'output'.
 // Pre: 'output.size()' is no less than 4/3 of 'input.size()'.
-size_t to_base64(TSpan<const uint8_t> input, TSpan<char> output) noexcept;
+size_t encodeBase64(TSpan<const uint8_t> input, TSpan<char> output) noexcept;
 
 // Returns the number of bytes written into 'output'.
 // Pre: 'output.size()' is no less than 3/4 of 'input.size()'.
-size_t from_base64(TStringView input, TSpan<uint8_t> output) noexcept;
+size_t decodeBase64(TStringView input, TSpan<uint8_t> output) noexcept;
 
-inline std::string to_base64(TSpan<const uint8_t> input)
+inline std::string encodeBase64(TSpan<const uint8_t> input)
 {
     std::string result;
     enum { k = 128 };
@@ -25,13 +25,13 @@ inline std::string to_base64(TSpan<const uint8_t> input)
         size_t i = 0;
         do
         {
-            result.append((char *) buf, to_base64(input.subspan(i*3*k, 3*k), buf));
+            result.append((char *) buf, encodeBase64(input.subspan(i*3*k, 3*k), buf));
         } while (i++ < (input.size() - 1)/(3*k));
     }
     return result;
 }
 
-inline std::string from_base64(TStringView input)
+inline std::string decodeBase64(TStringView input)
 {
     std::string result;
     enum { k = 128 };
@@ -41,7 +41,7 @@ inline std::string from_base64(TStringView input)
         size_t i = 0;
         do
         {
-            result.append((char *) buf, from_base64(input.substr(i*4*k, 4*k), buf));
+            result.append((char *) buf, decodeBase64(input.substr(i*4*k, 4*k), buf));
         } while (i++ < (input.size() - 1)/(4*k));
     }
     return result;
