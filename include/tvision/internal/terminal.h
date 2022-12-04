@@ -164,6 +164,7 @@ namespace TermIO
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
+    ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, MouseState &) noexcept;
 
     bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept;
     void setAltModifier(KeyDownEvent &keyDown) noexcept;

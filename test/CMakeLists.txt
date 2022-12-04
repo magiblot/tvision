@@ -19,6 +19,13 @@ if (TV_BUILD_TESTS)
         ${GTEST_MAIN}
     )
 
-    add_custom_command(TARGET ${PROJECT_NAME}-test POST_BUILD COMMAND ${PROJECT_NAME}-test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    add_custom_command(
+        OUTPUT ${PROJECT_NAME}-test-passed
+        COMMAND ${PROJECT_NAME}-test
+        COMMAND ${CMAKE_COMMAND} -E touch ${PROJECT_NAME}-test-passed
+        DEPENDS ${PROJECT_NAME}-test
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    add_custom_target(${PROJECT_NAME}-test-run ALL DEPENDS ${PROJECT_NAME}-test-passed)
 
 endif()

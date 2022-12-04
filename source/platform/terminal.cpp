@@ -118,6 +118,31 @@ namespace terminp
         { kbCtrlTab,   kbAltTab    },
     };
 
+    static const const_unordered_map<uchar, ushort> virtualKeyCodeToKeyCode =
+    {
+        { VK_BACK,      kbBack      }, { VK_TAB,        kbTab       },
+        { VK_RETURN,    kbEnter     }, { VK_ESCAPE,     kbEsc       },
+        { VK_PRIOR,     kbPgUp      }, { VK_NEXT,       kbPgDn      },
+        { VK_END,       kbEnd       }, { VK_HOME,       kbHome      },
+        { VK_LEFT,      kbLeft      }, { VK_UP,         kbUp        },
+        { VK_RIGHT,     kbRight     }, { VK_DOWN,       kbDown      },
+        { VK_INSERT,    kbIns       }, { VK_DELETE,     kbDel       },
+        { VK_NUMPAD0,   '0'         }, { VK_NUMPAD1,    '1'         },
+        { VK_NUMPAD2,   '2'         }, { VK_NUMPAD3,    '3'         },
+        { VK_NUMPAD4,   '4'         }, { VK_NUMPAD5,    '5'         },
+        { VK_NUMPAD6,   '6'         }, { VK_NUMPAD7,    '7'         },
+        { VK_NUMPAD8,   '8'         }, { VK_NUMPAD9,    '9'         },
+        { VK_MULTIPLY,  '*'         }, { VK_ADD,        '+'         },
+        { VK_SEPARATOR, '|'         }, { VK_SUBTRACT,   '-'         },
+        { VK_DECIMAL,   '.'         }, { VK_DIVIDE,     '/'         },
+        { VK_F1,        kbF1        }, { VK_F2,         kbF2        },
+        { VK_F3,        kbF3        }, { VK_F4,         kbF4        },
+        { VK_F5,        kbF5        }, { VK_F6,         kbF6        },
+        { VK_F7,        kbF7        }, { VK_F8,         kbF8        },
+        { VK_F9,        kbF9        }, { VK_F10,        kbF10       },
+        { VK_F11,       kbF11       }, { VK_F12,        kbF12       },
+    };
+
     static inline void setModifier( KeyDownEvent &keyDown, ushort mod,
                                     const const_unordered_map<ushort, ushort> &keyMap ) noexcept
     {
@@ -472,122 +497,12 @@ bool TermIO::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
 // Pre: "\x1B" has just been read.
 {
-    size_t osc_strlen = 0;
-    static thread_local char osc_string[1048577];
-
     ParseResult res = Rejected;
     switch (buf.get())
     {
         case '_':
-            {
-                // ***
-                do  {
-                    osc_string[osc_strlen] = buf.get();
-                    osc_strlen++;
-
-                } while (osc_string[osc_strlen-1] != '\x07');
-
-                osc_string[osc_strlen-1] = 0;
-
-                if (strncmp(osc_string, "f2l", 3) == 0) {
-
-                    std::string s = from_base64({osc_string+3, osc_strlen - 4});
-
-                    const char* out = s.c_str();
-                    
-                    KEY_EVENT_RECORD kev {};
-                    if (strcmp(out + s.length() - 1, "K") == 0 )
-                    {
-                        kev.bKeyDown = 1;
-                        memcpy(&kev.wRepeatCount,       out,        sizeof(kev.wRepeatCount));
-                        memcpy(&kev.wVirtualKeyCode,    out + 2,    sizeof(kev.wVirtualKeyCode));
-                        memcpy(&kev.wVirtualScanCode,   out + 4,    sizeof(kev.wVirtualScanCode));
-                        memcpy(&kev.dwControlKeyState,  out + 6,    sizeof(kev.dwControlKeyState));
-                        memcpy(&kev.uChar.UnicodeChar,  out + 10,   sizeof(kev.uChar.UnicodeChar));
-
-                        static const const_unordered_map<uint8_t, uint16_t> vktovsc =
-                        {
-                            {VK_BACK, kbBack},
-                            {VK_TAB, kbTab},
-                            {VK_RETURN, kbEnter},
-                            {VK_ESCAPE, kbEsc},
-                            {VK_PRIOR, kbPgUp},
-                            {VK_NEXT, kbPgDn},
-                            {VK_END, kbEnd},
-                            {VK_HOME, kbHome},
-                            {VK_LEFT, kbLeft},
-                            {VK_UP, kbUp},
-                            {VK_RIGHT, kbRight},
-                            {VK_DOWN, kbDown},
-                            {VK_INSERT, kbIns},
-                            {VK_DELETE, kbDel},
-                            {VK_NUMPAD0, '0'},
-                            {VK_NUMPAD1, '1'},
-                            {VK_NUMPAD2, '2'},
-                            {VK_NUMPAD3, '3'},
-                            {VK_NUMPAD4, '4'},
-                            {VK_NUMPAD5, '5'},
-                            {VK_NUMPAD6, '6'},
-                            {VK_NUMPAD7, '7'},
-                            {VK_NUMPAD8, '8'},
-                            {VK_NUMPAD9, '9'},
-                            {VK_MULTIPLY, '*'},
-                            {VK_ADD, '+'},
-                            {VK_SEPARATOR, '|'},
-                            {VK_SUBTRACT, '-'},
-                            {VK_DECIMAL, '.'},
-                            {VK_DIVIDE, '/'},
-                            {VK_F1, kbF1},
-                            {VK_F2, kbF2},
-                            {VK_F3, kbF3},
-                            {VK_F4, kbF4},
-                            {VK_F5, kbF5},
-                            {VK_F6, kbF6},
-                            {VK_F7, kbF7},
-                            {VK_F8, kbF8},
-                            {VK_F9, kbF9},
-                            {VK_F10, kbF10},
-                            {VK_F11, kbF11},
-                            {VK_F12, kbF12},
-                        };
-
-                        if (uint16_t keyCode = vktovsc[kev.wVirtualKeyCode])
-                        {
-                            kev.wVirtualScanCode = keyCode >> 8;
-                            kev.uChar.UnicodeChar = keyCode & 0xFF;
-                        }
-                        // Ctrl+alphanumeric fix for far2l tty backend
-                        if ( ((0x30 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x39) ||
-                              (0x41 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x5A)) &&
-                             kev.uChar.UnicodeChar == 0 )
-                        {
-                            kev.uChar.UnicodeChar = kev.wVirtualKeyCode;
-                        }
-
-                        bool b = getKeyEvent(kev, ev);
-
-
-                        fprintf(stderr, "[wVirtualKeyCode: 0x%x]\n", kev.wVirtualKeyCode);
-                        fprintf(stderr, "[wVirtualScanCode: 0x%x]\n", kev.wVirtualScanCode);
-                        fprintf(stderr, "[dwControlKeyState: 0x%x]\n", kev.dwControlKeyState);
-                        fprintf(stderr, "[uChar.UnicodeChar: 0x%x]\n", kev.uChar.UnicodeChar);
-                        fprintf(stderr, "[ev.keyDown.textLength: %d]\n", (int) ev.keyDown.textLength);
-                        fprintf(stderr, "[ev.keyDown.text: '%.*s']\n", (int) ev.keyDown.textLength, ev.keyDown.text);
-                        fprintf(stderr, "[ev.keyDown.keyCode: %i]\n", ev.keyDown.keyCode);
-                        fprintf(stderr, "\n");
-
-                        if (b)
-                        {
-                            fixKey(ev.keyDown);
-                            return Accepted;
-                        }
-                    }
-
-                }
-
-                return Ignored;
-            }
-
+            if (buf.get() == 'f' && buf.get() == '2' && buf.get() == 'l')
+                return parseFar2lInput(buf, ev, oldm) == Accepted ? Accepted : Ignored;
         case '[':
             switch (buf.get())
             {
@@ -870,6 +785,57 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     {
         ev.what = evKeyDown;
         return Accepted;
+    }
+    return Ignored;
+}
+
+ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, MouseState &) noexcept
+// Pre: "\x1B_far2l" has just been read.
+{
+    using namespace terminp;
+    enum { k = 32 };
+    char s[4*k];
+    size_t len = 0;
+    char c;
+    while (c = buf.get(), c != -1 && c != '\x07')
+        if (len < sizeof(s))
+            s[len++] = c;
+    TStringView input {s, len};
+
+    uint8_t out[3*k];
+    size_t outLen = from_base64(input, out);
+    if (outLen > 0)
+    {
+        if (out[outLen - 1] == 'K' && outLen - 1 == 14)
+        {
+            KEY_EVENT_RECORD kev {};
+            kev.bKeyDown = 1;
+            memcpy(&kev.wRepeatCount,      &out[0] , 2);
+            memcpy(&kev.wVirtualKeyCode,   &out[2] , 2);
+            memcpy(&kev.wVirtualScanCode,  &out[4] , 2);
+            memcpy(&kev.dwControlKeyState, &out[6] , 4);
+            memcpy(&kev.uChar.UnicodeChar, &out[10], 4);
+
+            if (uint16_t keyCode = virtualKeyCodeToKeyCode[kev.wVirtualKeyCode])
+            {
+                kev.wVirtualScanCode = keyCode >> 8;
+                kev.uChar.UnicodeChar = keyCode & 0xFF;
+            }
+            // When running directly in a terminal, far2l does not set the
+            // UnicodeChar field in Ctrl+Letter/Number events.
+            if ( ((0x30 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x39) ||
+                  (0x41 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x5A)) &&
+                 kev.uChar.UnicodeChar == 0 )
+            {
+                kev.uChar.UnicodeChar = kev.wVirtualKeyCode;
+            }
+
+            if (getKeyEvent(kev, ev))
+            {
+                fixKey(ev.keyDown);
+                return Accepted;
+            }
+        }
     }
     return Ignored;
 }
