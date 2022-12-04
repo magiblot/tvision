@@ -81,7 +81,7 @@ size_t from_base64(TStringView input, TSpan<uint8_t> output) noexcept
         output[j + 1] = n >> 8 & 0xFF;
         output[j + 2] = n & 0xFF;
     }
-    if (hasPadding)
+    if (hasPadding && noPadLen + 1 < iLen)
     {
         uint32_t n = b64d[p[noPadLen]] << 18 | b64d[p[noPadLen + 1]] << 12;
         output[j++] = n >> 16;
