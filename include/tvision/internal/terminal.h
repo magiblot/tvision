@@ -5,6 +5,8 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+#include <tvision/compat/windows/windows.h>
+
 namespace tvision
 {
 
@@ -13,6 +15,9 @@ class StdioCtl;
 struct InputState
 {
     uchar buttons;
+#ifdef _WIN32
+    wchar_t surrogate;
+#endif
 };
 
 class GetChBuf
@@ -150,8 +155,8 @@ namespace TermIO
     void keyModsOn(const StdioCtl &) noexcept;
     void keyModsOff(const StdioCtl &) noexcept;
 
-    bool getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
-    bool getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
+    void setAltModifier(KeyDownEvent &keyDown) noexcept;
+    void fixKey(KeyDownEvent &keyDown) noexcept;
 
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;
@@ -163,8 +168,7 @@ namespace TermIO
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
     ParseResult parseFar2lInput(GetChBuf &, TEvent &, InputState &) noexcept;
 
-    void setAltModifier(KeyDownEvent &keyDown) noexcept;
-    void fixKey(KeyDownEvent &keyDown) noexcept;
+    bool getWin32Key(const KEY_EVENT_RECORD &, TEvent &, InputState &) noexcept;
 
 }
 

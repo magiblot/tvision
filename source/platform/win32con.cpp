@@ -168,7 +168,7 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
         if ( ir.Event.KeyEvent.bKeyDown || // KeyDown
              (ir.Event.KeyEvent.wVirtualKeyCode == VK_MENU && // Pasted surrogate character
                 ir.Event.KeyEvent.uChar.UnicodeChar) )
-            return getKeyEvent(ir.Event.KeyEvent, ev);
+            return TermIO::getWin32Key(ir.Event.KeyEvent, ev, state);
         break;
     case MOUSE_EVENT:
         return getMouseEvent(ir.Event.MouseEvent, ev);
@@ -179,98 +179,6 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
         return True;
     }
     return false;
-}
-
-bool Win32Input::getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
-{
-    if (getUnicodeEvent(KeyEventW, ev))
-    {
-        ev.what = evKeyDown;
-        ev.keyDown.charScan.scanCode = KeyEventW.wVirtualScanCode;
-        ev.keyDown.charScan.charCode = KeyEventW.uChar.AsciiChar;
-        ev.keyDown.controlKeyState = KeyEventW.dwControlKeyState;
-
-        if (ev.keyDown.textLength)
-        {
-            ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
-            if (KeyEventW.wVirtualKeyCode == VK_MENU)
-                // This is enabled when pasting certain characters, and it confuses
-                // applications. Clear it.
-                ev.keyDown.charScan.scanCode = 0;
-            if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ)
-                // If the character cannot be represented in the current codepage,
-                // or if it would accidentally trigger a Ctrl+Key combination,
-                // make the whole keyCode zero to avoid side effects.
-                ev.keyDown.keyCode = kbNoKey;
-        }
-
-        if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
-             ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 ||
-             ev.keyDown.keyCode == 0x3A00 )
-            // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
-            ev.keyDown.keyCode = kbNoKey;
-        else if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
-                  (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
-        {
-            // When AltGr+Key does not produce a character, a
-            // keyCode with unwanted effects may be read instead.
-            if (!ev.keyDown.textLength)
-                ev.keyDown.keyCode = kbNoKey;
-        }
-        else if (KeyEventW.wVirtualScanCode < 89)
-        {
-            // Convert NT style virtual scan codes to PC BIOS codes.
-            uchar index = KeyEventW.wVirtualScanCode;
-            ushort keyCode = 0;
-            if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
-                keyCode = THardwareInfo::AltCvt[index];
-            else if ((ev.keyDown.controlKeyState & kbCtrlShift) && THardwareInfo::CtrlCvt[index])
-                keyCode = THardwareInfo::CtrlCvt[index];
-            else if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
-                keyCode = THardwareInfo::ShiftCvt[index];
-            else if ( !(ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
-                      THardwareInfo::NormalCvt[index] )
-                keyCode = THardwareInfo::NormalCvt[index];
-            if (keyCode != 0)
-            {
-                ev.keyDown.keyCode = keyCode;
-                if (ev.keyDown.charScan.charCode < ' ')
-                    ev.keyDown.textLength = 0;
-            }
-        }
-
-        return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
-    }
-    return false;
-}
-
-bool Win32Input::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
-// Returns true unless the event contains a UTF-16 surrogate,
-// in which case we need the next event.
-{
-    ushort utf16[2] = {KeyEventW.uChar.UnicodeChar, 0};
-    ev.keyDown.textLength = 0;
-    // Do not treat non-printable characters as text.
-    if (' ' <= utf16[0] && utf16[0] != 0x7F) {
-        if (0xD800 <= utf16[0] && utf16[0] <= 0xDBFF) {
-            surrogate = utf16[0];
-            return false;
-        } else {
-            if (surrogate) {
-                if (0xDC00 <= utf16[0] && utf16[0] <= 0xDFFF) {
-                    utf16[1] = utf16[0];
-                    utf16[0] = surrogate;
-                }
-                surrogate = 0;
-            }
-            ev.keyDown.textLength = WideCharToMultiByte(
-                CP_UTF8, 0,
-                (wchar_t*) utf16, utf16[1] ? 2 : 1,
-                ev.keyDown.text, sizeof(ev.keyDown.text),
-                nullptr, nullptr );
-        }
-    }
-    return true;
 }
 
 bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev) noexcept

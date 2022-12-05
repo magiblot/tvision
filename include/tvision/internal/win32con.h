@@ -1,13 +1,13 @@
 #ifndef WIN32CON_H
 #define WIN32CON_H
 
-#include <internal/termdisp.h>
-
 #ifdef _WIN32
 
 #include <tvision/tv.h>
 #include <tvision/compat/windows/windows.h>
 #include <internal/stdioctl.h>
+#include <internal/termdisp.h>
+#include <internal/terminal.h>
 
 namespace tvision
 {
@@ -46,11 +46,9 @@ public:
 class Win32Input final : public InputStrategy
 {
     const StdioCtl &io;
-    ushort surrogate {0};
+    InputState state;
 
     bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;
-    bool getKeyEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
-    bool getUnicodeEvent(KEY_EVENT_RECORD, TEvent &ev) noexcept;
     bool getMouseEvent(MOUSE_EVENT_RECORD, TEvent &ev) noexcept;
 
 public:
