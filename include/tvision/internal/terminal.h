@@ -169,6 +169,7 @@ namespace TermIO
     ParseResult parseFar2lInput(GetChBuf &, TEvent &, InputState &) noexcept;
 
     bool getWin32Key(const KEY_EVENT_RECORD &, TEvent &, InputState &) noexcept;
+    void getWin32Mouse(const MOUSE_EVENT_RECORD &, TEvent &, InputState &) noexcept;
 
 }
 

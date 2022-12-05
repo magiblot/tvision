@@ -697,6 +697,18 @@ ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state
                 return Accepted;
             }
         }
+        else if (out[outLen - 1] == 'M' && outLen - 1 == 16)
+        {
+            MOUSE_EVENT_RECORD mev {};
+            memcpy(&mev.dwMousePosition.X, &out[0],  2);
+            memcpy(&mev.dwMousePosition.Y, &out[2],  2);
+            memcpy(&mev.dwButtonState,     &out[4],  4);
+            memcpy(&mev.dwControlKeyState, &out[8],  4);
+            memcpy(&mev.dwEventFlags,      &out[12], 4);
+
+            getWin32Mouse(mev, ev, state);
+            return Accepted;
+        }
     }
     return Ignored;
 }
@@ -806,6 +818,25 @@ bool TermIO::getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputStat
     }
 
     return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
+}
+
+void TermIO::getWin32Mouse(const MOUSE_EVENT_RECORD &MouseEvent, TEvent &ev, InputState &state) noexcept
+{
+    ev.what = evMouse;
+    ev.mouse.where.x = MouseEvent.dwMousePosition.X;
+    ev.mouse.where.y = MouseEvent.dwMousePosition.Y;
+    ev.mouse.buttons = state.buttons = MouseEvent.dwButtonState;
+    ev.mouse.eventFlags = MouseEvent.dwEventFlags;
+    ev.mouse.controlKeyState = MouseEvent.dwControlKeyState;
+
+    // Rotation sense is represented by the sign of dwButtonState's high word
+    Boolean positive = !(MouseEvent.dwButtonState & 0x80000000);
+    if( MouseEvent.dwEventFlags & MOUSE_WHEELED )
+        ev.mouse.wheel = positive ? mwUp : mwDown;
+    else if( MouseEvent.dwEventFlags & MOUSE_HWHEELED )
+        ev.mouse.wheel = positive ? mwRight : mwLeft;
+    else
+        ev.mouse.wheel = 0;
 }
 
 } // namespace tvision

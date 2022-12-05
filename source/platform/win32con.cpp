@@ -171,35 +171,15 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
             return TermIO::getWin32Key(ir.Event.KeyEvent, ev, state);
         break;
     case MOUSE_EVENT:
-        return getMouseEvent(ir.Event.MouseEvent, ev);
+        TermIO::getWin32Mouse(ir.Event.MouseEvent, ev, state);
+        return true;
     case WINDOW_BUFFER_SIZE_EVENT:
         ev.what = evCommand;
         ev.message.command = cmScreenChanged;
         ev.message.infoPtr = 0;
-        return True;
+        return true;
     }
     return false;
-}
-
-bool Win32Input::getMouseEvent(MOUSE_EVENT_RECORD MouseEvent, TEvent &ev) noexcept
-{
-    ev.what = evMouse;
-    ev.mouse.where.x = MouseEvent.dwMousePosition.X;
-    ev.mouse.where.y = MouseEvent.dwMousePosition.Y;
-    ev.mouse.buttons = MouseEvent.dwButtonState;
-    ev.mouse.eventFlags = MouseEvent.dwEventFlags;
-    ev.mouse.controlKeyState = MouseEvent.dwControlKeyState;
-
-    // Rotation sense is represented by the sign of dwButtonState's high word
-    Boolean positive = !(MouseEvent.dwButtonState & 0x80000000);
-    if( MouseEvent.dwEventFlags & MOUSE_WHEELED )
-        ev.mouse.wheel = positive ? mwUp : mwDown;
-    else if( MouseEvent.dwEventFlags & MOUSE_HWHEELED )
-        ev.mouse.wheel = positive ? mwRight : mwLeft;
-    else
-        ev.mouse.wheel = 0;
-
-    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////
