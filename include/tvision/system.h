@@ -78,7 +78,7 @@ const int meTripleClick = 0x10;
 struct MouseEventType
 {
     TPoint where;
-    ushort eventFlags;           // Replacement for doubleClick.
+    ushort eventFlags;          // Replacement for doubleClick.
     ushort controlKeyState;
     uchar buttons;
     uchar wheel;
@@ -199,7 +199,7 @@ struct KeyDownEvent
         CharScanType charScan;
         };
     ushort controlKeyState;
-    char text[4];
+    char text[4];               // NOT null-terminated.
     uchar textLength;
 
     TStringView getText() const;
