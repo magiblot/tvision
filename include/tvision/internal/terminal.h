@@ -10,12 +10,9 @@ namespace tvision
 
 class StdioCtl;
 
-struct MouseState
+struct InputState
 {
-    TPoint where;
     uchar buttons;
-    uchar wheel;
-    uchar mods;
 };
 
 class GetChBuf
@@ -156,17 +153,16 @@ namespace TermIO
     bool getKeyEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
     bool getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept;
 
-    ParseResult parseEscapeSeq(GetChBuf&, TEvent&, MouseState&) noexcept;
-    ParseResult parseX10Mouse(GetChBuf&, TEvent&, MouseState&) noexcept;
-    ParseResult parseSGRMouse(GetChBuf&, TEvent&, MouseState&) noexcept;
+    ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
+    ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;
+    ParseResult parseSGRMouse(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseCSIKey(const CSIData &csi, TEvent&) noexcept;
     ParseResult parseFKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
-    ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, MouseState &) noexcept;
+    ParseResult parseFar2lInput(GetChBuf &, TEvent &, InputState &) noexcept;
 
-    bool acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept;
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
     void fixKey(KeyDownEvent &keyDown) noexcept;
 

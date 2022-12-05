@@ -24,8 +24,8 @@ class NcursesInput : public InputStrategy
     enum { readTimeout = 5 };
 
     const StdioCtl &io;
-    MouseState mstate;
-    int buttonCount;
+    InputState state {};
+    int buttonCount {0};
     bool mouseEnabled;
 
     static int getch_nb() noexcept;

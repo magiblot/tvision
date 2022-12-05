@@ -341,25 +341,6 @@ void TermIO::keyModsOff(const StdioCtl &io) noexcept
     io.write(seq.data(), seq.size());
 }
 
-bool TermIO::acceptMouseEvent(TEvent &ev, MouseState &oldm, const MouseState &newm) noexcept
-{
-    // Some terminal emulators send a mouse event every pixel the graphical
-    // mouse cursor moves over the window. Filter out those unnecessary
-    // events.
-    if (newm.buttons != oldm.buttons || newm.wheel || newm.where != oldm.where)
-    {
-        ev.what = evMouse;
-        ev.mouse = {};
-        ev.mouse.buttons = newm.buttons;
-        ev.mouse.where = newm.where;
-        ev.mouse.wheel = newm.wheel;
-        ev.mouse.controlKeyState = newm.mods;
-        oldm = newm;
-        return true;
-    }
-    return false;
-}
-
 void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
 {
     terminp::setAltModifier(keyDown);
@@ -494,7 +475,7 @@ bool TermIO::getUnicodeEvent(KEY_EVENT_RECORD KeyEventW, TEvent &ev) noexcept
     return true;
 }
 
-ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
+ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B" has just been read.
 {
     ParseResult res = Rejected;
@@ -502,15 +483,15 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) 
     {
         case '_':
             if (buf.get() == 'f' && buf.get() == '2' && buf.get() == 'l')
-                return parseFar2lInput(buf, ev, oldm) == Accepted ? Accepted : Ignored;
+                return parseFar2lInput(buf, ev, state) == Accepted ? Accepted : Ignored;
         case '[':
             switch (buf.get())
             {
                 // Note: mouse events are usually detected in 'NcursesInput::parseCursesMouse'.
                 case 'M':
-                    return parseX10Mouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
+                    return parseX10Mouse(buf, ev, state) == Accepted ? Accepted : Ignored;
                 case '<':
-                    return parseSGRMouse(buf, ev, oldm) == Accepted ? Accepted : Ignored;
+                    return parseSGRMouse(buf, ev, state) == Accepted ? Accepted : Ignored;
                 default:
                 {
                     buf.unget();
@@ -530,7 +511,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, MouseState &oldm) 
             res = parseSS3Key(buf, ev);
             break;
         case '\x1B':
-            res = parseEscapeSeq(buf, ev, oldm);
+            res = parseEscapeSeq(buf, ev, state);
             if (res == Accepted && ev.what == evKeyDown)
                 setAltModifier(ev.keyDown);
             break;
@@ -544,7 +525,7 @@ const ushort
     mmAlt = 0x08,
     mmCtrl = 0x10;
 
-ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
+ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B[M" has just been read.
 // The complete sequence looks like "\x1B[Mabc", where:
 // * 'a' is the button number plus 32.
@@ -574,29 +555,30 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) n
         --*i;
     }
 
-    MouseState newm = {};
-    newm.where = {col, row};
-    newm.buttons = oldm.buttons;
-    newm.mods = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
+    ev.what = evMouse;
+    ev.mouse = {};
+    ev.mouse.where = {col, row};
+    ev.mouse.controlKeyState = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
     switch (but)
     {
         case 0: // Press.
         case 32: // Drag.
-            newm.buttons |= mbLeftButton; break;
+            state.buttons |= mbLeftButton; break;
         case 1:
         case 33:
-            newm.buttons |= mbMiddleButton; break;
+            state.buttons |= mbMiddleButton; break;
         case 2:
         case 34:
-            newm.buttons |= mbRightButton; break;
-        case 3: newm.buttons = 0; break; // Release.
-        case 64: newm.wheel = mwUp; break;
-        case 65: newm.wheel = mwDown; break;
+            state.buttons |= mbRightButton; break;
+        case 3: state.buttons = 0; break; // Release.
+        case 64: ev.mouse.wheel = mwUp; break;
+        case 65: ev.mouse.wheel = mwDown; break;
     }
-    return acceptMouseEvent(ev, oldm, newm) ? Accepted : Ignored;
+    ev.mouse.buttons = state.buttons;
+    return Accepted;
 }
 
-ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) noexcept
+ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Extended-coordinates
 // Pre: "\x1B[<" has just been read.
 // The complete sequence looks like "\x1B[<a;b;cM" or "\x1B[<a;b;cm", where:
@@ -617,40 +599,41 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, MouseState &oldm) n
     col = max(col, 1);
     --row, --col;
     // Finally, the press/release state.
-    uint state = (uint) buf.last();
-    if (!(state == 'M' || state == 'm')) return Rejected;
+    uint type = (uint) buf.last();
+    if (!(type == 'M' || type == 'm')) return Rejected;
 
-    MouseState newm = {};
-    newm.where = {col, row};
-    newm.buttons = oldm.buttons;
-    newm.mods = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
-    if (state == 'M') // Press, wheel or drag.
+    ev.what = evMouse;
+    ev.mouse = {};
+    ev.mouse.where = {col, row};
+    ev.mouse.controlKeyState = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
+    if (type == 'M') // Press, wheel or drag.
     {
         switch (but)
         {
             case 0:
             case 32:
-                newm.buttons |= mbLeftButton; break;
+                state.buttons |= mbLeftButton; break;
             case 1:
             case 33:
-                newm.buttons |= mbMiddleButton; break;
+                state.buttons |= mbMiddleButton; break;
             case 2:
             case 34:
-                newm.buttons |= mbRightButton; break;
-            case 64: newm.wheel = mwUp; break;
-            case 65: newm.wheel = mwDown; break;
+                state.buttons |= mbRightButton; break;
+            case 64: ev.mouse.wheel = mwUp; break;
+            case 65: ev.mouse.wheel = mwDown; break;
         }
     }
     else // Release.
     {
         switch (but)
         {
-            case 0: newm.buttons &= ~mbLeftButton; break;
-            case 1: newm.buttons &= ~mbMiddleButton; break;
-            case 2: newm.buttons &= ~mbRightButton; break;
+            case 0: state.buttons &= ~mbLeftButton; break;
+            case 1: state.buttons &= ~mbMiddleButton; break;
+            case 2: state.buttons &= ~mbRightButton; break;
         }
     }
-    return acceptMouseEvent(ev, oldm, newm) ? Accepted : Ignored;
+    ev.mouse.buttons = state.buttons;
+    return Accepted;
 }
 
 // The functions below are meant to parse a few sequences emitted
@@ -789,7 +772,7 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     return Ignored;
 }
 
-ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, MouseState &) noexcept
+ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &) noexcept
 // Pre: "\x1B_far2l" has just been read.
 {
     using namespace terminp;

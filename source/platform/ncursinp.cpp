@@ -252,8 +252,6 @@ static const auto fromCursesHighKey =
 NcursesInput::NcursesInput(const StdioCtl &aIo, NcursesDisplay &, bool mouse) noexcept :
     InputStrategy(aIo.in()),
     io(aIo),
-    mstate({}),
-    buttonCount(0),
     mouseEnabled(mouse)
 {
     // Capture all keyboard input.
@@ -276,7 +274,6 @@ NcursesInput::NcursesInput(const StdioCtl &aIo, NcursesDisplay &, bool mouse) no
     TermIO::keyModsOn(io);
     if (mouseEnabled)
     {
-        mstate.where = {-1, -1};
         // The button count is not really important. Turbo Vision only checks
         // whether it is non-zero.
         buttonCount = 2;
@@ -339,7 +336,7 @@ bool NcursesInput::getEvent(TEvent &ev) noexcept
     {
         // Try to parse a escape sequence.
         NcGetChBuf buf;
-        switch (TermIO::parseEscapeSeq(buf, ev, mstate))
+        switch (TermIO::parseEscapeSeq(buf, ev, state))
         {
             case Rejected: break;
             case Accepted: return true;
@@ -427,32 +424,33 @@ bool NcursesInput::parseCursesMouse(TEvent &ev) noexcept
     MEVENT mevent;
     if (getmouse(&mevent) == OK)
     {
-        MouseState newm = {};
-        newm.where = {mevent.x, mevent.y};
-        newm.buttons = mstate.buttons;
+        ev.what = evMouse;
+        ev.mouse = {};
+        ev.mouse.where = {mevent.x, mevent.y};
         if (mevent.bstate & BUTTON1_PRESSED)
-            newm.buttons |= mbLeftButton;
+            state.buttons |= mbLeftButton;
         if (mevent.bstate & BUTTON1_RELEASED)
-            newm.buttons &= ~mbLeftButton;
+            state.buttons &= ~mbLeftButton;
         if (mevent.bstate & BUTTON2_PRESSED)
-            newm.buttons |= mbMiddleButton;
+            state.buttons |= mbMiddleButton;
         if (mevent.bstate & BUTTON2_RELEASED)
-            newm.buttons &= ~mbMiddleButton;
+            state.buttons &= ~mbMiddleButton;
         if (mevent.bstate & BUTTON3_PRESSED)
-            newm.buttons |= mbRightButton;
+            state.buttons |= mbRightButton;
         if (mevent.bstate & BUTTON3_RELEASED)
-            newm.buttons &= ~mbRightButton;
+            state.buttons &= ~mbRightButton;
+        ev.mouse.buttons = state.buttons;
 
 #if NCURSES_MOUSE_VERSION > 1
         // Mouse wheel support was added in Ncurses v6. Before that, only
         // scroll up would work. It's better not to support wheel scrolling
         // in that case.
         if (mevent.bstate & BUTTON4_PRESSED)
-            newm.wheel = mwUp;
+            ev.mouse.wheel = mwUp;
         else if (mevent.bstate & BUTTON5_PRESSED)
-            newm.wheel = mwDown;
+            ev.mouse.wheel = mwDown;
 #endif
-        return TermIO::acceptMouseEvent(ev, mstate, newm);
+        return true;
     }
     else
     {
@@ -464,7 +462,7 @@ bool NcursesInput::parseCursesMouse(TEvent &ev) noexcept
                                  TermIO::parseX10Mouse})
         {
             NcGetChBuf buf;
-            switch (parseMouse(buf, ev, mstate))
+            switch (parseMouse(buf, ev, state))
             {
                 case Rejected: buf.reject(); break;
                 case Accepted: return true;

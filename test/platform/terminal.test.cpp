@@ -112,8 +112,8 @@ TEST(TermIO, ShouldReadFar2lKeys)
     {
         StrGetChBuf buf(testCase.input);
         ParseResultEvent actual {};
-        MouseState m {};
-        actual.parseResult = TermIO::parseFar2lInput(buf, actual.ev, m);
+        InputState state {};
+        actual.parseResult = TermIO::parseFar2lInput(buf, actual.ev, state);
         expectResultMatches(actual, testCase);
     }
 }
