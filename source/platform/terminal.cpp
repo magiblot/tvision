@@ -362,8 +362,11 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
     switch (buf.get())
     {
         case '_':
-            if (buf.get() == 'f' && buf.get() == '2' && buf.get() == 'l')
+            if (buf.readStr("f2l"))
                 return parseFar2lInput(buf, ev, state) == Accepted ? Accepted : Ignored;
+            if (buf.readStr("far2lok"))
+                return Ignored;
+            break;
         case '[':
             switch (buf.get())
             {

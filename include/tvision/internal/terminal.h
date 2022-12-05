@@ -40,6 +40,7 @@ public:
     void reject() noexcept;
     bool getNum(uint &) noexcept;
     bool getInt(int &) noexcept;
+    bool readStr(TStringView) noexcept;
 
 };
 
@@ -109,6 +110,19 @@ inline bool GetChBuf::getInt(int &result) noexcept
     }
     if (digits)
         return (result = sign*num), true;
+    return false;
+}
+
+inline bool GetChBuf::readStr(TStringView str) noexcept
+{
+    size_t origSize = size;
+    size_t i = 0;
+    while (i < str.size() && get() == str[i])
+        ++i;
+    if (i == str.size())
+        return true;
+    while (origSize < size)
+        unget();
     return false;
 }
 
