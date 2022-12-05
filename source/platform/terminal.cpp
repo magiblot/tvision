@@ -345,12 +345,14 @@ void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
     terminp::setAltModifier(keyDown);
 }
 
-void TermIO::fixKey(KeyDownEvent &keyDown) noexcept
+void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
 {
     using namespace terminp;
+    ushort mods = keyDown.controlKeyState;
     if (keyDown.controlKeyState & kbShift) setShiftModifier(keyDown);
     if (keyDown.controlKeyState & kbCtrlShift) setCtrlModifier(keyDown);
     if (keyDown.controlKeyState & kbAltShift) setAltModifier(keyDown);
+    keyDown.controlKeyState = mods;
 }
 
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
@@ -693,7 +695,7 @@ ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state
 
             if (getWin32Key(kev, ev, state))
             {
-                fixKey(ev.keyDown);
+                normalizeKey(ev.keyDown);
                 return Accepted;
             }
         }

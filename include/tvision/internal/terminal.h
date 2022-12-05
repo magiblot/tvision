@@ -156,7 +156,7 @@ namespace TermIO
     void keyModsOff(const StdioCtl &) noexcept;
 
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
-    void fixKey(KeyDownEvent &keyDown) noexcept;
+    void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;

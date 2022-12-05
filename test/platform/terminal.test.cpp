@@ -102,10 +102,10 @@ TEST(TermIO, ShouldReadFar2lKeys)
         {"AQBTAAAAAAAAAHMAAABL", {Accepted, keyDownEv(0x0073, 0x0000, "s")}},
         {"AQBTAAAAAAAAAHMAAABL\x07", {Accepted, keyDownEv(0x0073, 0x0000, "s")}},
         {"AQC+AAAAAAAAAKwgAABL\x07", {Accepted, keyDownEv(kbNoKey, 0x0000, "€")}},
-        {"AQBWAAAACAAAAAAAAABL\x07", {Accepted, keyDownEv(kbCtrlV, kbCtrlShift, "")}},
-        {"AQA5AAAACAAAADkAAABL\x07", {Accepted, keyDownEv(0x0039, kbCtrlShift, "9")}},
-        {"AQBWAAAACgAAAFYAAABL\x07", {Accepted, keyDownEv(kbAltV, kbCtrlShift | kbAltShift, "")}},
-        {"AQBWAAAACgAAAAAAAABL\x07", {Accepted, keyDownEv(kbAltV, kbCtrlShift | kbAltShift, "")}},
+        {"AQBWAAAACAAAAAAAAABL\x07", {Accepted, keyDownEv(kbCtrlV, kbLeftCtrl, "")}},
+        {"AQA5AAAACAAAADkAAABL\x07", {Accepted, keyDownEv(0x0039, kbLeftCtrl, "9")}},
+        {"AQBWAAAACgAAAFYAAABL\x07", {Accepted, keyDownEv(kbAltV, kbLeftCtrl | kbLeftAlt, "")}},
+        {"AQBWAAAACgAAAAAAAABL\x07", {Accepted, keyDownEv(kbAltV, kbLeftCtrl | kbLeftAlt, "")}},
     };
 
     for (auto &testCase : testCases)

@@ -53,7 +53,7 @@ bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
             keyCode = kbCtrlBack;
         else if (keyCode == kbAltTab && ((ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) == kbShift))
             keyCode = kbShiftTab;
-        TermIO::fixKey(ev.keyDown);
+        TermIO::normalizeKey(ev.keyDown);
         return true;
     }
     return false;
