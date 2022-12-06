@@ -364,7 +364,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
         case '_':
             if (buf.readStr("f2l"))
                 return parseFar2lInput(buf, ev, state) == Accepted ? Accepted : Ignored;
-            if (buf.readStr("far2lok"))
+            if (buf.readStr("far2lok\x07"))
                 return Ignored;
             break;
         case '[':
