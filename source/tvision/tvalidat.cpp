@@ -140,7 +140,7 @@ void* TPXPictureValidator::read( ipstream& is )
 
 TPXPictureValidator::~TPXPictureValidator()
 {
-  delete pic;
+  delete[] pic;
 }
 
 void TPXPictureValidator::error()
@@ -618,7 +618,7 @@ TFilterValidator::TFilterValidator( StreamableInit s) noexcept : TValidator(s)
 
 TFilterValidator::~TFilterValidator()
 {
-    delete validChars;
+    delete[] validChars;
 }
 
 #if !defined(NO_STREAMABLE)
