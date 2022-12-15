@@ -81,6 +81,11 @@ bool EventSource::hasPendingEvents() noexcept
     return false;
 }
 
+bool EventSource::getEvent(TEvent &) noexcept
+{
+    return false;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // WakeUpEventSource
 

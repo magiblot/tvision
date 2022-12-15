@@ -27,9 +27,9 @@ GpmInput *GpmInput::create() noexcept
          * In such case, GPM text selection and copy/paste will be active. */
         .minMod = 0,
         .maxMod = 0 };
-    // Workaround: because we only instantiate GPM in the Linux console, discard
-    // the TERM variable during Gpm_Open so that GPM won't assume it is being
-    // ran under xterm (e.g. if TERM=xterm).
+    // Because we only instantiate GPM in the Linux console, discard the
+    // TERM variable during Gpm_Open so that GPM won't assume it is being
+    // ran under xterm (e.g. if TERM=xterm), and 'gpm_fd' won't be -2.
     {
         std::unique_ptr<char[]> term {newStr(getenv("TERM"))};
         if (term) unsetenv("TERM");
@@ -49,18 +49,12 @@ GpmInput::GpmInput() noexcept :
 
 GpmInput::~GpmInput()
 {
-    /* gpm_fd is -1 if the connection failed or -2 if it's just translating
-     * xterm events. It's greater or equal than 0 if a direct connection
-     * succeeded. */
-    if (gpm_fd != -1)
-    {
-        Gpm_Close();
-    }
+    Gpm_Close();
 }
 
 int GpmInput::getButtonCount() noexcept
 {
-    return gpm_fd < 0 ? 0 : 2;
+    return 2;
 }
 
 void GpmInput::fitEvent(Gpm_Event &gpmEvent) noexcept

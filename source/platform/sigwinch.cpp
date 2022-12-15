@@ -14,7 +14,7 @@ SigwinchHandler *SigwinchHandler::instance {nullptr};
 void SigwinchHandler::handleSignal(int) noexcept
 {
     if (instance)
-        instance->eventSource.signal();
+        instance->signal();
     // Don't call the previous SIGWINCH handler. Unfortunately, Ncurses
     // clears the screen when doing so and causes blinking.
 }
@@ -28,7 +28,7 @@ bool SigwinchHandler::getEvent(void *, TEvent &ev) noexcept
 
 inline SigwinchHandler::SigwinchHandler( SysManualEvent::Handle handle,
                                          const struct sigaction &aOldSa ) noexcept :
-    eventSource(handle, &getEvent, nullptr),
+    WakeUpEventSource(handle, &getEvent, nullptr),
     oldSa(aOldSa)
 {
     instance = this;

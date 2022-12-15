@@ -45,21 +45,18 @@ Platform::~Platform()
     restoreConsole();
 }
 
-void Platform::restoreConsole() noexcept
+void Platform::restoreConsole(ConsoleStrategy *&c) noexcept
 {
-    auto doRemove = [] (void *self, EventSource &source) {
-        ((Platform *) self)->waiter.removeSource(source);
-    };
-    console.lock([&] (ConsoleStrategy *&c) {
-        if (c != &dummyConsole)
-        {
-            flushScreen();
-            c->forEachSource(this, *(void (*)(void *, EventSource &)) doRemove);
-            SignalHandler::disable();
-            delete c;
-            c = &dummyConsole;
-        }
-    });
+    if (c != &dummyConsole)
+    {
+        displayBuf.flushScreen(c->display);
+        for (auto *source : c->sources)
+            if (source)
+                waiter.removeSource(*source);
+        SignalHandler::disable();
+        delete c;
+        c = &dummyConsole;
+    }
 }
 
 // The remaining methods are in platfcon.cpp.

@@ -12,9 +12,8 @@ struct TEvent;
 namespace tvision
 {
 
-class SigwinchHandler
+class SigwinchHandler final : public WakeUpEventSource
 {
-    WakeUpEventSource eventSource;
     struct sigaction oldSa;
 
     static SigwinchHandler *instance;
@@ -28,14 +27,7 @@ public:
 
     static SigwinchHandler *create() noexcept;
     ~SigwinchHandler();
-
-    EventSource &getEventSource() noexcept;
 };
-
-inline EventSource &SigwinchHandler::getEventSource() noexcept
-{
-    return eventSource;
-}
 
 } // namespace tvision
 

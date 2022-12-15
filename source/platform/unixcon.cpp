@@ -1,10 +1,30 @@
 #include <internal/unixcon.h>
-#include <internal/scrlife.h>
 
 #ifdef _TV_UNIX
 
+#include <internal/scrlife.h>
+#include <internal/sigwinch.h>
+
 namespace tvision
 {
+
+inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
+                                                 InputStrategy &aInput,
+                                                 ScreenLifetime &aScrl,
+                                                 SigwinchHandler *aSigwinch ) noexcept :
+    ConsoleStrategy(aDisplay, aInput, {&aInput, aSigwinch}),
+    scrl(aScrl),
+    sigwinch(aSigwinch)
+{
+}
+
+UnixConsoleStrategy &UnixConsoleStrategy::create( ScreenLifetime &scrl,
+                                                  DisplayStrategy &display,
+                                                  InputStrategy &input ) noexcept
+{
+    auto *sigwinch = SigwinchHandler::create();
+    return *new UnixConsoleStrategy(display, input, scrl, sigwinch);
+}
 
 UnixConsoleStrategy::~UnixConsoleStrategy()
 {
@@ -12,12 +32,6 @@ UnixConsoleStrategy::~UnixConsoleStrategy()
     delete &input;
     delete &display;
     delete &scrl;
-}
-
-void UnixConsoleStrategy::forEachSource(void *args, void (&action)(void *, EventSource &)) noexcept
-{
-    action(args, input);
-    forEachPrivateSource(args, action);
 }
 
 } // namespace tvision

@@ -4,39 +4,27 @@
 #include <internal/platform.h>
 #ifdef _TV_UNIX
 
-#include <internal/sigwinch.h>
-
 namespace tvision
 {
 
 class ScreenLifetime;
+class SigwinchHandler;
 
 class UnixConsoleStrategy : public ConsoleStrategy
 {
     ScreenLifetime &scrl;
     SigwinchHandler *sigwinch;
 
-    void forEachSource(void *args, void (&action)(void *, EventSource &)) noexcept override;
-
-protected:
-
-    void forEachPrivateSource(void *args, void (&action)(void *, EventSource &)) noexcept
-    {
-        if (sigwinch)
-            action(args, sigwinch->getEventSource());
-    }
+    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &,
+                         ScreenLifetime &, SigwinchHandler * ) noexcept;
 
 public:
 
-    // Takes ownership over 'aDisplay' and 'aInput'.
-    UnixConsoleStrategy(ScreenLifetime &aScrl, DisplayStrategy &aDisplay, InputStrategy &aInput) noexcept :
-        ConsoleStrategy(aDisplay, aInput),
-        scrl(aScrl),
-        sigwinch(SigwinchHandler::create())
-    {
-    }
+    // Takes ownership over 'scrl', 'display' and 'input'.
+    static UnixConsoleStrategy &create( ScreenLifetime &scrl,
+                                        DisplayStrategy &display,
+                                        InputStrategy &input ) noexcept;
 
-    // Deletes 'display' and 'input'.
     ~UnixConsoleStrategy();
 
     static int charWidth(uint32_t) noexcept;

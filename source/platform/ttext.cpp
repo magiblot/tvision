@@ -3,6 +3,7 @@
 
 #include <internal/codepage.h>
 #include <internal/platform.h>
+#include <internal/unixcon.h>
 #include <internal/linuxcon.h>
 #include <internal/win32con.h>
 #include <internal/winwidth.h>

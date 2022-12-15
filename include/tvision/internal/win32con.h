@@ -20,12 +20,11 @@ class Win32ConsoleStrategy final : public ConsoleStrategy
     const StdioCtl &io;
     UINT cpInput, cpOutput;
 
-
     Win32ConsoleStrategy( const StdioCtl &aIo,
                           UINT cpInput, UINT cpOutput,
                           DisplayStrategy &aDisplay,
                           InputStrategy &aInput ) noexcept :
-        ConsoleStrategy(aDisplay, aInput),
+        ConsoleStrategy(aDisplay, aInput, {&aInput}),
         io(aIo),
         cpInput(cpInput),
         cpOutput(cpOutput)
@@ -35,7 +34,6 @@ class Win32ConsoleStrategy final : public ConsoleStrategy
     ~Win32ConsoleStrategy();
 
     bool isAlive() noexcept override;
-    void forEachSource(void *, void (&)(void *, EventSource &)) noexcept override;
 
 public:
 

@@ -31,33 +31,30 @@ ConsoleStrategy &Platform::createConsole() noexcept
     if (io.isLinuxConsole())
         return LinuxConsoleStrategy::create(io, scrl, *display, *new NcursesInput(io, *display, false));
 #endif // __linux__
-    return *new UnixConsoleStrategy(scrl, *display, *new NcursesInput(io, *display, true));
+    return UnixConsoleStrategy::create(scrl, *display, *new NcursesInput(io, *display, true));
 #endif // _WIN32
 }
 
-void Platform::setUpConsole() noexcept
+void Platform::setUpConsole(ConsoleStrategy *&c) noexcept
 {
-    auto doAdd = [] (void *self, EventSource &source) {
-        ((Platform *) self)->waiter.addSource(source);
-    };
-    console.lock([&] (ConsoleStrategy *&c) {
-        if (c == &dummyConsole)
-        {
-            c = &createConsole();
-            SignalHandler::enable(signalCallback);
-            c->forEachSource(this, *(void (*)(void *, EventSource &)) doAdd);
-        }
-    });
+    if (c == &dummyConsole)
+    {
+        c = &createConsole();
+        SignalHandler::enable(signalCallback);
+        for (auto *source : c->sources)
+            if (source)
+                waiter.addSource(*source);
+    }
 }
 
 void Platform::checkConsole() noexcept
 {
-    console.lock([&] (ConsoleStrategy *c) {
+    console.lock([&] (ConsoleStrategy *&c) {
         if (!c->isAlive())
         {
             // The console likely crashed (Windows).
-            restoreConsole();
-            setUpConsole();
+            restoreConsole(c);
+            setUpConsole(c);
         }
     });
 }

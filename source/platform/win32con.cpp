@@ -108,11 +108,6 @@ bool Win32ConsoleStrategy::isAlive() noexcept
     return GetNumberOfConsoleInputEvents(io.in(), &events);
 }
 
-void Win32ConsoleStrategy::forEachSource(void *args, void (&action)(void *, EventSource &)) noexcept
-{
-    action(args, input);
-}
-
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 

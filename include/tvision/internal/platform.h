@@ -8,6 +8,7 @@
 #include <internal/buffdisp.h>
 #include <internal/events.h>
 #include <atomic>
+#include <vector>
 
 struct TEvent;
 
@@ -43,7 +44,7 @@ public:
     }
 
     virtual ~InputStrategy() {}
-    virtual bool getEvent(TEvent &ev) noexcept { return false; }
+
     virtual int getButtonCount() noexcept { return 0; }
     virtual void cursorOn() noexcept {}
     virtual void cursorOff() noexcept {}
@@ -53,23 +54,26 @@ struct ConsoleStrategy
 {
     DisplayStrategy &display;
     InputStrategy &input;
+    const std::vector<EventSource *> sources;
 
-    ConsoleStrategy(DisplayStrategy &aDisplay, InputStrategy &aInput) noexcept :
+    ConsoleStrategy( DisplayStrategy &aDisplay, InputStrategy &aInput,
+                     std::vector<EventSource *> &&aSources ) noexcept :
         display(aDisplay),
-        input(aInput)
+        input(aInput),
+        sources(std::move(aSources))
     {
     }
 
     virtual ~ConsoleStrategy() {}
+
     virtual bool isAlive() noexcept { return true; }
-    virtual void forEachSource(void *, void (&)(void *, EventSource &)) noexcept {}
 };
 
 using ThreadId = const void *;
 
 struct ThisThread
 {
-    static const void *id() noexcept
+    static ThreadId id() noexcept
     {
         static thread_local struct {} idBase;
         return &idBase;
@@ -84,25 +88,23 @@ template <class T>
 struct SignalThreadSafe
 {
     T t;
-    std::atomic<ThreadId> lockingThread {nullptr};
+    std::atomic<ThreadId> lockingThread {};
 
-    using Self = SignalThreadSafe;
-
-    struct Lock
+    struct LockGuard
     {
-        Self *self;
-        Lock(Self *aSelf) noexcept : self(aSelf)
+        SignalThreadSafe *self;
+        LockGuard(SignalThreadSafe *aSelf) noexcept : self(aSelf)
         {
-            ThreadId zero = nullptr;
+            ThreadId none {};
             // Use a spin lock because regular mutexes are not signal-safe.
             if (self)
-                while (self->lockingThread.compare_exchange_weak(zero, ThisThread::id()))
+                while (self->lockingThread.compare_exchange_weak(none, ThisThread::id()))
                     ;
         }
-        ~Lock()
+        ~LockGuard()
         {
             if (self)
-                self->lockingThread = nullptr;
+                self->lockingThread = ThreadId {};
         }
     };
 
@@ -110,7 +112,7 @@ struct SignalThreadSafe
     // 'func' takes a 'T &' by parameter.
     auto lock(Func &&func) noexcept
     {
-        Lock lk {lockedByThisThread() ? nullptr : this};
+        LockGuard lk {lockedByThisThread() ? nullptr : this};
         return func(t);
     }
 
@@ -129,7 +131,7 @@ class Platform
     BufferedDisplay displayBuf;
     DisplayStrategy dummyDisplay;
     InputStrategy dummyInput {(SysHandle) 0};
-    ConsoleStrategy dummyConsole {dummyDisplay, dummyInput};
+    ConsoleStrategy dummyConsole {dummyDisplay, dummyInput, {}};
     // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
     // or an owning reference to a heap-allocated ConsoleStrategy object.
     SignalThreadSafe<ConsoleStrategy *> console {&dummyConsole};
@@ -137,6 +139,8 @@ class Platform
     Platform() noexcept;
     ~Platform();
 
+    void setUpConsole(ConsoleStrategy *&) noexcept;
+    void restoreConsole(ConsoleStrategy *&) noexcept;
     void checkConsole() noexcept;
     bool sizeChanged(TEvent &ev) noexcept;
     ConsoleStrategy &createConsole() noexcept;
@@ -152,8 +156,10 @@ public:
     static Platform instance;
     static int (*charWidth)(uint32_t) noexcept;
 
-    void setUpConsole() noexcept;
-    void restoreConsole() noexcept;
+    void setUpConsole() noexcept
+        { console.lock([&] (auto *&c) { setUpConsole(c); }); }
+    void restoreConsole() noexcept
+        { console.lock([&] (auto *&c) { restoreConsole(c); }); }
 
     bool getEvent(TEvent &ev) noexcept;
     void waitForEvents(int ms) noexcept { checkConsole(); waiter.waitForEvents(ms); }

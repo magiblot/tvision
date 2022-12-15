@@ -1,9 +1,15 @@
 #ifdef __linux__
 
+#define Uses_TEvent
+#define Uses_TKeys
+#include <tvision/tv.h>
+
 #include <internal/linuxcon.h>
 #include <internal/stdioctl.h>
 #include <internal/gpminput.h>
 #include <internal/terminal.h>
+#include <internal/scrlife.h>
+#include <internal/sigwinch.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
 #include <sys/ioctl.h>
@@ -13,27 +19,39 @@
 namespace tvision
 {
 
+inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
+                                                   ScreenLifetime &aScrl,
+                                                   SigwinchHandler *aSigwinch,
+                                                   LinuxConsoleInput &aWrapper,
+                                                   GpmInput *aGpm ) noexcept :
+    ConsoleStrategy( aDisplay,
+                     aGpm ? *aGpm : aWrapper.input,
+                     {&aWrapper, aGpm, aSigwinch} ),
+    scrl(aScrl),
+    sigwinch(aSigwinch),
+    wrapper(aWrapper),
+    gpm(aGpm)
+{
+}
+
 LinuxConsoleStrategy &LinuxConsoleStrategy::create( const StdioCtl &io, ScreenLifetime &scrl,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
 {
-    return *new LinuxConsoleStrategy(io, scrl, display, input, GpmInput::create());
+    auto *sigwinch = SigwinchHandler::create();
+    auto &wrapper = *new LinuxConsoleInput(io, input);
+    auto *gpm = GpmInput::create();
+    return *new LinuxConsoleStrategy(display, scrl, sigwinch, wrapper, gpm);
 }
 
 LinuxConsoleStrategy::~LinuxConsoleStrategy()
 {
-    // The superclass always deletes 'input'. If we have a different object
-    // in 'wrapper.input', we delete it too.
-    if (&wrapper.input != &input)
-        delete &wrapper.input;
-}
-
-void LinuxConsoleStrategy::forEachSource(void *args, void (&action)(void *, EventSource &)) noexcept
-{
-    action(args, wrapper);
-    if (&wrapper.input != &input)
-        action(args, input);
-    UnixConsoleStrategy::forEachPrivateSource(args, action);
+    delete sigwinch;
+    delete gpm;
+    delete &wrapper.input;
+    delete &wrapper;
+    delete &display;
+    delete &scrl;
 }
 
 bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept

@@ -1,20 +1,20 @@
 #ifndef TVISION_LINUXCON_H
 #define TVISION_LINUXCON_H
 
-#include <internal/unixcon.h>
-
 #ifdef __linux__
 
-#define Uses_TKeys
-#define Uses_TEvent
-#include <tvision/tv.h>
+#include <internal/platform.h>
+
+struct TEvent;
 
 namespace tvision
 {
 
+class ScreenLifetime;
+class SigwinchHandler;
 class GpmInput;
 
-struct LinuxConsoleInput : public EventSource
+struct LinuxConsoleInput final : public EventSource
 {
     const StdioCtl &io;
     InputStrategy &input;
@@ -32,17 +32,16 @@ struct LinuxConsoleInput : public EventSource
     static ushort getKeyboardModifiers(const StdioCtl &io) noexcept;
 };
 
-class LinuxConsoleStrategy : public UnixConsoleStrategy
+class LinuxConsoleStrategy : public ConsoleStrategy
 {
-    LinuxConsoleInput wrapper;
+    ScreenLifetime &scrl;
+    SigwinchHandler *sigwinch;
+    LinuxConsoleInput &wrapper;
+    GpmInput *gpm;
 
-    LinuxConsoleStrategy( const StdioCtl &aIo, ScreenLifetime &aScrl,
-                          DisplayStrategy &aDisplay, InputStrategy &aInput,
-                          GpmInput *gpm ) noexcept :
-        UnixConsoleStrategy(aScrl, aDisplay, gpm ? (InputStrategy &) *gpm : aInput),
-        wrapper(aIo, aInput)
-    {
-    }
+    LinuxConsoleStrategy( DisplayStrategy &aDisplay, ScreenLifetime &aScrl,
+                          SigwinchHandler *aSigwinch, LinuxConsoleInput &aWrapper,
+                          GpmInput *aGpm ) noexcept;
 
 public:
 
@@ -53,8 +52,6 @@ public:
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;
     ~LinuxConsoleStrategy();
-
-    void forEachSource(void *, void (&)(void *, EventSource &)) noexcept override;
 
     static int charWidth(uint32_t) noexcept;
 };

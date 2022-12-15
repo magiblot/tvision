@@ -10,7 +10,6 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/sigwinch.h>
 #include <internal/terminal.h>
 
 namespace tvision
@@ -25,7 +24,6 @@ class NcursesInput : public InputStrategy
 
     const StdioCtl &io;
     InputState state {};
-    int buttonCount {0};
     bool mouseEnabled;
 
     static int getch_nb() noexcept;

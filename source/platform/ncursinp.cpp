@@ -273,12 +273,7 @@ NcursesInput::NcursesInput(const StdioCtl &aIo, NcursesDisplay &, bool mouse) no
 
     TermIO::keyModsOn(io);
     if (mouseEnabled)
-    {
-        // The button count is not really important. Turbo Vision only checks
-        // whether it is non-zero.
-        buttonCount = 2;
         TermIO::mouseOn(io);
-    }
 }
 
 NcursesInput::~NcursesInput()
@@ -290,7 +285,9 @@ NcursesInput::~NcursesInput()
 
 int NcursesInput::getButtonCount() noexcept
 {
-    return buttonCount;
+    // The exact button count is not really important. Turbo Vision
+    // only checks whether it is non-zero.
+    return mouseEnabled ? 2 : 0;
 }
 
 int NcursesInput::getch_nb() noexcept
