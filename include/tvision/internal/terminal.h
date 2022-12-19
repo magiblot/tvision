@@ -20,20 +20,30 @@ struct InputState
 #endif
 };
 
+class InputGetter
+{
+public:
+
+    virtual int get() noexcept = 0;
+    virtual void unget(int) noexcept = 0;
+};
+
 class GetChBuf
 {
-    enum { maxSize = 63 };
+    enum { maxSize = 31 };
 
+    InputGetter &in;
     uint size {0};
     int keys[maxSize];
 
-protected:
-
-    virtual int do_getch() noexcept = 0;
-    virtual bool do_ungetch(int) noexcept = 0;
-
 public:
 
+    GetChBuf(InputGetter &aIn) noexcept :
+        in(aIn)
+    {
+    }
+
+    int getUnbuffered() noexcept;
     int get(bool keepErr) noexcept;
     int last(size_t i) noexcept;
     void unget() noexcept;
@@ -44,11 +54,16 @@ public:
 
 };
 
+inline int GetChBuf::getUnbuffered() noexcept
+{
+    return in.get();
+}
+
 inline int GetChBuf::get(bool keepErr=false) noexcept
 {
     if (size < maxSize)
     {
-        int k = do_getch();
+        int k = in.get();
         if (keepErr || k != -1)
             keys[size++] = k;
         return k;
@@ -67,7 +82,7 @@ inline void GetChBuf::unget() noexcept
 {
     int k;
     if (size && (k = keys[--size]) != -1)
-        do_ungetch(k);
+        in.unget(k);
 }
 
 inline void GetChBuf::reject() noexcept
@@ -172,6 +187,7 @@ namespace TermIO
     void setAltModifier(KeyDownEvent &keyDown) noexcept;
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
+    ParseResult parseEvent(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, InputState&) noexcept;

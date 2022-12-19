@@ -33,16 +33,6 @@ class NcursesInput : public InputStrategy
 
     bool parseCursesMouse(TEvent&) noexcept;
 
-    class NcGetChBuf : public GetChBuf
-    {
-
-    protected:
-
-        int do_getch() noexcept override;
-        bool do_ungetch(int) noexcept override;
-
-    };
-
 public:
 
     // Lifetimes of 'io' and 'display' must exceed that of 'this'.

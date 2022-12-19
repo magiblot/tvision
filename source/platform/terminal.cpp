@@ -355,6 +355,13 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
     keyDown.controlKeyState = mods;
 }
 
+ParseResult TermIO::parseEvent(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
+{
+    if (buf.get() == '\x1B')
+        return parseEscapeSeq(buf, ev, state);
+    return Rejected;
+}
+
 ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B" has just been read.
 {
@@ -382,25 +389,22 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
                     if (csi.readFrom(buf))
                     {
                         if (csi.terminator() == 'u')
-                            res = parseFixTermKey(csi, ev);
+                            return parseFixTermKey(csi, ev);
                         else
-                            res = parseCSIKey(csi, ev);
+                            return parseCSIKey(csi, ev);
                     }
                     break;
                 }
             }
             break;
         case 'O':
-            res = parseSS3Key(buf, ev);
-            break;
+            return parseSS3Key(buf, ev);
         case '\x1B':
             res = parseEscapeSeq(buf, ev, state);
             if (res == Accepted && ev.what == evKeyDown)
                 setAltModifier(ev.keyDown);
             break;
     }
-    if (res == Rejected)
-        buf.reject();
     return res;
 }
 
@@ -663,7 +667,7 @@ ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state
     char s[4*k];
     size_t len = 0;
     char c;
-    while (c = buf.get(), c != -1 && c != '\x07')
+    while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
         if (len < sizeof(s))
             s[len++] = c;
     TStringView input {s, len};

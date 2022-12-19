@@ -9,26 +9,27 @@
 namespace tvision
 {
 
-class StrGetChBuf : public GetChBuf
+class StrInputGetter : public InputGetter
 {
     TStringView str;
     size_t i {0};
 
 public:
 
-    StrGetChBuf(TStringView aStr) noexcept :
+    StrInputGetter(TStringView aStr) noexcept :
         str(aStr)
     {
     }
 
-    int do_getch() noexcept override
+    int get() noexcept override
     {
         return i < str.size() ? str[i++] : -1;
     }
 
-    bool do_ungetch(int) noexcept override
+    void unget(int) noexcept override
     {
-        return i > 0 && (--i, true);
+        if (i > 0)
+            --i;
     }
 };
 
@@ -110,7 +111,8 @@ TEST(TermIO, ShouldReadFar2lKeys)
 
     for (auto &testCase : testCases)
     {
-        StrGetChBuf buf(testCase.input);
+        StrInputGetter in(testCase.input);
+        GetChBuf buf(in);
         ParseResultEvent actual {};
         InputState state {};
         actual.parseResult = TermIO::parseFar2lInput(buf, actual.ev, state);
