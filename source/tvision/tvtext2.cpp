@@ -91,8 +91,7 @@ char getCtrlChar(ushort keyCode) noexcept
 
 ushort getCtrlCode(uchar ch) noexcept
 {
-	return getAltCode(ch)|(((('a'<=ch)&&(ch<='z'))?(ch&~0x20):ch)-'A'+1);
-
+    return getAltCode(ch)|(((('a'<=ch)&&(ch<='z'))?(ch&~0x20):ch)-'A'+1);
 }
 
 

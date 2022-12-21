@@ -27,10 +27,6 @@
 //
 // Not all key combinations can be used in all platforms. In particular:
 //
-// * In 16-bit mode, the 'control key' definitions cannot be used to define
-//   menu hotkeys, etc., which require scan codes. They are intended only
-//   to provide mnemonic names for the ASCII control codes.
-//
 // * In 16-bit mode, keystrokes corresponding to the 'additional extended
 //   key codes' are not reported.
 //

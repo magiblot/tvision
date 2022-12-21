@@ -224,6 +224,14 @@ static const TKeyCodeLookupEntry
     kbCtrlBackEntry =   { kbBack,   kbCtrlShift },
     kbCtrlEnterEntry =  { kbEnter,  kbCtrlShift };
 
+static int isRawCtrlKey(uchar scanCode, uchar charCode)
+{
+    static const char scanKeys[35 + 1] =
+        "QWERTYUIOP\0\0\0\0ASDFGHJKL\0\0\0\0\0ZXCVBNM";
+    return 16 <= scanCode && scanCode < 16 + 35
+        && scanKeys[scanCode - 16] == charCode - 1 + 'A';
+};
+
 static int isPrintableCharacter(uchar charCode) noexcept
 {
     return ' ' <= charCode && charCode != 0x7F && charCode != 0xFF;
@@ -246,8 +254,8 @@ TKey::TKey(ushort keyCode, ushort shiftState) noexcept
     uchar charCode = keyCode & 0xFF;
 
     const TKeyCodeLookupEntry *entry = 0;
-    if (keyCode <= kbCtrlZ)
-        entry = &ctrlKeyLookup[keyCode];
+    if (keyCode <= kbCtrlZ || isRawCtrlKey(scanCode, charCode))
+        entry = &ctrlKeyLookup[charCode];
     else if ((keyCode & 0xFF) == 0)
     {
         if (scanCode < extKeyLookupSize)
