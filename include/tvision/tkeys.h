@@ -131,7 +131,8 @@ const ushort
     kbScrollState = 0x0010,
     kbNumState    = 0x0020,
     kbCapsState   = 0x0040,
-    kbInsState    = 0x0080;
+    kbInsState    = 0x0080,
+    kbBracketed   = 0x0400;
 #else
     kbLeftShift   = SHIFT_PRESSED,
     kbRightShift  = SHIFT_PRESSED,
@@ -146,7 +147,8 @@ const ushort
     kbNumState    = NUMLOCK_ON,
     kbCapsState   = CAPSLOCK_ON,
     kbEnhanced    = ENHANCED_KEY,
-    kbInsState    = 0x200;  // Ensure this doesn't overlap above values
+    kbInsState    = 0x200,  // Ensure this doesn't overlap above values
+    kbBracketed   = 0x400;
 #endif
 
 #endif // __TKeys

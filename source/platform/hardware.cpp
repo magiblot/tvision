@@ -121,6 +121,16 @@ void THardwareInfo::stopEventWait() noexcept
     platf->stopEventWait();
 }
 
+BOOL THardwareInfo::setClipboardText( TStringView text ) noexcept
+{
+    return FALSE;
+}
+
+BOOL THardwareInfo::requestClipboardText( void (&accept)(TStringView) ) noexcept
+{
+    return FALSE;
+}
+
 #ifndef _WIN32
 
 extern "C" DWORD GetTickCount(void) noexcept

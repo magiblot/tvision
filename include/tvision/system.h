@@ -268,6 +268,9 @@ public:
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
 
+    static void putTextEvent( TStringView ) noexcept;
+    static Boolean getTextEvent( TEvent& ) noexcept;
+
 private:
 
     static TMouse *mouse;
@@ -281,8 +284,6 @@ private:
 #endif
     static void __MOUSEHUGE mouseInt();
 #endif
-
-    static void setLast( TEvent& ) noexcept;
 
     static MouseEventType _NEAR lastMouse;
 public:
@@ -308,6 +309,9 @@ private:
     static ushort _NEAR autoTicks;
     static ushort _NEAR autoDelay;
 
+    static char *pendingText;
+    static size_t pendingTextLength;
+    static size_t pendingTextIndex;
 };
 
 inline void TEvent::getMouseEvent() noexcept
@@ -316,6 +320,29 @@ inline void TEvent::getMouseEvent() noexcept
 }
 
 #endif  // Uses_TEventQueue
+
+#if defined( Uses_TClipboard ) && !defined( __TClipboard )
+#define __TClipboard
+
+class TClipboard
+{
+public:
+
+    ~TClipboard();
+
+    static void setText(TStringView text) noexcept;
+    static void requestText() noexcept;
+
+private:
+
+    TClipboard();
+
+    static TClipboard instance;
+    static char *localText;
+    static size_t localTextLength;
+};
+
+#endif
 
 #if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen

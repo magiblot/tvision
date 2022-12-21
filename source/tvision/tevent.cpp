@@ -20,6 +20,7 @@
 #define Uses_TScreen
 #define Uses_TEventQueue
 #define Uses_THardwareInfo
+#define Uses_TText
 #include <tvision/tv.h>
 
 #if !defined (__FLAT__)
@@ -58,6 +59,10 @@ MouseEventType _NEAR TEventQueue::downMouse;
 
 TMouse *TEventQueue::mouse;
 
+char *TEventQueue::pendingText = 0;
+size_t TEventQueue::pendingTextLength = 0;
+size_t TEventQueue::pendingTextIndex = 0;
+
 TEventQueue::TEventQueue() noexcept
 {
     static TMouse mouse;
@@ -95,6 +100,8 @@ void TEventQueue::suspend() noexcept
 TEventQueue::~TEventQueue()
 {
     suspend();
+    delete pendingText;
+    pendingText = 0;
 }
 
 
@@ -284,8 +291,40 @@ I   POP DS
 }
 #endif
 
+void TEventQueue::putTextEvent( TStringView text ) noexcept
+{
+    delete[] pendingText;
+    pendingText = newStr(text);
+    pendingTextLength = text.size();
+    pendingTextIndex = 0;
+}
+
+Boolean TEventQueue::getTextEvent( TEvent &event ) noexcept
+{
+    if( pendingText )
+        {
+        TSpan<char> text( pendingText + pendingTextIndex,
+                          pendingTextLength - pendingTextIndex );
+        size_t length = TText::next( text );
+        if( length > 0 )
+            {
+            KeyDownEvent keyDown = { 0x0000, kbBracketed, {0}, (uchar) length };
+            event.what = evKeyDown;
+            event.keyDown = keyDown;
+            memcpy( event.keyDown.text, text.data(), length );
+            pendingTextIndex += length;
+            return True;
+            }
+        delete[] pendingText;
+        pendingText = 0;
+        }
+    return False;
+}
+
 void TEvent::getKeyEvent() noexcept
 {
+    if( TEventQueue::getTextEvent( *this ) )
+        return;
 #if defined( __FLAT__ )
     if( THardwareInfo::getKeyEvent( *this ) )
     {

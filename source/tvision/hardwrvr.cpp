@@ -371,14 +371,24 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     return False;
 }
 
-void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
+void THardwareInfo::waitForEvents( int timeoutMs )
 {
     if (!pendingEvent)
         WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );
 }
 
-void THardwareInfo::stopEventWait() noexcept
+void THardwareInfo::stopEventWait()
 {
+}
+
+BOOL THardwareInfo::setClipboardText( TStringView text )
+{
+    return FALSE;
+}
+
+BOOL THardwareInfo::requestClipboardText( void (&accept)(TStringView) )
+{
+    return FALSE;
 }
 
 #endif  // __BORLANDC__
