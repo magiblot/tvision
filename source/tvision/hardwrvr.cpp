@@ -108,17 +108,32 @@ ushort THardwareInfo::biosSel;
 
 #define INT10   { __emit__( 0xCD ); __emit__( 0x10 ); }
 
-static void *GetKernel32Proc(const char *name)
+static void *getModuleProc(const char *modName, const char *procName)
 {
-    HMODULE mod = GetModuleHandle("KERNEL32");
-    return mod != 0 ? GetProcAddress(mod, name) : 0;
+    HMODULE mod = GetModuleHandle(modName);
+    return mod != 0 ? GetProcAddress(mod, procName) : 0;
 };
+
+// These methods are not available on DPMI32 and cannot be linked statically.
+
+static BOOL (WINAPI * pSetConsoleActiveScreenBuffer)(HANDLE) =
+    (BOOL (WINAPI *)(HANDLE)) getModuleProc("KERNEL32", "SetConsoleActiveScreenBuffer");
+static BOOL (WINAPI * pOpenClipboard)(HWND) =
+    (BOOL (WINAPI *)(HWND)) getModuleProc("USER32", "OpenClipboard");
+static BOOL (WINAPI * pCloseClipboard)() =
+    (BOOL (WINAPI *)()) getModuleProc("USER32", "CloseClipboard");
+static HANDLE (WINAPI * pSetClipboardData)(UINT, HANDLE) =
+    (HANDLE (WINAPI *)(UINT, HANDLE)) getModuleProc("USER32", "SetClipboardData");
+static HANDLE (WINAPI * pGetClipboardData)(UINT) =
+    (HANDLE (WINAPI *)(UINT)) getModuleProc("USER32", "GetClipboardData");
+static BOOL (WINAPI * pEmptyClipboard)() =
+    (BOOL (WINAPI *)()) getModuleProc("USER32", "EmptyClipboard");
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
 THardwareInfo::THardwareInfo()
 {
-    if( GetKernel32Proc("Borland32") != 0 )
+    if( getModuleProc("KERNEL32", "Borland32") != 0 )
         platform = plDPMI32;
     else
         platform = plWinNT;
@@ -164,20 +179,17 @@ THardwareInfo::~THardwareInfo()
 
 void THardwareInfo::setUpConsole()
 {
-    // SetConsoleActiveScreenBuffer is not available on DPMI32.
-    void *proc = GetKernel32Proc("SetConsoleActiveScreenBuffer");
-    if( proc != 0 )
+    if( pSetConsoleActiveScreenBuffer )
         {
-        ((BOOL WINAPI(*)(HANDLE)) proc)( consoleHandle[cnOutput] );
+        pSetConsoleActiveScreenBuffer( consoleHandle[cnOutput] );
         GetConsoleScreenBufferInfo( consoleHandle[cnOutput], &sbInfo );
         }
 }
 
 void THardwareInfo::restoreConsole()
 {
-    void *proc = GetKernel32Proc("SetConsoleActiveScreenBuffer");
-    if( proc != 0 )
-        ((BOOL WINAPI(*)(HANDLE)) proc)( consoleHandle[cnStartup] );
+    if( pSetConsoleActiveScreenBuffer )
+        pSetConsoleActiveScreenBuffer( consoleHandle[cnStartup] );
 }
 
 ushort THardwareInfo::getScreenMode()
@@ -383,12 +395,47 @@ void THardwareInfo::stopEventWait()
 
 BOOL THardwareInfo::setClipboardText( TStringView text )
 {
-    return FALSE;
+    BOOL result = False;
+    if( pOpenClipboard && pOpenClipboard( 0 ) )
+        {
+        HGLOBAL hData;
+        char *pData;
+        if( pEmptyClipboard() &&
+            ( (result = text.empty()) == True ||
+              ( (hData = GlobalAlloc( GMEM_MOVEABLE, text.size() + 1 )) != 0 &&
+                (pData = (char *) GlobalLock( hData )) != 0
+              )
+            )
+          )
+            {
+            memcpy(pData, text.data(), text.size());
+            pData[text.size()] = '\0';
+            GlobalUnlock( hData );
+            if( (result = (pSetClipboardData( CF_OEMTEXT, hData ) != 0)) == False )
+                GlobalFree( hData );
+            }
+        pCloseClipboard();
+        }
+    return result;
 }
 
-BOOL THardwareInfo::requestClipboardText( void (&accept)(TStringView) )
+BOOL THardwareInfo::requestClipboardText( void (&accept)( TStringView ) )
 {
-    return FALSE;
+    BOOL result = False;
+    if( pOpenClipboard && pOpenClipboard( 0 ) )
+        {
+        HGLOBAL hData;
+        char *pData;
+        if( (hData = pGetClipboardData( CF_OEMTEXT )) != 0 &&
+            (result = ((pData = (char *) GlobalLock( hData )) != 0)) == True
+          )
+            {
+            accept( pData );
+            GlobalUnlock( hData );
+            }
+        pCloseClipboard();
+        }
+    return result;
 }
 
 #endif  // __BORLANDC__
