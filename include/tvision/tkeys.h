@@ -195,7 +195,9 @@ inline constexpr TKey::TKey() noexcept :
 
 inline constexpr Boolean operator==(TKey a, TKey b) noexcept
 {
-    return Boolean( (a.code | (a.mods << 16)) == (b.code | (b.mods << 16)) );
+    return Boolean(
+        (a.code | ((int32_t) a.mods << 16)) == (b.code | ((int32_t) b.mods << 16))
+    );
 }
 
 inline constexpr Boolean operator!=(TKey a, TKey b) noexcept
