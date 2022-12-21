@@ -184,7 +184,6 @@ namespace TermIO
     void keyModsOn(const StdioCtl &) noexcept;
     void keyModsOff(const StdioCtl &) noexcept;
 
-    void setAltModifier(KeyDownEvent &keyDown) noexcept;
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
     ParseResult parseEvent(GetChBuf&, TEvent&, InputState&) noexcept;

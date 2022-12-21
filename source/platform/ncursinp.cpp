@@ -366,7 +366,10 @@ bool NcursesInput::getEvent(TEvent &ev) noexcept
             parsePrintableChar(ev, keys, num_keys);
 
         if (Alt)
-            TermIO::setAltModifier(ev.keyDown);
+        {
+            ev.keyDown.controlKeyState |= kbAltShift;
+            TermIO::normalizeKey(ev.keyDown);
+        }
 
         return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }

@@ -5,6 +5,7 @@
 #include <internal/terminal.h>
 #include <internal/stdioctl.h>
 #include <internal/constmap.h>
+#include <internal/constarr.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
@@ -13,286 +14,175 @@
 namespace tvision
 {
 
-namespace terminp
+static const const_unordered_map<ushort, constarray<ushort, 3>> moddedKeyCodes =
+{
+    { 'A', {0, kbCtrlA, kbAltA}                }, { 'B', {0, kbCtrlB, kbAltB}                },
+    { 'C', {0, kbCtrlC, kbAltC}                }, { 'D', {0, kbCtrlD, kbAltD}                },
+    { 'E', {0, kbCtrlE, kbAltE}                }, { 'F', {0, kbCtrlF, kbAltF}                },
+    { 'G', {0, kbCtrlG, kbAltG}                }, { 'H', {0, kbCtrlH, kbAltH}                },
+    { 'I', {0, kbCtrlI, kbAltI}                }, { 'J', {0, kbCtrlJ, kbAltJ}                },
+    { 'K', {0, kbCtrlK, kbAltK}                }, { 'L', {0, kbCtrlL, kbAltL}                },
+    { 'M', {0, kbCtrlM, kbAltM}                }, { 'N', {0, kbCtrlN, kbAltN}                },
+    { 'O', {0, kbCtrlO, kbAltO}                }, { 'P', {0, kbCtrlP, kbAltP}                },
+    { 'Q', {0, kbCtrlQ, kbAltQ}                }, { 'R', {0, kbCtrlR, kbAltR}                },
+    { 'S', {0, kbCtrlS, kbAltS}                }, { 'T', {0, kbCtrlT, kbAltT}                },
+    { 'U', {0, kbCtrlU, kbAltU}                }, { 'V', {0, kbCtrlV, kbAltV}                },
+    { 'W', {0, kbCtrlW, kbAltW}                }, { 'X', {0, kbCtrlX, kbAltX}                },
+    { 'Y', {0, kbCtrlY, kbAltY}                }, { 'Z', {0, kbCtrlZ, kbAltZ}                },
+    { '1', {0, 0, kbAlt1}                      }, { '2', {0, 0, kbAlt2}                      },
+    { '3', {0, 0, kbAlt3}                      }, { '4', {0, 0, kbAlt4}                      },
+    { '5', {0, 0, kbAlt5}                      }, { '6', {0, 0, kbAlt6}                      },
+    { '7', {0, 0, kbAlt7}                      }, { '8', {0, 0, kbAlt8}                      },
+    { '9', {0, 0, kbAlt9}                      }, { '0', {0, 0, kbAlt0}                      },
+    { ' ', {0, 0, kbAltSpace}                  }, { '-', {0, 0, kbAltMinus}                  },
+    { '=', {0, 0, kbAltEqual}                  },
+    { kbF1, {kbShiftF1, kbCtrlF1, kbAltF1}     }, { kbF2, {kbShiftF2, kbCtrlF2, kbAltF2}     },
+    { kbF3, {kbShiftF3, kbCtrlF3, kbAltF3}     }, { kbF4, {kbShiftF4, kbCtrlF4, kbAltF4}     },
+    { kbF5, {kbShiftF5, kbCtrlF5, kbAltF5}     }, { kbF6, {kbShiftF6, kbCtrlF6, kbAltF6}     },
+    { kbF7, {kbShiftF7, kbCtrlF7, kbAltF7}     }, { kbF8, {kbShiftF8, kbCtrlF8, kbAltF8}     },
+    { kbF9, {kbShiftF9, kbCtrlF9, kbAltF9}     }, { kbF10, {kbShiftF10, kbCtrlF10, kbAltF10} },
+    { kbF11, {kbShiftF11, kbCtrlF11, kbAltF11} }, { kbF12, {kbShiftF12, kbCtrlF12, kbAltF12} },
+    { kbEsc, {0, 0, kbAltEsc}                  }, { kbBack, {0, kbCtrlBack, kbAltBack}       },
+    { kbTab, {kbShiftTab, kbCtrlTab, kbAltTab} }, { kbEnter, {0, kbCtrlEnter, kbAltEnter}    },
+    { kbHome, {0, kbCtrlHome, kbAltHome}       }, { kbUp, {0, kbCtrlUp, kbAltUp}             },
+    { kbPgUp, {0, kbCtrlPgUp, kbAltPgUp}       }, { kbLeft, {0, kbCtrlLeft, kbAltLeft}       },
+    { kbRight, {0, kbCtrlRight, kbAltRight}    }, { kbEnd, {0, kbCtrlEnd, kbAltEnd}          },
+    { kbDown, {0, kbCtrlDown, kbAltDown}       }, { kbPgDn, {0, kbCtrlPgDn, kbAltPgDn}       },
+    { kbIns, {kbShiftIns, kbCtrlIns, kbAltIns} }, { kbDel, {kbShiftDel, kbCtrlDel, kbAltDel} },
+};
+
+static const const_unordered_map<uchar, ushort> virtualKeyCodeToKeyCode =
+{
+    { VK_BACK,      kbBack      }, { VK_TAB,        kbTab       },
+    { VK_RETURN,    kbEnter     }, { VK_ESCAPE,     kbEsc       },
+    { VK_PRIOR,     kbPgUp      }, { VK_NEXT,       kbPgDn      },
+    { VK_END,       kbEnd       }, { VK_HOME,       kbHome      },
+    { VK_LEFT,      kbLeft      }, { VK_UP,         kbUp        },
+    { VK_RIGHT,     kbRight     }, { VK_DOWN,       kbDown      },
+    { VK_INSERT,    kbIns       }, { VK_DELETE,     kbDel       },
+    { VK_NUMPAD0,   '0'         }, { VK_NUMPAD1,    '1'         },
+    { VK_NUMPAD2,   '2'         }, { VK_NUMPAD3,    '3'         },
+    { VK_NUMPAD4,   '4'         }, { VK_NUMPAD5,    '5'         },
+    { VK_NUMPAD6,   '6'         }, { VK_NUMPAD7,    '7'         },
+    { VK_NUMPAD8,   '8'         }, { VK_NUMPAD9,    '9'         },
+    { VK_MULTIPLY,  '*'         }, { VK_ADD,        '+'         },
+    { VK_SEPARATOR, '|'         }, { VK_SUBTRACT,   '-'         },
+    { VK_DECIMAL,   '.'         }, { VK_DIVIDE,     '/'         },
+    { VK_F1,        kbF1        }, { VK_F2,         kbF2        },
+    { VK_F3,        kbF3        }, { VK_F4,         kbF4        },
+    { VK_F5,        kbF5        }, { VK_F6,         kbF6        },
+    { VK_F7,        kbF7        }, { VK_F8,         kbF8        },
+    { VK_F9,        kbF9        }, { VK_F10,        kbF10       },
+    { VK_F11,       kbF11       }, { VK_F12,        kbF12       },
+};
+
+const uint XTermModDefault = 1;
+
+static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
+{
+    mods -= XTermModDefault;
+    ushort tvmods =
+          (kbShift & -(mods & 1))
+        | (kbAltShift & -(mods & 2))
+        | (kbCtrlShift & -(mods & 4))
+        ;
+    KeyDownEvent keyDown {{keyCode}, tvmods};
+    TermIO::normalizeKey(keyDown);
+    return keyDown;
+}
+
+static bool isAlpha(uint32_t ascii) noexcept
+{
+    return ' ' <= ascii && ascii < 127;
+};
+
+static bool isPrivate(uint32_t codepoint) noexcept
+{
+    return 57344 <= codepoint && codepoint <= 63743;
+};
+
+static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexcept
 {
 
-    // Modifier precedece: Shift < Ctrl < Alt
-
-    static const const_unordered_map<ushort, ushort> ShiftKeyCode =
+    ushort keyCode = 0;
+    switch (value)
     {
-        { kbF1,        kbShiftF1   }, { kbF2,        kbShiftF2   },
-        { kbF3,        kbShiftF3   }, { kbF4,        kbShiftF4   },
-        { kbF5,        kbShiftF5   }, { kbF6,        kbShiftF6   },
-        { kbF7,        kbShiftF7   }, { kbF8,        kbShiftF8   },
-        { kbF9,        kbShiftF9   }, { kbF10,       kbShiftF10  },
-        { kbF11,       kbShiftF11  }, { kbF12,       kbShiftF12  },
-        { kbIns,       kbShiftIns  }, { kbDel,       kbShiftDel  },
-        { kbTab,       kbShiftTab  },
-    };
-
-    static const const_unordered_map<ushort, ushort> CtrlKeyCode =
-    {
-        { 'A', kbCtrlA }, { 'B', kbCtrlB }, { 'C', kbCtrlC }, { 'D', kbCtrlD },
-        { 'E', kbCtrlE }, { 'F', kbCtrlF }, { 'G', kbCtrlG }, { 'H', kbCtrlH },
-        { 'I', kbCtrlI }, { 'J', kbCtrlJ }, { 'K', kbCtrlK }, { 'L', kbCtrlL },
-        { 'M', kbCtrlM }, { 'N', kbCtrlN }, { 'O', kbCtrlO }, { 'P', kbCtrlP },
-        { 'Q', kbCtrlQ }, { 'R', kbCtrlR }, { 'S', kbCtrlS }, { 'T', kbCtrlT },
-        { 'U', kbCtrlU }, { 'V', kbCtrlV }, { 'W', kbCtrlW }, { 'X', kbCtrlX },
-        { 'Y', kbCtrlY }, { 'Z', kbCtrlZ },
-        { kbF1,        kbCtrlF1    }, { kbF2,        kbCtrlF2    },
-        { kbF3,        kbCtrlF3    }, { kbF4,        kbCtrlF4    },
-        { kbF5,        kbCtrlF5    }, { kbF6,        kbCtrlF6    },
-        { kbF7,        kbCtrlF7    }, { kbF8,        kbCtrlF8    },
-        { kbF9,        kbCtrlF9    }, { kbF10,       kbCtrlF10   },
-        { kbF11,       kbCtrlF11   }, { kbF12,       kbCtrlF12   },
-        { kbShiftF1,   kbCtrlF1    }, { kbShiftF2,   kbCtrlF2    },
-        { kbShiftF3,   kbCtrlF3    }, { kbShiftF4,   kbCtrlF4    },
-        { kbShiftF5,   kbCtrlF5    }, { kbShiftF6,   kbCtrlF6    },
-        { kbShiftF7,   kbCtrlF7    }, { kbShiftF8,   kbCtrlF8    },
-        { kbShiftF9,   kbCtrlF9    }, { kbShiftF10,  kbCtrlF10   },
-        { kbShiftF11,  kbCtrlF11   }, { kbShiftF12,  kbCtrlF12   },
-        { kbBack,      kbCtrlBack  }, { kbEnter,     kbCtrlEnter },
-        { kbDown,      kbCtrlDown  }, { kbUp,        kbCtrlUp    },
-        { kbLeft,      kbCtrlLeft  }, { kbRight,     kbCtrlRight },
-        { kbIns,       kbCtrlIns   }, { kbDel,       kbCtrlDel   },
-        { kbHome,      kbCtrlHome  }, { kbEnd,       kbCtrlEnd   },
-        { kbPgUp,      kbCtrlPgUp  }, { kbPgDn,      kbCtrlPgDn  },
-        { kbTab,       kbCtrlTab   },
-        { kbShiftIns,  kbCtrlIns   }, { kbShiftDel,  kbCtrlDel   },
-        { kbShiftTab,  kbCtrlTab   },
-    };
-
-    static const const_unordered_map<ushort, ushort> AltKeyCode =
-    {
-        { 'A', kbAltA }, { 'B', kbAltB }, { 'C', kbAltC }, { 'D', kbAltD },
-        { 'E', kbAltE }, { 'F', kbAltF }, { 'G', kbAltG }, { 'H', kbAltH },
-        { 'I', kbAltI }, { 'J', kbAltJ }, { 'K', kbAltK }, { 'L', kbAltL },
-        { 'M', kbAltM }, { 'N', kbAltN }, { 'O', kbAltO }, { 'P', kbAltP },
-        { 'Q', kbAltQ }, { 'R', kbAltR }, { 'S', kbAltS }, { 'T', kbAltT },
-        { 'U', kbAltU }, { 'V', kbAltV }, { 'W', kbAltW }, { 'X', kbAltX },
-        { 'Y', kbAltY }, { 'Z', kbAltZ },
-        { kbCtrlA, kbAltA }, { kbCtrlB, kbAltB }, { kbCtrlC, kbAltC }, { kbCtrlD, kbAltD },
-        { kbCtrlE, kbAltE }, { kbCtrlF, kbAltF }, { kbCtrlG, kbAltG }, { kbCtrlH, kbAltH },
-        { kbCtrlI, kbAltI }, { kbCtrlJ, kbAltJ }, { kbCtrlK, kbAltK }, { kbCtrlL, kbAltL },
-        { kbCtrlM, kbAltM }, { kbCtrlN, kbAltN }, { kbCtrlO, kbAltO }, { kbCtrlP, kbAltP },
-        { kbCtrlQ, kbAltQ }, { kbCtrlR, kbAltR }, { kbCtrlS, kbAltS }, { kbCtrlT, kbAltT },
-        { kbCtrlU, kbAltU }, { kbCtrlV, kbAltV }, { kbCtrlW, kbAltW }, { kbCtrlX, kbAltX },
-        { '1', kbAlt1 }, { '2', kbAlt2 }, { '3', kbAlt3 }, { '4', kbAlt4 },
-        { '5', kbAlt5 }, { '6', kbAlt6 }, { '7', kbAlt7 }, { '8', kbAlt8 },
-        { '9', kbAlt9 }, { '0', kbAlt0 },
-        { ' ',         kbAltSpace  },
-        { kbF1,        kbAltF1     }, { kbF2,        kbAltF2     },
-        { kbF3,        kbAltF3     }, { kbF4,        kbAltF4     },
-        { kbF5,        kbAltF5     }, { kbF6,        kbAltF6     },
-        { kbF7,        kbAltF7     }, { kbF8,        kbAltF8     },
-        { kbF9,        kbAltF9     }, { kbF10,       kbAltF10    },
-        { kbF11,       kbAltF11    }, { kbF12,       kbAltF12    },
-        { kbShiftF1,   kbAltF1     }, { kbShiftF2,   kbAltF2     },
-        { kbShiftF3,   kbAltF3     }, { kbShiftF4,   kbAltF4     },
-        { kbShiftF5,   kbAltF5     }, { kbShiftF6,   kbAltF6     },
-        { kbShiftF7,   kbAltF7     }, { kbShiftF8,   kbAltF8     },
-        { kbShiftF9,   kbAltF9     }, { kbShiftF10,  kbAltF10    },
-        { kbShiftF11,  kbAltF11    }, { kbShiftF12,  kbAltF12    },
-        { kbCtrlF1,    kbAltF1     }, { kbCtrlF2,    kbAltF2     },
-        { kbCtrlF3,    kbAltF3     }, { kbCtrlF4,    kbAltF4     },
-        { kbCtrlF5,    kbAltF5     }, { kbCtrlF6,    kbAltF6     },
-        { kbCtrlF7,    kbAltF7     }, { kbCtrlF8,    kbAltF8     },
-        { kbCtrlF9,    kbAltF9     }, { kbCtrlF10,   kbAltF10    },
-        { kbCtrlF11,   kbAltF11    }, { kbCtrlF12,   kbAltF12    },
-        { kbBack,      kbAltBack   }, { kbEnter,     kbAltEnter  },
-        { kbDown,      kbAltDown   }, { kbUp,        kbAltUp     },
-        { kbLeft,      kbAltLeft   }, { kbRight,     kbAltRight  },
-        { kbIns,       kbAltIns    }, { kbDel,       kbAltDel    },
-        { kbHome,      kbAltHome   }, { kbEnd,       kbAltEnd    },
-        { kbPgUp,      kbAltPgUp   }, { kbPgDn,      kbAltPgDn   },
-        { kbTab,       kbAltTab    }, { kbEsc,       kbAltEsc    },
-        { kbShiftIns,  kbAltIns    }, { kbShiftDel,  kbAltDel    },
-        { kbShiftTab,  kbAltTab    },
-        { kbCtrlBack,  kbAltBack   },
-        { kbCtrlDown,  kbAltDown   }, { kbCtrlUp,    kbAltUp     },
-        { kbCtrlLeft,  kbAltLeft   }, { kbCtrlRight, kbAltRight  },
-        { kbCtrlIns,   kbAltIns    }, { kbCtrlDel,   kbAltDel    },
-        { kbCtrlHome,  kbAltHome   }, { kbCtrlEnd,   kbAltEnd    },
-        { kbCtrlPgUp,  kbAltPgUp   }, { kbCtrlPgDn,  kbAltPgDn   },
-        { kbCtrlTab,   kbAltTab    },
-    };
-
-    static const const_unordered_map<uchar, ushort> virtualKeyCodeToKeyCode =
-    {
-        { VK_BACK,      kbBack      }, { VK_TAB,        kbTab       },
-        { VK_RETURN,    kbEnter     }, { VK_ESCAPE,     kbEsc       },
-        { VK_PRIOR,     kbPgUp      }, { VK_NEXT,       kbPgDn      },
-        { VK_END,       kbEnd       }, { VK_HOME,       kbHome      },
-        { VK_LEFT,      kbLeft      }, { VK_UP,         kbUp        },
-        { VK_RIGHT,     kbRight     }, { VK_DOWN,       kbDown      },
-        { VK_INSERT,    kbIns       }, { VK_DELETE,     kbDel       },
-        { VK_NUMPAD0,   '0'         }, { VK_NUMPAD1,    '1'         },
-        { VK_NUMPAD2,   '2'         }, { VK_NUMPAD3,    '3'         },
-        { VK_NUMPAD4,   '4'         }, { VK_NUMPAD5,    '5'         },
-        { VK_NUMPAD6,   '6'         }, { VK_NUMPAD7,    '7'         },
-        { VK_NUMPAD8,   '8'         }, { VK_NUMPAD9,    '9'         },
-        { VK_MULTIPLY,  '*'         }, { VK_ADD,        '+'         },
-        { VK_SEPARATOR, '|'         }, { VK_SUBTRACT,   '-'         },
-        { VK_DECIMAL,   '.'         }, { VK_DIVIDE,     '/'         },
-        { VK_F1,        kbF1        }, { VK_F2,         kbF2        },
-        { VK_F3,        kbF3        }, { VK_F4,         kbF4        },
-        { VK_F5,        kbF5        }, { VK_F6,         kbF6        },
-        { VK_F7,        kbF7        }, { VK_F8,         kbF8        },
-        { VK_F9,        kbF9        }, { VK_F10,        kbF10       },
-        { VK_F11,       kbF11       }, { VK_F12,        kbF12       },
-    };
-
-    static inline void setModifier( KeyDownEvent &keyDown, ushort mod,
-                                    const const_unordered_map<ushort, ushort> &keyMap ) noexcept
-    {
-        keyDown.controlKeyState |= mod;
-        uchar c = keyDown.charScan.charCode;
-        if (keyDown.charScan.scanCode == 0)
-            c = ('a' <= c && c <= 'z') ? (c - 'a' + 'A') : c;
-        ushort testKeyCode = keyDown.charScan.scanCode << 8 | c;
-        if (ushort keyCode = keyMap[testKeyCode])
-        {
-            keyDown.keyCode = keyCode;
-            if (keyDown.charScan.charCode < ' ')
-                keyDown.textLength = 0;
-        }
+        case     8: keyCode = kbBack;   break;
+        case     9: keyCode = kbTab;    break;
+        case    13: keyCode = kbEnter;  break;
+        case    27: keyCode = kbEsc;    break;
+        case   127: keyCode = kbBack;   break;
+        // Functional keys as represented in Kitty's keyboard protocol.
+        // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html#functional
+        // Keypad.
+        case 57414: keyCode = kbEnter;  break;
+        case 57417: keyCode = kbLeft;   break;
+        case 57418: keyCode = kbRight;  break;
+        case 57419: keyCode = kbUp;     break;
+        case 57420: keyCode = kbDown;   break;
+        case 57421: keyCode = kbPgUp;   break;
+        case 57422: keyCode = kbPgDn;   break;
+        case 57423: keyCode = kbHome;   break;
+        case 57424: keyCode = kbEnd;    break;
+        case 57425: keyCode = kbIns;    break;
+        case 57426: keyCode = kbDel;    break;
+        default: if (isAlpha(value)) keyCode = value;
     }
-
-    static void setShiftModifier(KeyDownEvent &keyDown) noexcept
+    keyDown = keyWithXTermMods(keyCode, mods);
+    if ( (keyDown.keyCode == 0 || isAlpha(keyDown.keyCode)) &&
+         ' ' <= value && !isPrivate(value) )
     {
-        setModifier(keyDown, kbShift, ShiftKeyCode);
+        keyDown.textLength = utf32To8(value, keyDown.text);
+        keyDown.charScan.charCode =
+            CpTranslator::printableFromUtf8({keyDown.text, keyDown.textLength});
     }
+    return keyDown.keyCode != 0 || keyDown.textLength != 0;
+}
 
-    static void setCtrlModifier(KeyDownEvent &keyDown) noexcept
+static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown) noexcept
+{
+    ushort keyCode = 0;
+    switch (letter)
     {
-        setModifier(keyDown, kbCtrlShift, CtrlKeyCode);
+        case 'A': keyCode = kbUp; break;
+        case 'B': keyCode = kbDown; break;
+        case 'C': keyCode = kbRight; break;
+        case 'D': keyCode = kbLeft; break;
+        case 'E': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
+        case 'F': keyCode = kbEnd; break;
+        case 'H': keyCode = kbHome; break;
+        case 'P': keyCode = kbF1; break;
+        case 'Q': keyCode = kbF2; break;
+        case 'R': keyCode = kbF3; break;
+        case 'S': keyCode = kbF4; break;
+        case 'Z': keyCode = kbTab; break;
+        // Keypad in XTerm (SS3).
+        case 'j': keyCode = '*'; break;
+        case 'k': keyCode = '+'; break;
+        case 'm': keyCode = '-'; break;
+        case 'M': keyCode = kbEnter; break;
+        case 'n': keyCode = kbDel; break;
+        case 'o': keyCode = '/'; break;
+        case 'p': keyCode = kbIns; break;
+        case 'q': keyCode = kbEnd; break;
+        case 'r': keyCode = kbDown; break;
+        case 's': keyCode = kbPgDn; break;
+        case 't': keyCode = kbLeft; break;
+        case 'u': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
+        case 'v': keyCode = kbRight; break;
+        case 'w': keyCode = kbHome; break;
+        case 'x': keyCode = kbUp; break;
+        case 'y': keyCode = kbPgUp; break;
+        default: return false;
     }
-
-    static void setAltModifier(KeyDownEvent &keyDown) noexcept
+    keyDown = keyWithXTermMods(keyCode, mod);
+    if (isAlpha(keyDown.keyCode))
     {
-        setModifier(keyDown, kbAltShift, AltKeyCode);
+        keyDown.text[0] = keyDown.keyCode;
+        keyDown.textLength = 1;
     }
-
-    static KeyDownEvent keyWithModifiers(ushort keyCode, ushort mods) noexcept
-    {
-        KeyDownEvent keyDown {{keyCode}, mods};
-        if (mods & kbShift) setShiftModifier(keyDown);
-        if (mods & kbCtrlShift) setCtrlModifier(keyDown);
-        if (mods & kbAltShift) setAltModifier(keyDown);
-        return keyDown;
-    }
-
-    const uint XTermModDefault = 1;
-
-    static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
-    {
-        mods -= XTermModDefault;
-        ushort tvmods =
-            (kbShift & -(mods & 1))
-            | (kbAltShift & -(mods & 2))
-            | (kbCtrlShift & -(mods & 4))
-            ;
-        return keyWithModifiers(keyCode, tvmods);
-    }
-
-    static bool isAlpha(uint32_t ascii) noexcept
-    {
-        return ' ' <= ascii && ascii < 127;
-    };
-
-    static bool isPrivate(uint32_t codepoint) noexcept
-    {
-        return 57344 <= codepoint && codepoint <= 63743;
-    };
-
-    static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexcept
-    {
-
-        ushort keyCode = 0;
-        switch (value)
-        {
-            case     8: keyCode = kbBack;   break;
-            case     9: keyCode = kbTab;    break;
-            case    13: keyCode = kbEnter;  break;
-            case    27: keyCode = kbEsc;    break;
-            case   127: keyCode = kbBack;   break;
-            // Functional keys as represented in Kitty's keyboard protocol.
-            // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html#functional
-            // Keypad.
-            case 57414: keyCode = kbEnter;  break;
-            case 57417: keyCode = kbLeft;   break;
-            case 57418: keyCode = kbRight;  break;
-            case 57419: keyCode = kbUp;     break;
-            case 57420: keyCode = kbDown;   break;
-            case 57421: keyCode = kbPgUp;   break;
-            case 57422: keyCode = kbPgDn;   break;
-            case 57423: keyCode = kbHome;   break;
-            case 57424: keyCode = kbEnd;    break;
-            case 57425: keyCode = kbIns;    break;
-            case 57426: keyCode = kbDel;    break;
-            default: if (isAlpha(value)) keyCode = value;
-        }
-        keyDown = keyWithXTermMods(keyCode, mods);
-        // Note that 'keyDown.keyCode' may be different from 'keyCode'
-        // if there are modifiers.
-        if ( (keyDown.keyCode == 0 || isAlpha(keyDown.keyCode)) &&
-            ' ' <= value && !isPrivate(value) )
-        {
-            keyDown.textLength = utf32To8(value, keyDown.text);
-            keyDown.charScan.charCode =
-                CpTranslator::printableFromUtf8({keyDown.text, keyDown.textLength});
-        }
-        return keyDown.keyCode != 0 || keyDown.textLength != 0;
-    }
-
-    static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown) noexcept
-    {
-        ushort keyCode = 0;
-        switch (letter)
-        {
-            case 'A': keyCode = kbUp; break;
-            case 'B': keyCode = kbDown; break;
-            case 'C': keyCode = kbRight; break;
-            case 'D': keyCode = kbLeft; break;
-            case 'E': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
-            case 'F': keyCode = kbEnd; break;
-            case 'H': keyCode = kbHome; break;
-            case 'P': keyCode = kbF1; break;
-            case 'Q': keyCode = kbF2; break;
-            case 'R': keyCode = kbF3; break;
-            case 'S': keyCode = kbF4; break;
-            case 'Z': keyCode = kbTab; break;
-            // Keypad in XTerm (SS3).
-            case 'j': keyCode = '*'; break;
-            case 'k': keyCode = '+'; break;
-            case 'm': keyCode = '-'; break;
-            case 'M': keyCode = kbEnter; break;
-            case 'n': keyCode = kbDel; break;
-            case 'o': keyCode = '/'; break;
-            case 'p': keyCode = kbIns; break;
-            case 'q': keyCode = kbEnd; break;
-            case 'r': keyCode = kbDown; break;
-            case 's': keyCode = kbPgDn; break;
-            case 't': keyCode = kbLeft; break;
-            case 'u': keyCode = kbNoKey; break; // Numpad 5, "KP_Begin".
-            case 'v': keyCode = kbRight; break;
-            case 'w': keyCode = kbHome; break;
-            case 'x': keyCode = kbUp; break;
-            case 'y': keyCode = kbPgUp; break;
-            default: return false;
-        }
-        keyDown = keyWithXTermMods(keyCode, mod);
-        // Note that 'keyDown.keyCode' may be different from 'keyCode'
-        // if there are modifiers.
-        if (isAlpha(keyDown.keyCode))
-        {
-            keyDown.text[0] = keyDown.keyCode;
-            keyDown.textLength = 1;
-        }
-        return true;
-    }
-
-} // namespace terminp
+    return true;
+}
 
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
@@ -340,19 +230,30 @@ void TermIO::keyModsOff(const StdioCtl &io) noexcept
     io.write(seq.data(), seq.size());
 }
 
-void TermIO::setAltModifier(KeyDownEvent &keyDown) noexcept
-{
-    terminp::setAltModifier(keyDown);
-}
-
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
 {
-    using namespace terminp;
-    ushort mods = keyDown.controlKeyState;
-    if (keyDown.controlKeyState & kbShift) setShiftModifier(keyDown);
-    if (keyDown.controlKeyState & kbCtrlShift) setCtrlModifier(keyDown);
-    if (keyDown.controlKeyState & kbAltShift) setAltModifier(keyDown);
-    keyDown.controlKeyState = mods;
+    TKey key(keyDown);
+    if (key.mods & (kbShift | kbCtrlShift | kbAltShift))
+    {
+        // Modifier precedece: Shift < Ctrl < Alt.
+        int largestMod = (key.mods & kbAltShift) ? 2
+                       : (key.mods & kbCtrlShift) ? 1
+                       : 0;
+        if (ushort keyCode = moddedKeyCodes[key.code][largestMod])
+        {
+            keyDown.keyCode = keyCode;
+            if (keyDown.charScan.charCode < ' ')
+                keyDown.textLength = 0;
+        }
+    }
+    // TKey does not distinguish left/right modifiers, so preserve those
+    // when available.
+    ushort origMods = keyDown.controlKeyState;
+    keyDown.controlKeyState =
+        ((origMods | key.mods) & ~(kbCtrlShift | kbAltShift))
+      | ((origMods & kbCtrlShift ? origMods : key.mods) & kbCtrlShift)
+      | ((origMods & kbAltShift ? origMods : key.mods) & kbAltShift)
+        ;
 }
 
 ParseResult TermIO::parseEvent(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
@@ -402,7 +303,10 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
         case '\x1B':
             res = parseEscapeSeq(buf, ev, state);
             if (res == Accepted && ev.what == evKeyDown)
-                setAltModifier(ev.keyDown);
+            {
+                ev.keyDown.controlKeyState |= kbAltShift;
+                normalizeKey(ev.keyDown);
+            }
             break;
     }
     return res;
@@ -532,7 +436,6 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev) noexcept
 // https://invisible-island.net/xterm/xterm-function-keys.html
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 {
-    using namespace terminp;
     uint terminator = csi.terminator();
     if (csi.length == 1 && terminator == '~')
     {
@@ -631,7 +534,6 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev) noexcept
 // Pre: "\x1BO" has just been read.
 // Konsole, IntelliJ.
 {
-    using namespace terminp;
     uint mod;
     if (!buf.getNum(mod)) return Rejected;
     uint key = (uint) buf.last();
@@ -644,7 +546,6 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
 // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
 // http://www.leonerd.org.uk/hacks/fixterms/
 {
-    using namespace terminp;
 
     if (csi.length < 1 || csi.terminator() != 'u')
         return Rejected;
@@ -662,7 +563,6 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
 ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B_far2l" has just been read.
 {
-    using namespace terminp;
     enum { k = 32 };
     char s[4*k];
     size_t len = 0;
