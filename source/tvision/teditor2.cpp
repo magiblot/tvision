@@ -115,16 +115,16 @@ TMenuItem& TEditor::initContextMenu( TPoint )
         *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
 }
 
-uint TEditor::insertAndConvertText( const char *text, uint length,
+uint TEditor::insertMultilineText( const char *text, uint length,
                                     Boolean selectText )
 {
     size_t i = 0, j = 0;
     do  {
-        if( text[i] == '\n' )
+        if( text[i] == '\n' || text[i] == '\r' )
             {
             if( !insertText( &text[j], i - j, selectText ) ) return j;
             if( !insertEOL( selectText ) ) return i;
-            if( i + 1 < length && text[i + 1] == '\r' )
+            if( i + 1 < length && text[i + 1] == '\n' )
                 ++i;
             j = i + 1;
             }
@@ -611,10 +611,10 @@ void TEditor::updateCommands()
     setCmdState( cmUndo, Boolean( delCount != 0 || insCount != 0 ) );
     if( isClipboard() == False )
         {
-        setCmdState(cmCut, Boolean(clipboard != 0 && hasSelection()));
-        setCmdState(cmCopy, Boolean(clipboard != 0 && hasSelection()));
+        setCmdState(cmCut, hasSelection());
+        setCmdState(cmCopy, hasSelection());
         setCmdState(cmPaste,
-                    Boolean(clipboard != 0 && (clipboard->hasSelection())) );
+                    Boolean(clipboard == 0 || clipboard->hasSelection()) );
         }
     setCmdState(cmClear, hasSelection());
     setCmdState(cmFind, True);

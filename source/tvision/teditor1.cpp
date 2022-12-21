@@ -22,6 +22,7 @@
 #define Uses_opstream
 #define Uses_ipstream
 #define Uses_TText
+#define Uses_TClipboard
 #include <tvision/tv.h>
 
 #if !defined( __STRING_H )
@@ -326,9 +327,16 @@ uint TEditor::charPtr( uint p, int target )
 Boolean TEditor::clipCopy()
 {
     Boolean res = False;
-    if( (clipboard != 0) && (clipboard != this) )
+    if( clipboard != this )
         {
-        res = clipboard->insertFrom(this);
+        if( clipboard != 0 )
+            res = clipboard->insertFrom(this);
+        else
+            {
+            TClipboard::setText( TStringView( buffer + bufPtr(selStart),
+                                              selEnd - selStart ) );
+            res = True;
+            }
         selecting = False;
         update(ufUpdate);
         }
@@ -343,8 +351,13 @@ void TEditor::clipCut()
 
 void TEditor::clipPaste()
 {
-    if( (clipboard != 0) && (clipboard != this) )
-        insertFrom(clipboard);
+    if( clipboard != this )
+        {
+        if( clipboard != 0 )
+            insertFrom(clipboard);
+        else
+            TClipboard::requestText();
+        }
 }
 
 void TEditor::convertEvent( TEvent& event )
@@ -622,7 +635,7 @@ void TEditor::handleEvent( TEvent& event )
                     char buf[512];
                     size_t length;
                     while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
-                        insertAndConvertText( buf, (uint) length, False );
+                        insertMultilineText( buf, (uint) length, False );
                     }
 
                 trackCursor(centerCursor);
