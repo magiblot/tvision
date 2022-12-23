@@ -311,74 +311,76 @@ BOOL THardwareInfo::getMouseEvent( MouseEventType& event )
 
 BOOL THardwareInfo::getKeyEvent( TEvent& event )
 {
-    if( !pendingEvent )
-        {
-        GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
-        if( pendingEvent )
-            ReadConsoleInput( consoleHandle[cnInput], &irBuffer, 1, &pendingEvent );
-        }
-
-    if( pendingEvent )
-        {
-        if( irBuffer.EventType == KEY_EVENT && irBuffer.Event.KeyEvent.bKeyDown )
+    do  {
+        if( !pendingEvent )
             {
-            event.what = evKeyDown;
-            event.keyDown.charScan.scanCode = irBuffer.Event.KeyEvent.wVirtualScanCode;
-            event.keyDown.charScan.charCode = irBuffer.Event.KeyEvent.uChar.AsciiChar;
-            event.keyDown.controlKeyState = irBuffer.Event.KeyEvent.dwControlKeyState;
-
-            if( event.keyDown.keyCode == 0x2A00 || event.keyDown.keyCode == 0x1D00 ||
-                event.keyDown.keyCode == 0x3600 || event.keyDown.keyCode == 0x3800 ||
-                event.keyDown.keyCode == 0x3A00 )
-                // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
-                event.keyDown.keyCode = kbNoKey;
-            else if( (event.keyDown.controlKeyState & kbCtrlShift) &&
-                     (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
-                {
-                // When AltGr+Key does not produce a character, a
-                // keyCode with unwanted effects may be read instead.
-                if (!event.keyDown.charScan.charCode)
-                    event.keyDown.keyCode = kbNoKey;
-                }
-            else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
-                {
-                // Convert NT style virtual scan codes to PC BIOS codes.
-                uchar index = irBuffer.Event.KeyEvent.wVirtualScanCode;
-                if ((event.keyDown.controlKeyState & kbAltShift) && AltCvt[index] != 0)
-                    event.keyDown.keyCode = AltCvt[index];
-                else if ((event.keyDown.controlKeyState & kbCtrlShift) && CtrlCvt[index] != 0)
-                    event.keyDown.keyCode = CtrlCvt[index];
-                else if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
-                    event.keyDown.keyCode = ShiftCvt[index];
-                else if ( !(event.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
-                          NormalCvt[index] != 0 )
-                    event.keyDown.keyCode = NormalCvt[index];
-                }
-
-            /* Set/Reset insert flag.
-             */
-            if( event.keyDown.keyCode == kbIns )
-                insertState = !insertState;
-
-            if( insertState )
-                event.keyDown.controlKeyState |= kbInsState;
-
-            pendingEvent = 0;
-            return event.keyDown.keyCode != kbNoKey;
+            GetNumberOfConsoleInputEvents( consoleHandle[cnInput], &pendingEvent );
+            if( pendingEvent )
+                ReadConsoleInput( consoleHandle[cnInput], &irBuffer, 1, &pendingEvent );
+            else
+                return False;
             }
-        // Ignore all events except mouse and buffer size events.
+
         // Pending mouse events will be read on the next polling loop.
-        else if( irBuffer.EventType != MOUSE_EVENT )
+        if( pendingEvent && irBuffer.EventType != MOUSE_EVENT )
             {
             pendingEvent = 0;
-            if( irBuffer.EventType == WINDOW_BUFFER_SIZE_EVENT )
+
+            if( irBuffer.EventType == KEY_EVENT && irBuffer.Event.KeyEvent.bKeyDown )
+                {
+                event.what = evKeyDown;
+                event.keyDown.charScan.scanCode = irBuffer.Event.KeyEvent.wVirtualScanCode;
+                event.keyDown.charScan.charCode = irBuffer.Event.KeyEvent.uChar.AsciiChar;
+                event.keyDown.controlKeyState = irBuffer.Event.KeyEvent.dwControlKeyState;
+
+                if( event.keyDown.keyCode == 0x2A00 || event.keyDown.keyCode == 0x1D00 ||
+                    event.keyDown.keyCode == 0x3600 || event.keyDown.keyCode == 0x3800 ||
+                    event.keyDown.keyCode == 0x3A00 )
+                    // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
+                    event.keyDown.keyCode = kbNoKey;
+                else if( (event.keyDown.controlKeyState & kbCtrlShift) &&
+                         (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
+                    {
+                    // When AltGr+Key does not produce a character, a
+                    // keyCode with unwanted effects may be read instead.
+                    if( !event.keyDown.charScan.charCode )
+                        event.keyDown.keyCode = kbNoKey;
+                    }
+                else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
+                    {
+                    // Convert NT style virtual scan codes to PC BIOS codes.
+                    uchar index = irBuffer.Event.KeyEvent.wVirtualScanCode;
+                    if ((event.keyDown.controlKeyState & kbAltShift) && AltCvt[index] != 0)
+                        event.keyDown.keyCode = AltCvt[index];
+                    else if ((event.keyDown.controlKeyState & kbCtrlShift) && CtrlCvt[index] != 0)
+                        event.keyDown.keyCode = CtrlCvt[index];
+                    else if ((event.keyDown.controlKeyState & kbShift) && ShiftCvt[index] != 0)
+                        event.keyDown.keyCode = ShiftCvt[index];
+                    else if ( !(event.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
+                              NormalCvt[index] != 0 )
+                        event.keyDown.keyCode = NormalCvt[index];
+                    }
+
+                /* Set/Reset insert flag.
+                 */
+                if( event.keyDown.keyCode == kbIns )
+                    insertState = !insertState;
+
+                if( insertState )
+                    event.keyDown.controlKeyState |= kbInsState;
+
+                if( event.keyDown.keyCode != kbNoKey )
+                    return True;
+                }
+            else if( irBuffer.EventType == WINDOW_BUFFER_SIZE_EVENT )
                 {
                 event.what = evCommand;
                 event.message.command = cmScreenChanged;
+                event.message.infoPtr = 0;
                 return True;
                 }
             }
-        }
+        } while( !pendingEvent );
 
     return False;
 }
