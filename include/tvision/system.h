@@ -428,12 +428,6 @@ public:
 
 };
 
-#ifdef __BORLANDC__
-inline void TScreen::flushScreen() noexcept
-{
-}
-#endif
-
 #endif  // Uses_TScreen
 
 #if defined( Uses_TSystemError ) && !defined( __TSystemError )

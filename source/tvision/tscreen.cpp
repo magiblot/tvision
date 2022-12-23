@@ -315,12 +315,12 @@ void TScreen::clearScreen() noexcept
     TDisplay::clearScreen( screenWidth, screenHeight );
 }
 
-#ifndef __BORLANDC__ // Otherwise in system.h
 void TScreen::flushScreen() noexcept
 {
+#ifdef __FLAT__
     THardwareInfo::flushScreen();
-}
 #endif
+}
 
 void TScreen::setVideoMode( ushort mode ) noexcept
 {
