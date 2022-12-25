@@ -624,18 +624,23 @@ void TEditor::handleEvent( TEvent& event )
               )
                 {
                 lock();
-                if( overwrite == True && hasSelection() == False )
-                    if( curPtr != lineEnd(curPtr) )
-                        selEnd = nextChar(curPtr);
-
-                if( encSingleByte )
-                    insertText( &event.keyDown.charScan.charCode, 1, False);
-                else
+                if( event.keyDown.controlKeyState & kbPaste )
                     {
                     char buf[512];
                     size_t length;
                     while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
                         insertMultilineText( buf, (uint) length, False );
+                    }
+                else
+                    {
+                    if( overwrite == True && hasSelection() == False )
+                        if( curPtr != lineEnd(curPtr) )
+                            selEnd = nextChar(curPtr);
+
+                    if( encSingleByte )
+                        insertText( &event.keyDown.charScan.charCode, 1, False );
+                    else
+                        insertText( event.keyDown.text, event.keyDown.textLength, False );
                     }
 
                 trackCursor(centerCursor);
