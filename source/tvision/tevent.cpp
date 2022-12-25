@@ -296,9 +296,13 @@ I   POP DS
 void TEventQueue::putPaste( TStringView text ) noexcept
 {
     delete[] pasteText;
-    pasteText = newStr(text);
-    pasteTextLength = text.size();
-    pasteTextIndex = 0;
+    // Always initialize the paste event so that 'waitForEvent' won't block.
+    if( (pasteText = new char[ text.size() ]) != 0 )
+        {
+        pasteTextLength = text.size();
+        pasteTextIndex = 0;
+        memcpy( pasteText, text.data(), text.size() );
+        }
 }
 
 Boolean TEventQueue::getPasteEvent( TEvent &ev ) noexcept
@@ -415,7 +419,7 @@ I   INT 16h;
 void TEventQueue::waitForEvent(int timeoutMs) noexcept
 {
 #if defined( __FLAT__ )
-    if( pasteTextIndex == pasteTextLength && keyEventCount == 0 )
+    if( !pasteText && keyEventCount == 0 )
         THardwareInfo::waitForEvent(timeoutMs);
 #else
     (void) timeoutMs;
