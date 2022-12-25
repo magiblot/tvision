@@ -413,9 +413,10 @@ public:
     void select();
     virtual void setState( ushort aState, Boolean enable );
 
+    void getEvent( TEvent& event, int timeoutMs );
     void keyEvent( TEvent& event );
     Boolean mouseEvent( TEvent& event, ushort mask );
-    virtual Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
+    Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
 
     TPoint makeGlobal( TPoint source ) noexcept;
     TPoint makeLocal( TPoint source ) noexcept;

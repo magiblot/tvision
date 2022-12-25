@@ -19,6 +19,7 @@
 #define Uses_TGroup
 #define Uses_TRect
 #define Uses_TEvent
+#define Uses_TProgram
 #define Uses_opstream
 #define Uses_ipstream
 #include <tvision/tv.h>
@@ -505,6 +506,16 @@ void TView::getEvent( TEvent& event )
         owner->getEvent(event);
 }
 
+void TView::getEvent( TEvent& event, int timeoutMs )
+{
+    int saveTimeout = TProgram::eventTimeout;
+    TProgram::eventTimeout = timeoutMs;
+
+    getEvent( event );
+
+    TProgram::eventTimeout = saveTimeout;
+}
+
 TRect TView::getExtent() const noexcept
 {
     return TRect( 0, 0, size.x, size.y );
@@ -808,11 +819,45 @@ void TView::sizeLimits( TPoint& min, TPoint& max )
         max.x = max.y = INT_MAX;
 }
 
-Boolean TView::textEvent( TEvent &event, TSpan<char> dest, size_t &length )
+static Boolean getEventText( TEvent &event, TSpan<char> dest, size_t &length )
 {
-    if( owner )
-        return owner->textEvent( event, dest, length );
+    if( event.what == evKeyDown )
+        {
+        TStringView text = event.keyDown.textLength         ? event.keyDown.getText()
+                         : event.keyDown.keyCode == kbEnter ? TStringView("\n")
+                         : event.keyDown.keyCode == kbTab   ? TStringView("\t")
+                                                            : TStringView();
+        TSpan<char> dst = dest.subspan( length );
+        if( !text.empty() && text.size() <= dst.size() )
+            {
+            memcpy( dst.data(), text.data(), text.size() );
+            length += text.size();
+            return True;
+            }
+        }
     return False;
+}
+
+Boolean TView::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
+// Fill the 'dest' buffer with text from consecutive events.
+// If 'event' is an evKeyDown, its text is also included in 'dest'.
+// 'length' is set to the number of bytes written into 'dest'.
+// Returns whether any bytes were written into 'dest'.
+// On exit, 'event.what' is evNothing.
+{
+    length = 0;
+
+    getEventText( event, dest, length );
+    do  {
+        int timeoutMs = 0;
+        getEvent( event, timeoutMs );
+        } while( getEventText( event, dest, length ) );
+
+    if( event.what != evNothing )
+        putEvent( event );
+    clearEvent( event );
+
+    return Boolean( length != 0 );
 }
 
 TView* TView::TopView() noexcept

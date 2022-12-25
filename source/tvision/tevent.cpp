@@ -366,6 +366,8 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
         ++keyEventIndex;
         --keyEventCount;
         }
+    else
+        ev.what = evNothing;
 }
 
 Boolean TEventQueue::readKeyPress( TEvent &ev ) noexcept

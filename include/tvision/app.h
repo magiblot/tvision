@@ -268,7 +268,6 @@ public:
     virtual void initScreen();
     virtual void outOfMemory();
     virtual void putEvent( TEvent& event );
-    virtual Boolean textEvent(TEvent& event, TSpan<char> dest, size_t &length);
     virtual void run();
     virtual TWindow* insertWindow(TWindow*);
     void setScreenMode( ushort mode );
@@ -287,15 +286,13 @@ public:
     static TMenuBar * _NEAR menuBar;
     static TDeskTop * _NEAR deskTop;
     static int _NEAR appPalette;
-    static int _NEAR appEventTimeout;
+    static int _NEAR eventTimeout;
 
 protected:
 
     static TEvent _NEAR pending;
 
 private:
-
-    Boolean readTextEvent(TEvent &, TSpan<char>, size_t &, Boolean);
 
     static const char * _NEAR exitText;
 

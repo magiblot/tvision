@@ -34,7 +34,7 @@ TMenuBar * _NEAR TProgram::menuBar = 0;
 TDeskTop * _NEAR TProgram::deskTop = 0;
 TProgram * _NEAR TProgram::application = 0;
 int _NEAR TProgram::appPalette = apColor;
-int _NEAR TProgram::appEventTimeout = 20; // 50 wake-ups per second.
+int _NEAR TProgram::eventTimeout = 20; // 50 wake-ups per second.
 TEvent _NEAR TProgram::pending;
 
 extern TPoint shadowSize;
@@ -128,7 +128,7 @@ void TProgram::getEvent(TEvent& event)
         }
     else
         {
-        TEvent::waitForEvent(appEventTimeout);
+        TEvent::waitForEvent(eventTimeout);
         event.getMouseEvent();
         if( event.what == evNothing )
             {
@@ -323,50 +323,4 @@ TView* TProgram::validView(TView* p) noexcept
         return 0;
         }
     return p;
-}
-
-Boolean TProgram::textEvent( TEvent& event, TSpan<char> dest, size_t &length )
-// Fill the 'dest' buffer with text from successive events.
-// 'event' must be either an evNothing or an evKeyDown, in which case its text
-// is also included in 'dest'. The function stops when a non-text event is found.
-// 'length' is set to the number of bytes written into 'dest'.
-// On exit, 'event.what' is evNothing.
-{
-    length = 0;
-    readTextEvent( event, dest, length, False );
-    do  {
-        if( pending.what != evNothing )
-            {
-            event = pending;
-            pending.what = evNothing;
-            }
-        else
-            event.getKeyEvent();
-        } while( readTextEvent( event, dest, length, True ) );
-
-    return Boolean( length != 0 );
-}
-
-Boolean TProgram::readTextEvent(TEvent &event, TSpan<char> dest, size_t &length, Boolean keep)
-{
-    if( event.what == evKeyDown )
-        {
-        TStringView text = event.keyDown.textLength         ? event.keyDown.getText()
-                         : event.keyDown.keyCode == kbEnter ? TStringView("\n")
-                         : event.keyDown.keyCode == kbTab   ? TStringView("\t")
-                                                            : TStringView();
-        TSpan<char> dst = dest.subspan(length);
-        if( text.size() && text.size() <= dst.size() )
-            {
-            for( size_t i = 0; i < text.size(); ++i )
-                dst[i] = text[i];
-            length += text.size();
-            clearEvent(event);
-            return True;
-            }
-        }
-    if( keep && event.what != evNothing )
-        putEvent(event);
-    clearEvent(event);
-    return False;
 }
