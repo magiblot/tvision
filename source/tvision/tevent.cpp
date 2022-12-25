@@ -371,37 +371,7 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
 Boolean TEventQueue::readKeyPress( TEvent &ev ) noexcept
 {
 #if defined( __FLAT__ )
-    if( THardwareInfo::getKeyEvent( ev ) )
-    {
-        if( ev.what == evKeyDown )
-        {
-            // Need to handle special case of Alt-Space, Ctrl-Ins, Shift-Ins,
-            // Ctrl-Del, Shift-Del
-
-            switch( ev.keyDown.keyCode )
-            {
-            case ' ':
-                if( ev.keyDown.controlKeyState & kbAltShift )
-                    ev.keyDown.keyCode = kbAltSpace;
-                break;
-
-            case kbDel:
-                if( ev.keyDown.controlKeyState & kbCtrlShift )
-                    ev.keyDown.keyCode = kbCtrlDel;
-                else if( ev.keyDown.controlKeyState & kbShift )
-                    ev.keyDown.keyCode = kbShiftDel;
-                break;
-
-            case kbIns:
-                if( ev.keyDown.controlKeyState & kbCtrlShift )
-                    ev.keyDown.keyCode = kbCtrlIns;
-                else if( ev.keyDown.controlKeyState & kbShift )
-                    ev.keyDown.keyCode = kbShiftIns;
-                break;
-            }
-        }
-    }
-    else
+    if( !THardwareInfo::getKeyEvent( ev ) )
         ev.what = evNothing;
 #else
 
