@@ -37,8 +37,8 @@ void TClipboard::setText(TStringView text) noexcept
 void TClipboard::requestText() noexcept
 {
 #ifdef __FLAT__
-    if (THardwareInfo::requestClipboardText(TEventQueue::putTextEvent))
+    if (THardwareInfo::requestClipboardText(TEventQueue::putPaste))
         return;
 #endif
-    TEventQueue::putTextEvent(TStringView(localText, localTextLength));
+    TEventQueue::putPaste(TStringView(localText, localTextLength));
 }

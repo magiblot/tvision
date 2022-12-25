@@ -22,6 +22,7 @@
 #endif  // __LIMITS_H
 
 const int eventQSize = 16;
+const int keyEventQSize = 3;
 const int maxCollectionSize = (int)(( (unsigned long) UINT_MAX - 16)/sizeof( void * ));
 
 const int maxViewWidth = 132;

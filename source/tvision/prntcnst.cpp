@@ -113,6 +113,7 @@ static const TConstant controlKeyStateFlags[] =
 #if defined( __FLAT__ )
     NM(kbEnhanced),
 #endif
+    NM(kbPaste),
     NMEND(),
 };
 
