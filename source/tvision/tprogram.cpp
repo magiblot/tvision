@@ -128,7 +128,7 @@ void TProgram::getEvent(TEvent& event)
         }
     else
         {
-        TEvent::waitEvent(appEventTimeout);
+        TEvent::waitForEvent(appEventTimeout);
         event.getMouseEvent();
         if( event.what == evNothing )
             {

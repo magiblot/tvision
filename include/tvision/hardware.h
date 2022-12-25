@@ -90,7 +90,7 @@ public:
     static BOOL getMouseEvent( MouseEventType& event ) noexcept;
     static BOOL getKeyEvent( TEvent& event ) noexcept;
     static void clearPendingEvent() noexcept;
-    static void waitForEvents( int timeoutMs ) noexcept;
+    static void waitForEvent( int timeoutMs ) noexcept;
     static void stopEventWait() noexcept;
     static BOOL setClipboardText( TStringView text ) noexcept;
     static BOOL requestClipboardText( void (&accept)( TStringView ) ) noexcept;

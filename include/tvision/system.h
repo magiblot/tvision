@@ -242,7 +242,7 @@ struct TEvent
 
     void getMouseEvent() noexcept;
     void getKeyEvent() noexcept;
-    static void waitEvent(int timeoutMs) noexcept;
+    static void waitForEvent(int timeoutMs) noexcept;
     static void putNothing() noexcept;
 };
 
@@ -261,6 +261,7 @@ public:
     static void getKeyEvent( TEvent& ) noexcept;
     static void suspend() noexcept;
     static void resume() noexcept;
+    static void waitForEvent( int ) noexcept;
 
     friend class TView;
     friend class TProgram;

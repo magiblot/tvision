@@ -385,7 +385,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     return False;
 }
 
-void THardwareInfo::waitForEvents( int timeoutMs )
+void THardwareInfo::waitForEvent( int timeoutMs )
 {
     if (!pendingEvent)
         WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );

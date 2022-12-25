@@ -166,7 +166,7 @@ public:
     void removeSource(EventSource &) noexcept;
 
     bool getEvent(TEvent &ev) noexcept;
-    void waitForEvents(int ms) noexcept;
+    void waitForEvent(int ms) noexcept;
     void stopEventWait() noexcept;
 };
 

@@ -410,16 +410,24 @@ I   INT 16h;
     return Boolean( ev.what != evNothing );
 }
 
+void TEventQueue::waitForEvent(int timeoutMs) noexcept
+{
+#if defined( __FLAT__ )
+    if( pasteTextIndex == pasteTextLength && keyEventCount == 0 )
+        THardwareInfo::waitForEvent(timeoutMs);
+#else
+    (void) timeoutMs;
+#endif
+}
+
 void TEvent::getKeyEvent() noexcept
 {
     TEventQueue::getKeyEvent( *this );
 }
 
-void TEvent::waitEvent(int timeoutMs) noexcept
+void TEvent::waitForEvent(int timeoutMs) noexcept
 {
-#if defined( __FLAT__ )
-    THardwareInfo::waitForEvents(timeoutMs);
-#endif
+    TEventQueue::waitForEvent( timeoutMs );
 }
 
 void TEvent::putNothing() noexcept
