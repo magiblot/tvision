@@ -123,12 +123,12 @@ void THardwareInfo::stopEventWait() noexcept
 
 BOOL THardwareInfo::setClipboardText( TStringView text ) noexcept
 {
-    return FALSE;
+    return platf->setClipboardText(text);
 }
 
 BOOL THardwareInfo::requestClipboardText( void (&accept)(TStringView) ) noexcept
 {
-    return FALSE;
+    return platf->requestClipboardText(accept);
 }
 
 #ifndef _WIN32

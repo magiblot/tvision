@@ -34,6 +34,8 @@ class Win32ConsoleStrategy final : public ConsoleStrategy
     ~Win32ConsoleStrategy();
 
     bool isAlive() noexcept override;
+    bool setClipboardText(TStringView) noexcept override;
+    bool requestClipboardText(void (&)(TStringView)) noexcept override;
 
 public:
 
@@ -58,10 +60,10 @@ public:
     {
     }
 
+    bool getEvent(TEvent &ev) noexcept override;
     int getButtonCount() noexcept override;
     void cursorOn() noexcept override;
     void cursorOff() noexcept override;
-    bool getEvent(TEvent &ev) noexcept override;
 };
 
 class Win32Display : public TerminalDisplay

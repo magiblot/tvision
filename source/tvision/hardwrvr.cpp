@@ -413,10 +413,11 @@ BOOL THardwareInfo::setClipboardText( TStringView text )
             memcpy(pData, text.data(), text.size());
             pData[text.size()] = '\0';
             GlobalUnlock( hData );
-            if( (result = (pSetClipboardData( CF_OEMTEXT, hData ) != 0)) == False )
-                GlobalFree( hData );
+            result = pSetClipboardData( CF_OEMTEXT, hData ) != 0;
             }
         pCloseClipboard();
+        if( hData && !result )
+            GlobalFree( hData );
         }
     return result;
 }

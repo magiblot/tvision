@@ -67,6 +67,8 @@ struct ConsoleStrategy
     virtual ~ConsoleStrategy() {}
 
     virtual bool isAlive() noexcept { return true; }
+    virtual bool setClipboardText(TStringView) noexcept { return false; }
+    virtual bool requestClipboardText(void (&)(TStringView)) noexcept { return false; }
 };
 
 using ThreadId = const void *;
@@ -189,6 +191,11 @@ public:
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     TScreenCell *reloadScreenInfo() noexcept
         { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
+
+    bool setClipboardText(TStringView text) noexcept
+        { return console.lock([&] (auto *c) { return c->setClipboardText(text); }); }
+    bool requestClipboardText(void (&accept)(TStringView)) noexcept
+        { return console.lock([&] (auto *c) { return c->requestClipboardText(accept); }); }
 };
 
 } // namespace tvision
