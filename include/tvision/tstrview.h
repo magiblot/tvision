@@ -15,7 +15,7 @@
 #ifdef TVISION_STL
 #include <string>
 
-#ifdef __cpp_lib_string_view
+#if __cplusplus >= 201703L || __cpp_lib_string_view
 #include <string_view>
 #endif
 #endif // TVISION_STL
@@ -45,7 +45,7 @@ public:
     constexpr TStringView(TSpan<char> span);
     constexpr TStringView(TSpan<const char> span);
 #ifdef TVISION_STL
-#ifdef __cpp_lib_string_view
+#if __cplusplus >= 201703L || __cpp_lib_string_view
     constexpr TStringView(std::string_view text);
     constexpr operator std::string_view() const;
 #endif
@@ -111,7 +111,7 @@ inline constexpr TStringView::TStringView(TSpan<const char> span) :
 }
 
 #ifdef TVISION_STL
-#ifdef __cpp_lib_string_view
+#if __cplusplus >= 201703L || __cpp_lib_string_view
 inline constexpr TStringView::TStringView(std::string_view text) :
     str(text.data()),
     len(text.size())
@@ -230,7 +230,7 @@ inline Boolean operator!=(TStringView a, TStringView b)
 #include <typeindex>
 
 namespace std {
-#ifdef __cpp_lib_string_view
+#if __cplusplus >= 201703L || __cpp_lib_string_view
     template<>
     struct hash<TStringView> : public std::hash<std::string_view>
     {
