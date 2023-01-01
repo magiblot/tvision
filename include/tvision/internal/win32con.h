@@ -1,16 +1,19 @@
 #ifndef WIN32CON_H
 #define WIN32CON_H
 
-#ifdef _WIN32
-
 #include <tvision/tv.h>
-#include <tvision/compat/windows/windows.h>
+#include <compat/windows/windows.h>
 #include <internal/stdioctl.h>
 #include <internal/termdisp.h>
 #include <internal/terminal.h>
 
 namespace tvision
 {
+
+bool getWin32Key(const KEY_EVENT_RECORD &, TEvent &, InputState &) noexcept;
+void getWin32Mouse(const MOUSE_EVENT_RECORD &, TEvent &, InputState &) noexcept;
+
+#ifdef _WIN32
 
 class Win32Input;
 class Win32Display;
@@ -97,8 +100,8 @@ protected:
     void lowlevelFlush() noexcept override;
 };
 
-} // namespace tvision
-
 #endif // _WIN32
+
+} // namespace tvision
 
 #endif // WIN32CON_H

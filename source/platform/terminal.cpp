@@ -1,15 +1,14 @@
 #define Uses_TKeys
-#define Uses_THardwareInfo
 #include <tvision/tv.h>
 
 #include <internal/terminal.h>
+#include <internal/far2l.h>
 #include <internal/stdioctl.h>
 #include <internal/constmap.h>
 #include <internal/constarr.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
-#include <internal/base64.h>
 
 namespace tvision
 {
@@ -49,31 +48,6 @@ static const const_unordered_map<ushort, constarray<ushort, 3>> moddedKeyCodes =
     { kbRight, {0, kbCtrlRight, kbAltRight}    }, { kbEnd, {0, kbCtrlEnd, kbAltEnd}          },
     { kbDown, {0, kbCtrlDown, kbAltDown}       }, { kbPgDn, {0, kbCtrlPgDn, kbAltPgDn}       },
     { kbIns, {kbShiftIns, kbCtrlIns, kbAltIns} }, { kbDel, {kbShiftDel, kbCtrlDel, kbAltDel} },
-};
-
-static const const_unordered_map<uchar, ushort> virtualKeyCodeToKeyCode =
-{
-    { VK_BACK,      kbBack      }, { VK_TAB,        kbTab       },
-    { VK_RETURN,    kbEnter     }, { VK_ESCAPE,     kbEsc       },
-    { VK_PRIOR,     kbPgUp      }, { VK_NEXT,       kbPgDn      },
-    { VK_END,       kbEnd       }, { VK_HOME,       kbHome      },
-    { VK_LEFT,      kbLeft      }, { VK_UP,         kbUp        },
-    { VK_RIGHT,     kbRight     }, { VK_DOWN,       kbDown      },
-    { VK_INSERT,    kbIns       }, { VK_DELETE,     kbDel       },
-    { VK_NUMPAD0,   '0'         }, { VK_NUMPAD1,    '1'         },
-    { VK_NUMPAD2,   '2'         }, { VK_NUMPAD3,    '3'         },
-    { VK_NUMPAD4,   '4'         }, { VK_NUMPAD5,    '5'         },
-    { VK_NUMPAD6,   '6'         }, { VK_NUMPAD7,    '7'         },
-    { VK_NUMPAD8,   '8'         }, { VK_NUMPAD9,    '9'         },
-    { VK_MULTIPLY,  '*'         }, { VK_ADD,        '+'         },
-    { VK_SEPARATOR, '|'         }, { VK_SUBTRACT,   '-'         },
-    { VK_DECIMAL,   '.'         }, { VK_DIVIDE,     '/'         },
-    { VK_F1,        kbF1        }, { VK_F2,         kbF2        },
-    { VK_F3,        kbF3        }, { VK_F4,         kbF4        },
-    { VK_F5,        kbF5        }, { VK_F6,         kbF6        },
-    { VK_F7,        kbF7        }, { VK_F8,         kbF8        },
-    { VK_F9,        kbF9        }, { VK_F10,        kbF10       },
-    { VK_F11,       kbF11       }, { VK_F12,        kbF12       },
 };
 
 const uint XTermModDefault = 1;
@@ -271,7 +245,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
     {
         case '_':
             if (buf.readStr("f2l"))
-                return parseFar2lInput(buf, ev, state) == Accepted ? Accepted : Ignored;
+                return parseFar2lInput(buf, ev, state);
             if (buf.readStr("far2lok\x07"))
                 return Ignored;
             break;
@@ -558,194 +532,6 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
         return Accepted;
     }
     return Ignored;
-}
-
-ParseResult TermIO::parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
-// Pre: "\x1B_far2l" has just been read.
-{
-    enum { k = 32 };
-    char s[4*k];
-    size_t len = 0;
-    char c;
-    while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
-        if (len < sizeof(s))
-            s[len++] = c;
-    TStringView input {s, len};
-
-    uint8_t out[3*k];
-    size_t outLen = decodeBase64(input, out);
-    if (outLen > 0)
-    {
-        if (out[outLen - 1] == 'K' && outLen - 1 == 14)
-        {
-            KEY_EVENT_RECORD kev {};
-            kev.bKeyDown = 1;
-            memcpy(&kev.wRepeatCount,      &out[0],  2);
-            memcpy(&kev.wVirtualKeyCode,   &out[2],  2);
-            memcpy(&kev.wVirtualScanCode,  &out[4],  2);
-            memcpy(&kev.dwControlKeyState, &out[6],  4);
-            memcpy(&kev.uChar.UnicodeChar, &out[10], 4);
-
-            if (uint16_t keyCode = virtualKeyCodeToKeyCode[kev.wVirtualKeyCode])
-            {
-                kev.wVirtualScanCode = keyCode >> 8;
-                kev.uChar.UnicodeChar = keyCode & 0xFF;
-            }
-            // When running directly in a terminal, far2l does not set the
-            // UnicodeChar field in Ctrl+Letter/Number events.
-            if ( ((0x30 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x39) ||
-                  (0x41 <= kev.wVirtualKeyCode && kev.wVirtualKeyCode <= 0x5A)) &&
-                 kev.uChar.UnicodeChar == 0 )
-            {
-                kev.uChar.UnicodeChar = kev.wVirtualKeyCode;
-            }
-
-            if (getWin32Key(kev, ev, state))
-            {
-                normalizeKey(ev.keyDown);
-                return Accepted;
-            }
-        }
-        else if (out[outLen - 1] == 'M' && outLen - 1 == 16)
-        {
-            MOUSE_EVENT_RECORD mev {};
-            memcpy(&mev.dwMousePosition.X, &out[0],  2);
-            memcpy(&mev.dwMousePosition.Y, &out[2],  2);
-            memcpy(&mev.dwButtonState,     &out[4],  4);
-            memcpy(&mev.dwControlKeyState, &out[8],  4);
-            memcpy(&mev.dwEventFlags,      &out[12], 4);
-
-            getWin32Mouse(mev, ev, state);
-            return Accepted;
-        }
-    }
-    return Ignored;
-}
-
-static bool getWin32KeyText(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state) noexcept
-// Returns true unless the event contains a UTF-16 surrogate (Windows only),
-// in which case we need the next event.
-{
-    uint32_t ch = KeyEvent.uChar.UnicodeChar;
-    ev.keyDown.textLength = 0;
-
-    // Do not treat non-printable characters as text.
-    if (' ' <= ch && ch != 0x7F)
-    {
-#ifdef _WIN32
-        if (0xD800 <= ch && ch <= 0xDBFF)
-        {
-            state.surrogate = ch;
-            return false;
-        }
-
-        wchar_t utf16[2] = {(wchar_t) ch, 0};
-        if (state.surrogate)
-        {
-            if (0xDC00 <= ch && ch <= 0xDFFF)
-            {
-                utf16[1] = (wchar_t) ch;
-                utf16[0] = state.surrogate;
-            }
-            state.surrogate = 0;
-        }
-
-        ev.keyDown.textLength = WideCharToMultiByte(
-            CP_UTF8, 0,
-            utf16, utf16[1] ? 2 : 1,
-            ev.keyDown.text, sizeof(ev.keyDown.text),
-            nullptr, nullptr
-        );
-#else
-        (void) state;
-
-        if (ch < 0xD800 || (0xDFFF < ch && ch < 0x10FFFF))
-            ev.keyDown.textLength = (uchar) utf32To8(ch, ev.keyDown.text);
-#endif // _WIN32
-    }
-    return true;
-}
-
-bool TermIO::getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state) noexcept
-{
-    if (!getWin32KeyText(KeyEvent, ev, state))
-        return false;
-
-    ev.what = evKeyDown;
-    ev.keyDown.charScan.scanCode = KeyEvent.wVirtualScanCode;
-    ev.keyDown.charScan.charCode = KeyEvent.uChar.AsciiChar;
-    ev.keyDown.controlKeyState = KeyEvent.dwControlKeyState;
-
-    if (ev.keyDown.textLength)
-    {
-        ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
-        if (KeyEvent.wVirtualKeyCode == VK_MENU)
-            // This is enabled when pasting certain characters, and it confuses
-            // applications. Clear it.
-            ev.keyDown.charScan.scanCode = 0;
-        if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ)
-            // If the character cannot be represented in the current codepage,
-            // or if it would accidentally trigger a Ctrl+Key combination,
-            // make the whole keyCode zero to avoid side effects.
-            ev.keyDown.keyCode = kbNoKey;
-    }
-
-    if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
-         ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 ||
-         ev.keyDown.keyCode == 0x3A00 )
-        // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
-        ev.keyDown.keyCode = kbNoKey;
-    else if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
-              (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
-    {
-        // When AltGr+Key does not produce a character, a
-        // keyCode with unwanted effects may be read instead.
-        if (!ev.keyDown.textLength)
-            ev.keyDown.keyCode = kbNoKey;
-    }
-    else if (KeyEvent.wVirtualScanCode < 89)
-    {
-        // Convert NT style virtual scan codes to PC BIOS codes.
-        uchar index = KeyEvent.wVirtualScanCode;
-        ushort keyCode = 0;
-        if ((ev.keyDown.controlKeyState & kbAltShift) && THardwareInfo::AltCvt[index])
-            keyCode = THardwareInfo::AltCvt[index];
-        else if ((ev.keyDown.controlKeyState & kbCtrlShift) && THardwareInfo::CtrlCvt[index])
-            keyCode = THardwareInfo::CtrlCvt[index];
-        else if ((ev.keyDown.controlKeyState & kbShift) && THardwareInfo::ShiftCvt[index])
-            keyCode = THardwareInfo::ShiftCvt[index];
-        else if ( !(ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) &&
-                  THardwareInfo::NormalCvt[index] )
-            keyCode = THardwareInfo::NormalCvt[index];
-
-        if (keyCode != 0)
-        {
-            ev.keyDown.keyCode = keyCode;
-            if (ev.keyDown.charScan.charCode < ' ')
-                ev.keyDown.textLength = 0;
-        }
-    }
-
-    return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
-}
-
-void TermIO::getWin32Mouse(const MOUSE_EVENT_RECORD &MouseEvent, TEvent &ev, InputState &state) noexcept
-{
-    ev.what = evMouse;
-    ev.mouse.where.x = MouseEvent.dwMousePosition.X;
-    ev.mouse.where.y = MouseEvent.dwMousePosition.Y;
-    ev.mouse.buttons = state.buttons = MouseEvent.dwButtonState;
-    ev.mouse.eventFlags = MouseEvent.dwEventFlags;
-    ev.mouse.controlKeyState = MouseEvent.dwControlKeyState;
-
-    // Rotation sense is represented by the sign of dwButtonState's high word
-    Boolean positive = !(MouseEvent.dwButtonState & 0x80000000);
-    if( MouseEvent.dwEventFlags & MOUSE_WHEELED )
-        ev.mouse.wheel = positive ? mwUp : mwDown;
-    else if( MouseEvent.dwEventFlags & MOUSE_HWHEELED )
-        ev.mouse.wheel = positive ? mwRight : mwLeft;
-    else
-        ev.mouse.wheel = 0;
 }
 
 } // namespace tvision

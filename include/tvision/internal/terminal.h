@@ -178,7 +178,6 @@ struct CSIData
 
 namespace TermIO
 {
-
     void mouseOn(const StdioCtl &) noexcept;
     void mouseOff(const StdioCtl &) noexcept;
     void keyModsOn(const StdioCtl &) noexcept;
@@ -195,11 +194,6 @@ namespace TermIO
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
-    ParseResult parseFar2lInput(GetChBuf &, TEvent &, InputState &) noexcept;
-
-    bool getWin32Key(const KEY_EVENT_RECORD &, TEvent &, InputState &) noexcept;
-    void getWin32Mouse(const MOUSE_EVENT_RECORD &, TEvent &, InputState &) noexcept;
-
 }
 
 } // namespace tvision
