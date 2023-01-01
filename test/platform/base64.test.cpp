@@ -42,7 +42,7 @@ TEST(Base64, ShouldEncodeProperly)
     };
     for (auto &testCase : testCases)
     {
-        auto &&actual = encodeBase64({(uint8_t *) testCase.input.data(), testCase.input.size()});
+        auto &&actual = encodeBase64(testCase.input);
         expectResultMatches(actual, testCase);
     }
 }

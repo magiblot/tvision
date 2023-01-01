@@ -7,43 +7,27 @@
 namespace tvision
 {
 
-// Returns the number of bytes written into 'output'.
-// Pre: 'output.size()' is no less than 4/3 of 'input.size()'.
-size_t encodeBase64(TSpan<const uint8_t> input, TSpan<char> output) noexcept;
+// Returns the region of 'output' that contains the encoded data.
+// Pre: the capacity of 'output' is no less than 4/3 of 'input.size()'.
+TStringView encodeBase64(TStringView input, char *output) noexcept;
 
-// Returns the number of bytes written into 'output'.
-// Pre: 'output.size()' is no less than 3/4 of 'input.size()'.
-size_t decodeBase64(TStringView input, TSpan<uint8_t> output) noexcept;
+// Returns the region of 'output' that contains the decoded data.
+// Pre: the capacity of 'output' is no less than 3/4 of 'input.size()'.
+TStringView decodeBase64(TStringView input, char *output) noexcept;
 
-inline std::string encodeBase64(TSpan<const uint8_t> input)
+inline std::string encodeBase64(TStringView input)
 {
-    std::string result;
-    enum { k = 128 };
-    char buf[4*k];
-    if (!input.empty())
-    {
-        size_t i = 0;
-        do
-        {
-            result.append((char *) buf, encodeBase64(input.subspan(i*3*k, 3*k), buf));
-        } while (i++ < (input.size() - 1)/(3*k));
-    }
+    std::string result((input.size() * 4)/3 + 4, '\0');
+    auto encoded = encodeBase64(input, result.data());
+    result.resize(encoded.size());
     return result;
 }
 
 inline std::string decodeBase64(TStringView input)
 {
-    std::string result;
-    enum { k = 128 };
-    uint8_t buf[3*k];
-    if (!input.empty())
-    {
-        size_t i = 0;
-        do
-        {
-            result.append((char *) buf, decodeBase64(input.substr(i*4*k, 4*k), buf));
-        } while (i++ < (input.size() - 1)/(4*k));
-    }
+    std::string result((input.size() * 3)/4 + 3, '\0');
+    auto encoded = decodeBase64(input, result.data());
+    result.resize(encoded.size());
     return result;
 }
 

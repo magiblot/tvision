@@ -44,13 +44,11 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
     while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
         if (len < sizeof(s))
             s[len++] = c;
-    TStringView input {s, len};
-
-    uint8_t out[3*k];
-    size_t outLen = decodeBase64(input, out);
-    if (outLen > 0)
+    char o[3*k];
+    TStringView out = decodeBase64({s, len}, o);
+    if (!out.empty())
     {
-        if (out[outLen - 1] == 'K' && outLen - 1 == 14)
+        if (out.back() == 'K' && out.size() - 1 == 14)
         {
             KEY_EVENT_RECORD kev {};
             kev.bKeyDown = 1;
@@ -80,7 +78,7 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
                 return Accepted;
             }
         }
-        else if (out[outLen - 1] == 'M' && outLen - 1 == 16)
+        else if (out.back() == 'M' && out.size() - 1 == 16)
         {
             MOUSE_EVENT_RECORD mev {};
             memcpy(&mev.dwMousePosition.X, &out[0],  2);

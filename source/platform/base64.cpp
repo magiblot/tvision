@@ -29,7 +29,7 @@ static constexpr uint8_t b64d[256] =
     128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 };
 
-size_t encodeBase64(TSpan<const uint8_t> input, TSpan<char> output) noexcept
+TStringView encodeBase64(TStringView input, char *output) noexcept
 {
     auto* p = (const uint8_t *) input.data();
     size_t iLen = input.size();
@@ -63,15 +63,16 @@ size_t encodeBase64(TSpan<const uint8_t> input, TSpan<char> output) noexcept
         j += 4;
     }
 
-    return j;
+    return {output, j};
 }
 
-size_t decodeBase64(TStringView input, TSpan<uint8_t> output) noexcept
+TStringView decodeBase64(TStringView input, char *aOutput) noexcept
 {
     auto *p = (const uint8_t *) input.data();
     size_t iLen = input.size();
     bool hasPadding = iLen > 0 && (iLen % 4 != 0 || p[iLen - 1] == '=');
     size_t noPadLen = ((iLen + 3) / 4 - hasPadding) * 4;
+    auto *output = (uint8_t *) aOutput;
 
     size_t j = 0;
     for (size_t i = 0; i < noPadLen; i += 4, j += 3)
@@ -92,7 +93,7 @@ size_t decodeBase64(TStringView input, TSpan<uint8_t> output) noexcept
         }
     }
 
-    return j;
+    return {aOutput, j};
 }
 
 } // namespace tvision
