@@ -225,12 +225,15 @@ TStatusLine *TFormApp::initStatusLine( TRect r )
 {
     r.a.y = r.b.y - 1;
     return new TStatusLine( r,
-    *new TStatusDef( 0, 0xFFFF ) +
-      *new TStatusItem( "~F2~ Save", kbF2, cmListSave ) +
-      *new TStatusItem( "~F3~ Open", kbF3, cmListOpen ) +
-      *new TStatusItem( "~F10~ Menu", kbF10, cmMenu) +
-      *new TStatusItem( "", kbCtrlF5, cmResize )
-      );
+      *new TStatusDef( 0, 0xFFFF ) +
+        *new TStatusItem( "~F2~ Save", kbF2, cmListSave ) +
+        *new TStatusItem( "~F3~ Open", kbF3, cmListOpen ) +
+        *new TStatusItem( "~F10~ Menu", kbF10, cmMenu) +
+        *new TStatusItem( 0, kbShiftDel, cmCut ) +
+        *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
+        *new TStatusItem( 0, kbShiftIns, cmPaste ) +
+        *new TStatusItem( "", kbCtrlF5, cmResize )
+        );
 }
 
 int main()

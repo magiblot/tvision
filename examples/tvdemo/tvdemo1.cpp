@@ -183,6 +183,9 @@ TStatusLine *TVDemo::initStatusLine( TRect r )
       *new TStatusDef( 0, 50 ) +
         *new TStatusItem( "~F1~ Help", kbF1, cmHelp ) +
         *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
+        *new TStatusItem( 0, kbShiftDel, cmCut ) +
+        *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
+        *new TStatusItem( 0, kbShiftIns, cmPaste ) +
         *new TStatusItem( 0, kbAltF3, cmClose ) +
         *new TStatusItem( 0, kbF10, cmMenu ) +
         *new TStatusItem( 0, kbF5, cmZoom ) +
