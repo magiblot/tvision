@@ -246,8 +246,8 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
         case '_':
             if (buf.readStr("f2l"))
                 return parseFar2lInput(buf, ev, state);
-            if (buf.readStr("far2lok\x07"))
-                return Ignored;
+            if (buf.readStr("far2l"))
+                return parseFar2lAnswer(buf, ev, state);
             break;
         case '[':
             switch (buf.get())
@@ -532,6 +532,21 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
         return Accepted;
     }
     return Ignored;
+}
+
+bool TermIO::setClipboardText(const StdioCtl &io, TStringView text, InputState &state) noexcept
+{
+    if (setFar2lClipboard(io, text, state))
+        return true;
+    return false;
+}
+
+bool TermIO::requestClipboardText(const StdioCtl &io, void (&accept)(TStringView), InputState &state) noexcept
+{
+    state.putPaste = &accept;
+    if (requestFar2lClipboard(io, state))
+        return true;
+    return false;
 }
 
 } // namespace tvision

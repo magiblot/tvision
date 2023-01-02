@@ -6,8 +6,23 @@
 #include <internal/constmap.h>
 #include <internal/base64.h>
 
+#include <time.h>
+
 namespace tvision
 {
+
+enum Far2lRequestIds : char
+{
+    f2lNoAnswer = '\0',
+    f2lClipGetData = '\xA0',
+};
+
+static char f2lClientIdData[32 + 1];
+static TStringView f2lClientId =
+(
+    sprintf(f2lClientIdData, "%032llu", (unsigned long long) time(nullptr)),
+    f2lClientIdData
+);
 
 static const const_unordered_map<uchar, ushort> virtualKeyCodeToKeyCode =
 {
@@ -92,6 +107,178 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
         }
     }
     return Ignored;
+}
+
+ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
+// Pre: "\x1B_far2l" has just been read.
+{
+    size_t capacity = 4096;
+    char *s = (char *) malloc(capacity);
+    size_t len = 0;
+    char c;
+    while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
+    {
+        if (capacity == len)
+        {
+            if (void *tmp = realloc(s, capacity *= 2))
+                s = (char *) tmp;
+            else
+                capacity = 0;
+        }
+        if (capacity)
+            s[len++] = c;
+    }
+
+    if (capacity)
+    {
+        TStringView encoded {s, len};
+        if (encoded == "ok")
+            state.hasFar2l = true;
+        else if (char *pDecoded = (char *) malloc((encoded.size() * 3)/4 + 3))
+        {
+            TStringView decoded = decodeBase64(encoded, pDecoded);
+            if (decoded.size() >= 5 && decoded.back() == f2lClipGetData)
+            {
+                uint32_t dataSize;
+                memcpy(&dataSize, &decoded[decoded.size() - 5], 4);
+                if (state.putPaste && decoded.size() >= 5 + dataSize)
+                {
+                    TStringView text = decoded.substr(decoded.size() - 5 - dataSize, dataSize);
+                    // Discard null terminator.
+                    if (dataSize > 0 && text.back() == '\0')
+                        text = text.substr(0, text.size() - 1);
+                    state.putPaste(text);
+                }
+            }
+            free(pDecoded);
+        }
+    }
+    free(s);
+    return Ignored;
+}
+
+template <bool write = true, class... Args>
+size_t concat(char *out, TStringView, Args ...args) noexcept;
+template <bool write = true, class... Args>
+size_t concat(char *out, char c, Args ...args) noexcept;
+template <bool write = true, class... Args>
+size_t concat(char *out, uint32_t i, Args ...args) noexcept;
+
+template <bool write = true, class... Args>
+inline size_t concat(char *out) noexcept
+{
+    return 0;
+}
+
+template <bool write, class... Args>
+inline size_t concat(char *out, TStringView s, Args ...args) noexcept
+{
+    size_t len = s.size();
+    if (write)
+        memcpy(out, s.data(), len);
+    return len + concat<write>(out + len, args...);
+}
+
+template <bool write, class... Args>
+inline size_t concat(char *out, char c, Args ...args) noexcept
+{
+    size_t len = sizeof(c);
+    if (write)
+        memcpy(out, &c, len);
+    return len + concat<write>(out + len, args...);
+}
+
+template <bool write, class... Args>
+inline size_t concat(char *out, uint32_t i, Args ...args) noexcept
+{
+    size_t len = sizeof(i);
+    if (write)
+        memcpy(out, &i, len);
+    return len + concat<write>(out + len, args...);
+}
+
+template <class... Args>
+inline size_t concatLength(Args ...args)
+{
+    return concat<false>(nullptr, args...);
+}
+
+template <class... Args>
+inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &dec, std::vector<char> &enc, Args ...args)
+{
+    dec.resize(concatLength(args...));
+    concat(&dec[0], args...);
+    enc.resize((dec.size() * 4)/3 + 4);
+    TStringView b64 = encodeBase64({&dec[0], dec.size()}, &enc[0]);
+    TStringView prefix = "\x1B_far2l:";
+    char suffix = '\x07';
+    size_t headLen = out.size();
+    size_t pushLen = concatLength(prefix, b64, suffix);
+    out.resize(headLen + pushLen);
+    concat(&out[headLen], prefix, b64, suffix);
+}
+
+bool setFar2lClipboard(const StdioCtl &io, TStringView text, InputState &state) noexcept
+{
+    if (state.hasFar2l)
+    {
+        std::vector<char> out, dec, enc;
+        // CLIP_OPEN
+        pushFar2lRequest(out, dec, enc,
+            f2lClientId,
+            (uint32_t) f2lClientId.size(),
+            "oc",
+            f2lNoAnswer
+        );
+        // CLIP_SETDATA
+        if (text.size() > UINT_MAX - 1)
+            text = text.substr(0, UINT_MAX - 1);
+        pushFar2lRequest(out, dec, enc,
+            text,
+            '\0',
+            (uint32_t) (text.size() + 1),
+            (uint32_t) CF_TEXT,
+            "sc",
+            f2lNoAnswer
+        );
+        // CLIP_CLOSE
+        pushFar2lRequest(out, dec, enc,
+            "cc",
+            f2lNoAnswer
+        );
+        io.write(out.data(), out.size());
+        return true;
+    }
+    return false;
+}
+
+bool requestFar2lClipboard(const StdioCtl &io, InputState &state) noexcept
+{
+    if (state.hasFar2l)
+    {
+        std::vector<char> out, dec, enc;
+        // CLIP_OPEN
+        pushFar2lRequest(out, dec, enc,
+            f2lClientId,
+            (uint32_t) f2lClientId.size(),
+            "oc",
+            f2lNoAnswer
+        );
+        // CLIP_GETDATA
+        pushFar2lRequest(out, dec, enc,
+            (uint32_t) CF_TEXT,
+            "gc",
+            f2lClipGetData
+        );
+        // CLIP_CLOSE
+        pushFar2lRequest(out, dec, enc,
+            "cc",
+            f2lNoAnswer
+        );
+        io.write(out.data(), out.size());
+        return true;
+    }
+    return false;
 }
 
 } // namespace tvision

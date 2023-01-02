@@ -171,6 +171,12 @@ typedef unsigned int        UINT;
 #define VK_PA1            0xFD
 #define VK_OEM_CLEAR      0xFE
 
+//
+// Predefined Clipboard Formats
+//
+
+#define CF_TEXT             1
+
 // winnls.h
 
 #define CP_UTF8 65001 // UTF-8 translation

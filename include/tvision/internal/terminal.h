@@ -18,6 +18,8 @@ struct InputState
 #ifdef _WIN32
     wchar_t surrogate {0};
 #endif
+    bool hasFar2l {false};
+    void (*putPaste)(TStringView) {nullptr};
 };
 
 class InputGetter
@@ -184,6 +186,9 @@ namespace TermIO
     void keyModsOff(const StdioCtl &) noexcept;
 
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
+
+    bool setClipboardText(const StdioCtl &, TStringView, InputState &) noexcept;
+    bool requestClipboardText(const StdioCtl &, void (&)(TStringView), InputState &) noexcept;
 
     ParseResult parseEvent(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;

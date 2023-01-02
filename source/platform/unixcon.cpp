@@ -88,7 +88,7 @@ static bool write_subprocess(const char * const cmd[], TStringView, int timeoutM
 
 static bool commandIsAvailable(const Command &cmd)
 {
-    return (!cmd.env || getenv(cmd.env)) && executable_exists(cmd.argv[0]);
+    return (!cmd.env || !getEnv<TStringView>(cmd.env).empty()) && executable_exists(cmd.argv[0]);
 }
 
 bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
@@ -100,6 +100,8 @@ bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
                 return true;
             break;
         }
+    if (TermIO::setClipboardText(io, text, inputState))
+        return true;
     return false;
 }
 
@@ -117,6 +119,8 @@ bool UnixConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noex
             }
             break;
         }
+    if (TermIO::requestClipboardText(io, accept, inputState))
+        return true;
     return false;
 }
 
