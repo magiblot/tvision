@@ -399,7 +399,7 @@ void TInputLine::handleEvent( TEvent& event )
                         // The event text may contain null characters, but 'data' is null-terminated,
                         // so rely on strlen to measure the text length.
                         strnzcpy( keyText, event.keyDown.getText(), sizeof( keyText ) );
-                        if( (len = strlen(keyText)) != 0 )
+                        if( (len = strlen(keyText)) > 0 )
                             {
                             deleteSelect();
                             if( (state & sfCursorIns) != 0 )
@@ -407,6 +407,8 @@ void TInputLine::handleEvent( TEvent& event )
 
                             if( checkValid(True) )
                                 {
+                                if( strchr("\t\r\n", keyText[0]) != 0 )
+                                    keyText[0] = ' '; // Replace tabs and newlines into spaces.
                                 TTextMetrics dataMts = TText::measure(data);
                                 TTextMetrics keyMts = TText::measure(keyText);
                                 if( strlen(data) + len <= maxLen &&

@@ -317,7 +317,14 @@ Boolean TEventQueue::getPasteEvent( TEvent &ev ) noexcept
             KeyDownEvent keyDown = { {0x0000}, kbPaste, {0}, (uchar) length };
             ev.what = evKeyDown;
             ev.keyDown = keyDown;
-            memcpy( ev.keyDown.text, text.data(), length );
+            if( text[0] == '\r' ) // Convert CR and CRLF into LF.
+                {
+                ev.keyDown.text[0] = '\n';
+                if( pasteTextIndex + 1 < pasteTextLength && text[1] == '\n' )
+                    pasteTextIndex += 1;
+                }
+            else
+                memcpy( ev.keyDown.text, text.data(), length );
             pasteTextIndex += length;
             return True;
             }
