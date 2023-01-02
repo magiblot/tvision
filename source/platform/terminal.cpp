@@ -8,6 +8,7 @@
 #include <internal/constarr.h>
 #include <internal/codepage.h>
 #include <internal/getenv.h>
+#include <internal/base64.h>
 #include <internal/utf8.h>
 
 namespace tvision
@@ -534,10 +535,26 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     return Ignored;
 }
 
+static void setOsc52Clipboard(const StdioCtl &io, TStringView text) noexcept
+{
+    TStringView prefix = "\x1B]52;;";
+    TStringView suffix = "\x07";
+    if (char *buf = (char *) malloc(prefix.size() + suffix.size() + (text.size() * 4)/3 + 4))
+    {
+        memcpy(buf, prefix.data(), prefix.size());
+        TStringView b64 = encodeBase64(text, buf + prefix.size());
+        memcpy(buf + prefix.size() + b64.size(), suffix.data(), suffix.size());
+        io.write(buf, prefix.size() + b64.size() + suffix.size());
+        free(buf);
+    }
+}
+
 bool TermIO::setClipboardText(const StdioCtl &io, TStringView text, InputState &state) noexcept
 {
     if (setFar2lClipboard(io, text, state))
         return true;
+    // This is not guaranteed to work, so we return false anyway.
+    setOsc52Clipboard(io, text);
     return false;
 }
 
