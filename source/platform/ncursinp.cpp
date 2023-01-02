@@ -7,6 +7,7 @@
 
 #include <ncurses.h>
 #include <internal/ncursinp.h>
+#include <internal/terminal.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
 #include <internal/stdioctl.h>
@@ -263,9 +264,11 @@ static class NcursesInputGetter : public InputGetter
     }
 } ncInputGetter;
 
-NcursesInput::NcursesInput(const StdioCtl &aIo, NcursesDisplay &, bool mouse) noexcept :
+NcursesInput::NcursesInput( const StdioCtl &aIo, NcursesDisplay &,
+                            InputState &aState, bool mouse ) noexcept :
     InputStrategy(aIo.in()),
     io(aIo),
+    state(aState),
     mouseEnabled(mouse)
 {
     // Capture all keyboard input.

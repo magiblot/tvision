@@ -10,12 +10,11 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/terminal.h>
-
 namespace tvision
 {
 
 class NcursesDisplay;
+struct InputState;
 
 class NcursesInput : public InputStrategy
 {
@@ -23,7 +22,7 @@ class NcursesInput : public InputStrategy
     enum { readTimeout = 5 };
 
     const StdioCtl &io;
-    InputState state {};
+    InputState &state;
     bool mouseEnabled;
 
     static int getch_nb() noexcept;
@@ -35,8 +34,8 @@ class NcursesInput : public InputStrategy
 
 public:
 
-    // Lifetimes of 'io' and 'display' must exceed that of 'this'.
-    NcursesInput(const StdioCtl &io, NcursesDisplay &display, bool mouse) noexcept;
+    // Lifetimes of 'io', 'display' and 'state' must exceed that of 'this'.
+    NcursesInput(const StdioCtl &io, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
     ~NcursesInput();
 
     bool getEvent(TEvent &ev) noexcept;

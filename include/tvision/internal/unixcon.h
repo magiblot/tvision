@@ -9,19 +9,25 @@ namespace tvision
 
 class ScreenLifetime;
 class SigwinchHandler;
+struct InputState;
 
 class UnixConsoleStrategy : public ConsoleStrategy
 {
+    const StdioCtl &io;
     ScreenLifetime &scrl;
+    InputState &inputState;
     SigwinchHandler *sigwinch;
 
-    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &,
-                         ScreenLifetime &, SigwinchHandler * ) noexcept;
+    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &, const StdioCtl &,
+                         ScreenLifetime &, InputState &, SigwinchHandler * ) noexcept;
 
 public:
 
-    // Takes ownership over 'scrl', 'display' and 'input'.
-    static UnixConsoleStrategy &create( ScreenLifetime &scrl,
+    // The lifetime of 'io' must exceed that of the returned object.
+    // Takes ownership over 'scrl', 'inputState', 'display' and 'input'.
+    static UnixConsoleStrategy &create( const StdioCtl & io,
+                                        ScreenLifetime &scrl,
+                                        InputState &inputState,
                                         DisplayStrategy &display,
                                         InputStrategy &input ) noexcept;
 

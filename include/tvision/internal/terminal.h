@@ -14,9 +14,9 @@ class StdioCtl;
 
 struct InputState
 {
-    uchar buttons;
+    uchar buttons {0};
 #ifdef _WIN32
-    wchar_t surrogate;
+    wchar_t surrogate {0};
 #endif
 };
 

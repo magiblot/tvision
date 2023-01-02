@@ -4,6 +4,8 @@
 
 #include <internal/scrlife.h>
 #include <internal/sigwinch.h>
+#include <internal/terminal.h>
+#include <internal/getenv.h>
 
 #include <stdlib.h>
 #include <errno.h>
@@ -49,20 +51,26 @@ constexpr Command pasteCommands[] =
 
 inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
                                                  InputStrategy &aInput,
+                                                 const StdioCtl &aIo,
                                                  ScreenLifetime &aScrl,
+                                                 InputState &aInputState,
                                                  SigwinchHandler *aSigwinch ) noexcept :
     ConsoleStrategy(aDisplay, aInput, {&aInput, aSigwinch}),
+    io(aIo),
     scrl(aScrl),
+    inputState(aInputState),
     sigwinch(aSigwinch)
 {
 }
 
-UnixConsoleStrategy &UnixConsoleStrategy::create( ScreenLifetime &scrl,
+UnixConsoleStrategy &UnixConsoleStrategy::create( const StdioCtl &io,
+                                                  ScreenLifetime &scrl,
+                                                  InputState &inputState,
                                                   DisplayStrategy &display,
                                                   InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
-    return *new UnixConsoleStrategy(display, input, scrl, sigwinch);
+    return *new UnixConsoleStrategy(display, input, io, scrl, inputState, sigwinch);
 }
 
 UnixConsoleStrategy::~UnixConsoleStrategy()
@@ -70,6 +78,7 @@ UnixConsoleStrategy::~UnixConsoleStrategy()
     delete sigwinch;
     delete &input;
     delete &display;
+    delete &inputState;
     delete &scrl;
 }
 

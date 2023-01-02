@@ -13,6 +13,7 @@ namespace tvision
 class ScreenLifetime;
 class SigwinchHandler;
 class GpmInput;
+struct InputState;
 
 struct LinuxConsoleInput final : public EventSource
 {
@@ -35,20 +36,22 @@ struct LinuxConsoleInput final : public EventSource
 class LinuxConsoleStrategy : public ConsoleStrategy
 {
     ScreenLifetime &scrl;
+    InputState &inputState;
     SigwinchHandler *sigwinch;
     LinuxConsoleInput &wrapper;
     GpmInput *gpm;
 
-    LinuxConsoleStrategy( DisplayStrategy &aDisplay, ScreenLifetime &aScrl,
-                          SigwinchHandler *aSigwinch, LinuxConsoleInput &aWrapper,
-                          GpmInput *aGpm ) noexcept;
+    LinuxConsoleStrategy( DisplayStrategy &, LinuxConsoleInput &,
+                          ScreenLifetime &, InputState &, SigwinchHandler *,
+                          GpmInput * ) noexcept;
 
 public:
 
     // Pre: 'io.isLinuxConsole()' returns 'true'.
     // The lifetime of 'io' must exceed that of the returned object.
-    // Takes ownership over 'scrl', 'display' and 'input'.
+    // Takes ownership over 'scrl', 'inputState', 'display' and 'input'.
     static LinuxConsoleStrategy &create( const StdioCtl &io, ScreenLifetime &scrl,
+                                         InputState &inputState,
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;
     ~LinuxConsoleStrategy();

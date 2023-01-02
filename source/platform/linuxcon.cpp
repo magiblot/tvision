@@ -20,14 +20,16 @@ namespace tvision
 {
 
 inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
-                                                   ScreenLifetime &aScrl,
-                                                   SigwinchHandler *aSigwinch,
                                                    LinuxConsoleInput &aWrapper,
+                                                   ScreenLifetime &aScrl,
+                                                   InputState &aInputState,
+                                                   SigwinchHandler *aSigwinch,
                                                    GpmInput *aGpm ) noexcept :
     ConsoleStrategy( aDisplay,
                      aGpm ? *aGpm : aWrapper.input,
                      {&aWrapper, aGpm, aSigwinch} ),
     scrl(aScrl),
+    inputState(aInputState),
     sigwinch(aSigwinch),
     wrapper(aWrapper),
     gpm(aGpm)
@@ -35,13 +37,14 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 }
 
 LinuxConsoleStrategy &LinuxConsoleStrategy::create( const StdioCtl &io, ScreenLifetime &scrl,
+                                                    InputState &inputState,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
     auto &wrapper = *new LinuxConsoleInput(io, input);
     auto *gpm = GpmInput::create();
-    return *new LinuxConsoleStrategy(display, scrl, sigwinch, wrapper, gpm);
+    return *new LinuxConsoleStrategy(display, wrapper, scrl, inputState, sigwinch, gpm);
 }
 
 LinuxConsoleStrategy::~LinuxConsoleStrategy()
@@ -51,6 +54,7 @@ LinuxConsoleStrategy::~LinuxConsoleStrategy()
     delete &wrapper.input;
     delete &wrapper;
     delete &display;
+    delete &inputState;
     delete &scrl;
 }
 
