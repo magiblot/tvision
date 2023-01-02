@@ -168,6 +168,7 @@ const ushort
     cmClear         = 24,
     cmTile          = 25,
     cmCascade       = 26,
+    cmRedo          = 27,
 
 // Standard messages
 
