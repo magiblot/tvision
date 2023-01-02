@@ -464,7 +464,8 @@ void TInputLine::handleEvent( TEvent& event )
                     }
                 break;
             }
-        updateCommands();
+        if( canUpdateCommands() )
+            updateCommands();
         }
 }
 
@@ -478,17 +479,8 @@ void TInputLine::selectAll( Boolean enable, Boolean scroll )
     if( scroll )
         firstPos = max( 0, displayedPos(curPos)-size.x+2 );
     drawView();
-    updateCommands();
-}
-
-void TInputLine::setCmdState( ushort command, Boolean enable )
-{
-    TCommandSet s;
-    s += command;
-    if( enable == True && (~state & (sfActive | sfSelected)) == 0 )
-        enableCommands(s);
-    else
-        disableCommands(s);
+    if( canUpdateCommands() )
+        updateCommands();
 }
 
 void TInputLine::setData( void *rec )
@@ -503,12 +495,14 @@ void TInputLine::setData( void *rec )
 
 void TInputLine::setState( ushort aState, Boolean enable )
 {
+    Boolean updateBefore = canUpdateCommands();
     TView::setState( aState, enable );
-    if( aState == sfSelected ||
-        ( aState == sfActive && (state & sfSelected) != 0 )
-      )
+    Boolean updateAfter = canUpdateCommands();
+
+    if( aState == sfSelected || (aState == sfActive && (state & sfSelected)) )
         selectAll( enable, False );
-    updateCommands();
+    if( updateBefore != updateAfter )
+        updateCommands();
 }
 
 void TInputLine::setValidator( TValidator* aValid )
@@ -517,6 +511,21 @@ void TInputLine::setValidator( TValidator* aValid )
       destroy(validator);
 
     validator = aValid;
+}
+
+Boolean TInputLine::canUpdateCommands()
+{
+    return Boolean( (~state & (sfActive | sfSelected)) == 0 );
+}
+
+void TInputLine::setCmdState( ushort command, Boolean enable )
+{
+    TCommandSet s;
+    s += command;
+    if( enable && canUpdateCommands() )
+        enableCommands(s);
+    else
+        disableCommands(s);
 }
 
 void TInputLine::updateCommands()
