@@ -456,7 +456,9 @@ void TInputLine::handleEvent( TEvent& event )
                     TClipboard::setText(sel);
                     if( event.message.command == cmCut )
                         {
+                        saveState();
                         deleteSelect();
+                        checkValid(True);
                         selStart = selEnd = 0;
                         drawView();
                         }
