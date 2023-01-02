@@ -560,8 +560,7 @@ constexpr inline TColorAttr::TColorAttr(TColorDesired fg, TColorDesired bg, usho
 
 inline bool TColorAttr::isBIOS() const
 {
-    return ::getFore(*this).isBIOS() & ::getBack(*this).isBIOS()
-            & !::getStyle(*this);
+    return (int) ::getFore(*this).isBIOS() & ::getBack(*this).isBIOS() & !::getStyle(*this);
 }
 
 inline uchar TColorAttr::asBIOS() const
@@ -645,7 +644,7 @@ constexpr inline TColorAttr reverseAttribute(TColorAttr attr)
          bg = ::getBack(attr);
     // The 'slReverse' attribute is represented differently by every terminal,
     // so it is better to swap the colors manually unless any of them is default.
-    if (fg.isDefault() | bg.isDefault())
+    if ((int) fg.isDefault() | bg.isDefault())
         ::setStyle(attr, ::getStyle(attr) ^ slReverse);
     else
     {

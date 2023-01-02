@@ -18,7 +18,7 @@ TStringView decodeBase64(TStringView input, char *output) noexcept;
 inline std::string encodeBase64(TStringView input)
 {
     std::string result((input.size() * 4)/3 + 4, '\0');
-    auto encoded = encodeBase64(input, result.data());
+    auto encoded = encodeBase64(input, &result[0]);
     result.resize(encoded.size());
     return result;
 }
@@ -26,7 +26,7 @@ inline std::string encodeBase64(TStringView input)
 inline std::string decodeBase64(TStringView input)
 {
     std::string result((input.size() * 3)/4 + 3, '\0');
-    auto encoded = decodeBase64(input, result.data());
+    auto encoded = decodeBase64(input, &result[0]);
     result.resize(encoded.size());
     return result;
 }

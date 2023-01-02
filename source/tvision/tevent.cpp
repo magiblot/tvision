@@ -314,7 +314,7 @@ Boolean TEventQueue::getPasteEvent( TEvent &ev ) noexcept
         size_t length = TText::next( text );
         if( length > 0 )
             {
-            KeyDownEvent keyDown = { 0x0000, kbPaste, {0}, (uchar) length };
+            KeyDownEvent keyDown = { {0x0000}, kbPaste, {0}, (uchar) length };
             ev.what = evKeyDown;
             ev.keyDown = keyDown;
             memcpy( ev.keyDown.text, text.data(), length );

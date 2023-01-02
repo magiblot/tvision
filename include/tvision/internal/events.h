@@ -70,6 +70,8 @@ public:
     {
     }
 
+    virtual ~EventSource() {}
+
     virtual bool hasPendingEvents() noexcept;
     virtual bool getEvent(TEvent &) noexcept;
 };
