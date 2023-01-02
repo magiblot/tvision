@@ -108,10 +108,21 @@ bool Win32ConsoleStrategy::isAlive() noexcept
     return GetNumberOfConsoleInputEvents(io.in(), &events);
 }
 
+static bool openClipboard() noexcept
+{
+    for (int i = 0; i < 5; ++i)
+    {
+        if (OpenClipboard(nullptr))
+            return true;
+        Sleep(5);
+    }
+    return false;
+}
+
 bool Win32ConsoleStrategy::setClipboardText(TStringView text) noexcept
 {
     bool result = false;
-    if (OpenClipboard(nullptr))
+    if (openClipboard())
     {
         HGLOBAL hData;
         wchar_t *pData;
@@ -140,7 +151,7 @@ bool Win32ConsoleStrategy::setClipboardText(TStringView text) noexcept
 bool Win32ConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noexcept
 {
     bool result = false;
-    if (OpenClipboard(nullptr))
+    if (openClipboard())
     {
         HGLOBAL hData;
         wchar_t *pData;
