@@ -201,6 +201,8 @@ private:
     void saveState();
     void restoreState();
     Boolean checkValid(Boolean);
+    void setCmdState( ushort, Boolean );
+    void updateCommands();
 
     static const char _NEAR rightArrow;
     static const char _NEAR leftArrow;
