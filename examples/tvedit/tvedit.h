@@ -22,12 +22,7 @@ class TEditWindow;
 class TDialog;
 
 const int
-//  cmOpen       = 100,
-//  cmNew        = 101,
-  cmChangeDrct = 102,
-//  cmDosShell   = 103,
-  cmCalculator = 104,
-  cmShowClip   = 105;
+  cmChangeDrct = 102;
 
 class TEditorApp : public TApplication
 {
@@ -47,10 +42,7 @@ private:
     void fileOpen();
     void fileNew();
     void changeDir();
-    void showClip();
 };
-
-extern TEditWindow *clipWindow;
 
 ushort execDialog( TDialog *d, void *data );
 TDialog *createFindDialog();

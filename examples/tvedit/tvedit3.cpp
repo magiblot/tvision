@@ -53,7 +53,6 @@ TMenuBar *TEditorApp::initMenuBar( TRect r )
         *new TMenuItem( "Cu~t~", cmCut, kbShiftDel, hcNoContext, "Shift-Del" ) +
         *new TMenuItem( "~C~opy", cmCopy, kbCtrlIns, hcNoContext, "Ctrl-Ins" ) +
         *new TMenuItem( "~P~aste", cmPaste, kbShiftIns, hcNoContext, "Shift-Ins" ) +
-        *new TMenuItem( "~S~how clipboard", cmShowClip, kbNoKey ) +
              newLine() +
         *new TMenuItem( "~C~lear", cmClear, kbCtrlDel, hcNoContext, "Ctrl-Del" );
 
@@ -87,6 +86,9 @@ TStatusLine *TEditorApp::initStatusLine( TRect r )
             *new TStatusItem( "~F5~ Zoom", kbF5, cmZoom ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmNext ) +
             *new TStatusItem( "~F10~ Menu", kbF10, cmMenu ) +
+            *new TStatusItem( 0, kbShiftDel, cmCut ) +
+            *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
+            *new TStatusItem( 0, kbShiftIns, cmPaste ) +
             *new TStatusItem( 0, kbCtrlF5, cmResize )
             );
 
