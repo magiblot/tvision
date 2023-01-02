@@ -72,9 +72,9 @@ static int nextWord(TStringView s, int pos) noexcept
 
 TInputLine::TInputLine( const TRect& bounds, uint limit, TValidator *aValid, ushort limitMode ) noexcept :
     TView(bounds),
-    maxLen      ( (limitMode == ilMaxBytes) ? min(max(limit-1, 0), 255) : 255 ),
-    maxWidth    ( (limitMode == ilMaxWidth) ? limit : UINT_MAX ),
-    maxGraphemes( (limitMode == ilMaxGraphemes) ? limit : UINT_MAX ),
+    maxLen  ( (limitMode == ilMaxBytes) ? min(max(limit-1, 0), 255) : 255 ),
+    maxWidth( (limitMode == ilMaxWidth) ? limit : UINT_MAX ),
+    maxChars( (limitMode == ilMaxChars) ? limit : UINT_MAX ),
     curPos( 0 ),
     firstPos( 0 ),
     selStart( 0 ),
@@ -413,7 +413,7 @@ void TInputLine::handleEvent( TEvent& event )
                                 TTextMetrics keyMts = TText::measure(keyText);
                                 if( strlen(data) + len <= maxLen &&
                                     dataMts.width + keyMts.width <= maxWidth &&
-                                    dataMts.graphemeCount + keyMts.graphemeCount <= maxGraphemes
+                                    dataMts.graphemeCount + keyMts.graphemeCount <= maxChars
                                   )
                                     {
                                     if( firstPos > curPos )
@@ -544,7 +544,7 @@ void TInputLine::updateCommands()
 void TInputLine::write( opstream& os )
 {
     TView::write( os );
-    os << maxLen << maxWidth << maxGraphemes << curPos << firstPos
+    os << maxLen << maxWidth << maxChars << curPos << firstPos
        << selStart << selEnd;
     os.writeString( data);
     os << validator;
@@ -553,7 +553,7 @@ void TInputLine::write( opstream& os )
 void *TInputLine::read( ipstream& is )
 {
     TView::read( is );
-    is >> maxLen >> maxWidth >> maxGraphemes >> curPos >> firstPos
+    is >> maxLen >> maxWidth >> maxChars >> curPos >> firstPos
        >> selStart >> selEnd;
     data = new char[maxLen + 1];
     oldData = new char[maxLen + 1];

@@ -153,9 +153,9 @@ inline opstream& operator << ( opstream& os, TDialog* cl )
 #define __TInputLine
 
 const ushort
-    ilMaxBytes      = 0,
-    ilMaxWidth      = 1,
-    ilMaxGraphemes  = 2;
+    ilMaxBytes = 0,
+    ilMaxWidth = 1,
+    ilMaxChars = 2;
 
 class _FAR TRect;
 struct _FAR TEvent;
@@ -183,7 +183,7 @@ public:
     char* data;
     uint maxLen;
     uint maxWidth;
-    uint maxGraphemes;
+    uint maxChars;
     int curPos;
     int firstPos;
     int selStart;

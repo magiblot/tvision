@@ -381,10 +381,10 @@ The following are new features not available in Borland's release of Turbo Visio
 * New method `static void TEvent::waitForEvent(int timeoutMs)` which may block for up to `timeoutMs` milliseconds waiting for input events. If it blocks, it has the side effect of flushing screen updates. It is invoked by `TProgram::getEvent()` with `static int TProgram::eventTimeout` (default `20`) as argument so that the event loop doesn't consume 100% CPU.
 * New method `static void TEvent::putNothing()` which puts an `evNothing` event into the event queue and causes `TEvent::waitForEvent()` not to block until an `evNothing` is returned by `TEvent::getKeyEvent()`. This will usually cause the main thread to wake up from `TEvent::waitForEvent()` and to invoke `TApplication::idle()` immediately. This method is thread-safe, so it can be used to unblock the event loop from any other thread.
 * New method `void TView::getEvent(TEvent &, int timeoutMs)` which allows waiting for an event with an user-provided timeout (instead of `TProgram::eventTimeout`).
-* It is now possible to specify a maximum text width or maximum grapheme count in `TInputLine`. This is done through a new parameter in `TInputLine`'s constructor, `ushort limitMode`, which controls how the second constructor parameter, `uint limit`, is to be treated. The `ilXXXX` constants define the possible values of `limitMode`:
+* It is now possible to specify a maximum text width or maximum character count in `TInputLine`. This is done through a new parameter in `TInputLine`'s constructor, `ushort limitMode`, which controls how the second constructor parameter, `uint limit`, is to be treated. The `ilXXXX` constants define the possible values of `limitMode`:
     * `ilMaxBytes` (the default): the text can be up to `limit` bytes long, including the null terminator.
     * `ilMaxWidth`: the text can be up to `limit` columns wide.
-    * `ilMaxGraphemes`: the text can contain up to `limit` non-combining characters.
+    * `ilMaxChars`: the text can contain up to `limit` non-combining characters or graphemes.
     
     In any case, the text in a `TInputLine` can never be more than 256 bytes long, including the null terminator.
 * New functions which allow getting the names of Turbo Vision's constants at runtime (e.g. `evCommand`, `kbShiftIns`, etc.):
