@@ -42,6 +42,10 @@
 #pragma warning(push)
 #pragma warning(disable: 4250)
 #endif
+#if defined( __clang__ )
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
 
 #if !defined( __FLAT__ )
 #if !defined ( __LARGE__ )
@@ -764,4 +768,7 @@
 #endif
 #if defined( _MSC_VER )
 #pragma warning(pop)
+#endif
+#if defined( __clang__ )
+#pragma clang diagnostic pop
 #endif

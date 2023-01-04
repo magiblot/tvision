@@ -73,6 +73,8 @@ StderrRedirector::~StderrRedirector()
 {
     // Restore standard error to the default state as long as it still
     // refers to the temporary file, then dump the temporary file to it.
+    ssize_t r;
+    (void) r;
     if (isSameFile(fileFd, STDERR_FILENO))
     {
         dup2(ttyFd, STDERR_FILENO);
@@ -83,14 +85,14 @@ StderrRedirector::~StderrRedirector()
             bool truncated;
             if ((truncated = (size > maxStderrSize)))
             {
-                ftruncate(fileFd, maxStderrSize);
+                r = ftruncate(fileFd, maxStderrSize);
                 size = maxStderrSize;
             }
 
             copyFile(fileFd, ttyFd, size, stderrBuffer);
 
             if (truncated)
-                write(ttyFd, truncationMsg, sizeof(truncationMsg) - 1);
+                r = write(ttyFd, truncationMsg, sizeof(truncationMsg) - 1);
         }
     }
 
