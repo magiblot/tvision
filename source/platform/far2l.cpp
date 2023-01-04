@@ -137,11 +137,11 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
         else if (char *pDecoded = (char *) malloc((encoded.size() * 3)/4 + 3))
         {
             TStringView decoded = decodeBase64(encoded, pDecoded);
-            if (decoded.size() >= 5 && decoded.back() == f2lClipGetData)
+            if (decoded.size() >= 5 && decoded.back() == f2lClipGetData && state.putPaste)
             {
                 uint32_t dataSize;
                 memcpy(&dataSize, &decoded[decoded.size() - 5], 4);
-                if (state.putPaste && decoded.size() >= 5 + dataSize)
+                if (dataSize < UINT_MAX - 5 && decoded.size() >= 5 + dataSize)
                 {
                     TStringView text = decoded.substr(decoded.size() - 5 - dataSize, dataSize);
                     // Discard null terminator.
