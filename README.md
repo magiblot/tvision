@@ -111,9 +111,16 @@ The build requirements are:
 
 * A compiler supporting C++14.
 * `libncursesw` (note the 'w').
-* `libgpm` (for mouse support on the Linux console) (optional).
+* `libgpm` for mouse support on the Linux console (optional).
 
 If your distribution provides separate *devel* packages (e.g. `libncurses-dev`, `libgpm-dev` in Debian-based distros), install these too.
+
+<div id="build-linux-runtime"></div>
+
+The runtime requirements are:
+
+* `xsel` or `xlip` for clipboard support in X11 environments.
+* `wl-clipboard` for clipboard support in Wayland environments.
 
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
 
@@ -296,6 +303,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
     * Support for X10 and SGR mouse encodings.
     * Support for Xterm's [*modifyOtherKeys*](https://invisible-island.net/xterm/manpage/xterm.html#VT100-Widget-Resources:modifyOtherKeys).
     * Support for Paul Evans' [*fixterms*](http://www.leonerd.org.uk/hacks/fixterms/) and Kitty's [keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/).
+    * Support for [far2l](https://github.com/elfmz/far2l)'s terminal extensions.
     * Support for key modifiers (via `TIOCLINUX`) and mouse (via GPM) in the Linux console.
 * Custom signal handler that restores the terminal state before the program crashes.
 * When `stderr` is a tty, messages written to it are redirected to a buffer to prevent them from messing up the display and are eventually printed to the console when the application shuts down or is suspended.
@@ -376,6 +384,7 @@ The following are new features not available in Borland's release of Turbo Visio
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
 * New method `TVMemMgr::reallocateDiscardable()` which can be used along `allocateDiscardable` and `freeDiscardable`.
 * New method `TView::textEvent()` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
+* New class `TClipboard`, see [Clipboard interaction](#clipboard).
 * Unicode support, see [Unicode](#unicode).
 * True Color support, see [extended colors](#color).
 * New method `static void TEvent::waitForEvent(int timeoutMs)` which may block for up to `timeoutMs` milliseconds waiting for input events. If it blocks, it has the side effect of flushing screen updates. It is invoked by `TProgram::getEvent()` with `static int TProgram::eventTimeout` (default `20`) as argument so that the event loop doesn't consume 100% CPU.
@@ -463,9 +472,8 @@ Unicode support consists in two new fields in `ev.keyDown` (which is a `struct K
 * `char text[4]`, which may contain whatever was read from the terminal: usually a UTF-8 sequence, but possibly any kind of raw data.
 * `uchar textLength`, which is the number of bytes of data available in `text`, from 0 to 4.
 
-Note that the `text` field may contain garbage or uninitialized data from position `textLength` on.
-
-You can also get a `TStringView` out of a `KeyDownEvent` with the `getText()` method.
+Note that the `text` string is not null-terminated. 
+You can get a `TStringView` out of a `KeyDownEvent` with the `getText()` method.
 
 So a Unicode character can be retrieved from `TEvent` in the following way:
 
@@ -719,25 +727,68 @@ Use cases where Unicode is not supported (not an exhaustive list):
 
 # Clipboard interaction
 
-The Turbo Vision API offers no integration with the system clipboard. As a developer you can still access it by other means (e.g. via [libclipboard](https://github.com/jtanx/libclipboard)). But unless you do that, the only way for a user to paste text into your application is to do so through the terminal emulator.
+Originally, Turbo Vision offered no integration with the system clipboard, since there was no such thing on MS-DOS.
 
-Unfortunately, each character is processed as a separate `evKeyDown` event. If the user pastes 5000 characters, the application will execute the same operations as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen, etcetera. As you can imagine, this is far from optimal.
+It did offer the possibility of using an instance of `TEditor` as an internal clipboard, via the `TEditor::clipboard` static member. However, `TEditor` was the only class able to interact with this clipboard. It was not possible to use it with `TInputLine`, for example.
 
-For the purpose of dealing with this situation, the Turbo Vision API has been extended with the following function:
+Turbo Vision applications are now most likely to be ran in a graphical environment through a terminal emulator. In this context, it would be desirable to interact with the system clipboard in the same way as a regular GUI application would do.
+
+To deal with this, a new class `TClipboard` has been added which allows accessing the system clipboard. If the system clipboard is not accessible, it will instead use an internal clipboard.
+
+## Enabling clipboard support
+
+On Windows and macOS, clipboard integration is supported out-of-the-box.
+
+On Unix systems other than macOS, it is necessary to install some external dependencies. See [runtime requirements](#build-linux-runtime).
+
+For applications running remotely (e.g. through SSH or in WSL), clipboard integration is supported in the following situations:
+
+* When X11 forwarding over SSH is enabled (`ssh -X`).
+* When your terminal emulator supports far2l's terminal extensions ([far2l](https://github.com/elfmz/far2l), [putty4far2l](https://github.com/ivanshatsky/putty4far2l)).
+* When your terminal emulator supports OSC 52 escape codes. However, this will only work for the Copy action; Paste must be done through the terminal.
+
+It is always possible to paste text through your terminal emulator (usually with `Ctrl+Shift+V` or `Command+V`).
+
+## API usage
+
+### Writing to the clipboard
 
 ```c++
-Boolean TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length);
+static void TClipboard::setText(TStringView text);
 ```
 
-`TEditor` takes advantage of this function to provide a good user experience when pasting text through the terminal. You can check it out in the `tvedit` application. As a developer, you may be interested in using it if you are implementing a text editing component. Otherwise, you don't need to care about it.
+Sets the contents of the system clipboard to `text`. If the system clipboard is not accessible, an internal clipboard is used instead.
 
-Just for the record, here is a more detailed explanation:
+### Reading the clipboard
 
-`textEvent()` tries to read text from standard input and stores it in a user-provided buffer `dest`. It returns `False` when no more events are available in the program's input queue or if a non-text event is found, in which case this event is saved with `putEvent()` so that it can be processed in the next iteration of the event loop.
+```c++
+static void TClipboard::requestText();
+```
 
-The exact number of bytes read is stored in the output parameter `length`, which can never be greater than `dest.size()`.
+Requests the contents of the system clipboard asynchronously, which will be later received in the form of regular `evKeyDown` events. If the system clipboard is not accessible, an internal clipboard is used instead.
 
-It is intended to be used as follows:
+### Processing Paste events
+
+A Turbo Vision application may receive a Paste event for two different reasons:
+
+* Because `TClipboard::requestText()` was invoked.
+* Because the user pasted text through the terminal.
+
+In both cases the application will receive the clipboard contents in the form of regular `evKeyDown` events. These events will have a `kbPaste` flag in `keyDown.controlKeyState` so that they can be distinguished from regular key presses.
+
+Therefore, if your view can handle user input it will also handle Paste events by default. However, if the user pastes 5000 characters, the application will behave as if the user pressed the keyboard 5000 times. This involves drawing views, completing the event loop, updating the screen..., which is far from optimal if your view is a text editing component, for example.
+
+For the purpose of dealing with this situation, another function has been added:
+
+```c++
+bool TView::textEvent(TEvent &event, TSpan<char> dest, size_t &length);
+```
+
+`textEvent()` attempts to read text from consecutive `evKeyDown` events and stores it in a user-provided buffer `dest`. It returns `false` when no more events are available or if a non-text event is found, in which case this event is saved with `putEvent()` so that it can be processed in the next iteration of the event loop. Finally, it calls `clearEvent(event)`.
+
+The exact number of bytes read is stored in the output parameter `length`, which will never be larger than `dest.size()`.
+
+Here is an example on how to use it:
 
 ```c++
 // 'ev' is a TEvent, and 'ev.what' equals 'evKeyDown'.
@@ -745,16 +796,34 @@ It is intended to be used as follows:
 if (ev.keyDown.textLength) {
     char buf[512];
     size_t length;
-    // Fill 'buf' with text from the input queue,
-    // including the text in 'ev'.
+    // Fill 'buf' with the text in 'ev' and in
+    // upcoming events from the input queue.
     while (textEvent(ev, buf, length)) {
-        // Process 'length' bytes of text in 'buf'.
-        // ...
+        // Process 'length' bytes of text in 'buf'...
     }
-    // 'textEvent()' clears 'ev' after reading it the first time
-    // (by this point, 'ev.what' is 'evNothing').
 }
 ```
+
+### Enabling application-wide clipboard usage
+
+The standard views `TEditor` and `TInputLine` react to the `cmCut`, `cmCopy` and `cmPaste` commands. However, your application first has to be set up to use these commands. For example:
+
+```c++
+TStatusLine *TMyApplication::initStatusLine( TRect r )
+{
+    r.a.y = r.b.y - 1;
+    return new TStatusLine( r,
+        *new TStatusDef( 0, 0xFFFF ) +
+            // ...
+            *new TStatusItem( 0, kbCtrlX, cmCut ) +
+            *new TStatusItem( 0, kbCtrlC, cmCopy ) +
+            *new TStatusItem( 0, kbCtrlV, cmPaste ) +
+            // ...
+    );
+}
+```
+
+`TEditor` and `TInputLine` automatically enable and disable these commands. For example, if a `TEditor` or `TInputLine` is focused, the `cmPaste` command will be enabled. If there is selected text, the `cmCut` and `cmCopy` commands will also be enabled. If no `TEditor` or `TInputLine`s are focused, then these commands will be disabled.
 
 <div id="color"></div>
 
