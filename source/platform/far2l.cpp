@@ -213,7 +213,7 @@ inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &tmp, Arg
     tmp.resize((argsLen * 4)/3 + 4);
     TStringView b64 = encodeBase64({&out[headLen], argsLen}, &tmp[0]);
     TStringView prefix = "\x1B_far2l:";
-    char suffix = '\x07';
+    TStringView suffix = "\x1B\\";
     size_t pushLen = concatLength(prefix, b64, suffix);
     out.resize(headLen + pushLen);
     concat(&out[headLen], prefix, b64, suffix);

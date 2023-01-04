@@ -190,14 +190,14 @@ void TermIO::keyModsOn(const StdioCtl &io) noexcept
                       "\x1B[?1036h" // Enable metaSendsEscape (XTerm).
                       "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
                       "\x1B[>1u"    // Disambiguate escape codes (Kitty).
-                      "\x1B_far2l1\x07" // Enable far2l extended input.
+                      "\x1B_far2l1\x1B\\" // Enable far2l extended input.
                     ;
     io.write(seq.data(), seq.size());
 }
 
 void TermIO::keyModsOff(const StdioCtl &io) noexcept
 {
-    TStringView seq = "\x1B_far2l0\x07" // Disable far2l extended input.
+    TStringView seq = "\x1B_far2l0\x1B\\" // Disable far2l extended input.
                       "\x1B[<u"     // Restore previous keyboard mode (Kitty).
                       "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
