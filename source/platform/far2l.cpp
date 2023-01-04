@@ -198,21 +198,22 @@ inline size_t concat(char *out, uint32_t i, Args ...args) noexcept
 }
 
 template <class... Args>
-inline size_t concatLength(Args ...args)
+inline size_t concatLength(Args ...args) noexcept
 {
     return concat<false>(nullptr, args...);
 }
 
 template <class... Args>
-inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &dec, std::vector<char> &enc, Args ...args)
+inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &tmp, Args ...args)
 {
-    dec.resize(concatLength(args...));
-    concat(&dec[0], args...);
-    enc.resize((dec.size() * 4)/3 + 4);
-    TStringView b64 = encodeBase64({&dec[0], dec.size()}, &enc[0]);
+    size_t headLen = out.size();
+    size_t argsLen = concatLength(args...);
+    out.resize(headLen + argsLen);
+    concat(&out[headLen], args...);
+    tmp.resize((argsLen * 4)/3 + 4);
+    TStringView b64 = encodeBase64({&out[headLen], argsLen}, &tmp[0]);
     TStringView prefix = "\x1B_far2l:";
     char suffix = '\x07';
-    size_t headLen = out.size();
     size_t pushLen = concatLength(prefix, b64, suffix);
     out.resize(headLen + pushLen);
     concat(&out[headLen], prefix, b64, suffix);
@@ -222,9 +223,9 @@ bool setFar2lClipboard(const StdioCtl &io, TStringView text, InputState &state) 
 {
     if (state.hasFar2l)
     {
-        std::vector<char> out, dec, enc;
+        std::vector<char> out, tmp;
         // CLIP_OPEN
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             f2lClientId,
             (uint32_t) f2lClientId.size(),
             "oc",
@@ -233,7 +234,7 @@ bool setFar2lClipboard(const StdioCtl &io, TStringView text, InputState &state) 
         // CLIP_SETDATA
         if (text.size() > UINT_MAX - 1)
             text = text.substr(0, UINT_MAX - 1);
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             text,
             '\0',
             (uint32_t) (text.size() + 1),
@@ -242,7 +243,7 @@ bool setFar2lClipboard(const StdioCtl &io, TStringView text, InputState &state) 
             f2lNoAnswer
         );
         // CLIP_CLOSE
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             "cc",
             f2lNoAnswer
         );
@@ -256,22 +257,22 @@ bool requestFar2lClipboard(const StdioCtl &io, InputState &state) noexcept
 {
     if (state.hasFar2l)
     {
-        std::vector<char> out, dec, enc;
+        std::vector<char> out, tmp;
         // CLIP_OPEN
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             f2lClientId,
             (uint32_t) f2lClientId.size(),
             "oc",
             f2lNoAnswer
         );
         // CLIP_GETDATA
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             (uint32_t) CF_TEXT,
             "gc",
             f2lClipGetData
         );
         // CLIP_CLOSE
-        pushFar2lRequest(out, dec, enc,
+        pushFar2lRequest(out, tmp,
             "cc",
             f2lNoAnswer
         );
