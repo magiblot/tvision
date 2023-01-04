@@ -23,29 +23,41 @@ enum { clipboardTimeoutMs = 1500 };
 
 struct Command
 {
-    const char * const (&argv)[];
+    const char * const *argv;
     const char *env;
 };
+
+#ifdef __APPLE__
+constexpr const char * pbcopyArgv[] = {"pbcopy", 0};
+constexpr const char * pbpasteArgv[] = {"pbpaste", 0};
+#else
+constexpr const char * wlCopyArgv[] = {"wl-copy", 0};
+constexpr const char * xselCopyArgv[] = {"xsel", "--input", "--clipboard", 0};
+constexpr const char * xclipCopyArgv[] = {"xclip", "-in", "-selection", "clipboard", 0};
+constexpr const char * wlPasteArgv[] = {"wl-paste", "--no-newline", 0};
+constexpr const char * xselPasteArgv[] = {"xsel", "--output", "--clipboard", 0};
+constexpr const char * xclipPasteArgv[] = {"xclip", "-out", "-selection", "clipboard", 0};
+#endif
 
 constexpr Command copyCommands[] =
 {
 #ifdef __APPLE__
-    {{"pbcopy", 0}},
+    {pbcopyArgv},
 #else
-    {{"wl-copy", 0}, "WAYLAND_DISPLAY"},
-    {{"xsel", "--input", "--clipboard", 0}, "DISPLAY"},
-    {{"xclip", "-in", "-selection", "clipboard", 0}, "DISPLAY"},
+    {wlCopyArgv, "WAYLAND_DISPLAY"},
+    {xselCopyArgv, "DISPLAY"},
+    {xclipCopyArgv, "DISPLAY"},
 #endif
 };
 
 constexpr Command pasteCommands[] =
 {
 #ifdef __APPLE__
-    {"pbpaste", 0},
+    {pbpasteArgv},
 #else
-    {{"wl-paste", "--no-newline", 0}, "WAYLAND_DISPLAY"},
-    {{"xsel", "--output", "--clipboard", 0}, "DISPLAY"},
-    {{"xclip", "-out", "-selection", "clipboard", 0}, "DISPLAY"},
+    {wlPasteArgv, "WAYLAND_DISPLAY"},
+    {xselPasteArgv, "DISPLAY"},
+    {xclipPasteArgv, "DISPLAY"},
 #endif
 };
 

@@ -11,11 +11,10 @@
 namespace tvision
 {
 
-enum Far2lRequestIds : char
-{
+// Request IDs
+const char
     f2lNoAnswer = '\0',
-    f2lClipGetData = '\xA0',
-};
+    f2lClipGetData = '\xA0';
 
 static char f2lClientIdData[32 + 1];
 static TStringView f2lClientId =

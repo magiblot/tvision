@@ -158,10 +158,11 @@ public:
     static Platform instance;
     static int (*charWidth)(uint32_t) noexcept;
 
+    // Explicit 'this' required by GCC 5.
     void setUpConsole() noexcept
-        { console.lock([&] (auto *&c) { setUpConsole(c); }); }
+        { console.lock([&] (auto *&c) { this->setUpConsole(c); }); }
     void restoreConsole() noexcept
-        { console.lock([&] (auto *&c) { restoreConsole(c); }); }
+        { console.lock([&] (auto *&c) { this->restoreConsole(c); }); }
 
     bool getEvent(TEvent &ev) noexcept;
     void waitForEvent(int ms) noexcept { checkConsole(); waiter.waitForEvent(ms); }
