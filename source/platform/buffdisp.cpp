@@ -68,6 +68,16 @@ void BufferedDisplay::clearScreen(DisplayStrategy &display) noexcept
     resizeBuffer();
 }
 
+void BufferedDisplay::redrawScreen(DisplayStrategy &display) noexcept
+{
+    screenTouched = true;
+    lastFlush = {};
+    memset(&flushBuffer[0], 0, flushBuffer.size()*sizeof(TScreenCell));
+    for (auto &range : rowDamage)
+        range = {0, size.x - 1};
+    flushScreen(display);
+}
+
 void BufferedDisplay::setCaretSize(int size) noexcept
 {
     newCaretSize = size;

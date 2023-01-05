@@ -33,7 +33,7 @@ ConsoleStrategy &Platform::createConsole() noexcept
     if (io.isLinuxConsole())
         return LinuxConsoleStrategy::create(io, scrl, inputState, *display, *new NcursesInput(io, *display, inputState, false));
 #endif // __linux__
-    return UnixConsoleStrategy::create(io, scrl, inputState, *display, *new NcursesInput(io, *display, inputState, true));
+    return UnixConsoleStrategy::create(io, displayBuf, scrl, inputState, *display, *new NcursesInput(io, *display, inputState, true));
 #endif // _WIN32
 }
 

@@ -71,6 +71,7 @@ public:
     void setCaretPosition(int x, int y) noexcept;
     void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept;
     void clearScreen(DisplayStrategy &) noexcept;
+    void redrawScreen(DisplayStrategy &) noexcept;
     void flushScreen(DisplayStrategy &) noexcept;
     TScreenCell *reloadScreenInfo(DisplayStrategy &) noexcept;
 
