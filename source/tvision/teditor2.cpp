@@ -115,21 +115,20 @@ TMenuItem& TEditor::initContextMenu( TPoint )
         *new TMenuItem( "~U~ndo", cmUndo, kbCtrlU, hcNoContext, "Ctrl-U" );
 }
 
-uint TEditor::insertMultilineText( const char *text, uint length,
-                                    Boolean selectText )
+uint TEditor::insertMultilineText( const char *text, uint length )
 {
     size_t i = 0, j = 0;
     do  {
         if( text[i] == '\n' || text[i] == '\r' )
             {
-            if( !insertText( &text[j], i - j, selectText ) ) return j;
-            if( !insertEOL( selectText ) ) return i;
-            if( i + 1 < length && text[i + 1] == '\n' )
+            if( !insertText( &text[j], i - j, False ) ) return j;
+            if( !insertEOL( False ) ) return i;
+            if( i + 1 < length && text[i] == '\r' && text[i + 1] == '\n' )
                 ++i;
             j = i + 1;
             }
         } while( ++i < length );
-    if( !insertText( &text[j], i - j, selectText ) ) return j;
+    if( !insertText( &text[j], i - j, False ) ) return j;
     return i;
 }
 

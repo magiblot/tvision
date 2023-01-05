@@ -629,7 +629,7 @@ void TEditor::handleEvent( TEvent& event )
                     char buf[512];
                     size_t length;
                     while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
-                        insertMultilineText( buf, (uint) length, False );
+                        insertMultilineText( buf, (uint) length );
                     }
                 else
                     {

@@ -199,7 +199,7 @@ public:
     virtual void handleEvent( TEvent& );
     virtual void initBuffer();
     virtual TMenuItem& initContextMenu( TPoint );
-    uint insertMultilineText( const char *, uint, Boolean );
+    uint insertMultilineText( const char *, uint );
     Boolean insertBuffer( const char *, uint, uint, Boolean, Boolean );
     Boolean insertEOL( Boolean );
     virtual Boolean insertFrom( TEditor * );
