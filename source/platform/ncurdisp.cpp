@@ -12,7 +12,7 @@
 namespace tvision
 {
 
-NcursesDisplay::NcursesDisplay(const StdioCtl &aIo) noexcept :
+NcursesDisplay::NcursesDisplay(StdioCtl &aIo) noexcept :
     TerminalDisplay(aIo),
     definedPairs(0),
     usesNcursesDraw(false)

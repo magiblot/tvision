@@ -36,7 +36,7 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 {
 }
 
-LinuxConsoleStrategy &LinuxConsoleStrategy::create( const StdioCtl &io, ScreenLifetime &scrl,
+LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io, ScreenLifetime &scrl,
                                                     InputState &inputState,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
@@ -86,7 +86,7 @@ bool LinuxConsoleInput::hasPendingEvents() noexcept
     return input.hasPendingEvents();
 }
 
-ushort LinuxConsoleInput::getKeyboardModifiers(const StdioCtl &io) noexcept
+ushort LinuxConsoleInput::getKeyboardModifiers(StdioCtl &io) noexcept
 {
     char res = 6;
     ulong actualModifiers = 0;

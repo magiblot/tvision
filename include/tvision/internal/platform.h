@@ -5,7 +5,7 @@
 #define Uses_TColorAttr
 #include <tvision/tv.h>
 #include <internal/stdioctl.h>
-#include <internal/buffdisp.h>
+#include <internal/dispbuff.h>
 #include <internal/events.h>
 #include <atomic>
 #include <vector>
@@ -130,7 +130,7 @@ class Platform
     StdioCtl io;
 #endif
     EventWaiter waiter;
-    BufferedDisplay displayBuf;
+    DisplayBuffer displayBuf;
     DisplayStrategy dummyDisplay;
     InputStrategy dummyInput {(SysHandle) 0};
     ConsoleStrategy dummyConsole {dummyDisplay, dummyInput, {}};

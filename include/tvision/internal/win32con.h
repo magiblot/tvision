@@ -20,10 +20,10 @@ class Win32Display;
 
 class Win32ConsoleStrategy final : public ConsoleStrategy
 {
-    const StdioCtl &io;
+    StdioCtl &io;
     UINT cpInput, cpOutput;
 
-    Win32ConsoleStrategy( const StdioCtl &aIo,
+    Win32ConsoleStrategy( StdioCtl &aIo,
                           UINT cpInput, UINT cpOutput,
                           DisplayStrategy &aDisplay,
                           InputStrategy &aInput ) noexcept :
@@ -48,7 +48,7 @@ public:
 
 class Win32Input final : public InputStrategy
 {
-    const StdioCtl &io;
+    StdioCtl &io;
     InputState state;
 
     bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;
@@ -57,7 +57,7 @@ class Win32Input final : public InputStrategy
 public:
 
     // The lifetime of 'aIo' must exceed that of 'this'.
-    Win32Input(const StdioCtl &aIo) noexcept :
+    Win32Input(StdioCtl &aIo) noexcept :
         InputStrategy(aIo.in()),
         io(aIo)
     {
@@ -79,7 +79,7 @@ class Win32Display : public TerminalDisplay
 public:
 
     // The lifetime of 'aIo' must exceed that of 'this'.
-    Win32Display(const StdioCtl &aIo) noexcept :
+    Win32Display(StdioCtl &aIo) noexcept :
         TerminalDisplay(aIo)
     {
         initCapabilities();

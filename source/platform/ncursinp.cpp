@@ -264,7 +264,7 @@ static class NcursesInputGetter : public InputGetter
     }
 } ncInputGetter;
 
-NcursesInput::NcursesInput( const StdioCtl &aIo, NcursesDisplay &,
+NcursesInput::NcursesInput( StdioCtl &aIo, NcursesDisplay &,
                             InputState &aState, bool mouse ) noexcept :
     InputStrategy(aIo.in()),
     io(aIo),

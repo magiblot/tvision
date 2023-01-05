@@ -5,7 +5,7 @@
 #include <internal/scrlife.h>
 #include <internal/sigwinch.h>
 #include <internal/terminal.h>
-#include <internal/buffdisp.h>
+#include <internal/dispbuff.h>
 #include <internal/getenv.h>
 
 #include <stdlib.h>
@@ -64,8 +64,8 @@ constexpr Command pasteCommands[] =
 
 inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
                                                  InputStrategy &aInput,
-                                                 const StdioCtl &aIo,
-                                                 BufferedDisplay &aDisplayBuf,
+                                                 StdioCtl &aIo,
+                                                 DisplayBuffer &aDisplayBuf,
                                                  ScreenLifetime &aScrl,
                                                  InputState &aInputState,
                                                  SigwinchHandler *aSigwinch ) noexcept :
@@ -78,8 +78,8 @@ inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
 {
 }
 
-UnixConsoleStrategy &UnixConsoleStrategy::create( const StdioCtl &io,
-                                                  BufferedDisplay &displayBuf,
+UnixConsoleStrategy &UnixConsoleStrategy::create( StdioCtl &io,
+                                                  DisplayBuffer &displayBuf,
                                                   ScreenLifetime &scrl,
                                                   InputState &inputState,
                                                   DisplayStrategy &display,

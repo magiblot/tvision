@@ -162,7 +162,7 @@ static bool keyFromLetter(uint letter, uint mod, KeyDownEvent &keyDown) noexcept
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
 
-void TermIO::mouseOn(const StdioCtl &io) noexcept
+void TermIO::mouseOn(StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B[?1001s" // Save old highlight mouse reporting.
                       "\x1B[?1000h" // Enable mouse reporting.
@@ -172,7 +172,7 @@ void TermIO::mouseOn(const StdioCtl &io) noexcept
     io.write(seq.data(), seq.size());
 }
 
-void TermIO::mouseOff(const StdioCtl &io) noexcept
+void TermIO::mouseOff(StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B[?1006l" // Disable SGR extended mouse reporting.
                       "\x1B[?1002l" // Disable mouse drag reporting.
@@ -182,7 +182,7 @@ void TermIO::mouseOff(const StdioCtl &io) noexcept
     io.write(seq.data(), seq.size());
 }
 
-void TermIO::keyModsOn(const StdioCtl &io) noexcept
+void TermIO::keyModsOn(StdioCtl &io) noexcept
 {
     // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
     // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
@@ -195,7 +195,7 @@ void TermIO::keyModsOn(const StdioCtl &io) noexcept
     io.write(seq.data(), seq.size());
 }
 
-void TermIO::keyModsOff(const StdioCtl &io) noexcept
+void TermIO::keyModsOff(StdioCtl &io) noexcept
 {
     TStringView seq = "\x1B_far2l0\x1B\\" // Disable far2l extended input.
                       "\x1B[<u"     // Restore previous keyboard mode (Kitty).
@@ -535,7 +535,7 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
     return Ignored;
 }
 
-static void setOsc52Clipboard(const StdioCtl &io, TStringView text) noexcept
+static void setOsc52Clipboard(StdioCtl &io, TStringView text) noexcept
 {
     TStringView prefix = "\x1B]52;;";
     TStringView suffix = "\x07";
@@ -549,7 +549,7 @@ static void setOsc52Clipboard(const StdioCtl &io, TStringView text) noexcept
     }
 }
 
-bool TermIO::setClipboardText(const StdioCtl &io, TStringView text, InputState &state) noexcept
+bool TermIO::setClipboardText(StdioCtl &io, TStringView text, InputState &state) noexcept
 {
     if (setFar2lClipboard(io, text, state))
         return true;
@@ -558,7 +558,7 @@ bool TermIO::setClipboardText(const StdioCtl &io, TStringView text, InputState &
     return false;
 }
 
-bool TermIO::requestClipboardText(const StdioCtl &io, void (&accept)(TStringView), InputState &state) noexcept
+bool TermIO::requestClipboardText(StdioCtl &io, void (&accept)(TStringView), InputState &state) noexcept
 {
     state.putPaste = &accept;
     if (requestFar2lClipboard(io, state))

@@ -21,7 +21,7 @@ class NcursesInput : public InputStrategy
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeout = 5 };
 
-    const StdioCtl &io;
+    StdioCtl &io;
     InputState &state;
     bool mouseEnabled;
 
@@ -35,7 +35,7 @@ class NcursesInput : public InputStrategy
 public:
 
     // Lifetimes of 'io', 'display' and 'state' must exceed that of 'this'.
-    NcursesInput(const StdioCtl &io, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
+    NcursesInput(StdioCtl &io, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
     ~NcursesInput();
 
     bool getEvent(TEvent &ev) noexcept;

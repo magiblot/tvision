@@ -4,7 +4,7 @@
 #define Uses_TColorAttr
 #include <tvision/tv.h>
 
-#include <internal/buffdisp.h>
+#include <internal/dispbuff.h>
 
 namespace tvision
 {
@@ -38,18 +38,18 @@ inline ScreenCursor::ScreenCursor() noexcept :
     visible(false),
     backup(0)
 {
-    BufferedDisplay::addCursor(this);
+    DisplayBuffer::addCursor(this);
 }
 
 inline ScreenCursor::~ScreenCursor()
 {
-    BufferedDisplay::removeCursor(this);
+    DisplayBuffer::removeCursor(this);
 }
 
 inline void ScreenCursor::show() noexcept
 {
     if (!visible)
-        BufferedDisplay::changeCursor();
+        DisplayBuffer::changeCursor();
     visible = true;
 }
 
@@ -66,7 +66,7 @@ inline bool ScreenCursor::isVisible() const noexcept
 inline void ScreenCursor::setPos(const TPoint &p) noexcept
 {
     if (visible && p != pos)
-        BufferedDisplay::changeCursor();
+        DisplayBuffer::changeCursor();
     pos = p;
 }
 

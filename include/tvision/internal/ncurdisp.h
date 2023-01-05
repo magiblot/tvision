@@ -28,7 +28,7 @@ class NcursesDisplay : public TerminalDisplay
 public:
 
     // The lifetime of 'aIo' exceeds that of 'this'.
-    NcursesDisplay(const StdioCtl &io) noexcept;
+    NcursesDisplay(StdioCtl &io) noexcept;
     ~NcursesDisplay();
 
     void reloadScreenInfo() noexcept override;

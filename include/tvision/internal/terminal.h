@@ -180,15 +180,15 @@ struct CSIData
 
 namespace TermIO
 {
-    void mouseOn(const StdioCtl &) noexcept;
-    void mouseOff(const StdioCtl &) noexcept;
-    void keyModsOn(const StdioCtl &) noexcept;
-    void keyModsOff(const StdioCtl &) noexcept;
+    void mouseOn(StdioCtl &) noexcept;
+    void mouseOff(StdioCtl &) noexcept;
+    void keyModsOn(StdioCtl &) noexcept;
+    void keyModsOff(StdioCtl &) noexcept;
 
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
-    bool setClipboardText(const StdioCtl &, TStringView, InputState &) noexcept;
-    bool requestClipboardText(const StdioCtl &, void (&)(TStringView), InputState &) noexcept;
+    bool setClipboardText(StdioCtl &, TStringView, InputState &) noexcept;
+    bool requestClipboardText(StdioCtl &, void (&)(TStringView), InputState &) noexcept;
 
     ParseResult parseEvent(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
