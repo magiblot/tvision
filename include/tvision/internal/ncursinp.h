@@ -19,7 +19,7 @@ struct InputState;
 class NcursesInput : public InputStrategy
 {
     enum : char { KEY_ESC = '\x1B' };
-    enum { readTimeout = 5 };
+    enum { readTimeout = 10 };
 
     StdioCtl &io;
     InputState &state;
