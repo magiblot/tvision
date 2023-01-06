@@ -11,6 +11,13 @@ namespace tvision
 {
 
 class StdioCtl;
+class EventSource;
+
+struct Far2lState
+{
+    bool enabled {false};
+    bool canPing {false};
+};
 
 struct InputState
 {
@@ -18,7 +25,7 @@ struct InputState
 #ifdef _WIN32
     wchar_t surrogate {0};
 #endif
-    bool hasFar2l {false};
+    Far2lState far2l;
     bool hasFullOsc52 {false};
     void (*putPaste)(TStringView) {nullptr};
 };
@@ -184,7 +191,7 @@ namespace TermIO
     void mouseOn(StdioCtl &) noexcept;
     void mouseOff(StdioCtl &) noexcept;
     void keyModsOn(StdioCtl &) noexcept;
-    void keyModsOff(StdioCtl &) noexcept;
+    void keyModsOff(StdioCtl &, EventSource &, InputState &) noexcept;
 
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 

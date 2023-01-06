@@ -5,6 +5,7 @@
 #include <internal/win32con.h>
 #include <internal/constmap.h>
 #include <internal/base64.h>
+#include <internal/events.h>
 
 #include <time.h>
 
@@ -14,6 +15,7 @@ namespace tvision
 // Request IDs
 const char
     f2lNoAnswer = '\0',
+    f2lPing = '\x04',
     f2lClipGetData = '\xA0';
 
 static char f2lClientIdData[32 + 1];
@@ -111,11 +113,12 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
 ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B_far2l" has just been read.
 {
+    ParseResult res = Ignored;
     if (char *s = TermIO::readUntilBelOrSt(buf))
     {
         TStringView encoded(s);
         if (encoded == "ok")
-            state.hasFar2l = true;
+            state.far2l.enabled = true;
         else if (char *pDecoded = (char *) malloc((encoded.size() * 3)/4 + 3))
         {
             TStringView decoded = decodeBase64(encoded, pDecoded);
@@ -132,11 +135,21 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
                     state.putPaste(text);
                 }
             }
+            else if (decoded.size() > 0 && decoded.back() == f2lPing)
+            {
+                if (!state.far2l.canPing)
+                    state.far2l.canPing = true;
+                else
+                {
+                    ev.what = evFar2lPing;
+                    res = Accepted;
+                }
+            }
             free(pDecoded);
         }
         free(s);
     }
-    return Ignored;
+    return res;
 }
 
 template <bool write = true, class... Args>
@@ -203,7 +216,7 @@ inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &tmp, Arg
 
 bool setFar2lClipboard(StdioCtl &io, TStringView text, InputState &state) noexcept
 {
-    if (state.hasFar2l)
+    if (state.far2l.enabled)
     {
         std::vector<char> out, tmp;
         // CLIP_OPEN
@@ -237,7 +250,7 @@ bool setFar2lClipboard(StdioCtl &io, TStringView text, InputState &state) noexce
 
 bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
 {
-    if (state.hasFar2l)
+    if (state.far2l.enabled)
     {
         std::vector<char> out, tmp;
         // CLIP_OPEN
@@ -262,6 +275,19 @@ bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
         return true;
     }
     return false;
+}
+
+void waitFar2lPing(EventSource &source, InputState &state) noexcept
+{
+    if (state.far2l.canPing)
+    {
+        TEvent ev {};
+        do
+        {
+            source.getEvent(ev);
+        }
+        while (ev.what != evFar2lPing);
+    }
 }
 
 } // namespace tvision

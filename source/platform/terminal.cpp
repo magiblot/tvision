@@ -190,7 +190,8 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
                       "\x1B[?1036h" // Enable metaSendsEscape (XTerm).
                       "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
                       "\x1B[>1u"    // Disambiguate escape codes (Kitty).
-                      "\x1B_far2l1\x1B\\" // Enable far2l extended input.
+                      far2lEnableSeq
+                      far2lPingSeq
                     ;
     io.write(seq.data(), seq.size());
     if (char *term = getenv("TERM"))
@@ -212,14 +213,19 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
     }
 }
 
-void TermIO::keyModsOff(StdioCtl &io) noexcept
+void TermIO::keyModsOff(StdioCtl &io, EventSource &source, InputState &state) noexcept
 {
-    TStringView seq = "\x1B_far2l0\x1B\\" // Disable far2l extended input.
+    TStringView seq = far2lPingSeq
+                      far2lDisableSeq
                       "\x1B[<u"     // Restore previous keyboard mode (Kitty).
                       "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
                     ;
     io.write(seq.data(), seq.size());
+    // If we are running across a slow connection, it is highly likely that
+    // far2l will send us keyUp or mouse events before extensions get disabled.
+    // Therefore, discard events until we get a ping response.
+    waitFar2lPing(source, state);
 }
 
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept

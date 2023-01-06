@@ -301,7 +301,7 @@ NcursesInput::~NcursesInput()
 {
     if (mouseEnabled)
         TermIO::mouseOff(io);
-    TermIO::keyModsOff(io);
+    TermIO::keyModsOff(io, *this, state);
     consumeUnprocessedInput();
 }
 
