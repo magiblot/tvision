@@ -745,9 +745,12 @@ For applications running remotely (e.g. through SSH or in WSL), clipboard integr
 
 * When X11 forwarding over SSH is enabled (`ssh -X`).
 * When your terminal emulator supports far2l's terminal extensions ([far2l](https://github.com/elfmz/far2l), [putty4far2l](https://github.com/ivanshatsky/putty4far2l)).
-* When your terminal emulator supports OSC 52 escape codes. However, this will only work for the Copy action; Paste must be done through the terminal.
+* When your terminal emulator supports OSC 52 escape codes:
+    * [alacritty](https://github.com/alacritty/alacritty), [kitty](https://github.com/kovidgoyal/kitty), [foot](https://codeberg.org/dnkl/foot).
+    * [xterm](https://invisible-island.net/xterm/), if the `allowWindowOps` option is enabled.
+    * A few other terminals only support the Copy action.
 
-It is always possible to paste text through your terminal emulator (usually with `Ctrl+Shift+V` or `Command+V`).
+Additionally, it is always possible to paste text using your terminal emulator's own Paste command (usually `Ctrl+Shift+V` or `Cmd+V`).
 
 ## API usage
 

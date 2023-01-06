@@ -19,6 +19,7 @@ struct InputState
     wchar_t surrogate {0};
 #endif
     bool hasFar2l {false};
+    bool hasFullOsc52 {false};
     void (*putPaste)(TStringView) {nullptr};
 };
 
@@ -199,6 +200,10 @@ namespace TermIO
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
+    ParseResult parseDCS(GetChBuf&, InputState&) noexcept;
+    ParseResult parseOSC(GetChBuf&, InputState&) noexcept;
+
+    char *readUntilBelOrSt(GetChBuf &) noexcept;
 }
 
 } // namespace tvision

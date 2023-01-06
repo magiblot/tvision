@@ -111,26 +111,9 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
 ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 // Pre: "\x1B_far2l" has just been read.
 {
-    size_t capacity = 4096;
-    char *s = (char *) malloc(capacity);
-    size_t len = 0;
-    char c;
-    while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
+    if (char *s = TermIO::readUntilBelOrSt(buf))
     {
-        if (capacity == len)
-        {
-            if (void *tmp = realloc(s, capacity *= 2))
-                s = (char *) tmp;
-            else
-                capacity = 0;
-        }
-        if (capacity)
-            s[len++] = c;
-    }
-
-    if (capacity)
-    {
-        TStringView encoded {s, len};
+        TStringView encoded(s);
         if (encoded == "ok")
             state.hasFar2l = true;
         else if (char *pDecoded = (char *) malloc((encoded.size() * 3)/4 + 3))
@@ -151,8 +134,8 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
             }
             free(pDecoded);
         }
+        free(s);
     }
-    free(s);
     return Ignored;
 }
 
