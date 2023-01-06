@@ -403,7 +403,10 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
     ev.what = evKeyDown;
     ev.keyDown.charScan.scanCode = KeyEvent.wVirtualScanCode;
     ev.keyDown.charScan.charCode = KeyEvent.uChar.AsciiChar;
-    ev.keyDown.controlKeyState = KeyEvent.dwControlKeyState;
+    ev.keyDown.controlKeyState = KeyEvent.dwControlKeyState & (
+        kbShift | kbCtrlShift | kbAltShift |
+        kbScrollState | kbNumState | kbCapsState | kbEnhanced
+    );
 
     if (ev.keyDown.textLength)
     {
@@ -465,7 +468,10 @@ void getWin32Mouse(const MOUSE_EVENT_RECORD &MouseEvent, TEvent &ev, InputState 
     ev.mouse.where.y = MouseEvent.dwMousePosition.Y;
     ev.mouse.buttons = state.buttons = MouseEvent.dwButtonState;
     ev.mouse.eventFlags = MouseEvent.dwEventFlags;
-    ev.mouse.controlKeyState = MouseEvent.dwControlKeyState;
+    ev.mouse.controlKeyState = MouseEvent.dwControlKeyState & (
+        kbShift | kbCtrlShift | kbAltShift |
+        kbScrollState | kbNumState | kbCapsState | kbEnhanced
+    );
 
     // Rotation sense is represented by the sign of dwButtonState's high word
     Boolean positive = !(MouseEvent.dwButtonState & 0x80000000);

@@ -132,7 +132,7 @@ const ushort
     kbNumState    = 0x0020,
     kbCapsState   = 0x0040,
     kbInsState    = 0x0080,
-    kbPaste       = 0x0400;
+    kbPaste       = 0x0100;
 #else
     kbLeftShift   = SHIFT_PRESSED,
     kbRightShift  = SHIFT_PRESSED,
