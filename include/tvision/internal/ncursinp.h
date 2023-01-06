@@ -31,6 +31,7 @@ class NcursesInput : public InputStrategy
     void readUtf8Char(int keys[4], int &num_keys) noexcept;
 
     bool parseCursesMouse(TEvent&) noexcept;
+    void consumeUnprocessedInput() noexcept;
 
 public:
 

@@ -14,6 +14,10 @@
 #include <internal/codepage.h>
 #include <internal/constmap.h>
 #include <string>
+#include <chrono>
+
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 
 namespace tvision
 {
@@ -298,6 +302,7 @@ NcursesInput::~NcursesInput()
     if (mouseEnabled)
         TermIO::mouseOff(io);
     TermIO::keyModsOff(io);
+    consumeUnprocessedInput();
 }
 
 int NcursesInput::getButtonCount() noexcept
@@ -473,6 +478,18 @@ bool NcursesInput::parseCursesMouse(TEvent &ev) noexcept
         }
         return false;
     }
+}
+
+void NcursesInput::consumeUnprocessedInput() noexcept
+{
+    // This may be useful if the terminal has sent us events right before we
+    // disabled keyboard and mouse extensions, or if we have been killed by
+    // a signal.
+    TEvent ev;
+    auto begin = steady_clock::now();
+    while ( getEvent(ev) &&
+            steady_clock::now() - begin <= milliseconds(readTimeout) )
+        ;
 }
 
 } // namespace tvision
