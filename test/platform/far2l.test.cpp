@@ -90,7 +90,7 @@ constexpr static TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStrin
 TEST(TermIO, ShouldReadFar2lKeys)
 {
     static constexpr char longString[1024*1024] = {0};
-    static constexpr TestCase<TStringView, ParseResultEvent> testCases[] =
+    static const TestCase<TStringView, ParseResultEvent> testCases[] =
     {
         {"", {Ignored}},
         {"\x07", {Ignored}},

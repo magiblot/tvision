@@ -7,7 +7,7 @@ namespace tvision
 
 TEST(Base64, ShouldDecodeProperly)
 {
-    static constexpr TestCase<TStringView> testCases[] =
+    static const TestCase<TStringView> testCases[] =
     {
         {""        , ""      },
         {"Zg=="    , "f"     },
@@ -30,7 +30,7 @@ TEST(Base64, ShouldDecodeProperly)
 
 TEST(Base64, ShouldEncodeProperly)
 {
-    static constexpr TestCase<TStringView> testCases[] =
+    static const TestCase<TStringView> testCases[] =
     {
         {""      , ""        },
         {"f"     , "Zg=="    },
