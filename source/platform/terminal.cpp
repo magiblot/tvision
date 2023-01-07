@@ -191,7 +191,6 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
                       "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
                       "\x1B[>1u"    // Disambiguate escape codes (Kitty).
                       far2lEnableSeq
-                      far2lPingSeq
                     ;
     io.write(seq.data(), seq.size());
     if (char *term = getenv("TERM"))

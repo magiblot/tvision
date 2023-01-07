@@ -6,6 +6,10 @@
 #include <internal/constmap.h>
 #include <internal/base64.h>
 #include <internal/events.h>
+#include <chrono>
+
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 
 #include <time.h>
 
@@ -137,13 +141,9 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
             }
             else if (decoded.size() > 0 && decoded.back() == f2lPing)
             {
-                if (!state.far2l.canPing)
-                    state.far2l.canPing = true;
-                else
-                {
-                    ev.what = evFar2lPing;
-                    res = Accepted;
-                }
+                ev.what = evNothing;
+                ev.message.infoPtr = &state.far2l;
+                res = Accepted;
             }
             free(pDecoded);
         }
@@ -279,14 +279,16 @@ bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
 
 void waitFar2lPing(EventSource &source, InputState &state) noexcept
 {
-    if (state.far2l.canPing)
+    if (state.far2l.enabled)
     {
         TEvent ev {};
+        auto begin = steady_clock::now();
         do
         {
             source.getEvent(ev);
         }
-        while (ev.what != evFar2lPing);
+        while ( (ev.what != evNothing || ev.message.infoPtr != &state.far2l) &&
+                steady_clock::now() - begin <= milliseconds(pingTimeout) );
     }
 }
 

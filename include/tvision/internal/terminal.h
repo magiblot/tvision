@@ -16,7 +16,6 @@ class EventSource;
 struct Far2lState
 {
     bool enabled {false};
-    bool canPing {false};
 };
 
 struct InputState

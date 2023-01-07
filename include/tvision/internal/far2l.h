@@ -12,8 +12,7 @@ class EventSource;
 #define far2lDisableSeq "\x1B_far2l0\x1B\\"
 #define far2lPingSeq "\x1B_far2l:FAR=\x1B\\"
 
-const ushort
-    evFar2lPing = 0xFA21;
+enum { pingTimeout = 200 };
 
 ParseResult parseFar2lAnswer(GetChBuf &, TEvent &, InputState &) noexcept;
 ParseResult parseFar2lInput(GetChBuf &, TEvent &, InputState &) noexcept;
