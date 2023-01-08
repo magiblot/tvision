@@ -108,7 +108,7 @@ void TCluster::drawMultiBox( const char *icon, const char* marker)
                 {
                     if(!buttonState( cur ))
                         color = cDis;
-                    else if( (cur == sel) && (~state & (sfSelected | sfActive)) == 0 )
+                    else if( (cur == sel) && (state & sfSelected) != 0 )
                         color = cSel;
                     else
                         color = cNorm;
@@ -327,7 +327,7 @@ void TCluster::setData(void * rec)
 void TCluster::setState( ushort aState, Boolean enable )
 {
     TView::setState( aState, enable );
-    if( aState & (sfSelected | sfActive) )
+    if( aState == sfSelected )
         drawView();
 }
 
