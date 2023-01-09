@@ -293,10 +293,50 @@ I   POP DS
 }
 #endif
 
+void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
+{
+    static TEvent pendingKey = {0};
+    if( pendingKey.what != evNothing )
+        {
+        ev = pendingKey;
+        pendingKey.what = evNothing;
+        return;
+        }
+
+    getKeyOrPasteEvent( ev );
+
+    if( ev.what == evKeyDown && (ev.keyDown.controlKeyState & kbPaste) != 0 )
+        {
+        if( ev.keyDown.textLength == 0 )
+            {
+            ev.keyDown.text[0] = (char) ev.keyDown.charScan.charCode;
+            ev.keyDown.textLength = 1;
+            }
+        if( ev.keyDown.text[0] == '\r' ) // Convert CR and CRLF into LF.
+            {
+            ev.keyDown.text[0] = '\n';
+
+            TEvent next;
+            getKeyOrPasteEvent( next );
+
+            if( next.what == evKeyDown &&
+                (next.keyDown.controlKeyState & kbPaste) != 0 &&
+                next.keyDown.textLength == 1 &&
+                next.keyDown.text[0] == '\n'
+              )
+                ; // Drop event.
+            else
+                pendingKey = next;
+            }
+        ev.keyDown.keyCode = 0;
+        }
+}
+
 void TEventQueue::putPaste( TStringView text ) noexcept
 {
     delete[] pasteText;
-    // Always initialize the paste event so that 'waitForEvent' won't block.
+    // Always initialize the paste event, even if it is empty, so that
+    // 'waitForEvent' won't block in the next call.
     if( (pasteText = new char[ text.size() ]) != 0 )
         {
         pasteTextLength = text.size();
@@ -317,14 +357,7 @@ Boolean TEventQueue::getPasteEvent( TEvent &ev ) noexcept
             KeyDownEvent keyDown = { {0x0000}, kbPaste, {0}, (uchar) length };
             ev.what = evKeyDown;
             ev.keyDown = keyDown;
-            if( text[0] == '\r' ) // Convert CR and CRLF into LF.
-                {
-                ev.keyDown.text[0] = '\n';
-                if( pasteTextIndex + 1 < pasteTextLength && text[1] == '\n' )
-                    pasteTextIndex += 1;
-                }
-            else
-                memcpy( ev.keyDown.text, text.data(), length );
+            memcpy( ev.keyDown.text, text.data(), length );
             pasteTextIndex += length;
             return True;
             }
@@ -342,7 +375,7 @@ static int isTextEvent( TEvent &ev ) noexcept
              ev.keyDown.keyCode == kbTab );
 }
 
-void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
+void TEventQueue::getKeyOrPasteEvent( TEvent &ev ) noexcept
 {
     if( getPasteEvent( ev ) )
         return;
@@ -360,7 +393,7 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
                 break;
                 }
             }
-        // If we receive at least 3 consecutive text events, then this is
+        // If we receive at least X consecutive text events, then this is
         // the beginning of a paste event.
         if( keyEventCount == keyEventQSize && firstNonText == keyEventQSize )
             keyPasteState = True;

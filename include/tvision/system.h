@@ -277,6 +277,7 @@ private:
     static TMouse * _NEAR mouse;
     static Boolean getMouseState( TEvent& ) noexcept;
     static Boolean getPasteEvent( TEvent& ) noexcept;
+    static void getKeyOrPasteEvent( TEvent& ) noexcept;
     static Boolean readKeyPress( TEvent& ) noexcept;
 
 #if !defined( __FLAT__ )
