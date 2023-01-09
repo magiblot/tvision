@@ -26,6 +26,7 @@ struct InputState
 #endif
     Far2lState far2l;
     bool hasFullOsc52 {false};
+    bool bracketedPaste {false};
     void (*putPaste)(TStringView) {nullptr};
 };
 
@@ -201,7 +202,7 @@ namespace TermIO
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, InputState&) noexcept;
-    ParseResult parseCSIKey(const CSIData &csi, TEvent&) noexcept;
+    ParseResult parseCSIKey(const CSIData &csi, TEvent&, InputState&) noexcept;
     ParseResult parseFKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
     ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;

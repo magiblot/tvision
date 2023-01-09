@@ -378,6 +378,8 @@ bool NcursesInput::getEvent(TEvent &ev) noexcept
             ev.keyDown.controlKeyState |= kbAltShift;
             TermIO::normalizeKey(ev.keyDown);
         }
+        if (state.bracketedPaste)
+            ev.keyDown.controlKeyState |= kbPaste;
 
         return ev.keyDown.keyCode != kbNoKey || ev.keyDown.textLength;
     }
