@@ -171,7 +171,7 @@ static bool executable_exists(const char *name)
         p = q;
     }
     while (p < end && *p++);
-    return true;
+    return false;
 }
 
 enum class run_subprocess_mode
