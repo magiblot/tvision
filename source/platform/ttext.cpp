@@ -296,12 +296,12 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         {
             if (i < cells.size())
             {
-                if (mb.length < 0)
-                    // This would be unnecessary if it wasn't because we
-                    // might later try to append combining characters to this.
-                    cells[i]._ch.moveInt(CpTranslator::toUtf8Int(text[j]));
-                else if (text[j] == '\0')
+                // We need to convert control characters here since we
+                // might later try to append combining characters to this.
+                if (text[j] == '\0')
                     cells[i]._ch.moveChar(' ');
+                else if (text[j] < ' ' || '\x7F' <= text[j])
+                    cells[i]._ch.moveInt(CpTranslator::toUtf8Int(text[j]));
                 else
                     cells[i]._ch.moveChar(text[j]);
                 return {1, 1};
@@ -381,7 +381,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 bool wide = width > 1;
-                cells[i]._ch.moveStr(textU8, wide);
+                if (textU32[j] == '\0')
+                    cells[i]._ch.moveChar(' ');
+                else
+                    cells[i]._ch.moveStr(textU8, wide);
                 bool drawTrail = (wide && i + 1 < cells.size());
                 if (drawTrail)
                     cells[i + 1]._ch.moveWideCharTrail();
