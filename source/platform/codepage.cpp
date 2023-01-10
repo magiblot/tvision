@@ -10,13 +10,8 @@
 namespace tvision
 {
 
-/* The Turbo Vision library has all its characters encoded in code page 437.
- * While Unicode support is not added, it's better to just translate them
- * with a lookup table. The following table allows translating the characters
- * stored by Turbo Vision into the corresponding UTF-8 mulibyte characters.
- * Taken from https://en.wikipedia.org/wiki/Code_page_437 */
-
-static const TStringView cp437toUtf8[256] = {
+static const TStringView cp437toUtf8[256] =
+{
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
@@ -37,7 +32,8 @@ static const TStringView cp437toUtf8[256] = {
 
 static const std::array<uint32_t, 256> cp437toUtf8Int = make_utf8int<256>(cp437toUtf8);
 
-static const TStringView cp850toUtf8[256] = {
+static const TStringView cp850toUtf8[256] =
+{
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
     " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",

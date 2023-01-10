@@ -181,7 +181,7 @@ void TEventQueue::getMouseEvent( TEvent & ev) noexcept
             {
             ev.what = evMouseWheel;
 #ifdef __BORLANDC__
-        // A bug in Borland C++ causes mouse position to be trash on
+        // A bug in Borland C++ causes mouse position to be trash in
         // MOUSE_WHEELED events.
             ev.mouse.where = lastMouse.where;
 #endif

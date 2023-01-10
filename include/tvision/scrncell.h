@@ -47,7 +47,7 @@ inline void setCell(TScreenCell &cell, TCellChar ch, TColorAttr attr)
 // INVARIANT:
 // * '_text' contains one of the following:
 //     1. A single byte of ASCII or 'extended ASCII' text (1 column wide).
-//     2. Up to 12 bytes of UTF-8 text (1 or 2 columns wide in total,
+//     2. Up to 15 bytes of UTF-8 text (1 or 2 columns wide in total,
 //        meaning that it must not contain just zero-width characters).
 //     3. A special value that marks it as wide char trail.
 

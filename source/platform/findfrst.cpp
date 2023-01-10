@@ -105,7 +105,7 @@ bool FindFirstRec::setPath(const char* pathname) noexcept
         // Win32's FindFirst is designed to reject paths ending with a
         // separator. But legacy code unaware of Unix separators may be unable
         // to remove it and call findfirst with such a pathname. Therefore,
-        // we handle this case mercifully.
+        // we handle this case gracefully.
         if (searchDir.back() == '/')
             wildcard = '.';
         else

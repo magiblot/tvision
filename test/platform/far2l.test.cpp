@@ -87,7 +87,7 @@ constexpr static TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStrin
     return ev;
 }
 
-TEST(TermIO, ShouldReadFar2lKeys)
+TEST(Far2l, ShouldReadFar2lKeys)
 {
     static constexpr char longString[1024*1024] = {0};
     static const TestCase<TStringView, ParseResultEvent> testCases[] =
