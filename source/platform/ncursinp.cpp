@@ -488,10 +488,12 @@ void NcursesInput::consumeUnprocessedInput() noexcept
     // disabled keyboard and mouse extensions, or if we have been killed by
     // a signal.
     TEvent ev;
+    wtimeout(stdscr, 0);
     auto begin = steady_clock::now();
     while ( getEvent(ev) &&
             steady_clock::now() - begin <= milliseconds(readTimeout) )
         ;
+    wtimeout(stdscr, readTimeout);
 }
 
 } // namespace tvision
