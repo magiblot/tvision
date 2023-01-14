@@ -130,14 +130,3 @@ BOOL THardwareInfo::requestClipboardText( void (&accept)(TStringView) ) noexcept
 {
     return platf->requestClipboardText(accept);
 }
-
-#ifndef _WIN32
-
-extern "C" DWORD GetTickCount(void) noexcept
-{
-    // This effectively gives a system time reference in milliseconds.
-    // steady_clock is best suited for measuring intervals.
-    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
-}
-
-#endif

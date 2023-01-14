@@ -2,28 +2,19 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-#ifndef __BORLANDC__
+#if !defined( __BORLANDC__ )
 #include <chrono>
 #endif
 
 static TTimePoint systemTimeMs()
 {
-#ifdef __BORLANDC__
-#ifdef __FLAT__
+#if !defined( __FLAT__ )
+    return THardwareInfo::getTickCount()*55;
+#elif defined( __BORLANDC__ )
     return GetTickCount();
 #else
-    uint32_t time = THardwareInfo::getTickCount()*55;
-    return time;
-#endif // __FLAT__
-#else
-#ifdef _WIN32
     return GetTickCount64();
-#else
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()
-    ).count();
-#endif // _WIN32
-#endif // __BORLANDC__
+#endif
 }
 
 struct TTimer

@@ -29,6 +29,8 @@ typedef char CHAR;
 typedef short SHORT;
 typedef int32_t LONG;
 typedef wchar_t WCHAR;
+typedef int64_t LONGLONG;
+typedef uint64_t ULONGLONG;
 
 // windef.h
 
@@ -300,6 +302,7 @@ typedef struct _CONSOLE_CURSOR_INFO {
 // winbase.h
 
 DWORD GetTickCount(void) noexcept;
+ULONGLONG GetTickCount64(void) noexcept;
 
 } // extern "C"
 
