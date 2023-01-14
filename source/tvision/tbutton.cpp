@@ -48,7 +48,8 @@ TButton::TButton( const TRect& bounds,
     title( newStr( aTitle ) ),
     command( aCommand ),
     flags( aFlags ),
-    amDefault( Boolean( (aFlags & bfDefault) != 0 ) )
+    amDefault( Boolean( (aFlags & bfDefault) != 0 ) ),
+    animationTimer( 0 )
 {
     options |= ofSelectable | ofFirstClick | ofPreProcess | ofPostProcess;
     eventMask |= evBroadcast;
@@ -224,7 +225,10 @@ void TButton::handleEvent( TEvent& event )
                 )
               )
                 {
-                press();
+                drawState( True );
+                if( animationTimer != 0 )
+                    press();
+                animationTimer = setTimer( animationDuration );
                 clearEvent( event );
                 }
             break;
@@ -252,6 +256,16 @@ void TButton::handleEvent( TEvent& event )
                 case cmCommandSetChanged:
                     setState(sfDisabled,Boolean(!commandEnabled(command)));
                     drawView();
+                    break;
+
+                case cmTimeout:
+                    if( animationTimer != 0 && event.message.infoPtr == animationTimer )
+                        {
+                        animationTimer = 0;
+                        drawState( False );
+                        press();
+                        clearEvent( event );
+                        }
                     break;
                 }
         break;

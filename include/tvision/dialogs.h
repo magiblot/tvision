@@ -300,6 +300,9 @@ private:
     void pressButton( TEvent& );
     TRect getActiveRect();
 
+    enum { animationDuration = 100 };
+    TTimerId animationTimer;
+
     static const char * _NEAR shadows;
     static const char * _NEAR markers;
 
