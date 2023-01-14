@@ -400,14 +400,12 @@ BOOL THardwareInfo::setClipboardText( TStringView text )
     BOOL result = False;
     if( pOpenClipboard && pOpenClipboard( 0 ) )
         {
-        HGLOBAL hData;
+        HGLOBAL hData = NULL;
         char *pData;
         if( pEmptyClipboard() &&
-            ( (result = text.empty()) == True ||
-              ( (hData = GlobalAlloc( GMEM_MOVEABLE, text.size() + 1 )) != 0 &&
-                (pData = (char *) GlobalLock( hData )) != 0
-              )
-            )
+            (result = text.empty()) == 0 &&
+            (hData = GlobalAlloc( GMEM_MOVEABLE, text.size() + 1 )) != 0 &&
+            (pData = (char *) GlobalLock( hData )) != 0
           )
             {
             memcpy(pData, text.data(), text.size());
