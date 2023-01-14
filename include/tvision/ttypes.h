@@ -109,6 +109,8 @@ opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
 class TStringView;
 ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
 
+typedef void _FAR *TTimerId;
+
 typedef int ccIndex;
 typedef Boolean (*ccTestFunc)( void *, void * );
 typedef void (*ccAppFunc)( void *, void * );

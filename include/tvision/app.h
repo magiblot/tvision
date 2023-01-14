@@ -250,6 +250,7 @@ const int
 
 class _FAR TDialog;
 class _FAR TWindow;
+class _FAR TTimerQueue;
 
 class TProgram : public TGroup, public virtual TProgInit
 {
@@ -274,6 +275,9 @@ public:
     TView *validView( TView *p ) noexcept;
     virtual void shutDown();
 
+    virtual TTimerId setTimer( uint timeoutMs, int periodMs = -1 );
+    virtual void killTimer( TTimerId id );
+
     virtual void suspend() {}
     virtual void resume() {}
 
@@ -294,7 +298,10 @@ protected:
 
 private:
 
+    static int eventWaitTimeout();
+
     static const char * _NEAR exitText;
+    static TTimerQueue _NEAR timerQueue;
 
 };
 

@@ -25,6 +25,7 @@
 #define Uses_TStatusDef
 #define Uses_TStatusItem
 #define Uses_TDialog
+#define Uses_TTimerQueue
 #include <tvision/tv.h>
 
 // Public variables
@@ -36,6 +37,7 @@ TProgram * _NEAR TProgram::application = 0;
 int _NEAR TProgram::appPalette = apColor;
 int _NEAR TProgram::eventTimeout = 20; // 50 wake-ups per second.
 TEvent _NEAR TProgram::pending;
+TTimerQueue _NEAR TProgram::timerQueue;
 
 extern TPoint shadowSize;
 
@@ -96,6 +98,14 @@ Boolean TProgram::canMoveFocus()
     return deskTop->valid(cmReleasedFocus);
 }
 
+int TProgram::eventWaitTimeout()
+{
+    int timerTimeout = min(timerQueue.timeUntilTimeout(), (int32_t) INT_MAX);
+    if (timerTimeout < 0)
+        return eventTimeout;
+    return min(eventTimeout, timerTimeout);
+}
+
 ushort TProgram::executeDialog( TDialog* pD, void* data )
 {
     ushort c=cmCancel;
@@ -128,7 +138,7 @@ void TProgram::getEvent(TEvent& event)
         }
     else
         {
-        TEvent::waitForEvent(eventTimeout);
+        event.waitForEvent(eventWaitTimeout());
         event.getMouseEvent();
         if( event.what == evNothing )
             {
@@ -197,6 +207,11 @@ void TProgram::handleEvent( TEvent& event )
         }
 }
 
+static void doHandleTimeout( TTimerId id, void *self )
+{
+    message( (TProgram *) self, evBroadcast, cmTimeout, id );
+}
+
 void TProgram::idle()
 {
     if( statusLine != 0 )
@@ -207,6 +222,8 @@ void TProgram::idle()
         message( this, evBroadcast, cmCommandSetChanged, 0 );
         commandSetChanged = False;
         }
+
+    timerQueue.collectTimeouts(doHandleTimeout, this);
 }
 
 TDeskTop *TProgram::initDeskTop( TRect r )
@@ -276,6 +293,10 @@ TWindow* TProgram::insertWindow(TWindow* pWin)
    return NULL;
 }
 
+void TProgram::killTimer( TTimerId id )
+{
+    timerQueue.killTimer(id);
+}
 
 void TProgram::outOfMemory()
 {
@@ -305,6 +326,11 @@ void TProgram::setScreenMode( ushort mode )
     setState(sfExposed, True);
     redraw();
     TEventQueue::mouse->show(); //ShowMouse();
+}
+
+TTimerId TProgram::setTimer( uint timeoutMs, int periodMs )
+{
+    return timerQueue.setTimer( timeoutMs, periodMs );
 }
 
 TView* TProgram::validView(TView* p) noexcept

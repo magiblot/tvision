@@ -330,6 +330,38 @@ inline void TEvent::getMouseEvent() noexcept
 
 #endif  // Uses_TEventQueue
 
+#if defined( Uses_TTimerQueue ) && !defined( __TTimerQueue )
+#define __TTimerQueue
+
+#ifdef __BORLANDC__
+typedef uint32_t TTimePoint;
+#else
+typedef uint64_t TTimePoint;
+#endif
+
+struct _FAR TTimer;
+
+class TTimerQueue
+{
+public:
+
+    TTimerQueue() noexcept;
+    TTimerQueue(TTimePoint (&getTimeMs)()) noexcept;
+    ~TTimerQueue();
+
+    TTimerId setTimer(uint32_t timeoutMs, int32_t periodMs = -1);
+    void killTimer(TTimerId id);
+    void collectTimeouts(void (&func)(TTimerId, void *), void *args);
+    int32_t timeUntilTimeout();
+
+private:
+
+    TTimePoint (&getTimeMs)();
+    TTimer *first;
+};
+
+#endif // Uses_TTimerQueue
+
 #if defined( Uses_TClipboard ) && !defined( __TClipboard )
 #define __TClipboard
 

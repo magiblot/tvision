@@ -175,6 +175,7 @@ const ushort
     cmReceivedFocus     = 50,
     cmReleasedFocus     = 51,
     cmCommandSetChanged = 52,
+    cmTimeout           = 58,
 
 // TScrollBar messages
 
@@ -190,6 +191,7 @@ const ushort
     cmListItemSelected  = 56,
 
 //  TProgram messages
+
     cmScreenChanged     = 57,
 
 //  Event masks
@@ -418,6 +420,9 @@ public:
     void keyEvent( TEvent& event );
     Boolean mouseEvent( TEvent& event, ushort mask );
     Boolean textEvent( TEvent &event, TSpan<char> dest, size_t &length );
+
+    virtual TTimerId setTimer( uint timeoutMs, int periodMs = -1 );
+    virtual void killTimer( TTimerId id );
 
     TPoint makeGlobal( TPoint source ) noexcept;
     TPoint makeLocal( TPoint source ) noexcept;

@@ -416,6 +416,18 @@ The following are new features not available in Borland's release of Turbo Visio
     if (event.keyDown == TKey(kbEnter, kbShift))
         doStuff();
     ```
+* New methods which allow the usage of timed events:
+    ```c++
+    TTimerId TView::setTimer(uint timeoutMs, int periodMs = -1);
+    void TView::killTimer(TTimerId id);
+    ```
+    `setTimer` starts a timer that will first time out in `timeoutMs` milliseconds and then every `periodMs` millisecods.
+
+    If `periodMs` is negative, the timer only times out a single time and is cleaned up automatically. Otherwise, it will keep timing out periodically until `killTimer` is invoked.
+
+    When a timer times out, an `evBroadcast` event with the command `cmTimeout` is emitted, and `message.infoPtr` is set to the id of the timed-out timer.
+
+    Timeout events are generated in `TProgram::idle()`, that is, only if there are no keyboard or mouse events available.
 
 ## Screenshots
 

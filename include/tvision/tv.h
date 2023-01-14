@@ -512,6 +512,10 @@
 #define __INC_SYSTEM_H
 #endif
 
+#if defined( Uses_TTimerQueue )
+#define __INC_SYSTEM_H
+#endif
+
 #if defined( Uses_TEventQueue )
 #define Uses_TEvent
 #define __INC_SYSTEM_H

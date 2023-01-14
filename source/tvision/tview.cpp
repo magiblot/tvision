@@ -574,6 +574,12 @@ void TView::keyEvent( TEvent& event )
        } while( event.what != evKeyDown );
 }
 
+void TView::killTimer( TTimerId id )
+{
+    if( owner != 0 )
+        owner->killTimer(id);
+}
+
 void TView::locate( TRect& bounds )
 {
     TPoint   min, max;
@@ -797,6 +803,13 @@ void TView::setState( ushort aState, Boolean enable )
                    );
             break;
         }
+}
+
+TTimerId TView::setTimer( uint timeoutMs, int periodMs )
+{
+    if( owner != 0 )
+        return owner->setTimer(timeoutMs, periodMs);
+    return 0;
 }
 
 void TView::show()
