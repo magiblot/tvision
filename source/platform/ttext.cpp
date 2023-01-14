@@ -236,6 +236,17 @@ size_t TText::prev(TStringView text, size_t index) noexcept
     return 0;
 }
 
+char TText::toCodePage(TStringView text) noexcept
+{
+    using namespace tvision;
+    size_t length = TText::next(text);
+    if (length == 0)
+        return '\0';
+    if (length == 1 && (text[0] < ' ' || '\x7F' <= text[0]))
+        return text[0];
+    return CpTranslator::fromUtf8(text.substr(0, length));
+}
+
 template <class Text>
 inline TText::Lw TText::scrollImplT(Text text, int count, Boolean includeIncomplete) noexcept
 {
