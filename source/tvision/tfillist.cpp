@@ -309,16 +309,14 @@ static inline int isAbsolute( const char *path )
     return isSep( path[0] ) || (path[0] && path[1] == ':' && isSep( path[2] ) );
 }
 
-static inline void addFinalSep( char *path, size_t size )
+static void addFinalSep( char *path, size_t size )
 {
     size_t len = strlen(path);
     if( !(len && isSep( path[len-1] )) )
         strnzcat( path, "\\", size );
 }
 
-#pragma warn -inl
-
-static inline int getPathDrive( const char *path )
+static int getPathDrive( const char *path )
 {
     if( path[0] && path[1] == ':' )
     {
@@ -328,8 +326,6 @@ static inline int getPathDrive( const char *path )
     }
     return -1;
 }
-
-#pragma warn .inl
 
 Boolean getHomeDir( char *drive, char *dir ) noexcept
 {
@@ -350,6 +346,8 @@ Boolean getHomeDir( char *drive, char *dir ) noexcept
         return True;
         }
 #endif
+    (void) drive;
+    (void) dir;
     return False;
 }
 
