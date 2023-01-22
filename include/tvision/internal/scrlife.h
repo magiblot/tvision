@@ -10,13 +10,8 @@ namespace tvision
 
 class StderrRedirector
 {
-    enum { maxStderrSize = 16*1024*1024 };
-
-    static char stderrBuffer alignas(4096) [4096];
-    static const char truncationMsg[];
-
     int ttyFd {-1};
-    int fileFd {-1};
+    int bufFd[2] {-1, -1};
 
 public:
 
