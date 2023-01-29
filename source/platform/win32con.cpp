@@ -16,6 +16,11 @@ namespace tvision
 
 #ifdef _WIN32
 
+static bool isWine() noexcept
+{
+    return GetProcAddress(GetModuleHandle("ntdll"), "wine_get_version");
+}
+
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
     auto &io = *new StdioCtl;
@@ -37,11 +42,19 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
         consoleMode &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
         SetConsoleMode(io.out(), consoleMode);
         // Try enabling VT sequences.
-        consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
-        consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-        SetConsoleMode(io.out(), consoleMode);
-        GetConsoleMode(io.out(), &consoleMode);
-        supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        if (isWine())
+            // Wine does not support them, but unlike the legacy console,
+            // it does not return error when attempting to enable it, so we
+            // have to handle this case separately.
+            supportsVT = false;
+        else
+        {
+            consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
+            consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
+            SetConsoleMode(io.out(), consoleMode);
+            GetConsoleMode(io.out(), &consoleMode);
+            supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        }
     }
 
     // Set the console and the environment in UTF-8 mode.
