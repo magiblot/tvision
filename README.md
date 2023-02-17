@@ -119,7 +119,7 @@ If your distribution provides separate *devel* packages (e.g. `libncurses-dev`, 
 
 The runtime requirements are:
 
-* `xsel` or `xlip` for clipboard support in X11 environments.
+* `xsel` or `xclip` for clipboard support in X11 environments.
 * `wl-clipboard` for clipboard support in Wayland environments.
 
 The minimal command line required to build a Turbo Vision application (e.g. `hello.cpp` with GCC) from this project's root is:
@@ -395,7 +395,7 @@ The following are new features not available in Borland's release of Turbo Visio
     * `ilMaxBytes` (the default): the text can be up to `limit` bytes long, including the null terminator.
     * `ilMaxWidth`: the text can be up to `limit` columns wide.
     * `ilMaxChars`: the text can contain up to `limit` non-combining characters or graphemes.
-    
+
     In any case, the text in a `TInputLine` can never be more than 256 bytes long, including the null terminator.
 * New functions which allow getting the names of Turbo Vision's constants at runtime (e.g. `evCommand`, `kbShiftIns`, etc.):
     ```c++
@@ -485,7 +485,7 @@ Unicode support consists in two new fields in `ev.keyDown` (which is a `struct K
 * `char text[4]`, which may contain whatever was read from the terminal: usually a UTF-8 sequence, but possibly any kind of raw data.
 * `uchar textLength`, which is the number of bytes of data available in `text`, from 0 to 4.
 
-Note that the `text` string is not null-terminated. 
+Note that the `text` string is not null-terminated.
 You can get a `TStringView` out of a `KeyDownEvent` with the `getText()` method.
 
 So a Unicode character can be retrieved from `TEvent` in the following way:
