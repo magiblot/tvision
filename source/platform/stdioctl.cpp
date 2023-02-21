@@ -216,7 +216,7 @@ StdioCtl::StdioCtl() noexcept
     }
     if (!isValid(cn[input].handle))
     {
-        cn[input].handle = CreateFile(
+        cn[input].handle = CreateFileA(
             "CONIN$",
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ,
@@ -228,7 +228,7 @@ StdioCtl::StdioCtl() noexcept
     }
     if (!isValid(cn[startupOutput].handle))
     {
-        cn[startupOutput].handle = CreateFile(
+        cn[startupOutput].handle = CreateFileA(
             "CONOUT$",
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_WRITE,
@@ -279,7 +279,7 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
     // Writing 0 bytes causes the cursor to become invisible for a short time
     // in old versions of the Windows console.
     if (bytes != 0)
-        WriteConsole(out(), data, bytes, nullptr, nullptr);
+        WriteConsoleA(out(), data, bytes, nullptr, nullptr);
 }
 
 TPoint StdioCtl::getSize() const noexcept

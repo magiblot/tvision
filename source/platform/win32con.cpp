@@ -18,7 +18,7 @@ namespace tvision
 
 static bool isWine() noexcept
 {
-    return GetProcAddress(GetModuleHandle("ntdll"), "wine_get_version");
+    return GetProcAddress(GetModuleHandleA("ntdll"), "wine_get_version");
 }
 
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
@@ -327,7 +327,7 @@ void Win32Display::clearScreen() noexcept
     BYTE attr = 0x07;
     DWORD read;
     FillConsoleOutputAttribute(io.out(), attr, length, coord, &read);
-    FillConsoleOutputCharacter(io.out(), ' ', length, coord, &read);
+    FillConsoleOutputCharacterA(io.out(), ' ', length, coord, &read);
     lastAttr = attr;
 }
 
