@@ -53,7 +53,7 @@ void SysManualEvent::clear() noexcept
 
 bool SysManualEvent::createHandle(HANDLE &hEvent) noexcept
 {
-    return (hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr)) != NULL;
+    return (hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr)) != NULL;
 }
 
 SysManualEvent::~SysManualEvent()
