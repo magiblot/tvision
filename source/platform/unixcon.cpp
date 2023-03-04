@@ -25,7 +25,8 @@ enum { clipboardTimeoutMs = 1500 };
 struct Command
 {
     const char * const *argv;
-    const char *env;
+    const char *requiredEnv;
+    const char * const *customEnv;
 };
 
 #ifdef __APPLE__
@@ -35,9 +36,41 @@ constexpr const char * pbpasteArgv[] = {"pbpaste", 0};
 constexpr const char * wlCopyArgv[] = {"wl-copy", 0};
 constexpr const char * xselCopyArgv[] = {"xsel", "--input", "--clipboard", 0};
 constexpr const char * xclipCopyArgv[] = {"xclip", "-in", "-selection", "clipboard", 0};
+constexpr const char * wslCopyArgv[] = {"/mnt/c/Windows/System32/cmd.exe", "/D", "/Q", "/C", "clip.exe", 0};
 constexpr const char * wlPasteArgv[] = {"wl-paste", "--no-newline", 0};
 constexpr const char * xselPasteArgv[] = {"xsel", "--output", "--clipboard", 0};
 constexpr const char * xclipPasteArgv[] = {"xclip", "-out", "-selection", "clipboard", 0};
+constexpr const char * wslPasteArgv[] =
+{
+    // PowerShell is the only native tool which allows reading the clipboard.
+    // It must be launched in a separate window to work around
+    // https://github.com/microsoft/terminal/issues/280. Because of this,
+    // a temporary file is required to read PowerShell's output.
+    // In addition, an environment variable is used to insert quoutes in order
+    // to work around https://github.com/microsoft/WSL/issues/2835.
+    // Also, since the PATH variable might get altered when using sudo, it is
+    // best to use the absolute path of cmd.exe.
+    "/mnt/c/Windows/System32/cmd.exe", "/D", "/Q", "/C",
+    "FOR",
+        "%i", "IN", "(", "%q%%TMP%%q%", "%q%%TEMP%%q%", "%q%%USERPROFILE%%q%", "\\.", ".", ")",
+    "DO",
+        "set", "TMPNAM=%q%%~i\\tmp%RANDOM%%RANDOM%.tmp%q%", "&&",
+        "call", "copy", "/Y", "NUL", "^%TMPNAM^%", ">", "NUL", "&&",
+        "(", "cmd", "/C", "start", "/I", "/MIN", "/WAIT",
+            "powershell", "-NoProfile", "-NoLogo", "-NonInteractive", "-WindowStyle", "Hidden",
+                "Get-Clipboard", "-Raw", "^^^|",
+                "Out-File", "-NoNewline", "-Encoding", "unicode", "-FilePath", "'^%TMPNAM^%'", "^&^&",
+            "type", "^%TMPNAM^%", "^&",
+            "del", "/Q", "^%TMPNAM^%", "^>", "NUL", ")", "&&",
+        "exit",
+    0,
+};
+constexpr const char *wslPasteEnv[] =
+{
+    "WSLENV", "q",
+    "q", "\"",
+    0,
+};
 #endif
 
 constexpr Command copyCommands[] =
@@ -45,6 +78,7 @@ constexpr Command copyCommands[] =
 #ifdef __APPLE__
     {pbcopyArgv},
 #else
+    {wslCopyArgv},
     {wlCopyArgv, "WAYLAND_DISPLAY"},
     {xselCopyArgv, "DISPLAY"},
     {xclipCopyArgv, "DISPLAY"},
@@ -59,6 +93,7 @@ constexpr Command pasteCommands[] =
     {wlPasteArgv, "WAYLAND_DISPLAY"},
     {xselPasteArgv, "DISPLAY"},
     {xclipPasteArgv, "DISPLAY"},
+    {wslPasteArgv, nullptr, wslPasteEnv},
 #endif
 };
 
@@ -99,12 +134,12 @@ UnixConsoleStrategy::~UnixConsoleStrategy()
 }
 
 static bool executable_exists(const char *name);
-static TSpan<char> read_subprocess(const char * const cmd[], int timeoutMs);
+static TSpan<char> read_subprocess(const char * const cmd[], const char * const env[], int timeoutMs);
 static bool write_subprocess(const char * const cmd[], TStringView, int timeoutMs);
 
 static bool commandIsAvailable(const Command &cmd)
 {
-    return (!cmd.env || !getEnv<TStringView>(cmd.env).empty()) && executable_exists(cmd.argv[0]);
+    return (!cmd.requiredEnv || !getEnv<TStringView>(cmd.requiredEnv).empty()) && executable_exists(cmd.argv[0]);
 }
 
 bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
@@ -129,7 +164,7 @@ bool UnixConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noex
     for (auto &cmd : pasteCommands)
         if (commandIsAvailable(cmd))
         {
-            TSpan<char> text = read_subprocess(cmd.argv, clipboardTimeoutMs);
+            TSpan<char> text = read_subprocess(cmd.argv, cmd.customEnv, clipboardTimeoutMs);
             if (text.data())
             {
                 accept(text);
@@ -145,8 +180,8 @@ bool UnixConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noex
 
 static bool executable_exists(const char *name)
 {
-    const char *path = getenv("PATH");
-    if (!path)
+    const char *path = "";
+    if (name[0] != '/' && !(path = getenv("PATH")))
         path = "/usr/local/bin:/bin:/usr/bin";
     const char *end = path + strlen(path);
     size_t nameLen = strlen(name);
@@ -186,7 +221,7 @@ struct run_subprocess_t
     int fd {-1};
 };
 
-static run_subprocess_t run_subprocess(const char * const argv[], run_subprocess_mode mode)
+static run_subprocess_t run_subprocess(const char * const argv[], const char * const env[], run_subprocess_mode mode)
 {
     int fds[2];
     if (pipe(fds) == -1)
@@ -194,6 +229,9 @@ static run_subprocess_t run_subprocess(const char * const argv[], run_subprocess
     pid_t pid = fork();
     if (pid == 0)
     {
+        for (auto *p = env; p && *p; p += 2)
+            setenv(p[0], p[1], true);
+
         int nul     = open("/dev/null", O_RDWR);
         int new_in  = mode == run_subprocess_mode::read ? nul    : fds[0];
         int new_out = mode == run_subprocess_mode::read ? fds[1] : nul;
@@ -301,9 +339,9 @@ static write_pipe_t write_pipe(int fd, const char *data, size_t size, int timeou
     return {bytesWritten == size, res == 0};
 }
 
-static TSpan<char> read_subprocess(const char * const cmd[], int timeoutMs)
+static TSpan<char> read_subprocess(const char * const cmd[], const char * const env[], int timeoutMs)
 {
-    auto process = run_subprocess(cmd, run_subprocess_mode::read);
+    auto process = run_subprocess(cmd, env, run_subprocess_mode::read);
     if (process.pid == -1)
         return {};
     auto res = read_pipe(process.fd, timeoutMs);
@@ -318,7 +356,7 @@ static TSpan<char> read_subprocess(const char * const cmd[], int timeoutMs)
 
 static bool write_subprocess(const char * const cmd[], TStringView text, int timeoutMs)
 {
-    auto process = run_subprocess(cmd, run_subprocess_mode::write);
+    auto process = run_subprocess(cmd, nullptr, run_subprocess_mode::write);
     if (process.pid == -1)
         return false;
     auto res = write_pipe(process.fd, text.data(), text.size(), timeoutMs);
