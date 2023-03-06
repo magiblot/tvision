@@ -78,7 +78,6 @@ static bool isPrivate(uint32_t codepoint) noexcept
 
 static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexcept
 {
-
     ushort keyCode = 0;
     switch (value)
     {
@@ -90,7 +89,24 @@ static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexc
         // Functional keys as represented in Kitty's keyboard protocol.
         // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html#functional
         // Keypad.
+        case 57399: keyCode = '0';      break;
+        case 57400: keyCode = '1';      break;
+        case 57401: keyCode = '2';      break;
+        case 57402: keyCode = '3';      break;
+        case 57403: keyCode = '4';      break;
+        case 57404: keyCode = '5';      break;
+        case 57405: keyCode = '6';      break;
+        case 57406: keyCode = '7';      break;
+        case 57407: keyCode = '8';      break;
+        case 57408: keyCode = '9';      break;
+        case 57409: keyCode = '.';      break;
+        case 57410: keyCode = '/';      break;
+        case 57411: keyCode = '*';      break;
+        case 57412: keyCode = '-';      break;
+        case 57413: keyCode = '+';      break;
         case 57414: keyCode = kbEnter;  break;
+        case 57415: keyCode = '=';      break;
+        case 57416: keyCode = ',';      break;
         case 57417: keyCode = kbLeft;   break;
         case 57418: keyCode = kbRight;  break;
         case 57419: keyCode = kbUp;     break;
@@ -104,10 +120,11 @@ static bool keyFromCodepoint(uint value, uint mods, KeyDownEvent &keyDown) noexc
         default: if (isAlpha(value)) keyCode = value;
     }
     keyDown = keyWithXTermMods(keyCode, mods);
-    if ( (keyDown.keyCode == 0 || isAlpha(keyDown.keyCode)) &&
-         ' ' <= value && !isPrivate(value) )
+    if ( isAlpha(keyDown.keyCode) ||
+         (keyDown.keyCode == 0 && ' ' <= value && !isPrivate(value)) )
     {
-        keyDown.textLength = utf32To8(value, keyDown.text);
+        uint32_t codepoint = keyDown.keyCode == 0 ? value : keyDown.keyCode;
+        keyDown.textLength = utf32To8(codepoint, keyDown.text);
         keyDown.charScan.charCode =
             CpTranslator::printableFromUtf8({keyDown.text, keyDown.textLength});
     }
