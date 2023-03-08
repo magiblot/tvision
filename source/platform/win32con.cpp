@@ -466,6 +466,11 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
             ev.keyDown.keyCode = keyCode;
             if (ev.keyDown.charScan.charCode < ' ')
                 ev.keyDown.textLength = 0;
+            else if (ev.keyDown.charScan.charCode < 0x7F && !ev.keyDown.textLength)
+            {
+                ev.keyDown.text[0] = ev.keyDown.charScan.charCode;
+                ev.keyDown.textLength = 1;
+            }
         }
     }
 
