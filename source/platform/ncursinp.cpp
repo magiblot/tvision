@@ -53,7 +53,7 @@ namespace tvision
  * combinations from your terminal application. */
 
 static constexpr KeyDownEvent fromNonPrintableAscii[32] = {
-    {{kbNoKey},     0}          , // ^@, Null
+    {{'@'},         kbCtrlShift, {'@'}, 1}, // ^@, Null
     {{kbCtrlA},     kbCtrlShift},
     {{kbCtrlB},     kbCtrlShift},
     {{kbCtrlC},     kbCtrlShift},
@@ -81,10 +81,10 @@ static constexpr KeyDownEvent fromNonPrintableAscii[32] = {
     {{kbCtrlY},     kbCtrlShift},
     {{kbCtrlZ},     kbCtrlShift},
     {{kbEsc},       0}          , // ^[, Escape
-    {{0x1C},        0}          , // ^\, ?
-    {{0x1D},        0}          , // ^], ?
-    {{0x1E},        0}          , // ^^, ?
-    {{0x1F},        0}          , // ^_, ?
+    {{'\\'},        kbCtrlShift, {'\\'}, 1}, // ^\, File Separator
+    {{']'},         kbCtrlShift, {']'}, 1}, // ^], Group Separator
+    {{'^'},         kbCtrlShift, {'^'}, 1}, // ^^, Record Separator
+    {{'_'},         kbCtrlShift, {'_'}, 1}, // ^_, Unit Separator
 };
 
 static const const_unordered_map<ushort, KeyDownEvent> fromCursesKeyCode = {
