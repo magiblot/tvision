@@ -371,7 +371,7 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, InputState &state) 
     ev.what = evMouse;
     ev.mouse = {};
     ev.mouse.where = {col, row};
-    ev.mouse.controlKeyState = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
+    ev.mouse.controlKeyState = (-!!(mod & mmAlt) & kbLeftAlt) | (-!!(mod & mmCtrl) & kbLeftCtrl);
     switch (but)
     {
         case 0: // Press.
@@ -418,7 +418,7 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, InputState &state) 
     ev.what = evMouse;
     ev.mouse = {};
     ev.mouse.where = {col, row};
-    ev.mouse.controlKeyState = (mod & mmAlt ? kbAltShift : 0) | (mod & mmCtrl ? kbCtrlShift : 0);
+    ev.mouse.controlKeyState = (-!!(mod & mmAlt) & kbLeftAlt) | (-!!(mod & mmCtrl) & kbLeftCtrl);
     if (type == 'M') // Press, wheel or drag.
     {
         switch (but)

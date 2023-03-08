@@ -95,9 +95,9 @@ ushort LinuxConsoleInput::getKeyboardModifiers(StdioCtl &io) noexcept
         if (res & (1 << KG_SHIFT))
             actualModifiers |= kbShift;
         if (res & (1 << KG_CTRL))
-            actualModifiers |= kbCtrlShift;
+            actualModifiers |= kbLeftCtrl;
         if (res & (1 << KG_ALT))
-            actualModifiers |= kbAltShift;
+            actualModifiers |= kbLeftAlt;
     }
     return actualModifiers;
 }
