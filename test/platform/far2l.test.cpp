@@ -42,6 +42,8 @@ static bool operator==(const ParseResultEvent &a, const ParseResultEvent &b)
 {
     if (a.parseResult != b.parseResult)
         return false;
+    if (a.parseResult == Ignored)
+        return true;
     if (a.ev.what != b.ev.what)
         return false;
     if (a.ev.what == evNothing)
@@ -87,6 +89,9 @@ constexpr static TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStrin
     return ev;
 }
 
+const ushort
+    kbS = 0x1f73, kb9 = 0x0a39;
+
 TEST(Far2l, ShouldReadFar2lKeys)
 {
     static constexpr char longString[1024*1024] = {0};
@@ -99,13 +104,14 @@ TEST(Far2l, ShouldReadFar2lKeys)
         {"AQBTAAAAAAAAAHMAAAB=", {Ignored}},
         {"AQBTAAAAAAAAAHMAAABLaa==", {Ignored}},
         {"AQBTAAAAAAAAAHMAAHMAAABL", {Ignored}},
-        {"AQBTAAAAAAAAAHMAAABL", {Accepted, keyDownEv(0x0073, 0x0000, "s")}},
-        {"AQBTAAAAAAAAAHMAAABL\x07", {Accepted, keyDownEv(0x0073, 0x0000, "s")}},
+        {"AQBTAAAAAAAAAHMAAABL", {Accepted, keyDownEv(kbS, 0x0000, "s")}},
+        {"AQBTAAAAAAAAAHMAAABL\x07", {Accepted, keyDownEv(kbS, 0x0000, "s")}},
         {"AQC+AAAAAAAAAKwgAABL\x07", {Accepted, keyDownEv(kbNoKey, 0x0000, "€")}},
         {"AQBWAAAACAAAAAAAAABL\x07", {Accepted, keyDownEv(kbCtrlV, kbLeftCtrl, "")}},
-        {"AQA5AAAACAAAADkAAABL\x07", {Accepted, keyDownEv(0x0039, kbLeftCtrl, "9")}},
+        {"AQA5AAAACAAAADkAAABL\x07", {Accepted, keyDownEv(kb9, kbLeftCtrl, "9")}},
         {"AQBWAAAACgAAAFYAAABL\x07", {Accepted, keyDownEv(kbAltV, kbLeftCtrl | kbLeftAlt, "")}},
-        {"AQBWAAAACgAAAAAAAABL\x07", {Accepted, keyDownEv(kbAltV, kbLeftCtrl | kbLeftAlt, "")}},
+        {"AQBWAAAACgAAAAAAAABL\x07", {Ignored}}, // AltGr + V, UnicodeChar = 0
+        {"AQAMAAAAIgAAAAAAAABL\x07", {Ignored}}, // Alt + VK_CLEAR
     };
 
     for (auto &testCase : testCases)
