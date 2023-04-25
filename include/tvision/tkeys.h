@@ -213,4 +213,7 @@ inline opstream& operator << ( opstream& os, TKey& p )
 inline opstream& operator << ( opstream& os, TKey* p )
     { return os << p->code << p->mods; }
 
+// For Darwin, kbAltX doesn't work; use kbOptX instead.
+const TKey kbOptX(0x00f7, 0x0200);
+
 #endif  // __TKey

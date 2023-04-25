@@ -182,7 +182,11 @@ TStatusLine *TVDemo::initStatusLine( TRect r )
     return (new TStatusLine( r,
       *new TStatusDef( 0, 50 ) +
         *new TStatusItem( "~F1~ Help", kbF1, cmHelp ) +
+#ifdef USE_OPT_X
+        *new TStatusItem( "~Opt-X~ Exit", kbOptX, cmQuit ) +
+#else
         *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
+#endif
         *new TStatusItem( 0, kbShiftDel, cmCut ) +
         *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
         *new TStatusItem( 0, kbShiftIns, cmPaste ) +
