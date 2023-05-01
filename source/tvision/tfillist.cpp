@@ -360,27 +360,33 @@ void fexpand( char *rpath ) noexcept
 
 void fexpand( char *rpath, const char *relativeTo ) noexcept
 {
-    char path[MAXPATH];
-    char drive[MAXDRIVE];
-    char dir[MAXDIR];
-    char file[MAXFILE];
-    char ext[MAXEXT];
+    union
+        {
+        struct
+            {
+            char drive[MAXDRIVE];
+            char dir[MAXDIR];
+            char file[MAXFILE];
+            char ext[MAXEXT];
+            } fn;
+        char path[MAXDRIVE + MAXDIR + MAXFILE + MAXEXT];
+        };
 
     int drv;
     // Prioritize drive letter in 'rpath'.
     if( (drv = getPathDrive(rpath)) == -1 &&
         (drv = getPathDrive(relativeTo)) == -1 )
         drv = getdisk();
-    drive[0] = drv + 'A';
-    drive[1] = ':';
-    drive[2] = '\0';
+    fn.drive[0] = drv + 'A';
+    fn.drive[1] = ':';
+    fn.drive[2] = '\0';
 
-    int flags = fnsplit( rpath, 0, dir, file, ext );
-    if( (flags & DIRECTORY) == 0 || !isSep(dir[0]) )
+    int flags = fnsplit( rpath, 0, fn.dir, fn.file, fn.ext );
+    if( (flags & DIRECTORY) == 0 || !isSep(fn.dir[0]) )
         {
         char rbase[MAXPATH];
-        if( isHomeExpand(dir) && getHomeDir(drive, rbase) ) // Home expansion. Overwrite drive if necessary.
-            strnzcat( rbase, dir+1, MAXDIR ); // 'dir' begins with "~/" or "~\", so we can reuse the separator.
+        if( isHomeExpand(fn.dir) && getHomeDir(fn.drive, rbase) ) // Home expansion. Overwrite drive if necessary.
+            strnzcat( rbase, fn.dir+1, MAXDIR ); // 'dir' begins with "~/" or "~\", so we can reuse the separator.
         else
             {
             // If 'rpath' is relative but contains a drive letter, just swap drives.
@@ -405,22 +411,22 @@ void fexpand( char *rpath, const char *relativeTo ) noexcept
                 }
             // Ensure 'rbase' ends with a separator.
             addFinalSep( rbase, MAXPATH );
-            strnzcat( rbase, dir, MAXDIR );
+            strnzcat( rbase, fn.dir, MAXDIR );
             }
         if( !isSep(rbase[0]) )
             {
-            dir[0] = '\\';
-            strnzcpy( dir+1, rbase, MAXDIR-1 );
+            fn.dir[0] = '\\';
+            strnzcpy( fn.dir+1, rbase, MAXDIR-1 );
             }
         else
-            strnzcpy( dir, rbase, MAXDIR );
+            strnzcpy( fn.dir, rbase, MAXDIR );
         }
 
-    char *p = dir;
+    char *p = fn.dir;
     while( (p = strchr( p, '/' )) != 0 )
         *p = '\\';
-    squeeze( dir );
-    fnmerge( path, drive, dir, file, ext );
+    squeeze( fn.dir );
+    fnmerge( path, fn.drive, fn.dir, fn.file, fn.ext );
 #ifndef __FLAT__
     strupr( path );
 #endif
