@@ -635,6 +635,7 @@ void opstream::writeString( const char *str )
 
 void opstream::writeString( TStringView str )
 {
+    str = str.substr(0, nullStringLen - 1);
     writeByte( (uchar)str.size() );
     writeBytes( str.data(), str.size() );
 }
