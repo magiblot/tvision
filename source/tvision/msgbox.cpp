@@ -108,15 +108,10 @@ ushort messageBoxRect( const TRect &r,
                        ... ) noexcept
 {
     va_list argptr;
-    va_start( argptr, fmt );
-
     char msg[256];
-#ifdef __BORLANDC__
-    vsprintf( msg, fmt, argptr );
-#else
-    vsnprintf( msg, 256, fmt, argptr );
-#endif
 
+    va_start( argptr, fmt );
+    vsnprintf( msg, 256, fmt, argptr );
     va_end( argptr );
 
     return messageBoxRect( r, msg, aOptions );
@@ -143,15 +138,10 @@ ushort messageBox( TStringView msg, ushort aOptions ) noexcept
 ushort messageBox( unsigned aOptions, const char *fmt, ... ) noexcept
 {
     va_list argptr;
-    va_start( argptr, fmt );
-
     char msg[256];
-#ifdef __BORLANDC__
-    vsprintf( msg, fmt, argptr );
-#else
-    vsnprintf( msg, 256, fmt, argptr );
-#endif
 
+    va_start( argptr, fmt );
+    vsnprintf( msg, 256, fmt, argptr );
     va_end( argptr );
 
     return messageBoxRect( makeRect(msg), msg, aOptions );

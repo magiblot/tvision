@@ -59,11 +59,7 @@ void TParamText::setText( const char *fmt, ... )
     va_list ap;
 
     va_start( ap, fmt );
-#ifdef __BORLANDC__
-    vsprintf( str, fmt, ap );
-#else
     vsnprintf( str, 256, fmt, ap );
-#endif
     va_end( ap );
 
     drawView();
