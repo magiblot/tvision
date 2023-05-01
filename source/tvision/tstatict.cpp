@@ -47,11 +47,16 @@ void TStaticText::draw()
     Boolean center;
     int i, j, l, p, y;
     TDrawBuffer b;
-    char s[256];
+    char buf[256];
+    TStringView s;
 
     color = getColor(1);
-    getText(s);
-    l = strlen(s);
+    getText(buf);
+    s = buf;
+    // If possible, read directly from 'text' to prevent truncation.
+    if (s == TStringView(text).substr(0, s.size()))
+        s = text;
+    l = (int) s.size();
     p = 0;
     y = 0;
     center = False;
@@ -66,13 +71,13 @@ void TStaticText::draw()
                 ++p;
                 }
             i = p;
-            int last = i + TText::scroll(TStringView(&s[i], l-i), size.x, False);
+            int last = i + TText::scroll(s.substr(i), size.x, False);
             do {
                 j = p;
                 while ((p < l) && (s[p] == ' '))
                     ++p;
                 while ((p < l) && (s[p] != ' ') && (s[p] != '\n'))
-                    p += TText::next(TStringView(&s[p], l-p));
+                    p += TText::next(s.substr(p));
                 } while ((p < l) && (p < last) && (s[p] != '\n'));
             if (p > last)
                 {
@@ -81,12 +86,12 @@ void TStaticText::draw()
                 else
                     p = last;
                 }
-            int width = strwidth(TStringView(&s[i], p-i));
+            int width = strwidth(s.substr(i, p-i));
             if (center == True)
                 j = (size.x - width) / 2 ;
             else
                 j = 0;
-            b.moveStr(j, TStringView(&s[i], l-i), color, (ushort) width);
+            b.moveStr(j, s.substr(i), color, (ushort) width);
             while ((p < l) && (s[p] == ' '))
                 p++;
             if ((p < l) && (s[p] == '\n'))
