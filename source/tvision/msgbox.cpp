@@ -25,10 +25,6 @@
 #define Uses_TLabel
 #include <tvision/tv.h>
 
-#if !defined( __STDARG_H )
-#include <stdarg.h>
-#endif  // __STDARG_H
-
 #if !defined( __STDIO_H )
 #include <stdio.h>
 #endif  // __STDIO_H

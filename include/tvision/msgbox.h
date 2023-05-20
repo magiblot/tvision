@@ -17,10 +17,6 @@
 #if defined( Uses_MsgBox ) && !defined( __MsgBox )
 #define __MsgBox
 
-#if !defined( __STDARG_H )
-#include <stdarg.h>
-#endif  // __STDARG_H
-
 #if defined( __BORLANDC__ )
 #pragma option -Vo-
 #endif

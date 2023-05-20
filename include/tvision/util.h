@@ -16,7 +16,7 @@
 #if !defined( __UTIL_H )
 #define __UTIL_H
 
-#include <stddef.h>
+#include <stdarg.h>
 
 inline constexpr int min( int a, int b )
 {
@@ -72,6 +72,8 @@ ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup * = 0);
 Boolean lowMemory() noexcept;
 
 char *newStr( TStringView ) noexcept;
+char *fmtStr( const char _FAR *format, ... ) noexcept;
+char *vfmtStr( const char _FAR *format, va_list args ) noexcept;
 
 Boolean driveValid( char drive ) noexcept;
 Boolean isDir( const char *str ) noexcept;

@@ -25,10 +25,8 @@
 #include "tvedit.h"
 
 #include <stdlib.h>
-#include <stdarg.h>
 #include <strstrea.h>
 #include <iomanip.h>
-#include <signal.h>
 
 TEditWindow *TEditorApp::openEditor( const char *fileName, Boolean visible )
 {

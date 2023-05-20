@@ -30,7 +30,6 @@
 
 #include "tvedit.h"
 
-#include <stdarg.h>
 #include <strstrea.h>
 #include <iomanip.h>
 

@@ -21,10 +21,6 @@
 #include <stdio.h>
 #endif  // __STDIO_H
 
-#if !defined( __STDARG_H )
-#include <stdarg.h>
-#endif  // __STDARG_H
-
 #if !defined( __STRING_H )
 #include <string.h>
 #endif  // __STRING_H
