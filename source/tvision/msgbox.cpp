@@ -116,8 +116,8 @@ static TRect makeRect(TStringView text)
     TRect r( 0, 0, 40, 9 );
 
     int width = strwidth(text);
-    while (width > (r.b.x - 7)*(r.b.y - 6))
-        ++r.b.y;
+    if (width > (r.b.x - 7)*(r.b.y - 6))
+        r.b.y = width/(r.b.x - 7) + 6 + 1;
 
     r.move((TProgram::deskTop->size.x - r.b.x) / 2,
            (TProgram::deskTop->size.y - r.b.y) / 2);
