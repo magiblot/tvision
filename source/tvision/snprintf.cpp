@@ -41,7 +41,7 @@ static size_t _PASCAL _NEAR strnputn(const void *s, size_t n, void *outP)
         size_t copyLen = min(n, bufLen - 1);
         memcpy(buf.cur, s, copyLen);
         buf.cur[copyLen] = '\0';
-        buf.cur += copyLen + 1;
+        buf.cur += copyLen;
     }
     return n;
 }
