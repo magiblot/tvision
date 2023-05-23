@@ -618,7 +618,7 @@ void TEditor::handleEvent( TEvent& event )
             break;
 
         case evKeyDown:
-            if( ( !encSingleByte && event.keyDown.textLength ) ||
+            if( ( !encSingleByte && event.keyDown.textLength > 0 ) ||
                 event.keyDown.charScan.charCode == 9 ||
                 ( event.keyDown.charScan.charCode >= 32 && event.keyDown.charScan.charCode < 255 )
               )
@@ -637,10 +637,10 @@ void TEditor::handleEvent( TEvent& event )
                         if( curPtr != lineEnd(curPtr) )
                             selEnd = nextChar(curPtr);
 
-                    if( encSingleByte )
-                        insertText( &event.keyDown.charScan.charCode, 1, False );
-                    else
+                    if( !encSingleByte && event.keyDown.textLength > 0 )
                         insertText( event.keyDown.text, event.keyDown.textLength, False );
+                    else
+                        insertText( &event.keyDown.charScan.charCode, 1, False );
                     }
 
                 trackCursor(centerCursor);
