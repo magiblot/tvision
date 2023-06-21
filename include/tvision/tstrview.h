@@ -212,7 +212,7 @@ inline constexpr Boolean operator==(TStringView a, TStringView b)
 inline Boolean operator==(TStringView a, TStringView b)
 {
     if (a.size() == b.size())
-        return Boolean( memcmp(a.data(), b.data(), b.size()) == 0 );
+        return Boolean( b.size() == 0 || memcmp(a.data(), b.data(), b.size()) == 0 );
     return False;
 }
 #endif
