@@ -59,8 +59,8 @@ static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
     mods -= XTermModDefault;
     ushort tvmods =
           (kbShift & -(mods & 1))
-        | (kbAltShift & -(mods & 2))
-        | (kbCtrlShift & -(mods & 4))
+        | (kbLeftAlt & -(mods & 2))
+        | (kbLeftCtrl & -(mods & 4))
         ;
     KeyDownEvent keyDown {{keyCode}, tvmods};
     TermIO::normalizeKey(keyDown);
@@ -406,7 +406,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
             res = parseEscapeSeq(buf, ev, state);
             if (res == Accepted && ev.what == evKeyDown)
             {
-                ev.keyDown.controlKeyState |= kbAltShift;
+                ev.keyDown.controlKeyState |= kbLeftAlt;
                 normalizeKey(ev.keyDown);
             }
             break;
