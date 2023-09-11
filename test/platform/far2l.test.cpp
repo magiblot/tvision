@@ -4,90 +4,10 @@
 #include <internal/far2l.h>
 
 #include <test.h>
+#include "terminal.test.h"
 
 namespace tvision
 {
-
-class StrInputGetter : public InputGetter
-{
-    TStringView str;
-    size_t i {0};
-
-public:
-
-    StrInputGetter(TStringView aStr) noexcept :
-        str(aStr)
-    {
-    }
-
-    int get() noexcept override
-    {
-        return i < str.size() ? str[i++] : -1;
-    }
-
-    void unget(int) noexcept override
-    {
-        if (i > 0)
-            --i;
-    }
-};
-
-struct ParseResultEvent
-{
-    ParseResult parseResult;
-    TEvent ev;
-};
-
-static bool operator==(const ParseResultEvent &a, const ParseResultEvent &b)
-{
-    if (a.parseResult != b.parseResult)
-        return false;
-    if (a.parseResult == Ignored)
-        return true;
-    if (a.ev.what != b.ev.what)
-        return false;
-    if (a.ev.what == evNothing)
-        return true;
-    if (a.ev.what == evKeyDown)
-        return
-            a.ev.keyDown.keyCode == b.ev.keyDown.keyCode &&
-            a.ev.keyDown.controlKeyState == b.ev.keyDown.controlKeyState &&
-            a.ev.keyDown.getText() == b.ev.keyDown.getText();
-    abort();
-}
-
-static std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
-{
-    os << "{";
-    switch (p.parseResult)
-    {
-        case Rejected: os << "Rejected"; break;
-        case Accepted: os << "Accepted"; break;
-        case Ignored: os << "Ignored"; break;
-    }
-    os << ", {";
-    printEventCode(os, p.ev.what);
-    os << ", {{";
-    printKeyCode(os, p.ev.keyDown.keyCode);
-    os << "}, {";
-    printControlKeyState(os, p.ev.keyDown.controlKeyState);
-    os << "}, '" << p.ev.keyDown.getText() << "'}}";
-    return os;
-}
-
-constexpr static TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text)
-{
-    TEvent ev {};
-    ev.what = evKeyDown;
-    ev.keyDown.keyCode = keyCode;
-    ev.keyDown.controlKeyState = controlKeyState;
-    while (ev.keyDown.textLength <= sizeof(ev.keyDown.text) && ev.keyDown.textLength < text.size())
-    {
-        ev.keyDown.text[ev.keyDown.textLength] = text[ev.keyDown.textLength];
-        ++ev.keyDown.textLength;
-    }
-    return ev;
-}
 
 const ushort
     kbS = 0x1f73, kb9 = 0x0a39;

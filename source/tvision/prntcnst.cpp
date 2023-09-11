@@ -125,6 +125,7 @@ static const TConstant eventCodes[] =
     NM(evMouseMove),
     NM(evMouseAuto),
     NM(evMouseWheel),
+    NM(evMouse),
     NM(evKeyDown),
     NM(evCommand),
     NM(evBroadcast),

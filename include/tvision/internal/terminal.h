@@ -42,26 +42,26 @@ class GetChBuf
 {
     enum { maxSize = 31 };
 
-    InputGetter &in;
     uint size {0};
     int keys[maxSize];
 
 public:
+
+    InputGetter &in;
 
     GetChBuf(InputGetter &aIn) noexcept :
         in(aIn)
     {
     }
 
-    int getUnbuffered() noexcept;
-    int get(bool keepErr) noexcept;
-    int last(size_t i) noexcept;
-    void unget() noexcept;
+    inline int getUnbuffered() noexcept;
+    inline int get(bool keepErr = false) noexcept;
+    inline int last(size_t i) noexcept;
+    inline void unget() noexcept;
     void reject() noexcept;
     bool getNum(uint &) noexcept;
     bool getInt(int &) noexcept;
     bool readStr(TStringView) noexcept;
-
 };
 
 inline int GetChBuf::getUnbuffered() noexcept
@@ -69,7 +69,7 @@ inline int GetChBuf::getUnbuffered() noexcept
     return in.get();
 }
 
-inline int GetChBuf::get(bool keepErr=false) noexcept
+inline int GetChBuf::get(bool keepErr) noexcept
 {
     if (size < maxSize)
     {
@@ -95,96 +95,28 @@ inline void GetChBuf::unget() noexcept
         in.unget(k);
 }
 
-inline void GetChBuf::reject() noexcept
-{
-    while (size)
-        unget();
-}
-
-// getNum, getInt: INVARIANT: the last non-digit read key (or -1)
-// can be accessed with 'last()' and can also be ungetted.
-
-inline bool GetChBuf::getNum(uint &result) noexcept
-{
-    uint num = 0, digits = 0;
-    int k;
-    while ((k = get(true)) != -1 && '0' <= k && k <= '9')
-    {
-        num = 10 * num + (k - '0');
-        ++digits;
-    }
-    if (digits)
-        return (result = num), true;
-    return false;
-}
-
-inline bool GetChBuf::getInt(int &result) noexcept
-{
-    int num = 0, digits = 0, sign = 1;
-    int k = get(true);
-    if (k == '-')
-    {
-        sign = -1;
-        k = get(true);
-    }
-    while (k != -1 && '0' <= k && k <= '9')
-    {
-        num = 10 * num + (k - '0');
-        ++digits;
-        k = get(true);
-    }
-    if (digits)
-        return (result = sign*num), true;
-    return false;
-}
-
-inline bool GetChBuf::readStr(TStringView str) noexcept
-{
-    size_t origSize = size;
-    size_t i = 0;
-    while (i < str.size() && get() == str[i])
-        ++i;
-    if (i == str.size())
-        return true;
-    while (origSize < size)
-        unget();
-    return false;
-}
-
 enum ParseResult { Rejected = 0, Accepted, Ignored };
 
 struct CSIData
 {
     // Represents the data stored in a CSI escape sequence:
-    // \x1B [ val[0] sep[0] val[1] sep[1] ...
+    // \x1B [ _val[0] ; _val[1] ; ... terminator
 
     // CSIs can be longer, but this is the largest we need for now.
-    enum { maxLength = 3 };
+    enum { maxLength = 6 };
 
-    uint val[maxLength];
-    uint sep[maxLength];
-    uint length;
+    uint _val[maxLength];
+    uint terminator {0};
+    uint length {0};
 
-    bool readFrom(GetChBuf &buf) noexcept
-    {
-        length = 0;
-        for (uint i = 0; i < maxLength; ++i)
-        {
-            if (!buf.getNum(val[i]))
-                val[i] = 1;
-            int k = buf.last();
-            if (k == -1) return false;
-            if ((sep[i] = (uint) k) != ';')
-                return (length = i + 1), true;
-        }
-        return false;
-    }
-
-    uint terminator() const noexcept
-    {
-        return length ? sep[length - 1] : 0;
-    }
+    bool readFrom(GetChBuf &buf) noexcept;
+    inline uint getValue(uint i, uint defaultValue = 1) const noexcept;
 };
+
+inline uint CSIData::getValue(uint i, uint defaultValue) const noexcept
+{
+    return i < length && _val[i] != UINT_MAX ? _val[i] : defaultValue;
+}
 
 namespace TermIO
 {
@@ -209,6 +141,7 @@ namespace TermIO
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
     ParseResult parseDCS(GetChBuf&, InputState&) noexcept;
     ParseResult parseOSC(GetChBuf&, InputState&) noexcept;
+    ParseResult parseWin32InputModeKeyOrEscapeSeq(const CSIData &, InputGetter&, TEvent&, InputState&) noexcept;
 
     char *readUntilBelOrSt(GetChBuf &) noexcept;
 }
