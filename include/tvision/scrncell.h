@@ -167,9 +167,6 @@ constexpr inline const char& TCellChar::operator[](size_t i) const
 // with text.
 //
 // Considerations:
-// * '_wide' indicates the width of the text in '_ch' minus one. In practice,
-//   the only possible character widths are 0, 1 and 2, and the text in a
-//   TCellChar is at least one column wide. So 'wide' will be either 0 or 1.
 // * In order for a double-width character to be displayed entirely, its cell
 //   must be followed by another containing a wide char trail. If it is not,
 //   or if a wide char trail is not preceded by a double-width character,
@@ -238,43 +235,6 @@ inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr)
     ::setChar(cell, ch);
     ::setAttr(cell, attr);
 }
-
-#ifdef SCRNCELL_DEBUG
-#include <type_traits>
-
-namespace scrncell
-{
-    template <class T>
-    inline void check_trivial()
-    {
-        static_assert(std::is_trivial<T>(), "");
-    }
-
-    template<class C, class T = typename C::trivial_t>
-    static void check_convertible()
-    {
-        scrncell::check_trivial<C>();
-        static_assert(sizeof(C) == sizeof(T), "");
-        static_assert(alignof(C) == alignof(T), "");
-    }
-
-    inline void check_assumptions()
-    {
-        check_trivial<TColorDesired>();
-        check_trivial<TColorAttr>();
-        check_trivial<TAttrPair>();
-        check_trivial<TCellChar>();
-        check_trivial<TScreenCell>();
-        check_convertible<TColorBIOS>();
-        check_convertible<TColorRGB>();
-        check_convertible<TColorXTerm>();
-        static_assert(sizeof(TScreenCell) == 24, "");
-        static_assert(sizeof(TColorDesired) == 4, "");
-        static_assert(sizeof(TColorAttr) == 8, "");
-    }
-}
-
-#endif // SCRNCELL_DEBUG
 
 #endif // __BORLANDC__
 

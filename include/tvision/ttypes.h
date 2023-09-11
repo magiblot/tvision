@@ -136,42 +136,47 @@ extern const uchar specialChars[];
 #define TVISION_STL
 #endif
 
+// Constructors and casting operator which make a struct trivial and
+// convertible from and into a primitive type 'T'.
+#define TV_TRIVIALLY_CONVERTIBLE(Self, T, mask) \
+    Self() = default; \
+    Self(T asT) \
+    { \
+        asT &= T(mask); \
+        memcpy(this, &asT, sizeof(T)); \
+    } \
+    operator T() const \
+    { \
+        T asT; \
+        memcpy(&asT, this, sizeof(T)); \
+        return asT & T(mask); \
+    }
+
 // In types with user-defined constructors, the default assignment operator
 // creates a temporary object. If the type is large enough, the compiler
 // may not be able to optimize out the temporary object. This has been observed
-// with GCC, Clang, MSVC.
+// with GCC, Clang and MSVC.
 //
-// To work around this in performance-critical types, we define a template
+// To work around this in performance-critical types, we define a custom
 // assignment operator which just invokes the type constructor with the
 // assigned object, so that the initialization is done in-place instead of in a
 // temporary location.
 //
 // In order to use placement new, 'operator new(size_t, void*)' has to be defined.
-// Usually this would be accomplished by including the <new> header, but due to
-// compilation performance it is more convenient to define a class-overloaded
-// operator new. We also define operator delete to avoid a warning in some compilers.
+// Instead of including the <new> header, due to compilation performance, it is
+// more convenient to define a class-overloaded operator new. We also define
+// operator delete to avoid a warning in some compilers.
+//
+// Also, it is required to use a template assignment operator. This is the
+// only way to make the assignment 't = {}' equivalent to 't = T()'.
 //
 // This macro is intended to be used in the definition of types with trivial
 // destructors, so there is no need to invoke the destructor before placement
 // new nor guard against self-assignment.
-//
-// This solution is incompatible with non-template assignment operators,
-// because of the following:
-//
-//     "Note that, if a non-template assignment operator from some non-class
-//      type is available, it is preferred over the copy/move assignment in
-//      'E1 = {}' because '{}' to non-class is an identity conversion, which
-//      outranks the user-defined conversion from '{}' to a class type."
-// (From https://en.cppreference.com/w/cpp/language/operator_assignment).
-//
-// This means that if we define a custom 'T& operator=(int)', the assignment
-// 't = {}' will be equivalent to 't = 0' instead of 't = T()'. This would
-// break the programmer's expectations completely.
-#define TV_TRIVIALLY_ASSIGNABLE(S) \
+#define TV_TRIVIALLY_ASSIGNABLE(Self) \
     void* operator new(size_t, void *p) noexcept { return p; } \
     void operator delete(void *, void *) noexcept {}; \
     template <class T> \
-    S& operator=(const T &t) { return *new (this) S(t); }
-
+    Self& operator=(const T &t) { return *new (this) Self(t); }
 
 #endif  // __TTYPES_H
