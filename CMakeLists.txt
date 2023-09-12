@@ -114,11 +114,6 @@ function(tv_set_warnings target)
             -Wno-pragmas
         )
     endif()
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(${target} PRIVATE
-            -Wno-overloaded-virtual
-        )
-    endif()
 endfunction()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

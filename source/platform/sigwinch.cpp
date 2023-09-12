@@ -19,7 +19,7 @@ void SigwinchHandler::handleSignal(int) noexcept
     // clears the screen when doing so and causes blinking.
 }
 
-bool SigwinchHandler::getEvent(void *, TEvent &ev) noexcept
+bool SigwinchHandler::emitScreenChangedEvent(void *, TEvent &ev) noexcept
 {
     ev.what = evCommand;
     ev.message.command = cmScreenChanged;
@@ -28,7 +28,7 @@ bool SigwinchHandler::getEvent(void *, TEvent &ev) noexcept
 
 inline SigwinchHandler::SigwinchHandler( SysManualEvent::Handle handle,
                                          const struct sigaction &aOldSa ) noexcept :
-    WakeUpEventSource(handle, &getEvent, nullptr),
+    WakeUpEventSource(handle, &emitScreenChangedEvent, nullptr),
     oldSa(aOldSa)
 {
     instance = this;

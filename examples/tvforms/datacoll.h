@@ -16,6 +16,11 @@
 #if !defined( __DATACOLL_H )
 #define __DATACOLL_H
 
+#if defined( __GNUC__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 #define Uses_TStringCollection
 #define Uses_TStreamable
 #include <tvision/tv.h>
@@ -64,5 +69,9 @@ inline opstream& operator << ( opstream& os, TDataCollection& cl )
     { return os << (TStreamable&)cl; }
 inline opstream& operator << ( opstream& os, TDataCollection* cl )
     { return os << (TStreamable *)cl; }
+
+#if defined( __GNUC__ )
+#pragma GCC diagnostic pop
+#endif
 
 #endif  // __DATACOLL_H

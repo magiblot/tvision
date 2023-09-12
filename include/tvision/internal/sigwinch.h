@@ -18,7 +18,7 @@ class SigwinchHandler final : public WakeUpEventSource
 
     static SigwinchHandler *instance;
     static void handleSignal(int) noexcept;
-    static bool getEvent(void *, TEvent &) noexcept;
+    static bool emitScreenChangedEvent(void *, TEvent &) noexcept;
 
     SigwinchHandler( SysManualEvent::Handle handle,
                      const struct sigaction &aOldSa ) noexcept;

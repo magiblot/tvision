@@ -42,9 +42,9 @@
 #pragma warning(push)
 #pragma warning(disable: 4250)
 #endif
-#if defined( __clang__ )
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#if defined( __GNUC__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 #if !defined( __FLAT__ )
@@ -773,6 +773,6 @@
 #if defined( _MSC_VER )
 #pragma warning(pop)
 #endif
-#if defined( __clang__ )
-#pragma clang diagnostic pop
+#if defined( __GNUC__ )
+#pragma GCC diagnostic pop
 #endif
