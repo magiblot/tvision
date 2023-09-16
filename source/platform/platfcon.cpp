@@ -77,7 +77,7 @@ bool Platform::getEvent(TEvent &ev) noexcept
 
 void Platform::signalCallback(bool enter) noexcept
 {
-    if (!instance.console.lockedByThisThread())
+    if (!instance.console.lockedByCurrentThread())
     {
         // FIXME: these are not signal safe!
         if (enter)

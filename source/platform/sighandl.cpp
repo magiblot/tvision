@@ -101,7 +101,7 @@ bool SignalHandler::invokeHandlerOrDefault( int signo, struct sigaction &action,
                                             siginfo_t *info, void *context ) noexcept
 {
     // If the handler is a custom one, invoke it directly.
-    if (action.sa_flags & SA_SIGINFO && action.sa_sigaction)
+    if ((action.sa_flags & SA_SIGINFO) && action.sa_sigaction)
         action.sa_sigaction(signo, info, context);
     else if (!(action.sa_flags & SA_SIGINFO) && action.sa_handler)
         action.sa_handler(signo);

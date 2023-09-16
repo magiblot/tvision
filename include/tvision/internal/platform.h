@@ -7,7 +7,7 @@
 #include <internal/stdioctl.h>
 #include <internal/dispbuff.h>
 #include <internal/events.h>
-#include <atomic>
+#include <internal/mutex.h>
 #include <vector>
 
 struct TEvent;
@@ -71,59 +71,6 @@ struct ConsoleStrategy
     virtual bool requestClipboardText(void (&)(TStringView)) noexcept { return false; }
 };
 
-using ThreadId = const void *;
-
-struct ThisThread
-{
-    static ThreadId id() noexcept
-    {
-        static thread_local struct {} idBase;
-        return &idBase;
-    }
-};
-
-#if ATOMIC_POINTER_LOCK_FREE < 2
-#warning The code below assumes that atomic pointers are lock-free, but they are not.
-#endif
-
-template <class T>
-struct SignalThreadSafe
-{
-    T t;
-    std::atomic<ThreadId> lockingThread {};
-
-    struct LockGuard
-    {
-        SignalThreadSafe *self;
-        LockGuard(SignalThreadSafe *aSelf) noexcept : self(aSelf)
-        {
-            ThreadId none {};
-            // Use a spin lock because regular mutexes are not signal-safe.
-            if (self)
-                while (self->lockingThread.compare_exchange_weak(none, ThisThread::id()))
-                    ;
-        }
-        ~LockGuard()
-        {
-            if (self)
-                self->lockingThread = ThreadId {};
-        }
-    };
-
-    template <class Func>
-    // 'func' takes a 'T &' by parameter.
-    auto lock(Func &&func) noexcept
-    {
-        LockGuard lk {lockedByThisThread() ? nullptr : this};
-        return func(t);
-    }
-
-    bool lockedByThisThread() const noexcept
-    {
-        return lockingThread == ThisThread::id();
-    }
-};
-
 class Platform
 {
 #ifdef _TV_UNIX
@@ -136,7 +83,7 @@ class Platform
     ConsoleStrategy dummyConsole {dummyDisplay, dummyInput, {}};
     // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
     // or an owning reference to a heap-allocated ConsoleStrategy object.
-    SignalThreadSafe<ConsoleStrategy *> console {&dummyConsole};
+    SignalSafeReentrantMutex<ConsoleStrategy *> console {&dummyConsole};
 
     Platform() noexcept;
     ~Platform();
