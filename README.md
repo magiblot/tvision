@@ -303,6 +303,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
     * Support for X10 and SGR mouse encodings.
     * Support for Xterm's [*modifyOtherKeys*](https://invisible-island.net/xterm/manpage/xterm.html#VT100-Widget-Resources:modifyOtherKeys).
     * Support for Paul Evans' [*fixterms*](http://www.leonerd.org.uk/hacks/fixterms/) and Kitty's [keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/).
+    * Support for Conpty's [`win32-input-mode`](https://github.com/microsoft/terminal/blob/37b0cfd32ba0aa54e0fe50bb158154d906472a89/doc/specs/%234999%20-%20Improved%20keyboard%20handling%20in%20Conpty.md) (available in WSL).
     * Support for [far2l](https://github.com/elfmz/far2l)'s terminal extensions.
     * Support for key modifiers (via `TIOCLINUX`) and mouse (via GPM) in the Linux console.
 * Custom signal handler that restores the terminal state before the program crashes.
