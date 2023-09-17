@@ -5,53 +5,26 @@
 #include <tvision/tv.h>
 #endif
 
+#include <string.h>
 #include <unordered_map>
-#include <array>
 
 namespace tvision
 {
 
 class CpTranslator
 {
-
-    CpTranslator() noexcept;
-    static CpTranslator instance;
-
-    struct CpTable
-    {
-        TStringView cp;
-        const uint32_t *toUtf8Int;
-        const std::unordered_map<uint32_t, char> fromUtf8;
-
-        CpTable( TStringView cp,
-                 const TStringView toUtf8[256],
-                 const std::array<uint32_t, 256> &toUtf8Int ) noexcept;
-    };
-
-    static const CpTable tables[2];
-    static const CpTable *activeTable;
-
-    static void useTable(const CpTable *table) noexcept
-    {
-        activeTable = table;
-    }
+    static const char (*currentToUtf8)[256][4];
+    static const std::unordered_map<uint32_t, char> *currentFromUtf8;
 
 public:
 
-    static void use(TStringView cp) noexcept
-    {
-        for (const CpTable &t : tables)
-            if (t.cp == cp)
-            {
-                useTable(&t);
-                return; // Watch out!
-            }
-        useTable(&tables[0]);
-    }
+    static void init() noexcept;
 
     static uint32_t toUtf8Int(unsigned char c) noexcept
     {
-        return activeTable->toUtf8Int[c];
+        uint32_t asInt;
+        memcpy(&asInt, (*currentToUtf8)[c], sizeof(asInt));
+        return asInt;
     }
 
     static char fromUtf8(TStringView s) noexcept;
@@ -63,7 +36,6 @@ public:
             return '\0';
         return c;
     }
-
 };
 
 } // namespace tvision

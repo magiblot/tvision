@@ -73,9 +73,6 @@ struct ConsoleStrategy
 
 class Platform
 {
-#ifdef _TV_UNIX
-    StdioCtl io;
-#endif
     EventWaiter waiter;
     DisplayBuffer displayBuf;
     DisplayStrategy dummyDisplay;
@@ -85,8 +82,7 @@ class Platform
     // or an owning reference to a heap-allocated ConsoleStrategy object.
     SignalSafeReentrantMutex<ConsoleStrategy *> console {&dummyConsole};
 
-    Platform() noexcept;
-    ~Platform();
+    static Platform *instance;
 
     void setUpConsole(ConsoleStrategy *&) noexcept;
     void restoreConsole(ConsoleStrategy *&) noexcept;
@@ -94,7 +90,8 @@ class Platform
     bool sizeChanged(TEvent &ev) noexcept;
     ConsoleStrategy &createConsole() noexcept;
 
-    static int errorCharWidth(uint32_t) noexcept;
+    static int initAndGetCharWidth(uint32_t) noexcept;
+    static void initEncodingStuff() noexcept;
     static void signalCallback(bool) noexcept;
 
     bool screenChanged() noexcept
@@ -102,10 +99,13 @@ class Platform
 
 public:
 
-    static Platform instance;
     static int (*charWidth)(uint32_t) noexcept;
 
-    // Explicit 'this' required by GCC 5.
+    // Platform is a singleton. It gets created and destroyed by THardwareInfo.
+    Platform() noexcept;
+    ~Platform();
+
+    // Note: explicit 'this' required by GCC 5.
     void setUpConsole() noexcept
         { console.lock([&] (auto *&c) { this->setUpConsole(c); }); }
     void restoreConsole() noexcept

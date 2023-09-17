@@ -26,14 +26,11 @@
 #include <stdlib.h>
 #include <signal.h>
 
-TStaticInit::TStaticInit() noexcept
-{
-    // Construct on first use
-    static THardwareInfo hwInfoManager;
-    static TScreen tsc;
-    static TEventQueue teq;
-    static TSystemError sysErr;
-}
+static THardwareInfo hwInfoManager;
+TMouse _NEAR TEventQueue::mouse;
+static TScreen tsc;
+static TEventQueue teq;
+static TSystemError sysErr;
 
 void initHistory();
 void doneHistory();

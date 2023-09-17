@@ -57,8 +57,6 @@ MouseEventType _NEAR TEventQueue::lastMouse;
 MouseEventType _NEAR TEventQueue::curMouse;
 MouseEventType _NEAR TEventQueue::downMouse;
 
-TMouse * _NEAR TEventQueue::mouse;
-
 char * _FAR TEventQueue::pasteText = 0;
 size_t _NEAR TEventQueue::pasteTextLength = 0;
 size_t _NEAR TEventQueue::pasteTextIndex = 0;
@@ -70,26 +68,24 @@ Boolean _NEAR TEventQueue::keyPasteState = False;
 
 TEventQueue::TEventQueue() noexcept
 {
-    static TMouse _NEAR mouse;
-    this->mouse = &mouse;
     resume();
 }
 
 
 void TEventQueue::resume() noexcept
 {
-    if( mouse->present() == False )
-        mouse->resume();
-    if( mouse->present() == False )
+    if( mouse.present() == False )
+        mouse.resume();
+    if( mouse.present() == False )
         return;
 
-    mouse->getEvent( curMouse );
+    mouse.getEvent( curMouse );
     lastMouse = curMouse;
 
 #if defined( __FLAT__ )
     THardwareInfo::clearPendingEvent();
 #else
-    mouse->registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
+    mouse.registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
 #endif
 
     mouseEvents = True;
@@ -99,7 +95,7 @@ void TEventQueue::resume() noexcept
 
 void TEventQueue::suspend() noexcept
 {
-    mouse->suspend();
+    mouse.suspend();
 }
 
 TEventQueue::~TEventQueue()

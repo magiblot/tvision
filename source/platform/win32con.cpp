@@ -23,7 +23,7 @@ static bool isWine() noexcept
 
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
-    auto &io = *new StdioCtl;
+    auto &io = StdioCtl::getInstance();
     // Set the input mode.
     {
         DWORD consoleMode = 0;
@@ -112,7 +112,7 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
     delete &input;
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
-    delete &io;
+    StdioCtl::destroyInstance();
 }
 
 bool Win32ConsoleStrategy::isAlive() noexcept

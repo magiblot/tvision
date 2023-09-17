@@ -1,5 +1,3 @@
-#define Uses_TKeys
-#define Uses_TEvent
 #include <tvision/tv.h>
 
 #include <internal/codepage.h>
@@ -10,7 +8,7 @@
 namespace tvision
 {
 
-static const TStringView cp437toUtf8[256] =
+constexpr char cp437toUtf8[256][4] =
 {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
@@ -30,9 +28,7 @@ static const TStringView cp437toUtf8[256] =
     "≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 };
 
-static const std::array<uint32_t, 256> cp437toUtf8Int = make_utf8int<256>(cp437toUtf8);
-
-static const TStringView cp850toUtf8[256] =
+constexpr char cp850toUtf8[256][4] =
 {
     "\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
     "►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼",
@@ -54,45 +50,74 @@ static const TStringView cp850toUtf8[256] =
     // it is often represented as a regular hyphen.
 };
 
-static const std::array<uint32_t, 256> cp850toUtf8Int = make_utf8int<256>(cp850toUtf8);
+// Provide a default value for 'currentToUtf8' in case it gets used before
+// calling 'init()'.
+const char (*CpTranslator::currentToUtf8)[256][4] = &cp437toUtf8;
+const std::unordered_map<uint32_t, char> *CpTranslator::currentFromUtf8 = nullptr;
 
-static std::unordered_map<uint32_t, char> initMap(const TStringView toUtf8[256]) noexcept
+static std::unordered_map<uint32_t, char> initMap(const char toUtf8[256][4]) noexcept
 {
     std::unordered_map<uint32_t, char> map;
     for (size_t i = 0; i < 256; ++i)
-        map.emplace(string_as_int<uint32_t>(toUtf8[i]), char(i));
+    {
+        const char *ch = toUtf8[i];
+        size_t length = 1 + Utf8BytesLeft(ch[0]);
+        map.emplace(string_as_int<uint32_t>(TStringView(ch, length)), char(i));
+    }
     return map;
 }
 
-CpTranslator::CpTable::CpTable( TStringView cp,
-                                const TStringView toUtf8[256],
-                                const std::array<uint32_t, 256> &toUtf8Int ) noexcept :
-    cp(cp),
-    toUtf8Int(toUtf8Int.data()),
-    fromUtf8(initMap(toUtf8))
+struct CpTable
 {
-}
+    TStringView cp;
+    const char (&toUtf8)[256][4];
+    const std::unordered_map<uint32_t, char> fromUtf8;
 
-const CpTranslator::CpTable CpTranslator::tables[] = {
-    { "437", cp437toUtf8, cp437toUtf8Int },
-    { "850", cp850toUtf8, cp850toUtf8Int }
+    CpTable( TStringView cp,
+             const char (&toUtf8)[256][4] ) noexcept :
+        cp(cp),
+        toUtf8(toUtf8),
+        fromUtf8(initMap(toUtf8))
+    {
+    }
 };
 
-const CpTranslator::CpTable *CpTranslator::activeTable = nullptr;
-CpTranslator CpTranslator::instance;
-
-CpTranslator::CpTranslator() noexcept
+void CpTranslator::init() noexcept
 {
-    // Set the active codepage. 437 is the default.
-    use(getEnv<TStringView>("TVISION_CODEPAGE", "437"));
+    static const CpTable tables[] =
+    {
+        CpTable("437", cp437toUtf8),
+        CpTable("850", cp850toUtf8),
+    };
+
+    static int init = [] ()
+    {
+        TStringView cp = getEnv<TStringView>("TVISION_CODEPAGE", "437");
+        const CpTable *newTable = &tables[0];
+
+        for (const CpTable &table : tables)
+            if (table.cp == cp)
+            {
+                newTable = &table;
+                break;
+            }
+
+        currentToUtf8 = &newTable->toUtf8;
+        currentFromUtf8 = &newTable->fromUtf8;
+
+        (void) init;
+        return 0;
+    }();
 }
 
 char CpTranslator::fromUtf8(TStringView s) noexcept
 {
-    auto it = activeTable->fromUtf8.find(string_as_int<uint32_t>(s));
-    if (it != activeTable->fromUtf8.end())
+    init();
+
+    auto it = currentFromUtf8->find(string_as_int<uint32_t>(s));
+    if (it != currentFromUtf8->end())
         return it->second;
     return 0;
 }
 
-} // namespace
+} // namespace tvision

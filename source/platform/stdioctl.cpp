@@ -5,6 +5,26 @@
 #include <internal/getenv.h>
 #include <initializer_list>
 
+namespace tvision
+{
+
+StdioCtl *StdioCtl::instance = nullptr;
+
+StdioCtl &StdioCtl::getInstance() noexcept
+{
+    if (!instance)
+        instance = new StdioCtl;
+    return *instance;
+}
+
+void StdioCtl::destroyInstance() noexcept
+{
+    delete instance;
+    instance = nullptr;
+}
+
+} // namespace tvision
+
 #ifdef _TV_UNIX
 
 #include <unistd.h>

@@ -16,20 +16,21 @@ TEvent THardwareInfo::eventQ[];
 size_t THardwareInfo::eventCount = 0;
 
 static bool alwaysFlush;
+static tvision::Platform *platf;
 
 THardwareInfo::THardwareInfo() noexcept
 {
     using namespace tvision;
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
+    platf = new Platform();
 }
 
 THardwareInfo::~THardwareInfo()
 {
+    delete platf;
+    platf = nullptr;
 }
-
-// For brevity.
-static constexpr auto *platf = &tvision::Platform::instance;
 
 void THardwareInfo::setCaretSize( ushort size ) noexcept { platf->setCaretSize(size); }
 void THardwareInfo::setCaretPosition( ushort x, ushort y ) noexcept { platf->setCaretPosition(x, y); }

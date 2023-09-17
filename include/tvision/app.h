@@ -310,16 +310,7 @@ private:
 #if defined( Uses_TApplication ) && !defined( __TApplication )
 #define __TApplication
 
-class TStaticInit
-{
-
-public:
-    TStaticInit() noexcept;
-
-};
-
-// Virtual inheritance of TStaticInit to ensure its constructor is ran first.
-class TApplication : public TProgram, public virtual TStaticInit
+class TApplication : public TProgram
 {
 
 protected:

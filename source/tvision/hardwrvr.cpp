@@ -116,18 +116,12 @@ static void *getModuleProc(const char *modName, const char *procName)
 
 // These methods are not available on DPMI32 and cannot be linked statically.
 
-static BOOL (WINAPI * pSetConsoleActiveScreenBuffer)(HANDLE) =
-    (BOOL (WINAPI *)(HANDLE)) getModuleProc("KERNEL32", "SetConsoleActiveScreenBuffer");
-static BOOL (WINAPI * pOpenClipboard)(HWND) =
-    (BOOL (WINAPI *)(HWND)) getModuleProc("USER32", "OpenClipboard");
-static BOOL (WINAPI * pCloseClipboard)() =
-    (BOOL (WINAPI *)()) getModuleProc("USER32", "CloseClipboard");
-static HANDLE (WINAPI * pSetClipboardData)(UINT, HANDLE) =
-    (HANDLE (WINAPI *)(UINT, HANDLE)) getModuleProc("USER32", "SetClipboardData");
-static HANDLE (WINAPI * pGetClipboardData)(UINT) =
-    (HANDLE (WINAPI *)(UINT)) getModuleProc("USER32", "GetClipboardData");
-static BOOL (WINAPI * pEmptyClipboard)() =
-    (BOOL (WINAPI *)()) getModuleProc("USER32", "EmptyClipboard");
+static BOOL (WINAPI * pSetConsoleActiveScreenBuffer)(HANDLE);
+static BOOL (WINAPI * pOpenClipboard)(HWND);
+static BOOL (WINAPI * pCloseClipboard)();
+static HANDLE (WINAPI * pSetClipboardData)(UINT, HANDLE);
+static HANDLE (WINAPI * pGetClipboardData)(UINT);
+static BOOL (WINAPI * pEmptyClipboard)();
 
 // Constructor for 16-bit version is in HARDWARE.ASM
 
@@ -169,6 +163,19 @@ THardwareInfo::THardwareInfo()
     consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
     consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
     SetConsoleMode( consoleHandle[cnInput], consoleMode );
+
+    pSetConsoleActiveScreenBuffer =
+        (BOOL (WINAPI *)(HANDLE)) getModuleProc("KERNEL32", "SetConsoleActiveScreenBuffer");
+    pOpenClipboard =
+        (BOOL (WINAPI *)(HWND)) getModuleProc("USER32", "OpenClipboard");
+    pCloseClipboard =
+        (BOOL (WINAPI *)()) getModuleProc("USER32", "CloseClipboard");
+    pSetClipboardData =
+        (HANDLE (WINAPI *)(UINT, HANDLE)) getModuleProc("USER32", "SetClipboardData");
+    pGetClipboardData =
+        (HANDLE (WINAPI *)(UINT)) getModuleProc("USER32", "GetClipboardData");
+    pEmptyClipboard =
+        (BOOL (WINAPI *)()) getModuleProc("USER32", "EmptyClipboard");
 }
 
 THardwareInfo::~THardwareInfo()

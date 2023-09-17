@@ -28,11 +28,23 @@ class StdioCtl final
     FILE *outfile {nullptr};
 #endif // _WIN32
 
-
-public:
+    static StdioCtl *instance;
 
     StdioCtl() noexcept;
     ~StdioCtl();
+
+public:
+
+    // On Windows, the StdioCtl instance is created every time the alternate
+    // screen buffer is enabled and it is destroyed when restoring the console.
+    // On Unix, the StdioCtl instance is created just once at the beginning
+    // of the program execution (in static initialization) and destroyed when
+    // exiting the program.
+
+    // Creates a global instance if none exists, and returns it.
+    static StdioCtl &getInstance() noexcept;
+    // Destroys the global instance if it exists.
+    static void destroyInstance() noexcept;
 
     void write(const char *data, size_t bytes) const noexcept;
     TPoint getSize() const noexcept;

@@ -22,6 +22,7 @@ ConsoleStrategy &Platform::createConsole() noexcept
 #ifdef _WIN32
     return Win32ConsoleStrategy::create();
 #else
+    auto &io = StdioCtl::getInstance();
     ScreenLifetime &scrl = *new ScreenLifetime;
     InputState &inputState = *new InputState;
     NcursesDisplay *display;
@@ -77,13 +78,13 @@ bool Platform::getEvent(TEvent &ev) noexcept
 
 void Platform::signalCallback(bool enter) noexcept
 {
-    if (!instance.console.lockedByCurrentThread())
+    if (instance && !instance->console.lockedByCurrentThread())
     {
         // FIXME: these are not signal safe!
         if (enter)
-            instance.restoreConsole();
+            instance->restoreConsole();
         else
-            instance.setUpConsole();
+            instance->setUpConsole();
     }
 }
 

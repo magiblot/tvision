@@ -3,7 +3,6 @@
 
 #include <internal/strings.h>
 
-#include <array>
 #include <stdint.h>
 #include <string.h>
 
@@ -16,15 +15,6 @@ inline constexpr uint Utf8BytesLeft(char first_byte) noexcept
     return (first_byte & 0b11100000) == 0b11000000 ? 1 : \
            (first_byte & 0b11110000) == 0b11100000 ? 2 : \
            (first_byte & 0b11111000) == 0b11110000 ? 3 : 0;
-}
-
-template<size_t N>
-inline std::array<uint32_t, N> make_utf8int(const TStringView utf8[N]) noexcept
-{
-    std::array<uint32_t, N> result {};
-    for (size_t i = 0; i < N; ++i)
-        result[i] = string_as_int<uint32_t>(utf8[i]);
-    return result;
 }
 
 inline constexpr uint32_t utf8To32(TStringView s) noexcept
