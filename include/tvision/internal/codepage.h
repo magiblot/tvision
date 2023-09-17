@@ -20,7 +20,7 @@ public:
 
     static void init() noexcept;
 
-    static uint32_t toUtf8Int(unsigned char c) noexcept
+    static uint32_t toPackedUtf8(unsigned char c) noexcept
     {
         uint32_t asInt;
         memcpy(&asInt, (*currentToUtf8)[c], sizeof(asInt));

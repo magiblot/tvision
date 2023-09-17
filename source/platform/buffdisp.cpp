@@ -204,7 +204,7 @@ inline void DisplayBuffer::validateCell(TScreenCell &cell) const noexcept
             ch[0] = ' ';
         else if (c < ' ' || 0x7F <= c)
             // Translate from codepage as fallback.
-            ch.moveInt(CpTranslator::toUtf8Int(c));
+            ch.moveInt(CpTranslator::toPackedUtf8(c));
     }
 }
 

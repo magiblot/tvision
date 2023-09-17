@@ -273,7 +273,7 @@ void EventWaiter::waitForEvent(int ms) noexcept
     }
 }
 
-void EventWaiter::stopEventWait() noexcept
+void EventWaiter::interruptEventWait() noexcept
 {
     if (wakeUp)
         wakeUp->signal();

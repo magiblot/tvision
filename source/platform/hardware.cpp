@@ -117,9 +117,9 @@ void THardwareInfo::waitForEvent( int timeoutMs ) noexcept
     }
 }
 
-void THardwareInfo::stopEventWait() noexcept
+void THardwareInfo::interruptEventWait() noexcept
 {
-    platf->stopEventWait();
+    platf->interruptEventWait();
 }
 
 BOOL THardwareInfo::setClipboardText( TStringView text ) noexcept

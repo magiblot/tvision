@@ -324,7 +324,7 @@ void TScreen::flushScreen() noexcept
 
 void TScreen::setVideoMode( ushort mode ) noexcept
 {
-    if ( mode != smChanged )
+    if ( mode != smUpdate )
         setCrtMode( fixCrtMode( mode ) );
 #ifdef __FLAT__
     else

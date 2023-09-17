@@ -475,6 +475,6 @@ void TEvent::waitForEvent(int timeoutMs) noexcept
 void TEvent::putNothing() noexcept
 {
 #if defined( __FLAT__ )
-    THardwareInfo::stopEventWait();
+    THardwareInfo::interruptEventWait();
 #endif
 }

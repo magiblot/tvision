@@ -404,7 +404,7 @@ public:
         smFont8x8   = 0x0100,
         smColor256  = 0x0200,
         smColorHigh = 0x0400,
-        smChanged   = 0x1000
+        smUpdate    = 0x8000,
         };
 
     static void clearScreen( uchar, uchar ) noexcept;

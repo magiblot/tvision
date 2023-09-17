@@ -312,7 +312,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (text[j] == '\0')
                     cells[i]._ch.moveChar(' ');
                 else if (text[j] < ' ' || '\x7F' <= text[j])
-                    cells[i]._ch.moveInt(CpTranslator::toUtf8Int(text[j]));
+                    cells[i]._ch.moveInt(CpTranslator::toPackedUtf8(text[j]));
                 else
                     cells[i]._ch.moveChar(text[j]);
                 return {1, 1};

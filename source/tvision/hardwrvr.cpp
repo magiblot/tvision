@@ -398,7 +398,7 @@ void THardwareInfo::waitForEvent( int timeoutMs )
         WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );
 }
 
-void THardwareInfo::stopEventWait()
+void THardwareInfo::interruptEventWait()
 {
 }
 

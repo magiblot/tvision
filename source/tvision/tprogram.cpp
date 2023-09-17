@@ -159,7 +159,7 @@ void TProgram::getEvent(TEvent& event)
         }
     if( event.what == evCommand && event.message.command == cmScreenChanged )
         {
-        setScreenMode( TDisplay::smChanged );
+        setScreenMode( TDisplay::smUpdate );
         clearEvent(event);
         }
 }

@@ -113,7 +113,7 @@ public:
 
     bool getEvent(TEvent &ev) noexcept;
     void waitForEvent(int ms) noexcept { checkConsole(); waiter.waitForEvent(ms); }
-    void stopEventWait() noexcept { waiter.stopEventWait(); }
+    void interruptEventWait() noexcept { waiter.interruptEventWait(); }
 
     int getButtonCount() noexcept
         { return console.lock([] (auto *c) { return c->input.getButtonCount(); }); }

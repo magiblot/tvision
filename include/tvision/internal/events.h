@@ -169,7 +169,7 @@ public:
 
     bool getEvent(TEvent &ev) noexcept;
     void waitForEvent(int ms) noexcept;
-    void stopEventWait() noexcept;
+    void interruptEventWait() noexcept;
 };
 
 } // namespace tvision

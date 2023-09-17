@@ -91,7 +91,7 @@ public:
     static BOOL getKeyEvent( TEvent& event ) noexcept;
     static void clearPendingEvent() noexcept;
     static void waitForEvent( int timeoutMs ) noexcept;
-    static void stopEventWait() noexcept;
+    static void interruptEventWait() noexcept;
     static BOOL setClipboardText( TStringView text ) noexcept;
     static BOOL requestClipboardText( void (&accept)( TStringView ) ) noexcept;
 
