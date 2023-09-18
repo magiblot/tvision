@@ -394,20 +394,22 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
 }
 
 #ifdef __FLAT__
-TSpan<TScreenCell> TDrawBuffer::allocData() noexcept
+// This makes it possible to create TDrawBuffers for screens wider than 'maxViewWidth'.
+// This does not work nor is necessary in non-flat builds.
+// We must take the greatest of the screen's dimensions, because we cannot assume
+// that 'screenWidth > screenHeight' and TDrawBuffer can also be used to draw
+// vertical views (e.g. TScrollBar).
+static TSpan<TScreenCell> allocData() noexcept
 {
     size_t len = max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
     return TSpan<TScreenCell>(new TScreenCell[len], len);
 }
 
 TDrawBuffer::TDrawBuffer() noexcept :
-    // This makes it possible to create TDrawBuffers for big screen widths.
-    // This does not work nor is necessary in non-Flat builds.
-    // Some views assume that width > height when drawing themselves (e.g. TScrollBar).
     data(allocData())
 {
 #ifndef __BORLANDC__
-    // We need this as the TScreenCell struct has unused bits.
+    // Uninitialized data could cause severe screen garbling.
     memset(data.data(), 0, data.size_bytes());
 #endif
 }

@@ -102,9 +102,7 @@ void TCluster::drawMultiBox( const char *icon, const char* marker)
             if( cur < strings->getCount() )
             {
                 int col = column( cur );
-
-                if ( ((col+cstrlen((const char*)strings->at(cur))+5)
-                    < (int) b.length()) &&  (col < size.x))
+                if( col < size.x )
                 {
                     if(!buttonState( cur ))
                         color = cDis;
@@ -122,7 +120,6 @@ void TCluster::drawMultiBox( const char *icon, const char* marker)
                         b.putChar( col, specialChars[0] );
                         b.putChar( column(cur+size.y)-1, specialChars[1] );
                     }
-
                 }
             }
         }

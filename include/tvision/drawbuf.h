@@ -42,7 +42,6 @@ public:
 
     void putAttribute( ushort indent, TColorAttr attr ) noexcept;
     void putChar( ushort indent, uchar c ) noexcept;
-    size_t length() const noexcept;
 
 #ifdef __FLAT__
     TDrawBuffer() noexcept;
@@ -52,12 +51,12 @@ public:
 protected:
 
 #ifdef __FLAT__
-    static TSpan<TScreenCell> allocData() noexcept;
-
     const TSpan<TScreenCell> data;
 #else
     TScreenCell data[maxViewWidth];
 #endif
+
+    size_t length() const noexcept;
 
 };
 
