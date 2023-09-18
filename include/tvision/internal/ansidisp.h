@@ -141,6 +141,12 @@ public:
     void lowlevelFlush() noexcept override
         { AnsiDisplayBase::lowlevelFlush(); }
 
+    void clearScreen() noexcept override
+    {
+        clearAttributes();
+        AnsiDisplayBase::clearScreen();
+    }
+
     void reloadScreenInfo() noexcept override
     {
         DisplayBase::reloadScreenInfo();
