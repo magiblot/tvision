@@ -86,9 +86,9 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
     fflush(fout());
     size_t written = 0;
     int r;
-    while ( 0 <= (r = ::write(out(), data + written, bytes - written)) &&
-            (written += r) < bytes )
-        ;
+    while ( written < bytes &&
+            0 <= (r = ::write(out(), data + written, bytes - written)) )
+        written += r;
 }
 
 TPoint StdioCtl::getSize() const noexcept
