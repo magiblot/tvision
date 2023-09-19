@@ -2,7 +2,6 @@
 
 #ifdef _TV_UNIX
 
-#include <internal/scrlife.h>
 #include <internal/sigwinch.h>
 #include <internal/terminal.h>
 #include <internal/dispbuff.h>
@@ -101,13 +100,11 @@ inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
                                                  InputStrategy &aInput,
                                                  StdioCtl &aIo,
                                                  DisplayBuffer &aDisplayBuf,
-                                                 ScreenLifetime &aScrl,
                                                  InputState &aInputState,
                                                  SigwinchHandler *aSigwinch ) noexcept :
     ConsoleStrategy(aDisplay, aInput, {&aInput, aSigwinch}),
     io(aIo),
     displayBuf(aDisplayBuf),
-    scrl(aScrl),
     inputState(aInputState),
     sigwinch(aSigwinch)
 {
@@ -115,13 +112,12 @@ inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
 
 UnixConsoleStrategy &UnixConsoleStrategy::create( StdioCtl &io,
                                                   DisplayBuffer &displayBuf,
-                                                  ScreenLifetime &scrl,
                                                   InputState &inputState,
                                                   DisplayStrategy &display,
                                                   InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
-    return *new UnixConsoleStrategy(display, input, io, displayBuf, scrl, inputState, sigwinch);
+    return *new UnixConsoleStrategy(display, input, io, displayBuf, inputState, sigwinch);
 }
 
 UnixConsoleStrategy::~UnixConsoleStrategy()
@@ -130,7 +126,6 @@ UnixConsoleStrategy::~UnixConsoleStrategy()
     delete &input;
     delete &display;
     delete &inputState;
-    delete &scrl;
 }
 
 static bool executable_exists(const char *name);

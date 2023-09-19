@@ -8,7 +8,6 @@
 #include <internal/stdioctl.h>
 #include <internal/gpminput.h>
 #include <internal/terminal.h>
-#include <internal/scrlife.h>
 #include <internal/sigwinch.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>
@@ -21,14 +20,12 @@ namespace tvision
 
 inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
                                                    LinuxConsoleInput &aWrapper,
-                                                   ScreenLifetime &aScrl,
                                                    InputState &aInputState,
                                                    SigwinchHandler *aSigwinch,
                                                    GpmInput *aGpm ) noexcept :
     ConsoleStrategy( aDisplay,
                      aGpm ? *aGpm : aWrapper.input,
                      {&aWrapper, aGpm, aSigwinch} ),
-    scrl(aScrl),
     inputState(aInputState),
     sigwinch(aSigwinch),
     wrapper(aWrapper),
@@ -36,7 +33,7 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 {
 }
 
-LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io, ScreenLifetime &scrl,
+LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io,
                                                     InputState &inputState,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
@@ -44,7 +41,7 @@ LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io, ScreenLifetime
     auto *sigwinch = SigwinchHandler::create();
     auto &wrapper = *new LinuxConsoleInput(io, input);
     auto *gpm = GpmInput::create();
-    return *new LinuxConsoleStrategy(display, wrapper, scrl, inputState, sigwinch, gpm);
+    return *new LinuxConsoleStrategy(display, wrapper, inputState, sigwinch, gpm);
 }
 
 LinuxConsoleStrategy::~LinuxConsoleStrategy()
@@ -55,7 +52,6 @@ LinuxConsoleStrategy::~LinuxConsoleStrategy()
     delete &wrapper;
     delete &display;
     delete &inputState;
-    delete &scrl;
 }
 
 bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept

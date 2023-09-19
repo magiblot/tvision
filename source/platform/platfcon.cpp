@@ -7,7 +7,6 @@
 #include <internal/ncursinp.h>
 #include <internal/sighandl.h>
 #include <internal/terminal.h>
-#include <internal/scrlife.h>
 #include <internal/getenv.h>
 
 namespace tvision
@@ -23,7 +22,6 @@ ConsoleStrategy &Platform::createConsole() noexcept
     return Win32ConsoleStrategy::create();
 #else
     auto &io = StdioCtl::getInstance();
-    ScreenLifetime &scrl = *new ScreenLifetime;
     InputState &inputState = *new InputState;
     NcursesDisplay *display;
     if (getEnv<TStringView>("TVISION_DISPLAY") == "ncurses")
@@ -32,9 +30,9 @@ ConsoleStrategy &Platform::createConsole() noexcept
         display = new AnsiDisplay<NcursesDisplay>(io);
 #ifdef __linux__
     if (io.isLinuxConsole())
-        return LinuxConsoleStrategy::create(io, scrl, inputState, *display, *new NcursesInput(io, *display, inputState, false));
+        return LinuxConsoleStrategy::create(io, inputState, *display, *new NcursesInput(io, *display, inputState, false));
 #endif // __linux__
-    return UnixConsoleStrategy::create(io, displayBuf, scrl, inputState, *display, *new NcursesInput(io, *display, inputState, true));
+    return UnixConsoleStrategy::create(io, displayBuf, inputState, *display, *new NcursesInput(io, *display, inputState, true));
 #endif // _WIN32
 }
 

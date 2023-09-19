@@ -4,13 +4,13 @@
 #ifdef __linux__
 
 #include <internal/platform.h>
+#include <internal/erredir.h>
 
 struct TEvent;
 
 namespace tvision
 {
 
-class ScreenLifetime;
 class SigwinchHandler;
 class GpmInput;
 struct InputState;
@@ -35,22 +35,23 @@ struct LinuxConsoleInput final : public EventSource
 
 class LinuxConsoleStrategy : public ConsoleStrategy
 {
-    ScreenLifetime &scrl;
+    StderrRedirector errRedir;
+
     InputState &inputState;
     SigwinchHandler *sigwinch;
     LinuxConsoleInput &wrapper;
     GpmInput *gpm;
 
     LinuxConsoleStrategy( DisplayStrategy &, LinuxConsoleInput &,
-                          ScreenLifetime &, InputState &, SigwinchHandler *,
+                          InputState &, SigwinchHandler *,
                           GpmInput * ) noexcept;
 
 public:
 
     // Pre: 'io.isLinuxConsole()' returns 'true'.
     // The lifetime of 'io' must exceed that of the returned object.
-    // Takes ownership over 'scrl', 'inputState', 'display' and 'input'.
-    static LinuxConsoleStrategy &create( StdioCtl &io, ScreenLifetime &scrl,
+    // Takes ownership over 'inputState', 'display' and 'input'.
+    static LinuxConsoleStrategy &create( StdioCtl &io,
                                          InputState &inputState,
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;
