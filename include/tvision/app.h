@@ -310,7 +310,16 @@ private:
 #if defined( Uses_TApplication ) && !defined( __TApplication )
 #define __TApplication
 
-class TApplication : public TProgram
+class TSubsystemsInit
+{
+
+public:
+
+    TSubsystemsInit() noexcept;
+
+};
+
+class TApplication : public virtual TSubsystemsInit, public TProgram
 {
 
 protected:

@@ -74,18 +74,18 @@ TEventQueue::TEventQueue() noexcept
 
 void TEventQueue::resume() noexcept
 {
-    if( mouse.present() == False )
-        mouse.resume();
-    if( mouse.present() == False )
+    if( TMouse::present() == False )
+        TMouse::resume();
+    if( TMouse::present() == False )
         return;
 
-    mouse.getEvent( curMouse );
+    TMouse::getEvent( curMouse );
     lastMouse = curMouse;
 
 #if defined( __FLAT__ )
     THardwareInfo::clearPendingEvent();
 #else
-    mouse.registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
+    TMouse::registerHandler( 0xFFFF, (void (_FAR *)()) mouseInt );
 #endif
 
     mouseEvents = True;
@@ -95,7 +95,7 @@ void TEventQueue::resume() noexcept
 
 void TEventQueue::suspend() noexcept
 {
-    mouse.suspend();
+    TMouse::suspend();
 }
 
 TEventQueue::~TEventQueue()

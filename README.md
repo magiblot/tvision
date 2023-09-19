@@ -384,6 +384,7 @@ The following are new features not available in Borland's release of Turbo Visio
     * Many functions which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
 * New class `TSpan<T>`, inspired by `std::span`.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
+* The system integration subsystems (`THardwareInfo`, `TScreen`, `TEventQueue`...) are now initialized when constructing a `TApplication` for the first time, rather than before `main`. They are still destroyed on exit from `main`.
 * New method `TVMemMgr::reallocateDiscardable()` which can be used along `allocateDiscardable` and `freeDiscardable`.
 * New method `TView::textEvent()` which allows receiving text in an efficient manner, see [Clipboard interaction](#clipboard).
 * New class `TClipboard`, see [Clipboard interaction](#clipboard).

@@ -17,7 +17,6 @@
 #define Uses_THardwareInfo
 #define Uses_TScreen
 #define Uses_TObject
-#define Uses_TMouse
 #define Uses_TApplication
 #define Uses_TDeskTop
 #include <tvision/tv.h>
@@ -26,14 +25,17 @@
 #include <stdlib.h>
 #include <signal.h>
 
-static THardwareInfo hwInfoManager;
-TMouse _NEAR TEventQueue::mouse;
-static TScreen tsc;
-static TEventQueue teq;
-static TSystemError sysErr;
-
 void initHistory();
 void doneHistory();
+
+TSubsystemsInit::TSubsystemsInit() noexcept
+{
+    static THardwareInfo hwInfoManager;
+    static TMouse tms;
+    static TScreen tsc;
+    static TEventQueue teq;
+    static TSystemError sysErr;
+}
 
 TApplication::TApplication() noexcept :
     TProgInit( &TApplication::initStatusLine,

@@ -316,7 +316,7 @@ void TProgram::setScreenMode( ushort mode )
 {
     TRect  r;
 
-    TEventQueue::mouse.hide(); //HideMouse();
+    TMouse::hide();
     TScreen::setVideoMode( mode );
     initScreen();
     buffer = TScreen::screenBuffer;
@@ -325,7 +325,7 @@ void TProgram::setScreenMode( ushort mode )
     setState(sfExposed, False);
     setState(sfExposed, True);
     redraw();
-    TEventQueue::mouse.show(); //ShowMouse();
+    TMouse::show();
 }
 
 TTimerId TProgram::setTimer( uint timeoutMs, int periodMs )
