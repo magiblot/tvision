@@ -4,7 +4,7 @@
 #ifdef __linux__
 
 #include <internal/platform.h>
-#include <internal/erredir.h>
+#include <internal/errredir.h>
 
 struct TEvent;
 

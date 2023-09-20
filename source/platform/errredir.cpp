@@ -1,4 +1,4 @@
-#include <internal/erredir.h>
+#include <internal/errredir.h>
 
 #ifdef _TV_UNIX
 

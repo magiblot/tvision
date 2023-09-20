@@ -1,5 +1,5 @@
-#ifndef TVISION_ERREDIR_H
-#define TVISION_ERREDIR_H
+#ifndef TVISION_ERRREDIR_H
+#define TVISION_ERRREDIR_H
 
 #include <tvision/tv.h>
 
@@ -23,4 +23,4 @@ public:
 
 #endif // _TV_UNIX
 
-#endif // TVISION_ERREDIR_H
+#endif // TVISION_ERRREDIR_H

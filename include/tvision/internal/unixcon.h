@@ -4,7 +4,7 @@
 #include <internal/platform.h>
 #ifdef _TV_UNIX
 
-#include <internal/erredir.h>
+#include <internal/errredir.h>
 
 namespace tvision
 {
