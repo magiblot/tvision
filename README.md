@@ -752,11 +752,11 @@ To deal with this, a new class `TClipboard` has been added which allows accessin
 
 ## Enabling clipboard support
 
-On Windows and macOS, clipboard integration is supported out-of-the-box.
+On Windows (including WSL) and macOS, clipboard integration is supported out-of-the-box.
 
 On Unix systems other than macOS, it is necessary to install some external dependencies. See [runtime requirements](#build-linux-runtime).
 
-For applications running remotely (e.g. through SSH or in WSL), clipboard integration is supported in the following situations:
+For applications running remotely (e.g. through SSH), clipboard integration is supported in the following situations:
 
 * When X11 forwarding over SSH is enabled (`ssh -X`).
 * When your terminal emulator supports far2l's terminal extensions ([far2l](https://github.com/elfmz/far2l), [putty4far2l](https://github.com/ivanshatsky/putty4far2l)).

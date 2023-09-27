@@ -3,6 +3,7 @@
 #ifdef _TV_UNIX
 
 #include <internal/getenv.h>
+#include <internal/utf8.h>
 
 #include <stdlib.h>
 #include <errno.h>
@@ -16,14 +17,9 @@
 namespace tvision
 {
 
-enum { clipboardTimeoutMs = 1500 };
+#define PID_PLACEHOLDER "########"
 
-struct Command
-{
-    const char * const *argv;
-    const char *requiredEnv;
-    const char * const *customEnv;
-};
+enum { clipboardTimeoutMs = 1500 };
 
 #ifdef __APPLE__
 constexpr const char * pbcopyArgv[] = {"pbcopy", 0};
@@ -32,49 +28,116 @@ constexpr const char * pbpasteArgv[] = {"pbpaste", 0};
 constexpr const char * wlCopyArgv[] = {"wl-copy", 0};
 constexpr const char * xselCopyArgv[] = {"xsel", "--input", "--clipboard", 0};
 constexpr const char * xclipCopyArgv[] = {"xclip", "-in", "-selection", "clipboard", 0};
-constexpr const char * wslCopyArgv[] = {"/mnt/c/Windows/System32/cmd.exe", "/D", "/Q", "/C", "clip.exe", 0};
+constexpr const char * wslCopyArgv[] = {"/mnt/c/Windows/System32/clip.exe", 0};
 constexpr const char * wlPasteArgv[] = {"wl-paste", "--no-newline", 0};
 constexpr const char * xselPasteArgv[] = {"xsel", "--output", "--clipboard", 0};
 constexpr const char * xclipPasteArgv[] = {"xclip", "-out", "-selection", "clipboard", 0};
-constexpr const char * wslPasteArgv[] =
-{
-    // PowerShell is the only native tool which allows reading the clipboard.
-    // It must be launched in a separate window to work around
-    // https://github.com/microsoft/terminal/issues/280. Because of this,
-    // a temporary file is required to read PowerShell's output.
-    // In addition, an environment variable is used to insert quoutes in order
+
+static char wslPasteCmd[] =
+    // Both PowerShell and CScript can be used to read the clipboard.
+    // Although PowerShell is more modern and can be run without a script file,
+    // it is far slower and requires a very complicated workaround for
+    // https://github.com/microsoft/terminal/issues/280. Therefore, we stick
+    // to CScript.
+    // The environment variable 'q' is used to insert quoutes in order
     // to work around https://github.com/microsoft/WSL/issues/2835.
-    // Also, since the PATH variable might get altered when using sudo, it is
-    // best to use the absolute path of cmd.exe.
-    "/mnt/c/Windows/System32/cmd.exe", "/D", "/Q", "/C",
-    "FOR",
-        "%i", "IN", "(", "%q%%TMP%%q%", "%q%%TEMP%%q%", "%q%%USERPROFILE%%q%", "\\.", ".", ")",
-    "DO",
-        "set", "TMPNAM=%q%%~i\\tmp%RANDOM%%RANDOM%.tmp%q%", "&&",
-        "call", "copy", "/Y", "NUL", "^%TMPNAM^%", ">", "NUL", "&&",
-        "(", "cmd", "/C", "start", "/I", "/MIN", "/WAIT",
-            "powershell", "-NoProfile", "-NoLogo", "-NonInteractive", "-WindowStyle", "Hidden",
-                "Get-Clipboard", "-Raw", "^^^|",
-                "Out-File", "-NoNewline", "-Encoding", "unicode", "-FilePath", "'^%TMPNAM^%'", "^&^&",
-            "type", "^%TMPNAM^%", "^&",
-            "del", "/Q", "^%TMPNAM^%", "^>", "NUL", ")", "&&",
-        "exit",
-    0,
-};
+    "(FOR"
+        " %i IN (%q%%TMP%%q% %q%%TEMP%%q% %q%%USERPROFILE%%q% \\. .)"
+    " DO"
+        " set SCRIPT_PATH=%q%%~i\\" PID_PLACEHOLDER "%RANDOM%.vbs%q%"
+        // Try to write the script file.
+        " && cmd /C"
+            " echo"
+                // Print the clipboard contents in UTF-16.
+                " WScript.StdOut.Write"
+                    " CreateObject(%q%HTMLFile%q%^).ParentWindow.ClipboardData.GetData(%q%Text%q%^)"
+            " ^> ^%SCRIPT_PATH^%"
+        // If it worked, run it and exit.
+        " && ("
+            " cmd /C"
+                " cscript //NoLogo //B //U ^%SCRIPT_PATH^%"
+                // Delete the files and keep the error status.
+                " ^&^& (del /Q ^%SCRIPT_PATH^% ^& exit ^)"
+                " ^|^| (del /Q ^%SCRIPT_PATH^% ^& exit 1^)"
+            " && exit"
+            " || exit 1"
+        ")"
+        // Otherwise, try another path.
+    ")"
+    // We could not write anywhere.
+    " & exit 1";
+
+constexpr const char *wslPasteArgv[] = {"/mnt/c/Windows/System32/cmd.exe", "/D", "/Q", "/C", wslPasteCmd, 0};
+
 constexpr const char *wslPasteEnv[] =
 {
     "WSLENV", "q",
     "q", "\"",
     0,
 };
+
+static int initPlaceholders = []
+{
+    static_assert(sizeof(PID_PLACEHOLDER) - 1 == 8, "");
+
+    // Use the PID to avoid name clashes between files created by different
+    // processes. This is more effective than pseudo-random values which
+    // depend on the current timestamp such as %RANDOM%.
+    int pid = (int) getpid();
+    char buf[sizeof(PID_PLACEHOLDER)];
+    snprintf(buf, sizeof(buf), "%08X", pid);
+
+    for (char *p : {wslPasteCmd})
+        while ((p = strstr(p, PID_PLACEHOLDER)))
+            memcpy(p, buf, 8);
+
+    (void) initPlaceholders;
+    return 0;
+}();
+
+static void wslCopyPrepare(TSpan<char> &text) noexcept
+// When writing text to clip.exe, append a null character at the end
+// to work around https://github.com/microsoft/WSL/issues/4852.
+{
+    if (char *dstText = (char *) malloc(text.size() + 1))
+    {
+        memcpy(dstText, text.data(), text.size());
+        dstText[text.size()] = '\0';
+        free(text.data());
+        text = {dstText, text.size() + 1};
+    }
+}
+
+static void wslPastePrepare(TSpan<char> &text) noexcept
+// We receive the clipboard contents from CScript in UTF-16, so we have to
+// convert them to UTF-8.
+{
+    uint16_t *srcText = (uint16_t *) text.data();
+    size_t srcLength = text.size()/2;
+    char *dstText;
+    size_t dstLength = 0;
+    // Each UTF-16 code unit may produce up to 3 UTF-8 bytes.
+    if ((dstText = (char *) malloc(srcLength * 3)))
+        dstLength = utf16To8({srcText, srcLength}, dstText);
+    free(srcText);
+    text = {dstText, dstLength};
+}
 #endif
+
+struct Command
+{
+    const char * const *argv;
+    const char *requiredEnv;
+    const char * const *customEnv;
+    void (*prepare)(TSpan<char> &);
+};
 
 constexpr Command copyCommands[] =
 {
 #ifdef __APPLE__
     {pbcopyArgv},
 #else
-    {wslCopyArgv},
+    {wslCopyArgv, nullptr, nullptr, wslCopyPrepare},
     {wlCopyArgv, "WAYLAND_DISPLAY"},
     {xselCopyArgv, "DISPLAY"},
     {xclipCopyArgv, "DISPLAY"},
@@ -89,7 +152,7 @@ constexpr Command pasteCommands[] =
     {wlPasteArgv, "WAYLAND_DISPLAY"},
     {xselPasteArgv, "DISPLAY"},
     {xclipPasteArgv, "DISPLAY"},
-    {wslPasteArgv, nullptr, wslPasteEnv},
+    {wslPasteArgv, nullptr, wslPasteEnv, wslPastePrepare},
 #endif
 };
 
@@ -99,15 +162,31 @@ static bool write_subprocess(const char * const cmd[], TStringView, int timeoutM
 
 static bool commandIsAvailable(const Command &cmd)
 {
-    return (!cmd.requiredEnv || !getEnv<TStringView>(cmd.requiredEnv).empty()) && executable_exists(cmd.argv[0]);
+    return (!cmd.requiredEnv || !getEnv<TStringView>(cmd.requiredEnv).empty())
+        && executable_exists(cmd.argv[0]);
 }
 
-bool UnixClipboard::setClipboardText(TStringView text) noexcept
+static TSpan<char> copyStr(TStringView str) noexcept
+{
+    if (char *buf = (char *) malloc(str.size()))
+    {
+        memcpy(buf, str.data(), str.size());
+        return {buf, str.size()};
+    }
+    return {};
+}
+
+bool UnixClipboard::setClipboardText(TStringView aText) noexcept
 {
     for (auto &cmd : copyCommands)
         if (commandIsAvailable(cmd))
         {
-            if (write_subprocess(cmd.argv, text, clipboardTimeoutMs))
+            TSpan<char> text = copyStr(aText);
+            if (cmd.prepare)
+                cmd.prepare(text);
+            bool success = write_subprocess(cmd.argv, text, clipboardTimeoutMs);
+            free(text.data());
+            if (success)
                 return true;
             break;
         }
@@ -120,6 +199,8 @@ bool UnixClipboard::requestClipboardText(void (&accept)(TStringView)) noexcept
         if (commandIsAvailable(cmd))
         {
             TSpan<char> text = read_subprocess(cmd.argv, cmd.customEnv, clipboardTimeoutMs);
+            if (cmd.prepare)
+                cmd.prepare(text);
             if (text.data())
             {
                 accept(text);

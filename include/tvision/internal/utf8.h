@@ -33,34 +33,53 @@ inline constexpr uint32_t utf8To32(TStringView s) noexcept
     return 0;
 }
 
-inline size_t utf32To8(uint32_t u, char utf8[4]) noexcept
+inline size_t utf32To8(uint32_t u32, char u8[4]) noexcept
 {
-    union {
-        uint8_t asChars[4] {0};
-        uint32_t asInt;
-    };
-    if (u <= 0x007F) {
-        memcpy(&utf8[0], &u, 4);
-        return 1;
-    } else if (u <= 0x07FF) {
-        asChars[1] =  (u        & 0b00111111) | 0b10000000;
-        asChars[0] = ((u >> 6)  & 0b00011111) | 0b11000000;
-        memcpy(&utf8[0], asChars, 4);
-        return 2;
-    } else if (u <= 0xFFFF) {
-        asChars[2] =  (u        & 0b00111111) | 0b10000000;
-        asChars[1] = ((u >> 6)  & 0b00111111) | 0b10000000;
-        asChars[0] = ((u >> 12) & 0b00001111) | 0b11100000;
-        memcpy(&utf8[0], asChars, 4);
-        return 3;
-    } else {
-        asChars[3] =  (u        & 0b00111111) | 0b10000000;
-        asChars[2] = ((u >> 6)  & 0b00111111) | 0b10000000;
-        asChars[1] = ((u >> 12) & 0b00111111) | 0b10000000;
-        asChars[0] = ((u >> 18) & 0b00000111) | 0b11110000;
-        memcpy(&utf8[0], asChars, 4);
-        return 4;
+    size_t length;
+    uint32_t asInt;
+    if (u32 <= 0x007F)
+    {
+        asInt = u32;
+        length = 1;
     }
+    else if (u32 <= 0x07FF)
+    {
+        asInt =
+            (((u32 >> 6)  & 0b00011111) | 0b11000000) |
+            (( u32        & 0b00111111) | 0b10000000) << 8;
+        length = 2;
+    }
+    else if (u32 <= 0xFFFF)
+    {
+        asInt =
+            (((u32 >> 12) & 0b00001111) | 0b11100000) |
+            (((u32 >> 6)  & 0b00111111) | 0b10000000) << 8 |
+            (( u32        & 0b00111111) | 0b10000000) << 16;
+        length = 3;
+    }
+    else
+    {
+        asInt =
+            (((u32 >> 18) & 0b00000111) | 0b11110000) |
+            (((u32 >> 12) & 0b00111111) | 0b10000000) << 8 |
+            (((u32 >> 6)  & 0b00111111) | 0b10000000) << 16 |
+            (( u32        & 0b00111111) | 0b10000000) << 24;
+        length = 4;
+    }
+    memcpy(u8, &asInt, 4);
+    return length;
+}
+
+inline size_t utf16To8(uint16_t u16[2], char u8[4])
+// Pre: 'u16' contains a valid UTF-16 sequence. If the character consists of a
+// single code unit, then 'u16[1] == 0'.
+{
+    uint32_t u32;
+    if (u16[1] == 0)
+        u32 = u16[0];
+    else
+        u32 = (u16[0] - 0xD800) << 10 | (u16[1] - 0xDC00) | 0x10000;
+    return utf32To8(u32, u8);
 }
 
 inline int utf32To16(uint32_t u32, uint16_t u16[2]) noexcept
@@ -78,6 +97,10 @@ inline int utf32To16(uint32_t u32, uint16_t u16[2]) noexcept
     }
     return -1;
 }
+
+// Returns the length of the converted text.
+// Pre: the capacity of 'output' is enough to hold the result.
+size_t utf16To8(TSpan<const uint16_t> input, char *output) noexcept;
 
 } // namespace tvision
 
