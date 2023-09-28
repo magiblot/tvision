@@ -3,6 +3,54 @@
 
 #include <internal/terminal.h>
 
+inline bool operator==(const TEvent &a, const TEvent &b)
+{
+    if (a.what != b.what)
+        return false;
+    if (a.what == evNothing)
+        return true;
+    if (a.what == evKeyDown)
+        return
+            a.keyDown.keyCode == b.keyDown.keyCode &&
+            a.keyDown.controlKeyState == b.keyDown.controlKeyState &&
+            a.keyDown.getText() == b.keyDown.getText();
+    if (a.what == evMouse)
+        return
+            a.mouse.where == b.mouse.where &&
+            a.mouse.eventFlags == b.mouse.eventFlags &&
+            a.mouse.controlKeyState == b.mouse.controlKeyState &&
+            a.mouse.buttons == b.mouse.buttons &&
+            a.mouse.wheel == b.mouse.wheel;
+    abort();
+}
+
+inline std::ostream &operator<<(std::ostream &os, const TEvent &ev)
+{
+    os << "{";
+    if (ev.what == evKeyDown)
+    {
+        os << "{";
+        printKeyCode(os, ev.keyDown.keyCode);
+        os << "}, {";
+        printControlKeyState(os, ev.keyDown.controlKeyState);
+        os << "}, '" << ev.keyDown.getText() << "'";
+    }
+    else if (ev.what == evMouse)
+    {
+        os << "(" << ev.mouse.where.x << "," << ev.mouse.where.y << ")";
+        os << ", ";
+        printMouseEventFlags(os, ev.mouse.eventFlags);
+        os << ", ";
+        printControlKeyState(os, ev.mouse.controlKeyState);
+        os << ", ";
+        printMouseButtonState(os, ev.mouse.buttons);
+        os << ", ";
+        printMouseWheelState(os, ev.mouse.wheel);
+    }
+    os << "}";
+    return os;
+}
+
 namespace tvision
 {
 
@@ -41,29 +89,13 @@ struct ParseResultEvent
     TEvent ev;
 };
 
-static bool operator==(const ParseResultEvent &a, const ParseResultEvent &b)
+inline bool operator==(const ParseResultEvent &a, const ParseResultEvent &b)
 {
     if (a.parseResult != b.parseResult)
         return false;
     if (a.parseResult == Ignored)
         return true;
-    if (a.ev.what != b.ev.what)
-        return false;
-    if (a.ev.what == evNothing)
-        return true;
-    if (a.ev.what == evKeyDown)
-        return
-            a.ev.keyDown.keyCode == b.ev.keyDown.keyCode &&
-            a.ev.keyDown.controlKeyState == b.ev.keyDown.controlKeyState &&
-            a.ev.keyDown.getText() == b.ev.keyDown.getText();
-    if (a.ev.what == evMouse)
-        return
-            a.ev.mouse.where == b.ev.mouse.where &&
-            a.ev.mouse.eventFlags == b.ev.mouse.eventFlags &&
-            a.ev.mouse.controlKeyState == b.ev.mouse.controlKeyState &&
-            a.ev.mouse.buttons == b.ev.mouse.buttons &&
-            a.ev.mouse.wheel == b.ev.mouse.wheel;
-    abort();
+    return a.ev == b.ev;
 }
 
 inline std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
@@ -77,28 +109,7 @@ inline std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
         {
             os << "Accepted, {";
             printEventCode(os, p.ev.what);
-            os << ", {";
-            if (p.ev.what == evKeyDown)
-            {
-                os << "{";
-                printKeyCode(os, p.ev.keyDown.keyCode);
-                os << "}, {";
-                printControlKeyState(os, p.ev.keyDown.controlKeyState);
-                os << "}, '" << p.ev.keyDown.getText() << "'";
-            }
-            else if (p.ev.what == evMouse)
-            {
-                os << "(" << p.ev.mouse.where.x << "," << p.ev.mouse.where.y << ")";
-                os << ", ";
-                printMouseEventFlags(os, p.ev.mouse.eventFlags);
-                os << ", ";
-                printControlKeyState(os, p.ev.mouse.controlKeyState);
-                os << ", ";
-                printMouseButtonState(os, p.ev.mouse.buttons);
-                os << ", ";
-                printMouseWheelState(os, p.ev.mouse.wheel);
-            }
-            os << "}}";
+            os << ", " << p.ev << "}";
         }
     }
     os << "}";

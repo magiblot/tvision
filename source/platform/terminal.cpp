@@ -741,6 +741,11 @@ class Win32InputModeUnwrapper : public InputGetter
     InputGetter &in;
     InputState &state;
 
+    enum { maxSize = 31 };
+
+    ushort ungetSize {0};
+    short ungetBuffer[maxSize];
+
 public:
 
     Win32InputModeUnwrapper(InputGetter &aIn, InputState &aState) noexcept :
@@ -750,23 +755,31 @@ public:
 
     int get() noexcept override
     {
+        if (ungetSize > 0)
+            return ungetBuffer[--ungetSize];
+
         GetChBuf buf(in);
         CSIData csi;
         TEvent ev {};
+        // If we get a win32-input-mode event with no scan code and
+        // a single-byte character, take just that character.
         if ( buf.get() == '\x1B' && buf.get() == '['
              && csi.readFrom(buf) && csi.terminator == '_'
              && parseWin32InputModeKey(csi, ev, state) == Accepted
              && ev.keyDown.charScan.scanCode == 0
              && ev.keyDown.textLength == 1 )
-            return ev.keyDown.text[0];
+            return (uchar) ev.keyDown.text[0];
         buf.reject();
         return -1;
     }
 
-    void unget(int) noexcept override
+    void unget(int key) noexcept override
     {
-        // Do nothing. It is desirable not to reject win32-input-mode events,
-        // as that would just spill escape sequences into the input queue.
+        // We could reconstruct the original win32-input-mode event and call
+        // 'in.unget()', but there is no need for that. However, we still need
+        // to be able to temporarily store characters returned by 'get()'.
+        if (ungetSize < maxSize)
+            ungetBuffer[ungetSize++] = (short) key;
     }
 };
 
