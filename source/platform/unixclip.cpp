@@ -5,10 +5,14 @@
 #include <internal/getenv.h>
 #include <internal/utf8.h>
 
+#include <initializer_list>
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
