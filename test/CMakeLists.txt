@@ -19,6 +19,14 @@ if (TV_BUILD_TESTS)
         ${GTEST_MAIN}
     )
 
+    if (NOT WIN32)
+        find_library(PTHREAD pthread REQUIRED)
+        tv_message(STATUS "Found 'pthread': ${PTHREAD}")
+        target_link_libraries(${PROJECT_NAME}-test PRIVATE
+            ${PTHREAD}
+        )
+    endif()
+
     add_custom_command(
         OUTPUT ${PROJECT_NAME}-test-passed
         COMMAND ${PROJECT_NAME}-test
