@@ -11,7 +11,6 @@ namespace tvision
 {
 
 class StdioCtl;
-class EventSource;
 
 struct Far2lState
 {
@@ -27,6 +26,7 @@ struct InputState
     Far2lState far2l;
     bool hasFullOsc52 {false};
     bool bracketedPaste {false};
+    bool gotDsrResponse {false};
     void (*putPaste)(TStringView) {nullptr};
 };
 
@@ -123,7 +123,7 @@ namespace TermIO
     void mouseOn(StdioCtl &) noexcept;
     void mouseOff(StdioCtl &) noexcept;
     void keyModsOn(StdioCtl &) noexcept;
-    void keyModsOff(StdioCtl &, EventSource &, InputState &) noexcept;
+    void keyModsOff(StdioCtl &) noexcept;
 
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
@@ -141,9 +141,11 @@ namespace TermIO
     ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
     ParseResult parseDCS(GetChBuf&, InputState&) noexcept;
     ParseResult parseOSC(GetChBuf&, InputState&) noexcept;
+    ParseResult parseCPR(const CSIData &csi, InputState&) noexcept;
     ParseResult parseWin32InputModeKeyOrEscapeSeq(const CSIData &, InputGetter&, TEvent&, InputState&) noexcept;
 
     char *readUntilBelOrSt(GetChBuf &) noexcept;
+    void consumeUnprocessedInput(StdioCtl &, InputGetter &, InputState &) noexcept;
 }
 
 } // namespace tvision

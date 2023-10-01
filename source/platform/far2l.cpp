@@ -6,10 +6,6 @@
 #include <internal/constmap.h>
 #include <internal/base64.h>
 #include <internal/events.h>
-#include <chrono>
-
-using std::chrono::milliseconds;
-using std::chrono::steady_clock;
 
 #include <time.h>
 
@@ -19,7 +15,6 @@ namespace tvision
 // Request IDs
 const char
     f2lNoAnswer = '\0',
-    f2lPing = '\x04',
     f2lClipGetData = '\xA0';
 
 static char f2lClientIdData[32 + 1];
@@ -157,12 +152,6 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
                     state.putPaste(text);
                 }
             }
-            else if (decoded.size() > 0 && decoded.back() == f2lPing)
-            {
-                ev.what = evNothing;
-                ev.message.infoPtr = &state.far2l;
-                res = Accepted;
-            }
             free(pDecoded);
         }
         free(s);
@@ -293,21 +282,6 @@ bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
         return true;
     }
     return false;
-}
-
-void waitFar2lPing(EventSource &source, InputState &state) noexcept
-{
-    if (state.far2l.enabled)
-    {
-        TEvent ev {};
-        auto begin = steady_clock::now();
-        do
-        {
-            source.getEvent(ev);
-        }
-        while ( (ev.what != evNothing || ev.message.infoPtr != &state.far2l) &&
-                steady_clock::now() - begin <= milliseconds(pingTimeout) );
-    }
 }
 
 } // namespace tvision

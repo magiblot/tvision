@@ -10,28 +10,37 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
+#include <internal/terminal.h>
+
 namespace tvision
 {
 
 class NcursesDisplay;
-struct InputState;
+
+struct NcursesInputGetter final : public InputGetter
+{
+    size_t pendingCount {0};
+
+    int get() noexcept override;
+    void unget(int k) noexcept override;
+};
 
 class NcursesInput : public InputStrategy
 {
     enum : char { KEY_ESC = '\x1B' };
-    enum { readTimeout = 10 };
+    enum { readTimeoutMs = 10 };
 
     StdioCtl &io;
     InputState &state;
     bool mouseEnabled;
+    NcursesInputGetter in;
 
-    static int getch_nb() noexcept;
+    int getChNb() noexcept;
     void detectAlt(int keys[4], bool &Alt) noexcept;
     void parsePrintableChar(TEvent &ev, int keys[4], int &num_keys) noexcept;
     void readUtf8Char(int keys[4], int &num_keys) noexcept;
 
     bool parseCursesMouse(TEvent&) noexcept;
-    void consumeUnprocessedInput() noexcept;
 
 public:
 
@@ -39,9 +48,9 @@ public:
     NcursesInput(StdioCtl &io, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
     ~NcursesInput();
 
-    bool getEvent(TEvent &ev) noexcept;
-    int getButtonCount() noexcept;
-    bool hasPendingEvents() noexcept;
+    bool getEvent(TEvent &ev) noexcept override;
+    int getButtonCount() noexcept override;
+    bool hasPendingEvents() noexcept override;
 };
 
 } // namespace tvision

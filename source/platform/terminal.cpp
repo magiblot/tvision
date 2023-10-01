@@ -12,6 +12,8 @@
 #include <internal/base64.h>
 #include <internal/utf8.h>
 
+#include <chrono>
+
 namespace tvision
 {
 
@@ -305,10 +307,9 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
     }
 }
 
-void TermIO::keyModsOff(StdioCtl &io, EventSource &source, InputState &state) noexcept
+void TermIO::keyModsOff(StdioCtl &io) noexcept
 {
-    TStringView seq = far2lPingSeq
-                      far2lDisableSeq
+    TStringView seq = far2lDisableSeq
                       "\x1B[?9001l" // Disable win32-input-mode (Conpty).
                       "\x1B[<u"     // Restore previous keyboard mode (Kitty).
                       "\x1B[>4m"    // Reset modifyOtherKeys (XTerm).
@@ -317,10 +318,6 @@ void TermIO::keyModsOff(StdioCtl &io, EventSource &source, InputState &state) no
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
                     ;
     io.write(seq.data(), seq.size());
-    // If we are running across a slow connection, it is highly likely that
-    // far2l will send us keyUp or mouse events before extensions get disabled.
-    // Therefore, discard events until we get a ping response.
-    waitFar2lPing(source, state);
 }
 
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
@@ -386,6 +383,8 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
                         {
                             case 'u':
                                 return parseFixTermKey(csi, ev);
+                            case 'R':
+                                return parseCPR(csi, state);
                             case '_':
                                 return parseWin32InputModeKeyOrEscapeSeq(csi, buf.in, ev, state);
                             default:
@@ -650,7 +649,6 @@ ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
 // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
 // http://www.leonerd.org.uk/hacks/fixterms/
 {
-
     if (csi.length < 1 || csi.terminator != 'u')
         return Rejected;
 
@@ -710,12 +708,21 @@ ParseResult TermIO::parseOSC(GetChBuf &buf, InputState &state) noexcept
     return Ignored;
 }
 
+ParseResult TermIO::parseCPR(const CSIData &csi, InputState &state) noexcept
+// Pre: csi.terminator == 'R'.
+// We receive a Cursor Position Report as response to the Device Status Report
+// request we make in 'consumeUnprocessedInput()'.
+{
+    if (csi.length != 2)
+        return Rejected;
+
+    state.gotDsrResponse = true;
+    return Ignored;
+}
+
 static ParseResult parseWin32InputModeKey(const CSIData &csi, TEvent &ev, InputState &state) noexcept
 // https://github.com/microsoft/terminal/blob/main/doc/specs/%234999%20-%20Improved%20keyboard%20handling%20in%20Conpty.md
 {
-    if (csi.terminator != '_')
-        return Rejected;
-
     KEY_EVENT_RECORD kev;
     kev.wVirtualKeyCode = (ushort) csi.getValue(0, 0);
     kev.wVirtualScanCode = (ushort) csi.getValue(1, 0);
@@ -784,6 +791,7 @@ public:
 };
 
 ParseResult TermIO::parseWin32InputModeKeyOrEscapeSeq(const CSIData &csi, InputGetter &in, TEvent &ev, InputState &state) noexcept
+// Pre: csi.terminator == '_'.
 {
     ParseResult res = parseWin32InputModeKey(csi, ev, state);
     if (res == Accepted && ev.keyDown == 0x001B)
@@ -875,6 +883,33 @@ char *TermIO::readUntilBelOrSt(GetChBuf &buf) noexcept
         return s;
     }
     return {};
+}
+
+void TermIO::consumeUnprocessedInput(StdioCtl &io, InputGetter &in, InputState &state) noexcept
+// The terminal might have kept sending us events while the application is
+// exiting. This is especially likely to happen when the application is running
+// remotely accross a slow connection and terminal extensions are in place
+// which report key release events (e.g. far2l and win32-input-mode), or when
+// the application gets killed by a signal while the user was dragging the mouse.
+// Therefore, we print a DSR request and attempt to read events until we get a
+// response to it. This has to be done after disabling keyboard and mouse extensions.
+{
+    using namespace std::chrono;
+    auto timeout = milliseconds(200);
+
+    TStringView seq = "\x1B[6n"; // Device Status Report.
+    io.write(seq.data(), seq.size());
+
+    TEvent ev {};
+    state.gotDsrResponse = false;
+    auto begin = steady_clock::now();
+    do
+    {
+        GetChBuf buf {in};
+        parseEvent(buf, ev, state);
+    }
+    while ( !state.gotDsrResponse &&
+            (steady_clock::now() - begin <= timeout) );
 }
 
 } // namespace tvision
