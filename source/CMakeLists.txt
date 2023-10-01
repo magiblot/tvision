@@ -54,7 +54,7 @@ endforeach()
 
 if (TV_USE_STATIC_RTL) # Implies MSVC
     target_compile_options(${PROJECT_NAME} PUBLIC
-        /MT$<$<CONFIG:Debug>:d>
+        /MT$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:d>
     )
 endif()
 

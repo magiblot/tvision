@@ -78,25 +78,31 @@ jobs:
       shell: bash
       run: cmake . -A Win32 -DTV_USE_STATIC_RTL=ON
 
-    - name: Build
+    - name: Build (Release) (library, apps)
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+      run: cmake --build . --config Release -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+
+    - name: Build (RelWithDebInfo) (library)
+      shell: bash
+      run: cmake --build . --config RelWithDebInfo --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Examples
       uses: actions/upload-artifact@v3
       with:
         name: examples-x86
         path: |
-          ${{env.BUILD_TYPE}}/tvdemo.exe
-          ${{env.BUILD_TYPE}}/tvedit.exe
-          ${{env.BUILD_TYPE}}/tvhc.exe
+          Release/tvdemo.exe
+          Release/tvedit.exe
+          Release/tvhc.exe
 
     - name: Upload Library
       uses: actions/upload-artifact@v3
       with:
         name: library-x86
         path: |
-          ${{env.BUILD_TYPE}}/tvision.lib
+          Release/tvision.lib
+          RelWithDebInfo/tvision-relwithdebinfo.lib
+          RelWithDebInfo/tvision-relwithdebinfo.pdb
 
   build-windows-msvc64:
     name: Windows (MSVC) (x64)
@@ -108,25 +114,31 @@ jobs:
       shell: bash
       run: cmake . -A x64 -DTV_USE_STATIC_RTL=ON
 
-    - name: Build
+    - name: Build (Release) (library, apps)
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+      run: cmake --build . --config Release -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+
+    - name: Build (RelWithDebInfo) (library)
+      shell: bash
+      run: cmake --build . --config RelWithDebInfo --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Examples
       uses: actions/upload-artifact@v3
       with:
         name: examples-x64
         path: |
-          ${{env.BUILD_TYPE}}/tvdemo.exe
-          ${{env.BUILD_TYPE}}/tvedit.exe
-          ${{env.BUILD_TYPE}}/tvhc.exe
+          Release/tvdemo.exe
+          Release/tvedit.exe
+          Release/tvhc.exe
 
     - name: Upload Library
       uses: actions/upload-artifact@v3
       with:
         name: library-x64
         path: |
-          ${{env.BUILD_TYPE}}/tvision.lib
+          Release/tvision.lib
+          RelWithDebInfo/tvision-relwithdebinfo.lib
+          RelWithDebInfo/tvision-relwithdebinfo.pdb
 
   build-windows-mingw:
     name: Windows (MinGW)
