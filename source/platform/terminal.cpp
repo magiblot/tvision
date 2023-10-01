@@ -276,35 +276,45 @@ void TermIO::mouseOff(StdioCtl &io) noexcept
 
 void TermIO::keyModsOn(StdioCtl &io) noexcept
 {
-    // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-    // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
-    TStringView seq = "\x1B[?1036s" // Save metaSendsEscape (XTerm).
-                      "\x1B[?1036h" // Enable metaSendsEscape (XTerm).
-                      "\x1B[?2004s" // Save bracketed paste.
-                      "\x1B[?2004h" // Enable bracketed paste.
-                      "\x1B[>4;1m"  // Enable modifyOtherKeys (XTerm).
-                      "\x1B[>1u"    // Disambiguate escape codes (Kitty).
-                      "\x1B[?9001h" // Enable win32-input-mode (Conpty).
-                      far2lEnableSeq
-                    ;
-    io.write(seq.data(), seq.size());
+    char buf[256];
+
+    strcat(buf,
+        "\x1B[?1036s"   // Save metaSendsEscape (XTerm).
+        "\x1B[?1036h"   // Enable metaSendsEscape (XTerm).
+        "\x1B[?2004s"   // Save bracketed paste.
+        "\x1B[?2004h"   // Enable bracketed paste.
+        "\x1B[>4;1m"    // Enable modifyOtherKeys (XTerm).
+        "\x1B[>1u"      // Disambiguate escape codes (Kitty).
+        "\x1B[?9001h"   // Enable win32-input-mode (Conpty).
+        far2lEnableSeq  // Enable far2l terminal extensions.
+    );
+
     if (char *term = getenv("TERM"))
     {
         // Check for full OSC 52 clipboard support.
         if (strstr(term, "alacritty") || strstr(term, "foot"))
-            // Request clipboard contents to see if they are readable. It is
-            // not safe to print this blindly so only do it for TERMs which
-            // we know should work.
-            seq = "\x1B]52;;?\x07";
+            strcat(buf,
+                // Request clipboard contents to see if they are readable. It is
+                // not safe to print this blindly so only do it for TERMs which
+                // we know should work.
+                "\x1B]52;;?\x07"
+            );
         else
-            seq =
+            strcat(buf,
                 // Check for the 'kitty-query-clipboard_control' capability (XTGETTCAP).
                 "\x1BP+q6b697474792d71756572792d636c6970626f6172645f636f6e74726f6c\x1B\\"
                 // Check for 'allowWindowOps' (XTQALLOWED).
                 "\x1B]60\x1B\\"
-                ;
-        io.write(seq.data(), seq.size());
+            );
     }
+
+    strcat(buf,
+        // Some terminals do not recognize the sequences above and will display
+        // them on screen. Clear the screen to prevent this.
+        "\x1B[2J"
+    );
+
+    io.write(buf, strlen(buf));
 }
 
 void TermIO::keyModsOff(StdioCtl &io) noexcept
