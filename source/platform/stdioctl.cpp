@@ -172,6 +172,14 @@ namespace stdioctl
         return GetConsoleMode(h, &mode);
     }
 
+    static COORD windowSize(SMALL_RECT srWindow)
+    {
+        return {
+            srWindow.Right - srWindow.Left + 1,
+            srWindow.Bottom - srWindow.Top + 1,
+        };
+    }
+
 } // namespace stdioctl
 
 StdioCtl::StdioCtl() noexcept
@@ -271,8 +279,7 @@ StdioCtl::StdioCtl() noexcept
         // Force the screen buffer size to match the window size.
         // The Console API guarantees this, but some implementations
         // are not compliant (e.g. Wine).
-        sbInfo.dwSize.X = sbInfo.srWindow.Right - sbInfo.srWindow.Left + 1;
-        sbInfo.dwSize.Y = sbInfo.srWindow.Bottom - sbInfo.srWindow.Top + 1;
+        sbInfo.dwSize = windowSize(sbInfo.srWindow);
         SetConsoleScreenBufferSize(cn[activeOutput].handle, sbInfo.dwSize);
     }
     SetConsoleActiveScreenBuffer(cn[activeOutput].handle);
@@ -286,6 +293,40 @@ StdioCtl::StdioCtl() noexcept
 
 StdioCtl::~StdioCtl()
 {
+    using namespace stdioctl;
+    CONSOLE_SCREEN_BUFFER_INFO activeSbInfo {};
+    GetConsoleScreenBufferInfo(cn[activeOutput].handle, &activeSbInfo);
+    CONSOLE_SCREEN_BUFFER_INFO startupSbInfo {};
+    GetConsoleScreenBufferInfo(cn[startupOutput].handle, &startupSbInfo);
+
+    COORD activeWindowSize = windowSize(activeSbInfo.srWindow);
+    COORD startupWindowSize = windowSize(startupSbInfo.srWindow);
+
+    // Preserve the current window size.
+    if ( activeWindowSize.X != startupWindowSize.X ||
+         activeWindowSize.Y != startupWindowSize.Y )
+    {
+        // The buffer is not allowed to be smaller than the window, so enlarge
+        // it if necessary. But do not shrink it in the opposite case, to avoid
+        // loss of data.
+        COORD dwSize = startupSbInfo.dwSize;
+        if (dwSize.X < activeWindowSize.X)
+            dwSize.X = activeWindowSize.X;
+        if (dwSize.Y < activeWindowSize.Y)
+            dwSize.Y = activeWindowSize.Y;
+        SetConsoleScreenBufferSize(cn[startupOutput].handle, dwSize);
+        // Get the updated cursor position, in case it changed after the resize.
+        GetConsoleScreenBufferInfo(cn[startupOutput].handle, &startupSbInfo);
+        // Make sure the cursor is visible. If possible, show it in the bottom row.
+        SMALL_RECT srWindow = startupSbInfo.srWindow;
+        COORD dwCursorPosition = startupSbInfo.dwCursorPosition;
+        srWindow.Right = max(dwCursorPosition.X, activeWindowSize.X - 1);
+        srWindow.Left = srWindow.Right - (activeWindowSize.X - 1);
+        srWindow.Bottom = max(dwCursorPosition.Y, activeWindowSize.Y - 1);
+        srWindow.Top = srWindow.Bottom - (activeWindowSize.Y - 1);
+        SetConsoleWindowInfo(cn[startupOutput].handle, TRUE, &srWindow);
+    }
+
     SetConsoleActiveScreenBuffer(cn[startupOutput].handle);
     for (auto &c : cn)
         if (c.owning)
