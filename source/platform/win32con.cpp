@@ -257,14 +257,14 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 void Win32Display::reloadScreenInfo() noexcept
 {
     size = io.getSize();
-    // Set the buffer size to the viewport size so that the scrollbars
-    // do not become visible after resizing.
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
     GetConsoleScreenBufferInfo(io.out(), &sbInfo);
-    // Set the cursor temporally to (0, 0) to prevent the console from crashing due to a bug.
+    // Set the cursor temporally to (0, 0) to prevent the console from crashing
+    // due to https://github.com/microsoft/terminal/issues/7511.
     auto curPos = sbInfo.dwCursorPosition;
     SetConsoleCursorPosition(io.out(), {0, 0});
-    // Resize the buffer.
+    // Make sure the buffer size matches the viewport size so that the
+    // scrollbars are not shown.
     SetConsoleScreenBufferSize(io.out(), {(short) size.x, (short) size.y});
     // Restore the cursor position (it does not matter if it is out of bounds).
     SetConsoleCursorPosition(io.out(), curPos);
