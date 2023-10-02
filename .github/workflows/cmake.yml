@@ -86,6 +86,10 @@ jobs:
       shell: bash
       run: cmake --build . --config RelWithDebInfo --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
+    - name: Build (Debug) (library)
+      shell: bash
+      run: cmake --build . --config Debug --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+
     - name: Upload Examples
       uses: actions/upload-artifact@v3
       with:
@@ -103,6 +107,8 @@ jobs:
           Release/tvision.lib
           RelWithDebInfo/tvision-relwithdebinfo.lib
           RelWithDebInfo/tvision-relwithdebinfo.pdb
+          Debug/tvision-debug.lib
+          Debug/tvision-debug.pdb
 
   build-windows-msvc64:
     name: Windows (MSVC) (x64)
@@ -122,6 +128,10 @@ jobs:
       shell: bash
       run: cmake --build . --config RelWithDebInfo --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
+    - name: Build (Debug) (library)
+      shell: bash
+      run: cmake --build . --config Debug --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
+
     - name: Upload Examples
       uses: actions/upload-artifact@v3
       with:
@@ -139,6 +149,8 @@ jobs:
           Release/tvision.lib
           RelWithDebInfo/tvision-relwithdebinfo.lib
           RelWithDebInfo/tvision-relwithdebinfo.pdb
+          Debug/tvision-debug.lib
+          Debug/tvision-debug.pdb
 
   build-windows-mingw:
     name: Windows (MinGW)
