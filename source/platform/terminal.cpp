@@ -278,7 +278,7 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
 {
     char buf[256];
 
-    strcat(buf,
+    strcpy(buf,
         "\x1B[?1036s"   // Save metaSendsEscape (XTerm).
         "\x1B[?1036h"   // Enable metaSendsEscape (XTerm).
         "\x1B[?2004s"   // Save bracketed paste.
