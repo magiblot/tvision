@@ -80,7 +80,6 @@ __link( RMemo )
 #define FORM_WILDCARD "*.f16"
 #endif
 
-extern TPoint shadowSize;
 const int MAXSIZE = 150;
 
 
@@ -183,10 +182,6 @@ void TFormApp::handleEvent(TEvent& event)
                 break;
             case cmVideoMode:
                 newMode = TScreen::screenMode ^ TDisplay::smFont8x8;
-                if ((newMode & TDisplay::smFont8x8) != 0)
-                    shadowSize.x = 1;
-                else
-                    shadowSize.x = 2;
                 setScreenMode((ushort)newMode);
                 break;
 
