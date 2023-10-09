@@ -28,11 +28,11 @@ public:
     THeapView( TRect& r );
     virtual void update();
     virtual void draw();
-    virtual long heapSize();
+    uint32_t heapSize();
 
 private:
 
-    long oldMem, newMem;
+    uint32_t oldMem, newMem;
     char heapStr[16];
 
 };

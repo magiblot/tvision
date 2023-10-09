@@ -31,7 +31,9 @@
 
 #include "gadgets.h"
 
-//extern "C" unsigned long farcoreleft( void );
+#if !defined( __BORLANDC__ ) && defined( _WIN32 )
+#include <psapi.h>
+#endif
 
 //
 // ------------- Heap Viewer functions
@@ -65,26 +67,18 @@ void THeapView::update()
 }
 
 
-long THeapView::heapSize()
+uint32_t THeapView::heapSize()
 {
     ostrstream totalStr( heapStr, sizeof heapStr);
 
-#ifdef __BORLANDC__
-//#if !defined( __DPMI32__ )
-    long total = farcoreleft();
-//#else
-//    long total = 0;
-//#endif
-
+#if defined( __BORLANDC__ )
+    // When using Borland C++, display the unused physical memory.
 #if !defined( __DPMI16__ ) && !defined( __DPMI32__ )
     struct farheapinfo heap;
 #endif
+    uint32_t total = farcoreleft();
 
-//#if defined( __DPMI32__ )
-//    switch( _HEAPEMPTY )
-//#else
     switch( heapcheck() )
-//#endif
         {
         case _HEAPEMPTY:
             strcpy(heapStr, "     No heap");
@@ -106,19 +100,25 @@ long THeapView::heapSize()
             totalStr << setw(12) << total << ends;
             break;
         }
+
     return(total);
-#elif defined(__GLIBC__) && !defined(__UCLIBC__) && !defined(__MUSL__)
-    // mallinfo is defined in malloc.h but only exists in Glibc.
-    // It doesn't exactly measure the heap size, but it kinda does the trick.
-    int allocatedBytes =
+#elif defined( __GLIBC__ ) && !defined( __UCLIBC__ ) && !defined( __MUSL__ )
+    // When using Glibc, display the memory consumed by malloc allocations in use.
+    size_t allocatedSize =
 #if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 33)
-        mallinfo2()
+        mallinfo2().uordblks;
 #else
-        mallinfo()
+        (uint) mallinfo().uordblks;
 #endif
-        .uordblks;
-    totalStr << setw(12) << allocatedBytes << ends;
-    return allocatedBytes;
+    totalStr << setw(12) << allocatedSize << ends;
+    return (uint32_t) allocatedSize;
+#elif defined( _WIN32 )
+    // When on Windows, display the virtual memory used by the process.
+    HANDLE hProcess = GetCurrentProcess();
+    PROCESS_MEMORY_COUNTERS_EX pmc {};
+    GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS *) &pmc, sizeof(pmc));
+    totalStr << setw(12) << pmc.PrivateUsage << ends;
+    return (uint32_t) pmc.PrivateUsage;
 #else
     totalStr << ends;
     return 0;
