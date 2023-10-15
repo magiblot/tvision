@@ -158,6 +158,18 @@ TEST_F(SignalHandlerTest, ShouldOnlyInvokeCallbackOnEnterWhenSignalKillsTheProce
     ASSERT_EQ(counters->callbackExitInvocations, 0);
 }
 
+TEST_F(SignalHandlerTest, ShouldInvokeCallbackOnEnterAndExitWhenSignalIsIgnored)
+{
+    installSignalHandler(SIGINT, SIG_IGN);
+    SignalHandler::enable(signalCallbackThatTemporarilyDisablesSignalHandler);
+    for (int i = 1; i <= 2; ++i)
+    {
+        ASSERT_NE(raise(SIGINT), -1);
+        ASSERT_EQ(counters->callbackEnterInvocations, i);
+        ASSERT_EQ(counters->callbackExitInvocations, i);
+    }
+}
+
 TEST_F(SignalHandlerTest, ShouldFallBackToDefaultHandlerWhenCallbackAborts)
 {
     installSignalHandler(SIGABRT, signalHandlerThatDoesNotKillTheProcess);

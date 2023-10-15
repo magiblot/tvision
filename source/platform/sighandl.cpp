@@ -98,15 +98,23 @@ void SignalHandler::handleSignal(int signo, siginfo_t *info, void *context)
     }
 }
 
+template <class T>
+static inline bool isCustomHandler(T &&handler)
+{
+    return (void *) handler != (void *) SIG_DFL
+        && (void *) handler != (void *) SIG_IGN;
+}
+
 bool SignalHandler::invokeHandlerOrDefault( int signo, const struct sigaction &action,
                                             siginfo_t *info, void *context ) noexcept
 {
     // If the handler is a custom one, invoke it directly.
-    if ((action.sa_flags & SA_SIGINFO) && action.sa_sigaction)
+    if ((action.sa_flags & SA_SIGINFO) && isCustomHandler(action.sa_sigaction))
         action.sa_sigaction(signo, info, context);
-    else if (!(action.sa_flags & SA_SIGINFO) && action.sa_handler)
+    else if (!(action.sa_flags & SA_SIGINFO) && isCustomHandler(action.sa_handler))
         action.sa_handler(signo);
     else
+        // Run default handler by re-raising the signal.
         return invokeDefault(signo, info);
     return false;
 }
