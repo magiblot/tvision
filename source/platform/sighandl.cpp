@@ -1,7 +1,8 @@
 #include <internal/sighandl.h>
-#include <stdlib.h>
 
 #ifdef _TV_UNIX
+
+#include <stdlib.h>
 
 namespace tvision
 {
@@ -97,7 +98,7 @@ void SignalHandler::handleSignal(int signo, siginfo_t *info, void *context)
     }
 }
 
-bool SignalHandler::invokeHandlerOrDefault( int signo, struct sigaction &action,
+bool SignalHandler::invokeHandlerOrDefault( int signo, const struct sigaction &action,
                                             siginfo_t *info, void *context ) noexcept
 {
     // If the handler is a custom one, invoke it directly.
