@@ -175,8 +175,8 @@ namespace stdioctl
     static COORD windowSize(SMALL_RECT srWindow)
     {
         return {
-            srWindow.Right - srWindow.Left + 1,
-            srWindow.Bottom - srWindow.Top + 1,
+            short(srWindow.Right - srWindow.Left + 1),
+            short(srWindow.Bottom - srWindow.Top + 1),
         };
     }
 
