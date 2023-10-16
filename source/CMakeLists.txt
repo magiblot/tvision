@@ -63,6 +63,10 @@ if (WIN32)
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
     )
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        # Windows Vista is the minimum supported version.
+        _WIN32_WINNT=0x0600
+    )
 endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
