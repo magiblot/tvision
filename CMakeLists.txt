@@ -89,7 +89,7 @@ function(tv_add_private_includes target)
             "${PROJECT_SOURCE_DIR}/include/tvision/compat/windows"
         )
     endif()
-    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+    if (NOT WIN32 AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android"))
         target_include_directories(${target} PRIVATE
             "${PROJECT_SOURCE_DIR}/include/tvision/compat/malloc"
         )
