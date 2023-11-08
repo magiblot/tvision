@@ -864,10 +864,10 @@ char *TermIO::readUntilBelOrSt(GetChBuf &buf) noexcept
 {
     size_t capacity = 1024;
     size_t len = 0;
-    char prev = '\0';
     if (char *s = (char *) malloc(capacity))
     {
-        char c;
+        int prev = '\0';
+        int c;
         while (c = buf.getUnbuffered(), c != -1)
         {
             if (c == '\x07') // BEL
@@ -885,7 +885,7 @@ char *TermIO::readUntilBelOrSt(GetChBuf &buf) noexcept
                     s = (free(s), nullptr);
             }
             if (s)
-                s[len++] = c;
+                s[len++] = (char) c;
             prev = c;
         }
         if (s)

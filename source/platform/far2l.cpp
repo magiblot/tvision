@@ -79,10 +79,10 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
     enum { k = 32 };
     char s[4*k];
     size_t len = 0;
-    char c;
+    int c;
     while (c = buf.getUnbuffered(), c != -1 && c != '\x07')
         if (len < sizeof(s))
-            s[len++] = c;
+            s[len++] = (char) c;
     char o[3*k];
     TStringView out = decodeBase64({s, len}, o);
     if (!out.empty())
