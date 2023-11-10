@@ -6,7 +6,7 @@
 # * TV_USE_STATIC_RTL (default OFF) to link against the static version of the
 #   runtime library (MSVC only).
 # * TV_REDUCE_APP_SIZE (default OFF) to reduce executable size by asking the
-#   linker to strip out unused funcions and data. This affects the library's PUBLIC
+#   linker to strip out unused functions and data. This affects the library's PUBLIC
 #   linker flags.
 # * TV_OPTIMIZE_BUILD (default ON) to build with Precompiled Headers (CMake 3.16
 #   or newer).
@@ -133,7 +133,7 @@ elseif (TV_USE_STATIC_RTL)
     set(TV_USE_STATIC_RTL OFF)
 endif()
 
-option(TV_REDUCE_APP_SIZE "Strip out unused funcions and data from executables" OFF)
+option(TV_REDUCE_APP_SIZE "Strip out unused functions and data from executables" OFF)
 if ((CMAKE_VERSION VERSION_LESS "3.13.0") AND TV_REDUCE_APP_SIZE)
     tv_message(WARNING "'TV_REDUCE_APP_SIZE' requested but only available in CMake 3.13.0 or newer.")
     set(TV_REDUCE_APP_SIZE OFF)
