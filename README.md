@@ -14,7 +14,9 @@ The original goals of this project were:
 
 At one point I considered I had done enough, and that any attempts at revamping the library and overcoming its original limitations would require either extending the API or breaking backward compatibility, and that a major rewrite would be most likely necessary.
 
-However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing arquitecture, wrote the [Turbo](https://github.com/magiblot/turbo) text editor and also made the new features available on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
+However, between July and August 2020 I found the way to integrate full-fledged Unicode support into the existing
+architecture, wrote the [Turbo](https://github.com/magiblot/turbo) text editor and also made the new features available
+on Windows. So I am confident that Turbo Vision can now meet many of the expectations of modern users and programmers.
 
 The original location of this project is https://github.com/magiblot/tvision.
 
@@ -153,7 +155,8 @@ cmake --build ./build --config Release # Could also be 'Debug', 'MinSizeRel' or 
 
 In the example above, `tvision.lib` and the example applications will be placed at `./build/Release`.
 
-If you wish to link Turbo Vision statically against Microsofts's run-time library (`/MT` instead of `/MD`), enable the `TV_USE_STATIC_RTL` option (`-DTV_USE_STATIC_RTL=ON` when calling `cmake`).
+If you wish to link Turbo Vision statically against Microsoft's run-time library (`/MT` instead of `/MD`), enable
+the `TV_USE_STATIC_RTL` option (`-DTV_USE_STATIC_RTL=ON` when calling `cmake`).
 
 If you wish to link an application against Turbo Vision, note that MSVC won't allow you to mix `/MT` with `/MD` or debug with non-debug binaries. All components have to be linked against the RTL in the same way.
 
@@ -424,7 +427,7 @@ The following are new features not available in Borland's release of Turbo Visio
     TTimerId TView::setTimer(uint timeoutMs, int periodMs = -1);
     void TView::killTimer(TTimerId id);
     ```
-    `setTimer` starts a timer that will first time out in `timeoutMs` milliseconds and then every `periodMs` millisecods.
+  `setTimer` starts a timer that will first time out in `timeoutMs` milliseconds and then every `periodMs` milliseconds.
 
     If `periodMs` is negative, the timer only times out a single time and is cleaned up automatically. Otherwise, it will keep timing out periodically until `killTimer` is invoked.
 
@@ -885,7 +888,8 @@ Below is a more detailed explanation aimed at developers.
 
 ## Data Types
 
-In the first place we will explain the data types the programmer needs to know in order to take advantage of the extended color suport.
+In the first place we will explain the data types the programmer needs to know in order to take advantage of the
+extended color support.
 
 To get access to them, define the macro `Uses_TColorAttr` before including `<tvision/tv.h>`. You may not need to do this because other classes like `TView` or `TDrawBuffer` already depend on it.
 
@@ -1148,7 +1152,7 @@ So, in general, there are three ways to use extended colors in views:
     }
     ```
 
-3. By returning extended color attributes from an overriden `mapColor` method:
+3. By returning extended color attributes from an overridden `mapColor` method:
 
 ```c++
 // The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.

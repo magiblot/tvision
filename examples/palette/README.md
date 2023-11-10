@@ -34,7 +34,7 @@ drawing.  It may be desirable to have similar components of
 unrelated views to be drawn in the same color.  It may also be
 desirable to give the user a method of changing at runtime the
 colors used for the application. The palette system in Turbo
-Vision will allow both of these possiblities.
+Vision will allow both of these possibilities.
 
 A further benefit
 of the Turbo Vision palettes is that the system automatically
