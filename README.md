@@ -880,14 +880,9 @@ Extended color support basically comes down to the following:
 
 Below is a more detailed explanation aimed at developers.
 
-<details>
-<summary>API reference of extended color support (<i>click to expand</i>).</summary>
-
 ## Data Types
 
-In the first place we will explain the data types the programmer needs to know in order to take advantage of the extended color support.
-
-To get access to them, define the macro `Uses_TColorAttr` before including `<tvision/tv.h>`. You may not need to do this because other classes like `TView` or `TDrawBuffer` already depend on it.
+In the first place we will explain the data types the programmer needs to know in order to take advantage of the extended color support. To get access to them, you may have to define the macro `Uses_TColorAttr` before including `<tvision/tv.h>`.
 
 All the types described in this section are *trivial*. This means that they can be `memset`'d and `memcpy`'d. But variables of these types are *uninitialized* when declared without initializer, just like primitive types. So make sure you don't manipulate them before initializing them.
 
@@ -896,7 +891,7 @@ All the types described in this section are *trivial*. This means that they can 
 Several types are defined which represent different color formats.
 The reason why these types exist is to allow distinguishing color formats using the type system. Some of them also have public fields which make it easier to manipulate individual bits.
 
-* `TColorBIOS` represents a BIOS color. It behaves the same as `uint8_t`, but allows accessing the `r`, `g`, `b` and `bright` bits individually.
+* `TColorBIOS` represents a BIOS color. It allows accessing the `r`, `g`, `b` and `bright` bits individually, and can be casted implicitly into/from `uint8_t`.
 
     The memory layout is:
 
@@ -906,6 +901,7 @@ The reason why these types exist is to allow distinguishing color formats using 
     * Bit 3: Bright (field `bright`).
     * Bits 4-7: unused.
 
+    Examples of `TColorBIOS` usage:
     ```c++
     TColorBIOS bios = 0x4;  // 0x4: red.
     bios.bright = 1;        // 0xC: light red.
@@ -916,7 +912,7 @@ The reason why these types exist is to allow distinguishing color formats using 
 
     In terminal emulators, BIOS colors are mapped to the basic 16 ANSI colors.
 
-* `TColorRGB` represents a color in 24-bit RGB. It behaves the same as `uint32_t` but allows accessing the `r`, `g` and `b` bit fields individually.
+* `TColorRGB` represents a color in 24-bit RGB. It allows accessing the `r`, `g` and `b` bit fields individually, and can be casted implicitly into/from `uint32_t`.
 
     The memory layout is:
 
@@ -925,6 +921,7 @@ The reason why these types exist is to allow distinguishing color formats using 
     * Bits 16-23: Red (field `r`).
     * Bits 24-31: unused.
 
+    Examples of `TColorRGB` usage:
     ```c++
     TColorRGB rgb = 0x9370DB;   // 0xRRGGBB.
     rgb = {0x93, 0x70, 0xDB};   // {R, G, B}.
@@ -933,7 +930,7 @@ The reason why these types exist is to allow distinguishing color formats using 
     uint32_t c = rgb;           // Implicit conversion to integer types.
     ```
 
-* `TColorXTerm` represents an index into the `xterm-256color` color palette. It behaves the same as `uint8_t`.
+* `TColorXTerm` represents an index into the `xterm-256color` color palette. It can be casted into and from `uint8_t`.
 
 ### `TColorDesired`
 
@@ -1101,7 +1098,25 @@ As an API extension, the `mapColor` method has been made `virtual`. This makes i
 
 So, in general, there are three ways to use extended colors in views:
 
-1. By providing extended color attributes directly to `TDrawBuffer` methods, if the palette system is not being used. For example:
+1. By returning extended color attributes from an overridden `mapColor` method:
+
+```c++
+// The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.
+TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
+{
+    // In this example the values are hardcoded,
+    // but they could be stored elsewhere if desired.
+    switch (index)
+    {
+        case 1:     return {0x492983, 0x826124}; // Page areas.
+        case 2:     return {0x438939, 0x091297}; // Arrows.
+        case 3:     return {0x123783, 0x329812}; // Indicator.
+        default:    return errorAttr;
+    }
+}
+```
+
+2. By providing extended color attributes directly to `TDrawBuffer` methods, if the palette system is not being used. For example:
 
     ```c++
     // The 'TMyView' class inherits from 'TView' and overrides 'TView::draw'.
@@ -1114,7 +1129,7 @@ So, in general, there are three ways to use extended colors in views:
     }
     ```
 
-2. By modifying the palettes. There are two ways to do this:
+3. By modifying the palettes. There are two ways to do this:
 
     1. By modifying the application palette after it has been built. Note that the palette elements are `TColorAttr`. For example:
 
@@ -1148,24 +1163,6 @@ So, in general, there are three ways to use extended colors in views:
     }
     ```
 
-3. By returning extended color attributes from an overridden `mapColor` method:
-
-```c++
-// The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.
-TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
-{
-    // In this example the values are hardcoded,
-    // but they could be stored elsewhere if desired.
-    switch (index)
-    {
-        case 1:     return {0x492983, 0x826124}; // Page areas.
-        case 2:     return {0x438939, 0x091297}; // Arrows.
-        case 3:     return {0x123783, 0x329812}; // Indicator.
-        default:    return errorAttr;
-    }
-}
-```
-
 ## Display capabilities
 
 `TScreen::screenMode` exposes some information about the display's color support:
@@ -1176,7 +1173,7 @@ TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
     * If `TScreen::screenMode & TDisplay::smColor256`, the display supports at least 256 colors.
     * If `TScreen::screenMode & TDisplay::smColorHigh`, the display supports even more colors (e.g. 24-bit color). `TDisplay::smColor256` is also set in this case.
 
-## Backward-compatibility
+## Backward-compatibility of color types
 
 The types defined previously represent concepts that are also important when developing for Borland C++:
 
@@ -1191,23 +1188,7 @@ One of this project's key principles is that the API should be used in the same 
 Backward-compatibility is accomplished in the following way:
 
 * In Borland C++, `TColorAttr` and `TAttrPair` are `typedef`'d to `uchar` and `ushort`, respectively.
-* In modern platforms, `TColorAttr` and `TAttrPair` can be used in place of `uchar` and `ushort`, respectively. That is, the assertions in the following code won't fail:
-
-    ```c++
-    // Any value which fits into a 'uchar' can be
-    // losslessly passed through TColorAttr.
-    uchar c = 0;
-    do {
-        assert(uchar(TColorAttr {c}) == c);
-    } while (c++ < UCHAR_MAX);
-
-    // Any value which fits into a 'ushort' can be
-    // losslessly passed through TAttrPair.
-    ushort s = 0;
-    do {
-        assert(ushort(TAttrPair {s}) == s);
-    } while (s++ < USHRT_MAX);
-    ```
+* In modern platforms, `TColorAttr` and `TAttrPair` can be used in place of `uchar` and `ushort`, respectively, since they are able to hold any value that fits into them and can be casted implicitly into/from them.
 
     A `TColorAttr` initialized with `uchar` represents a BIOS color attribute. When converting back to `uchar`, the following happens:
 
@@ -1220,7 +1201,7 @@ A use case of backward-compatibility within Turbo Vision itself is the `TPalette
 
 The new design simply replaces `uchar` with `TColorAttr`. This means there are no changes in the way `TPalette` is used, yet `TPalette` is now able to store extended color attributes.
 
-`TColorDialog` hasn't been remodeled yet, and thus it can't be used to pick extended color attributes at runtime.
+`TColorDialog` hasn't been remodeled, and thus it can't be used to pick extended color attributes at runtime.
 
 ### Example: adding extended color support to legacy code
 
@@ -1256,5 +1237,3 @@ The code above still works just like it did originally. It's only non-BIOS color
 ```
 
 Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is, minimizing the risk of increasing code complexity or introducing bugs.
-</details>
-</br>
