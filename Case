@@ -1,0 +1,8 @@
+echo "# Free-online-Case-converter-Tool" >> README.md
+  git init
+  git add README.md
+  git commit -m "first commit"
+  git branch -M main
+  git remote add origin https://github.com/faisal202322/Free-online-Case-converter-Tool.git
+  git push -u origin main
+<a href="https://uppercase-converter.com/">Case converter tool</a></p>
