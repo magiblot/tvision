@@ -41,17 +41,17 @@ public:
 
     TTextDevice( const TRect& bounds,
                  TScrollBar *aHScrollBar,
-                 TScrollBar *aVScrollBar,
-                 ushort aBufSize = 256
+                 TScrollBar *aVScrollBar
                ) noexcept;
-    ~TTextDevice();
 
     virtual int do_sputn( const char *s, int count ) = 0;
     virtual int overflow( int = EOF );
 
 protected:
 
-    virtual int sync();
+#if !defined( __BORLANDC__ )
+    virtual std::streamsize xsputn(const char *s, std::streamsize count);
+#endif
 
 };
 
@@ -81,7 +81,6 @@ public:
 
     void bufInc( ushort& val );
     Boolean canInsert( ushort amount );
-    short calcWidth();
     virtual void draw();
     ushort nextLine( ushort pos );
     ushort prevLines( ushort pos, ushort lines );

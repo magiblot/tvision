@@ -27,57 +27,32 @@
 #pragma argsused
 TTextDevice::TTextDevice( const TRect& bounds,
                           TScrollBar *aHScrollBar,
-                          TScrollBar *aVScrollBar,
-                          ushort aBufSize ) noexcept :
-    TScroller(bounds,aHScrollBar,aVScrollBar)
+                          TScrollBar *aVScrollBar ) noexcept :
+    TScroller(bounds, aHScrollBar, aVScrollBar)
 {
-    // Borland's streambuf::sputn is wrong and never invokes overflow().
-    // So leave the device unbuffered when compiling with Borland C++.
-#ifndef __BORLANDC__
-    if( aBufSize )
-        {
-        char *buffer = new char[aBufSize];
-        setp( buffer, buffer + aBufSize );
-        }
-    else
-#endif
-        {
-        setp( 0, 0 );
-        }
-}
-
-TTextDevice::~TTextDevice()
-{
-    delete[] pbase();
 }
 
 int TTextDevice::overflow( int c )
 {
     if( c != EOF )
         {
-        if( pptr() > pbase() )
-            {
-            sync();
-            sputc(c);
-            }
-        else
-            {
-            char b = c;
-            do_sputn( &b, 1 );
-            }
+        char b = c;
+        do_sputn( &b, 1 );
         }
     return 1;
 }
 
-int TTextDevice::sync()
+#if !defined( __BORLANDC__ )
+// The 'xsputn' method in modern STL is the equivalent of 'do_sputn' in
+// Borland's RTL. We must invoke 'do_sputn' here in order to replicate
+// the original behaviour. Otherwise, the default 'xsputn' will fall back on
+// 'overflow' and the inserted characters will be processed one by one,
+// which in the case of TTerminal may lead to performance issues.
+std::streamsize TTextDevice::xsputn(const char *s, std::streamsize count)
 {
-    if( pptr() > pbase() )
-        {
-        do_sputn( pbase(), pptr() - pbase() );
-        setp( pbase(), epptr() );
-        }
-    return 0;
+    return (std::streamsize) do_sputn(s, (int) count);
 }
+#endif
 
 TTerminal::TTerminal( const TRect& bounds,
                       TScrollBar *aHScrollBar,
