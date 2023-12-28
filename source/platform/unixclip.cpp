@@ -100,19 +100,19 @@ static int initPlaceholders = []
 }();
 
 static void wslCopyPrepare(TSpan<char> &text) noexcept
+// Pre: 'text' is malloc-allocated.
 // When writing text to clip.exe, append a null character at the end
 // to work around https://github.com/microsoft/WSL/issues/4852.
 {
-    if (char *dstText = (char *) malloc(text.size() + 1))
+    if (char *dstText = (char *) realloc(text.data(), text.size() + 1))
     {
-        memcpy(dstText, text.data(), text.size());
         dstText[text.size()] = '\0';
-        free(text.data());
         text = {dstText, text.size() + 1};
     }
 }
 
 static void wslPastePrepare(TSpan<char> &text) noexcept
+// Pre: 'text' is malloc-allocated.
 // We receive the clipboard contents from CScript in UTF-16, so we have to
 // convert them to UTF-8.
 {
