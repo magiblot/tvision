@@ -99,43 +99,28 @@ Boolean TTerminal::canInsert( ushort amount )
     return Boolean( queBack > T );
 }
 
-#ifdef __FLAT__
-
-#define DRAW_DYNAMIC_STR 1
-#define resizeStr(_len) \
-    slen = _len; \
-    if (slen > scap) { \
-        char *ss = (char *) ::realloc(s, (scap = max(slen, 2*scap))); \
-        if (ss) \
-            s = ss; \
-        else { \
-            ::free(s); \
-            return; \
-        } \
-    }
-
+static void discardPossiblyTruncatedCharsAtEnd( const char (&s)[256],
+                                                size_t &sLen )
+{
+#if !defined( __BORLANDC__ )
+    if( sLen == sizeof(s) )
+        {
+        sLen = 0;
+        while( sLen < sizeof(s) - (maxCharLength - 1) )
+            sLen += TText::next( TStringView( &s[sLen], sizeof(s) - sLen ) );
+        }
 #else
-
-#define DRAW_DYNAMIC_STR 0
-#define resizeStr(_len) \
-    slen = _len;
-
-#endif // __FLAT__
+    (void) s, (void) sLen;
+#endif
+}
 
 void TTerminal::draw()
 {
-#if DRAW_DYNAMIC_STR
-    size_t scap = 256;
-    char *s = (char*) ::malloc(scap);
-    TScreenCell *_b = (TScreenCell*) alloca(size.x*sizeof(TScreenCell));
-#else
+    TDrawBuffer b;
     char s[256];
-    TScreenCell _b[maxViewWidth];
-#endif
-    size_t slen = 0;
-    TSpan<TScreenCell> b(_b, size.x);
-    short  i;
-    ushort begLine, endLine;
+    size_t sLen;
+    int x, y;
+    ushort begLine, endLine, linePos;
     ushort bottomLine;
     TColorAttr color = mapColor(1);
 
@@ -149,44 +134,51 @@ void TTerminal::draw()
         endLine = queFront;
 
     if( limit.y > size.y )
-        i = size.y - 1;
+        y = size.y - 1;
     else
         {
-        for( i = limit.y; i <= size.y - 1; i++ )
-            writeChar(0, i, ' ', 1, size.x);
-        i =  limit.y -  1;
+        for( y = limit.y; y < size.y; y++ )
+            writeChar(0, y, ' ', 1, size.x);
+        y = limit.y - 1;
         }
 
-    for( ; i >= 0; i-- )
+    for( ; y >= 0; y-- )
         {
+        x = 0;
         begLine = prevLines(endLine, 1);
-        if (endLine >= begLine)
+        linePos = begLine;
+        while( linePos != endLine )
             {
-            int T = int( endLine - begLine );
-            resizeStr(T);
-            memcpy( s, &buffer[begLine], T );
-            }
-        else
-            {
-            int T = int( bufSize - begLine);
-            resizeStr(T + endLine);
-            memcpy( s, &buffer[begLine], T );
-            memcpy( s+T, buffer, endLine );
+            if( endLine >= linePos )
+                {
+                size_t cpyLen = min( endLine - linePos, sizeof(s) );
+                memcpy( s, &buffer[linePos], cpyLen );
+                sLen = cpyLen;
+                }
+            else
+                {
+                size_t fstCpyLen = min( bufSize - linePos, sizeof(s) );
+                size_t sndCpyLen = min( endLine, sizeof(s) - fstCpyLen );
+                memcpy( s, &buffer[linePos], fstCpyLen );
+                memcpy( &s[fstCpyLen], buffer, sndCpyLen );
+                sLen = fstCpyLen + sndCpyLen;
+                }
+
+            discardPossiblyTruncatedCharsAtEnd(s, sLen);
+            if( linePos >= bufSize - sLen )
+                linePos = sLen - (bufSize - linePos);
+            else
+                linePos += sLen;
+
+            x += b.moveStr( x, TStringView( s, sLen ), color );
             }
 
-        int w = TText::drawStr(b, TStringView(s, slen), color);
-        TText::drawChar(b.subspan(w), ' ', color);
-        writeBuf( 0, i, size.x, 1, b.data() );
+        b.moveChar( x, ' ', color, max( size.x - x, 0 ) );
+        writeBuf( 0, y, size.x, 1, b );
         endLine = begLine;
         bufDec( endLine );
         }
-#if DRAW_DYNAMIC_STR
-    ::free(s);
-#endif
 }
-
-#undef DRAW_DYNAMIC_STR
-#undef resizeStr
 
 ushort TTerminal::nextLine( ushort pos )
 {
