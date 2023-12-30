@@ -193,6 +193,13 @@ int TTerminal::do_sputn( const char *s, int count )
 {
     ushort screenLines = limit.y;
     ushort i;
+
+    if( count > bufSize - 1 )
+        {
+        s += count - (bufSize - 1);
+        count = bufSize - 1;
+        }
+
     for( i = 0; i < count; i++ )
         if( s[i] == '\n' )
             screenLines++;
@@ -200,7 +207,8 @@ int TTerminal::do_sputn( const char *s, int count )
     while( !canInsert( count ) )
         {
         queBack = nextLine( queBack );
-        screenLines--;
+        if( screenLines > 1 )
+            screenLines--;
         }
 
     if( queFront + count >= bufSize )
