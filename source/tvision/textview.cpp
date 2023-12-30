@@ -182,13 +182,10 @@ void TTerminal::draw()
 
 ushort TTerminal::nextLine( ushort pos )
 {
+    while( pos != queFront && buffer[pos] != '\n' )
+        bufInc( pos );
     if( pos != queFront )
-        {
-        while( buffer[pos] != '\n' && pos != queFront )
-            bufInc(pos);
-        if( pos != queFront )
-            bufInc( pos );
-        }
+        bufInc( pos );
     return pos;
 }
 
