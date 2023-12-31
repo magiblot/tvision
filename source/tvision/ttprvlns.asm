@@ -77,7 +77,7 @@ ifndef __FLAT__
 @@2:    MOV     AX,[SI+TTerminalQueBack]
         ADD     AX,WORD PTR [SI+TTerminalBuffer]
         CMP     DI,AX
-        JA      @@3
+        JAE     @@3
         MOV     CX,DI
         SUB     CX,WORD PTR [SI+TTerminalBuffer]
         JMP     @@4
@@ -123,7 +123,7 @@ else
 @@2:    MOVZX   EAX, WORD PTR [ESI+TTerminalQueBack]
         ADD     EAX,[ESI+TTerminalBuffer]
         CMP     EDI,EAX
-        JA      short @@3
+        JAE     short @@3
         MOV     ECX,EDI
         SUB     ECX,[ESI+TTerminalBuffer]
         JMP     short @@4
