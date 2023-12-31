@@ -124,6 +124,8 @@ void TTerminal::draw()
     ushort bottomLine;
     TColorAttr color = mapColor(1);
 
+    setCursor( -1, -1 );
+
     bottomLine = size.y + delta.y;
     if( limit.y > bottomLine )
         {
@@ -175,6 +177,9 @@ void TTerminal::draw()
 
         b.moveChar( x, ' ', color, max( size.x - x, 0 ) );
         writeBuf( 0, y, size.x, 1, b );
+        // Draw the cursor when this is the last line.
+        if( endLine == queFront )
+            setCursor( x, y );
         endLine = begLine;
         bufDec( endLine );
         }
@@ -230,12 +235,6 @@ int TTerminal::do_sputn( const char *s, int count )
     scrollTo( 0, screenLines + 1 );
     drawLock--;
 
-    i = prevLines( queFront, 1 );
-    if( i <= queFront )
-        i = queFront - i;
-    else
-        i = bufSize - (i - queFront);
-    setCursor( i, screenLines - delta.y - 1 );
     drawView();
     return count;
 }
