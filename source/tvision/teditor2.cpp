@@ -68,24 +68,24 @@ static inline int isWordChar( int ch )
 
 #pragma warn .asc
 
-void TEditor::detectEOL()
+void TEditor::detectEol()
 {
     for (uint p = 0; p < bufLen; ++p)
         if (bufChar(p) == '\r')
         {
             if (p+1 < bufLen && bufChar(p+1) == '\n')
-                eolType = eolCRLF;
+                eolType = eolCrLf;
             else
-                eolType = eolCR;
+                eolType = eolCr;
             return;
         }
         else if (bufChar(p) == '\n')
         {
-            eolType = eolLF;
+            eolType = eolLf;
             return;
         }
-    // Default to CRLF
-    eolType = eolCRLF;
+    // Default to CRLF.
+    eolType = eolCrLf;
 }
 
 Boolean TEditor::hasSelection()
@@ -425,7 +425,7 @@ void TEditor::setBufLen( uint length )
     delCount = 0;
     insCount = 0;
     modified = False;
-    detectEOL();
+    detectEol();
     update(ufView);
 }
 
@@ -555,7 +555,10 @@ void TEditor::startSelect()
 
 void TEditor::toggleEncoding()
 {
-    encSingleByte = Boolean( !encSingleByte );
+    if( encoding == encDefault )
+        encoding = encSingleByte;
+    else
+        encoding = encDefault;
     updateFlags |= ufView;
     setSelect(selStart, selEnd, Boolean( curPtr < selEnd ));
 }
@@ -633,7 +636,7 @@ void TEditor::write( opstream& os )
     TView::write( os );
     os << hScrollBar << vScrollBar << indicator
        << bufSize << (uchar)canUndo << (uchar)eolType
-       << (uchar)encSingleByte;
+       << (uchar)encoding;
 }
 
 void *TEditor::read( ipstream& is )
@@ -643,8 +646,8 @@ void *TEditor::read( ipstream& is )
        >> bufSize;
     uchar temp;
     is >> temp; canUndo = Boolean(temp);
-    is >> temp; eolType = EOLTypes(temp);
-    is >> temp; encSingleByte = Boolean(temp);
+    is >> temp; eolType = EolType(temp);
+    is >> temp; encoding = Encoding(temp);
     selecting = False;
     overwrite = False;
     autoIndent = True;

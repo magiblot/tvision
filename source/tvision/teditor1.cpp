@@ -192,7 +192,7 @@ TEditor::TEditor( const TRect& bounds,
     selecting( False ),
     overwrite( False ),
     autoIndent( True ) ,
-    encSingleByte( False ),
+    encoding( encDefault ),
     lockCount( 0 ),
     updateFlags( 0 ),
     keyState( 0 )
@@ -233,41 +233,41 @@ void TEditor::changeBounds( const TRect& bounds )
 
 TStringView TEditor::bufChars( uint P )
 {
-    static thread_local char buf[4];
-    if (!encSingleByte)
+    static thread_local char buf[maxCharLength];
+    if (encoding == encSingleByte)
+        {
+        buf[0] = bufChar(P);
+        return TStringView(buf, 1);
+        }
+    else
         {
         int len = min(max(max(curPtr, bufLen) - P, 1), sizeof(buf));
         for (int i = 0; i < len; ++i)
             buf[i] = bufChar(P + i);
         return TStringView(buf, len);
         }
-    else
-        {
-        buf[0] = bufChar(P);
-        return TStringView(buf, 1);
-        }
 }
 
-TStringView TEditor::bufPrevChars( uint P )
+TStringView TEditor::prevBufChars( uint P )
 {
-    static thread_local char buf[4];
-    if (!encSingleByte)
+    static thread_local char buf[maxCharLength];
+    if (encoding == encSingleByte)
+        {
+        buf[0] = bufChar(P - 1);
+        return TStringView(buf, 1);
+        }
+    else
         {
         int len = min(max(P, 1), sizeof(buf));
         for (int i = 0; i < len; ++i)
             buf[i] = bufChar(P - len + i);
         return TStringView(buf, len);
         }
-    else
-        {
-        buf[0] = bufChar(P - 1);
-        return TStringView(buf, 1);
-        }
 }
 
 void TEditor::nextChar( TStringView s, uint &p, uint &width )
 {
-    if (encSingleByte || !s.size())
+    if (encoding == encSingleByte || s.size() == 0)
         {
         ++p;
         ++width;
@@ -618,7 +618,7 @@ void TEditor::handleEvent( TEvent& event )
             break;
 
         case evKeyDown:
-            if( ( !encSingleByte && event.keyDown.textLength > 0 ) ||
+            if( ( encoding != encSingleByte && event.keyDown.textLength > 0 ) ||
                 event.keyDown.charScan.charCode == 9 ||
                 ( event.keyDown.charScan.charCode >= 32 && event.keyDown.charScan.charCode < 255 )
               )
@@ -637,7 +637,7 @@ void TEditor::handleEvent( TEvent& event )
                         if( curPtr != lineEnd(curPtr) )
                             selEnd = nextChar(curPtr);
 
-                    if( !encSingleByte && event.keyDown.textLength > 0 )
+                    if( encoding != encSingleByte && event.keyDown.textLength > 0 )
                         insertText( event.keyDown.text, event.keyDown.textLength, False );
                     else
                         insertText( &event.keyDown.charScan.charCode, 1, False );

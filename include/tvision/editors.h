@@ -251,7 +251,7 @@ public:
     void unlock();
     void update( uchar );
     void checkScrollBar( const TEvent&, TScrollBar *, int& );
-    void detectEOL();
+    void detectEol();
 
     TScrollBar *hScrollBar;
     TScrollBar *vScrollBar;
@@ -277,13 +277,13 @@ public:
     Boolean overwrite;
     Boolean autoIndent;
 
-    enum EOLTypes { eolCRLF, eolLF, eolCR } eolType;
+    enum EolType { eolCrLf, eolLf, eolCr } eolType;
+    enum Encoding { encDefault, encSingleByte } encoding;
 
-    Boolean encSingleByte;
     void nextChar( TStringView, uint &P, uint &width );
     Boolean formatCell( TSpan<TScreenCell>, uint&, TStringView, uint& , TColorAttr );
     TStringView bufChars( uint );
-    TStringView bufPrevChars( uint );
+    TStringView prevBufChars( uint );
 
     static TEditorDialog _NEAR editorDialog;
     static ushort _NEAR editorFlags;

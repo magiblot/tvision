@@ -55,15 +55,20 @@ void TEditor::formatLine( TScreenCell *DrawBuf,
             char Char = chars[0];
             if (Char == '\r' || Char == '\n')
                 goto fill;
-            if (Char == '\t') {
-                if (X < Width) {
-                    do {
+            if (Char == '\t')
+            {
+                if (X < Width)
+                {
+                    do
+                    {
                         ::setCell(Cells[X++], ' ', Color);
                     } while (X%8 != 0 && X < Width);
                     ++P;
-                } else
+                }
+                else
                     break;
-            } else
+            }
+            else
                 if (!formatCell(Cells, (uint&) X, chars, P, Color))
                     break;
         }
@@ -109,7 +114,7 @@ uint TEditor::nextChar( uint P )
     {
         if (bufChar(P) == '\r' && bufChar(P + 1) == '\n')
             return P + 2;
-        if (encSingleByte)
+        if (encoding == encSingleByte)
             return P + 1;
         else
             return P + TText::next(bufChars(P));
@@ -123,11 +128,11 @@ uint TEditor::prevChar( uint P )
     {
         if (bufChar(P - 2) == '\r' && bufChar(P - 1) == '\n')
             return P - 2;
-        if (encSingleByte)
+        if (encoding == encSingleByte)
             return P - 1;
         else
         {
-            TStringView t = bufPrevChars(P);
+            TStringView t = prevBufChars(P);
             return P - TText::prev(t, t.size());
         }
     }
