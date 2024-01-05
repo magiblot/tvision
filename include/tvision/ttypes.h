@@ -66,7 +66,7 @@ struct TColorAttr;
 struct TAttrPair;
 #endif
 
-const char EOS = '\0';
+enum : char { EOS = '\0'};
 
 enum StreamableInit { streamableInit };
 
@@ -115,7 +115,7 @@ typedef int ccIndex;
 typedef Boolean (*ccTestFunc)( void *, void * );
 typedef void (*ccAppFunc)( void *, void * );
 
-const int ccNotFound = -1;
+enum : int { ccNotFound = -1};
 
 extern const uchar specialChars[];
 

@@ -21,13 +21,14 @@
 #include <limits.h>
 #endif  // __LIMITS_H
 
-const int eventQSize = 16;
-const int keyEventQSize = 3;
-const int maxCollectionSize = (int)(( (unsigned long) UINT_MAX - 16)/sizeof( void * ));
+enum : int {
+    eventQSize = 16,
+    keyEventQSize = 3,
+    maxCollectionSize = (int)(( (unsigned long) UINT_MAX - 16)/sizeof( void * )),
 
-const int maxViewWidth = 132;
+    maxViewWidth = 132,
 
-const int maxFindStrLen    = 80;
-const int maxReplaceStrLen = 80;
-
+    maxFindStrLen    = 80,
+    maxReplaceStrLen = 80
+};
 #endif  // __CONFIG_H

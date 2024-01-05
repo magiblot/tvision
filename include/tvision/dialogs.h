@@ -25,15 +25,15 @@
 #if !defined( __BUTTON_TYPE )
 #define __BUTTON_TYPE
 
-const int
+enum : int {
     bfNormal    = 0x00,
     bfDefault   = 0x01,
     bfLeftJust  = 0x02,
     bfBroadcast = 0x04,
     bfGrabFocus = 0x08,
 
-    cmRecordHistory = 60;
-
+    cmRecordHistory = 60
+};
 #endif  // __BUTTON_TYPE
 
 /* ---------------------------------------------------------------------- */
@@ -91,11 +91,11 @@ const int
 
 #define cpDialog cpGrayDialog
 
-const int
+enum : int {
       dpBlueDialog = 0,
       dpCyanDialog = 1,
-      dpGrayDialog = 2;
-
+      dpGrayDialog = 2
+};
 class _FAR TRect;
 struct _FAR TEvent;
 class _FAR TValidator;
@@ -152,11 +152,11 @@ inline opstream& operator << ( opstream& os, TDialog* cl )
 #if defined( Uses_TInputLine ) && !defined( __TInputLine )
 #define __TInputLine
 
-const ushort
+enum : ushort {
     ilMaxBytes = 0,
     ilMaxWidth = 1,
-    ilMaxChars = 2;
-
+    ilMaxChars = 2
+};
 class _FAR TRect;
 struct _FAR TEvent;
 class _FAR TValidator;
@@ -573,10 +573,12 @@ inline TCheckBoxes::TCheckBoxes( const TRect& bounds, TSItem *aStrings) noexcept
 #if defined( Uses_TMultiCheckBoxes ) && !defined( __TMultiCheckBoxes )
 #define __TMultiCheckBoxes
 
-const unsigned short cfOneBit       = 0x0101,
-                     cfTwoBits      = 0x0203,
-                     cfFourBits     = 0x040F,
-                     cfEightBits    = 0x08FF;
+enum : unsigned short {
+    cfOneBit       = 0x0101,
+    cfTwoBits      = 0x0203,
+    cfFourBits     = 0x040F,
+    cfEightBits    = 0x08FF
+};
 
 /* ---------------------------------------------------------------------- */
 /*      TMultiCheckBoxes                                                  */

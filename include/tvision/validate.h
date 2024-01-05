@@ -19,7 +19,7 @@
 
 // TValidator Status constants
 
-static const int
+enum : int {
   vsOk     =  0,
   vsSyntax =  1,      // Error in the syntax of either a TPXPictureValidator
                       // or a TDBPictureValidator
@@ -27,7 +27,8 @@ static const int
 // Validator option flags
   voFill     =  0x0001,
   voTransfer =  0x0002,
-  voReserved =  0x00FC;
+  voReserved =  0x00FC
+};
 
 // TVTransfer constants
 

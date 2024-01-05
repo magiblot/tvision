@@ -265,11 +265,12 @@ inline TColorRGB XTerm256toRGB(uint8_t idx)
 // In a terminal emulator, the 'default color' is the color of text that has no
 // display attributes (bold, color...) enabled.
 
-const uchar
+enum : uchar {
     ctDefault       = 0x0,  // Terminal default.
     ctBIOS          = 0x1,  // TColorBIOS.
     ctRGB           = 0x2,  // TColorRGB.
-    ctXTerm         = 0x3;  // TColorXTerm.
+    ctXTerm         = 0x3   // TColorXTerm.
+};
 
 struct TColorDesired
 {
@@ -454,7 +455,7 @@ constexpr inline void TColorDesired::bitCast(uint32_t val)
 // colors set to 'default'. Therefore, a zero-initialized TColorAttr produces
 // visible text.
 
-const ushort
+enum : ushort {
 
 // TColorAttr Style masks
 
@@ -467,7 +468,8 @@ const ushort
 
 // Private masks
 
-    slNoShadow      = 0x200; // Don't draw window shadows over this cell.
+    slNoShadow      = 0x200  // Don't draw window shadows over this cell.
+};
 
 struct TAttrPair;
 

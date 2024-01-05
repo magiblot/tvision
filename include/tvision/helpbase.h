@@ -17,7 +17,7 @@
 #if !defined( __HELPBASE_H )
 #define __HELPBASE_H
 
-const int32_t magicHeader = 0x46484246L; //"FBHF"
+enum : int32_t { magicHeader = 0x46484246L }; //"FBHF"
 
 #define cHelpViewer "\x06\x07\x08"
 #define cHelpWindow "\x80\x81\x82\x83\x84\x85\x86\x87"

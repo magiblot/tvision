@@ -40,7 +40,7 @@
 // These constants do not cover all possible combinations of the Shift, Ctrl
 // and Alt modifiers. For that purpose, see the TKey class below.
 
-const ushort
+enum : ushort {
 
 // Control keys
 
@@ -132,7 +132,7 @@ const ushort
     kbNumState    = 0x0020,
     kbCapsState   = 0x0040,
     kbInsState    = 0x0080,
-    kbPaste       = 0x0100;
+    kbPaste       = 0x0100
 #else
     kbLeftShift   = SHIFT_PRESSED,
     kbRightShift  = SHIFT_PRESSED,
@@ -148,8 +148,9 @@ const ushort
     kbCapsState   = CAPSLOCK_ON,
     kbEnhanced    = ENHANCED_KEY,
     kbInsState    = 0x200,  // Ensure this doesn't overlap above values
-    kbPaste       = 0x400;
+    kbPaste       = 0x400
 #endif
+};
 
 #endif // __TKeys
 

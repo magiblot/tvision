@@ -10,9 +10,9 @@
 #define __TText
 
 #if !defined( __BORLANDC__ )
-const int maxCharLength = 4; // Maximum length of a UTF-8 codepoint.
+enum : int { maxCharLength = 4 }; // Maximum length of a UTF-8 codepoint.
 #else
-const int maxCharLength = 1; // All characters are single-byte-encoded.
+enum : int { maxCharLength = 1 }; // All characters are single-byte-encoded.
 #endif
 
 struct TTextMetrics

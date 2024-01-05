@@ -37,7 +37,7 @@ ushort inputBox( TStringView Title, TStringView aLabel, char *s, uchar limit ) n
 ushort inputBoxRect( const TRect &bounds, TStringView title,
                      TStringView aLabel, char *s, uchar limit ) noexcept;
 
-const int
+enum : int {
 
 //  Message box classes
 
@@ -55,8 +55,9 @@ const int
 
     mfYesNoCancel  = mfYesButton | mfNoButton | mfCancelButton,
                                     // Standard Yes, No, Cancel dialog
-    mfOKCancel     = mfOKButton | mfCancelButton;
+    mfOKCancel     = mfOKButton | mfCancelButton
                                     // Standard OK, Cancel dialog
+};
 
 class MsgBoxText
 {

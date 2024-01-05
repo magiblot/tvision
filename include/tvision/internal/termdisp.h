@@ -8,11 +8,12 @@ namespace tvision
 
 // Terminal quirk flags.
 
-const uint
+enum : uint {
     qfBoldIsBright  = 0x0001,
     qfBlinkIsBright = 0x0002,
     qfNoItalic      = 0x0004,
-    qfNoUnderline   = 0x0008;
+    qfNoUnderline   = 0x0008
+};
 
 enum TermCapColors : uint8_t
 {

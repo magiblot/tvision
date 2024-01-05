@@ -179,30 +179,33 @@ inline opstream& operator << ( opstream& os, TDeskTop* cl )
 
 // Note: range $FF00 - $FFFF of help contexts are reserved by Borland
 
-const unsigned short hcNew          = 0xFF01;
-const unsigned short hcOpen         = 0xFF02;
-const unsigned short hcSave         = 0xFF03;
-const unsigned short hcSaveAs       = 0xFF04;
-const unsigned short hcSaveAll      = 0xFF05;
-const unsigned short hcChangeDir    = 0xFF06;
-const unsigned short hcDosShell     = 0xFF07;
-const unsigned short hcExit         = 0xFF08;
+enum : unsigned short {
 
-const unsigned short hcUndo         = 0xFF10;
-const unsigned short hcCut          = 0xFF11;
-const unsigned short hcCopy         = 0xFF12;
-const unsigned short hcPaste        = 0xFF13;
-const unsigned short hcClear        = 0xFF14;
+    hcNew          = 0xFF01,
+    hcOpen         = 0xFF02,
+    hcSave         = 0xFF03,
+    hcSaveAs       = 0xFF04,
+    hcSaveAll      = 0xFF05,
+    hcChangeDir    = 0xFF06,
+    hcDosShell     = 0xFF07,
+    hcExit         = 0xFF08,
 
-const unsigned short hcTile         = 0xFF20;
-const unsigned short hcCascade      = 0xFF21;
-const unsigned short hcCloseAll     = 0xFF22;
-const unsigned short hcResize       = 0xFF23;
-const unsigned short hcZoom         = 0xFF24;
-const unsigned short hcNext         = 0xFF25;
-const unsigned short hcPrev         = 0xFF26;
-const unsigned short hcClose        = 0xFF27;
+    hcUndo         = 0xFF10,
+    hcCut          = 0xFF11,
+    hcCopy         = 0xFF12,
+    hcPaste        = 0xFF13,
+    hcClear        = 0xFF14,
 
+    hcTile         = 0xFF20,
+    hcCascade      = 0xFF21,
+    hcCloseAll     = 0xFF22,
+    hcResize       = 0xFF23,
+    hcZoom         = 0xFF24,
+    hcNext         = 0xFF25,
+    hcPrev         = 0xFF26,
+    hcClose        = 0xFF27
+
+};
 
 class _FAR TStatusLine;
 class _FAR TMenuBar;
@@ -240,14 +243,14 @@ protected:
 /*      32-63 = TDialog                                                   */
 /* ---------------------------------------------------------------------- */
 
-const int
+enum : int {
 
 //  TApplication palette entries
 
     apColor      = 0,
     apBlackWhite = 1,
-    apMonochrome = 2;
-
+    apMonochrome = 2
+};
 class _FAR TDialog;
 class _FAR TWindow;
 class _FAR TTimerQueue;

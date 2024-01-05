@@ -24,7 +24,7 @@
 #if !defined( __COMMAND_CODES )
 #define __COMMAND_CODES
 
-const ushort
+enum : ushort {
 
 //  Standard command codes
 
@@ -197,7 +197,8 @@ const ushort
 //  Event masks
 
     positionalEvents    = evMouse & ~evMouseWheel,
-    focusedEvents       = evKeyboard | evCommand;
+    focusedEvents       = evKeyboard | evCommand
+};
 
 #endif  // __COMMAND_CODES
 

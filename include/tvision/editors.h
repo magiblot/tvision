@@ -36,25 +36,29 @@
 #if !defined( __EDIT_COMMAND_CODES )
 #define __EDIT_COMMAND_CODES
 
-const int
+enum : int {
   ufUpdate = 0x01,
   ufLine   = 0x02,
-  ufView   = 0x04;
+  ufView   = 0x04
+};
 
-const int
+enum : int {
   smExtend = 0x01,
   smDouble = 0x02,
-  smTriple = 0x04;
+  smTriple = 0x04
+};
 
-const unsigned
-  sfSearchFailed = -0x01;
+enum : unsigned {
+  sfSearchFailed = (unsigned)-0x01
+};
 
-const int
+enum : int {
   cmFind        = 82,
   cmReplace     = 83,
-  cmSearchAgain = 84;
+  cmSearchAgain = 84
+};
 
-const int
+enum : int {
   cmCharLeft    = 500,
   cmCharRight   = 501,
   cmWordLeft    = 502,
@@ -81,9 +85,10 @@ const int
   cmUpdateTitle = 523,
   cmSelectAll   = 524,
   cmDelWordLeft = 525,
-  cmEncoding    = 526;
+  cmEncoding    = 526
+};
 
-const int
+enum : int {
   edOutOfMemory   = 0,
   edReadError     = 1,
   edWriteError    = 2,
@@ -94,18 +99,21 @@ const int
   edFind          = 7,
   edSearchFailed  = 8,
   edReplace       = 9,
-  edReplacePrompt = 10;
+  edReplacePrompt = 10
+};
 
-const int
+enum : int {
   efCaseSensitive   = 0x0001,
   efWholeWordsOnly  = 0x0002,
   efPromptOnReplace = 0x0004,
   efReplaceAll      = 0x0008,
   efDoReplace       = 0x0010,
-  efBackupFiles     = 0x0100;
+  efBackupFiles     = 0x0100
+};
 
-const int
-  maxLineLength = 256;
+enum : int {
+  maxLineLength = 256
+};
 
 #endif  // __EDIT_COMMAND_CODES
 

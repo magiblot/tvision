@@ -26,7 +26,7 @@
 #if !defined( __FILE_CMDS )
 #define __FILE_CMDS
 
-const int
+enum : int {
 
 //  Commands
 
@@ -41,7 +41,9 @@ const int
 
     cmFileFocused = 102,    // A new file was focused in the TFileList
     cmFileDoubleClicked     // A file was selected in the TFileList
-            = 103;
+            = 103
+};
+
 
 #endif  // __FILE_CMDS
 
@@ -375,17 +377,18 @@ inline opstream& operator << ( opstream& os, TFileInfoPane* cl )
 #if defined( Uses_TFileDialog ) && !defined( __TFileDialog )
 #define __TFileDialog
 
-const int
+enum : int {
     fdOKButton      = 0x0001,      // Put an OK button in the dialog
     fdOpenButton    = 0x0002,      // Put an Open button in the dialog
     fdReplaceButton = 0x0004,      // Put a Replace button in the dialog
     fdClearButton   = 0x0008,      // Put a Clear button in the dialog
     fdHelpButton    = 0x0010,      // Put a Help button in the dialog
-    fdNoLoadDir     = 0x0100;      // Do not load the current directory
+    fdNoLoadDir     = 0x0100       // Do not load the current directory
                                    // contents into the dialog at Init.
                                    // This means you intend to change the
                                    // WildCard by using SetData or store
                                    // the dialog on a stream.
+};
 
 #if !defined( __DIR_H )
 #include <tvision/compat/borland/dir.h>
@@ -650,10 +653,11 @@ inline TDirCollection *TDirListBox::list()
 #if defined( Uses_TChDirDialog ) && !defined( __TChDirDialog )
 #define __TChDirDialog
 
-const int
+enum : int {
     cdNormal     = 0x0000, // Option to use dialog immediately
     cdNoLoadDir  = 0x0001, // Option to init the dialog to store on a stream
-    cdHelpButton = 0x0002; // Put a help button in the dialog
+    cdHelpButton = 0x0002  // Put a help button in the dialog
+};
 
 struct _FAR TEvent;
 class _FAR TInputLine;

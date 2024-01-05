@@ -23,13 +23,15 @@
 #if defined( Uses_TOutlineViewer ) && !defined( __TOutlineViewer )
 #define __TOutlineViewer
 
-const int
+enum : int {
   ovExpanded = 0x01,
   ovChildren = 0x02,
-  ovLast     = 0x04;
+  ovLast     = 0x04
+};
 
-const int
-  cmOutlineItemSelected = 301;
+enum : int {
+  cmOutlineItemSelected = 301
+};
 
 class TNode
 {

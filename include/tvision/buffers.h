@@ -24,7 +24,7 @@
 #if defined( Uses_TVMemMgr ) && !defined( __TVMemMgr )
 #define __TVMemMgr
 
-const int DEFAULT_SAFETY_POOL_SIZE = 4096;
+enum : int { DEFAULT_SAFETY_POOL_SIZE = 4096 };
 
 class TBufListEntry
 {
