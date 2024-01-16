@@ -66,7 +66,7 @@ inline size_t utf32To8(uint32_t u32, char u8[4]) noexcept
             (( u32        & 0b00111111) | 0b10000000) << 24;
         length = 4;
     }
-    memcpy(u8, &asInt, 4);
+    tvintmemcpy(u8, &asInt, 4);
     return length;
 }
 

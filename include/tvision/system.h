@@ -187,8 +187,14 @@ inline void TMouse::registerHandler( unsigned mask, void (_FAR *func)() )
 
 struct CharScanType
 {
+#ifndef TV_BIG_ENDIAN
     uchar charCode;
     uchar scanCode;
+#else
+    // big endian version reverses the order
+    uchar scanCode;
+    uchar charCode;
+#endif
 };
 
 struct KeyDownEvent

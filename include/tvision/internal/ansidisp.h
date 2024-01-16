@@ -30,14 +30,14 @@ struct TermColor
 
     TermColor& operator=(uint32_t val) noexcept
     {
-        memcpy(this, &val, sizeof(*this));
+        tvintmemcpy(this, &val, sizeof(*this));
         return *this;
         static_assert(sizeof(*this) == 4, "");
     }
     operator uint32_t() const noexcept
     {
         uint32_t val;
-        memcpy(&val, this, sizeof(*this));
+        tvintmemcpy(&val, this, sizeof(*this));
         return val;
     }
     TermColor(uint8_t aIdx, TermColorTypes aType) noexcept

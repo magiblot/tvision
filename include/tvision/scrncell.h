@@ -83,7 +83,7 @@ inline void TCellChar::moveInt(uint32_t mbc, bool wide)
 {
     memset(this, 0, sizeof(*this));
     // CAUTION: Assumes Little Endian.
-    memcpy(_text, &mbc, sizeof(mbc));
+    tvintmemcpy(_text, &mbc, sizeof(mbc));
     _flags = -int(wide) & fWide;
 }
 

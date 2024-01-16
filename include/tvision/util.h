@@ -110,4 +110,21 @@ char *ultoa( ulong value, char *buffer, int radix ) noexcept;
 
 #endif // __BORLANDC__
 
+#ifdef TV_BIG_ENDIAN
+    inline void *be_tvintmemcpy(void *dest, const void *src, size_t n)  // implementation of tvintmemcpy for Big Endian platforms, reverses bytes while copying
+    {
+        // TVision assumes Little Endian byte order for some operations where uints are assigned to stucts etc.
+        // This memcpy-like function reverses the order of the bytes when copying them, so can be used on big-endian
+        // platforms in place of a standard memcpy.
+        for (size_t i=0; i<n; i++) {
+            ((uchar*)dest)[i] = ((const uchar*)src)[n-i-1];
+        }
+        return dest;
+    }
+    #define tvintmemcpy be_tvintmemcpy
+#else
+    // On little-endian platforms, just use memcpy as before
+    #define tvintmemcpy memcpy
+#endif
+
 #endif  // __UTIL_H

@@ -23,7 +23,7 @@ public:
     static uint32_t toPackedUtf8(unsigned char c) noexcept
     {
         uint32_t asInt;
-        memcpy(&asInt, (*currentToUtf8)[c], sizeof(asInt));
+        tvintmemcpy(&asInt, (*currentToUtf8)[c], sizeof(asInt));
         return asInt;
     }
 

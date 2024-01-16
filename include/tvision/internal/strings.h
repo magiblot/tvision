@@ -13,8 +13,12 @@ inline constexpr Int string_as_int(TStringView s) noexcept
 {
     Int res = 0;
     for (size_t i = 0; i < min(s.size(), sizeof(res)); ++i)
+#ifndef TV_BIG_ENDIAN
         // CAUTION: Assumes Little Endian.
         res |= uint64_t(uint8_t(s[i])) << 8*i;
+#else
+        res |= uint64_t(uint8_t(s[i])) << 8*(sizeof(res)-1-i);
+#endif
     return res;
 }
 
@@ -35,6 +39,7 @@ inline char *fast_btoa(uint8_t value, char *buffer) noexcept
 {
     extern const btoa_lut_t btoa_lut;
     const auto &lut = (btoa_lut_elem_t (&) [256]) btoa_lut;
+#ifndef TV_BIG_ENDIAN
     // CAUTION: Assumes Little Endian.
     // We can afford to write more bytes into 'buffer' than digits.
     uint32_t asInt;
@@ -42,6 +47,11 @@ inline char *fast_btoa(uint8_t value, char *buffer) noexcept
     memcpy(buffer, &asInt, 4);
     return buffer + (asInt >> 24);
     static_assert(sizeof(btoa_lut_elem_t) == 4, "");
+#else
+    memcpy(buffer, &lut[value].chars, lut[value].digits);
+    buffer[lut[value].digits] = 0;  // null-terminate for safety - may not be needed?
+    return buffer + lut[value].digits;
+#endif
 }
 
 } // namespace tvision

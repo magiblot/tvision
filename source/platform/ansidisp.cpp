@@ -159,7 +159,7 @@ struct alignas(8) colorconv_r
     colorconv_r(TermColor aColor, TColorAttr::Style aExtraFlags=0) noexcept
     {
         uint64_t val = aColor | (uint64_t(aExtraFlags) << 32);
-        memcpy(this, &val, 8);
+        tvintmemcpy(this, &val, 8);
         static_assert(sizeof(*this) == 8, "");
     }
 };

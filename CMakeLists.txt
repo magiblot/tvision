@@ -160,6 +160,17 @@ endif()
 
 option(TV_BUILD_TESTS "Build and run tests" OFF)
 
+# Endianness detection
+
+include(TestBigEndian)
+TEST_BIG_ENDIAN(BIGENDIAN)
+if(${BIGENDIAN})
+    add_definitions(-DTV_BIG_ENDIAN)
+    tv_message_mp(STATUS "BIG ENDIAN platform detected")
+else()
+    tv_message_mp(STATUS "LITTLE ENDIAN platform detected")
+endif(${BIGENDIAN})
+
 # Library
 
 add_subdirectory(source)
