@@ -10,18 +10,20 @@ TEST(Utf8, ShouldConvertUtf16StringToUtf8)
     static const TestCase<TSpan<const char>, TStringView> testCases[] =
     {
         {"", ""},
-        {"\x61\x00\x62\x00\x63\x00\x64\x00", "abcd"},
-        {"\x6F\x00\x3D\xD8\x95\xDC\x57\x00", "o💕W"},
+        // Use Unicode string literals so that the resulting UTF-16 characters
+        // are encoded using the system's native endianess.
+        {(const char (&)[8]) u"\u0061\u0062\u0063\u0064", "abcd"},
+        {(const char (&)[8]) u"\u006F\U0001F495\u0057", "o💕W"},
     };
 
     for (auto &testCase : testCases)
     {
-        TSpan<const uint16_t> input {
+        TSpan<const uint16_t> u16Input {
             (const uint16_t *) testCase.input.data(),
             testCase.input.size()/2,
         };
-        char *buf = new char[input.size()*3];
-        size_t length = utf16To8(input, buf);
+        char *buf = new char[u16Input.size()*3];
+        size_t length = utf16To8(u16Input, buf);
         TStringView actual {buf, length};
         expectResultMatches(actual, testCase);
         delete[] buf;

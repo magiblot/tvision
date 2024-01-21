@@ -66,7 +66,7 @@ TEST(TermIO, ShouldReadWin32InputModeKeys)
         {"\x1B[112;59;0;0;8;1_", {}},
         // https://github.com/microsoft/terminal/issues/15083
         { // SGR mouse event
-            "\x1B[0;0;27;1;0;1_"
+            "\x1B[0;0;27;1;0;1_" // \x1B[<0;52;12M
             "\x1B[0;0;91;1;0;1_"
             "\x1B[0;0;60;1;0;1_"
             "\x1B[0;0;48;1;0;1_"

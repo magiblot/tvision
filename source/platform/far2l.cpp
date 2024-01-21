@@ -6,6 +6,7 @@
 #include <internal/constmap.h>
 #include <internal/base64.h>
 #include <internal/events.h>
+#include <internal/endian.h>
 
 #include <time.h>
 
@@ -97,6 +98,16 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
             memcpy(&kev.dwControlKeyState, &out[6],  4);
             memcpy(&kev.uChar.UnicodeChar, &out[10], 4);
 
+#ifdef TV_BIG_ENDIAN
+            // The protocol states that "all integer values are in
+            // little-endian format", so convert them.
+            reverseBytes(kev.wRepeatCount);
+            reverseBytes(kev.wVirtualKeyCode);
+            reverseBytes(kev.wVirtualScanCode);
+            reverseBytes(kev.dwControlKeyState);
+            reverseBytes((uint32_t &) kev.uChar.UnicodeChar);
+#endif
+
             if (uint16_t keyCode = virtualKeyCodeToKeyCode[kev.wVirtualKeyCode])
             {
                 kev.wVirtualScanCode = keyCode >> 8;
@@ -119,6 +130,14 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
             memcpy(&mev.dwButtonState,     &out[4],  4);
             memcpy(&mev.dwControlKeyState, &out[8],  4);
             memcpy(&mev.dwEventFlags,      &out[12], 4);
+
+#ifdef TV_BIG_ENDIAN
+            reverseBytes((uint16_t &) mev.dwMousePosition.X);
+            reverseBytes((uint16_t &) mev.dwMousePosition.Y);
+            reverseBytes(mev.dwButtonState);
+            reverseBytes(mev.dwControlKeyState);
+            reverseBytes(mev.dwEventFlags);
+#endif
 
             getWin32Mouse(mev, ev, state);
             return Accepted;
@@ -143,6 +162,9 @@ ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexc
             {
                 uint32_t dataSize;
                 memcpy(&dataSize, &decoded[decoded.size() - 5], 4);
+#ifdef TV_BIG_ENDIAN
+                reverseBytes(dataSize);
+#endif
                 if (dataSize < UINT_MAX - 5 && decoded.size() >= 5 + dataSize)
                 {
                     TStringView text = decoded.substr(decoded.size() - 5 - dataSize, dataSize);
@@ -195,7 +217,12 @@ inline size_t concat(char *out, uint32_t i, Args ...args) noexcept
 {
     size_t len = sizeof(i);
     if (write)
+    {
+#ifdef TV_BIG_ENDIAN
+        reverseBytes(i);
+#endif
         memcpy(out, &i, len);
+    }
     return len + concat<write>(out + len, args...);
 }
 

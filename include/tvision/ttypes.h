@@ -50,6 +50,8 @@ typedef long int32_t;
 typedef uchar uint8_t;
 typedef ushort uint16_t;
 typedef ulong uint32_t;
+typedef long intptr_t;
+typedef ulong uintptr_t;
 #endif
 
 #ifdef __BORLANDC__

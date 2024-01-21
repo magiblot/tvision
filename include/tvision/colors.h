@@ -57,20 +57,34 @@ inline TColorAttr reverseAttribute(TColorAttr attr)
 struct TColorRGB
 {
     uint32_t
+#ifndef TV_BIG_ENDIAN
         b       : 8,
         g       : 8,
         r       : 8,
         _unused : 8;
+#else
+        _unused : 8,
+        r       : 8,
+        g       : 8,
+        b       : 8;
+#endif
 
     TV_TRIVIALLY_CONVERTIBLE(TColorRGB, uint32_t, 0xFFFFFF)
     constexpr inline TColorRGB(uint8_t r, uint8_t g, uint8_t b);
 };
 
 constexpr inline TColorRGB::TColorRGB(uint8_t r, uint8_t g, uint8_t b) :
+#ifndef TV_BIG_ENDIAN
     b(b),
     g(g),
     r(r),
     _unused(0)
+#else
+    _unused(0),
+    r(r),
+    g(g),
+    b(b)
+#endif
 {
 }
 
@@ -90,11 +104,19 @@ constexpr inline TColorRGB::TColorRGB(uint8_t r, uint8_t g, uint8_t b) :
 struct TColorBIOS
 {
     uint8_t
+#ifndef TV_BIG_ENDIAN
         b       : 1,
         g       : 1,
         r       : 1,
         bright  : 1,
         _unused : 4;
+#else
+        _unused : 4,
+        bright  : 1,
+        r       : 1,
+        g       : 1,
+        b       : 1;
+#endif
 
     TV_TRIVIALLY_CONVERTIBLE(TColorBIOS, uint8_t, 0xF)
 };

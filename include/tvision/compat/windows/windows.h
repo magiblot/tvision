@@ -204,7 +204,11 @@ typedef struct _KEY_EVENT_RECORD {
     WORD wVirtualScanCode;
     union {
         WCHAR UnicodeChar;
+#ifndef TV_BIG_ENDIAN
         CHAR   AsciiChar;
+#else
+        struct { WCHAR : 8*sizeof(WCHAR) - 8, AsciiChar : 8; };
+#endif
     } uChar;
     DWORD dwControlKeyState;
 } KEY_EVENT_RECORD;

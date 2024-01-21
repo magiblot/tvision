@@ -1,7 +1,9 @@
 #ifndef TVISION_UTF8_H
 #define TVISION_UTF8_H
 
-#include <internal/strings.h>
+#include <tvision/tv.h>
+
+#include <internal/endian.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -66,6 +68,9 @@ inline size_t utf32To8(uint32_t u32, char u8[4]) noexcept
             (( u32        & 0b00111111) | 0b10000000) << 24;
         length = 4;
     }
+#ifdef TV_BIG_ENDIAN
+    reverseBytes(asInt);
+#endif
     memcpy(u8, &asInt, 4);
     return length;
 }

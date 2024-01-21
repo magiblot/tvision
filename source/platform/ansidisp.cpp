@@ -158,7 +158,11 @@ struct alignas(8) colorconv_r
     colorconv_r() = default;
     colorconv_r(TermColor aColor, TColorAttr::Style aExtraFlags=0) noexcept
     {
+        // Optimization: do bit-casting manually, just like with TermColor.
         uint64_t val = aColor | (uint64_t(aExtraFlags) << 32);
+#ifdef TV_BIG_ENDIAN
+        reverseBytes(val);
+#endif
         memcpy(this, &val, 8);
         static_assert(sizeof(*this) == 8, "");
     }

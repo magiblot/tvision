@@ -36,4 +36,8 @@ if (TV_BUILD_TESTS)
     )
     add_custom_target(${PROJECT_NAME}-test-run ALL DEPENDS ${PROJECT_NAME}-test-passed)
 
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0" AND TV_OPTIMIZE_BUILD)
+        target_precompile_headers(${PROJECT_NAME}-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/test.h")
+        tv_enable_unity(${PROJECT_NAME}-test)
+    endif()
 endif()

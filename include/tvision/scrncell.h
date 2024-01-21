@@ -76,13 +76,14 @@ struct TCellChar
 
 inline void TCellChar::moveChar(char ch)
 {
-    moveInt((uchar) ch);
+    memset(this, 0, sizeof(*this));
+    _text[0] = ch;
 }
 
 inline void TCellChar::moveInt(uint32_t mbc, bool wide)
+// Pre: 'mbc' is a bit-casted multibyte-encoded character.
 {
     memset(this, 0, sizeof(*this));
-    // CAUTION: Assumes Little Endian.
     memcpy(_text, &mbc, sizeof(mbc));
     _flags = -int(wide) & fWide;
 }

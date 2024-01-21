@@ -725,12 +725,13 @@ void TView::putInFrontOf( TView *Target )
 
 void TView::select()
 {
-    if( ! (options & ofSelectable))
-	return;
-    if( (options & ofTopSelect) != 0 )
-        makeFirst();
-    else if( owner != 0 )
-        owner->setCurrent( this, normalSelect );
+    if( (options & ofSelectable) != 0 && owner != 0 )
+        {
+        if( (options & ofTopSelect) != 0 )
+            makeFirst();
+        else
+            owner->setCurrent( this, normalSelect );
+        }
 }
 
 void TView::setBounds( const TRect& bounds ) noexcept

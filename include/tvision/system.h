@@ -187,8 +187,15 @@ inline void TMouse::registerHandler( unsigned mask, void (_FAR *func)() )
 
 struct CharScanType
 {
+#if !defined( TV_BIG_ENDIAN )
     uchar charCode;
     uchar scanCode;
+#else
+    // Due to the reverse byte order, swap the fields in order to preserve
+    // the aliasing with KeyDownEvent::keyCode.
+    uchar scanCode;
+    uchar charCode;
+#endif
 };
 
 struct KeyDownEvent
@@ -222,11 +229,21 @@ struct MessageEvent
     union
         {
         void *infoPtr;
+#if !defined( TV_BIG_ENDIAN )
         int32_t infoLong;
         ushort infoWord;
         short infoInt;
         uchar infoByte;
         char infoChar;
+#else
+        // Due to the reverse byte order, add padding at the beginning to
+        // preserve the aliasing with infoPtr.
+        struct { intptr_t  : 8*sizeof(infoPtr) - 32, infoLong : 32; };
+        struct { uintptr_t : 8*sizeof(infoPtr) - 16, infoWord : 16; };
+        struct { intptr_t  : 8*sizeof(infoPtr) - 16, infoInt  : 16; };
+        struct { uintptr_t : 8*sizeof(infoPtr) - 8,  infoByte : 8;  };
+        struct { intptr_t  : 8*sizeof(infoPtr) - 8,  infoChar : 8;  };
+#endif
         };
 };
 

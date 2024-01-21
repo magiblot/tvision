@@ -74,6 +74,17 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     TVISION_NO_STL
 )
 
+include(TestBigEndian)
+
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+
+if (IS_BIG_ENDIAN)
+    tv_message(STATUS "Big endian system detected")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC
+        TV_BIG_ENDIAN
+    )
+endif()
+
 # Dependencies
 
 if (NOT WIN32)
@@ -172,6 +183,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0" AND TV_OPTIMIZE_BUILD)
         file(GLOB_RECURSE TVSOURCE_NOUNITY "${CMAKE_CURRENT_LIST_DIR}/tvision/s*.cpp")
         list(APPEND TVSOURCE_NOUNITY "${CMAKE_CURRENT_LIST_DIR}/tvision/new.cpp")
         list(REMOVE_ITEM TVSOURCE_NOUNITY
+            "${CMAKE_CURRENT_LIST_DIR}/tvision/snprintf.cpp"
             "${CMAKE_CURRENT_LIST_DIR}/tvision/stddlg.cpp"
             "${CMAKE_CURRENT_LIST_DIR}/tvision/strmstat.cpp"
             "${CMAKE_CURRENT_LIST_DIR}/tvision/syserr.cpp"

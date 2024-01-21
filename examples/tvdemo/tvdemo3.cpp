@@ -48,10 +48,12 @@ void TVDemo::mouse()
 
     if (mouseCage != 0)
         {
+        int32_t mouseReverse = TEventQueue::mouseReverse;
         mouseCage->helpCtx = hcOMMouseDBox;
-        mouseCage->setData(&(TEventQueue::mouseReverse));
+        mouseCage->setData(&mouseReverse);
         if (deskTop->execView(mouseCage) != cmCancel)
-            mouseCage->getData(&(TEventQueue::mouseReverse));
+            mouseCage->getData(&mouseReverse);
+        TEventQueue::mouseReverse = mouseReverse;
         }
     destroy( mouseCage );
    

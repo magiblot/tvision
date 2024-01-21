@@ -340,7 +340,7 @@ inline void FlushScreenAlgorithm::writeCell() noexcept
 inline void FlushScreenAlgorithm::writeSpace() noexcept
 {
     TCellChar ch;
-    ch.moveInt(' ');
+    ch.moveChar(' ');
     writeCell(ch, cell->attr, 0);
 }
 
