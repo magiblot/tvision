@@ -12,12 +12,14 @@
 
 TEST(Scrncell, StructsShouldBeTrivialAndHaveTheExpectedAlignmentAndSize)
 {
-    check_trivial_size_align(TColorDesired, 4, 4);
-    check_trivial_size_align(TColorAttr, 8, 8);
-    check_trivial_size_align(TAttrPair, 16, 8);
-    check_trivial_size_align(TCellChar, 16, 1);
-    check_trivial_size_align(TScreenCell, 24, 8);
-    check_trivial_size_align(TColorBIOS, 1, 1);
-    check_trivial_size_align(TColorRGB, 4, 4);
-    check_trivial_size_align(TColorXTerm, 1, 1);
+    // Use 'alignof(type)' rather than hardcoding the alignment values,
+    // given that they may vary among systems.
+    check_trivial_size_align(TColorDesired, 4,  alignof(uint32_t));
+    check_trivial_size_align(TColorAttr,    8,  alignof(uint64_t));
+    check_trivial_size_align(TAttrPair,     16, alignof(uint64_t));
+    check_trivial_size_align(TCellChar,     16, alignof(uint8_t));
+    check_trivial_size_align(TScreenCell,   24, alignof(uint64_t));
+    check_trivial_size_align(TColorBIOS,    1,  alignof(uint8_t));
+    check_trivial_size_align(TColorRGB,     4,  alignof(uint32_t));
+    check_trivial_size_align(TColorXTerm,   1,  alignof(uint8_t));
 }
