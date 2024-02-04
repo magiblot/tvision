@@ -3,7 +3,6 @@
 
 #include <internal/stdioctl.h>
 #include <internal/getenv.h>
-#include <initializer_list>
 
 namespace tvision
 {
@@ -39,46 +38,34 @@ namespace tvision
 
 StdioCtl::StdioCtl() noexcept
 {
-    if (getEnv<TStringView>("TVISION_USE_STDIO").empty())
+    if ( getEnv<TStringView>("TVISION_USE_STDIO").empty()
+         && (files[0] = fopen("/dev/tty", "r")) != nullptr
+         && (files[1] = fopen("/dev/tty", "w")) != nullptr )
     {
-        for (int fd : {0, 1, 2})
-            if (auto *name = ::ttyname(fd))
-                if ((ttyfd = ::open(name, O_RDWR)) != -1)
-                    break;
-        // Last resort, although this may lead to 100% CPU usage because
-        // /dev/tty is not supported by macOS's poll(),
-        if (ttyfd == -1)
-            ttyfd = ::open("/dev/tty", O_RDWR);
-    }
-
-    if (ttyfd != -1)
-    {
-        for (auto &fd : fds)
-            fd = ttyfd;
-        int ttyfd2 = dup(ttyfd);
-        if (ttyfd2 == -1)
-            ttyfd2 = ttyfd; // This is wrong, but aborting is worse.
-        infile = ::fdopen(ttyfd, "r");
-        outfile = ::fdopen(ttyfd2, "w");
-        fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
-        fcntl(ttyfd2, F_SETFD, FD_CLOEXEC);
+        ownsFiles = true;
+        fds[0] = fileno(files[0]);
+        fds[1] = fileno(files[1]);
+        // Subprocesses must not inherit these file descriptors.
+        for (int fd : fds)
+            fcntl(fd, F_SETFD, FD_CLOEXEC);
     }
     else
     {
-        for (int i = 0; i < 2; ++i)
-            fds[i] = i;
-        infile = stdin;
-        outfile = stdout;
+        for (FILE *file : files)
+            if (file != nullptr)
+                fclose(file);
+        fds[0] = STDIN_FILENO;
+        fds[1] = STDOUT_FILENO;
+        files[0] = stdin;
+        files[1] = stdout;
     }
 }
 
 StdioCtl::~StdioCtl()
 {
-    if (ttyfd != -1)
-    {
-        ::fclose(infile);
-        ::fclose(outfile);
-    }
+    if (ownsFiles)
+        for (FILE *file : files)
+            fclose(file);
 }
 
 void StdioCtl::write(const char *data, size_t bytes) const noexcept
@@ -94,7 +81,7 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
 TPoint StdioCtl::getSize() const noexcept
 {
     struct winsize w;
-    for (int fd : {in(), out()})
+    for (int fd : fds)
     {
         if (ioctl(fd, TIOCGWINSZ, &w) != -1)
         {
@@ -115,7 +102,7 @@ TPoint StdioCtl::getFontSize() const noexcept
     struct console_font_op cfo {};
     cfo.op = KD_FONT_OP_GET;
     cfo.width = cfo.height = 32;
-    for (int fd : {in(), out()})
+    for (int fd : fds)
         if (ioctl(fd, KDFONTOP, &cfo) != -1)
             return {
                 max(cfo.width, 0),
@@ -123,7 +110,7 @@ TPoint StdioCtl::getFontSize() const noexcept
             };
 #endif
     struct winsize w;
-    for (int fd : {in(), out()})
+    for (int fd : fds)
         if (ioctl(fd, TIOCGWINSZ, &w) != -1)
             return {
                 w.ws_xpixel / max(w.ws_col, 1),
@@ -138,7 +125,7 @@ bool StdioCtl::isLinuxConsole() const noexcept
 {
     // This is the same function used to get the Shift/Ctrl/Alt modifiers
     // on the console. It only succeeds if a console file descriptor is used.
-    for (int fd : {in(), out()})
+    for (int fd : fds)
     {
         char subcode = 6;
         if (ioctl(fd, TIOCLINUX, &subcode) != -1)

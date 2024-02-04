@@ -10,6 +10,7 @@ using std::chrono::steady_clock;
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/select.h>
 #endif
 
 namespace tvision
@@ -133,33 +134,53 @@ static bool fdEmpty(int fd) noexcept
 
 static void pollHandles(PollData &pd, int ms) noexcept
 {
-    auto &fds = pd.items;
+    auto &fds = pd.handles;
     auto &states = pd.states;
-    if (poll(fds.data(), fds.size(), ms) > 0)
-        for (size_t i = 0; i < fds.size(); ++i)
+    // We use 'select' instead of 'poll' because it is more portable, especially
+    // on macOS. However, 'select' only supports file descriptors smaller than
+    // 'FD_SETSIZE'. But this should not be an issue, since we just open a few
+    // of them at program startup and when suspending/resuming the application.
+    fd_set readFds;
+    FD_ZERO(&readFds);
+    int maxFd = -1;
+    for (size_t i = 0; i < fds.size(); ++i)
+        if (fds[i] < FD_SETSIZE)
         {
-            if ( (fds[i].revents & POLLHUP) ||
-                 ((fds[i].revents & POLLIN) && fdEmpty(fds[i].fd)) )
-                // Broken pipe or EOF will cause poll to return immediately,
-                // so remove it from the list.
-                states[i] = psDisconnect;
-            else if (fds[i].revents & POLLIN)
-                states[i] = psReady;
+            FD_SET(fds[i], &readFds);
+            if (fds[i] > maxFd)
+                maxFd = fds[i];
         }
+
+    if (maxFd >= 0)
+    {
+        struct timeval timeout;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = ms*1000;
+        if ( select( maxFd + 1, &readFds, nullptr, nullptr,
+                     (ms < 0 ? nullptr : &timeout) ) >= 0 )
+            for (size_t i = 0; i < fds.size(); ++i)
+                if (fds[i] < FD_SETSIZE && FD_ISSET(fds[i], &readFds))
+                {
+                    if (fdEmpty(fds[i]))
+                        states[i] = psDisconnect;
+                    else
+                        states[i] = psReady;
+                }
+    }
 }
 
 #else
 
 static void pollHandles(PollData &pd, int ms) noexcept
 {
-    auto &handles = pd.items;
+    auto &handles = pd.handles;
     auto &states = pd.states;
     if (handles.size() == 0)
         Sleep(ms);
     else
     {
         DWORD res = WaitForMultipleObjects(
-            handles.size(), handles.data(), FALSE, ms < 0 ? INFINITE : ms);
+            handles.size(), &handles[0], FALSE, (ms < 0 ? INFINITE : ms));
         size_t i = 0;
         while (WAIT_OBJECT_0 <= res && res <= WAIT_OBJECT_0 + handles.size() - i - 1)
         {

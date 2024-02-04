@@ -7,29 +7,27 @@
 #include <memory>
 #include <vector>
 
-#ifdef _TV_UNIX
-#include <poll.h>
-#else
+#ifdef _WIN32
 #include <tvision/compat/windows/windows.h>
 #endif
 
 namespace tvision
 {
 
-#ifdef _TV_UNIX
-using SysHandle = int;
-#else
+#ifdef _WIN32
 using SysHandle = HANDLE;
+#else
+using SysHandle = int;
 #endif
 
 struct SysManualEvent
 {
-#ifdef _TV_UNIX
-    using Handle = int[2];
-    Handle fds;
-#else
+#ifdef _WIN32
     using Handle = HANDLE;
     Handle hEvent;
+#else
+    using Handle = int[2];
+    Handle fds;
 #endif
 
     static bool createHandle(Handle &handle) noexcept;
@@ -42,20 +40,20 @@ struct SysManualEvent
 };
 
 inline SysManualEvent::SysManualEvent(Handle aHandle) noexcept :
-#ifdef _TV_UNIX
-    fds {aHandle[0], aHandle[1]}
-#else
+#ifdef _WIN32
     hEvent {aHandle}
+#else
+    fds {aHandle[0], aHandle[1]}
 #endif
 {
 }
 
 inline SysHandle SysManualEvent::getWaitableHandle(Handle handle) noexcept
 {
-#ifdef _TV_UNIX
-    return handle[0];
-#else
+#ifdef _WIN32
     return handle;
+#else
+    return handle[0];
 #endif
 }
 
@@ -109,14 +107,6 @@ inline WakeUpEventSource::WakeUpEventSource( SysManualEvent::Handle aHandle,
 {
 }
 
-#ifdef _TV_UNIX
-using PollItem = struct pollfd;
-static inline PollItem pollItem(SysHandle fd) noexcept { return {fd, POLLIN}; }
-#else
-using PollItem = HANDLE;
-static inline PollItem pollItem(SysHandle h) noexcept { return h; }
-#endif
-
 enum PollState : uint8_t
 {
     psNothing,
@@ -126,24 +116,24 @@ enum PollState : uint8_t
 
 struct PollData
 {
-    std::vector<PollItem> items;
+    std::vector<SysHandle> handles;
     std::vector<PollState> states;
 
     void push_back(SysHandle h)
     {
-        items.push_back(pollItem(h));
+        handles.push_back(h);
         states.push_back(psNothing);
     }
 
     void erase(size_t i)
     {
-        items.erase(items.begin() + i);
+        handles.erase(handles.begin() + i);
         states.erase(states.begin() + i);
     }
 
     size_t size()
     {
-        return items.size();
+        return handles.size();
     }
 };
 

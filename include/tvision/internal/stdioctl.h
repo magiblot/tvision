@@ -22,10 +22,9 @@ class StdioCtl final
     } cn[3];
     bool ownsConsole {false};
 #else
-    int ttyfd {-1};
     int fds[2] {-1, -1};
-    FILE *infile {nullptr};
-    FILE *outfile {nullptr};
+    FILE *files[2] {nullptr, nullptr};
+    bool ownsFiles {false};
 #endif // _WIN32
 
     static StdioCtl *instance;
@@ -56,8 +55,8 @@ public:
 #else
     int in() const noexcept { return fds[0]; }
     int out() const noexcept { return fds[1]; }
-    FILE *fin() const noexcept { return infile; }
-    FILE *fout() const noexcept { return outfile; }
+    FILE *fin() const noexcept { return files[0]; }
+    FILE *fout() const noexcept { return files[1]; }
 #ifdef __linux__
     bool isLinuxConsole() const noexcept;
 #endif
