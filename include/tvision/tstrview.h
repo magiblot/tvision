@@ -204,9 +204,9 @@ inline constexpr const char _FAR * TStringView::cend() const
 #if defined(TVISION_STL) && (__cplusplus >= 201703L || __cpp_lib_constexpr_char_traits)
 inline constexpr Boolean operator==(TStringView a, TStringView b)
 {
-    return a.size() == b.size()
-      ? std::char_traits<char>::compare(a.data(), b.data(), b.size()) == 0
-      : False;
+    if (a.size() == b.size())
+        return Boolean( std::char_traits<char>::compare(a.data(), b.data(), b.size()) == 0 );
+    return False;
 }
 #else
 inline Boolean operator==(TStringView a, TStringView b)

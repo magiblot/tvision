@@ -257,18 +257,14 @@ inline BOOL THardwareInfo::setCtrlBrkHandler( BOOL install ) noexcept
 #ifdef _WIN32
     return SetConsoleCtrlHandler( &THardwareInfo::ctrlBreakHandler, install );
 #else
-/* Sets THardwareInfo::ctrlBreakHandle as the handler of control signals
- * CTRL_C_EVENT and CTRL_BREAK_EVENT. When the signal is received, the
- * handler sets the attribute TSystemError::ctrlBreakHit to true.
- * https://docs.microsoft.com/en-us/windows/console/handlerroutine
- */
-    // Stub
+    (void) install;
     return TRUE;
 #endif
 }
 
 inline BOOL THardwareInfo::setCritErrorHandler( BOOL install ) noexcept
 {
+    (void) install;
     return TRUE;        // Handled by NT or DPMI32..
 }
 
