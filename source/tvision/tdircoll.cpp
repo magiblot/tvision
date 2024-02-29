@@ -76,7 +76,11 @@ Boolean isDir( const char *str ) noexcept
                     (ff.ff_attrib & FA_DIREC) != 0 );
 }
 
-#define isSeparator(c) (c == '\\' || c == '/')
+#ifndef _TV_UNIX
+  #define isSeparator(c) (c == '\\' || c == '/')
+#else
+  #define isSeparator(c) (c == '/')
+#endif
 
 Boolean pathValid( const char *path ) noexcept
 {
@@ -124,6 +128,7 @@ Boolean validFileName( const char *fileName ) noexcept
 
 void getCurDir( char *dir, char drive ) noexcept
 {
+#ifndef _TV_UNIX
     dir[0] = (char) ((0 <= drive && drive <= 'Z' - 'A' ? drive : getdisk()) + 'A');
     dir[1] = ':';
     dir[2] = '\\';
@@ -131,6 +136,10 @@ void getCurDir( char *dir, char drive ) noexcept
     getcurdir( dir[0] - 'A' + 1, dir+3 );
     if( strlen( dir ) > 3 )
         strnzcat( dir, "\\", MAXPATH );
+#else
+    getcwd( dir, MAXPATH );
+    strnzcat( dir, "/", MAXPATH );
+#endif
 }
 
 Boolean isWild( const char *f ) noexcept
