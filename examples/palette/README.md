@@ -82,15 +82,15 @@ how they map into each other:
 ```
                           x01   x02   x03   x04   x05   x06
    ┌────────────────────┬─────┬─────┬─────┬─────┬─────┬─────┐
-   │TTextView           │ x09 │ x0A │ x0B │ x0C │ x0D │ x0E │
+   │TTestView           │ x09 │ x0A │ x0B │ x0C │ x0D │ x0E │
    └────────────────────┴─────┴─────┴─────┴─────┴─────┴─────┘
                            ▼     ▼     ▼     ▼     ▼     ▼
                  x01-x08  x09   x0A   x0B   x0C   x0D   x0E
    ┌────────────┬───────┬─────┬─────┬─────┬─────┬─────┬─────┐
-   │TTextWindow │  ...  │ x40 │ x41 │ x42 │ x43 │ x44 │ x45 │
+   │TTestWindow │  ...  │ x88 │ x89 │ x8A │ x8B │ x8C │ x8D │
    └────────────┴───────┴─────┴─────┴─────┴─────┴─────┴─────┘
                            ▼     ▼     ▼     ▼     ▼     ▼
-                 x01-x3F  x40   x41   x42   x43   x44   x45
+                 x01-x87  x88   x89   x8A   x8B   x8C   x8D
    ┌────────────┬───────┬─────┬─────┬─────┬─────┬─────┬─────┐
    │TTestApp    │  ...  │ x3E │ x2D │ x72 │ x5F │ x68 │ x4E │
    └────────────┴───────┴─────┴─────┴─────┴─────┴─────┴─────┘
@@ -109,9 +109,9 @@ above.  To draw something with color `0x01`, simply use `0x01` as the
 parameter to the write functions used in `TTestView::draw()`.
 `TTestView`'s palette contains the number `0x09` at index `0x01` and
 `TTestView`'s owner is `TTestWindow`.  Index `0x09` in `TTestWindow`'s
-palette contains `0x40`.  `TTestWindow`'s owner is `TDesktop` which has
+palette contains `0x88`.  `TTestWindow`'s owner is `TDesktop` which has
 a `NULL` palette and is skipped (see notes). `TDesktop`'s owner is
-`TTestApp` and it's palette contains `0x3E` at index `0x40`.  So the
+`TTestApp` and it's palette contains `0x3E` at index `0x88`.  So the
 color that will be used is `0x3E` or yellow on cyan.
 
 The `writeXXX` functions in TView all take color index values in

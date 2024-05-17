@@ -58,7 +58,7 @@ TPalette& TTestView::getPalette() const
 // TTestWindow
 //
 
-#define cpTestWindow "\x40\x41\x42\x43\x44\x45"
+#define cpTestWindow "\x88\x89\x8A\x8B\x8C\x8D"
 // SIX new colors!
 #define cpBlueWindow "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
 // original palettes
