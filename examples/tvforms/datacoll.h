@@ -27,6 +27,10 @@
 
 enum KeyTypes {stringKey, longIntKey};
 
+// WARNING: This collection can only be used with trivial types.
+// It uses malloc/free for item allocations in order to bypass the
+// safety pool when building with Borland C++.
+
 class TDataCollection : public TStringCollection
 {
 
@@ -36,7 +40,6 @@ public:
     virtual int compare( void *, void * );
     virtual void error( int code );
     virtual void freeItem( void * );
-    virtual void setLimit( int );
 
 protected:
 

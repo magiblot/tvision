@@ -62,7 +62,7 @@ void *TDataCollection::readItem( ipstream& is )
 {
     void *obj;
 
-    obj = new char[itemSize];
+    obj = malloc(itemSize);
     is.readBytes(obj, itemSize);
     return obj;
 }
@@ -105,33 +105,5 @@ void TDataCollection::error( int code )
 
 void TDataCollection::freeItem( void *item )
 {
-    if (item != NULL)
-        delete[] (char *) item;
-}
-
-void TDataCollection::setLimit( int aLimit )
-{
-    void **aItems;
-
-    if (aLimit < count)
-        aLimit = count;
-    if (aLimit > maxCollectionSize)
-        aLimit = maxCollectionSize;
-    if (aLimit != limit)
-        {
-        if (aLimit == 0)
-            aItems = NULL;
-        else
-            {
-            // Restrict collection: don't allow it to eat into safety pool.
-            // Requires careful checking for success at point of insertion.
-            aItems = new void *[aLimit];
-            if ( (count != 0) && (items != 0) )
-                memcpy(aItems, items, count * sizeof(void *));
-            }
-        if (limit != 0)
-            delete[] items;
-        items = aItems;
-        limit = aLimit;
-        }
+    ::free(item);
 }

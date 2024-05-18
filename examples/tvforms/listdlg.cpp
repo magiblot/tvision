@@ -477,7 +477,7 @@ Boolean TListDialog::saveForm(TDialog *f)
       return False;
 
     // Extract data from form. Don't use safety pool.
-    p = new char[dataCollection->itemSize];
+    p = malloc(dataCollection->itemSize);
     if (p == NULL)
         {
         TApplication::application->outOfMemory();
@@ -490,16 +490,16 @@ Boolean TListDialog::saveForm(TDialog *f)
     if ( (!(dataCollection->duplicates) && dataCollection->search(dataCollection->keyOf(p), i)) )
         if ( (((TForm*)f)->prevData == NULL) || (((TForm *)f)->prevData != dataCollection->at(i)) )
             {
-            delete[] (char *) p;
+            free(p);
             messageBox("Duplicate keys are not allowed in this database. "
                        "Delete duplicate record before saving this form.",
                         mfError | mfOKButton);
             return False;
             }
 
-    // Free previous data?
+    // Free previous data.
     if (((TForm *)f)->prevData != NULL)
-        dataCollection->remove(((TForm*)f)->prevData);
+        dataCollection->free(((TForm*)f)->prevData);
 
     // TDataCollection.Insert may fail because it doesn't use
     //  the safety pool. Check status field after insert and cleanup
@@ -508,7 +508,7 @@ Boolean TListDialog::saveForm(TDialog *f)
     dataCollection->insert(p);
     if (dataCollection->status != 0)
         {
-        delete[] (char *) p;
+        free(p);
         TApplication::application->outOfMemory();
         return False;
         }

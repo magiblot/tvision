@@ -330,6 +330,7 @@ void *TButton::read( ipstream& is )
         state &= ~sfDisabled;
     else
         state |= sfDisabled;
+    animationTimer = 0;
     return this;
 }
 

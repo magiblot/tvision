@@ -67,7 +67,7 @@ int main(void)
     collection->duplicates = allowDuplicates;
     for(i = 0; i < dataCount; ++i)
         {
-        p = new TDataRec;
+        p = malloc(sizeof(TDataRec));
         memset(p, 0 , sizeof(TDataRec));   // keep padding bytes initialized
         f->setData((void *)&data[i]);      // move into object
         f->getData(p);                     // move onto heap

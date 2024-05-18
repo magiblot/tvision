@@ -164,13 +164,9 @@ void TNSCollection::freeAll()
 
 void TNSCollection::freeItem( void *item )
 {
-    // 'delete' (which does not work on void pointers because it is unable to
-    // find a destructor function) is overriden when compiling with Borland C++
-    // (new.cpp) and has side effects.
-    // On Linux, it cannot be replaced with 'free' because mixing 'new' with 'free'
-    // or 'malloc' with 'delete' is undefined behaviour.
-    // The right thing to do is to invoke 'operator delete' directly, which
-    // deallocates memory but does not invoke any destructors.
+    // WARNING: The right thing to do is to override this method and cast the
+    // pointer to its actual type. This default implementation won't call any
+    // destructors if used with non-trivially-destructible items.
     ::operator delete(item);
 }
 
