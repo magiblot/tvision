@@ -78,6 +78,7 @@ Boolean TDirListBox::isSelected( short item )
 
 void TDirListBox::showDrives( TDirCollection *dirs )
 {
+#ifndef _TV_UNIX
     Boolean isFirst = True;
     char oldc[5];
     strcpy( oldc, "0:\\" );
@@ -116,6 +117,7 @@ void TDirListBox::showDrives( TDirCollection *dirs )
         s[ strlen(lastDir)+1 ] = EOS;
         dirs->insert( new TDirEntry( s, oldc ) );
         }
+#endif
 }
 
 void TDirListBox::showDirs( TDirCollection *dirs )
@@ -131,32 +133,50 @@ void TDirListBox::showDirs( TDirCollection *dirs )
     strcpy( org, pathDir );
 
     char *curDir = dir;
+#ifndef _TV_UNIX
     char *end = dir + 3;
+    const char sepChar = '\\';
+
     char hold = *end;
     *end = EOS;         // mark end of drive name
     strcpy( name, curDir );
     dirs->insert( new TDirEntry( org, name ) );
 
     *end = hold;        // restore full path
+#else
+    char *end = dir + 1;
+    const char sepChar = '/';
+    indent = 0;
+#endif
     curDir = end;
-    while( (end = strchr( curDir, '\\' )) != 0 )
+    while( (end = strchr( curDir, sepChar )) != 0 )
         {
         *end = EOS;
         strncpy( name, curDir, size_t(end-curDir) );
         name[size_t(end-curDir)] = EOS;
         dirs->insert( new TDirEntry( org - indent, dir ) );
-        *end = '\\';
+        *end = sepChar;
         curDir = end+1;
         indent += indentSize;
         }
 
     cur = dirs->getCount() - 1;
 
-    end = strrchr( dir, '\\' );
+    end = strrchr( dir, sepChar );
+    if ( end == NULL )
+        {
+            // no separators found so just bail.
+            // fixes segfault if no separators found (eg Linux path on Windows or vice versa)
+            return;
+        }
     char path[MAXPATH];
     strncpy( path, dir, size_t(end-dir+1) );
     end = path + unsigned(end-dir)+1;
+#ifndef _TV_UNIX
     strcpy( end, "*.*" );
+#else
+    strcpy( end, "*" );
+#endif
 
     Boolean isFirst = True;
     ffblk ff;
@@ -198,11 +218,16 @@ void TDirListBox::newDirectory( TStringView str )
 {
     strnzcpy( dir, str, sizeof(dir) );
     TDirCollection *dirs = new TDirCollection( 5, 5 );
+#ifndef _TV_UNIX
     dirs->insert( new TDirEntry( drives, drives ) );
     if( str == drives )
         showDrives( dirs );
     else
         showDirs( dirs );
+#else
+    dirs->insert( new TDirEntry( "/", "/" ) );
+    showDirs( dirs );
+#endif
     newList( dirs );
     focusItem( cur );
 }

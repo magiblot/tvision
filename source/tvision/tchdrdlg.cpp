@@ -88,7 +88,11 @@ void TChDirDialog::getData( void * )
 {
 }
 
-#define isSeparator(c) (c == '\\' || c == '/')
+#ifndef _TV_UNIX
+  #define isSeparator(c) (c == '\\' || c == '/')
+#else
+  #define isSeparator(c) (c == '/')
+#endif
 
 static void trimEndSeparator(char *path)
 {
@@ -114,6 +118,7 @@ void TChDirDialog::handleEvent( TEvent& event )
                     {
                     TDirEntry *p = dirList->list()->at( dirList->focused );
                     strcpy( curDir, p->dir() );
+#ifndef _TV_UNIX
                     if( strcmp( curDir, drivesText ) == 0 )
                         break;
                     else if( driveValid( curDir[0] ) )
@@ -124,6 +129,16 @@ void TChDirDialog::handleEvent( TEvent& event )
                         }
                     else
                         return;
+#else
+                    if ( strcmp( curDir, "/" ) == 0 )
+                        break;
+                    else
+                        {
+                        int len = strlen( curDir );
+                        if( !isSeparator(curDir[len - 1]) )
+                            strcat(curDir, "/");
+                        }
+#endif
                     break;
                     }
                 default:
@@ -163,8 +178,10 @@ void TChDirDialog::setUpDialog()
 
 static int changeDir( const char *path )
 {
+#ifndef _TV_UNIX
     if( path[1] == ':' )
         setdisk( toupper(path[0]) - 'A' );
+#endif
     return chdir( path );
 }
 
