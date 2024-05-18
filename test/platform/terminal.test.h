@@ -116,7 +116,7 @@ inline std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
     return os;
 }
 
-constexpr TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text)
+inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text)
 {
     TEvent ev {};
     ev.what = evKeyDown;
@@ -130,7 +130,7 @@ constexpr TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView t
     return ev;
 }
 
-constexpr TEvent mouseEv(TPoint where, ushort eventFlags, ushort controlKeyState, uchar buttons, uchar wheel)
+inline TEvent mouseEv(TPoint where, ushort eventFlags, ushort controlKeyState, uchar buttons, uchar wheel)
 {
     TEvent ev {};
     ev.what = evMouse;

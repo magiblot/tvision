@@ -69,12 +69,12 @@ TCluster::~TCluster()
     destroy( (TCollection *)strings );
 }
 
-ushort  TCluster::dataSize()
+ushort TCluster::dataSize()
 {
     // value is now a long, but for compatibility with earlier TV,
-    // return size of short; TMultiCheckBoxes returns sizeof(long).
+    // return size of short; TMultiCheckBoxes returns sizeof(uint32_t).
 
-    return sizeof(short);
+    return sizeof(ushort);
 }
 
 void TCluster::drawBox( const char *icon, char marker)

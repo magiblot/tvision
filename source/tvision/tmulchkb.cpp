@@ -69,7 +69,7 @@ void TMultiCheckBoxes::draw()
 
 ushort TMultiCheckBoxes::dataSize()
 {
-    return  sizeof(int32_t);
+    return sizeof(uint32_t);
 }
 
 uchar TMultiCheckBoxes::multiMark(int item)

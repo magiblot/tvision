@@ -392,6 +392,7 @@ void TInputLine::handleEvent( TEvent& event )
                             }
                         deleteSelect();
                         checkValid(True);
+                        break;
                     case kbIns:
                         setState(sfCursorIns, Boolean(!(state & sfCursorIns)));
                         break;

@@ -39,6 +39,8 @@ private:
 class TFileViewer : public TScroller
 {
 
+    enum { maxLineLength = 256 };
+
 public:
 
     char *fileName;
@@ -82,8 +84,6 @@ public:
     TFileWindow( const char *fileName );
 
 };
-
-const int maxLineLength = 256;
 
 #endif
 

@@ -65,8 +65,7 @@ void doCalcChange( TView *p, void *d )
     p->changeBounds(r);
 }
 
-#pragma warn -par
-static void doAwaken (TView* v, void* p)
+static void doAwaken( TView *v, void * )
 {
     v->awaken();
 }

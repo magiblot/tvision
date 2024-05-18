@@ -69,7 +69,7 @@ static void signalHandlerThatDoesNotKillTheProcess(int)
     ++SignalHandlerTest::counters->handlerInvocations;
 }
 
-static void extendedSignalHandlerThatDoesNotKillTheProcess(int signo, siginfo_t *info, void *context)
+static void extendedSignalHandlerThatDoesNotKillTheProcess(int, siginfo_t *, void *)
 {
     ++SignalHandlerTest::counters->handlerInvocations;
 }

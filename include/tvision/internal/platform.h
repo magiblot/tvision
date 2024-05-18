@@ -26,10 +26,10 @@ public:
     virtual void clearScreen() noexcept {}
     virtual ushort getScreenMode() noexcept { return 0; }
     virtual void reloadScreenInfo() noexcept {}
-    virtual void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept {}
-    virtual void lowlevelMoveCursor(uint x, uint y) noexcept {};
+    virtual void lowlevelWriteChars(TStringView /*chars*/, TColorAttr /*attr*/) noexcept {}
+    virtual void lowlevelMoveCursor(uint /*x*/, uint /*y*/) noexcept {};
     virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
-    virtual void lowlevelCursorSize(int size) noexcept {};
+    virtual void lowlevelCursorSize(int /*size*/) noexcept {};
     virtual void lowlevelFlush() noexcept {};
     virtual bool screenChanged() noexcept { return false; }
 };

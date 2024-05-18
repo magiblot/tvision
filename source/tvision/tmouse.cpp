@@ -124,6 +124,8 @@ void THWMouse::hide() noexcept
 #pragma argsused
 void THWMouse::setRange( ushort rx, ushort ry ) noexcept
 {
+    (void) rx;
+    (void) ry;
 #if !defined( __FLAT__ )
     if( buttonCount != 0 )
         {

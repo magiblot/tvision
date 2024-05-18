@@ -39,8 +39,8 @@ BOOL THardwareInfo::isCaretVisible() noexcept { return platf->isCaretVisible(); 
 ushort THardwareInfo::getScreenRows() noexcept { return platf->getScreenRows(); }
 ushort THardwareInfo::getScreenCols() noexcept { return platf->getScreenCols(); }
 ushort THardwareInfo::getScreenMode() noexcept { return platf->getScreenMode(); }
-void THardwareInfo::setScreenMode( ushort mode ) noexcept {}
-void THardwareInfo::clearScreen( ushort w, ushort h ) noexcept { platf->clearScreen(); }
+void THardwareInfo::setScreenMode( ushort ) noexcept {}
+void THardwareInfo::clearScreen( ushort, ushort ) noexcept { platf->clearScreen(); }
 void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len ) noexcept
 {
     platf->screenWrite(x, y, buf, len);
@@ -48,7 +48,7 @@ void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len
         flushScreen();
 }
 TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept { return platf->reloadScreenInfo(); }
-void THardwareInfo::freeScreenBuffer( TScreenCell *buffer ) noexcept {}
+void THardwareInfo::freeScreenBuffer( TScreenCell * ) noexcept {}
 DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount(); }
 void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
 void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }

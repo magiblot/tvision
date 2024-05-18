@@ -146,7 +146,7 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
     return Ignored;
 }
 
-ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
+ParseResult parseFar2lAnswer(GetChBuf &buf, TEvent &, InputState &state) noexcept
 // Pre: "\x1B_far2l" has just been read.
 {
     ParseResult res = Ignored;
@@ -189,7 +189,7 @@ template <bool write = true, class... Args>
 size_t concat(char *out, uint32_t i, Args ...args) noexcept;
 
 template <bool write = true, class... Args>
-inline size_t concat(char *out) noexcept
+inline size_t concat(char *) noexcept
 {
     return 0;
 }

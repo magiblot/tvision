@@ -48,12 +48,15 @@ void TVDemo::mouse()
 
     if (mouseCage != 0)
         {
-        int32_t mouseReverse = TEventQueue::mouseReverse;
+        // 'mouseReverse' will be received by the checkbox inserted into
+        // 'TMouseDialog'. 'TCheckBoxes' takes a pointer to a 'ushort' in
+        // 'getData'/'setData'.
+        ushort mouseReverse = TEventQueue::mouseReverse;
         mouseCage->helpCtx = hcOMMouseDBox;
         mouseCage->setData(&mouseReverse);
         if (deskTop->execView(mouseCage) != cmCancel)
             mouseCage->getData(&mouseReverse);
-        TEventQueue::mouseReverse = mouseReverse;
+        TEventQueue::mouseReverse = Boolean( mouseReverse );
         }
     destroy( mouseCage );
    

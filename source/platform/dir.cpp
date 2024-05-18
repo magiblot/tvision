@@ -58,6 +58,7 @@ void fnmerge( char *pathP, const char *driveP, const char *dirP,
               const char *nameP, const char *extP ) noexcept
 {
     using namespace tvision;
+    (void) driveP;
     size_t n = 0;
 #ifdef _WIN32
     if (driveP && *driveP)

@@ -329,6 +329,8 @@ static int getPathDrive( const char *path )
 
 Boolean getHomeDir( char *drive, char *dir ) noexcept
 {
+    (void) drive;
+    (void) dir;
 #ifdef _WIN32
     const char *homedrive = getenv( "HOMEDRIVE" );
     const char *homepath = getenv( "HOMEPATH" );
@@ -346,8 +348,6 @@ Boolean getHomeDir( char *drive, char *dir ) noexcept
         return True;
         }
 #endif
-    (void) drive;
-    (void) dir;
     return False;
 }
 

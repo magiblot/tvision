@@ -7,47 +7,29 @@
 #include "terminal.test.h"
 #include <vector>
 
-static bool operator==(const KeyDownEvent &a, const KeyDownEvent &b)
-{
-    return a.keyCode == b.keyCode && a.controlKeyState == b.controlKeyState
-        && a.getText() == b.getText();
-}
-
-static std::ostream &operator<<(std::ostream &os, const KeyDownEvent &keyDown)
-{
-    os << "{{";
-    printKeyCode(os, keyDown.keyCode);
-    os << "}, {";
-    printControlKeyState(os, keyDown.controlKeyState);
-    os << "}, {";
-    os << "\"" << keyDown.getText() << "\"";
-    os << "}}";
-    return os;
-}
-
 namespace tvision
 {
 
 TEST(TermIO, ShouldNormalizeKeys)
 {
-    static constexpr TestCase<KeyDownEvent> testCases[] =
+    static const TestCase<TEvent> testCases[] =
     {
-        {{'a', 0, {'a'}, 1}, {'a', 0, {'a'}, 1}},
-        {{'a', kbShift, {'a'}, 1}, {'a', kbShift, {'a'}, 1}},
-        {{'a', kbCtrlShift, {'a'}, 1}, {kbCtrlA, kbCtrlShift}},
-        {{'a', kbLeftAlt, {'a'}, 1}, {kbAltA, kbLeftAlt}},
-        {{kbIns, kbShift}, {kbShiftIns, kbShift}},
-        {{kbBack, kbLeftCtrl | kbLeftAlt}, {kbAltBack, kbLeftCtrl | kbLeftAlt}},
-        {{kbCtrlBack, kbLeftCtrl}, {kbCtrlBack, kbLeftCtrl}},
-        {{kbCtrlBack}, {kbCtrlBack, kbCtrlShift}},
-        {{kbIns, kbLeftCtrl | kbEnhanced}, {kbCtrlIns, kbLeftCtrl | kbEnhanced}},
-        {{kbCtrlDel, kbLeftAlt}, {kbAltDel, kbCtrlShift | kbLeftAlt}},
+        {keyDownEv('a', 0x0000, "a"), keyDownEv('a', 0x0000, "a")},
+        {keyDownEv('a', kbShift, "a"), keyDownEv('a', kbShift, "a")},
+        {keyDownEv('a', kbCtrlShift, "a"), keyDownEv(kbCtrlA, kbCtrlShift, "")},
+        {keyDownEv('a', kbLeftAlt, "a"), keyDownEv(kbAltA, kbLeftAlt, "")},
+        {keyDownEv(kbIns, kbShift, ""), keyDownEv(kbShiftIns, kbShift, "")},
+        {keyDownEv(kbBack, kbLeftCtrl | kbLeftAlt, ""), keyDownEv(kbAltBack, kbLeftCtrl | kbLeftAlt, "")},
+        {keyDownEv(kbCtrlBack, kbLeftCtrl, ""), keyDownEv(kbCtrlBack, kbLeftCtrl, "")},
+        {keyDownEv(kbCtrlBack, 0x0000, ""), keyDownEv(kbCtrlBack, kbCtrlShift, "")},
+        {keyDownEv(kbIns, kbLeftCtrl | kbEnhanced, ""), keyDownEv(kbCtrlIns, kbLeftCtrl | kbEnhanced, "")},
+        {keyDownEv(kbCtrlDel, kbLeftAlt, ""), keyDownEv(kbAltDel, kbCtrlShift | kbLeftAlt, "")},
     };
 
     for (auto &testCase : testCases)
     {
-        KeyDownEvent actual = testCase.input;
-        TermIO::normalizeKey(actual);
+        TEvent actual = testCase.input;
+        TermIO::normalizeKey(actual.keyDown);
         expectResultMatches(actual, testCase);
     }
 }

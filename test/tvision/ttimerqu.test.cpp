@@ -197,7 +197,7 @@ TEST(TTimerQueue, ShouldHandleZeroTimedTimersProperly)
     EXPECT_EQ(timeouts, 3);
 }
 
-static void nestedHandleTimeout(TTimerId id, void *args)
+static void nestedHandleTimeout(TTimerId, void *args)
 {
     ++timeouts;
     currentTime = 1500;

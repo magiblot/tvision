@@ -45,8 +45,7 @@ TValidator::TValidator() noexcept
 
 #if !defined(NO_STREAMABLE)
 
-#pragma argsused
-TValidator::TValidator( StreamableInit s) noexcept
+TValidator::TValidator( StreamableInit ) noexcept
 {
 }
 
@@ -64,14 +63,12 @@ void TValidator::error()
 {
 }
 
-#pragma warn -par
-Boolean TValidator::isValidInput(char* s, Boolean suppressFill)
+Boolean TValidator::isValidInput(char*, Boolean)
 {
   return True;
 }
 
-#pragma warn -par
-Boolean TValidator::isValid(const char* s)
+Boolean TValidator::isValid(const char*)
 {
   return True;
 }
@@ -85,8 +82,9 @@ void TValidator::write(opstream& os)
 
 #endif
 
-#pragma warn -par
-ushort TValidator::transfer(char* s, void* buffer, TVTransfer flag)
+ushort TValidator::transfer(char*, void*, TVTransfer
+
+)
 {
   return 0;
 }
@@ -643,7 +641,7 @@ Boolean TFilterValidator::isValid(const char* s)
   return Boolean(strspn(s, validChars) == strlen(s));
 }
 
-Boolean TFilterValidator::isValidInput(char* s, Boolean suppressFill)
+Boolean TFilterValidator::isValidInput(char* s, Boolean)
 {
   return Boolean(strspn(s, validChars) == strlen(s));
 }
@@ -744,7 +742,7 @@ Boolean TLookupValidator::isValid(const char* s)
   return lookup(s);
 }
 
-Boolean TLookupValidator::lookup(const char* s)
+Boolean TLookupValidator::lookup(const char*)
 {
   return True;
 }

@@ -369,9 +369,8 @@ char* TOutlineViewer::getGraph(int level, long lines, ushort flags)
   return createGraph(level, lines, flags, levelWidth, endWidth, graphChars);
 }
 
-#pragma warn -par
-static Boolean isNode( TOutlineViewer* outLine, TNode* node, int level,
-                       int position, long lines, ushort flags )
+static Boolean isNode( TOutlineViewer* , TNode*, int,
+                       int position, long, ushort )
 {
     return Boolean(auxPos == position);
 }
@@ -400,8 +399,7 @@ static thread_local long focLines;
 static thread_local ushort focFlags;
 static thread_local int focLevel;
 
-#pragma warn -par
-static Boolean isFocused( TOutlineViewer* focusCheck, TNode* cur, int level,
+static Boolean isFocused( TOutlineViewer* focusCheck, TNode*, int level,
                           int position, long lines, ushort flags )
 {
       if (position == focusCheck->foc)
@@ -544,8 +542,7 @@ void TOutlineViewer::handleEvent(TEvent& event)
   Called whenever Node is selected by the user either via keyboard
   control or by the mouse. }
 */
-#pragma warn -par
-void TOutlineViewer::selected(int i)
+void TOutlineViewer::selected(int)
 {
 }
 
@@ -561,9 +558,8 @@ void TOutlineViewer::setState(ushort aState, Boolean enable)
 static thread_local int updateCount;
 static thread_local int updateMaxX;
 
-#pragma warn -par
 static Boolean countNode( TOutlineViewer* beingCounted, TNode* p, int level,
-                          int position, long lines,  ushort flags )
+                          int, long lines,  ushort flags )
 {
     int len;
     char *graph;

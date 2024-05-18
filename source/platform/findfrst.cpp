@@ -54,7 +54,7 @@ FindFirstRec* FindFirstRec::get(struct find_t *fileinfo) noexcept
     // Return the FindFirstRec instance pointed to by fileinfo.
     std::lock_guard<std::mutex> lock(recList);
     size_t pos = fileinfo->reserved;
-    if (0 <= pos && pos < recList.size() && recList[pos].finfo == fileinfo)
+    if (pos < recList.size() && recList[pos].finfo == fileinfo)
         return &recList[pos];
     return 0;
 }
