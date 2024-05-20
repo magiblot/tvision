@@ -674,6 +674,7 @@ public:
     virtual void setData( void *rec );
     virtual Boolean valid( ushort );
     virtual void shutDown();
+    virtual void sizeLimits( TPoint& min, TPoint& max );
 
 private:
 

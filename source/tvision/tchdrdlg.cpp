@@ -46,27 +46,45 @@ TChDirDialog::TChDirDialog( ushort opts, ushort histId ) noexcept :
     TDialog( TRect( 16, 2, 64, 20 ), changeDirTitle )
 {
     options |= ofCentered;
+    flags |= wfGrow;
 
-    dirInput = new TInputLine( TRect( 3, 3, 30, 4 ), 68 );
+    dirInput = new TInputLine( TRect( 3, 3, 42, 4 ), MAXPATH-1 );
+    dirInput->growMode = gfGrowHiX;
     insert( dirInput );
     insert( new TLabel( TRect( 2, 2, 17, 3 ), dirNameText, dirInput ));
-    insert( new THistory( TRect( 30, 3, 33, 4 ), dirInput, histId ) );
+    THistory *history = new THistory( TRect( 42, 3, 45, 4 ), dirInput, histId );
+    history->growMode = gfGrowLoX | gfGrowHiX;
+    insert( history );
 
     TScrollBar *sb = new TScrollBar( TRect( 32, 6, 33, 16 ) );
     insert( sb );
     dirList = new TDirListBox( TRect( 3, 6, 32, 16 ), sb );
+    dirList->growMode = gfGrowHiX | gfGrowHiY;
     insert( dirList );
     insert( new TLabel( TRect( 2, 5, 17, 6 ), dirTreeText, dirList ) );
 
     okButton = new TButton( TRect( 35, 6, 45, 8 ), okText, cmOK, bfDefault );
+    okButton->growMode = gfGrowLoX | gfGrowHiX;
     insert( okButton );
+
     chDirButton = new TButton( TRect( 35, 9, 45, 11 ), chdirText, cmChangeDir, bfNormal );
+    chDirButton->growMode = gfGrowLoX | gfGrowHiX;
     insert( chDirButton );
-    insert( new TButton( TRect( 35, 12, 45, 14 ), revertText, cmRevert, bfNormal ) );
+
+    TButton *revertButton = new TButton( TRect( 35, 12, 45, 14 ), revertText, cmRevert, bfNormal );
+    revertButton->growMode = gfGrowLoX | gfGrowHiX;
+    insert( revertButton );
+
     if( (opts & cdHelpButton) != 0 )
-        insert( new TButton( TRect( 35, 15, 45, 17 ), helpText, cmHelp, bfNormal ) );
+        {
+        TButton *helpButton = new TButton( TRect( 35, 15, 45, 17 ), helpText, cmHelp, bfNormal );
+        helpButton->growMode = gfGrowLoX | gfGrowHiX;
+        insert( helpButton );
+        }
+
     if( (opts & cdNoLoadDir) == 0 )
         setUpDialog();
+
     selectNext( False );
 }
 
@@ -82,6 +100,13 @@ void TChDirDialog::shutDown()
     okButton = 0;
     chDirButton = 0;
     TDialog::shutDown();
+}
+
+void TChDirDialog::sizeLimits( TPoint& min, TPoint& max )
+{
+    TDialog::sizeLimits( min, max );
+    min.x = 48;
+    min.y = 18;
 }
 
 void TChDirDialog::getData( void * )
