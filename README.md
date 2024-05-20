@@ -396,8 +396,6 @@ The following are new features not available in Borland's release of Turbo Visio
     * `ilMaxBytes` (the default): the text can be up to `limit` bytes long, including the null terminator.
     * `ilMaxWidth`: the text can be up to `limit` columns wide.
     * `ilMaxChars`: the text can contain up to `limit` non-combining characters or graphemes.
-
-    In any case, the text in a `TInputLine` can never be more than 256 bytes long, including the null terminator.
 * New functions which allow getting the names of Turbo Vision's constants at runtime (e.g. `evCommand`, `kbShiftIns`, etc.):
     ```c++
     void printKeyCode(ostream &, ushort keyCode);

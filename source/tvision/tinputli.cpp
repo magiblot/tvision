@@ -70,11 +70,11 @@ static int nextWord(TStringView s, int pos) noexcept
 
 #define cpInputLine "\x13\x13\x14\x15"
 
-TInputLine::TInputLine( const TRect& bounds, uint limit, TValidator *aValid, ushort limitMode ) noexcept :
+TInputLine::TInputLine( const TRect& bounds, int limit, TValidator *aValid, ushort limitMode ) noexcept :
     TView(bounds),
-    maxLen  ( (limitMode == ilMaxBytes) ? min(max(limit-1, 0), 255) : 255 ),
-    maxWidth( (limitMode == ilMaxWidth) ? limit : UINT_MAX ),
-    maxChars( (limitMode == ilMaxChars) ? limit : UINT_MAX ),
+    maxLen  ( (limitMode == ilMaxBytes) ? min(max(limit - 1, 0), INT_MAX - 1) : 255 ),
+    maxWidth( (limitMode == ilMaxWidth) ? limit : INT_MAX ),
+    maxChars( (limitMode == ilMaxChars) ? limit : INT_MAX ),
     curPos( 0 ),
     firstPos( 0 ),
     selStart( 0 ),
@@ -250,30 +250,36 @@ void TInputLine::restoreState()
 Boolean TInputLine::checkValid(Boolean noAutoFill)
 {
     int oldLen, newLen;
-    char newData[256];
+
+    char *newData = 0;
+    Boolean result = True;
 
     if (validator)
         {
+        newData = new char[maxLen + 1];
         oldLen = strlen(data);
-        strcpy(newData, data);
+        memcpy(newData, data, oldLen + 1);
         if (!validator->isValidInput(newData, noAutoFill))
             {
             restoreState();
-            return False;
+            result = False;
             }
         else
             {
-            if (strlen(newData) > maxLen)
-                newData[maxLen] = 0;
-            strcpy(data, newData);
-            newLen = strlen(data);
+            newLen = strlen(newData);
+            if (newLen > maxLen)
+                {
+                newData[maxLen] = '\0';
+                newLen = maxLen;
+                }
+            memcpy(data, newData, newLen + 1);
             if ((curPos >= oldLen) && (newLen > oldLen))
                 curPos = newLen;
-            return True;
             }
         }
-    else
-        return True;
+
+    delete[] newData;
+    return result;
 }
 
 
@@ -412,9 +418,9 @@ void TInputLine::handleEvent( TEvent& event )
                                     keyText[0] = ' '; // Replace tabs and newlines into spaces.
                                 TTextMetrics dataMts = TText::measure(data);
                                 TTextMetrics keyMts = TText::measure(keyText);
-                                if( strlen(data) + len <= maxLen &&
-                                    dataMts.width + keyMts.width <= maxWidth &&
-                                    dataMts.graphemeCount + keyMts.graphemeCount <= maxChars
+                                if( strlen(data) + len <= (uint) maxLen &&
+                                    dataMts.width + keyMts.width <= (uint) maxWidth &&
+                                    dataMts.graphemeCount + keyMts.graphemeCount <= (uint) maxChars
                                   )
                                     {
                                     if( firstPos > curPos )

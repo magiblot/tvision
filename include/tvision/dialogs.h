@@ -166,7 +166,7 @@ class TInputLine : public TView
 
 public:
 
-    TInputLine( const TRect& bounds, uint limit, TValidator *aValid = 0, ushort limitMode = ilMaxBytes ) noexcept;
+    TInputLine( const TRect& bounds, int limit, TValidator *aValid = 0, ushort limitMode = ilMaxBytes ) noexcept;
     ~TInputLine();
 
     virtual ushort dataSize();
@@ -181,9 +181,9 @@ public:
     void setValidator( TValidator* aValid );
 
     char* data;
-    uint maxLen;
-    uint maxWidth;
-    uint maxChars;
+    int maxLen;
+    int maxWidth;
+    int maxChars;
     int curPos;
     int firstPos;
     int selStart;
