@@ -3,7 +3,7 @@
 /*                                                            */
 /* function(s)                                                */
 /*            fmtStr                                          */
-/*            vfmtStr                                         */
+/*            vFmtStr                                         */
 /*------------------------------------------------------------*/
 
 #include <tvision/tv.h>
@@ -19,13 +19,13 @@ char *fmtStr(const char _FAR *fmt, ...) noexcept
     va_list ap;
 
     va_start(ap, fmt);
-    char *ret = vfmtStr(fmt, ap);
+    char *ret = vFmtStr(fmt, ap);
     va_end(ap);
 
     return ret;
 }
 
-char *vfmtStr(const char _FAR *fmt, va_list ap) noexcept
+char *vFmtStr(const char _FAR *fmt, va_list ap) noexcept
 {
     va_list ap2;
 

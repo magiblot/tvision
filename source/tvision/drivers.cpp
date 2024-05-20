@@ -38,8 +38,8 @@
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      indent - character position within the buffer where the data      */
-/*               is to go                                                 */
+/*      indent - cell position within the buffer where the data is to     */
+/*               go                                                       */
 /*                                                                        */
 /*      source - far pointer to an array of characters                    */
 /*                                                                        */
@@ -105,8 +105,8 @@ __5:
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      indent  - character position within the buffer where the data     */
-/*                is to go                                                */
+/*      indent  - cell position within the buffer where the data is to    */
+/*                go                                                      */
 /*                                                                        */
 /*      c       - character to be put into the buffer (0 to retain the    */
 /*                already present characters)                             */
@@ -186,8 +186,8 @@ __4:
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      indent  - character position within the buffer where the data     */
-/*                is to go                                                */
+/*      indent  - cell position within the buffer where the data is to    */
+/*                go                                                      */
 /*                                                                        */
 /*      str     - string of characters to be moved into the buffer        */
 /*                                                                        */
@@ -198,7 +198,7 @@ __4:
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      actual number of display columns that were filled with text.      */
+/*      number of cells in the buffer that were actually updated          */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
@@ -252,8 +252,8 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      indent  - character position within the buffer where the data     */
-/*                is to go                                                */
+/*      indent  - cell position within the buffer where the data is to    */
+/*                go                                                      */
 /*                                                                        */
 /*      str     - string of characters to be moved into the buffer        */
 /*                                                                        */
@@ -262,22 +262,24 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*                low byte is used, and a '~' in the string toggles       */
 /*                between the low byte and the high byte.                 */
 /*                                                                        */
-/*      width   - number of display columns to be copied from str.        */
+/*      maxWidth - maximum amount of data to be moved, measured in        */
+/*                 text width                                             */
 /*                                                                        */
-/*      begin   - initial display column in str where to start counting.  */
+/*      strIndent - position in str where to start moving from,           */
+/*                  measured in text width                                */
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      actual number of display columns that were filled with text.      */
+/*      number of cells in the buffer that were actually updated          */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, ushort width, ushort begin ) noexcept
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, ushort maxWidth, ushort strIndent ) noexcept
 {
     size_t i = indent, j = 0, w = 0;
     int toggle = 1;
     TColorAttr curAttr = ((TColorAttr *) &attrs)[0];
-    TSpan<TScreenCell> span(&data[0], min(indent + width, length()));
+    TSpan<TScreenCell> dest(&data[0], min(indent + maxWidth, length()));
     while (j < str.size())
         if (str[j] == '~')
             {
@@ -287,18 +289,18 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, u
             }
         else
             {
-            if (begin <= w)
+            if (strIndent <= w)
                 {
-                if (!TText::drawOne(span, i, str, j, curAttr))
+                if (!TText::drawOne(dest, i, str, j, curAttr))
                     break;
                 }
             else
                 {
                 if (!TText::next(str, j, w))
                     break;
-                if (begin < w && i < span.size())
-                    // 'begin' is in the middle of a double-width character.
-                    ::setCell(span[i++], ' ', curAttr);
+                if (strIndent < w && i < dest.size())
+                    // 'strIndent' is in the middle of a double-width character.
+                    ::setCell(dest[i++], ' ', curAttr);
                 }
             }
     return i - indent;
@@ -320,7 +322,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, u
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      actual number of display columns that were filled with text.      */
+/*      number of cells in the buffer that were actually updated          */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
@@ -368,28 +370,30 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
 /*      attr    - text attribute to be put into the buffer with each      */
 /*                character in the string.                                */
 /*                                                                        */
-/*      width   - number of display columns to be copied from str.        */
+/*      maxWidth - maximum amount of data to be moved, measured in        */
+/*                 text width                                             */
 /*                                                                        */
-/*      begin   - initial display column in str where to start counting.  */
+/*      strIndent - position in str where to start moving from,           */
+/*                  measured in text width                                */
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      actual number of display columns that were filled with text.      */
+/*      number of cells in the buffer that were actually updated          */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
 ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
-                             ushort width, ushort begin ) noexcept
+                             ushort maxWidth, ushort strIndent ) noexcept
 {
 #ifdef __BORLANDC__
-    if (begin < str.size())
-        return moveStr(indent, str.substr(begin, width), attr);
+    if (strIndent < str.size())
+        return moveStr(indent, str.substr(strIndent, maxWidth), attr);
     return 0;
 #else
     if (attr != 0)
-        return TText::drawStr(data.subspan(0, indent + width), indent, str, begin, attr);
+        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strIndent, attr);
     else
-        return TText::drawStr(data.subspan(0, indent + width), indent, str, begin);
+        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strIndent);
 #endif
 }
 

@@ -591,12 +591,12 @@ ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
 `str` is interpreted according to the rules exposed previously.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin = 0); // New
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin = 0); // New
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strIndent = 0); // New
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strIndent = 0); // New
 ```
 `str` is interpreted according to the rules exposed previously, but:
-* `width` specifies the maximum number of display columns that should be read from `str`.
-* `begin` specifies the number of display columns that should be skipped at the beginning of `str`. This is useful for horizontal scrolling. If `begin` is in the middle of a multi-width character, the remaining positions in that character are filled with spaces.
+* `maxWidth` specifies the maximum amount of text that should be copied from `str`, measured in text width.
+* `strIndent` specifies the initial position `str` where to copy from, measured in text width. This is useful for horizontal scrolling. If `strIndent` is in the middle of a multi-width character, the remaining positions in that character are filled with spaces.
 
 The return values are the number of display columns that were actually filled with text.
 

@@ -41,39 +41,39 @@ Boolean lowMemory() noexcept
     return Boolean(TVMemMgr::safetyPoolExhausted());
 }
 
-size_t strnzcpy( char *dest, TStringView src, size_t size ) noexcept
+size_t strnzcpy( char *dst, TStringView src, size_t dstSize ) noexcept
 {
-    // Same as strlcpy. 'size' is the size of the 'dest' buffer,
-    // which is always made null-terminated unless 'size' is zero.
-    // Returns the number of bytes copied into 'dest'.
-    // 'dest' and 'src' must not overlap.
-    if (size)
+    // Same as 'strlcpy'. 'dstSize' is the size of the 'dst' buffer,
+    // which is always made null-terminated (unless 'dstSize' is zero).
+    // Returns the length of 'dst' (not counting the null terminator).
+    // 'dst' and 'src' must not overlap.
+    if (dstSize != 0)
     {
-        size_t copy_bytes = src.size();
-        if (copy_bytes > size - 1)
-            copy_bytes = size - 1;
-        memcpy(dest, src.data(), copy_bytes);
-        dest[copy_bytes] = '\0';
-        return copy_bytes;
+        size_t copyLen = src.size();
+        if (copyLen > dstSize - 1)
+            copyLen = dstSize - 1;
+        memcpy(dst, src.data(), copyLen);
+        dst[copyLen] = '\0';
+        return copyLen;
     }
     return 0;
 }
 
-size_t strnzcat( char *dest, TStringView src, size_t size ) noexcept
+size_t strnzcat( char *dst, TStringView src, size_t dstSize ) noexcept
 {
-    // Similar to strlcpy, except that 'dest' is always left null-terminated,
-    // and the return value is the length of 'dest'.
-    if (size)
+    // Similar to 'strlcat', except that 'dst' is always left null-terminated
+    // (unless 'dstSize' is zero).
+    // Returns the length of 'dst' (not counting the null terminator).
+    // 'dst' and 'src' must not overlap.
+    if (dstSize != 0)
     {
-        size_t dstLen = 0;
-        while (dstLen < size - 1 && dest[dstLen])
-            ++dstLen;
-        size_t copy_bytes = src.size();
-        if (copy_bytes > size - 1 - dstLen)
-            copy_bytes = size - 1 - dstLen;
-        memcpy(&dest[dstLen], src.data(), copy_bytes);
-        dest[dstLen + copy_bytes] = '\0';
-        return dstLen + copy_bytes;
+        size_t dstLen = strlen(dst);
+        size_t copyLen = src.size();
+        if (copyLen > dstSize - 1 - dstLen)
+            copyLen = dstSize - 1 - dstLen;
+        memcpy(&dst[dstLen], src.data(), copyLen);
+        dst[dstLen + copyLen] = '\0';
+        return dstLen + copyLen;
     }
     return 0;
 }

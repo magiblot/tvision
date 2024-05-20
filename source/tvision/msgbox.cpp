@@ -102,7 +102,7 @@ ushort messageBoxRect( const TRect &r,
     va_list argptr;
 
     va_start( argptr, fmt );
-    char *msg = vfmtStr( fmt, argptr );
+    char *msg = vFmtStr( fmt, argptr );
     va_end( argptr );
 
     ushort ret = messageBoxRect( r, msg, aOptions );
@@ -134,7 +134,7 @@ ushort messageBox( unsigned aOptions, const char *fmt, ... ) noexcept
     va_list argptr;
 
     va_start( argptr, fmt );
-    char *msg = vfmtStr( fmt, argptr );
+    char *msg = vFmtStr( fmt, argptr );
     va_end( argptr );
 
     ushort ret = messageBoxRect( makeRect(msg), msg, aOptions );
