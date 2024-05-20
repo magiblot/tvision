@@ -156,7 +156,7 @@ void TChDirDialog::handleEvent( TEvent& event )
                 }
             dirList->newDirectory( curDir );
             trimEndSeparator( curDir );
-            strcpy( dirInput->data, curDir );
+            strnzcpy( dirInput->data, curDir, dirInput->maxLen + 1 );
             dirInput->drawView();
             dirList->select();
             clearEvent( event );
@@ -180,7 +180,7 @@ void TChDirDialog::setUpDialog()
         if( dirInput != 0 )
             {
             trimEndSeparator( curDir );
-            strcpy( dirInput->data, curDir );
+            strnzcpy( dirInput->data, curDir, dirInput->maxLen + 1 );
             dirInput->drawView();
             }
         }
@@ -199,7 +199,7 @@ Boolean TChDirDialog::valid( ushort command )
         return True;
 
     char path[MAXPATH];
-    strcpy( path, dirInput->data );
+    strnzcpy( path, dirInput->data, MAXPATH );
     fexpand( path );
 
     trimEndSeparator( path );
