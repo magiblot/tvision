@@ -131,27 +131,35 @@ void TDirListBox::showDirs( TDirCollection *dirs )
     strcpy( org, pathDir );
 
     char *curDir = dir;
-    char *end = dir + 3;
-    char hold = *end;
-    *end = EOS;         // mark end of drive name
-    strcpy( name, curDir );
-    dirs->insert( new TDirEntry( org, name ) );
+    char *end;
 
-    *end = hold;        // restore full path
-    curDir = end;
+    // Show root directory.
+    if( (end = strchr( curDir, '\\' )) != 0 )
+        {
+        char hold = *(++end);
+        *end = EOS;
+        strcpy( name, curDir );
+        dirs->insert( new TDirEntry( org, dir ) );
+        *end = hold;
+        curDir = end;
+        }
+    else
+        return;
+
+    // Show directories up to the current one.
     while( (end = strchr( curDir, '\\' )) != 0 )
         {
         *end = EOS;
-        strncpy( name, curDir, size_t(end-curDir) );
-        name[size_t(end-curDir)] = EOS;
+        strcpy( name, curDir );
         dirs->insert( new TDirEntry( org - indent, dir ) );
         *end = '\\';
-        curDir = end+1;
+        curDir = end + 1;
         indent += indentSize;
         }
 
     cur = dirs->getCount() - 1;
 
+    // Show subdirectories.
     end = strrchr( dir, '\\' );
     char path[MAXPATH];
     strncpy( path, dir, size_t(end-dir+1) );
@@ -198,7 +206,10 @@ void TDirListBox::newDirectory( TStringView str )
 {
     strnzcpy( dir, str, sizeof(dir) );
     TDirCollection *dirs = new TDirCollection( 5, 5 );
+#if !defined( _TV_UNIX )
+    // Add 'Drives' entry.
     dirs->insert( new TDirEntry( drives, drives ) );
+#endif
     if( str == drives )
         showDrives( dirs );
     else

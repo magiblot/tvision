@@ -122,6 +122,15 @@ static void trimEndSeparator(char *path)
         path[len-1] = EOS;
 }
 
+static void getCurrentDir( char *dir )
+{
+    getCurDir( dir );
+#if defined( _TV_UNIX )
+    // Remove drive letter.
+    memmove(dir, dir + 2, strlen(dir) - 2 + 1);
+#endif
+}
+
 void TChDirDialog::handleEvent( TEvent& event )
 {
     TDialog::handleEvent( event );
@@ -133,7 +142,7 @@ void TChDirDialog::handleEvent( TEvent& event )
             switch( event.message.command )
                 {
                 case cmRevert:
-                    getCurDir( curDir );
+                    getCurrentDir( curDir );
                     break;
                 case cmChangeDir:
                     {
@@ -141,7 +150,7 @@ void TChDirDialog::handleEvent( TEvent& event )
                     strcpy( curDir, p->dir() );
                     if( strcmp( curDir, drivesText ) == 0 )
                         break;
-                    else if( driveValid( curDir[0] ) )
+                    else if( isSeparator( curDir[0] ) || driveValid( curDir[0] ) )
                         {
                         int len = strlen( curDir );
                         if( !isSeparator(curDir[len-1]) )
@@ -175,7 +184,7 @@ void TChDirDialog::setUpDialog()
     if( dirList != 0 )
         {
         char curDir[MAXPATH];
-        getCurDir( curDir );
+        getCurrentDir( curDir );
         dirList->newDirectory( curDir );
         if( dirInput != 0 )
             {
