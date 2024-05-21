@@ -47,29 +47,13 @@ TDirListBox::~TDirListBox()
 
 void TDirListBox::getText( char *text, short item, short maxChars )
 {
-    strncpy( text, list()->at(item)->text(), maxChars );
-    text[maxChars] = '\0';
+    strnzcpy( text, list()->at(item)->text(), maxChars + 1 );
 }
 
 void TDirListBox::selectItem( short item )
 {
     message( owner, evCommand, cmChangeDir, list()->at(item) );
 }
-
-/*
-void TDirListBox::handleEvent( TEvent& event )
-{
-    if( event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick) )
-        {
-        event.what = evCommand;
-        event.message.command = cmChangeDir;
-        putEvent( event );
-        clearEvent( event );
-        }
-    else
-       TListBox::handleEvent( event );
-}
-*/
 
 Boolean TDirListBox::isSelected( short item )
 {

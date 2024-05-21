@@ -48,10 +48,6 @@
 #include <string.h>
 #endif  // __STRING_H
 
-#if !defined( __STRSTREAM_H )
-#include <strstrea.h>
-#endif
-
 TFileDialog::TFileDialog( TStringView aWildCard,
                           TStringView aTitle,
                           TStringView inputName,
@@ -288,11 +284,7 @@ Boolean TFileDialog::checkDirectory( const char *str )
         return True;
     else
         {
-        char buf[256];
-        ostrstream os( buf, sizeof( buf )-1 );
-        os << invalidDriveText << ": '" << str << "'" << ends;
-        buf[sizeof( buf )-1] = '\0';
-        messageBox( buf, mfError | mfOKButton );
+        messageBox( mfError | mfOKButton, "%s: '%s'", invalidDriveText, str );
         fileName->select();
         return False;
         }
@@ -348,11 +340,7 @@ char ext[MAXEXT];
                 return True;
             else
                 {
-                char buf[256];
-                ostrstream os( buf, sizeof( buf )-1 );
-                os << invalidFileText << ": '" << fName << "'" << ends;
-                buf[sizeof( buf )-1] = '\0';
-                messageBox( buf, mfError | mfOKButton );
+                messageBox( mfError | mfOKButton, "%s: '%s'", invalidFileText, fName );
                 return False;
                 }
             }

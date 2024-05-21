@@ -30,7 +30,6 @@ __link(RScrollBar)
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <strstrea.h>
 #include <fstream.h>
 
 #include "tvcmds.h"
@@ -93,10 +92,7 @@ void TFileViewer::readFile( const char *fName )
     ifstream fileToView( fName );
     if( !fileToView )
         {
-        char buf[256] = {0};
-        ostrstream os( buf, sizeof( buf )-1 );
-        os << "Failed to open file '" << fName << "'." << ends;
-        messageBox( buf, mfError | mfOKButton );
+        messageBox( mfError | mfOKButton, "Failed to open file '%s'.", fName );
         isValid = False;
         }
     else

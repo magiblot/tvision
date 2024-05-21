@@ -31,11 +31,6 @@ __link( RInputLine )
 #include <stdlib.h>
 #endif  // __STDLIB_H
 
-#if !defined( __STRSTREAM_H )
-#include <strstrea.h>
-#endif  // __STRSTREAM_H
-
-
 // TKeyInputLine
 
 const char *const TKeyInputLine::name = "TKeyInputLine";
@@ -137,8 +132,6 @@ Boolean TNumInputLine::valid( ushort command )
 {
     int32_t value;
     Boolean ok;
-    char msg[80];
-    ostrstream os(msg, 80);
 
     ok = True;
     if ( (command != cmCancel) && (command != cmValid) )
@@ -149,8 +142,7 @@ Boolean TNumInputLine::valid( ushort command )
         if ( (value == 0) || (value < min) || (value > max) )
             {
             select();
-            os << "Number must be from " << min << " to " << max << "." << ends;
-            messageBox(os.str(), mfError + mfOKButton);
+            messageBox(mfError | mfOKButton, "Number must be from %ld to %ld.", (long) min, (long) max);
             selectAll(True);
             ok = False;
             }

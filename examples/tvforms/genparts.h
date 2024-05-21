@@ -129,7 +129,7 @@ TForm *makeForm()
     y = 2;
 
     r = TRect(inputCol, y, inputCol + partNumWidth + 2, y + 1);
-    c = new TNumInputLine(r, partNumWidth, 0, 9999);
+    c = new TNumInputLine(r, partNumWidth, 1, 9999);
     f->insert(c);
 
     r = TRect(labelCol, y, labelCol + labelWid, y + 1);
