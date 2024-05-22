@@ -25,7 +25,7 @@ if (TV_BUILD_EXAMPLES)
         # Until CMake 3.13, 'install' only accepts targets defined
         # in the current directory. So install from this function.
         if (${app} IN_LIST TVINSTALLAPPS)
-            install(TARGETS ${app} RUNTIME DESTINATION bin)
+            install(TARGETS ${app} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
         endif()
     endfunction()
 

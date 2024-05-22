@@ -153,14 +153,14 @@ tv_set_output_dir(${PROJECT_NAME})
 #
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-config
-    ARCHIVE DESTINATION lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     COMPONENT library
 )
 
 # package configuration
 
 install(EXPORT ${PROJECT_NAME}-config
-    DESTINATION lib/cmake/${PROJECT_NAME}
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
     NAMESPACE ${PROJECT_NAME}::
     FILE ${PROJECT_NAME}-config.cmake
     COMPONENT library
@@ -169,7 +169,7 @@ install(EXPORT ${PROJECT_NAME}-config
 # includes
 # ./include/tvision and children copied to destination/include/tvision etc...
 #
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/tvision" DESTINATION include)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/tvision" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Build optimization
 
