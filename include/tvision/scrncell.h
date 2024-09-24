@@ -91,9 +91,10 @@ inline void TCellChar::moveInt(uint32_t mbc, bool wide)
 inline void TCellChar::moveStr(TStringView mbc, bool wide)
 {
     static_assert(sizeof(_text) >= 4, "");
-    if (mbc.size() <= 4)
+    memset(this, 0, sizeof(*this));
+    if (0 < mbc.size() && mbc.size() <= 4)
     {
-        memset(this, 0, sizeof(*this));
+        _flags |= -int(wide) & fWide;
         switch (mbc.size())
         {
             case 4: _text[3] = mbc[3];
@@ -101,7 +102,6 @@ inline void TCellChar::moveStr(TStringView mbc, bool wide)
             case 2: _text[1] = mbc[1];
             case 1: _text[0] = mbc[0];
         }
-        _flags |= -int(wide) & fWide;
     }
 }
 
@@ -127,7 +127,7 @@ constexpr inline void TCellChar::appendZeroWidth(TStringView mbc)
     size_t sz = size();
     if (mbc.size() <= sizeof(_text) - sz)
     {
-        if (!mbc[0])
+        if (_text[0] == '\0')
             _text[0] = ' ';
         switch (mbc.size())
         {
