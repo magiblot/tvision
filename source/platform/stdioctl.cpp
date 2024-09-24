@@ -187,7 +187,7 @@ StdioCtl::StdioCtl() noexcept
     //    still work.
     //
     // So, in order to find out if a console needs to be allocated, we
-    // check whether at least of the standard handles is a console. If none
+    // check whether at least one of the standard handles is a console. If none
     // of them is, we allocate a new console. Yes, this will always spawn a
     // console if all three standard handles are redirected, but this is not
     // a common use case.

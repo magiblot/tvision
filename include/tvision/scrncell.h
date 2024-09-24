@@ -60,13 +60,13 @@ struct TCellChar
 
     TCellChar() = default;
     inline void moveChar(char ch);
-    inline void moveInt(uint32_t mbc, bool wide=false);
-    inline void moveStr(TStringView mbc, bool wide=false);
+    inline void moveMultiByteChar(uint32_t mbc, bool wide = false);
+    inline void moveMultiByteChar(TStringView mbc, bool wide = false);
     inline void moveWideCharTrail();
 
     constexpr inline bool isWide() const;
     constexpr inline bool isWideCharTrail() const;
-    constexpr inline void appendZeroWidth(TStringView mbc);
+    constexpr inline void appendZeroWidthChar(TStringView mbc);
     constexpr inline TStringView getText() const;
     constexpr inline size_t size() const;
 
@@ -80,7 +80,7 @@ inline void TCellChar::moveChar(char ch)
     _text[0] = ch;
 }
 
-inline void TCellChar::moveInt(uint32_t mbc, bool wide)
+inline void TCellChar::moveMultiByteChar(uint32_t mbc, bool wide)
 // Pre: 'mbc' is a bit-casted multibyte-encoded character.
 {
     memset(this, 0, sizeof(*this));
@@ -88,7 +88,7 @@ inline void TCellChar::moveInt(uint32_t mbc, bool wide)
     _flags = -int(wide) & fWide;
 }
 
-inline void TCellChar::moveStr(TStringView mbc, bool wide)
+inline void TCellChar::moveMultiByteChar(TStringView mbc, bool wide)
 {
     static_assert(sizeof(_text) >= 4, "");
     memset(this, 0, sizeof(*this));
@@ -121,7 +121,7 @@ constexpr inline bool TCellChar::isWideCharTrail() const
     return _flags & fTrail;
 }
 
-constexpr inline void TCellChar::appendZeroWidth(TStringView mbc)
+constexpr inline void TCellChar::appendZeroWidthChar(TStringView mbc)
 // Pre: !isWideCharTrail();
 {
     size_t sz = size();

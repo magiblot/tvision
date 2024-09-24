@@ -197,14 +197,14 @@ void DisplayBuffer::flushScreen(DisplayStrategy &display) noexcept
 inline void DisplayBuffer::validateCell(TScreenCell &cell) const noexcept
 {
     auto &ch = cell._ch;
-    if (!ch[1]) // size 1
+    if (ch[1] == '\0') // size 1
     {
         uchar c = ch[0];
         if (c == '\0')
             ch[0] = ' ';
         else if (c < ' ' || 0x7F <= c)
             // Translate from codepage as fallback.
-            ch.moveInt(CpTranslator::toPackedUtf8(c));
+            ch.moveMultiByteChar(CpTranslator::toPackedUtf8(c));
     }
 }
 

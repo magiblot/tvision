@@ -265,8 +265,8 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*      maxWidth - maximum amount of data to be moved, measured in        */
 /*                 text width                                             */
 /*                                                                        */
-/*      strIndent - position in str where to start moving from,           */
-/*                  measured in text width                                */
+/*      strOffset - position in str where to start moving from,           */
+/*                  measured in text width (not in bytes)                 */
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
@@ -274,7 +274,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
-ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, ushort maxWidth, ushort strIndent ) noexcept
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, ushort maxWidth, ushort strOffset ) noexcept
 {
     size_t i = indent, j = 0, w = 0;
     int toggle = 1;
@@ -289,7 +289,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, u
             }
         else
             {
-            if (strIndent <= w)
+            if (strOffset <= w)
                 {
                 if (!TText::drawOne(dest, i, str, j, curAttr))
                     break;
@@ -298,8 +298,8 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs, u
                 {
                 if (!TText::next(str, j, w))
                     break;
-                if (strIndent < w && i < dest.size())
-                    // 'strIndent' is in the middle of a double-width character.
+                if (strOffset < w && i < dest.size())
+                    // 'strOffset' is in the middle of a double-width character.
                     ::setCell(dest[i++], ' ', curAttr);
                 }
             }
@@ -373,8 +373,8 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
 /*      maxWidth - maximum amount of data to be moved, measured in        */
 /*                 text width                                             */
 /*                                                                        */
-/*      strIndent - position in str where to start moving from,           */
-/*                  measured in text width                                */
+/*      strOffset - position in str where to start moving from,           */
+/*                  measured in text width (not in bytes)                 */
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
@@ -383,17 +383,17 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
 /*------------------------------------------------------------------------*/
 
 ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
-                             ushort maxWidth, ushort strIndent ) noexcept
+                             ushort maxWidth, ushort strOffset ) noexcept
 {
 #ifdef __BORLANDC__
-    if (strIndent < str.size())
-        return moveStr(indent, str.substr(strIndent, maxWidth), attr);
+    if (strOffset < str.size())
+        return moveStr(indent, str.substr(strOffset, maxWidth), attr);
     return 0;
 #else
     if (attr != 0)
-        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strIndent, attr);
+        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strOffset, attr);
     else
-        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strIndent);
+        return TText::drawStr(data.subspan(0, indent + maxWidth), indent, str, strOffset);
 #endif
 }
 

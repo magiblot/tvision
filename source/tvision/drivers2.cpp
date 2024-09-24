@@ -64,7 +64,7 @@ const ushort arrowCodes[] =
 /*                                                                        */
 /*  returns                                                               */
 /*                                                                        */
-/*      length of string, ignoring '~' characters.                        */
+/*      displayed length of string, ignoring '~' characters.              */
 /*                                                                        */
 /*  Comments:                                                             */
 /*                                                                        */

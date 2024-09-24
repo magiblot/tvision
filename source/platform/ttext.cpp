@@ -285,7 +285,7 @@ TText::Lw TText::scrollImpl(TSpan<const uint32_t> text, int count, Boolean inclu
 namespace ttext
 {
 
-static inline bool isZWJ(TStringView mbc)
+static inline bool isZeroWidthJoiner(TStringView mbc)
 // We want to avoid printing certain characters which are usually represented
 // differently by different terminal applications or which can combine different
 // characters together, changing the width of a whole string.
@@ -312,7 +312,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (text[j] == '\0')
                     cells[i]._ch.moveChar(' ');
                 else if (text[j] < ' ' || '\x7F' <= text[j])
-                    cells[i]._ch.moveInt(CpTranslator::toPackedUtf8(text[j]));
+                    cells[i]._ch.moveMultiByteChar(CpTranslator::toPackedUtf8(text[j]));
                 else
                     cells[i]._ch.moveChar(text[j]);
                 return {1, 1};
@@ -324,7 +324,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             {
                 if (i < cells.size())
                 {
-                    cells[i]._ch.moveStr("�");
+                    cells[i]._ch.moveMultiByteChar("�");
                     return {(size_t) mb.length, 1};
                 }
             }
@@ -332,11 +332,11 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             {
                 TStringView zwc {&text[j], (size_t) mb.length};
                 // Append to the previous cell, if present.
-                if (i > 0 && !isZWJ(zwc))
+                if (i > 0 && !isZeroWidthJoiner(zwc))
                 {
                     size_t k = i;
                     while (cells[--k]._ch.isWideCharTrail() && k > 0);
-                    cells[k]._ch.appendZeroWidth(zwc);
+                    cells[k]._ch.appendZeroWidthChar(zwc);
                 }
                 return {(size_t) mb.length, 0};
             }
@@ -345,7 +345,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (i < cells.size())
                 {
                     bool wide = mb.width > 1;
-                    cells[i]._ch.moveStr({&text[j], (size_t) mb.length}, wide);
+                    cells[i]._ch.moveMultiByteChar({&text[j], (size_t) mb.length}, wide);
                     bool drawTrail = (wide && i + 1 < cells.size());
                     if (drawTrail)
                         cells[i + 1]._ch.moveWideCharTrail();
@@ -372,18 +372,18 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         {
             if (i < cells.size())
             {
-                cells[i]._ch.moveStr("�");
+                cells[i]._ch.moveMultiByteChar("�");
                 return {1, 1};
             }
         }
         else if (textU32[j] != 0 && width == 0)
         {
             // Append to the previous cell, if present.
-            if (i > 0 && !isZWJ(textU8))
+            if (i > 0 && !isZeroWidthJoiner(textU8))
             {
                 size_t k = i;
                 while (cells[--k]._ch.isWideCharTrail() && k > 0);
-                cells[k]._ch.appendZeroWidth(textU8);
+                cells[k]._ch.appendZeroWidthChar(textU8);
             }
             return {1, 0};
         }
@@ -395,7 +395,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (textU32[j] == '\0')
                     cells[i]._ch.moveChar(' ');
                 else
-                    cells[i]._ch.moveStr(textU8, wide);
+                    cells[i]._ch.moveMultiByteChar(textU8, wide);
                 bool drawTrail = (wide && i + 1 < cells.size());
                 if (drawTrail)
                     cells[i + 1]._ch.moveWideCharTrail();
