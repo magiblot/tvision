@@ -35,8 +35,14 @@ TCommandSet::TCommandSet() noexcept
 
 TCommandSet::TCommandSet( const TCommandSet& tc ) noexcept
 {
+    *this = tc;
+}
+
+TCommandSet& TCommandSet::operator = ( const TCommandSet& tc ) noexcept
+{
     for( int i = 0; i < 32; i++ )
         cmds[i] = tc.cmds[i];
+    return *this;
 }
 
 Boolean TCommandSet::has( int cmd ) noexcept

@@ -211,6 +211,7 @@ public:
 
     TCommandSet() noexcept;
     TCommandSet( const TCommandSet& ) noexcept;
+    TCommandSet& operator = ( const TCommandSet& ) noexcept;
 
     Boolean has( int cmd ) noexcept;
 
