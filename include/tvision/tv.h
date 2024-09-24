@@ -40,11 +40,14 @@
 #endif
 #if defined( _MSC_VER )
 #pragma warning(push)
-#pragma warning(disable: 4250)
+#pragma warning(disable: 4250) // Inheritance via dominance
+#pragma warning(disable: 4616) // Invalid #pragma warning number
+#pragma warning(disable: 26819) // Implicit fallthrough
 #endif
 #if defined( __GNUC__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 
 #if !defined( __FLAT__ )
