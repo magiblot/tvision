@@ -7,6 +7,7 @@
 #include <internal/gpminput.h>
 #include <internal/dispbuff.h>
 #include <internal/linuxcon.h>
+#include <linux/keyboard.h>
 #include <stdlib.h>
 #include <gpm.h>
 
@@ -20,11 +21,11 @@ GpmInput *GpmInput::create(DisplayBuffer &displayBuf) noexcept
     Gpm_Connect conn = {
         .eventMask = GPM_DOWN | GPM_UP | GPM_DRAG | GPM_MOVE,
         .defaultMask = 0, // Disable cursor drawing by the server.
-        /* Disable mouse event reporting when keyboard modifiers are active.
-         * In such case, GPM text selection and copy/paste will be active. */
+        // Report keyboard modifiers except Shift, which terminal emulators
+        // usually reserve for selecting text. Here GPM will do the same.
         .minMod = 0,
-        .maxMod = 0 };
-    // Because we only instantiate GPM in the Linux console, discard the
+        .maxMod = (ushort) ~(1 << KG_SHIFT) };
+    // Because we only instantiate GPM in the Linux console, unset the
     // TERM variable during Gpm_Open so that GPM won't assume it is being
     // ran under xterm (e.g. if TERM=xterm), and 'gpm_fd' won't be -2.
     char *term = newStr(getenv("TERM"));
@@ -82,6 +83,7 @@ bool GpmInput::getEvent(TEvent &ev) noexcept
         ev.what = evMouse;
         ev.mouse.where.x = gpmEvent.x;
         ev.mouse.where.y = gpmEvent.y;
+
         for (const auto &flag : gpmButtonFlags)
             if (gpmEvent.buttons & flag.gpm)
             {
@@ -91,12 +93,17 @@ bool GpmInput::getEvent(TEvent &ev) noexcept
                     buttonState &= ~flag.mb;
             }
         ev.mouse.buttons = buttonState;
+
         if (gpmEvent.wdy)
             ev.mouse.wheel = gpmEvent.wdy > 0 ? mwUp : mwDown;
         else if (gpmEvent.wdx)
             ev.mouse.wheel = gpmEvent.wdx > 0 ? mwRight : mwLeft;
         else
             ev.mouse.wheel = 0;
+
+        ev.mouse.controlKeyState =
+            LinuxConsoleInput::convertLinuxKeyModifiers(gpmEvent.modifiers);
+
         return true;
     }
     return false;

@@ -62,7 +62,7 @@ bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
     if (input.getEvent(ev))
     {
         auto &keyCode = ev.keyDown.keyCode;
-        ev.keyDown.controlKeyState = getKeyboardModifiers(io);
+        ev.keyDown.controlKeyState = getKeyboardModifiers();
         // Prevent Ctrl+H/Ctrl+I/Ctrl+J/Ctrl+M from being interpreted as
         // Ctrl+Back/Ctrl+Tab/Ctrl+Enter.
         if (keyCode == kbBack || keyCode == kbTab || keyCode == kbEnter)
@@ -83,20 +83,37 @@ bool LinuxConsoleInput::hasPendingEvents() noexcept
     return input.hasPendingEvents();
 }
 
-ushort LinuxConsoleInput::getKeyboardModifiers(StdioCtl &io) noexcept
+ushort LinuxConsoleInput::getKeyboardModifiers() noexcept
 {
     char res = 6;
-    ulong actualModifiers = 0;
     if (ioctl(io.in(), TIOCLINUX, &res) != -1)
+        return convertLinuxKeyModifiers(res);
+    return 0;
+}
+
+ushort LinuxConsoleInput::convertLinuxKeyModifiers(ushort linuxShiftState) noexcept
+{
+    constexpr struct
     {
-        if (res & (1 << KG_SHIFT))
-            actualModifiers |= kbShift;
-        if (res & (1 << KG_CTRL))
-            actualModifiers |= kbLeftCtrl;
-        if (res & (1 << KG_ALT))
-            actualModifiers |= kbLeftAlt;
-    }
-    return actualModifiers;
+        uchar kb;
+        uchar tv;
+    } linuxModifierFlags[] =
+    {
+        {1 << KG_SHIFT, kbShift},
+        {1 << KG_CTRLL, kbLeftCtrl},
+        {1 << KG_CTRLR, kbRightCtrl},
+        {1 << KG_ALT, kbLeftAlt},
+        {1 << KG_ALTGR, kbRightAlt},
+    };
+
+    ushort modifiers = 0;
+    for (const auto &flags : linuxModifierFlags)
+        if (linuxShiftState & flags.kb)
+            modifiers |= flags.tv;
+    // It may be that KG_CTRL was detected, but not KG_CTRLL or KG_CTRLR.
+    if ((linuxShiftState & (1 << KG_CTRL)) && !(modifiers & kbCtrlShift))
+        modifiers |= kbLeftCtrl;
+    return modifiers;
 }
 
 } // namespace tvision

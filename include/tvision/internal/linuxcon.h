@@ -30,7 +30,9 @@ struct LinuxConsoleInput final : public EventSource
     bool getEvent(TEvent &ev) noexcept override;
     bool hasPendingEvents() noexcept override;
 
-    static ushort getKeyboardModifiers(StdioCtl &io) noexcept;
+    ushort getKeyboardModifiers() noexcept;
+
+    static ushort convertLinuxKeyModifiers(ushort linuxShiftState) noexcept;
 };
 
 class LinuxConsoleStrategy : public ConsoleStrategy
