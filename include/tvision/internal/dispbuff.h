@@ -2,6 +2,7 @@
 #define TVISION_DISPBUFF_H
 
 #define Uses_TPoint
+#define Uses_TScreenCell
 #include <tvision/tv.h>
 
 #include <vector>
