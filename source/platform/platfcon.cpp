@@ -30,7 +30,7 @@ ConsoleStrategy &Platform::createConsole() noexcept
         display = new AnsiDisplay<NcursesDisplay>(io);
 #ifdef __linux__
     if (io.isLinuxConsole())
-        return LinuxConsoleStrategy::create(io, inputState, *display, *new NcursesInput(io, *display, inputState, false));
+        return LinuxConsoleStrategy::create(io, displayBuf, inputState, *display, *new NcursesInput(io, *display, inputState, false));
 #endif // __linux__
     return UnixConsoleStrategy::create(io, displayBuf, inputState, *display, *new NcursesInput(io, *display, inputState, true));
 #endif // _WIN32

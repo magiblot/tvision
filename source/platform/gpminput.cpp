@@ -1,22 +1,19 @@
 #ifdef HAVE_GPM
 
-#define Uses_TPoint
 #define Uses_TEvent
 #define Uses_TKeys
-#define Uses_TScreen
 #include <tvision/tv.h>
 
 #include <internal/gpminput.h>
+#include <internal/dispbuff.h>
 #include <internal/linuxcon.h>
-#include <algorithm>
-#include <cstdlib>
-#include <memory>
+#include <stdlib.h>
 #include <gpm.h>
 
 namespace tvision
 {
 
-GpmInput *GpmInput::create() noexcept
+GpmInput *GpmInput::create(DisplayBuffer &displayBuf) noexcept
 {
     // Let coordinates begin at zero instead of one.
     gpm_zerobased = 1;
@@ -30,25 +27,26 @@ GpmInput *GpmInput::create() noexcept
     // Because we only instantiate GPM in the Linux console, discard the
     // TERM variable during Gpm_Open so that GPM won't assume it is being
     // ran under xterm (e.g. if TERM=xterm), and 'gpm_fd' won't be -2.
-    {
-        std::unique_ptr<char[]> term {newStr(getenv("TERM"))};
-        if (term) unsetenv("TERM");
-        Gpm_Open(&conn, 0);
-        if (term) setenv("TERM", term.get(), 1);
-    }
+    char *term = newStr(getenv("TERM"));
+    if (term) unsetenv("TERM");
+    Gpm_Open(&conn, 0);
+    if (term) setenv("TERM", term, 1);
+    delete[] term;
+
     if (gpm_fd != -1)
-        return new GpmInput;
+        return new GpmInput(displayBuf);
     return nullptr;
 }
 
-GpmInput::GpmInput() noexcept :
+inline GpmInput::GpmInput(DisplayBuffer &aDisplayBuf) noexcept :
     InputStrategy(gpm_fd),
-    buttonState(0)
+    displayBuf(aDisplayBuf)
 {
 }
 
 GpmInput::~GpmInput()
 {
+    displayBuf.setCursorVisibility(false);
     Gpm_Close();
 }
 
@@ -60,8 +58,8 @@ int GpmInput::getButtonCount() noexcept
 void GpmInput::fitEvent(Gpm_Event &gpmEvent) noexcept
 {
     short &x = gpmEvent.x, &y = gpmEvent.y;
-    x = std::min<short>(std::max<short>(x, 0), TScreen::screenWidth - 1);
-    y = std::min<short>(std::max<short>(y, 0), TScreen::screenHeight - 1);
+    x = (short) min(max(x, 0), displayBuf.size.x - 1);
+    y = (short) min(max(y, 0), displayBuf.size.y - 1);
 }
 
 static constexpr struct { uchar gpm, mb; } gpmButtonFlags[] =
@@ -77,8 +75,9 @@ bool GpmInput::getEvent(TEvent &ev) noexcept
     if (Gpm_GetEvent(&gpmEvent) == 1)
     {
         fitEvent(gpmEvent);
-        cursor.setPos({gpmEvent.x, gpmEvent.y});
-        cursor.show();
+        displayBuf.setCursorPosition(gpmEvent.x, gpmEvent.y);
+        // Do not show the cursor until we receive at least one mouse event.
+        displayBuf.setCursorVisibility(true);
 
         ev.what = evMouse;
         ev.mouse.where.x = gpmEvent.x;

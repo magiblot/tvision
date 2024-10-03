@@ -49,9 +49,10 @@ class LinuxConsoleStrategy : public ConsoleStrategy
 public:
 
     // Pre: 'io.isLinuxConsole()' returns 'true'.
-    // The lifetime of 'io' must exceed that of the returned object.
+    // The lifetime of 'io' and 'displayBuf' must exceed that of the returned object.
     // Takes ownership over 'inputState', 'display' and 'input'.
     static LinuxConsoleStrategy &create( StdioCtl &io,
+                                         DisplayBuffer &displayBuf,
                                          InputState &inputState,
                                          DisplayStrategy &display,
                                          InputStrategy &input ) noexcept;

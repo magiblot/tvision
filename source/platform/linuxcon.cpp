@@ -34,13 +34,14 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 }
 
 LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io,
+                                                    DisplayBuffer &displayBuf,
                                                     InputState &inputState,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
     auto &wrapper = *new LinuxConsoleInput(io, input);
-    auto *gpm = GpmInput::create();
+    auto *gpm = GpmInput::create(displayBuf);
     return *new LinuxConsoleStrategy(display, wrapper, inputState, sigwinch, gpm);
 }
 

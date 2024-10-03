@@ -10,7 +10,6 @@
 namespace tvision
 {
 
-class ScreenCursor;
 class DisplayStrategy;
 
 namespace
@@ -31,9 +30,14 @@ class DisplayBuffer
 
     const bool wideOverlapping;
     bool screenTouched {true};
-    bool caretMoved {false};
+    bool caretOrCursorChanged {false};
+
     TPoint caretPosition {-1, -1};
     int newCaretSize {0};
+
+    TPoint cursorPosition {-1, -1};
+    bool cursorVisible {false};
+    TColorAttr attrUnderCursor;
 
     bool limitFPS;
     std::chrono::microseconds flushDelay {};
@@ -52,9 +56,8 @@ class DisplayBuffer
     void setDirty(int x, int y, int len) noexcept;
     void validateCell(TScreenCell &cell) const noexcept;
 
-    std::vector<ScreenCursor*> cursors;
-    void drawCursors() noexcept;
-    void undrawCursors() noexcept;
+    void drawCursor() noexcept;
+    void undrawCursor() noexcept;
 
     bool needsFlush() const noexcept;
     bool timeToFlush() noexcept;
@@ -65,7 +68,6 @@ public:
     int caretSize {};
 
     DisplayBuffer() noexcept;
-    ~DisplayBuffer();
 
     void setCaretSize(int size) noexcept;
     void setCaretPosition(int x, int y) noexcept;
@@ -75,38 +77,14 @@ public:
     void flushScreen(DisplayStrategy &) noexcept;
     TScreenCell *reloadScreenInfo(DisplayStrategy &) noexcept;
 
-    static void addCursor(ScreenCursor *cursor) noexcept;
-    static void removeCursor(ScreenCursor *cursor) noexcept;
-    static void changeCursor() noexcept;
+    void setCursorPosition(int x, int y) noexcept;
+    void setCursorVisibility(bool visible) noexcept;
 };
 
 inline bool DisplayBuffer::inBounds(int x, int y) const noexcept
 {
     return 0 <= x && x < size.x &&
            0 <= y && y < size.y;
-}
-
-inline void DisplayBuffer::addCursor(ScreenCursor *cursor) noexcept
-{
-    auto &cursors = instance->cursors;
-    for (auto it = cursors.begin(); it != cursors.end(); ++it)
-        if (*it == cursor)
-            return;
-    cursors.push_back(cursor);
-}
-
-inline void DisplayBuffer::removeCursor(ScreenCursor *cursor) noexcept
-{
-    changeCursor();
-    auto &cursors = instance->cursors;
-    for (auto it = cursors.begin(); it != cursors.end(); ++it)
-        if (*it == cursor)
-            return (void) cursors.erase(it);
-}
-
-inline void DisplayBuffer::changeCursor() noexcept
-{
-    instance->caretMoved = true;
 }
 
 } // namespace tvision
