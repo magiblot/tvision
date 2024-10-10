@@ -370,7 +370,7 @@ bool NcursesInput::getEvent(TEvent &ev) noexcept
 
         if (Alt)
         {
-            ev.keyDown.controlKeyState |= kbAltShift;
+            ev.keyDown.controlKeyState |= kbLeftAlt;
             TermIO::normalizeKey(ev.keyDown);
         }
         if (state.bracketedPaste)
