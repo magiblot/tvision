@@ -44,7 +44,6 @@ class DisplayBuffer
     std::chrono::microseconds flushDelay {};
     std::chrono::time_point<std::chrono::steady_clock> lastFlush {};
 
-    static DisplayBuffer *instance;
 #ifdef _WIN32
     static constexpr int defaultFPS = 120; // Just 60 feels notably slower on Windows, I don't know why.
 #else
