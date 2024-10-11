@@ -90,9 +90,9 @@ inline void TCellChar::moveMultiByteChar(uint32_t mbc, bool wide)
 
 inline void TCellChar::moveMultiByteChar(TStringView mbc, bool wide)
 {
-    static_assert(sizeof(_text) >= 4, "");
+    static_assert(sizeof(_text) >= maxCharSize, "");
     memset(this, 0, sizeof(*this));
-    if (0 < mbc.size() && mbc.size() <= 4)
+    if (0 < mbc.size() && mbc.size() <= maxCharSize)
     {
         _flags |= -int(wide) & fWide;
         switch (mbc.size())

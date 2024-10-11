@@ -233,7 +233,7 @@ void TEditor::changeBounds( const TRect& bounds )
 
 TStringView TEditor::bufChars( uint P )
 {
-    static thread_local char buf[maxCharLength];
+    static thread_local char buf[maxCharSize];
     if (encoding == encSingleByte)
         {
         buf[0] = bufChar(P);
@@ -250,7 +250,7 @@ TStringView TEditor::bufChars( uint P )
 
 TStringView TEditor::prevBufChars( uint P )
 {
-    static thread_local char buf[maxCharLength];
+    static thread_local char buf[maxCharSize];
     if (encoding == encSingleByte)
         {
         buf[0] = bufChar(P - 1);

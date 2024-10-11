@@ -206,7 +206,7 @@ struct KeyDownEvent
         CharScanType charScan;
         };
     ushort controlKeyState;
-    char text[4];               // NOT null-terminated.
+    char text[maxCharSize];     // NOT null-terminated.
     uchar textLength;
 
     TStringView getText() const;

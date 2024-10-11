@@ -106,7 +106,7 @@ static void discardPossiblyTruncatedCharsAtEnd( const char (&s)[256],
     if( sLen == sizeof(s) )
         {
         sLen = 0;
-        while( sLen < sizeof(s) - (maxCharLength - 1) )
+        while( sLen < sizeof(s) - (maxCharSize - 1) )
             sLen += TText::next( TStringView( &s[sLen], sizeof(s) - sLen ) );
         }
 #else
