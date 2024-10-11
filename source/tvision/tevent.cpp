@@ -291,15 +291,21 @@ I   POP DS
 
 void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
 {
-    static TEvent pendingKey = {0};
-    if( pendingKey.what != evNothing )
-        {
-        ev = pendingKey;
-        pendingKey.what = evNothing;
-        return;
-        }
+    static Boolean shouldSkipLf = False;
 
     getKeyOrPasteEvent( ev );
+
+    if( shouldSkipLf )
+        {
+        shouldSkipLf = False;
+        // Skip a LF, since we had previously read a CR.
+        if( ev.what == evKeyDown && (ev.keyDown.controlKeyState & kbPaste) != 0 &&
+            ( (ev.keyDown.textLength == 0 && ev.keyDown.charScan.charCode == '\n') ||
+              (ev.keyDown.textLength == 1 && ev.keyDown.text[0] == '\n')
+            )
+          )
+            getKeyOrPasteEvent( ev );
+        }
 
     if( ev.what == evKeyDown && (ev.keyDown.controlKeyState & kbPaste) != 0 )
         {
@@ -308,21 +314,11 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
             ev.keyDown.text[0] = (char) ev.keyDown.charScan.charCode;
             ev.keyDown.textLength = 1;
             }
-        if( ev.keyDown.text[0] == '\r' ) // Convert CR and CRLF into LF.
+        // Convert CR and CRLF into LF.
+        if( ev.keyDown.text[0] == '\r' )
             {
             ev.keyDown.text[0] = '\n';
-
-            TEvent next;
-            getKeyOrPasteEvent( next );
-
-            if( next.what == evKeyDown &&
-                (next.keyDown.controlKeyState & kbPaste) != 0 &&
-                next.keyDown.textLength == 1 &&
-                next.keyDown.text[0] == '\n'
-              )
-                ; // Drop event.
-            else
-                pendingKey = next;
+            shouldSkipLf = True;
             }
         ev.keyDown.keyCode = 0;
         }
