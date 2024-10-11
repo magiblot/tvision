@@ -2,10 +2,6 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-#if !defined( __BORLANDC__ )
-#include <chrono>
-#endif
-
 static TTimePoint systemTimeMs()
 {
 #if !defined( __FLAT__ )
@@ -80,6 +76,12 @@ void TTimerQueue::killTimer(TTimerId id)
     }
 }
 
+static TTimePoint calcNextExpiresAt(TTimePoint expiresAt, TTimePoint now, int32_t period)
+// Pre: expiresAt <= now && period > 0.
+{
+    return (1 + (now - expiresAt + period)/period)*period + expiresAt - period;
+}
+
 void TTimerQueue::collectTimeouts(void (&func)(TTimerId, void *), void *args)
 {
     if (first == 0)
@@ -100,9 +102,7 @@ void TTimerQueue::collectTimeouts(void (&func)(TTimerId, void *), void *args)
         {
             (*p)->collectId = collectId;
             if ((*p)->period > 0)
-                (*p)->expiresAt =
-                    (1 + (now - (*p)->expiresAt + (*p)->period)/(*p)->period)*(*p)->period +
-                    (*p)->expiresAt - (*p)->period;
+                (*p)->expiresAt = calcNextExpiresAt((*p)->expiresAt, now, (*p)->period);
         }
         else // One-shot timer
         {
