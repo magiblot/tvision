@@ -61,10 +61,10 @@ char * _FAR TEventQueue::pasteText = 0;
 size_t _NEAR TEventQueue::pasteTextLength = 0;
 size_t _NEAR TEventQueue::pasteTextIndex = 0;
 
-TEvent _NEAR TEventQueue::keyEventQueue[ keyEventQSize ] = { {0} };
+TEvent _NEAR TEventQueue::keyEventQueue[ minPasteEventCount ] = { {0} };
 size_t _NEAR TEventQueue::keyEventCount = 0;
 size_t _NEAR TEventQueue::keyEventIndex = 0;
-Boolean _NEAR TEventQueue::keyPasteState = False;
+Boolean _NEAR TEventQueue::pasteState = False;
 
 TEventQueue::TEventQueue() noexcept
 {
@@ -324,7 +324,7 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
         }
 }
 
-void TEventQueue::putPaste( TStringView text ) noexcept
+void TEventQueue::setPasteText( TStringView text ) noexcept
 {
     delete[] pasteText;
     // Always initialize the paste event, even if it is empty, so that
@@ -373,8 +373,8 @@ void TEventQueue::getKeyOrPasteEvent( TEvent &ev ) noexcept
         return;
     if( keyEventCount == 0 )
         {
-        int firstNonText = keyEventQSize;
-        for( int i = 0; i < keyEventQSize; ++i )
+        int firstNonText = minPasteEventCount;
+        for( int i = 0; i < minPasteEventCount; ++i )
             {
             if( !readKeyPress( keyEventQueue[i] ) )
                 break;
@@ -387,13 +387,13 @@ void TEventQueue::getKeyOrPasteEvent( TEvent &ev ) noexcept
             }
         // If we receive at least X consecutive text events, then this is
         // the beginning of a paste event.
-        if( keyEventCount == keyEventQSize && firstNonText == keyEventQSize )
-            keyPasteState = True;
-        if( keyPasteState )
+        if( keyEventCount == minPasteEventCount && firstNonText == minPasteEventCount )
+            pasteState = True;
+        if( pasteState )
             for( int i = 0; i < min(keyEventCount, firstNonText); ++i )
                 keyEventQueue[i].keyDown.controlKeyState |= kbPaste;
-        if( keyEventCount < keyEventQSize || firstNonText < keyEventQSize )
-            keyPasteState = False;
+        if( keyEventCount < minPasteEventCount || firstNonText < minPasteEventCount )
+            pasteState = False;
         keyEventIndex = 0;
         }
     if( keyEventCount != 0 )
@@ -451,7 +451,7 @@ I   INT 16h;
 void TEventQueue::waitForEvents( int timeoutMs ) noexcept
 {
 #if defined( __FLAT__ )
-    if( !pasteText && keyEventCount == 0 )
+    if( pasteText == 0 && keyEventCount == 0 )
         THardwareInfo::waitForEvents( timeoutMs );
 #else
     (void) timeoutMs;

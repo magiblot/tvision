@@ -280,13 +280,12 @@ public:
     static void wakeUp() noexcept;
 
     friend class TView;
-    friend class TProgram;
     friend void genRefs();
 
     static ushort _NEAR doubleDelay;
     static Boolean _NEAR mouseReverse;
 
-    static void putPaste( TStringView ) noexcept;
+    static void setPasteText( TStringView ) noexcept;
 
 private:
 
@@ -332,10 +331,10 @@ private:
     static size_t _NEAR pasteTextLength;
     static size_t _NEAR pasteTextIndex;
 
-    static TEvent _NEAR keyEventQueue[ keyEventQSize ];
+    static TEvent _NEAR keyEventQueue[ minPasteEventCount ];
     static size_t _NEAR keyEventCount;
     static size_t _NEAR keyEventIndex;
-    static Boolean _NEAR keyPasteState;
+    static Boolean _NEAR pasteState;
 };
 
 inline void TEvent::getMouseEvent() noexcept
