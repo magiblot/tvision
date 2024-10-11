@@ -362,8 +362,8 @@ public:
 
     TTimerId setTimer(uint32_t timeoutMs, int32_t periodMs = -1);
     void killTimer(TTimerId id);
-    void collectTimeouts(void (&func)(TTimerId, void *), void *args);
-    int32_t timeUntilTimeout();
+    void collectExpiredTimers(void (&func)(TTimerId, void *), void *args);
+    int32_t timeUntilNextTimeout();
 
 private:
 

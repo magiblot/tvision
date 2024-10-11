@@ -228,7 +228,7 @@ void TButton::handleEvent( TEvent& event )
                 drawState( True );
                 if( animationTimer != 0 )
                     press();
-                animationTimer = setTimer( animationDuration );
+                animationTimer = setTimer( animationDurationMs );
                 clearEvent( event );
                 }
             break;
@@ -258,7 +258,7 @@ void TButton::handleEvent( TEvent& event )
                     drawView();
                     break;
 
-                case cmTimeout:
+                case cmTimerExpired:
                     if( animationTimer != 0 && event.message.infoPtr == animationTimer )
                         {
                         animationTimer = 0;

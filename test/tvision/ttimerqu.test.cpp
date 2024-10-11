@@ -17,20 +17,20 @@ static void handleTimeout(TTimerId, void *)
     ++timeouts;
 }
 
-TEST(TTimerQueue, EmptyQueueShouldReturnNoTimeouts)
+TEST(TTimerQueue, EmptyQueueShouldReturnNoExpiredTimers)
 {
     currentTime = 0;
     TTimerQueue timerQueue(mockCurrentTime);
 
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, -1);
 
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 0);
 }
 
-TEST(TTimerQueue, ShouldCollectExpiredTimeout)
+TEST(TTimerQueue, ShouldCollectExpiredTimers)
 {
     currentTime = 0;
     TTimerQueue timerQueue(mockCurrentTime);
@@ -39,7 +39,7 @@ TEST(TTimerQueue, ShouldCollectExpiredTimeout)
 
     currentTime = 1000;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 1);
 }
 
@@ -51,11 +51,11 @@ TEST(TTimerQueue, ShouldMeasureNextTimeoutProperly)
     timerQueue.setTimer(1000);
 
     currentTime = 1;
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 999);
 
     currentTime = 1001;
-    nextTimeout = timerQueue.timeUntilTimeout();
+    nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 0);
 }
 
@@ -68,9 +68,9 @@ TEST(TTimerQueue, ShouldUnqueueSingleShotTimer)
 
     currentTime = 1000;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
 
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, -1);
 }
 
@@ -81,24 +81,24 @@ TEST(TTimerQueue, ShouldRequeuePeriodicTimer)
 
     timerQueue.setTimer(1000, 500);
 
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 1000);
 
     currentTime = 1000;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 1);
 
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 0);
 
-    nextTimeout = timerQueue.timeUntilTimeout();
+    nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 500);
 
     currentTime = 1500;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 1);
 }
 
@@ -112,10 +112,10 @@ TEST(TTimerQueue, ShouldCollectOnlyExpiredTimeouts)
 
     currentTime = 1000;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 1);
 
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 500);
 }
 
@@ -128,7 +128,7 @@ TEST(TTimerQueue, ShouldMeasureNextTimeoutProperlyWithSeveralTimers)
     timerQueue.setTimer(1000);
 
     currentTime = 1;
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 999);
 }
 
@@ -142,7 +142,7 @@ TEST(TTimerQueue, ShouldCollectSeveralExpiredTimers)
 
     currentTime = 1500;
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 2);
 }
 
@@ -157,7 +157,7 @@ TEST(TTimerQueue, ShouldRemoveTimer)
     timerQueue.killTimer(id2);
 
     currentTime = 1;
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 1499);
 }
 
@@ -175,7 +175,7 @@ TEST(TTimerQueue, RemovingInvalidTimersShouldNotProduceErrors)
     timerQueue.killTimer((TTimerId) 3);
 
     currentTime = 1;
-    int32_t nextTimeout = timerQueue.timeUntilTimeout();
+    int32_t nextTimeout = timerQueue.timeUntilNextTimeout();
     EXPECT_EQ(nextTimeout, 1499);
 }
 
@@ -189,11 +189,11 @@ TEST(TTimerQueue, ShouldHandleZeroTimedTimersProperly)
     timerQueue.setTimer(0, 0);
 
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 3);
 
     timeouts = 0;
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
     EXPECT_EQ(timeouts, 3);
 }
 
@@ -201,7 +201,7 @@ static void nestedHandleTimeout(TTimerId, void *args)
 {
     ++timeouts;
     currentTime = 1500;
-    (*(TTimerQueue *) args).collectTimeouts(handleTimeout, nullptr);
+    (*(TTimerQueue *) args).collectExpiredTimers(handleTimeout, nullptr);
 }
 
 TEST(TTimerQueue, ShouldCollectTimeoutsWithNestedInvocation)
@@ -214,7 +214,7 @@ TEST(TTimerQueue, ShouldCollectTimeoutsWithNestedInvocation)
 
     currentTime = 1000;
     timeouts = 0;
-    timerQueue.collectTimeouts(nestedHandleTimeout, &timerQueue);
+    timerQueue.collectExpiredTimers(nestedHandleTimeout, &timerQueue);
     EXPECT_EQ(timeouts, 3);
 }
 
@@ -223,7 +223,7 @@ TEST(TTimerQueue, ShouldNotRequestCurrentTimeIfThereAreNoTimers)
     currentTimeRequests = 0;
 
     TTimerQueue timerQueue(mockCurrentTime);
-    timerQueue.collectTimeouts(handleTimeout, nullptr);
+    timerQueue.collectExpiredTimers(handleTimeout, nullptr);
 
     EXPECT_EQ(currentTimeRequests, 0);
 }

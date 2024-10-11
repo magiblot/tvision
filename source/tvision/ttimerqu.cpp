@@ -82,7 +82,7 @@ static TTimePoint calcNextExpiresAt(TTimePoint expiresAt, TTimePoint now, int32_
     return (1 + (now - expiresAt + period)/period)*period + expiresAt - period;
 }
 
-void TTimerQueue::collectTimeouts(void (&func)(TTimerId, void *), void *args)
+void TTimerQueue::collectExpiredTimers(void (&func)(TTimerId, void *), void *args)
 {
     if (first == 0)
         return;
@@ -123,7 +123,7 @@ void TTimerQueue::collectTimeouts(void (&func)(TTimerId, void *), void *args)
     }
 }
 
-int32_t TTimerQueue::timeUntilTimeout()
+int32_t TTimerQueue::timeUntilNextTimeout()
 {
     if (first == 0)
         return -1;

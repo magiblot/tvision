@@ -175,7 +175,7 @@ const ushort
     cmReceivedFocus     = 50,
     cmReleasedFocus     = 51,
     cmCommandSetChanged = 52,
-    cmTimeout           = 58,
+    cmTimerExpired      = 58,
 
 // TScrollBar messages
 

@@ -416,7 +416,7 @@ The following are new features not available in Borland's release of Turbo Visio
     if (event.keyDown == TKey(kbEnter, kbShift))
         doStuff();
     ```
-* New methods which allow the usage of timed events:
+* New methods which allow using timed events:
     ```c++
     TTimerId TView::setTimer(uint timeoutMs, int periodMs = -1);
     void TView::killTimer(TTimerId id);
@@ -425,9 +425,9 @@ The following are new features not available in Borland's release of Turbo Visio
 
     If `periodMs` is negative, the timer only times out a single time and is cleaned up automatically. Otherwise, it will keep timing out periodically until `killTimer` is invoked.
 
-    When a timer times out, an `evBroadcast` event with the command `cmTimeout` is emitted, and `message.infoPtr` is set to the id of the timed-out timer.
+    When a timer times out, an `evBroadcast` event with the command `cmTimerExpired` is emitted, and `message.infoPtr` is set to the `TTimerId` of the expired timer.
 
-    Timeout events are generated in `TProgram::idle()`, that is, only if there are no keyboard or mouse events available.
+    Timeout events are generated in `TProgram::idle()`. Therefore, they are only processed when no keyboard or mouse events are available.
 
 ## Screenshots
 
@@ -855,7 +855,7 @@ Colors can be specified using any of the following formats:
 * `xterm-256color` palette indices (8-bit).
 * The *terminal default* color. This is the color used by terminal emulators when no display attributes (bold, color...) are enabled (usually white for foreground and black for background).
 
-Although Turbo Vision applications are likely to be ran in a terminal emulator, the API makes no assumptions about the display device. That is, the complexity of dealing with terminal emulators is hidden from the programmer and managed by Turbo Vision itself.
+Although Turbo Vision applications are likely to be ran in a terminal emulator, the API makes no assumptions about the display device. That is to say, the complexity of dealing with terminal emulators is hidden from the programmer and managed by Turbo Vision itself.
 
 For example: color support varies among terminals. If the programmer uses a color format not supported by the terminal emulator, Turbo Vision will quantize it to what the terminal can display. The following images represent the quantization of a 24-bit RGB picture to 256, 16 and 8 color palettes:
 
@@ -1180,7 +1180,7 @@ The types defined previously represent concepts that are also important when dev
 | Color | A 4-bit number. | `struct TColorDesired`. |
 | Attribute Pair | `ushort`. An attribute in each byte. | `struct TAttrPair`. |
 
-One of this project's key principles is that the API should be used in the same way both in Borland C++ and modern platforms, that is, without the need for `#ifdef`s. Another principle is that legacy code should compile out-of-the-box, and adapting it to the new features should increase complexity as little as possible.
+One of this project's key principles is that the API should be used in the same way both in Borland C++ and modern platforms, that is to say, without the need for `#ifdef`s. Another principle is that legacy code should compile out-of-the-box, and adapting it to the new features should increase complexity as little as possible.
 
 Backward-compatibility is accomplished in the following way:
 
@@ -1233,4 +1233,4 @@ The code above still works just like it did originally. It's only non-BIOS color
 +    TAttrPair cFrame, cTitle;
 ```
 
-Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is, minimizing the risk of increasing code complexity or introducing bugs.
+Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is to say, minimizing the risk of increasing code complexity or introducing bugs.

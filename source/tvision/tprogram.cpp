@@ -100,7 +100,7 @@ Boolean TProgram::canMoveFocus()
 
 int TProgram::eventWaitTimeout()
 {
-    int timerTimeoutMs = min(timerQueue.timeUntilTimeout(), (int32_t) INT_MAX);
+    int timerTimeoutMs = min(timerQueue.timeUntilNextTimeout(), (int32_t) INT_MAX);
     if (timerTimeoutMs < 0)
         return eventTimeoutMs;
     return min(eventTimeoutMs, timerTimeoutMs);
@@ -207,9 +207,9 @@ void TProgram::handleEvent( TEvent& event )
         }
 }
 
-static void doHandleTimeout( TTimerId id, void *self )
+static void handleTimeout( TTimerId id, void *self )
 {
-    message( (TProgram *) self, evBroadcast, cmTimeout, id );
+    message( (TProgram *) self, evBroadcast, cmTimerExpired, id );
 }
 
 void TProgram::idle()
@@ -223,7 +223,7 @@ void TProgram::idle()
         commandSetChanged = False;
         }
 
-    timerQueue.collectTimeouts(doHandleTimeout, this);
+    timerQueue.collectExpiredTimers( handleTimeout, this );
 }
 
 TDeskTop *TProgram::initDeskTop( TRect r )
