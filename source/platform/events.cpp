@@ -283,7 +283,7 @@ bool EventWaiter::getEvent(TEvent &ev) noexcept
     return false;
 }
 
-void EventWaiter::waitForEvent(int ms) noexcept
+void EventWaiter::waitForEvents(int ms) noexcept
 {
     auto now = steady_clock::now();
     const auto end = ms < 0 ? time_point::max() : now + milliseconds(ms);

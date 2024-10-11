@@ -106,14 +106,14 @@ void THardwareInfo::readEvents() noexcept
             ++eventCount;
 }
 
-void THardwareInfo::waitForEvent( int timeoutMs ) noexcept
+void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
 {
     if (!eventCount)
     {
         // Flush the screen once for every time all events have been processed,
         // only when blocking for events.
         flushScreen();
-        platf->waitForEvent(timeoutMs);
+        platf->waitForEvents(timeoutMs);
     }
 }
 

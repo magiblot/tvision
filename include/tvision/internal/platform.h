@@ -112,7 +112,7 @@ public:
         { console.lock([&] (auto *&c) { this->restoreConsole(c); }); }
 
     bool getEvent(TEvent &ev) noexcept;
-    void waitForEvent(int ms) noexcept { checkConsole(); waiter.waitForEvent(ms); }
+    void waitForEvents(int ms) noexcept { checkConsole(); waiter.waitForEvents(ms); }
     void interruptEventWait() noexcept { waiter.interruptEventWait(); }
 
     int getButtonCount() noexcept

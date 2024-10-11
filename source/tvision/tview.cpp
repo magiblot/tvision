@@ -508,12 +508,12 @@ void TView::getEvent( TEvent& event )
 
 void TView::getEvent( TEvent& event, int timeoutMs )
 {
-    int saveTimeout = TProgram::eventTimeout;
-    TProgram::eventTimeout = timeoutMs;
+    int saveTimeout = TProgram::eventTimeoutMs;
+    TProgram::eventTimeoutMs = timeoutMs;
 
     getEvent( event );
 
-    TProgram::eventTimeout = saveTimeout;
+    TProgram::eventTimeoutMs = saveTimeout;
 }
 
 TRect TView::getExtent() const noexcept

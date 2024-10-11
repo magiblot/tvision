@@ -392,7 +392,7 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
     return False;
 }
 
-void THardwareInfo::waitForEvent( int timeoutMs )
+void THardwareInfo::waitForEvents( int timeoutMs )
 {
     if (!pendingEvent)
         WaitForSingleObject( consoleHandle[cnInput], timeoutMs < 0 ? INFINITE : timeoutMs );
@@ -400,6 +400,8 @@ void THardwareInfo::waitForEvent( int timeoutMs )
 
 void THardwareInfo::interruptEventWait()
 {
+    // Not implemented. This would only be necessary if writing a multi-threaded
+    // application using Borland C++.
 }
 
 BOOL THardwareInfo::setClipboardText( TStringView text )

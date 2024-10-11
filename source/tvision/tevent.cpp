@@ -452,29 +452,24 @@ I   INT 16h;
     return Boolean( ev.what != evNothing );
 }
 
-void TEventQueue::waitForEvent(int timeoutMs) noexcept
+void TEventQueue::waitForEvents( int timeoutMs ) noexcept
 {
 #if defined( __FLAT__ )
     if( !pasteText && keyEventCount == 0 )
-        THardwareInfo::waitForEvent(timeoutMs);
+        THardwareInfo::waitForEvents( timeoutMs );
 #else
     (void) timeoutMs;
+#endif
+}
+
+void TEventQueue::wakeUp() noexcept
+{
+#if defined( __FLAT__ )
+    THardwareInfo::interruptEventWait();
 #endif
 }
 
 void TEvent::getKeyEvent() noexcept
 {
     TEventQueue::getKeyEvent( *this );
-}
-
-void TEvent::waitForEvent(int timeoutMs) noexcept
-{
-    TEventQueue::waitForEvent( timeoutMs );
-}
-
-void TEvent::putNothing() noexcept
-{
-#if defined( __FLAT__ )
-    THardwareInfo::interruptEventWait();
-#endif
 }
