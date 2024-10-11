@@ -16,7 +16,7 @@
 #define Uses_TGroup
 #define Uses_TScreen
 #define Uses_THardwareInfo
-#define Uses_TEventQueue
+#define Uses_TEvent
 #include <tvision/tv.h>
 
 #ifdef __FLAT__
@@ -215,11 +215,11 @@ void TVWrite::L40( TView *dest ) noexcept
         else
         {
 #ifdef __BORLANDC__
-            THWMouse::hide();
+            TMouse::hide();
 #endif
             L50(owner);
 #ifdef __BORLANDC__
-            THWMouse::show();
+            TMouse::show();
 #endif
         }
     }
