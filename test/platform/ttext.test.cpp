@@ -5,6 +5,7 @@
 
 #define COMBINING_ZIGZAG_UTF8 "\xCD\x9B"
 #define COMBINING_ZIGZAG_UTF32 U"\u035B"
+#define ZERO_WIDTH_JOINER_UTF8 "\xE2\x80\x8D"
 
 static std::ostream &operator<<(std::ostream &os, TSpan<const char32_t> span)
 {
@@ -26,7 +27,7 @@ TEST(TText, ShouldConvertUtf8ControlCharacters)
 {
     static const TestCase<TStringView> testCases[] =
     {
-        {{"\0", 1}, " "},
+        {{"\0", 1}, {"\0", 1}},
         {"\x01", "☺"},
         {"\x1F", "▼"},
         {" ", " "},
@@ -52,7 +53,7 @@ TEST(TText, ShouldConvertUtf32ControlCharacters)
 {
     static const TestCase<TSpan<const char32_t>, TStringView> testCases[] =
     {
-        {{U"\0", 1}, " "},
+        {{U"\0", 1}, {"\0", 1}},
         {{U"\x01", 1}, "�"},
         {{U"\x1F", 1}, "�"},
         {{U" ", 1}, " "},
@@ -71,6 +72,34 @@ TEST(TText, ShouldConvertUtf32ControlCharacters)
         size_t i = 0, j = 0;
         while(TText::drawOne(cells, i, input, j));
         TStringView actual = cells[0]._ch.getText();
+        expectResultMatches(actual, testCase);
+    }
+}
+
+TEST(TText, ShouldDrawTextInScreenCells)
+{
+    enum { nCells = 2 };
+    static const TestCase<TStringView, std::vector<TStringView>> testCases[] =
+    {
+        {"a", {"a", {"\0", 1}}},
+        {"aa", {"a", "a"}},
+        {{"\0", 1}, {{"\0", 1}, {"\0", 1}}},
+        {{"\0\0", 2}, {{"\0", 1}, {"\0", 1}}},
+        {{"\0a", 2}, {{"\0", 1}, "a"}},
+        {"a" COMBINING_ZIGZAG_UTF8, {"a" COMBINING_ZIGZAG_UTF8, {"\0", 1}}},
+        {{"\0" COMBINING_ZIGZAG_UTF8, 3}, {" " COMBINING_ZIGZAG_UTF8, {"\0", 1}}},
+        {"क्"  ZERO_WIDTH_JOINER_UTF8 "ष", {"क्", "ष"}},
+    };
+
+    for (auto &testCase : testCases)
+    {
+        TScreenCell cells[nCells] {};
+        TText::drawStr(cells, 0, testCase.input, 0);
+
+        std::vector<TStringView> actual(nCells);
+        for (int i = 0; i < nCells; ++i)
+            actual[i] = cells[i]._ch.getText();
+
         expectResultMatches(actual, testCase);
     }
 }

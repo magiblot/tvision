@@ -308,10 +308,8 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 // We need to convert control characters here since we
-                // might later try to append combining characters to this.
-                if (text[j] == '\0')
-                    cells[i]._ch.moveChar(' ');
-                else if (text[j] < ' ' || '\x7F' <= text[j])
+                // might later try to append combining characters to them.
+                if (text[j] < ' ' || '\x7F' <= text[j])
                     cells[i]._ch.moveMultiByteChar(CpTranslator::toPackedUtf8(text[j]));
                 else
                     cells[i]._ch.moveChar(text[j]);
@@ -392,10 +390,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 bool wide = width > 1;
-                if (textU32[j] == '\0')
-                    cells[i]._ch.moveChar(' ');
-                else
-                    cells[i]._ch.moveMultiByteChar(textU8, wide);
+                cells[i]._ch.moveMultiByteChar(textU8, wide);
                 bool drawTrail = (wide && i + 1 < cells.size());
                 if (drawTrail)
                     cells[i + 1]._ch.moveWideCharTrail();
