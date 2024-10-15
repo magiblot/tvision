@@ -89,9 +89,15 @@ inline void TCellChar::moveMultiByteChar(uint32_t mbc, bool wide)
     memset(this, 0, sizeof(*this));
     memcpy(_text, &mbc, sizeof(mbc));
     _flags = -int(wide) & fWide;
+#ifndef TV_BIG_ENDIAN
     _textLength = 1 + ((mbc & 0xFF00) != 0) +
                       ((mbc & 0xFF0000) != 0) +
                       ((mbc & 0xFF000000) != 0);
+#else
+    _textLength = 1 + ((mbc & 0xFF0000) != 0) +
+                      ((mbc & 0xFF00) != 0) +
+                      ((mbc & 0xFF) != 0);
+#endif
 }
 
 inline void TCellChar::moveMultiByteChar(TStringView mbc, bool wide)
