@@ -82,13 +82,22 @@ void DisplayBuffer::setCaretPosition(int x, int y) noexcept
 
 void DisplayBuffer::screenWrite(int x, int y, TScreenCell *buf, int len) noexcept
 {
-    if (inBounds(x, y) && len)
+    if (inBounds(x, y) && len > 0)
     {
         len = min(len, size.x - x);
-        // Since 'buffer' is used as 'TScreen::screenBuffer' and is written to
-        // directly, we can avoid a copy operation in most cases.
-        if (buf < buffer.data() || buf >= buffer.data() + buffer.size())
-            memcpy(&buffer[y*size.x + x], buf, len*sizeof(TScreenCell));
+        TScreenCell *dst = &buffer[y*size.x + x];
+        // Since 'buffer' is also used as 'TScreen::screenBuffer' and is
+        // directly written into by 'TView::writeView', we can avoid a copy
+        // operation in most cases because the data is already there.
+        if (buf == dst)
+            ; // No need to copy anything.
+        // But since 'TScreen::screenBuffer' is public, it is also possible
+        // (theoretically) that the source and destination regions overlap each
+        // other. Turbo Vision does not do this, but handle this case anyway.
+        else if (max(buf, dst) <= min(&buf[len], &dst[len]))
+            memmove(dst, buf, len*sizeof(TScreenCell)); // Copy between overlapping regions.
+        else
+            memcpy(dst, buf, len*sizeof(TScreenCell));
 
         setDirty(x, y, len);
         screenTouched = true;
