@@ -55,6 +55,7 @@ TEST(TKey, ShouldConstructProperly)
         {{'A', kbCtrlShift | kbAltShift}, {'A', kbCtrlShift | kbAltShift}},
         {{'A', kbShift | kbCtrlShift | kbAltShift}, {'A', kbShift | kbCtrlShift | kbAltShift}},
         {{'a'}, {'A'}},
+        {{'a', kbRightAlt}, {'A'}},
         {{'a', kbShift}, {'A', kbShift}},
         {{'a', kbCtrlShift}, {'A', kbCtrlShift}},
         {{'a', kbShift | kbCtrlShift}, {'A', kbShift | kbCtrlShift}},

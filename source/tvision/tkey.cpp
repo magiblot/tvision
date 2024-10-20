@@ -249,14 +249,14 @@ TKey::TKey(ushort keyCode, ushort shiftState) noexcept
     ushort mods =
         (shiftState & kbShift ? kbShift : 0) |
         (shiftState & kbCtrlShift ? kbCtrlShift : 0) |
-        (shiftState & kbAltShift ? kbAltShift : 0);
+        (shiftState & kbLeftAlt ? kbAltShift : 0);
     uchar scanCode = keyCode >> 8;
     uchar charCode = keyCode & 0xFF;
 
     const TKeyCodeLookupEntry *entry = 0;
     if (keyCode <= kbCtrlZ || isRawCtrlKey(scanCode, charCode))
         entry = &ctrlKeyLookup[charCode];
-    else if ((keyCode & 0xFF) == 0)
+    else if (charCode == 0)
     {
         if (scanCode < extKeyLookupSize)
             entry = &extKeyLookup[scanCode];

@@ -333,10 +333,10 @@ void TermIO::keyModsOff(StdioCtl &io) noexcept
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
 {
     TKey key(keyDown);
-    if (key.mods & (kbShift | kbCtrlShift | kbAltShift))
+    if (key.mods & (kbShift | kbCtrlShift | kbLeftAlt))
     {
         // Modifier precedece: Shift < Ctrl < Alt.
-        int largestMod = (key.mods & kbAltShift) ? 2
+        int largestMod = (key.mods & kbLeftAlt) ? 2
                        : (key.mods & kbCtrlShift) ? 1
                        : 0;
         if (ushort keyCode = moddedKeyCodes[key.code][largestMod])
