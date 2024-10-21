@@ -438,13 +438,15 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
          ev.keyDown.keyCode == 0x3A00 )
         // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
         ev.keyDown.keyCode = kbNoKey;
-    else if ( (ev.keyDown.controlKeyState & kbCtrlShift) &&
-              (ev.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
+    else if (ev.keyDown.controlKeyState & kbRightAlt)
     {
-        // When AltGr+Key does not produce a character, a
-        // keyCode with unwanted effects may be read instead.
-        if (!ev.keyDown.textLength)
+        if (ev.keyDown.textLength == 0)
+            // When AltGr+Key does not produce a character, an unwanted keyCode
+            // may be read instead, so discard it.
             ev.keyDown.keyCode = kbNoKey;
+        else
+            // Otherwise, discard the Ctrl modifier that is automatically added.
+            ev.keyDown.controlKeyState &= ~kbLeftCtrl;
     }
     else if (KeyEvent.wVirtualScanCode < 89)
     {

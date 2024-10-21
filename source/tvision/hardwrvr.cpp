@@ -345,13 +345,15 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
                     event.keyDown.keyCode == 0x3A00 )
                     // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
                     event.keyDown.keyCode = kbNoKey;
-                else if( (event.keyDown.controlKeyState & kbCtrlShift) &&
-                         (event.keyDown.controlKeyState & kbAltShift) ) // Ctrl+Alt is AltGr.
+                else if( event.keyDown.controlKeyState & kbRightAlt )
                     {
-                    // When AltGr+Key does not produce a character, a
-                    // keyCode with unwanted effects may be read instead.
-                    if( !event.keyDown.charScan.charCode )
+                    if( event.keyDown.charScan.charCode == '\0' )
+                        // When AltGr+Key does not produce a character, an unwanted keyCode
+                        // may be read instead, so discard it.
                         event.keyDown.keyCode = kbNoKey;
+                    else
+                        // Otherwise, discard the Ctrl modifier that is automatically added.
+                        event.keyDown.controlKeyState &= ~kbLeftCtrl;
                     }
                 else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
                     {
