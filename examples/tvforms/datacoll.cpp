@@ -27,6 +27,10 @@ __link( RStringCollection )
 #include <string.h>
 #endif  // __STRING_H
 
+#if !defined( __STDLIB_H )
+#include <stdlib.h>
+#endif  // __STDLIB_H
+
 const char * const TDataCollection::name = "TDataCollection";
 
 void TDataCollection::write( opstream& os )

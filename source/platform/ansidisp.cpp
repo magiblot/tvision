@@ -1,5 +1,4 @@
 #include <internal/ansidisp.h>
-#include <internal/stdioctl.h>
 #include <internal/strings.h>
 #include <stdlib.h>
 

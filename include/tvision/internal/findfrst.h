@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#else
+#include <tvision/compat/windows/windows.h>
 #endif
 
 namespace tvision

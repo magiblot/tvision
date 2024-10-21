@@ -32,6 +32,7 @@
 #include "gadgets.h"
 
 #if !defined( __BORLANDC__ ) && defined( _WIN32 )
+#include <tvision/compat/windows/windows.h>
 #include <psapi.h>
 #endif
 

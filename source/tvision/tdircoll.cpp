@@ -30,6 +30,10 @@
 #include <dos.h>
 #endif  // __DOS_H
 
+#if defined( _WIN32 ) && defined( __FLAT__ )
+#include <tvision/compat/windows/windows.h>
+#endif
+
 #pragma warn -asc
 
 Boolean driveValid( char drive ) noexcept
