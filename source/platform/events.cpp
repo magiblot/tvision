@@ -175,21 +175,19 @@ static void pollHandles(PollData &pd, int ms) noexcept
 {
     auto &handles = pd.handles;
     auto &states = pd.states;
+    DWORD timeout = ms < 0 ? INFINITE : ms;
     if (handles.size() == 0)
-        Sleep(ms);
+        Sleep(timeout);
     else
     {
-        DWORD res = WaitForMultipleObjects(
-            handles.size(), &handles[0], FALSE, (ms < 0 ? INFINITE : ms));
+        DWORD res = WaitForMultipleObjects(handles.size(), &handles[0], false, timeout);
         size_t i = 0;
         while (WAIT_OBJECT_0 <= res && res <= WAIT_OBJECT_0 + handles.size() - i - 1)
         {
             i += res - WAIT_OBJECT_0;
             states[i] = psReady;
             if (++i < handles.size())
-                // Isn't this awful?
-                res = WaitForMultipleObjects(
-                    handles.size() - i, &handles[i], FALSE, 0);
+                res = WaitForMultipleObjects(handles.size() - i, &handles[i], false, 0);
             else
                 break;
         }
