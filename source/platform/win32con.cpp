@@ -419,14 +419,14 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
         kbScrollState | kbNumState | kbCapsState | kbEnhanced
     );
 
-    if (ev.keyDown.textLength)
+    if (ev.keyDown.textLength != 0)
     {
         ev.keyDown.charScan.charCode = CpTranslator::fromUtf8(ev.keyDown.getText());
         if (KeyEvent.wVirtualKeyCode == VK_MENU)
             // This is enabled when pasting certain characters, and it confuses
             // applications. Clear it.
             ev.keyDown.charScan.scanCode = 0;
-        if (!ev.keyDown.charScan.charCode || ev.keyDown.keyCode <= kbCtrlZ)
+        if (ev.keyDown.charScan.charCode == '\0' || ev.keyDown.keyCode <= kbCtrlZ)
             // If the character cannot be represented in the current codepage,
             // or if it would accidentally trigger a Ctrl+Key combination,
             // make the whole keyCode zero to avoid side effects.
@@ -435,8 +435,9 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
 
     if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
          ev.keyDown.keyCode == 0x3600 || ev.keyDown.keyCode == 0x3800 ||
-         ev.keyDown.keyCode == 0x3A00 )
-        // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
+         ev.keyDown.keyCode == 0x3A00 || ev.keyDown.keyCode == 0x5B00 ||
+         ev.keyDown.keyCode == 0x5C00 )
+        // Discard standalone Shift, Ctrl, Alt, Caps Lock, Windows keys.
         ev.keyDown.keyCode = kbNoKey;
     else if (ev.keyDown.controlKeyState & kbRightAlt)
     {

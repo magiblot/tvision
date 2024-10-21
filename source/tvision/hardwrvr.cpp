@@ -342,8 +342,9 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
 
                 if( event.keyDown.keyCode == 0x2A00 || event.keyDown.keyCode == 0x1D00 ||
                     event.keyDown.keyCode == 0x3600 || event.keyDown.keyCode == 0x3800 ||
-                    event.keyDown.keyCode == 0x3A00 )
-                    // Discard standalone Shift, Ctrl, Alt, Caps Lock keys.
+                    event.keyDown.keyCode == 0x3A00 || event.keyDown.keyCode == 0x5B00 ||
+                    event.keyDown.keyCode == 0x5C00 )
+                    // Discard standalone Shift, Ctrl, Alt, Caps Lock, Windows keys.
                     event.keyDown.keyCode = kbNoKey;
                 else if( event.keyDown.controlKeyState & kbRightAlt )
                     {
