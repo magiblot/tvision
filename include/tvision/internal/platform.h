@@ -100,9 +100,10 @@ public:
 
     static int (*charWidth)(uint32_t) noexcept;
 
-    // Platform is a singleton. It gets created and destroyed by THardwareInfo.
+    // Platform is a singleton. It gets created by THardwareInfo, but it is
+    // never destroyed in order to support invocations to 'interruptEventWait'
+    // from secondary threads.
     Platform() noexcept;
-    ~Platform();
 
     // Note: explicit 'this' required by GCC 5.
     void setUpConsole() noexcept
@@ -138,6 +139,8 @@ public:
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     TScreenCell *reloadScreenInfo() noexcept
         { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
+    void freeScreenBuffer() noexcept
+        { displayBuf.~DisplayBuffer(); new (&displayBuf) DisplayBuffer; }
 
     bool setClipboardText(TStringView text) noexcept
         { return console.lock([&] (auto *c) { return c->setClipboardText(text); }); }

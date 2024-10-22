@@ -21,15 +21,15 @@ static tvision::Platform *platf;
 THardwareInfo::THardwareInfo() noexcept
 {
     using namespace tvision;
+    static int initPlatform =
+        (platf = new Platform(), (void) initPlatform, 0);
+
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
-    platf = new Platform();
 }
 
 THardwareInfo::~THardwareInfo()
 {
-    delete platf;
-    platf = nullptr;
 }
 
 void THardwareInfo::setCaretSize( ushort size ) noexcept { platf->setCaretSize(size); }
@@ -48,7 +48,7 @@ void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len
         flushScreen();
 }
 TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept { return platf->reloadScreenInfo(); }
-void THardwareInfo::freeScreenBuffer( TScreenCell * ) noexcept {}
+void THardwareInfo::freeScreenBuffer(TScreenCell *) noexcept { platf->freeScreenBuffer(); }
 DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount(); }
 void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
 void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }

@@ -36,9 +36,7 @@ public:
 
     // On Windows, the ConsoleCtl instance is created every time the alternate
     // screen buffer is enabled and it is destroyed when restoring the console.
-    // On Unix, the ConsoleCtl instance is created just once at the beginning
-    // of the program execution (in static initialization) and destroyed when
-    // exiting the program.
+    // On Unix, the ConsoleCtl instance is created just once.
 
     // Creates a global instance if none exists, and returns it.
     static ConsoleCtl &getInstance() noexcept;

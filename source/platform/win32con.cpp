@@ -110,7 +110,6 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
     delete &input;
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
-    ConsoleCtl::destroyInstance();
 }
 
 bool Win32ConsoleStrategy::isAlive() noexcept

@@ -16,7 +16,7 @@ Platform *Platform::instance;
 
 // This is used by TText. It is a global function pointer (instead of an
 // instance method) so that it can be used regardless of whether the global
-// Platform instance has been created/destroyed or not.
+// Platform instance has been created or not.
 int (*Platform::charWidth)(uint32_t) noexcept = &Platform::initAndGetCharWidth;
 
 int Platform::initAndGetCharWidth(uint32_t wc) noexcept
@@ -55,15 +55,6 @@ Platform::Platform() noexcept
     initEncodingStuff();
 }
 
-Platform::~Platform()
-{
-    restoreConsole();
-#ifndef _WIN32
-    ConsoleCtl::destroyInstance();
-#endif
-    instance = nullptr;
-}
-
 void Platform::restoreConsole(ConsoleStrategy *&c) noexcept
 {
     if (c != &dummyConsole)
@@ -75,6 +66,9 @@ void Platform::restoreConsole(ConsoleStrategy *&c) noexcept
         SignalHandler::disable();
         delete c;
         c = &dummyConsole;
+#ifdef _WIN32
+        ConsoleCtl::destroyInstance();
+#endif
     }
 }
 
