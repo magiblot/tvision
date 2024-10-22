@@ -1,10 +1,10 @@
 #define Uses_TKeys
 #include <tvision/tv.h>
 
-#include <internal/terminal.h>
+#include <internal/termio.h>
 
 #include <test.h>
-#include "terminal.test.h"
+#include "termio.test.h"
 #include <vector>
 
 namespace tvision

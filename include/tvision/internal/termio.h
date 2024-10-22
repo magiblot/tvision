@@ -1,5 +1,5 @@
-#ifndef TVISION_TERMINAL_H
-#define TVISION_TERMINAL_H
+#ifndef TVISION_TERMIO_H
+#define TVISION_TERMIO_H
 
 #define Uses_TPoint
 #define Uses_TEvent
@@ -150,4 +150,4 @@ namespace TermIO
 
 } // namespace tvision
 
-#endif // TVISION_TERMINAL_H
+#endif // TVISION_TERMIO_H

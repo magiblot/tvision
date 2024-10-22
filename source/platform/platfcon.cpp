@@ -6,7 +6,7 @@
 #include <internal/ansiwrit.h>
 #include <internal/ncursinp.h>
 #include <internal/sighandl.h>
-#include <internal/terminal.h>
+#include <internal/termio.h>
 #include <internal/getenv.h>
 
 namespace tvision

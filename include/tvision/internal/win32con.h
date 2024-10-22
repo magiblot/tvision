@@ -4,7 +4,7 @@
 #include <tvision/tv.h>
 #include <compat/windows/windows.h>
 #include <internal/termdisp.h>
-#include <internal/terminal.h>
+#include <internal/termio.h>
 #include <internal/ansiwrit.h>
 
 namespace tvision

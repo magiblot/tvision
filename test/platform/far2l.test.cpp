@@ -4,7 +4,7 @@
 #include <internal/far2l.h>
 
 #include <test.h>
-#include "terminal.test.h"
+#include "termio.test.h"
 
 namespace tvision
 {

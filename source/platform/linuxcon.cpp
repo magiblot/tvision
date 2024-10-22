@@ -7,7 +7,7 @@
 #include <internal/linuxcon.h>
 #include <internal/stdioctl.h>
 #include <internal/gpminput.h>
-#include <internal/terminal.h>
+#include <internal/termio.h>
 #include <internal/sigwinch.h>
 #include <linux/keyboard.h>
 #include <linux/vt.h>

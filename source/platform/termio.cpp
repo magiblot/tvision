@@ -1,7 +1,7 @@
 #define Uses_TKeys
 #include <tvision/tv.h>
 
-#include <internal/terminal.h>
+#include <internal/termio.h>
 #include <internal/far2l.h>
 #include <internal/stdioctl.h>
 #include <internal/constmap.h>

@@ -1,7 +1,7 @@
-#ifndef TVISION_TERMINAL_TEST_H
-#define TVISION_TERMINAL_TEST_H
+#ifndef TVISION_TERMIO_TEST_H
+#define TVISION_TERMIO_TEST_H
 
-#include <internal/terminal.h>
+#include <internal/termio.h>
 
 inline bool operator==(const TEvent &a, const TEvent &b)
 {
@@ -144,4 +144,4 @@ inline TEvent mouseEv(TPoint where, ushort eventFlags, ushort controlKeyState, u
 
 } // namespace tvision
 
-#endif // TVISION_TERMINAL_TEST_H
+#endif // TVISION_TERMIO_TEST_H

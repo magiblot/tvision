@@ -10,7 +10,7 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <internal/terminal.h>
+#include <internal/termio.h>
 
 namespace tvision
 {

@@ -6,7 +6,7 @@
 #include <internal/stdioctl.h>
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
-#include <internal/terminal.h>
+#include <internal/termio.h>
 #include <internal/utf8.h>
 #include <locale.h>
 
