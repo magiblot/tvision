@@ -6,7 +6,6 @@
 #include <internal/stdioctl.h>
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
-#include <internal/ansidisp.h>
 #include <internal/terminal.h>
 #include <internal/utf8.h>
 #include <locale.h>
@@ -100,8 +99,7 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
         }
     }
     WinWidth::reset();
-    auto &display = supportsVT ? *new AnsiDisplay<Win32Display>(io)
-                               : *new Win32Display(io);
+    auto &display = *new Win32Display(io, supportsVT);
     auto &input = *new Win32Input(io);
     return *new Win32ConsoleStrategy(io, cpInput, cpOutput, display, input);
 }
@@ -254,6 +252,18 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
+Win32Display::Win32Display(StdioCtl &aIo, bool useAnsi) noexcept :
+    TerminalDisplay(aIo),
+    ansiScreenWriter(useAnsi ? new AnsiScreenWriter(aIo) : nullptr)
+{
+    initCapabilities();
+}
+
+Win32Display::~Win32Display()
+{
+    delete ansiScreenWriter;
+}
+
 void Win32Display::reloadScreenInfo() noexcept
 {
     size = io.getSize();
@@ -268,6 +278,9 @@ void Win32Display::reloadScreenInfo() noexcept
     SetConsoleScreenBufferSize(io.out(), {(short) size.x, (short) size.y});
     // Restore the cursor position (it does not matter if it is out of bounds).
     SetConsoleCursorPosition(io.out(), curPos);
+
+    if (ansiScreenWriter)
+        ansiScreenWriter->resetAttributes();
 }
 
 bool Win32Display::screenChanged() noexcept
@@ -322,39 +335,65 @@ void Win32Display::lowlevelCursorSize(int size) noexcept
 
 void Win32Display::clearScreen() noexcept
 {
-    COORD coord = {0, 0};
-    DWORD length = size.x * size.y;
-    BYTE attr = 0x07;
-    DWORD read;
-    FillConsoleOutputAttribute(io.out(), attr, length, coord, &read);
-    FillConsoleOutputCharacterA(io.out(), ' ', length, coord, &read);
-    lastAttr = attr;
+    if (ansiScreenWriter)
+        ansiScreenWriter->clearScreen();
+    else
+    {
+        COORD coord = {0, 0};
+        DWORD length = size.x * size.y;
+        BYTE attr = 0x07;
+        DWORD read;
+        FillConsoleOutputAttribute(io.out(), attr, length, coord, &read);
+        FillConsoleOutputCharacterA(io.out(), ' ', length, coord, &read);
+        lastAttr = attr;
+    }
 }
-
-// Fallback display support with rudimentary buffering.
 
 void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept
 {
-    uchar bios = attr.toBIOS();
-    if (bios != lastAttr)
+    if (ansiScreenWriter)
+        ansiScreenWriter->lowlevelWriteChars(chars, attr, termcap);
+    else
     {
-        lowlevelFlush();
-        SetConsoleTextAttribute(io.out(), bios);
-        lastAttr = bios;
+        uchar bios = attr.toBIOS();
+        if (bios != lastAttr)
+        {
+            lowlevelFlush();
+            SetConsoleTextAttribute(io.out(), bios);
+            lastAttr = bios;
+        }
+        buf.insert(buf.end(), chars.begin(), chars.end());
     }
-    buf.insert(buf.end(), chars.data(), chars.data()+chars.size());
 }
 
 void Win32Display::lowlevelMoveCursor(uint x, uint y) noexcept
 {
-    lowlevelFlush();
-    SetConsoleCursorPosition(io.out(), {(short) x, (short) y});
+    if (ansiScreenWriter)
+        ansiScreenWriter->lowlevelMoveCursor(x, y);
+    else
+    {
+        lowlevelFlush();
+        SetConsoleCursorPosition(io.out(), {(short) x, (short) y});
+    }
+}
+
+void Win32Display::lowlevelMoveCursorX(uint x, uint y) noexcept
+{
+    if (ansiScreenWriter)
+        ansiScreenWriter->lowlevelMoveCursorX(x);
+    else
+        lowlevelMoveCursor(x, y);
 }
 
 void Win32Display::lowlevelFlush() noexcept
 {
-    io.write(buf.data(), buf.size());
-    buf.resize(0);
+    if (ansiScreenWriter)
+        ansiScreenWriter->lowlevelFlush();
+    else
+    {
+        io.write(buf.data(), buf.size());
+        buf.resize(0);
+    }
 }
 
 #endif // _WIN32

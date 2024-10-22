@@ -366,8 +366,7 @@ inline void FlushScreenAlgorithm::writeCell( const TCellChar &Char,
                                              bool wide ) noexcept
 {
     // 'last' is the last written cell occupied by text.
-    // That is, the hardware cursor is located at {last.x + 1, last.y}.
-
+    // That is to say, the hardware cursor is located at {last.x + 1, last.y}.
     if (y != last.y)
         display.lowlevelMoveCursor(x, y);
     else if (x != last.x + 1)

@@ -1,4 +1,5 @@
-#include <internal/ansidisp.h>
+#include <internal/ansiwrit.h>
+#include <internal/termdisp.h>
 #include <internal/strings.h>
 #include <stdlib.h>
 
@@ -7,38 +8,38 @@
 namespace tvision
 {
 
-inline AnsiDisplayBase::Buffer::~Buffer()
+inline AnsiScreenWriter::Buffer::~Buffer()
 {
     free(head);
 }
 
-inline char *AnsiDisplayBase::Buffer::data() noexcept
+inline char *AnsiScreenWriter::Buffer::data() noexcept
 {
     return head;
 }
 
-inline size_t AnsiDisplayBase::Buffer::size() const noexcept
+inline size_t AnsiScreenWriter::Buffer::size() const noexcept
 {
     return tail - head;
 }
 
-inline void AnsiDisplayBase::Buffer::clear() noexcept
+inline void AnsiScreenWriter::Buffer::clear() noexcept
 {
     tail = head;
 }
 
-inline void AnsiDisplayBase::Buffer::push(TStringView s) noexcept
+inline void AnsiScreenWriter::Buffer::push(TStringView s) noexcept
 {
     memcpy(tail, s.data(), s.size());
     tail += s.size();
 }
 
-inline void AnsiDisplayBase::Buffer::push(char c) noexcept
+inline void AnsiScreenWriter::Buffer::push(char c) noexcept
 {
     *tail++ = c;
 }
 
-inline void AnsiDisplayBase::Buffer::reserve(size_t extraCapacity) noexcept
+void AnsiScreenWriter::Buffer::reserve(size_t extraCapacity) noexcept
 {
     size_t oldSize = size();
     if (oldSize + extraCapacity > capacity)
@@ -50,13 +51,13 @@ inline void AnsiDisplayBase::Buffer::reserve(size_t extraCapacity) noexcept
     }
 }
 
-AnsiDisplayBase::~AnsiDisplayBase()
+AnsiScreenWriter::~AnsiScreenWriter()
 {
-    clearAttributes();
+    resetAttributes();
     lowlevelFlush();
 }
 
-inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
+inline void AnsiScreenWriter::bufWriteCSI1(uint a, char F) noexcept
 {
     // CSI a F
     buf.reserve(32);
@@ -65,7 +66,7 @@ inline void AnsiDisplayBase::bufWriteCSI1(uint a, char F) noexcept
     buf.push(F);
 }
 
-inline void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
+inline void AnsiScreenWriter::bufWriteCSI2(uint a, uint b, char F) noexcept
 {
     // CSI a ; b F
     buf.reserve(32);
@@ -76,43 +77,44 @@ inline void AnsiDisplayBase::bufWriteCSI2(uint a, uint b, char F) noexcept
     buf.push(F);
 }
 
-void AnsiDisplayBase::clearAttributes() noexcept
+void AnsiScreenWriter::resetAttributes() noexcept
 {
     buf.reserve(4);
     buf.push(CSI "0m");
     lastAttr = {};
 }
 
-void AnsiDisplayBase::clearScreen() noexcept
+void AnsiScreenWriter::clearScreen() noexcept
 {
-    buf.reserve(4);
-    buf.push(CSI "2J");
+    buf.reserve(8);
+    buf.push(CSI "0m" CSI "2J");
+    lastAttr = {};
 }
 
 static char *convertAttributes(const TColorAttr &, TermAttr &, const TermCap &, char*) noexcept;
 
-void AnsiDisplayBase::lowlevelWriteChars( TStringView chars, TColorAttr attr,
-                                          const TermCap &termcap ) noexcept
+void AnsiScreenWriter::lowlevelWriteChars( TStringView chars, TColorAttr attr,
+                                   const TermCap &termcap ) noexcept
 {
     buf.reserve(256);
     buf.tail = convertAttributes(attr, lastAttr, termcap, buf.tail);
     buf.push(chars);
 }
 
-void AnsiDisplayBase::lowlevelMoveCursorX(uint x, uint) noexcept
+void AnsiScreenWriter::lowlevelMoveCursorX(uint x) noexcept
 {
     // Optimized case where the cursor only moves horizontally.
     bufWriteCSI1(x + 1, 'G');
 }
 
-void AnsiDisplayBase::lowlevelMoveCursor(uint x, uint y) noexcept
+void AnsiScreenWriter::lowlevelMoveCursor(uint x, uint y) noexcept
 {
     buf.reserve(32);
 //     buf.push('\r'); // Make dumps readable.
     bufWriteCSI2(y + 1, x + 1, 'H');
 }
 
-void AnsiDisplayBase::lowlevelFlush() noexcept
+void AnsiScreenWriter::lowlevelFlush() noexcept
 {
     io.write(buf.data(), buf.size());
     buf.clear();
@@ -220,15 +222,13 @@ static inline void writeFlag( char *&p, TermAttr attr, TermAttr lastAttr,
     }
 }
 
-typedef const char *c_str;
-
-static constexpr c_str
-    boldOnOff[2] =      { "1", "22"},
-    italicOnOff[2] =    { "3", "23"},
-    underlineOnOff[2] = { "4", "24"},
-    blinkOnOff[2] =     { "5", "25"},
-    reverseOnOff[2] =   { "7", "27"},
-    strikeOnOff[2] =    { "9", "29"};
+static constexpr const char
+    *boldOnOff[2] =      { "1", "22" },
+    *italicOnOff[2] =    { "3", "23" },
+    *underlineOnOff[2] = { "4", "24" },
+    *blinkOnOff[2] =     { "5", "25" },
+    *reverseOnOff[2] =   { "7", "27" },
+    *strikeOnOff[2] =    { "9", "29" };
 
 static inline char *writeAttributes( const TermAttr &attr,
                                      const TermAttr &lastAttr, char *p ) noexcept

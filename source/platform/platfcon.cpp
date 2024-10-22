@@ -3,7 +3,7 @@
 #include <internal/linuxcon.h>
 #include <internal/win32con.h>
 #include <internal/ncurdisp.h>
-#include <internal/ansidisp.h>
+#include <internal/ansiwrit.h>
 #include <internal/ncursinp.h>
 #include <internal/sighandl.h>
 #include <internal/terminal.h>
@@ -23,7 +23,7 @@ ConsoleStrategy &Platform::createConsole() noexcept
 #else
     auto &io = StdioCtl::getInstance();
     InputState &inputState = *new InputState;
-    NcursesDisplay &display = *new AnsiDisplay<NcursesDisplay>(io);
+    NcursesDisplay &display = *new NcursesDisplay(io);
 #ifdef __linux__
     if (io.isLinuxConsole())
         return LinuxConsoleStrategy::create(io, displayBuf, inputState, display, *new NcursesInput(io, display, inputState, false));

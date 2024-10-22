@@ -13,7 +13,8 @@ namespace tvision
 {
 
 NcursesDisplay::NcursesDisplay(StdioCtl &aIo) noexcept :
-    TerminalDisplay(aIo)
+    TerminalDisplay(aIo),
+    ansiScreenWriter(aIo)
 {
     // Start curses mode.
     term = newterm(nullptr, io.fout(), io.fin());
@@ -47,6 +48,7 @@ void NcursesDisplay::reloadScreenInfo() noexcept
     TPoint size = io.getSize();
     // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
     resize_term(size.y, size.x);
+    ansiScreenWriter.resetAttributes();
 }
 
 TPoint NcursesDisplay::getScreenSize() noexcept
@@ -68,6 +70,26 @@ int NcursesDisplay::getColorCount() noexcept
     return COLORS;
 }
 
+void NcursesDisplay::clearScreen() noexcept
+{
+    ansiScreenWriter.clearScreen();
+}
+
+void NcursesDisplay::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept
+{
+    ansiScreenWriter.lowlevelWriteChars(chars, attr, termcap);
+}
+
+void NcursesDisplay::lowlevelMoveCursor(uint x, uint y) noexcept
+{
+    ansiScreenWriter.lowlevelMoveCursor(x, y);
+}
+
+void NcursesDisplay::lowlevelMoveCursorX(uint x, uint) noexcept
+{
+    ansiScreenWriter.lowlevelMoveCursorX(x);
+}
+
 void NcursesDisplay::lowlevelCursorSize(int size) noexcept
 {
 /* The caret is the keyboard cursor. If size is 0, the caret is hidden. The
@@ -79,6 +101,11 @@ void NcursesDisplay::lowlevelCursorSize(int size) noexcept
  * very visible (2). They don't make a difference in all terminals, but
  * we can try mapping them to the values requested by Turbo Vision. */
     curs_set(size > 0 ? size == 100 ? 2 : 1 : 0); // Implies refresh().
+}
+
+void NcursesDisplay::lowlevelFlush() noexcept
+{
+    ansiScreenWriter.lowlevelFlush();
 }
 
 } // namespace tvision

@@ -3,9 +3,9 @@
 
 #include <tvision/tv.h>
 #include <compat/windows/windows.h>
-#include <internal/stdioctl.h>
 #include <internal/termdisp.h>
 #include <internal/terminal.h>
+#include <internal/ansiwrit.h>
 
 namespace tvision
 {
@@ -15,6 +15,7 @@ void getWin32Mouse(const MOUSE_EVENT_RECORD &, TEvent &, InputState &) noexcept;
 
 #ifdef _WIN32
 
+class StdioCtl;
 class Win32Input;
 class Win32Display;
 
@@ -71,31 +72,35 @@ public:
 
 class Win32Display : public TerminalDisplay
 {
-    TPoint size {};
-    uchar lastAttr {'\x00'};
-    std::vector<char> buf;
-    CONSOLE_FONT_INFO lastFontInfo {};
-
 public:
 
     // The lifetime of 'aIo' must exceed that of 'this'.
-    Win32Display(StdioCtl &aIo) noexcept :
-        TerminalDisplay(aIo)
-    {
-        initCapabilities();
-    }
+    Win32Display(StdioCtl &aIo, bool useAnsi) noexcept;
+    ~Win32Display();
+
+private:
+
+    TPoint size {};
+    CONSOLE_FONT_INFO lastFontInfo {};
+
+    AnsiScreenWriter *ansiScreenWriter;
+
+    uchar lastAttr {'\x00'};
+    std::vector<char> buf;
+
+protected:
 
     void reloadScreenInfo() noexcept override;
     TPoint getScreenSize() noexcept override;
     int getCaretSize() noexcept override;
-    int getColorCount() noexcept override;
     void clearScreen() noexcept override;
     bool screenChanged() noexcept override;
 
-protected:
+    int getColorCount() noexcept override;
 
     void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override;
     void lowlevelMoveCursor(uint x, uint y) noexcept override;
+    void lowlevelMoveCursorX(uint x, uint y) noexcept override;
     void lowlevelCursorSize(int size) noexcept override;
     void lowlevelFlush() noexcept override;
 };
