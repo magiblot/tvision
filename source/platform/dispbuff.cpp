@@ -6,8 +6,6 @@
 #include <internal/codepage.h>
 #include <internal/getenv.h>
 #include <chrono>
-using std::chrono::microseconds;
-using std::chrono::steady_clock;
 
 #ifdef _MSC_VER
 #define __builtin_expect(x, y) x
@@ -28,7 +26,7 @@ DisplayBuffer::DisplayBuffer() noexcept :
     int fps = getEnv<int>("TVISION_MAX_FPS", defaultFPS);
     limitFPS = (fps > 0);
     if (limitFPS)
-        flushDelay = microseconds((int) 1e6/fps);
+        flushDelay = std::chrono::microseconds((int) 1e6/fps);
 }
 
 TScreenCell *DisplayBuffer::reloadScreenInfo(DisplayStrategy &display) noexcept
@@ -119,13 +117,32 @@ bool DisplayBuffer::timeToFlush() noexcept
     // Avoid flushing faster than the maximum FPS.
     if (limitFPS)
     {
-        auto now = steady_clock::now();
-        if (now - lastFlush >= flushDelay)
+        auto now = Clock::now();
+        auto flushTime = lastFlush + flushDelay;
+        if (flushTime <= now)
+        {
             lastFlush = now;
+            pendingFlush = TimePoint();
+        }
         else
+        {
+            pendingFlush = flushTime;
             return false;
+        }
     }
     return true;
+}
+
+int DisplayBuffer::timeUntilPendingFlushMs() noexcept
+{
+    using namespace std::chrono;
+    if (pendingFlush != TimePoint())
+    {
+        auto time = pendingFlush - Clock::now();
+        if (time >= milliseconds::zero())
+            return duration_cast<milliseconds>(time).count();
+    }
+    return -1;
 }
 
 void DisplayBuffer::setCursorPosition(int x, int y) noexcept

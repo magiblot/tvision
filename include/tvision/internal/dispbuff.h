@@ -22,6 +22,9 @@ class DisplayBuffer
 {
     friend FlushScreenAlgorithm;
 
+    using Clock = std::chrono::steady_clock;
+    using TimePoint = Clock::time_point;
+
     struct Range {
         int begin, end;
     };
@@ -42,7 +45,8 @@ class DisplayBuffer
 
     bool limitFPS;
     std::chrono::microseconds flushDelay {};
-    std::chrono::time_point<std::chrono::steady_clock> lastFlush {};
+    TimePoint lastFlush {};
+    TimePoint pendingFlush {};
 
 #ifdef _WIN32
     static constexpr int defaultFPS = 120; // Just 60 feels notably slower on Windows, I don't know why.
@@ -79,6 +83,8 @@ public:
 
     void setCursorPosition(int x, int y) noexcept;
     void setCursorVisibility(bool visible) noexcept;
+
+    int timeUntilPendingFlushMs() noexcept;
 };
 
 inline bool DisplayBuffer::inBounds(int x, int y) const noexcept

@@ -71,6 +71,22 @@ bool Platform::getEvent(TEvent &ev) noexcept
     return false;
 }
 
+void Platform::waitForEvents(int ms) noexcept
+{
+    checkConsole();
+
+    int waitTimeoutMs = ms;
+    // When the DisplayBuffer has pending changes, ensure we wake up so that
+    // they can be flushed in time.
+    int flushTimeoutMs = displayBuf.timeUntilPendingFlushMs();
+    if (ms < 0)
+        waitTimeoutMs = flushTimeoutMs;
+    else if (flushTimeoutMs >= 0)
+        waitTimeoutMs = min(ms, flushTimeoutMs);
+
+    waiter.waitForEvents(waitTimeoutMs);
+}
+
 void Platform::signalCallback(bool enter) noexcept
 {
     if (instance && !instance->console.lockedByCurrentThread())
