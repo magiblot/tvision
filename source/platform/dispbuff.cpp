@@ -136,13 +136,12 @@ bool DisplayBuffer::timeToFlush() noexcept
 int DisplayBuffer::timeUntilPendingFlushMs() noexcept
 {
     using namespace std::chrono;
-    if (pendingFlush != TimePoint())
-    {
-        auto time = pendingFlush - Clock::now();
-        if (time >= milliseconds::zero())
-            return duration_cast<milliseconds>(time).count();
-    }
-    return -1;
+    if (pendingFlush == TimePoint())
+        return -1;
+    auto now = Clock::now();
+    if (pendingFlush < now)
+        return 0;
+    return duration_cast<milliseconds>(pendingFlush - now).count();
 }
 
 void DisplayBuffer::setCursorPosition(int x, int y) noexcept
