@@ -150,14 +150,14 @@ public:
 
     void clearScreen() noexcept override
     {
-        clearAttributes();
+        AnsiDisplayBase::clearAttributes();
         AnsiDisplayBase::clearScreen();
     }
 
     void reloadScreenInfo() noexcept override
     {
         DisplayBase::reloadScreenInfo();
-        clearAttributes();
+        AnsiDisplayBase::clearAttributes();
     }
 
 };

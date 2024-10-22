@@ -5,7 +5,6 @@
 
 #ifdef HAVE_NCURSES
 
-#include <unordered_map>
 #include <ncurses.h>
 
 namespace tvision
@@ -14,12 +13,6 @@ namespace tvision
 class NcursesDisplay : public TerminalDisplay
 {
     SCREEN *term;
-
-    bool hasColors;
-    std::unordered_map<ushort, int> pairIdentifiers;
-    ushort definedPairs;
-
-    bool usesNcursesDraw;
 
     void getCaretPosition(int &x, int &y) noexcept;
     uint translateAttributes(TColorAttr attr) noexcept;
@@ -31,19 +24,21 @@ public:
     NcursesDisplay(StdioCtl &io) noexcept;
     ~NcursesDisplay();
 
+protected:
+
     void reloadScreenInfo() noexcept override;
     TPoint getScreenSize() noexcept override;
     int getCaretSize() noexcept override;
     int getColorCount() noexcept override;
 
-    void clearScreen() noexcept override;
-
-protected:
-
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override;
-    void lowlevelMoveCursor(uint x, uint y) noexcept override;
     void lowlevelCursorSize(int size) noexcept override;
-    void lowlevelFlush() noexcept override;
+
+    // These methods need not be implemented. We rely on AnsiDisplay.
+
+    void clearScreen() noexcept override = 0;
+    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override = 0;
+    void lowlevelMoveCursor(uint x, uint y) noexcept override = 0;
+    void lowlevelFlush() noexcept override = 0;
 };
 
 } // namespace tvision

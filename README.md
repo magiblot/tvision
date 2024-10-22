@@ -328,7 +328,6 @@ The following environment variables are also taken into account:
     ```sh
     TVISION_USE_STDIO=1 tvdemo | tee out.txt
     ```
-* `TVISION_DISPLAY`: strategy for drawing to screen. Valid values are `ansi` and `ncurses`, with `ansi` being the default. The Ncurses library is used in either case, with the difference that `ncurses` uses Ncurses' own draw methods and is limited to 16 colors, while `ansi` supports 24-bit color and avoids redundant buffering and UTF-8 to wide char conversions.
 
 ### Windows
 
