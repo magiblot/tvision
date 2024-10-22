@@ -3,7 +3,7 @@
 
 #include <internal/termio.h>
 #include <internal/far2l.h>
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <internal/constmap.h>
 #include <internal/constarr.h>
 #include <internal/codepage.h>
@@ -254,27 +254,27 @@ bool CSIData::readFrom(GetChBuf &buf) noexcept
 // The default mouse experience with Ncurses is not always good. To work around
 // some issues, we request and parse mouse events manually.
 
-void TermIO::mouseOn(StdioCtl &io) noexcept
+void TermIO::mouseOn(ConsoleCtl &con) noexcept
 {
     TStringView seq = "\x1B[?1001s" // Save old highlight mouse reporting.
                       "\x1B[?1000h" // Enable mouse reporting.
                       "\x1B[?1002h" // Enable mouse drag reporting.
                       "\x1B[?1006h" // Enable SGR extended mouse reporting.
                     ;
-    io.write(seq.data(), seq.size());
+    con.write(seq.data(), seq.size());
 }
 
-void TermIO::mouseOff(StdioCtl &io) noexcept
+void TermIO::mouseOff(ConsoleCtl &con) noexcept
 {
     TStringView seq = "\x1B[?1006l" // Disable SGR extended mouse reporting.
                       "\x1B[?1002l" // Disable mouse drag reporting.
                       "\x1B[?1000l" // Disable mouse reporting.
                       "\x1B[?1001r" // Restore old highlight mouse reporting.
                     ;
-    io.write(seq.data(), seq.size());
+    con.write(seq.data(), seq.size());
 }
 
-void TermIO::keyModsOn(StdioCtl &io) noexcept
+void TermIO::keyModsOn(ConsoleCtl &con) noexcept
 {
     char buf[256];
 
@@ -314,10 +314,10 @@ void TermIO::keyModsOn(StdioCtl &io) noexcept
         "\x1B[2J"
     );
 
-    io.write(buf, strlen(buf));
+    con.write(buf, strlen(buf));
 }
 
-void TermIO::keyModsOff(StdioCtl &io) noexcept
+void TermIO::keyModsOff(ConsoleCtl &con) noexcept
 {
     TStringView seq = far2lDisableSeq
                       "\x1B[?9001l" // Disable win32-input-mode (Conpty).
@@ -327,7 +327,7 @@ void TermIO::keyModsOff(StdioCtl &io) noexcept
                       "\x1B[?2004r" // Restore bracketed paste.
                       "\x1B[?1036r" // Restore metaSendsEscape (XTerm).
                     ;
-    io.write(seq.data(), seq.size());
+    con.write(seq.data(), seq.size());
 }
 
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
@@ -818,7 +818,7 @@ ParseResult TermIO::parseWin32InputModeKeyOrEscapeSeq(const CSIData &csi, InputG
     return res;
 }
 
-static bool setOsc52Clipboard(StdioCtl &io, TStringView text, InputState &state) noexcept
+static bool setOsc52Clipboard(ConsoleCtl &con, TStringView text, InputState &state) noexcept
 {
     TStringView prefix = "\x1B]52;;";
     TStringView suffix = "\x07";
@@ -827,7 +827,7 @@ static bool setOsc52Clipboard(StdioCtl &io, TStringView text, InputState &state)
         memcpy(buf, prefix.data(), prefix.size());
         TStringView b64 = encodeBase64(text, buf + prefix.size());
         memcpy(buf + prefix.size() + b64.size(), suffix.data(), suffix.size());
-        io.write(buf, prefix.size() + b64.size() + suffix.size());
+        con.write(buf, prefix.size() + b64.size() + suffix.size());
         free(buf);
     }
     // Return false when there is no full OSC 52 support, even though we always
@@ -835,28 +835,28 @@ static bool setOsc52Clipboard(StdioCtl &io, TStringView text, InputState &state)
     return state.hasFullOsc52;
 }
 
-static bool requestOsc52Clipboard(StdioCtl &io, InputState &state) noexcept
+static bool requestOsc52Clipboard(ConsoleCtl &con, InputState &state) noexcept
 {
     if (state.hasFullOsc52)
     {
         TStringView seq = "\x1B]52;;?\x07";
-        io.write(seq.data(), seq.size());
+        con.write(seq.data(), seq.size());
         return true;
     }
     return false;
 }
 
-bool TermIO::setClipboardText(StdioCtl &io, TStringView text, InputState &state) noexcept
+bool TermIO::setClipboardText(ConsoleCtl &con, TStringView text, InputState &state) noexcept
 {
-    return setFar2lClipboard(io, text, state)
-        || setOsc52Clipboard(io, text, state);
+    return setFar2lClipboard(con, text, state)
+        || setOsc52Clipboard(con, text, state);
 }
 
-bool TermIO::requestClipboardText(StdioCtl &io, void (&accept)(TStringView), InputState &state) noexcept
+bool TermIO::requestClipboardText(ConsoleCtl &con, void (&accept)(TStringView), InputState &state) noexcept
 {
     state.putPaste = &accept;
-    return requestFar2lClipboard(io, state)
-        || requestOsc52Clipboard(io, state);
+    return requestFar2lClipboard(con, state)
+        || requestOsc52Clipboard(con, state);
 }
 
 char *TermIO::readUntilBelOrSt(GetChBuf &buf) noexcept
@@ -895,7 +895,7 @@ char *TermIO::readUntilBelOrSt(GetChBuf &buf) noexcept
     return {};
 }
 
-void TermIO::consumeUnprocessedInput(StdioCtl &io, InputGetter &in, InputState &state) noexcept
+void TermIO::consumeUnprocessedInput(ConsoleCtl &con, InputGetter &in, InputState &state) noexcept
 // The terminal might have kept sending us events while the application is
 // exiting. This is especially likely to happen when the application is running
 // remotely accross a slow connection and terminal extensions are in place
@@ -908,7 +908,7 @@ void TermIO::consumeUnprocessedInput(StdioCtl &io, InputGetter &in, InputState &
     auto timeout = milliseconds(200);
 
     TStringView seq = "\x1B[6n"; // Device Status Report.
-    io.write(seq.data(), seq.size());
+    con.write(seq.data(), seq.size());
 
     TEvent ev {};
     state.gotDsrResponse = false;

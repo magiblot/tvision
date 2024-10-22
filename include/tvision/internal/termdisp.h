@@ -6,6 +6,8 @@
 namespace tvision
 {
 
+class ConsoleCtl;
+
 // Terminal quirk flags.
 
 const uint
@@ -39,7 +41,7 @@ class TerminalDisplay : public DisplayStrategy
 
 protected:
 
-    StdioCtl &io;
+    ConsoleCtl &con;
     TermCap termcap;
 
     // The subclass must invoke this in the constructor.
@@ -50,9 +52,9 @@ protected:
 
 public:
 
-    // The lifetime of 'aIo' exceeds that of 'this'.
-    TerminalDisplay(StdioCtl &aIo) noexcept :
-        io(aIo)
+    // The lifetime of 'aCon' exceeds that of 'this'.
+    TerminalDisplay(ConsoleCtl &aCon) noexcept :
+        con(aCon)
     {
     }
 

@@ -30,7 +30,7 @@ class NcursesInput : public InputStrategy
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeoutMs = 10 };
 
-    StdioCtl &io;
+    ConsoleCtl &con;
     InputState &state;
     bool mouseEnabled;
     NcursesInputGetter in;
@@ -44,8 +44,8 @@ class NcursesInput : public InputStrategy
 
 public:
 
-    // Lifetimes of 'io', 'display' and 'state' must exceed that of 'this'.
-    NcursesInput(StdioCtl &io, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
+    // Lifetimes of 'con', 'display' and 'state' must exceed that of 'this'.
+    NcursesInput(ConsoleCtl &con, NcursesDisplay &display, InputState &state, bool mouse) noexcept;
     ~NcursesInput();
 
     bool getEvent(TEvent &ev) noexcept override;

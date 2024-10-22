@@ -71,7 +71,7 @@ struct TermAttr
 // AnsiScreenWriter allows printing characters and color attributes directly
 // to screen using ANSI escape codes.
 
-class StdioCtl;
+class ConsoleCtl;
 
 class AnsiScreenWriter
 {
@@ -91,7 +91,7 @@ class AnsiScreenWriter
         void reserve(size_t) noexcept;
     };
 
-    const StdioCtl &io;
+    ConsoleCtl &con;
     Buffer buf;
     TermAttr lastAttr {};
 
@@ -100,8 +100,8 @@ class AnsiScreenWriter
 
 public:
 
-    AnsiScreenWriter(StdioCtl &aIo) noexcept :
-        io(aIo)
+    AnsiScreenWriter(ConsoleCtl &aCon) noexcept :
+        con(aCon)
     {
     }
 

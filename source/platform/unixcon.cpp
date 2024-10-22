@@ -12,26 +12,26 @@ namespace tvision
 
 inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
                                                  InputStrategy &aInput,
-                                                 StdioCtl &aIo,
+                                                 ConsoleCtl &aCon,
                                                  DisplayBuffer &aDisplayBuf,
                                                  InputState &aInputState,
                                                  SigwinchHandler *aSigwinch ) noexcept :
     ConsoleStrategy(aDisplay, aInput, {&aInput, aSigwinch}),
-    io(aIo),
+    con(aCon),
     displayBuf(aDisplayBuf),
     inputState(aInputState),
     sigwinch(aSigwinch)
 {
 }
 
-UnixConsoleStrategy &UnixConsoleStrategy::create( StdioCtl &io,
+UnixConsoleStrategy &UnixConsoleStrategy::create( ConsoleCtl &con,
                                                   DisplayBuffer &displayBuf,
                                                   InputState &inputState,
                                                   DisplayStrategy &display,
                                                   InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
-    return *new UnixConsoleStrategy(display, input, io, displayBuf, inputState, sigwinch);
+    return *new UnixConsoleStrategy(display, input, con, displayBuf, inputState, sigwinch);
 }
 
 UnixConsoleStrategy::~UnixConsoleStrategy()
@@ -46,7 +46,7 @@ bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
 {
     if (UnixClipboard::setClipboardText(text))
         return true;
-    if (TermIO::setClipboardText(io, text, inputState))
+    if (TermIO::setClipboardText(con, text, inputState))
         return true;
     // On non-success, 'setClipboardText' prints an OSC sequence not all
     // terminals can handle; redraw the screen in case it has been messed up.
@@ -58,7 +58,7 @@ bool UnixConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noex
 {
     if (UnixClipboard::requestClipboardText(accept))
         return true;
-    if (TermIO::requestClipboardText(io, accept, inputState))
+    if (TermIO::requestClipboardText(con, accept, inputState))
         return true;
     return false;
 }

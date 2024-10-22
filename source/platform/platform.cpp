@@ -4,6 +4,7 @@
 #include <internal/win32con.h>
 #include <internal/sighandl.h>
 #include <internal/codepage.h>
+#include <internal/conctl.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,8 +36,8 @@ void Platform::initEncodingStuff() noexcept
 #else
         setlocale(LC_ALL, "");
 #ifdef __linux__
-        auto &io = StdioCtl::getInstance();
-        if (io.isLinuxConsole())
+        auto &con = ConsoleCtl::getInstance();
+        if (con.isLinuxConsole())
             charWidth = &LinuxConsoleStrategy::charWidth;
         else
 #endif // __linux__
@@ -58,7 +59,7 @@ Platform::~Platform()
 {
     restoreConsole();
 #ifndef _WIN32
-    StdioCtl::destroyInstance();
+    ConsoleCtl::destroyInstance();
 #endif
     instance = nullptr;
 }

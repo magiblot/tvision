@@ -10,7 +10,7 @@
 namespace tvision
 {
 
-class StdioCtl;
+class ConsoleCtl;
 
 struct Far2lState
 {
@@ -120,15 +120,15 @@ inline uint CSIData::getValue(uint i, uint defaultValue) const noexcept
 
 namespace TermIO
 {
-    void mouseOn(StdioCtl &) noexcept;
-    void mouseOff(StdioCtl &) noexcept;
-    void keyModsOn(StdioCtl &) noexcept;
-    void keyModsOff(StdioCtl &) noexcept;
+    void mouseOn(ConsoleCtl &) noexcept;
+    void mouseOff(ConsoleCtl &) noexcept;
+    void keyModsOn(ConsoleCtl &) noexcept;
+    void keyModsOff(ConsoleCtl &) noexcept;
 
     void normalizeKey(KeyDownEvent &keyDown) noexcept;
 
-    bool setClipboardText(StdioCtl &, TStringView, InputState &) noexcept;
-    bool requestClipboardText(StdioCtl &, void (&)(TStringView), InputState &) noexcept;
+    bool setClipboardText(ConsoleCtl &, TStringView, InputState &) noexcept;
+    bool requestClipboardText(ConsoleCtl &, void (&)(TStringView), InputState &) noexcept;
 
     ParseResult parseEvent(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseEscapeSeq(GetChBuf&, TEvent&, InputState&) noexcept;
@@ -145,7 +145,7 @@ namespace TermIO
     ParseResult parseWin32InputModeKeyOrEscapeSeq(const CSIData &, InputGetter&, TEvent&, InputState&) noexcept;
 
     char *readUntilBelOrSt(GetChBuf &) noexcept;
-    void consumeUnprocessedInput(StdioCtl &, InputGetter &, InputState &) noexcept;
+    void consumeUnprocessedInput(ConsoleCtl &, InputGetter &, InputState &) noexcept;
 }
 
 } // namespace tvision

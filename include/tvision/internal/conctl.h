@@ -1,5 +1,5 @@
-#ifndef TVISION_STDIOCTL_H
-#define TVISION_STDIOCTL_H
+#ifndef TVISION_CONCTL_H
+#define TVISION_CONCTL_H
 
 #include <tvision/tv.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 namespace tvision
 {
 
-class StdioCtl final
+class ConsoleCtl
 {
 #ifdef _WIN32
     enum { input = 0, startupOutput = 1, activeOutput = 2 };
@@ -27,21 +27,21 @@ class StdioCtl final
     bool ownsFiles {false};
 #endif // _WIN32
 
-    static StdioCtl *instance;
+    static ConsoleCtl *instance;
 
-    StdioCtl() noexcept;
-    ~StdioCtl();
+    ConsoleCtl() noexcept;
+    ~ConsoleCtl();
 
 public:
 
-    // On Windows, the StdioCtl instance is created every time the alternate
+    // On Windows, the ConsoleCtl instance is created every time the alternate
     // screen buffer is enabled and it is destroyed when restoring the console.
-    // On Unix, the StdioCtl instance is created just once at the beginning
+    // On Unix, the ConsoleCtl instance is created just once at the beginning
     // of the program execution (in static initialization) and destroyed when
     // exiting the program.
 
     // Creates a global instance if none exists, and returns it.
-    static StdioCtl &getInstance() noexcept;
+    static ConsoleCtl &getInstance() noexcept;
     // Destroys the global instance if it exists.
     static void destroyInstance() noexcept;
 
@@ -65,4 +65,4 @@ public:
 
 } //namespace tvision
 
-#endif // TVISION_STDIOCTL_H
+#endif // TVISION_CONCTL_H

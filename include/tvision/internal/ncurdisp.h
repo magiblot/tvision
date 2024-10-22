@@ -15,8 +15,8 @@ class NcursesDisplay : public TerminalDisplay
 {
 public:
 
-    // The lifetime of 'io' exceeds that of 'this'.
-    NcursesDisplay(StdioCtl &io) noexcept;
+    // The lifetime of 'con' exceeds that of 'this'.
+    NcursesDisplay(ConsoleCtl &con) noexcept;
     ~NcursesDisplay();
 
 private:

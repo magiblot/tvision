@@ -9,7 +9,7 @@
 #include <internal/ncursinp.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <internal/codepage.h>
 #include <internal/constmap.h>
 #include <string>
@@ -269,10 +269,10 @@ void NcursesInputGetter::unget(int k) noexcept
         ++pendingCount;
 }
 
-NcursesInput::NcursesInput( StdioCtl &aIo, NcursesDisplay &,
+NcursesInput::NcursesInput( ConsoleCtl &aCon, NcursesDisplay &,
                             InputState &aState, bool mouse ) noexcept :
-    InputStrategy(aIo.in()),
-    io(aIo),
+    InputStrategy(aCon.in()),
+    con(aCon),
     state(aState),
     mouseEnabled(mouse)
 {
@@ -293,17 +293,17 @@ NcursesInput::NcursesInput( StdioCtl &aIo, NcursesDisplay &,
      * special key sequences, I believe. */
     set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
 
-    TermIO::keyModsOn(io);
+    TermIO::keyModsOn(con);
     if (mouseEnabled)
-        TermIO::mouseOn(io);
+        TermIO::mouseOn(con);
 }
 
 NcursesInput::~NcursesInput()
 {
     if (mouseEnabled)
-        TermIO::mouseOff(io);
-    TermIO::keyModsOff(io);
-    TermIO::consumeUnprocessedInput(io, in, state);
+        TermIO::mouseOff(con);
+    TermIO::keyModsOff(con);
+    TermIO::consumeUnprocessedInput(con, in, state);
 }
 
 int NcursesInput::getButtonCount() noexcept

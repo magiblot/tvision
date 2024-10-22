@@ -15,21 +15,21 @@ void getWin32Mouse(const MOUSE_EVENT_RECORD &, TEvent &, InputState &) noexcept;
 
 #ifdef _WIN32
 
-class StdioCtl;
+class ConsoleCtl;
 class Win32Input;
 class Win32Display;
 
 class Win32ConsoleStrategy final : public ConsoleStrategy
 {
-    StdioCtl &io;
+    ConsoleCtl &con;
     UINT cpInput, cpOutput;
 
-    Win32ConsoleStrategy( StdioCtl &aIo,
+    Win32ConsoleStrategy( ConsoleCtl &aCon,
                           UINT cpInput, UINT cpOutput,
                           DisplayStrategy &aDisplay,
                           InputStrategy &aInput ) noexcept :
         ConsoleStrategy(aDisplay, aInput, {&aInput}),
-        io(aIo),
+        con(aCon),
         cpInput(cpInput),
         cpOutput(cpOutput)
     {
@@ -49,7 +49,7 @@ public:
 
 class Win32Input final : public InputStrategy
 {
-    StdioCtl &io;
+    ConsoleCtl &con;
     InputState state;
 
     bool getEvent(const INPUT_RECORD &, TEvent &ev) noexcept;
@@ -57,12 +57,8 @@ class Win32Input final : public InputStrategy
 
 public:
 
-    // The lifetime of 'aIo' must exceed that of 'this'.
-    Win32Input(StdioCtl &aIo) noexcept :
-        InputStrategy(aIo.in()),
-        io(aIo)
-    {
-    }
+    // The lifetime of 'con' must exceed that of 'this'.
+    Win32Input(ConsoleCtl &aCon) noexcept;
 
     bool getEvent(TEvent &ev) noexcept override;
     int getButtonCount() noexcept override;
@@ -74,8 +70,8 @@ class Win32Display : public TerminalDisplay
 {
 public:
 
-    // The lifetime of 'aIo' must exceed that of 'this'.
-    Win32Display(StdioCtl &aIo, bool useAnsi) noexcept;
+    // The lifetime of 'con' must exceed that of 'this'.
+    Win32Display(ConsoleCtl &con, bool useAnsi) noexcept;
     ~Win32Display();
 
 private:

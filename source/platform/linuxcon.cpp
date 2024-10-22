@@ -5,7 +5,7 @@
 #include <tvision/tv.h>
 
 #include <internal/linuxcon.h>
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <internal/gpminput.h>
 #include <internal/termio.h>
 #include <internal/sigwinch.h>
@@ -33,14 +33,14 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 {
 }
 
-LinuxConsoleStrategy &LinuxConsoleStrategy::create( StdioCtl &io,
+LinuxConsoleStrategy &LinuxConsoleStrategy::create( ConsoleCtl &con,
                                                     DisplayBuffer &displayBuf,
                                                     InputState &inputState,
                                                     DisplayStrategy &display,
                                                     InputStrategy &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
-    auto &wrapper = *new LinuxConsoleInput(io, input);
+    auto &wrapper = *new LinuxConsoleInput(con, input);
     auto *gpm = GpmInput::create(displayBuf);
     return *new LinuxConsoleStrategy(display, wrapper, inputState, sigwinch, gpm);
 }
@@ -86,7 +86,7 @@ bool LinuxConsoleInput::hasPendingEvents() noexcept
 ushort LinuxConsoleInput::getKeyboardModifiers() noexcept
 {
     char res = 6;
-    if (ioctl(io.in(), TIOCLINUX, &res) != -1)
+    if (ioctl(con.in(), TIOCLINUX, &res) != -1)
         return convertLinuxKeyModifiers(res);
     return 0;
 }

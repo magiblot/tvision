@@ -3,7 +3,7 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 #include <internal/win32con.h>
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <internal/winwidth.h>
 #include <internal/codepage.h>
 #include <internal/termio.h>
@@ -22,24 +22,24 @@ static bool isWine() noexcept
 
 Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
 {
-    auto &io = StdioCtl::getInstance();
+    auto &con = ConsoleCtl::getInstance();
     // Set the input mode.
     {
         DWORD consoleMode = 0;
-        GetConsoleMode(io.in(), &consoleMode);
+        GetConsoleMode(con.in(), &consoleMode);
         consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
         consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
         consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
         consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
-        SetConsoleMode(io.in(), consoleMode);
+        SetConsoleMode(con.in(), consoleMode);
     }
     // Set the output mode.
     bool supportsVT;
     {
         DWORD consoleMode = 0;
-        GetConsoleMode(io.out(), &consoleMode);
+        GetConsoleMode(con.out(), &consoleMode);
         consoleMode &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
-        SetConsoleMode(io.out(), consoleMode);
+        SetConsoleMode(con.out(), consoleMode);
         // Try enabling VT sequences.
         if (isWine())
             // Wine does not support them, but unlike the legacy console,
@@ -50,8 +50,8 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
         {
             consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
             consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-            SetConsoleMode(io.out(), consoleMode);
-            GetConsoleMode(io.out(), &consoleMode);
+            SetConsoleMode(con.out(), consoleMode);
+            GetConsoleMode(con.out(), &consoleMode);
             supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         }
     }
@@ -77,7 +77,7 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
             // "A monospace bitmap font has all of these low-order bits clear".
             return !(family & (TMPF_FIXED_PITCH | TMPF_VECTOR | TMPF_TRUETYPE | TMPF_DEVICE));
         };
-        if ( GetCurrentConsoleFontEx(io.out(), FALSE, &fontInfo)
+        if ( GetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo)
              && isBitmap(fontInfo.FontFamily) )
         {
             // Compute the new font height based on the bitmap font size.
@@ -91,17 +91,17 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
                 wcscpy(fontInfo.FaceName, name);
                 // SetCurrentConsoleFontEx succeeds even if the font is not available.
                 // We need to check whether the font has actually been set.
-                SetCurrentConsoleFontEx(io.out(), FALSE, &fontInfo);
-                GetCurrentConsoleFontEx(io.out(), FALSE, &fontInfo);
+                SetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
+                GetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
                 if (wcscmp(fontInfo.FaceName, name) == 0)
                     break;
             }
         }
     }
     WinWidth::reset();
-    auto &display = *new Win32Display(io, supportsVT);
-    auto &input = *new Win32Input(io);
-    return *new Win32ConsoleStrategy(io, cpInput, cpOutput, display, input);
+    auto &display = *new Win32Display(con, supportsVT);
+    auto &input = *new Win32Input(con);
+    return *new Win32ConsoleStrategy(con, cpInput, cpOutput, display, input);
 }
 
 Win32ConsoleStrategy::~Win32ConsoleStrategy()
@@ -110,13 +110,13 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
     delete &input;
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
-    StdioCtl::destroyInstance();
+    ConsoleCtl::destroyInstance();
 }
 
 bool Win32ConsoleStrategy::isAlive() noexcept
 {
     DWORD events = 0;
-    return GetNumberOfConsoleInputEvents(io.in(), &events);
+    return GetNumberOfConsoleInputEvents(con.in(), &events);
 }
 
 static bool openClipboard() noexcept
@@ -183,6 +183,12 @@ bool Win32ConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noe
 /////////////////////////////////////////////////////////////////////////
 // Win32Input
 
+Win32Input::Win32Input(ConsoleCtl &aCon) noexcept :
+    InputStrategy(aCon.in()),
+    con(aCon)
+{
+}
+
 int Win32Input::getButtonCount() noexcept
 {
     DWORD num;
@@ -193,15 +199,15 @@ int Win32Input::getButtonCount() noexcept
 void Win32Input::cursorOn() noexcept
 {
     DWORD consoleMode = 0;
-    GetConsoleMode(io.in(), &consoleMode);
-    SetConsoleMode(io.in(), consoleMode | ENABLE_MOUSE_INPUT);
+    GetConsoleMode(con.in(), &consoleMode);
+    SetConsoleMode(con.in(), consoleMode | ENABLE_MOUSE_INPUT);
 }
 
 void Win32Input::cursorOff() noexcept
 {
     DWORD consoleMode = 0;
-    GetConsoleMode(io.in(), &consoleMode);
-    SetConsoleMode(io.in(), consoleMode & ~ENABLE_MOUSE_INPUT);
+    GetConsoleMode(con.in(), &consoleMode);
+    SetConsoleMode(con.in(), consoleMode & ~ENABLE_MOUSE_INPUT);
 }
 
 bool Win32Input::getEvent(TEvent &ev) noexcept
@@ -209,7 +215,7 @@ bool Win32Input::getEvent(TEvent &ev) noexcept
     // ReadConsoleInput can sleep the process, so we first check the number
     // of available input events.
     DWORD events;
-    while (GetNumberOfConsoleInputEvents(io.in(), &events) && events)
+    while (GetNumberOfConsoleInputEvents(con.in(), &events) && events)
     {
         // getEvent(ir, ev) often returns false due to discarded events. But this
         // function should not return false if there are pending events, as that
@@ -218,7 +224,7 @@ bool Win32Input::getEvent(TEvent &ev) noexcept
         {
             INPUT_RECORD ir;
             DWORD ok;
-            if (!ReadConsoleInputW(io.in(), &ir, 1, &ok) || !ok)
+            if (!ReadConsoleInputW(con.in(), &ir, 1, &ok) || !ok)
                 return false;
             if (getEvent(ir, ev))
                 return true;
@@ -252,9 +258,9 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
-Win32Display::Win32Display(StdioCtl &aIo, bool useAnsi) noexcept :
-    TerminalDisplay(aIo),
-    ansiScreenWriter(useAnsi ? new AnsiScreenWriter(aIo) : nullptr)
+Win32Display::Win32Display(ConsoleCtl &aCon, bool useAnsi) noexcept :
+    TerminalDisplay(aCon),
+    ansiScreenWriter(useAnsi ? new AnsiScreenWriter(aCon) : nullptr)
 {
     initCapabilities();
 }
@@ -266,18 +272,18 @@ Win32Display::~Win32Display()
 
 void Win32Display::reloadScreenInfo() noexcept
 {
-    size = io.getSize();
+    size = con.getSize();
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
-    GetConsoleScreenBufferInfo(io.out(), &sbInfo);
+    GetConsoleScreenBufferInfo(con.out(), &sbInfo);
     // Set the cursor temporally to (0, 0) to prevent the console from crashing
     // due to https://github.com/microsoft/terminal/issues/7511.
     auto curPos = sbInfo.dwCursorPosition;
-    SetConsoleCursorPosition(io.out(), {0, 0});
+    SetConsoleCursorPosition(con.out(), {0, 0});
     // Make sure the buffer size matches the viewport size so that the
     // scrollbars are not shown.
-    SetConsoleScreenBufferSize(io.out(), {(short) size.x, (short) size.y});
+    SetConsoleScreenBufferSize(con.out(), {(short) size.x, (short) size.y});
     // Restore the cursor position (it does not matter if it is out of bounds).
-    SetConsoleCursorPosition(io.out(), curPos);
+    SetConsoleCursorPosition(con.out(), curPos);
 
     if (ansiScreenWriter)
         ansiScreenWriter->resetAttributes();
@@ -287,7 +293,7 @@ bool Win32Display::screenChanged() noexcept
 {
     bool changed = TerminalDisplay::screenChanged();
     CONSOLE_FONT_INFO fontInfo;
-    if ( GetCurrentConsoleFont(io.out(), FALSE, &fontInfo)
+    if ( GetCurrentConsoleFont(con.out(), FALSE, &fontInfo)
          && memcmp(&fontInfo, &lastFontInfo, sizeof(fontInfo)) != 0 )
     {
         changed = true;
@@ -305,7 +311,7 @@ TPoint Win32Display::getScreenSize() noexcept
 int Win32Display::getCaretSize() noexcept
 {
     CONSOLE_CURSOR_INFO crInfo {};
-    GetConsoleCursorInfo(io.out(), &crInfo);
+    GetConsoleCursorInfo(con.out(), &crInfo);
     return crInfo.bVisible ? crInfo.dwSize : 0;
 }
 
@@ -314,7 +320,7 @@ int Win32Display::getColorCount() noexcept
     // Conhost has had high color support for some time:
     // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
     DWORD consoleMode = 0;
-    GetConsoleMode(io.out(), &consoleMode);
+    GetConsoleMode(con.out(), &consoleMode);
     if (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
         return 256*256*256;
     return 16;
@@ -330,7 +336,7 @@ void Win32Display::lowlevelCursorSize(int size) noexcept
         crInfo.bVisible = FALSE;
         crInfo.dwSize = 1;
     }
-    SetConsoleCursorInfo(io.out(), &crInfo);
+    SetConsoleCursorInfo(con.out(), &crInfo);
 }
 
 void Win32Display::clearScreen() noexcept
@@ -343,8 +349,8 @@ void Win32Display::clearScreen() noexcept
         DWORD length = size.x * size.y;
         BYTE attr = 0x07;
         DWORD read;
-        FillConsoleOutputAttribute(io.out(), attr, length, coord, &read);
-        FillConsoleOutputCharacterA(io.out(), ' ', length, coord, &read);
+        FillConsoleOutputAttribute(con.out(), attr, length, coord, &read);
+        FillConsoleOutputCharacterA(con.out(), ' ', length, coord, &read);
         lastAttr = attr;
     }
 }
@@ -359,7 +365,7 @@ void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexce
         if (bios != lastAttr)
         {
             lowlevelFlush();
-            SetConsoleTextAttribute(io.out(), bios);
+            SetConsoleTextAttribute(con.out(), bios);
             lastAttr = bios;
         }
         buf.insert(buf.end(), chars.begin(), chars.end());
@@ -373,7 +379,7 @@ void Win32Display::lowlevelMoveCursor(uint x, uint y) noexcept
     else
     {
         lowlevelFlush();
-        SetConsoleCursorPosition(io.out(), {(short) x, (short) y});
+        SetConsoleCursorPosition(con.out(), {(short) x, (short) y});
     }
 }
 
@@ -391,7 +397,7 @@ void Win32Display::lowlevelFlush() noexcept
         ansiScreenWriter->lowlevelFlush();
     else
     {
-        io.write(buf.data(), buf.size());
+        con.write(buf.data(), buf.size());
         buf.resize(0);
     }
 }

@@ -6,6 +6,7 @@
 #include <internal/constmap.h>
 #include <internal/base64.h>
 #include <internal/events.h>
+#include <internal/conctl.h>
 #include <internal/endian.h>
 
 #include <time.h>
@@ -248,7 +249,7 @@ inline void pushFar2lRequest(std::vector<char> &out, std::vector<char> &tmp, Arg
     concat(&out[headLen], prefix, b64, suffix);
 }
 
-bool setFar2lClipboard(StdioCtl &io, TStringView text, InputState &state) noexcept
+bool setFar2lClipboard(ConsoleCtl &con, TStringView text, InputState &state) noexcept
 {
     if (state.far2l.enabled)
     {
@@ -276,13 +277,13 @@ bool setFar2lClipboard(StdioCtl &io, TStringView text, InputState &state) noexce
             "cc",
             f2lNoAnswer
         );
-        io.write(out.data(), out.size());
+        con.write(out.data(), out.size());
         return true;
     }
     return false;
 }
 
-bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
+bool requestFar2lClipboard(ConsoleCtl &con, InputState &state) noexcept
 {
     if (state.far2l.enabled)
     {
@@ -305,7 +306,7 @@ bool requestFar2lClipboard(StdioCtl &io, InputState &state) noexcept
             "cc",
             f2lNoAnswer
         );
-        io.write(out.data(), out.size());
+        con.write(out.data(), out.size());
         return true;
     }
     return false;

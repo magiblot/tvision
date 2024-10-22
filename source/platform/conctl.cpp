@@ -1,22 +1,22 @@
 #define Uses_TPoint
 #include <tvision/tv.h>
 
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <internal/getenv.h>
 
 namespace tvision
 {
 
-StdioCtl *StdioCtl::instance = nullptr;
+ConsoleCtl *ConsoleCtl::instance = nullptr;
 
-StdioCtl &StdioCtl::getInstance() noexcept
+ConsoleCtl &ConsoleCtl::getInstance() noexcept
 {
     if (!instance)
-        instance = new StdioCtl;
+        instance = new ConsoleCtl;
     return *instance;
 }
 
-void StdioCtl::destroyInstance() noexcept
+void ConsoleCtl::destroyInstance() noexcept
 {
     delete instance;
     instance = nullptr;
@@ -36,7 +36,7 @@ void StdioCtl::destroyInstance() noexcept
 namespace tvision
 {
 
-StdioCtl::StdioCtl() noexcept
+ConsoleCtl::ConsoleCtl() noexcept
 {
     if ( getEnv<TStringView>("TVISION_USE_STDIO").empty()
          && (files[0] = fopen("/dev/tty", "r")) != nullptr
@@ -61,14 +61,14 @@ StdioCtl::StdioCtl() noexcept
     }
 }
 
-StdioCtl::~StdioCtl()
+ConsoleCtl::~ConsoleCtl()
 {
     if (ownsFiles)
         for (FILE *file : files)
             fclose(file);
 }
 
-void StdioCtl::write(const char *data, size_t bytes) const noexcept
+void ConsoleCtl::write(const char *data, size_t bytes) const noexcept
 {
     fflush(fout());
     size_t written = 0;
@@ -78,7 +78,7 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
         written += r;
 }
 
-TPoint StdioCtl::getSize() const noexcept
+TPoint ConsoleCtl::getSize() const noexcept
 {
     struct winsize w;
     for (int fd : fds)
@@ -96,7 +96,7 @@ TPoint StdioCtl::getSize() const noexcept
     return {0, 0};
 }
 
-TPoint StdioCtl::getFontSize() const noexcept
+TPoint ConsoleCtl::getFontSize() const noexcept
 {
 #ifdef KDFONTOP
     struct console_font_op cfo {};
@@ -121,7 +121,7 @@ TPoint StdioCtl::getFontSize() const noexcept
 
 #ifdef __linux
 
-bool StdioCtl::isLinuxConsole() const noexcept
+bool ConsoleCtl::isLinuxConsole() const noexcept
 {
     // This is the same function used to get the Shift/Ctrl/Alt modifiers
     // on the console. It only succeeds if a console file descriptor is used.
@@ -145,31 +145,27 @@ bool StdioCtl::isLinuxConsole() const noexcept
 namespace tvision
 {
 
-namespace stdioctl
+
+static bool isValid(HANDLE h)
 {
+    return h && h != INVALID_HANDLE_VALUE;
+}
 
-    static bool isValid(HANDLE h)
-    {
-        return h && h != INVALID_HANDLE_VALUE;
-    }
+static bool isConsole(HANDLE h)
+{
+    DWORD mode;
+    return GetConsoleMode(h, &mode);
+}
 
-    static bool isConsole(HANDLE h)
-    {
-        DWORD mode;
-        return GetConsoleMode(h, &mode);
-    }
+static COORD windowSize(SMALL_RECT srWindow)
+{
+    return {
+        short(srWindow.Right - srWindow.Left + 1),
+        short(srWindow.Bottom - srWindow.Top + 1),
+    };
+}
 
-    static COORD windowSize(SMALL_RECT srWindow)
-    {
-        return {
-            short(srWindow.Right - srWindow.Left + 1),
-            short(srWindow.Bottom - srWindow.Top + 1),
-        };
-    }
-
-} // namespace stdioctl
-
-StdioCtl::StdioCtl() noexcept
+ConsoleCtl::ConsoleCtl() noexcept
 {
     // The console can be accessed in two ways: through GetStdHandle() or through
     // CreateFile(). GetStdHandle() will be unable to return a console handle
@@ -205,7 +201,6 @@ StdioCtl::StdioCtl() noexcept
     // We also need to remember whether we allocated a console or not, so that
     // we can free it when tearing down. If we don't, weird things may happen.
 
-    using namespace stdioctl;
     static constexpr struct { DWORD std; int index; } channels[] =
     {
         {STD_INPUT_HANDLE, input},
@@ -278,9 +273,8 @@ StdioCtl::StdioCtl() noexcept
         }
 }
 
-StdioCtl::~StdioCtl()
+ConsoleCtl::~ConsoleCtl()
 {
-    using namespace stdioctl;
     CONSOLE_SCREEN_BUFFER_INFO activeSbInfo {};
     GetConsoleScreenBufferInfo(cn[activeOutput].handle, &activeSbInfo);
     CONSOLE_SCREEN_BUFFER_INFO startupSbInfo {};
@@ -322,7 +316,7 @@ StdioCtl::~StdioCtl()
         FreeConsole();
 }
 
-void StdioCtl::write(const char *data, size_t bytes) const noexcept
+void ConsoleCtl::write(const char *data, size_t bytes) const noexcept
 {
     // Writing 0 bytes causes the cursor to become invisible for a short time
     // in old versions of the Windows console.
@@ -330,7 +324,7 @@ void StdioCtl::write(const char *data, size_t bytes) const noexcept
         WriteConsoleA(out(), data, bytes, nullptr, nullptr);
 }
 
-TPoint StdioCtl::getSize() const noexcept
+TPoint ConsoleCtl::getSize() const noexcept
 {
     CONSOLE_SCREEN_BUFFER_INFO sbInfo;
     auto &srWindow = sbInfo.srWindow;
@@ -342,7 +336,7 @@ TPoint StdioCtl::getSize() const noexcept
     return {0, 0};
 }
 
-TPoint StdioCtl::getFontSize() const noexcept
+TPoint ConsoleCtl::getFontSize() const noexcept
 {
     CONSOLE_FONT_INFO fontInfo;
     if (GetCurrentConsoleFont(out(), FALSE, &fontInfo))

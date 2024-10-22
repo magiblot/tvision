@@ -11,18 +11,19 @@ struct TEvent;
 namespace tvision
 {
 
+class ConsoleCtl;
 class SigwinchHandler;
 class GpmInput;
 struct InputState;
 
 struct LinuxConsoleInput final : public EventSource
 {
-    StdioCtl &io;
+    ConsoleCtl &con;
     InputStrategy &input;
 
-    LinuxConsoleInput(StdioCtl &aIo, InputStrategy &aInput) noexcept :
+    LinuxConsoleInput(ConsoleCtl &aCon, InputStrategy &aInput) noexcept :
         EventSource(aInput.handle),
-        io(aIo),
+        con(aCon),
         input(aInput)
     {
     }
@@ -51,9 +52,9 @@ class LinuxConsoleStrategy : public ConsoleStrategy
 public:
 
     // Pre: 'io.isLinuxConsole()' returns 'true'.
-    // The lifetime of 'io' and 'displayBuf' must exceed that of the returned object.
+    // The lifetime of 'con' and 'displayBuf' must exceed that of the returned object.
     // Takes ownership over 'inputState', 'display' and 'input'.
-    static LinuxConsoleStrategy &create( StdioCtl &io,
+    static LinuxConsoleStrategy &create( ConsoleCtl &con,
                                          DisplayBuffer &displayBuf,
                                          InputState &inputState,
                                          DisplayStrategy &display,

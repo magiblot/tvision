@@ -4,7 +4,7 @@
 #include <tvision/tv.h>
 
 #include <internal/ncurdisp.h>
-#include <internal/stdioctl.h>
+#include <internal/conctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ncurses.h>
@@ -12,12 +12,12 @@
 namespace tvision
 {
 
-NcursesDisplay::NcursesDisplay(StdioCtl &aIo) noexcept :
-    TerminalDisplay(aIo),
-    ansiScreenWriter(aIo)
+NcursesDisplay::NcursesDisplay(ConsoleCtl &aCon) noexcept :
+    TerminalDisplay(aCon),
+    ansiScreenWriter(aCon)
 {
     // Start curses mode.
-    term = newterm(nullptr, io.fout(), io.fin());
+    term = newterm(nullptr, con.fout(), con.fin());
     if (!term)
     {
         fputs("Cannot initialize Ncurses: 'newterm' failed.\n", stderr);
@@ -45,7 +45,7 @@ NcursesDisplay::~NcursesDisplay()
 
 void NcursesDisplay::reloadScreenInfo() noexcept
 {
-    TPoint size = io.getSize();
+    TPoint size = con.getSize();
     // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
     resize_term(size.y, size.x);
     ansiScreenWriter.resetAttributes();

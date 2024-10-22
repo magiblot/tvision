@@ -9,6 +9,7 @@
 namespace tvision
 {
 
+class ConsoleCtl;
 class SigwinchHandler;
 struct InputState;
 class DisplayBuffer;
@@ -17,20 +18,20 @@ class UnixConsoleStrategy : public ConsoleStrategy
 {
     StderrRedirector errRedir;
 
-    StdioCtl &io;
+    ConsoleCtl &con;
     DisplayBuffer &displayBuf;
     InputState &inputState;
     SigwinchHandler *sigwinch;
 
-    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &, StdioCtl &,
+    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &, ConsoleCtl &,
                          DisplayBuffer &, InputState &,
                          SigwinchHandler * ) noexcept;
 
 public:
 
-    // The lifetime of 'io' and 'displayBuf' must exceed that of the returned object.
+    // The lifetime of 'con' and 'displayBuf' must exceed that of the returned object.
     // Takes ownership over 'inputState', 'display' and 'input'.
-    static UnixConsoleStrategy &create( StdioCtl &io,
+    static UnixConsoleStrategy &create( ConsoleCtl &con,
                                         DisplayBuffer &displayBuf,
                                         InputState &inputState,
                                         DisplayStrategy &display,

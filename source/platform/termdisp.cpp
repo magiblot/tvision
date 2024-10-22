@@ -3,6 +3,7 @@
 
 #include <internal/termdisp.h>
 #include <internal/linuxcon.h>
+#include <internal/conctl.h>
 #include <internal/getenv.h>
 
 namespace tvision
@@ -28,7 +29,7 @@ TermCap TerminalDisplay::getCapabilities() noexcept
             termcap.colors = Indexed8;
             termcap.quirks |= qfBoldIsBright;
 #ifdef __linux__
-            if (io.isLinuxConsole())
+            if (con.isLinuxConsole())
                 termcap.quirks |= qfBlinkIsBright | qfNoItalic | qfNoUnderline;
             else
 #endif // __linux__
@@ -54,7 +55,7 @@ ushort TerminalDisplay::getScreenMode() noexcept
     else if (termcap.colors == Indexed256)
         mode |= TDisplay::smColor256;
 
-    TPoint fontSize = io.getFontSize();
+    TPoint fontSize = con.getFontSize();
     if (fontSize.x > 0 && fontSize.y > 0 && fontSize.x >= fontSize.y)
         mode |= TDisplay::smFont8x8;
 
@@ -63,7 +64,7 @@ ushort TerminalDisplay::getScreenMode() noexcept
 
 bool TerminalDisplay::screenChanged() noexcept
 {
-    TPoint size = io.getSize();
+    TPoint size = con.getSize();
     bool changed = (size != lastSize);
     lastSize = size;
     return changed;
