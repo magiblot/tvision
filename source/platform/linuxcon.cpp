@@ -67,11 +67,11 @@ bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
         // Ctrl+Back/Ctrl+Tab/Ctrl+Enter.
         if (keyCode == kbBack || keyCode == kbTab || keyCode == kbEnter)
             ev.keyDown.controlKeyState &= ~kbCtrlShift;
-        // Special cases for Ctrl+Back and Shift+Tab.
+        // Special cases for Ctrl+Back, Shift+Tab and Alt+Tab.
         if (keyCode == 0x001F && (ev.keyDown.controlKeyState & kbCtrlShift))
             keyCode = kbCtrlBack;
-        else if (keyCode == kbAltTab && ((ev.keyDown.controlKeyState & (kbShift | kbCtrlShift | kbAltShift)) == kbShift))
-            keyCode = kbShiftTab;
+        else if (keyCode == kbShiftTab || keyCode == kbAltTab)
+            keyCode = kbTab; // Take into account just the controlKeyState modifiers.
         TermIO::normalizeKey(ev.keyDown);
         return true;
     }
