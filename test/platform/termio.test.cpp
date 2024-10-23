@@ -20,10 +20,10 @@ TEST(TermIO, ShouldNormalizeKeys)
         {keyDownEv('a', kbLeftAlt, "a"), keyDownEv(kbAltA, kbLeftAlt, "")},
         {keyDownEv(kbIns, kbShift, ""), keyDownEv(kbShiftIns, kbShift, "")},
         {keyDownEv(kbBack, kbLeftCtrl | kbLeftAlt, ""), keyDownEv(kbAltBack, kbLeftCtrl | kbLeftAlt, "")},
-        {keyDownEv(kbCtrlBack, kbLeftCtrl, ""), keyDownEv(kbCtrlBack, kbLeftCtrl, "")},
-        {keyDownEv(kbCtrlBack, 0x0000, ""), keyDownEv(kbCtrlBack, kbCtrlShift, "")},
+        {keyDownEv(kbCtrlBack, kbRightCtrl, ""), keyDownEv(kbCtrlBack, kbRightCtrl, "")},
+        {keyDownEv(kbCtrlBack, 0x0000, ""), keyDownEv(kbCtrlBack, kbLeftCtrl, "")},
         {keyDownEv(kbIns, kbLeftCtrl | kbEnhanced, ""), keyDownEv(kbCtrlIns, kbLeftCtrl | kbEnhanced, "")},
-        {keyDownEv(kbCtrlDel, kbLeftAlt, ""), keyDownEv(kbAltDel, kbCtrlShift | kbLeftAlt, "")},
+        {keyDownEv(kbCtrlDel, kbLeftAlt, ""), keyDownEv(kbAltDel, kbLeftCtrl | kbLeftAlt, "")},
     };
 
     for (auto &testCase : testCases)

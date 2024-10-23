@@ -338,7 +338,7 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
     {
         // Modifier precedece: Shift < Ctrl < Alt.
         int largestMod = (newMods & kbLeftAlt) ? 2
-                       : (newMods & kbLeftShift) ? 1
+                       : (newMods & kbLeftCtrl) ? 1
                        : 0;
         if (ushort keyCode = moddedKeyCodes[tKey.code][largestMod])
         {

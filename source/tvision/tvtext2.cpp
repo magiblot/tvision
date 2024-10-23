@@ -10,6 +10,7 @@
  *
  */
 
+#define Uses_TKeys
 #define Uses_TEditWindow
 #define Uses_TFileList
 #define Uses_TProgram
