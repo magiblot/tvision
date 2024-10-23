@@ -18,6 +18,10 @@
 #define Uses_ipstream
 #include <tvision/tv.h>
 
+#if !defined( __CTYPE_H )
+#include <ctype.h>
+#endif  // __CTYPE_H
+
 #if !defined( __DIR_H )
 #include <dir.h>
 #endif  // __DIR_H
