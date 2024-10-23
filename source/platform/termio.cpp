@@ -332,14 +332,15 @@ void TermIO::keyModsOff(ConsoleCtl &con) noexcept
 
 void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
 {
-    TKey key(keyDown);
-    if (key.mods & (kbShift | kbCtrlShift | kbLeftAlt))
+    TKey tKey(keyDown);
+    ushort newMods = tKey.mods & (kbShift | kbLeftCtrl | kbLeftAlt);
+    if (newMods != 0)
     {
         // Modifier precedece: Shift < Ctrl < Alt.
-        int largestMod = (key.mods & kbLeftAlt) ? 2
-                       : (key.mods & kbCtrlShift) ? 1
+        int largestMod = (newMods & kbLeftAlt) ? 2
+                       : (newMods & kbLeftShift) ? 1
                        : 0;
-        if (ushort keyCode = moddedKeyCodes[key.code][largestMod])
+        if (ushort keyCode = moddedKeyCodes[tKey.code][largestMod])
         {
             keyDown.keyCode = keyCode;
             if (keyDown.charScan.charCode < ' ')
@@ -350,9 +351,9 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
     // when available.
     ushort origMods = keyDown.controlKeyState;
     keyDown.controlKeyState =
-        ((origMods | key.mods) & ~(kbCtrlShift | kbAltShift))
-      | ((origMods & kbCtrlShift ? origMods : key.mods) & kbCtrlShift)
-      | ((origMods & kbAltShift ? origMods : key.mods) & kbAltShift)
+        ((origMods | newMods) & ~(kbCtrlShift | kbAltShift))
+      | ((origMods & kbCtrlShift ? origMods : newMods) & kbCtrlShift)
+      | ((origMods & kbAltShift ? origMods : newMods) & kbAltShift)
         ;
 }
 
