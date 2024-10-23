@@ -128,7 +128,13 @@ void TMenuView::prevItem()
 void TMenuView::trackKey( Boolean findNext )
 {
     if( current == 0 )
-        return;
+        {
+        current = menu->items;
+        if( !findNext )
+            prevItem();
+        if( current->name != 0 )
+            return;
+        }
 
     do  {
         if( findNext )
