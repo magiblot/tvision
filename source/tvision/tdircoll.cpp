@@ -34,7 +34,7 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#if defined( _WIN32 ) && defined( __FLAT__ )
+#if defined( __FLAT__ )
 #include <tvision/compat/windows/windows.h>
 #endif
 
@@ -66,7 +66,7 @@ I       XCHG    AX, CX      // Put the return value into AX
 #else
     drive = toupper((uchar) drive);
     DWORD mask = 0x01 << (drive - 'A');
-    return (Boolean) (GetLogicalDrives() & mask);
+    return Boolean( (GetLogicalDrives() & mask) != 0 );
 #endif
 #else
     // Unless otherwise necessary, we will emulate there's only one disk:
