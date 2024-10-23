@@ -447,7 +447,7 @@ ushort TMenuView::getHelpCtx()
     if( c != 0 )
         return c->current->helpCtx;
     else
-        return hcNoContext;
+        return helpCtx;
 }
 
 TPalette& TMenuView::getPalette() const
