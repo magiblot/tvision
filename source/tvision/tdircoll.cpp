@@ -38,7 +38,7 @@
 
 Boolean driveValid( char drive ) noexcept
 {
-#ifdef _WIN32
+#if defined( __BORLANDC__ ) || defined( _WIN32 )
 #if !defined( __FLAT__ )
 I       MOV     AH, 19H     // Save the current drive in BL
 I       INT     21H
