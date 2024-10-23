@@ -264,7 +264,7 @@ void TCluster::handleEvent( TEvent& event )
                               (state & sfFocused) != 0
                             ) &&
                             c != 0 &&
-                            toupper(event.keyDown.charScan.charCode) == c
+                            c == (char) toupper(event.keyDown.charScan.charCode)
                           )
                         )
                       )

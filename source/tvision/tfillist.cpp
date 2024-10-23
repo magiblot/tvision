@@ -320,7 +320,7 @@ static int getPathDrive( const char *path )
 {
     if( path[0] && path[1] == ':' )
     {
-        int drive = toupper(path[0]) - 'A';
+        int drive = (char) toupper((uchar) path[0]) - 'A';
         if (0 <= drive && drive <= 'Z' - 'A')
             return drive;
     }

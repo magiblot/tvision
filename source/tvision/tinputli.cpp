@@ -43,7 +43,7 @@ char hotKey( const char *s ) noexcept
     char *p;
 
     if( (p = strchr( (char *) s, '~' )) != 0 )
-        return toupper(p[1]);
+        return toupper((uchar) p[1]);
     else
         return 0;
 }

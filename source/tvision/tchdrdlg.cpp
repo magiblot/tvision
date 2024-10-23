@@ -194,7 +194,7 @@ void TChDirDialog::setUpDialog()
 static int changeDir( const char *path )
 {
     if( path[1] == ':' )
-        setdisk( toupper(path[0]) - 'A' );
+        setdisk( (char) toupper((uchar) path[0]) - 'A' );
     return chdir( path );
 }
 

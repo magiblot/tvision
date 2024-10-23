@@ -77,7 +77,7 @@ int strnicmp( const char *s1, const char *s2, size_t maxlen ) noexcept
 char *strupr(char *s) noexcept
 {
     char* p = s;
-    while ((*p = toupper(*p)))
+    while ((*p = toupper((uchar) *p)))
         p++;
     return s;
 }

@@ -178,7 +178,7 @@ uint iScan( const char *block, uint size, const char *str )
         while (i < size)
         {
             uint j = i, k = 0;
-            while (j < size && toupper(block[j++]) == toupper(str[k]))
+            while (j < size && toupper((uchar) block[j++]) == toupper((uchar) str[k]))
                 if (++k == len)
                     return i;
             ++i;

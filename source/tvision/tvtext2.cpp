@@ -61,10 +61,10 @@ ushort getAltCode(char c) noexcept
     if( c == 0 )
         return 0;
 
-    c = toupper(c);
+    c = toupper((uchar) c);
 
     if( c == '\xF0' )
-        return 0x200;       // special case to handle alt-Space
+        return kbAltSpace;  // special case to handle alt-Space
 
     size_t i;
     for( i = 0; i < sizeof( altCodes1 ); i++)

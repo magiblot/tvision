@@ -60,7 +60,7 @@ __1:
 I       XCHG    AX, CX      // Put the return value into AX
     return Boolean(_AX);
 #else
-    drive = (char) toupper( drive );
+    drive = toupper((uchar) drive);
     DWORD mask = 0x01 << (drive - 'A');
     return (Boolean) (GetLogicalDrives() & mask);
 #endif
