@@ -232,8 +232,8 @@ ushort TMenuView::execute()
                         {
                         if ( current != lastTargetItem )
                             action = doSelect;
-                        else if ( !parentMenu )
-                        // If a main menu entry was closed, exit and stop listening
+                        else if ( size.y == 1 )
+                        // If a menu bar entry was closed, exit and stop listening
                         // for events.
                             action = doReturn;
                         else
@@ -248,7 +248,7 @@ ushort TMenuView::execute()
                     }
                 else if ( mouseActive && !mouseInView(e.mouse.where) )
                     action = doReturn;
-                else if ( parentMenu )
+                else if ( size.y != 1 )
                 // When MouseUp happens inside the Box but not on a highlightable entry
                 // (e.g. on a margin, or a separator), either the default or the first
                 // entry will be automatically highlighted. This was added in Turbo Vision 2.0.
@@ -270,26 +270,26 @@ ushort TMenuView::execute()
                     // A menu bar entry closed by clicking on its name stays highlighted
                     // until MouseUp. If mouse drag is then performed and a different
                     // entry is selected, it will open up automatically.
-                    else if ( mouseActive && !parentMenu && current != lastTargetItem )
+                    else if ( size.y == 1 && mouseActive && current != lastTargetItem )
                         autoSelect = True;
                     }
                 break;
             case  evKeyDown:
-                switch( ctrlToArrow(e.keyDown.keyCode) )
+                switch( e.keyDown.keyCode )
                     {
                     case  kbUp:
                     case  kbDown:
                         if( size.y != 1 )
-                            trackKey(Boolean(ctrlToArrow(e.keyDown.keyCode) == kbDown));
+                            trackKey(Boolean(e.keyDown.keyCode == kbDown));
                         else if( e.keyDown.keyCode == kbDown )
                             autoSelect =  True;
                         break;
                     case  kbLeft:
                     case  kbRight:
-                        if( parentMenu == 0 )
-                            trackKey(Boolean(ctrlToArrow(e.keyDown.keyCode) == kbRight));
-                        else
-                            action =  doReturn;
+                        if( size.y == 1 )
+                            trackKey(Boolean(e.keyDown.keyCode == kbRight));
+                        else if( parentMenu != 0 )
+                            action = doReturn;
                         break;
                     case  kbHome:
                     case  kbEnd:
