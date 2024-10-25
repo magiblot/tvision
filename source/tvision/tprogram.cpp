@@ -100,10 +100,12 @@ Boolean TProgram::canMoveFocus()
 
 int TProgram::eventWaitTimeout()
 {
-    int timerTimeoutMs = min(timerQueue.timeUntilNextTimeout(), (int32_t) INT_MAX);
-    if (timerTimeoutMs < 0)
+    int timerTimeoutMs = min( timerQueue.timeUntilNextTimeout(), (int32_t) INT_MAX );
+    if( timerTimeoutMs < 0 )
         return eventTimeoutMs;
-    return min(eventTimeoutMs, timerTimeoutMs);
+    if( eventTimeoutMs < 0 )
+        return timerTimeoutMs;
+    return min( eventTimeoutMs, timerTimeoutMs );
 }
 
 ushort TProgram::executeDialog( TDialog* pD, void* data )
