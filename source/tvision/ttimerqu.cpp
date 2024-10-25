@@ -15,10 +15,10 @@ static TTimePoint systemTimeMs()
 
 struct TTimer
 {
-    void *collectId;
     TTimePoint expiresAt;
     int32_t period;
     TTimer *next;
+    void *collectId;
 };
 
 TTimerQueue::TTimerQueue() noexcept :
@@ -87,12 +87,16 @@ void TTimerQueue::collectExpiredTimers(void (&func)(TTimerId, void *), void *arg
     if (first == 0)
         return;
 
+    // Given that the timer list may be mutated while we process expired timers,
+    // we iterate it from the beginning every time. In order to know which
+    // timers have already been processed, we mark them with a 'collectId'
+    // which identifies the current invocation of 'collectExpiredTimers'.
     void *collectId = &collectId;
     TTimePoint now = getTimeMs();
     while (True)
     {
         TTimer **p = &first;
-        while (*p != 0 && ((*p)->collectId == collectId || now < (*p)->expiresAt))
+        while (*p != 0 && ((*p)->collectId != 0 || now < (*p)->expiresAt))
             p = &(*p)->next;
         if (*p == 0)
             break;
@@ -128,7 +132,7 @@ int32_t TTimerQueue::timeUntilNextTimeout()
     if (first == 0)
         return -1;
     TTimePoint now = getTimeMs();
-    uint32_t maxValue = (uint32_t) -1 >> 1;
+    uint32_t maxValue = uint32_t(-1) >> 1;
     int32_t timeout = maxValue;
     TTimer *timer = first;
     do

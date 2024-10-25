@@ -204,18 +204,18 @@ static void nestedHandleTimeout(TTimerId, void *args)
     (*(TTimerQueue *) args).collectExpiredTimers(handleTimeout, nullptr);
 }
 
-TEST(TTimerQueue, ShouldCollectTimeoutsWithNestedInvocation)
+TEST(TTimerQueue, ShouldNotCollectTimeoutsWithNestedInvocation)
 {
     currentTime = 0;
     TTimerQueue timerQueue(mockCurrentTime);
 
-    timerQueue.setTimer(1500);
+    timerQueue.setTimer(0, 0);
     timerQueue.setTimer(1000, 500);
 
     currentTime = 1000;
     timeouts = 0;
     timerQueue.collectExpiredTimers(nestedHandleTimeout, &timerQueue);
-    EXPECT_EQ(timeouts, 3);
+    EXPECT_EQ(timeouts, 2);
 }
 
 TEST(TTimerQueue, ShouldNotRequestCurrentTimeIfThereAreNoTimers)
