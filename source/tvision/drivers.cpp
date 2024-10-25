@@ -403,9 +403,10 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
 // We must take the greatest of the screen's dimensions, because we cannot assume
 // that 'screenWidth > screenHeight' and TDrawBuffer can also be used to draw
 // vertical views (e.g. TScrollBar).
+// In addition, give some room for views that might exceed the screen size.
 static TSpan<TScreenCell> allocData() noexcept
 {
-    size_t len = max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
+    size_t len = 8 + max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
     return TSpan<TScreenCell>(new TScreenCell[len], len);
 }
 
