@@ -20,17 +20,14 @@ public:
 
     virtual ~DisplayStrategy() {}
 
-    virtual TPoint getScreenSize() noexcept { return {}; }
-    virtual int getCaretSize() noexcept { return 0; } // Range [0, 100].
     virtual void clearScreen() noexcept {}
     virtual ushort getScreenMode() noexcept { return 0; }
-    virtual void reloadScreenInfo() noexcept {}
+    virtual TPoint reloadScreenInfo() noexcept { return {0, 0}; }
     virtual void lowlevelWriteChars(TStringView /*chars*/, TColorAttr /*attr*/) noexcept {}
     virtual void lowlevelMoveCursor(uint /*x*/, uint /*y*/) noexcept {};
     virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
     virtual void lowlevelCursorSize(int /*size*/) noexcept {};
     virtual void lowlevelFlush() noexcept {};
-    virtual bool screenChanged() noexcept { return false; }
 };
 
 class InputStrategy : public EventSource
@@ -93,9 +90,6 @@ class Platform
     static void initEncodingStuff() noexcept;
     static void signalCallback(bool) noexcept;
 
-    bool screenChanged() noexcept
-        { return console.lock([] (auto *c) { return c->display.screenChanged(); }); }
-
 public:
 
     static int (*charWidth)(uint32_t) noexcept;
@@ -111,7 +105,7 @@ public:
     void restoreConsole() noexcept
         { console.lock([&] (auto *&c) { this->restoreConsole(c); }); }
 
-    bool getEvent(TEvent &ev) noexcept;
+    bool getEvent(TEvent &ev) noexcept { return waiter.getEvent(ev); }
     void waitForEvents(int ms) noexcept;
     void interruptEventWait() noexcept { waiter.interruptEventWait(); }
 

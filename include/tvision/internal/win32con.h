@@ -86,11 +86,8 @@ private:
 
 protected:
 
-    void reloadScreenInfo() noexcept override;
-    TPoint getScreenSize() noexcept override;
-    int getCaretSize() noexcept override;
+    TPoint reloadScreenInfo() noexcept override;
     void clearScreen() noexcept override;
-    bool screenChanged() noexcept override;
 
     int getColorCount() noexcept override;
 

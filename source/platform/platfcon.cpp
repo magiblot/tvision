@@ -57,20 +57,6 @@ void Platform::checkConsole() noexcept
     });
 }
 
-bool Platform::getEvent(TEvent &ev) noexcept
-{
-    if ( waiter.getEvent(ev)
-         && (ev.what != evCommand || ev.message.command != cmScreenChanged) )
-        return true;
-    if (screenChanged())
-    {
-        ev.what = evCommand;
-        ev.message.command = cmScreenChanged;
-        return true;
-    }
-    return false;
-}
-
 void Platform::waitForEvents(int ms) noexcept
 {
     checkConsole();

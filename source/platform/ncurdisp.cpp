@@ -43,26 +43,13 @@ NcursesDisplay::~NcursesDisplay()
     delscreen(term);
 }
 
-void NcursesDisplay::reloadScreenInfo() noexcept
+TPoint NcursesDisplay::reloadScreenInfo() noexcept
 {
     TPoint size = con.getSize();
     // 'resizeterm' causes terrible flickering, so we better use 'resize_term'.
     resize_term(size.y, size.x);
     ansiScreenWriter.resetAttributes();
-}
-
-TPoint NcursesDisplay::getScreenSize() noexcept
-{
-    int y, x;
-    getmaxyx(stdscr, y, x);
-    return {max(x, 0), max(y, 0)};
-}
-
-int NcursesDisplay::getCaretSize() noexcept
-{
-    int size = curs_set(0);
-    curs_set(size);
-    return size <= 0 ? 0 : size == 1 ? 1 : 100;
+    return size;
 }
 
 int NcursesDisplay::getColorCount() noexcept

@@ -269,7 +269,7 @@ Win32Display::~Win32Display()
     delete ansiScreenWriter;
 }
 
-void Win32Display::reloadScreenInfo() noexcept
+TPoint Win32Display::reloadScreenInfo() noexcept
 {
     size = con.getSize();
     CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
@@ -284,34 +284,19 @@ void Win32Display::reloadScreenInfo() noexcept
     // Restore the cursor position (it does not matter if it is out of bounds).
     SetConsoleCursorPosition(con.out(), curPos);
 
-    if (ansiScreenWriter)
-        ansiScreenWriter->resetAttributes();
-}
-
-bool Win32Display::screenChanged() noexcept
-{
-    bool changed = TerminalDisplay::screenChanged();
     CONSOLE_FONT_INFO fontInfo;
     if ( GetCurrentConsoleFont(con.out(), FALSE, &fontInfo)
          && memcmp(&fontInfo, &lastFontInfo, sizeof(fontInfo)) != 0 )
     {
-        changed = true;
+        // Character width depends on the font and the font size being used.
         WinWidth::reset();
         lastFontInfo = fontInfo;
     }
-    return changed;
-}
 
-TPoint Win32Display::getScreenSize() noexcept
-{
+    if (ansiScreenWriter)
+        ansiScreenWriter->resetAttributes();
+
     return size;
-}
-
-int Win32Display::getCaretSize() noexcept
-{
-    CONSOLE_CURSOR_INFO crInfo {};
-    GetConsoleCursorInfo(con.out(), &crInfo);
-    return crInfo.bVisible ? crInfo.dwSize : 0;
 }
 
 int Win32Display::getColorCount() noexcept

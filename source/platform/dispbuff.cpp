@@ -31,9 +31,8 @@ DisplayBuffer::DisplayBuffer() noexcept :
 
 TScreenCell *DisplayBuffer::reloadScreenInfo(DisplayStrategy &display) noexcept
 {
-    display.reloadScreenInfo();
-    size = display.getScreenSize();
-    caretSize = display.getCaretSize();
+    size = display.reloadScreenInfo();
+    caretSize = -1;
     resizeBuffer();
     return buffer.data();
 }

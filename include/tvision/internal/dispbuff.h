@@ -69,7 +69,7 @@ class DisplayBuffer
 public:
 
     TPoint size {};
-    int caretSize {};
+    int caretSize {-1};
 
     DisplayBuffer() noexcept;
 

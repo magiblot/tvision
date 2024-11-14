@@ -62,12 +62,4 @@ ushort TerminalDisplay::getScreenMode() noexcept
     return mode;
 }
 
-bool TerminalDisplay::screenChanged() noexcept
-{
-    TPoint size = con.getSize();
-    bool changed = (size != lastSize);
-    lastSize = size;
-    return changed;
-}
-
 } // namespace tvision
