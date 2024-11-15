@@ -11,7 +11,6 @@
 #include <internal/sighandl.h>
 #include <internal/conctl.h>
 #include <internal/termio.h>
-#include <internal/getenv.h>
 
 namespace tvision
 {
@@ -27,7 +26,7 @@ ConsoleAdapter &Platform::createConsole() noexcept
 #else
     auto &con = ConsoleCtl::getInstance();
     InputState &inputState = *new InputState;
-    NcursesDisplay &display = *new NcursesDisplay(con);
+    NcursesDisplay &display = NcursesDisplay::create(con);
 #ifdef __linux__
     if (con.isLinuxConsole())
         return LinuxConsoleAdapter::create(con, displayBuf, inputState, display, *new NcursesInput(con, display, inputState, false));

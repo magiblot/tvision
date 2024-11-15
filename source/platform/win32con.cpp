@@ -241,11 +241,10 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 // Win32Display
 
 Win32Display::Win32Display(ConsoleCtl &aCon, bool useAnsi) noexcept :
-    TerminalDisplay(aCon),
-    ansiScreenWriter( useAnsi ? new AnsiScreenWriter(aCon, TerminalDisplay::termcap)
-                              : nullptr )
+    con(aCon)
 {
-    TerminalDisplay::initCapabilities();
+    if (useAnsi)
+        ansiScreenWriter = new AnsiScreenWriter(con, TermCap::getDisplayCapabilities(con, *this));
 }
 
 Win32Display::~Win32Display()

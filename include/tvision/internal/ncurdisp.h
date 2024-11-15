@@ -1,7 +1,7 @@
 #ifndef TVISION_NCURDISP_H
 #define TVISION_NCURDISP_H
 
-#include <internal/termdisp.h>
+#include <internal/platform.h>
 
 #ifdef HAVE_NCURSES
 
@@ -11,20 +11,21 @@
 namespace tvision
 {
 
-class NcursesDisplay final : public TerminalDisplay
+class NcursesDisplay final : public DisplayAdapter
 {
 public:
 
-    // The lifetime of 'con' exceeds that of 'this'.
-    NcursesDisplay(ConsoleCtl &con) noexcept;
+    // The lifetime of 'con' exceeds that of the returned object.
+    static NcursesDisplay &create(ConsoleCtl &con) noexcept;
     ~NcursesDisplay();
 
 private:
 
-    AnsiScreenWriter ansiScreenWriter;
+    ConsoleCtl &con;
     SCREEN *term;
+    AnsiScreenWriter ansiScreenWriter;
 
-protected:
+    NcursesDisplay(ConsoleCtl &, SCREEN *) noexcept;
 
     TPoint reloadScreenInfo() noexcept override;
 

@@ -4,20 +4,27 @@
 #include <internal/conctl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ncurses.h>
 
 namespace tvision
 {
 
-NcursesDisplay::NcursesDisplay(ConsoleCtl &aCon) noexcept :
-    TerminalDisplay(aCon),
-    ansiScreenWriter(aCon, TerminalDisplay::termcap)
+inline NcursesDisplay::NcursesDisplay(ConsoleCtl &aCon, SCREEN *aTerm) noexcept :
+    con(aCon),
+    term(aTerm),
+    ansiScreenWriter(aCon, TermCap::getDisplayCapabilities(con, *this))
+{
+}
+
+NcursesDisplay &NcursesDisplay::create(ConsoleCtl &con) noexcept
 {
     // Start curses mode.
-    term = newterm(nullptr, con.fout(), con.fin());
+    SCREEN *term = newterm(nullptr, con.fout(), con.fin());
     if (!term)
     {
-        fputs("Cannot initialize Ncurses: 'newterm' failed.\n", stderr);
+        const char *termEnv = getenv("TERM");
+        if (!termEnv)
+            termEnv = "";
+        fprintf(stderr, "Cannot initialize Ncurses: 'newterm' failed (TERM is '%s').\n", termEnv);
         exit(1);
     }
     // Enable colors if the terminal supports it.
@@ -27,10 +34,11 @@ NcursesDisplay::NcursesDisplay(ConsoleCtl &aCon) noexcept :
         // Use default colors when clearing the screen.
         use_default_colors();
     }
-    TerminalDisplay::initCapabilities();
     /* Refresh now so that a possible first getch() doesn't make any relevant
      * changes to the screen due to its implicit refresh(). */
     wrefresh(stdscr);
+
+    return *new NcursesDisplay(con, term);
 }
 
 NcursesDisplay::~NcursesDisplay()

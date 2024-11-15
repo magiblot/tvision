@@ -2,13 +2,16 @@
 #define TVISION_ANSIWRIT_H
 
 #define Uses_TScreenCell
+#define Uses_TPoint
 #include <tvision/tv.h>
 
-#include <internal/termdisp.h>
 #include <internal/endian.h>
 
 namespace tvision
 {
+
+class ConsoleCtl;
+class DisplayAdapter;
 
 // TermColor represents a color that is to be printed to screen
 // using certain ANSI escape sequences.
@@ -68,10 +71,35 @@ struct TermAttr
     TColorAttr::Style style;
 };
 
+// Terminal quirk flags.
+
+const ushort
+    qfBoldIsBright  = 0x0001,
+    qfBlinkIsBright = 0x0002,
+    qfNoItalic      = 0x0004,
+    qfNoUnderline   = 0x0008;
+
+enum TermCapColors : uint8_t
+{
+    NoColor,
+    Indexed8,
+    Indexed16,
+    Indexed256,
+    Direct,
+    TermCapColorCount,
+};
+
+struct TermCap
+{
+    TermCapColors colors;
+    ushort quirks;
+
+    static TermCap getDisplayCapabilities( ConsoleCtl &con,
+                                           DisplayAdapter &display ) noexcept;
+};
+
 // AnsiScreenWriter allows printing characters and color attributes directly
 // to screen using ANSI escape codes.
-
-class ConsoleCtl;
 
 class AnsiScreenWriter
 {
@@ -92,7 +120,7 @@ class AnsiScreenWriter
     };
 
     ConsoleCtl &con;
-    const TermCap &termcap;
+    TermCap termcap;
     Buffer buf;
     TPoint caretPos {-1, -1};
     TermAttr lastAttr {};
@@ -102,7 +130,7 @@ class AnsiScreenWriter
 
 public:
 
-    AnsiScreenWriter(ConsoleCtl &aCon, const TermCap &aTermcap) noexcept :
+    AnsiScreenWriter(ConsoleCtl &aCon, TermCap aTermcap) noexcept :
         con(aCon),
         termcap(aTermcap)
     {

@@ -3,7 +3,7 @@
 
 #include <tvision/tv.h>
 #include <compat/windows/windows.h>
-#include <internal/termdisp.h>
+#include <internal/platform.h>
 #include <internal/termio.h>
 #include <internal/ansiwrit.h>
 
@@ -65,7 +65,7 @@ public:
     bool getEvent(TEvent &ev) noexcept override;
 };
 
-class Win32Display final : public TerminalDisplay
+class Win32Display final : public DisplayAdapter
 {
 public:
 
@@ -75,16 +75,16 @@ public:
 
 private:
 
+    ConsoleCtl &con;
+
     TPoint size {};
     CONSOLE_FONT_INFO lastFontInfo {};
 
-    AnsiScreenWriter *ansiScreenWriter;
+    AnsiScreenWriter *ansiScreenWriter {nullptr};
 
     TPoint caretPos {-1, -1};
     uchar lastAttr {'\x00'};
     std::vector<char> buf;
-
-protected:
 
     TPoint reloadScreenInfo() noexcept override;
 
