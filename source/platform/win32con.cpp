@@ -271,18 +271,26 @@ Win32Display::~Win32Display()
 
 TPoint Win32Display::reloadScreenInfo() noexcept
 {
+    TPoint lastSize = size;
     size = con.getSize();
-    CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
-    GetConsoleScreenBufferInfo(con.out(), &sbInfo);
-    // Set the cursor temporally to (0, 0) to prevent the console from crashing
-    // due to https://github.com/microsoft/terminal/issues/7511.
-    auto curPos = sbInfo.dwCursorPosition;
-    SetConsoleCursorPosition(con.out(), {0, 0});
-    // Make sure the buffer size matches the viewport size so that the
-    // scrollbars are not shown.
-    SetConsoleScreenBufferSize(con.out(), {(short) size.x, (short) size.y});
-    // Restore the cursor position (it does not matter if it is out of bounds).
-    SetConsoleCursorPosition(con.out(), curPos);
+
+    if (lastSize != size)
+    {
+        CONSOLE_SCREEN_BUFFER_INFO sbInfo {};
+        GetConsoleScreenBufferInfo(con.out(), &sbInfo);
+        // Set the cursor temporarily to (0, 0) to prevent the console from
+        // crashing due to https://github.com/microsoft/terminal/issues/7511.
+        auto curPos = sbInfo.dwCursorPosition;
+        SetConsoleCursorPosition(con.out(), {0, 0});
+        // Make sure the buffer size matches the viewport size so that the
+        // scrollbars are not shown.
+        // This must be done only when the viewport size has changed. Otherwise,
+        // we may keep triggering WINDOW_BUFFER_SIZE_EVENT events all the time,
+        // at least on Wine.
+        SetConsoleScreenBufferSize(con.out(), {(short) size.x, (short) size.y});
+        // Restore the cursor position (it does not matter if it is out of bounds).
+        SetConsoleCursorPosition(con.out(), curPos);
+    }
 
     CONSOLE_FONT_INFO fontInfo;
     if ( GetCurrentConsoleFont(con.out(), FALSE, &fontInfo)
