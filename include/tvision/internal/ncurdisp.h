@@ -8,6 +8,11 @@
 #include <internal/ansiwrit.h>
 #include <ncurses.h>
 
+// Undefine troublesome Ncurses macros.
+#ifdef scroll
+#undef scroll
+#endif
+
 namespace tvision
 {
 

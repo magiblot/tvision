@@ -5,7 +5,7 @@
 #define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <ncurses.h>
+#include <internal/ncurdisp.h>
 #include <internal/ncursinp.h>
 #include <internal/getenv.h>
 #include <internal/utf8.h>
