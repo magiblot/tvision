@@ -314,7 +314,7 @@ The following environment variables are also taken into account:
 
 * `TERM`: Ncurses uses it to determine terminal capabilities. It is set automatically by the terminal emulator.
 * `COLORTERM`: when set to `truecolor` or `24bit`, Turbo Vision will assume the terminal emulator supports 24-bit color. It is set automatically by terminal emulators that support it.
-* `TVISION_ESCDELAY`: the number of milliseconds to wait after receiving an ESC key press, default `10`. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination. Using a larger value is useful when the terminal doesn't support the Alt key.
+* `ESCDELAY`: the number of milliseconds to wait after receiving an ESC key press, default `10`. If another key is pressed during this delay, it will be interpreted as an Alt+Key combination. Using a larger value is useful when the terminal doesn't support the Alt key.
 * `TVISION_USE_STDIO`: when not empty, terminal I/O is performed through `stdin`/`stdout`, so that it can be redirected from the shell. By default, Turbo Vision performs terminal I/O through `/dev/tty`, allowing the user to redirect `stdin`, `stdout` and `stderr` for their needs, without affecting the application's stability.
 
     For example, the following will leave `out.txt` empty:

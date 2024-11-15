@@ -291,7 +291,7 @@ NcursesInput::NcursesInput( ConsoleCtl &aCon, NcursesDisplay &,
     /* Do not delay too much on ESC key presses, as the Alt modifier works well
      * in most modern terminals. Still, this delay helps ncurses distinguish
      * special key sequences, I believe. */
-    set_escdelay(getEnv<int>("TVISION_ESCDELAY", 10));
+    set_escdelay(getEnv<int>("ESCDELAY", 10));
 
     TermIO::keyModsOn(con);
     if (mouseEnabled)
