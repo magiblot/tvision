@@ -21,15 +21,17 @@ class Win32ConsoleAdapter final : public ConsoleAdapter
 {
     ConsoleCtl &con;
     InputAdapter &input;
+    DWORD startupMode;
     UINT cpInput, cpOutput;
 
-    Win32ConsoleAdapter( ConsoleCtl &aCon,
+    Win32ConsoleAdapter( ConsoleCtl &aCon, DWORD aStartupMode,
                          UINT cpInput, UINT cpOutput,
                          DisplayAdapter &aDisplay,
                          InputAdapter &aInput ) noexcept :
         ConsoleAdapter(aDisplay, {&aInput}),
         con(aCon),
         input(aInput),
+        startupMode(aStartupMode),
         cpInput(cpInput),
         cpOutput(cpOutput)
     {

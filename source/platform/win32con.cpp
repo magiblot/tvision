@@ -23,10 +23,12 @@ static bool isWine() noexcept
 Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
 {
     auto &con = ConsoleCtl::getInstance();
+    DWORD startupMode;
     // Set the input mode.
     {
         DWORD consoleMode = 0;
         GetConsoleMode(con.in(), &consoleMode);
+        startupMode = consoleMode;
         consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
         consoleMode |= ENABLE_MOUSE_INPUT; // Report mouse events.
         consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
@@ -102,7 +104,7 @@ Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
     WinWidth::reset();
     auto &display = *new Win32Display(con, supportsVT);
     auto &input = *new Win32Input(con);
-    return *new Win32ConsoleAdapter(con, cpInput, cpOutput, display, input);
+    return *new Win32ConsoleAdapter(con, startupMode, cpInput, cpOutput, display, input);
 }
 
 Win32ConsoleAdapter::~Win32ConsoleAdapter()
@@ -111,6 +113,7 @@ Win32ConsoleAdapter::~Win32ConsoleAdapter()
     delete &input;
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
+    SetConsoleMode(con.in(), startupMode);
 }
 
 bool Win32ConsoleAdapter::isAlive() noexcept
