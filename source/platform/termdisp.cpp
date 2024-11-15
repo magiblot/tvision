@@ -1,8 +1,4 @@
-#define Uses_TScreen
-#include <tvision/tv.h>
-
 #include <internal/termdisp.h>
-#include <internal/linuxcon.h>
 #include <internal/conctl.h>
 #include <internal/getenv.h>
 
@@ -40,26 +36,6 @@ TermCap TerminalDisplay::getCapabilities() noexcept
         }
     }
     return termcap;
-}
-
-ushort TerminalDisplay::getScreenMode() noexcept
-{
-    ushort mode;
-    if (termcap.colors == NoColor)
-        mode = TDisplay::smMono;
-    else
-        mode = TDisplay::smCO80;
-
-    if (termcap.colors == Direct)
-        mode |= TDisplay::smColor256 | TDisplay::smColorHigh;
-    else if (termcap.colors == Indexed256)
-        mode |= TDisplay::smColor256;
-
-    TPoint fontSize = con.getFontSize();
-    if (fontSize.x > 0 && fontSize.y > 0 && fontSize.x >= fontSize.y)
-        mode |= TDisplay::smFont8x8;
-
-    return mode;
 }
 
 } // namespace tvision

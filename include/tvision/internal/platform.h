@@ -14,53 +14,51 @@ struct TEvent;
 namespace tvision
 {
 
-class DisplayStrategy
+class DisplayAdapter
 {
 public:
 
-    virtual ~DisplayStrategy() {}
+    virtual ~DisplayAdapter() {}
 
-    virtual void clearScreen() noexcept {}
-    virtual ushort getScreenMode() noexcept { return 0; }
     virtual TPoint reloadScreenInfo() noexcept { return {0, 0}; }
-    virtual void lowlevelWriteChars(TStringView /*chars*/, TColorAttr /*attr*/) noexcept {}
-    virtual void lowlevelMoveCursor(uint /*x*/, uint /*y*/) noexcept {};
-    virtual void lowlevelMoveCursorX(uint x, uint y) noexcept { lowlevelMoveCursor(x, y); }
-    virtual void lowlevelCursorSize(int /*size*/) noexcept {};
-    virtual void lowlevelFlush() noexcept {};
+
+    virtual int getColorCount() noexcept { return 0; }
+    virtual TPoint getFontSize() noexcept { return {0, 0}; }
+
+    virtual void writeCell( TPoint /* pos */, TStringView /*text*/,
+                            TColorAttr /*attr*/, bool /*doubleWidth*/ ) noexcept {}
+    virtual void setCaretPosition(TPoint /*pos*/) noexcept {};
+    virtual void setCaretSize(int /*size*/) noexcept {};
+    virtual void clearScreen() noexcept {}
+    virtual void flush() noexcept {};
 };
 
-class InputStrategy : public EventSource
+class InputAdapter : public EventSource
 {
 public:
 
-    InputStrategy(SysHandle aHandle) noexcept :
+    InputAdapter(SysHandle aHandle) noexcept :
         EventSource(aHandle)
     {
     }
 
-    virtual ~InputStrategy() {}
-
-    virtual int getButtonCount() noexcept { return 0; }
-    virtual void cursorOn() noexcept {}
-    virtual void cursorOff() noexcept {}
+    virtual ~InputAdapter() {}
 };
 
-struct ConsoleStrategy
+struct ConsoleAdapter
 {
-    DisplayStrategy &display;
-    InputStrategy &input;
+    DisplayAdapter &display;
+
     const std::vector<EventSource *> sources;
 
-    ConsoleStrategy( DisplayStrategy &aDisplay, InputStrategy &aInput,
-                     std::vector<EventSource *> &&aSources ) noexcept :
+    ConsoleAdapter( DisplayAdapter &aDisplay,
+                    std::vector<EventSource *> &&aSources ) noexcept :
         display(aDisplay),
-        input(aInput),
         sources(std::move(aSources))
     {
     }
 
-    virtual ~ConsoleStrategy() {}
+    virtual ~ConsoleAdapter() {}
 
     virtual bool isAlive() noexcept { return true; }
     virtual bool setClipboardText(TStringView) noexcept { return false; }
@@ -71,20 +69,19 @@ class Platform
 {
     EventWaiter waiter;
     DisplayBuffer displayBuf;
-    DisplayStrategy dummyDisplay;
-    InputStrategy dummyInput {(SysHandle) 0};
-    ConsoleStrategy dummyConsole {dummyDisplay, dummyInput, {}};
+    DisplayAdapter dummyDisplay;
+    ConsoleAdapter dummyConsole {dummyDisplay, {}};
     // Invariant: 'console' contains either a non-owning reference to 'dummyConsole'
-    // or an owning reference to a heap-allocated ConsoleStrategy object.
-    SignalSafeReentrantMutex<ConsoleStrategy *> console {&dummyConsole};
+    // or an owning reference to a heap-allocated ConsoleAdapter object.
+    SignalSafeReentrantMutex<ConsoleAdapter *> console {&dummyConsole};
 
     static Platform *instance;
 
-    void setUpConsole(ConsoleStrategy *&) noexcept;
-    void restoreConsole(ConsoleStrategy *&) noexcept;
+    void setUpConsole(ConsoleAdapter *&) noexcept;
+    void restoreConsole(ConsoleAdapter *&) noexcept;
     void checkConsole() noexcept;
     bool sizeChanged(TEvent &ev) noexcept;
-    ConsoleStrategy &createConsole() noexcept;
+    ConsoleAdapter &createConsole() noexcept;
 
     static int initAndGetCharWidth(uint32_t) noexcept;
     static void initEncodingStuff() noexcept;
@@ -109,13 +106,6 @@ public:
     void waitForEvents(int ms) noexcept;
     void interruptEventWait() noexcept { waiter.interruptEventWait(); }
 
-    int getButtonCount() noexcept
-        { return console.lock([] (auto *c) { return c->input.getButtonCount(); }); }
-    void cursorOn() noexcept
-        { console.lock([] (auto *c) { c->input.cursorOn(); }); }
-    void cursorOff() noexcept
-        { console.lock([] (auto *c) { c->input.cursorOff(); }); }
-
     // Adjust the caret size to the range 1 to 100 because that's what the original
     // THardwareInfo::getCaretSize() does and what TScreen expects.
     int getCaretSize() noexcept { return min(max(displayBuf.caretSize, 1), 100); }
@@ -125,8 +115,7 @@ public:
     int getScreenRows() noexcept { return displayBuf.size.y; }
     int getScreenCols() noexcept { return displayBuf.size.x; }
     void setCaretPosition(int x, int y) noexcept { displayBuf.setCaretPosition(x, y); }
-    ushort getScreenMode() noexcept
-        { return console.lock([] (auto *c) { return c->display.getScreenMode(); }); }
+    ushort getScreenMode() noexcept;
     void setCaretSize(int size) noexcept { displayBuf.setCaretSize(size); }
     void screenWrite(int x, int y, TScreenCell *b, int l) noexcept { displayBuf.screenWrite(x, y, b, l); }
     void flushScreen() noexcept

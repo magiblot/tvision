@@ -49,9 +49,10 @@ void THardwareInfo::screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len
 }
 TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept { return platf->reloadScreenInfo(); }
 void THardwareInfo::freeScreenBuffer(TScreenCell *) noexcept { platf->freeScreenBuffer(); }
-DWORD THardwareInfo::getButtonCount() noexcept { return platf->getButtonCount(); }
-void THardwareInfo::cursorOn() noexcept { platf->cursorOn(); }
-void THardwareInfo::cursorOff() noexcept { platf->cursorOff(); }
+// Turbo Vision only checks whether this is non-zero.
+DWORD THardwareInfo::getButtonCount() noexcept { return 2; }
+void THardwareInfo::cursorOn() noexcept {}
+void THardwareInfo::cursorOff() noexcept {}
 void THardwareInfo::flushScreen() noexcept { platf->flushScreen(); }
 void THardwareInfo::setUpConsole() noexcept { platf->setUpConsole(); }
 void THardwareInfo::restoreConsole() noexcept { platf->restoreConsole(); }

@@ -25,7 +25,7 @@ struct NcursesInputGetter final : public InputGetter
     void unget(int k) noexcept override;
 };
 
-class NcursesInput : public InputStrategy
+class NcursesInput : public InputAdapter
 {
     enum : char { KEY_ESC = '\x1B' };
     enum { readTimeoutMs = 10 };
@@ -49,7 +49,6 @@ public:
     ~NcursesInput();
 
     bool getEvent(TEvent &ev) noexcept override;
-    int getButtonCount() noexcept override;
     bool hasPendingEvents() noexcept override;
 };
 

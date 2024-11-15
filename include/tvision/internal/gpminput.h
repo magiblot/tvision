@@ -16,7 +16,7 @@ namespace tvision
 
 class DisplayBuffer;
 
-class GpmInput final : public InputStrategy
+class GpmInput final : public InputAdapter
 {
     uchar buttonState {0};
     DisplayBuffer &displayBuf;
@@ -31,7 +31,6 @@ public:
     ~GpmInput();
 
     bool getEvent(TEvent &ev) noexcept override;
-    int getButtonCount() noexcept override;
 };
 
 } // namespace tvision
@@ -41,7 +40,7 @@ public:
 namespace tvision
 {
 
-class GpmInput : public InputStrategy
+class GpmInput : public InputAdapter
 {
 public:
     static GpmInput *create(DisplayBuffer &) noexcept { return nullptr; }

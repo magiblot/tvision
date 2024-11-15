@@ -68,8 +68,6 @@ public:
     {
     }
 
-    virtual ~EventSource() {}
-
     virtual bool hasPendingEvents() noexcept;
     virtual bool getEvent(TEvent &) noexcept;
 };
@@ -90,6 +88,7 @@ public:
     WakeUpEventSource( SysManualEvent::Handle aHandle,
                        bool (*aCallback) (void *, TEvent &),
                        void *aCallbackArgs ) noexcept;
+    virtual ~WakeUpEventSource() {}
 
     WakeUpEventSource &operator=(const WakeUpEventSource &) = delete;
 

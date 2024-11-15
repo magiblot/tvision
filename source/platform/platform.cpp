@@ -32,16 +32,16 @@ void Platform::initEncodingStuff() noexcept
         CpTranslator::init();
 #ifdef _WIN32
         setlocale(LC_ALL, ".utf8");
-        charWidth = &Win32ConsoleStrategy::charWidth;
+        charWidth = &Win32ConsoleAdapter::charWidth;
 #else
         setlocale(LC_ALL, "");
 #ifdef __linux__
         auto &con = ConsoleCtl::getInstance();
         if (con.isLinuxConsole())
-            charWidth = &LinuxConsoleStrategy::charWidth;
+            charWidth = &LinuxConsoleAdapter::charWidth;
         else
 #endif // __linux__
-            charWidth = &UnixConsoleStrategy::charWidth;
+            charWidth = &UnixConsoleAdapter::charWidth;
 #endif // _WIN32
 
         (void) init;
@@ -55,7 +55,7 @@ Platform::Platform() noexcept
     initEncodingStuff();
 }
 
-void Platform::restoreConsole(ConsoleStrategy *&c) noexcept
+void Platform::restoreConsole(ConsoleAdapter *&c) noexcept
 {
     if (c != &dummyConsole)
     {

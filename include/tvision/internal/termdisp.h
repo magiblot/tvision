@@ -32,9 +32,9 @@ struct TermCap
     uint quirks;
 };
 
-// TerminalDisplay is a DisplayStrategy with knowledge of terminal capabilities.
+// TerminalDisplay is a DisplayAdapter with knowledge of terminal capabilities.
 
-class TerminalDisplay : public DisplayStrategy
+class TerminalDisplay : public DisplayAdapter
 {
     TermCap getCapabilities() noexcept;
 
@@ -56,9 +56,6 @@ public:
         con(aCon)
     {
     }
-
-    virtual int getColorCount() noexcept = 0;
-    ushort getScreenMode() noexcept override;
 };
 
 } // namespace tvision

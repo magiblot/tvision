@@ -40,7 +40,7 @@ GpmInput *GpmInput::create(DisplayBuffer &displayBuf) noexcept
 }
 
 inline GpmInput::GpmInput(DisplayBuffer &aDisplayBuf) noexcept :
-    InputStrategy(gpm_fd),
+    InputAdapter(gpm_fd),
     displayBuf(aDisplayBuf)
 {
 }
@@ -49,11 +49,6 @@ GpmInput::~GpmInput()
 {
     displayBuf.setCursorVisibility(false);
     Gpm_Close();
-}
-
-int GpmInput::getButtonCount() noexcept
-{
-    return 2;
 }
 
 void GpmInput::fitEvent(Gpm_Event &gpmEvent) noexcept

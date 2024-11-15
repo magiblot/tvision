@@ -16,13 +16,13 @@ class SigwinchHandler;
 class GpmInput;
 struct InputState;
 
-struct LinuxConsoleInput final : public EventSource
+struct LinuxConsoleInput final : public InputAdapter
 {
     ConsoleCtl &con;
-    InputStrategy &input;
+    InputAdapter &input;
 
-    LinuxConsoleInput(ConsoleCtl &aCon, InputStrategy &aInput) noexcept :
-        EventSource(aInput.handle),
+    LinuxConsoleInput(ConsoleCtl &aCon, InputAdapter &aInput) noexcept :
+        InputAdapter(aInput.handle),
         con(aCon),
         input(aInput)
     {
@@ -36,7 +36,7 @@ struct LinuxConsoleInput final : public EventSource
     static ushort convertLinuxKeyModifiers(ushort linuxShiftState) noexcept;
 };
 
-class LinuxConsoleStrategy : public ConsoleStrategy
+class LinuxConsoleAdapter final : public ConsoleAdapter
 {
     StderrRedirector errRedir;
 
@@ -45,21 +45,21 @@ class LinuxConsoleStrategy : public ConsoleStrategy
     LinuxConsoleInput &wrapper;
     GpmInput *gpm;
 
-    LinuxConsoleStrategy( DisplayStrategy &, LinuxConsoleInput &,
-                          InputState &, SigwinchHandler *,
-                          GpmInput * ) noexcept;
+    LinuxConsoleAdapter( DisplayAdapter &, LinuxConsoleInput &,
+                         InputState &, SigwinchHandler *,
+                         GpmInput * ) noexcept;
 
 public:
 
     // Pre: 'io.isLinuxConsole()' returns 'true'.
     // The lifetime of 'con' and 'displayBuf' must exceed that of the returned object.
     // Takes ownership over 'inputState', 'display' and 'input'.
-    static LinuxConsoleStrategy &create( ConsoleCtl &con,
-                                         DisplayBuffer &displayBuf,
-                                         InputState &inputState,
-                                         DisplayStrategy &display,
-                                         InputStrategy &input ) noexcept;
-    ~LinuxConsoleStrategy();
+    static LinuxConsoleAdapter &create( ConsoleCtl &con,
+                                        DisplayBuffer &displayBuf,
+                                        InputState &inputState,
+                                        DisplayAdapter &display,
+                                        InputAdapter &input ) noexcept;
+    ~LinuxConsoleAdapter();
 
     static int charWidth(uint32_t) noexcept;
 };

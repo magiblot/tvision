@@ -18,14 +18,12 @@
 namespace tvision
 {
 
-inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
-                                                   LinuxConsoleInput &aWrapper,
-                                                   InputState &aInputState,
-                                                   SigwinchHandler *aSigwinch,
-                                                   GpmInput *aGpm ) noexcept :
-    ConsoleStrategy( aDisplay,
-                     aGpm ? *aGpm : aWrapper.input,
-                     {&aWrapper, aGpm, aSigwinch} ),
+inline LinuxConsoleAdapter::LinuxConsoleAdapter( DisplayAdapter &aDisplay,
+                                                 LinuxConsoleInput &aWrapper,
+                                                 InputState &aInputState,
+                                                 SigwinchHandler *aSigwinch,
+                                                 GpmInput *aGpm ) noexcept :
+    ConsoleAdapter(aDisplay, {&aWrapper, aGpm, aSigwinch}),
     inputState(aInputState),
     sigwinch(aSigwinch),
     wrapper(aWrapper),
@@ -33,19 +31,19 @@ inline LinuxConsoleStrategy::LinuxConsoleStrategy( DisplayStrategy &aDisplay,
 {
 }
 
-LinuxConsoleStrategy &LinuxConsoleStrategy::create( ConsoleCtl &con,
-                                                    DisplayBuffer &displayBuf,
-                                                    InputState &inputState,
-                                                    DisplayStrategy &display,
-                                                    InputStrategy &input ) noexcept
+LinuxConsoleAdapter &LinuxConsoleAdapter::create( ConsoleCtl &con,
+                                                  DisplayBuffer &displayBuf,
+                                                  InputState &inputState,
+                                                  DisplayAdapter &display,
+                                                  InputAdapter &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
     auto &wrapper = *new LinuxConsoleInput(con, input);
     auto *gpm = GpmInput::create(displayBuf);
-    return *new LinuxConsoleStrategy(display, wrapper, inputState, sigwinch, gpm);
+    return *new LinuxConsoleAdapter(display, wrapper, inputState, sigwinch, gpm);
 }
 
-LinuxConsoleStrategy::~LinuxConsoleStrategy()
+LinuxConsoleAdapter::~LinuxConsoleAdapter()
 {
     delete sigwinch;
     delete gpm;

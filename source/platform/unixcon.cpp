@@ -10,31 +10,32 @@
 namespace tvision
 {
 
-inline UnixConsoleStrategy::UnixConsoleStrategy( DisplayStrategy &aDisplay,
-                                                 InputStrategy &aInput,
-                                                 ConsoleCtl &aCon,
-                                                 DisplayBuffer &aDisplayBuf,
-                                                 InputState &aInputState,
-                                                 SigwinchHandler *aSigwinch ) noexcept :
-    ConsoleStrategy(aDisplay, aInput, {&aInput, aSigwinch}),
+inline UnixConsoleAdapter::UnixConsoleAdapter( DisplayAdapter &aDisplay,
+                                               InputAdapter &aInput,
+                                               ConsoleCtl &aCon,
+                                               DisplayBuffer &aDisplayBuf,
+                                               InputState &aInputState,
+                                               SigwinchHandler *aSigwinch ) noexcept :
+    ConsoleAdapter(aDisplay, {&aInput, aSigwinch}),
     con(aCon),
     displayBuf(aDisplayBuf),
     inputState(aInputState),
-    sigwinch(aSigwinch)
+    sigwinch(aSigwinch),
+    input(aInput)
 {
 }
 
-UnixConsoleStrategy &UnixConsoleStrategy::create( ConsoleCtl &con,
-                                                  DisplayBuffer &displayBuf,
-                                                  InputState &inputState,
-                                                  DisplayStrategy &display,
-                                                  InputStrategy &input ) noexcept
+UnixConsoleAdapter &UnixConsoleAdapter::create( ConsoleCtl &con,
+                                                DisplayBuffer &displayBuf,
+                                                InputState &inputState,
+                                                DisplayAdapter &display,
+                                                InputAdapter &input ) noexcept
 {
     auto *sigwinch = SigwinchHandler::create();
-    return *new UnixConsoleStrategy(display, input, con, displayBuf, inputState, sigwinch);
+    return *new UnixConsoleAdapter(display, input, con, displayBuf, inputState, sigwinch);
 }
 
-UnixConsoleStrategy::~UnixConsoleStrategy()
+UnixConsoleAdapter::~UnixConsoleAdapter()
 {
     delete sigwinch;
     delete &input;
@@ -42,7 +43,7 @@ UnixConsoleStrategy::~UnixConsoleStrategy()
     delete &inputState;
 }
 
-bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
+bool UnixConsoleAdapter::setClipboardText(TStringView text) noexcept
 {
     if (UnixClipboard::setClipboardText(text))
         return true;
@@ -54,7 +55,7 @@ bool UnixConsoleStrategy::setClipboardText(TStringView text) noexcept
     return false;
 }
 
-bool UnixConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noexcept
+bool UnixConsoleAdapter::requestClipboardText(void (&accept)(TStringView)) noexcept
 {
     if (UnixClipboard::requestClipboardText(accept))
         return true;

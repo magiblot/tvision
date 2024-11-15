@@ -20,7 +20,7 @@ static bool isWine() noexcept
     return GetProcAddress(GetModuleHandleW(L"ntdll"), "wine_get_version");
 }
 
-Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
+Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
 {
     auto &con = ConsoleCtl::getInstance();
     // Set the input mode.
@@ -28,6 +28,7 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
         DWORD consoleMode = 0;
         GetConsoleMode(con.in(), &consoleMode);
         consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
+        consoleMode |= ENABLE_MOUSE_INPUT; // Report mouse events.
         consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
         consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
         consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
@@ -101,10 +102,10 @@ Win32ConsoleStrategy &Win32ConsoleStrategy::create() noexcept
     WinWidth::reset();
     auto &display = *new Win32Display(con, supportsVT);
     auto &input = *new Win32Input(con);
-    return *new Win32ConsoleStrategy(con, cpInput, cpOutput, display, input);
+    return *new Win32ConsoleAdapter(con, cpInput, cpOutput, display, input);
 }
 
-Win32ConsoleStrategy::~Win32ConsoleStrategy()
+Win32ConsoleAdapter::~Win32ConsoleAdapter()
 {
     delete &display;
     delete &input;
@@ -112,7 +113,7 @@ Win32ConsoleStrategy::~Win32ConsoleStrategy()
     SetConsoleOutputCP(cpOutput);
 }
 
-bool Win32ConsoleStrategy::isAlive() noexcept
+bool Win32ConsoleAdapter::isAlive() noexcept
 {
     DWORD events = 0;
     return GetNumberOfConsoleInputEvents(con.in(), &events);
@@ -129,7 +130,7 @@ static bool openClipboard() noexcept
     return false;
 }
 
-bool Win32ConsoleStrategy::setClipboardText(TStringView text) noexcept
+bool Win32ConsoleAdapter::setClipboardText(TStringView text) noexcept
 {
     bool result = false;
     if (openClipboard())
@@ -156,7 +157,7 @@ bool Win32ConsoleStrategy::setClipboardText(TStringView text) noexcept
     return result;
 }
 
-bool Win32ConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noexcept
+bool Win32ConsoleAdapter::requestClipboardText(void (&accept)(TStringView)) noexcept
 {
     bool result = false;
     if (openClipboard())
@@ -183,30 +184,9 @@ bool Win32ConsoleStrategy::requestClipboardText(void (&accept)(TStringView)) noe
 // Win32Input
 
 Win32Input::Win32Input(ConsoleCtl &aCon) noexcept :
-    InputStrategy(aCon.in()),
+    InputAdapter(aCon.in()),
     con(aCon)
 {
-}
-
-int Win32Input::getButtonCount() noexcept
-{
-    DWORD num;
-    GetNumberOfConsoleMouseButtons(&num);
-    return num;
-}
-
-void Win32Input::cursorOn() noexcept
-{
-    DWORD consoleMode = 0;
-    GetConsoleMode(con.in(), &consoleMode);
-    SetConsoleMode(con.in(), consoleMode | ENABLE_MOUSE_INPUT);
-}
-
-void Win32Input::cursorOff() noexcept
-{
-    DWORD consoleMode = 0;
-    GetConsoleMode(con.in(), &consoleMode);
-    SetConsoleMode(con.in(), consoleMode & ~ENABLE_MOUSE_INPUT);
 }
 
 bool Win32Input::getEvent(TEvent &ev) noexcept
@@ -259,9 +239,10 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 
 Win32Display::Win32Display(ConsoleCtl &aCon, bool useAnsi) noexcept :
     TerminalDisplay(aCon),
-    ansiScreenWriter(useAnsi ? new AnsiScreenWriter(aCon) : nullptr)
+    ansiScreenWriter( useAnsi ? new AnsiScreenWriter(aCon, TerminalDisplay::termcap)
+                              : nullptr )
 {
-    initCapabilities();
+    TerminalDisplay::initCapabilities();
 }
 
 Win32Display::~Win32Display()
@@ -302,7 +283,12 @@ TPoint Win32Display::reloadScreenInfo() noexcept
     }
 
     if (ansiScreenWriter)
-        ansiScreenWriter->resetAttributes();
+        ansiScreenWriter->reset();
+    else
+    {
+        caretPos = {-1, -1};
+        lastAttr = '\x00';
+    }
 
     return size;
 }
@@ -318,7 +304,12 @@ int Win32Display::getColorCount() noexcept
     return 16;
 }
 
-void Win32Display::lowlevelCursorSize(int size) noexcept
+TPoint Win32Display::getFontSize() noexcept
+{
+    return con.getFontSize();
+}
+
+void Win32Display::setCaretSize(int size) noexcept
 {
     CONSOLE_CURSOR_INFO crInfo;
     if (size) {
@@ -347,46 +338,49 @@ void Win32Display::clearScreen() noexcept
     }
 }
 
-void Win32Display::lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept
+void Win32Display::writeCell( TPoint pos, TStringView text, TColorAttr attr,
+                              bool doubleWidth ) noexcept
 {
     if (ansiScreenWriter)
-        ansiScreenWriter->lowlevelWriteChars(chars, attr, termcap);
+        ansiScreenWriter->writeCell(pos, text, attr, doubleWidth);
     else
     {
-        uchar bios = attr.toBIOS();
-        if (bios != lastAttr)
+        if (pos != caretPos)
         {
-            lowlevelFlush();
-            SetConsoleTextAttribute(con.out(), bios);
-            lastAttr = bios;
+            flush();
+            SetConsoleCursorPosition(con.out(), {(short) pos.x, (short) pos.y});
         }
-        buf.insert(buf.end(), chars.begin(), chars.end());
+
+        uchar biosAttr = attr.toBIOS();
+        if (biosAttr != lastAttr)
+        {
+            flush();
+            SetConsoleTextAttribute(con.out(), biosAttr);
+        }
+
+        buf.insert(buf.end(), text.begin(), text.end());
+
+        caretPos = {pos.x + 1 + doubleWidth, pos.y};
+        lastAttr = biosAttr;
     }
 }
 
-void Win32Display::lowlevelMoveCursor(uint x, uint y) noexcept
+void Win32Display::setCaretPosition(TPoint pos) noexcept
 {
     if (ansiScreenWriter)
-        ansiScreenWriter->lowlevelMoveCursor(x, y);
+        ansiScreenWriter->setCaretPosition(pos);
     else
     {
-        lowlevelFlush();
-        SetConsoleCursorPosition(con.out(), {(short) x, (short) y});
+        flush();
+        SetConsoleCursorPosition(con.out(), {(short) pos.x, (short) pos.y});
+        caretPos = pos;
     }
 }
 
-void Win32Display::lowlevelMoveCursorX(uint x, uint y) noexcept
+void Win32Display::flush() noexcept
 {
     if (ansiScreenWriter)
-        ansiScreenWriter->lowlevelMoveCursorX(x);
-    else
-        lowlevelMoveCursor(x, y);
-}
-
-void Win32Display::lowlevelFlush() noexcept
-{
-    if (ansiScreenWriter)
-        ansiScreenWriter->lowlevelFlush();
+        ansiScreenWriter->flush();
     else
     {
         con.write(buf.data(), buf.size());

@@ -1,3 +1,6 @@
+#define Uses_TScreen
+#include <tvision/tv.h>
+
 #include <internal/platform.h>
 #include <internal/unixcon.h>
 #include <internal/linuxcon.h>
@@ -17,23 +20,23 @@ namespace tvision
 // Platform can be referenced by the application without having to link all the
 // console strategies.
 
-ConsoleStrategy &Platform::createConsole() noexcept
+ConsoleAdapter &Platform::createConsole() noexcept
 {
 #ifdef _WIN32
-    return Win32ConsoleStrategy::create();
+    return Win32ConsoleAdapter::create();
 #else
     auto &con = ConsoleCtl::getInstance();
     InputState &inputState = *new InputState;
     NcursesDisplay &display = *new NcursesDisplay(con);
 #ifdef __linux__
     if (con.isLinuxConsole())
-        return LinuxConsoleStrategy::create(con, displayBuf, inputState, display, *new NcursesInput(con, display, inputState, false));
+        return LinuxConsoleAdapter::create(con, displayBuf, inputState, display, *new NcursesInput(con, display, inputState, false));
 #endif // __linux__
-    return UnixConsoleStrategy::create(con, displayBuf, inputState, display, *new NcursesInput(con, display, inputState, true));
+    return UnixConsoleAdapter::create(con, displayBuf, inputState, display, *new NcursesInput(con, display, inputState, true));
 #endif // _WIN32
 }
 
-void Platform::setUpConsole(ConsoleStrategy *&c) noexcept
+void Platform::setUpConsole(ConsoleAdapter *&c) noexcept
 {
     if (c == &dummyConsole)
     {
@@ -47,7 +50,7 @@ void Platform::setUpConsole(ConsoleStrategy *&c) noexcept
 
 void Platform::checkConsole() noexcept
 {
-    console.lock([&] (ConsoleStrategy *&c) {
+    console.lock([&] (ConsoleAdapter *&c) {
         if (!c->isAlive())
         {
             // The console likely crashed (Windows).
@@ -71,6 +74,30 @@ void Platform::waitForEvents(int ms) noexcept
         waitTimeoutMs = min(ms, flushTimeoutMs);
 
     waiter.waitForEvents(waitTimeoutMs);
+}
+
+ushort Platform::getScreenMode() noexcept
+{
+    return console.lock([] (ConsoleAdapter *c) {
+        ushort mode;
+
+        int colorCount = c->display.getColorCount();
+        if (colorCount == 0)
+            mode = TDisplay::smMono;
+        else
+            mode = TDisplay::smCO80;
+
+        if (colorCount >= 256)
+            mode |= TDisplay::smColor256;
+        if (colorCount >= 256*256*256)
+            mode |= TDisplay::smColorHigh;
+
+        TPoint fontSize = c->display.getFontSize();
+        if (fontSize.x > 0 && fontSize.y > 0 && fontSize.x >= fontSize.y)
+            mode |= TDisplay::smFont8x8;
+
+        return mode;
+    });
 }
 
 void Platform::signalCallback(bool enter) noexcept

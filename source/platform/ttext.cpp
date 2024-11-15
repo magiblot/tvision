@@ -120,14 +120,14 @@ namespace tvision
 {
 
 #ifdef _TV_UNIX
-int UnixConsoleStrategy::charWidth(uint32_t wc) noexcept
+int UnixConsoleAdapter::charWidth(uint32_t wc) noexcept
 {
     return wcwidth(wc);
 }
 #endif // _TV_UNIX
 
 #ifdef __linux__
-int LinuxConsoleStrategy::charWidth(uint32_t wc) noexcept
+int LinuxConsoleAdapter::charWidth(uint32_t wc) noexcept
 {
     // The Linux Console does not support zero-width characters. It assumes
     // all characters are either single or double-width. Additionally, the
@@ -151,7 +151,7 @@ int LinuxConsoleStrategy::charWidth(uint32_t wc) noexcept
 #endif // __linux__
 
 #ifdef _WIN32
-int Win32ConsoleStrategy::charWidth(uint32_t wc) noexcept
+int Win32ConsoleAdapter::charWidth(uint32_t wc) noexcept
 {
     return WinWidth::width(wc);
 }

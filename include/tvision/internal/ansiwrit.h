@@ -92,28 +92,30 @@ class AnsiScreenWriter
     };
 
     ConsoleCtl &con;
+    const TermCap &termcap;
     Buffer buf;
+    TPoint caretPos {-1, -1};
     TermAttr lastAttr {};
 
-    void bufWriteCSI1(uint a, char F) noexcept;
-    void bufWriteCSI2(uint a, uint b, char F) noexcept;
+    void bufWriteCSI1(int a, char F) noexcept;
+    void bufWriteCSI2(int a, int b, char F) noexcept;
 
 public:
 
-    AnsiScreenWriter(ConsoleCtl &aCon) noexcept :
-        con(aCon)
+    AnsiScreenWriter(ConsoleCtl &aCon, const TermCap &aTermcap) noexcept :
+        con(aCon),
+        termcap(aTermcap)
     {
     }
 
     ~AnsiScreenWriter();
 
-    void resetAttributes() noexcept;
+    void reset() noexcept;
     void clearScreen() noexcept;
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr, const TermCap &) noexcept;
-    void lowlevelMoveCursor(uint x, uint y) noexcept;
-    void lowlevelMoveCursorX(uint x) noexcept;
-    void lowlevelFlush() noexcept;
+    void writeCell(TPoint, TStringView, TColorAttr, bool) noexcept;
+    void setCaretPosition(TPoint) noexcept;
+    void flush() noexcept;
 };
 
 } // namespace tvision

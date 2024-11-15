@@ -12,9 +12,8 @@ namespace tvision
 class ConsoleCtl;
 class SigwinchHandler;
 struct InputState;
-class DisplayBuffer;
 
-class UnixConsoleStrategy : public ConsoleStrategy
+class UnixConsoleAdapter final : public ConsoleAdapter
 {
     StderrRedirector errRedir;
 
@@ -22,22 +21,23 @@ class UnixConsoleStrategy : public ConsoleStrategy
     DisplayBuffer &displayBuf;
     InputState &inputState;
     SigwinchHandler *sigwinch;
+    InputAdapter &input;
 
-    UnixConsoleStrategy( DisplayStrategy &, InputStrategy &, ConsoleCtl &,
-                         DisplayBuffer &, InputState &,
-                         SigwinchHandler * ) noexcept;
+    UnixConsoleAdapter( DisplayAdapter &, InputAdapter &, ConsoleCtl &,
+                        DisplayBuffer &, InputState &,
+                        SigwinchHandler * ) noexcept;
 
 public:
 
     // The lifetime of 'con' and 'displayBuf' must exceed that of the returned object.
     // Takes ownership over 'inputState', 'display' and 'input'.
-    static UnixConsoleStrategy &create( ConsoleCtl &con,
-                                        DisplayBuffer &displayBuf,
-                                        InputState &inputState,
-                                        DisplayStrategy &display,
-                                        InputStrategy &input ) noexcept;
+    static UnixConsoleAdapter &create( ConsoleCtl &con,
+                                       DisplayBuffer &displayBuf,
+                                       InputState &inputState,
+                                       DisplayAdapter &display,
+                                       InputAdapter &input ) noexcept;
 
-    ~UnixConsoleStrategy();
+    ~UnixConsoleAdapter();
 
     bool setClipboardText(TStringView) noexcept override;
     bool requestClipboardText(void (&)(TStringView)) noexcept override;

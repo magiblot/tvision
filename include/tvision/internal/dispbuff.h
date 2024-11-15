@@ -11,7 +11,7 @@
 namespace tvision
 {
 
-class DisplayStrategy;
+class DisplayAdapter;
 
 namespace
 {
@@ -76,10 +76,10 @@ public:
     void setCaretSize(int size) noexcept;
     void setCaretPosition(int x, int y) noexcept;
     void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept;
-    void clearScreen(DisplayStrategy &) noexcept;
-    void redrawScreen(DisplayStrategy &) noexcept;
-    void flushScreen(DisplayStrategy &) noexcept;
-    TScreenCell *reloadScreenInfo(DisplayStrategy &) noexcept;
+    void clearScreen(DisplayAdapter &) noexcept;
+    void redrawScreen(DisplayAdapter &) noexcept;
+    void flushScreen(DisplayAdapter &) noexcept;
+    TScreenCell *reloadScreenInfo(DisplayAdapter &) noexcept;
 
     void setCursorPosition(int x, int y) noexcept;
     void setCursorVisibility(bool visible) noexcept;

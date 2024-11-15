@@ -11,7 +11,7 @@
 namespace tvision
 {
 
-class NcursesDisplay : public TerminalDisplay
+class NcursesDisplay final : public TerminalDisplay
 {
 public:
 
@@ -24,22 +24,18 @@ private:
     AnsiScreenWriter ansiScreenWriter;
     SCREEN *term;
 
-    void getCaretPosition(int &x, int &y) noexcept;
-    uint translateAttributes(TColorAttr attr) noexcept;
-    uint getColorPair(uchar pairKey) noexcept;
-
 protected:
 
     TPoint reloadScreenInfo() noexcept override;
-    void clearScreen() noexcept override;
 
     int getColorCount() noexcept override;
+    TPoint getFontSize() noexcept override;
 
-    void lowlevelWriteChars(TStringView chars, TColorAttr attr) noexcept override;
-    void lowlevelMoveCursor(uint x, uint y) noexcept override;
-    void lowlevelMoveCursorX(uint x, uint y) noexcept override;
-    void lowlevelCursorSize(int size) noexcept override;
-    void lowlevelFlush() noexcept override;
+    void writeCell(TPoint, TStringView, TColorAttr, bool) noexcept override;
+    void setCaretPosition(TPoint) noexcept override;
+    void setCaretSize(int) noexcept override;
+    void clearScreen() noexcept override;
+    void flush() noexcept override;
 };
 
 } // namespace tvision
@@ -49,7 +45,7 @@ protected:
 namespace tvision
 {
 
-class NcursesDisplay : public DisplayStrategy {};
+class NcursesDisplay : public DisplayAdapter {};
 
 } // namespace tvision
 

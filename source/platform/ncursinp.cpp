@@ -271,7 +271,7 @@ void NcursesInputGetter::unget(int k) noexcept
 
 NcursesInput::NcursesInput( ConsoleCtl &aCon, NcursesDisplay &,
                             InputState &aState, bool mouse ) noexcept :
-    InputStrategy(aCon.in()),
+    InputAdapter(aCon.in()),
     con(aCon),
     state(aState),
     mouseEnabled(mouse)
@@ -304,13 +304,6 @@ NcursesInput::~NcursesInput()
         TermIO::mouseOff(con);
     TermIO::keyModsOff(con);
     TermIO::consumeUnprocessedInput(con, in, state);
-}
-
-int NcursesInput::getButtonCount() noexcept
-{
-    // The exact button count is not really important. Turbo Vision
-    // only checks whether it is non-zero.
-    return mouseEnabled ? 2 : 0;
 }
 
 int NcursesInput::getChNb() noexcept
