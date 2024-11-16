@@ -21,9 +21,7 @@ static tvision::Platform *platf;
 THardwareInfo::THardwareInfo() noexcept
 {
     using namespace tvision;
-    static int initPlatform =
-        (platf = new Platform(), (void) initPlatform, 0);
-
+    platf = &Platform::getInstance();
     pendingEvent = 0;
     alwaysFlush = getEnv<int>("TVISION_MAX_FPS", 0) < 0;
 }

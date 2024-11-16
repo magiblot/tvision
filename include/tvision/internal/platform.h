@@ -92,9 +92,9 @@ public:
     static int (*charWidth)(uint32_t) noexcept;
 
     // Platform is a singleton. It gets created by THardwareInfo, but it is
-    // never destroyed in order to support invocations to 'interruptEventWait'
-    // from secondary threads.
-    Platform() noexcept;
+    // never destroyed so that secondary threads may keep invoking methods such
+    // as 'interruptEventWait'.
+    static Platform &getInstance() noexcept;
 
     // Note: explicit 'this' required by GCC 5.
     void setUpConsole() noexcept

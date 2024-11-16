@@ -49,10 +49,18 @@ void Platform::initEncodingStuff() noexcept
     }();
 }
 
-Platform::Platform() noexcept
+Platform &Platform::getInstance() noexcept
 {
-    instance = this;
-    initEncodingStuff();
+    static int init = [] ()
+    {
+        instance = new Platform;
+        initEncodingStuff();
+
+        (void) init;
+        return 0;
+    }();
+
+    return *instance;
 }
 
 void Platform::restoreConsole(ConsoleAdapter *&c) noexcept

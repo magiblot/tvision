@@ -17,7 +17,7 @@ namespace tvision
 
 // These methods are defined in a separate transaction unit so that the
 // Platform can be referenced by the application without having to link all the
-// console strategies.
+// console adapters.
 
 ConsoleAdapter &Platform::createConsole() noexcept
 {
