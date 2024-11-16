@@ -28,6 +28,6 @@ const int cmRestoreCmd  = 111;
 const int cmEventViewCmd= 112;
 const int cmChBackground= 113;
 const int cmFndEventView= 114;
-const int cmVideoMode   = 2002;
+const int cmVideoMode   = 115;
 
 #endif // __TVCMDS_H
