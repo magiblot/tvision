@@ -29,6 +29,10 @@ inline LinuxConsoleAdapter::LinuxConsoleAdapter( DisplayAdapter &aDisplay,
     wrapper(aWrapper),
     gpm(aGpm)
 {
+    // Ensure we don't miss a possible undetected screen size change (e.g. after
+    // recovering from SIGTSTP).
+    if (sigwinch)
+        sigwinch->signal();
 }
 
 LinuxConsoleAdapter &LinuxConsoleAdapter::create( ConsoleCtl &con,

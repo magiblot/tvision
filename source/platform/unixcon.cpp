@@ -23,6 +23,10 @@ inline UnixConsoleAdapter::UnixConsoleAdapter( DisplayAdapter &aDisplay,
     sigwinch(aSigwinch),
     input(aInput)
 {
+    // Ensure we don't miss a possible undetected screen size change (e.g. after
+    // recovering from SIGTSTP).
+    if (sigwinch)
+        sigwinch->signal();
 }
 
 UnixConsoleAdapter &UnixConsoleAdapter::create( ConsoleCtl &con,
