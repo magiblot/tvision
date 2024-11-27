@@ -3,7 +3,7 @@
 /*   BUFFERS.H                                                             */
 /*                                                                         */
 /*   defines the functions getBufMem() and freeBufMem() for use            */
-/*   in allocating and freeing viedo buffers                               */
+/*   in allocating and freeing video buffers                               */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 /*

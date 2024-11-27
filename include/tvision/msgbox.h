@@ -42,7 +42,7 @@ const int
 //  Message box classes
 
     mfWarning      = 0x0000,       // Display a Warning box
-    mfError        = 0x0001,       // Dispaly a Error box
+    mfError        = 0x0001,       // Display a Error box
     mfInformation  = 0x0002,       // Display an Information Box
     mfConfirmation = 0x0003,       // Display a Confirmation Box
 
