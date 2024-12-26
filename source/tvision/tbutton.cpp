@@ -60,6 +60,7 @@ TButton::TButton( const TRect& bounds,
 TButton::~TButton()
 {
     delete[] (char *)title;
+    killTimer(animationTimer);
 }
 
 void TButton::draw()
@@ -226,9 +227,8 @@ void TButton::handleEvent( TEvent& event )
               )
                 {
                 drawState( True );
-                if( animationTimer != 0 )
-                    press();
-                animationTimer = setTimer( animationDurationMs );
+                if( animationTimer == 0 )
+                    animationTimer = setTimer( animationDurationMs );
                 clearEvent( event );
                 }
             break;
