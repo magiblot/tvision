@@ -239,7 +239,9 @@ void TButton::handleEvent( TEvent& event )
                 case cmDefault:
                     if( amDefault && !(state & sfDisabled) )
                         {
-                        press();
+                        drawState( True );
+                        if( animationTimer == 0 )
+                            animationTimer = setTimer( animationDurationMs );
                         clearEvent(event);
                         }
                     break;
