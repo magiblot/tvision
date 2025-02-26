@@ -5,12 +5,12 @@ on: [push, pull_request]
 jobs:
   build-linux-gcc:
     name: Linux (GCC) (Unity)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev libgpm-dev libgtest-dev
+      run: sudo apt-get -y install libgpm-dev libgtest-dev
 
     - name: Configure CMake
       shell: bash
@@ -22,17 +22,20 @@ jobs:
 
   build-linux-gcc5:
     name: Linux (GCC 5)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
+        # Add legacy repositories required by g++-5
         sudo tee --append /etc/apt/sources.list << EOF
           deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
+          deb http://us.archive.ubuntu.com/ubuntu/ bionic main
         EOF
-        sudo apt -y update
-        sudo apt -y install libncursesw5-dev g++-5
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+        sudo apt-get update
+        sudo apt-get -y install g++-5
 
     - name: Configure CMake
       shell: bash
@@ -47,12 +50,12 @@ jobs:
 
   build-linux-clang:
     name: Linux (Clang)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev
+      run: sudo apt-get -y install libncursesw5-dev
 
     - name: Configure CMake
       shell: bash
@@ -67,7 +70,7 @@ jobs:
 
   build-linux-big-endian:
     name: Linux (GCC) (Big Endian)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -84,7 +87,7 @@ jobs:
         install: apk update && apk add make cmake g++ ncurses-dev gtest-dev linux-headers
         run: |
           cd /app
-          cmake . -DCMAKE_BUILD_TYPE= -DTV_BUILD_USING_GPM=OFF -DTV_BUILD_EXAMPLES=OFF -DTV_BUILD_TESTS=ON -DTV_LIBRARY_UNITY_BUILD=ON
+          cmake . -DCMAKE_BUILD_TYPE= -DTV_BUILD_USING_GPM=OFF -DTV_BUILD_EXAMPLES=OFF -DTV_BUILD_TESTS=ON -DTV_LIBRARY_UNITY_BUILD=ON -DCMAKE_CXX_FLAGS=
           cmake --build . -j$(nproc)
 
   build-windows-msvc32:
@@ -224,7 +227,7 @@ jobs:
 
   build-macos-clang:
     name: MacOS (Clang)
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
 
