@@ -32,6 +32,7 @@ Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
         consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
         consoleMode |= ENABLE_MOUSE_INPUT; // Report mouse events.
         consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
+        consoleMode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT); // Report Ctrl+S.
         consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
         consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
         SetConsoleMode(con.in(), consoleMode);
