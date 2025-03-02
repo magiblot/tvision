@@ -346,16 +346,21 @@ BOOL THardwareInfo::getKeyEvent( TEvent& event )
                     event.keyDown.keyCode == 0x5C00 )
                     // Discard standalone Shift, Ctrl, Alt, Caps Lock, Windows keys.
                     event.keyDown.keyCode = kbNoKey;
-                else if( event.keyDown.controlKeyState & kbRightAlt )
-                    {
-                    if( event.keyDown.charScan.charCode == '\0' )
-                        // When AltGr+Key does not produce a character, an unwanted keyCode
-                        // may be read instead, so discard it.
-                        event.keyDown.keyCode = kbNoKey;
-                    else
-                        // Otherwise, discard the Ctrl modifier that is automatically added.
-                        event.keyDown.controlKeyState &= ~kbLeftCtrl;
-                    }
+                else if( (event.keyDown.controlKeyState & kbLeftCtrl) &&
+                         (event.keyDown.controlKeyState & kbRightAlt) &&
+                         event.keyDown.charScan.charCode == '\0' )
+                    // We cannot tell for sure if the right Alt key is AltGr, since
+                    // that depends on the keyboard layout, but it is certain that
+                    // AltGr automatically adds the left Ctrl flag.
+                    // If both of these are set but no text is produced, discard the
+                    // whole event since we don't want AltGr to be handled as Ctrl+Alt.
+                    event.keyDown.keyCode = kbNoKey;
+                else if( (event.keyDown.controlKeyState & kbCtrlShift) &&
+                         (event.keyDown.controlKeyState & kbAltShift) &&
+                         event.keyDown.charScan.charCode != '\0' )
+                    // If Ctrl+Alt produces text, we are dealing with AltGr. In this case,
+                    // discard the Ctrl and Alt modifiers.
+                    event.keyDown.controlKeyState &= ~(kbCtrlShift | kbAltShift);
                 else if( irBuffer.Event.KeyEvent.wVirtualScanCode < 89 )
                     {
                     // Convert NT style virtual scan codes to PC BIOS codes.

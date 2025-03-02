@@ -249,7 +249,7 @@ TKey::TKey(ushort keyCode, ushort shiftState) noexcept
     ushort mods =
         (shiftState & kbShift ? kbShift : 0) |
         (shiftState & kbCtrlShift ? kbCtrlShift : 0) |
-        (shiftState & kbLeftAlt ? kbAltShift : 0);
+        (shiftState & kbAltShift ? kbAltShift : 0);
     uchar scanCode = keyCode >> 8;
     uchar charCode = keyCode & 0xFF;
 
