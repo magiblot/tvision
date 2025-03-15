@@ -1,19 +1,60 @@
-/*
- *      C/C++ Run Time Library - Version 6.0
- *
- *      Copyright (c) 1987, 1993 by Borland International
- *      All Rights Reserved.
- *
- */
-
 #ifndef TVISION_COMPAT_WINDOWS_H
 #define TVISION_COMPAT_WINDOWS_H
 
 #if defined(__BORLANDC__) || defined(_WIN32)
+
 #ifndef NOMINMAX
-#define NOMINMAX
+    #define NOMINMAX
+    #define TVISION_NOMINMAX_DEFINED
 #endif
+
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #define TVISION_WIN32_LEAN_AND_MEAN_DEFINED
+#endif
+
+#ifndef NOSERVICE
+    #define NOSERVICE
+    #define TVISION_NOSERVICE_DEFINED
+#endif
+
+#ifndef NOMCX
+    #define NOMCX
+    #define TVISION_NOMCX_DEFINED
+#endif
+
+#ifndef NOIME
+    #define NOIME
+    #define TVISION_NOIME_DEFINED
+#endif
+
 #include <windows.h>
+
+#ifdef TVISION_NOMINMAX_DEFINED
+    #undef NOMINMAX
+    #undef TVISION_NOMINMAX_DEFINED
+#endif
+
+#ifdef TVISION_WIN32_LEAN_AND_MEAN_DEFINED
+    #undef WIN32_LEAN_AND_MEAN
+    #undef TVISION_WIN32_LEAN_AND_MEAN_DEFINED
+#endif
+
+#ifdef TVISION_NOSERVICE_DEFINED
+    #undef NOSERVICE
+    #undef TVISION_NOSERVICE_DEFINED
+#endif
+
+#ifdef TVISION_NOMCX_DEFINED
+    #undef NOMCX
+    #undef TVISION_NOMCX_DEFINED
+#endif
+
+#ifdef TVISION_NOIME_DEFINED
+    #undef NOIME
+    #undef TVISION_NOIME_DEFINED
+#endif
+
 #else
 
 #include <stdint.h>
