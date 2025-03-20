@@ -64,16 +64,20 @@ bool LinuxConsoleInput::getEvent(TEvent &ev) noexcept
     if (input.getEvent(ev))
     {
         auto &keyCode = ev.keyDown.keyCode;
-        ev.keyDown.controlKeyState = getKeyboardModifiers();
+        auto &controlKeyState = ev.keyDown.controlKeyState;
+        controlKeyState = getKeyboardModifiers();
         // Prevent Ctrl+H/Ctrl+I/Ctrl+J/Ctrl+M from being interpreted as
         // Ctrl+Back/Ctrl+Tab/Ctrl+Enter.
         if (keyCode == kbBack || keyCode == kbTab || keyCode == kbEnter)
-            ev.keyDown.controlKeyState &= ~kbCtrlShift;
+            controlKeyState &= ~kbCtrlShift;
         // Special cases for Ctrl+Back, Shift+Tab and Alt+Tab.
-        if (keyCode == 0x001F && (ev.keyDown.controlKeyState & kbCtrlShift))
+        if (keyCode == 0x001F && (controlKeyState & kbCtrlShift))
             keyCode = kbCtrlBack;
         else if (keyCode == kbShiftTab || keyCode == kbAltTab)
             keyCode = kbTab; // Take into account just the controlKeyState modifiers.
+        // If right Alt produces text, it's AltGr and we should discard the modifier.
+        if ((controlKeyState & kbRightAlt) && ev.keyDown.textLength != 0)
+            controlKeyState &= ~kbRightAlt;
         TermIO::normalizeKey(ev.keyDown);
         return true;
     }
