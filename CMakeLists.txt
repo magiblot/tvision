@@ -16,7 +16,7 @@
 #   terminal color quantization (Unix only).
 # * TV_BUILD_TESTS (default OFF) to build and run tests.
 
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.5...3.30)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13.0")
     cmake_policy(SET CMP0077 NEW) # 'option()' honors normal variables.
 endif()
