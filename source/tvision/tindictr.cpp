@@ -22,7 +22,7 @@
 
 #if !defined( __STRSTREA_H )
 #include <strstrea.h>
-#endif	// __STRSTREA_H
+#endif  // __STRSTREA_H
 
 #define cpIndicator "\x02\x03"
 

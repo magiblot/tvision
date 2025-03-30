@@ -31,7 +31,7 @@
 
 #if !defined( __CTYPE_H )
 #include <ctype.h>
-#endif	// __CTYPE_H
+#endif  // __CTYPE_H
 
 #if !defined( __STRING_H )
 #include <string.h>

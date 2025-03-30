@@ -612,8 +612,8 @@ THelpTopic *THelpFile::invalidTopic()
     THelpTopic *topic;
     TParagraph *para;
 
-    topic =  new THelpTopic;
-    para =  new TParagraph;
+    topic = new THelpTopic;
+    para = new TParagraph;
     para->text = newStr(invalidContext);
     para->size = strlen(invalidContext);
     para->wrap = False;

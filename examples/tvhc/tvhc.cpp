@@ -791,7 +791,7 @@ Boolean isEndParagraph( State state )
     flag =
           ((line[0] == 0) ||
            (line[0] == commandChar[0]) ||
-       (line[0] == 26) ||
+       (line[0] == '\x1A') ||
            ((line[0] ==  ' ') && (state == wrapping)) ||
            ((line[0] != ' ') && (state == notWrapping)));
     if (flag)
@@ -847,7 +847,7 @@ TParagraph *readParagraph( fstream& textFile, int& offset, TCrossRefNode *&xRefs
     p->size = ofs;
     p->wrap = (state == wrapping)? True: False;
     p->text = new char[ofs];
-    memmove(p->text, buffer, ofs);
+    memcpy(p->text, buffer, ofs);
     p->next = 0;
     offset += ofs;
     return(p);
@@ -960,9 +960,9 @@ void readTopic( fstream& textFile, THelpFile& helpFile )
 
 
     if (topic != 0)
-    delete topic;
+        delete topic;
     if (topicDef != 0)
-    delete topicDef;
+        delete topicDef;
     disposeXRefs(xRefs);
 
     skipBlankLines(textFile);

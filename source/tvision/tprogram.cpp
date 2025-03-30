@@ -110,14 +110,14 @@ int TProgram::eventWaitTimeout()
 
 ushort TProgram::executeDialog( TDialog* pD, void* data )
 {
-    ushort c=cmCancel;
+    ushort c = cmCancel;
 
     if (validView(pD))
         {
         if (data)
-        pD->setData(data);
+            pD->setData(data);
         c = deskTop->execView(pD);
-        if ((c != cmCancel) && (data))
+        if ((c != cmCancel) && data)
             pD->getData(data);
         destroy(pD);
         }
