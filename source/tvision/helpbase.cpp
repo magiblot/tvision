@@ -525,13 +525,11 @@ void THelpIndex::add( int i, int32_t val )
         p = new int32_t[newSize];
         if (p != 0)
             {
-            memmove(p, index, size * sizeof(int32_t));
+            if (index != 0)
+                memcpy(p, index, size * sizeof(int32_t));
             memset(p+size, 0xFF, (newSize - size) * sizeof(int32_t));
             }
-        if (size > 0)
-            {
-            delete [] index;
-            }
+        delete[] index;
         index = p;
         size = newSize;
         }
@@ -550,22 +548,21 @@ THelpFile::THelpFile( iopstream &s )
     s.seekg(0, ios::end);
     size = s.tellg();
     s.seekg(0);
-    if ((size_t) size > sizeof(magic))
+    if (size > (int) sizeof(magic))
         s >> magic;
-    if (magic != magicHeader)
-        {
-        indexPos = 12;
-        s.seekg(indexPos);
-        index =  new THelpIndex;
-        modified = True;
-        }
-    else
+    if (magic == magicHeader && size >= 12)
         {
         s.seekg(8);
         s >> indexPos;
         s.seekg(indexPos);
         s >> index;
         modified = False;
+        }
+    else
+        {
+        indexPos = 12;
+        index = new THelpIndex;
+        modified = True;
         }
     stream = &s;
 }
@@ -576,14 +573,13 @@ THelpFile::~THelpFile(void)
 
     if (modified == True)
         {
+        ensureStreamSize(*stream, indexPos);
         stream->seekp(indexPos);
         *stream << index;
-        stream->seekp(0);
         magic = magicHeader;
-        streampos sp=stream->tellp();
         stream->seekp(0, ios::end);
         size = stream->tellp() - (streamoff) 8;
-        stream->seekp(sp);
+        stream->seekp(0);
         *stream << magic;
         *stream << size;
         *stream << indexPos;
@@ -630,10 +626,27 @@ void THelpFile::recordPositionInIndex( int i )
 
 void THelpFile::putTopic( THelpTopic *topic )
 {
+    ensureStreamSize(*stream, indexPos);
     stream->seekp(indexPos);
     *stream << topic;
     indexPos = stream->tellp();
     modified = True;
+}
+
+void THelpFile::ensureStreamSize( iopstream &stream, int desiredSize )
+// When the stream is backed by a regular file, 'seekp' can be used to extend
+// the file size. However, this behaviour is not guaranteed by the Standard and
+// it certainly won't work with devices such as a std::stringbuf. Therefore,
+// it's safer to extend the stream by manually writing null bytes.
+{
+    stream.seekg(0, ios::end);
+    streampos currentSize = stream.tellg();
+    if (currentSize < desiredSize)
+        {
+        stream.seekp(0, ios::end);
+        for (int i = currentSize; i < desiredSize; ++i)
+            stream.writeByte('\0');
+        }
 }
 
 void notAssigned( opstream& , int )

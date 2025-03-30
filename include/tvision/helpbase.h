@@ -183,6 +183,11 @@ public:
 
     THelpIndex *index;
     int32_t indexPos;
+
+private:
+
+    static void ensureStreamSize( iopstream &, int );
+
 };
 
 extern void notAssigned( opstream& s, int value );
