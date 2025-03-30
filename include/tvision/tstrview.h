@@ -173,12 +173,18 @@ inline constexpr const char _FAR & TStringView::back() const
 
 inline constexpr TStringView TStringView::substr(size_t pos) const
 {
-    return TStringView(str + pos, len - pos);
+    if (pos >= len)
+        return TStringView(str + len, 0);
+    else
+        return TStringView(str + pos, len - pos);
 }
 
 inline constexpr TStringView TStringView::substr(size_t pos, size_t n) const
 {
-    return TStringView(str + pos, n <= len - pos ? n : len - pos);
+    if (pos >= len)
+        return TStringView(str + len, 0);
+    else
+        return TStringView(str + pos, n <= len - pos ? n : len - pos);
 }
 
 inline constexpr const char _FAR * TStringView::begin() const
