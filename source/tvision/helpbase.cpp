@@ -396,50 +396,52 @@ Boolean isBlank( char ch ) noexcept
         return False;
 }
 
-static int scan( char *p, int offset, int size, char c) noexcept
+static TStringView getLineAtOffset( char *text, int textSize, int offset ) noexcept
 {
-    char *temp1, *temp2;
-
-    temp1 = p + offset;
-    temp2 = (char *) memchr(temp1, c, strlen(temp1));
-    if (temp2 == 0)
-        return size;
+    char *lineStart = &text[offset];
+    char *lineEnd = (char *) memchr(lineStart, '\n', textSize - offset);
+    if (lineEnd == 0)
+        lineEnd = &text[textSize];
     else
-        {
-        if ((int)(temp2 - temp1) <= size )
-            return (int) (temp2 - temp1) + 1;
-        else
-            return size;
-        }
+        ++lineEnd; // Point past '\n'.
+    return TStringView(lineStart, lineEnd - lineStart);
 }
 
-TStringView THelpTopic::wrapText( char *text, int size, int& offset, Boolean wrap ) noexcept
+static TStringView discardTrailingWhitespaces( TStringView str ) noexcept
 {
-    int i = scan(text, offset, size, '\n');
-    if( i + offset > size )
-        i = size - offset;
+    size_t newSize = str.size();
+    while( newSize > 0 )
+        {
+        if( !isBlank(str[newSize - 1]) )
+            break;
+        --newSize;
+        }
+    return str.substr(0, newSize);
+}
+
+TStringView THelpTopic::wrapText( char *text, int textSize, int& offset, Boolean wrap ) noexcept
+{
+    TStringView line = getLineAtOffset(text, textSize, offset);
     if( wrap )
         {
-        size_t l, w;
-        TText::scroll(TStringView(&text[offset], i), width, False, l, w);
-        if( int(l) < i )
+        size_t wrappedSize = TText::scroll(line, width, False);
+        if( 0 < wrappedSize && wrappedSize < line.size() )
             {
-            int j = l + offset;
-            int k = j;
-            while( (k > offset) && !(isBlank(text[k])) )
-                --k;
-            if( k == offset )
-                k = j;
-            if( k < size && isBlank(text[k]) )
-                ++k;
-            i = k - offset;
+            size_t newSize = wrappedSize;
+            // Omit the last word if it was cut off by wrapping.
+            while( newSize > 0 && !isBlank(line[newSize]) )
+                --newSize;
+            // Unless it fills the whole line.
+            if( newSize == 0 )
+                newSize = wrappedSize;
+            // If a space follows, keep it so 'offset' points past it.
+            if( (int) newSize < textSize && isBlank(line[newSize]) )
+                ++newSize;
+            line = line.substr(0, newSize);
             }
         }
-    TStringView str(&text[offset], i);
-    if (str.size() && str.back() == '\n')
-        str = str.substr(0, str.size() - 1);
-    offset += i;
-    return str;
+    offset += line.size();
+    return discardTrailingWhitespaces(line);
 }
 
 // THelpIndex
