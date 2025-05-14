@@ -10,7 +10,7 @@
 namespace tvision
 {
 
-TEST(Endianess, AliasingInKeyDownEventShouldWorkCorrectly)
+TEST(Endianness, AliasingInKeyDownEventShouldWorkCorrectly)
 {
     KeyDownEvent keyDown {};
     keyDown.keyCode = 0x1234;
@@ -18,7 +18,7 @@ TEST(Endianess, AliasingInKeyDownEventShouldWorkCorrectly)
     EXPECT_EQ(keyDown.charScan.scanCode, 0x12);
 }
 
-TEST(Endianess, AliasingInMessageEventShouldWorkCorrectly)
+TEST(Endianness, AliasingInMessageEventShouldWorkCorrectly)
 {
     MessageEvent message {};
     message.infoPtr = (void *) 0x12345678;
@@ -30,7 +30,7 @@ TEST(Endianess, AliasingInMessageEventShouldWorkCorrectly)
     EXPECT_EQ(message.infoLong, 0x12345678);
 }
 
-TEST(Endianess, TWindowShouldHandleSelectCommand)
+TEST(Endianness, TWindowShouldHandleSelectCommand)
 {
     short number = 1;
     TWindow window(TRect(0, 0, 0, 0), nullptr, number);
@@ -41,7 +41,7 @@ TEST(Endianess, TWindowShouldHandleSelectCommand)
     window.shutDown();
 }
 
-TEST(Endianess, ColorsWithBitFieldsShouldBehaveAsExpected)
+TEST(Endianness, ColorsWithBitFieldsShouldBehaveAsExpected)
 {
     TColorRGB rgb = 0x112233;
     EXPECT_EQ(rgb.r, 0x11);
@@ -61,7 +61,7 @@ TEST(Endianess, ColorsWithBitFieldsShouldBehaveAsExpected)
     EXPECT_EQ(bios.bright, 1);
 }
 
-TEST(Endianess, TermColorShouldBehaveAsExpected)
+TEST(Endianness, TermColorShouldBehaveAsExpected)
 {
     TColorRGB rgb = 0x123456;
     TermColor termRgb {rgb, TermColor::RGB};
