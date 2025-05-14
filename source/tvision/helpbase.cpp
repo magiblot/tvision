@@ -285,6 +285,22 @@ int THelpTopic::getNumCrossRefs() noexcept
     return numRefs;
 }
 
+int THelpTopic::longestLineWidth() noexcept
+{
+    int maxWidth = 0;
+    int lineCount = numLines();
+
+    for (int i = 1; i <= lineCount; ++i)
+        {
+        TStringView line = getLine(i);
+        int lineWidth = strwidth(line);
+        if (lineWidth > maxWidth)
+            maxWidth = lineWidth;
+        }
+
+    return maxWidth;
+}
+
 int THelpTopic::numLines() noexcept
 {
     int offset, lines;

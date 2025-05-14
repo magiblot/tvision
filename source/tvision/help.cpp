@@ -71,8 +71,8 @@ THelpViewer::THelpViewer( const TRect& bounds, TScrollBar* aHScrollBar,
     growMode = gfGrowHiX | gfGrowHiY;
     hFile = aHelpFile;
     topic = aHelpFile->getTopic(context);
-    topic->setWidth(size.x);
-    setLimit(78, topic->numLines());
+    topic->setWidth(size.x); // Width used for line wrapping.
+    setLimit(topic->longestLineWidth(), topic->numLines());
     selected = 1;
 }
 
@@ -86,7 +86,7 @@ void THelpViewer::changeBounds( const TRect& bounds )
 {
     TScroller::changeBounds(bounds);
     topic->setWidth(size.x);
-    setLimit(limit.x, topic->numLines());
+    setLimit(topic->longestLineWidth(), topic->numLines());
 }
 
 void THelpViewer::draw()
@@ -182,7 +182,7 @@ void THelpViewer::switchToTopic( int keyRef )
     topic = hFile->getTopic(keyRef);
     topic->setWidth(size.x);
     scrollTo(0, 0);
-    setLimit(limit.x, topic->numLines());
+    setLimit(topic->longestLineWidth(), topic->numLines());
     selected = 1;
     drawView();
 }

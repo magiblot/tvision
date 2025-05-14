@@ -375,6 +375,7 @@ The following are new features not available in Borland's release of Turbo Visio
 * Triple-click support: new mouse event flag `meTripleClick`.
 * `TRect` methods `move`, `grow`, `intersect` and `Union` now return `TRect&` instead of being `void` so that they can be chained.
 * `TOutlineViewer` now allows the root node to have siblings.
+* New method `THelpTopic::longestLineWidth` to measure the width of the longest line in a help topic, taking line wrapping into account.
 * New function `ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver=0)` which spawns a `TMenuPopup` on the desktop. See `source/tvision/popupmnu.cpp`.
 * New virtual method `TMenuItem& TEditor::initContextMenu(TPoint p)` that determines the entries of the right-click context menu in `TEditor`.
 * `fexpand` can now take a second parameter `relativeTo`.
