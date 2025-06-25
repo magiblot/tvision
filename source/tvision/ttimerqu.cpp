@@ -8,6 +8,8 @@ static TTimePoint systemTimeMs()
     return THardwareInfo::getTickCount()*55;
 #elif defined( __BORLANDC__ )
     return GetTickCount();
+#elif defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x600)
+    return GetTickCount();
 #else
     return GetTickCount64();
 #endif
