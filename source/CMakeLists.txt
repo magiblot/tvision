@@ -53,19 +53,29 @@ foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
 endforeach()
 
 if (TV_USE_STATIC_RTL) # Implies MSVC
-    target_compile_options(${PROJECT_NAME} PUBLIC
-        /MT$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:d>
-    )
+    if(MSVC)
+        target_compile_options(${PROJECT_NAME} PUBLIC
+            /MT$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:d>
+        )
+    elseif (CMAKE_COMPILER_IS_GNUCC)
+        target_compile_options(${PROJECT_NAME} PUBLIC
+            -static -static-libgcc -static-libstdc++
+        )
+        target_link_options(${PROJECT_NAME} PUBLIC
+            -static -static-libgcc -static-libstdc++
+        )
+    endif()
 endif()
 
 if (WIN32)
+    # Windows XP is the minimum supported version. Default is Windows Vista.
+    set(TV_WIN_VER "0x600" CACHE STRING   "Turbo Vision: Windows version")
     target_compile_definitions(${PROJECT_NAME} PUBLIC
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
     )
     target_compile_definitions(${PROJECT_NAME} PRIVATE
-        # Windows Vista is the minimum supported version.
-        _WIN32_WINNT=0x0600
+        _WIN32_WINNT=${TV_WIN_VER}
     )
 endif()
 
