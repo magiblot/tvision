@@ -15,95 +15,39 @@ namespace tvision
 
 #ifdef _WIN32
 
+#if defined( __GNUC__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
+template <class FuncPtr = FARPROC>
+static FuncPtr getModuleProc(const char *moduleName, const char *symbolName)
+{
+    if (HMODULE mod = GetModuleHandleA(moduleName))
+        return (FuncPtr) GetProcAddress(mod, symbolName);
+    return nullptr;
+}
+
+#if defined( __GNUC__ )
+#pragma GCC diagnostic pop
+#endif
+
 static bool isWine() noexcept
 {
-    return GetProcAddress(GetModuleHandleW(L"ntdll"), "wine_get_version");
+    return getModuleProc("NTDLL", "wine_get_version") != nullptr;
 }
 
 Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
 {
     auto &con = ConsoleCtl::getInstance();
-    DWORD startupMode;
-    // Set the input mode.
-    {
-        DWORD consoleMode = 0;
-        GetConsoleMode(con.in(), &consoleMode);
-        startupMode = consoleMode;
-        consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
-        consoleMode |= ENABLE_MOUSE_INPUT; // Report mouse events.
-        consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
-        consoleMode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT); // Report Ctrl+S.
-        consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
-        consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
-        SetConsoleMode(con.in(), consoleMode);
-    }
-    // Set the output mode.
-    bool supportsVT;
-    {
-        DWORD consoleMode = 0;
-        GetConsoleMode(con.out(), &consoleMode);
-        consoleMode &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
-        SetConsoleMode(con.out(), consoleMode);
-        // Try enabling VT sequences.
-        if (isWine())
-            // Wine does not support them, but unlike the legacy console,
-            // it does not return error when attempting to enable it, so we
-            // have to handle this case separately.
-            supportsVT = false;
-        else
-        {
-            consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
-            consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
-            SetConsoleMode(con.out(), consoleMode);
-            GetConsoleMode(con.out(), &consoleMode);
-            supportsVT = consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-        }
-    }
-
-    // Set the console and the environment in UTF-8 mode.
-    UINT cpInput = GetConsoleCP();
-    UINT cpOutput = GetConsoleOutputCP();
-    SetConsoleCP(CP_UTF8);
-    SetConsoleOutputCP(CP_UTF8);
-    setlocale(LC_ALL, ".utf8"); // Note that this must be done again after SetConsoleCP().
-    if (!supportsVT)
-    {
-        // Disable bitmap font in legacy console because multibyte characters
-        // are not displayed correctly.
-        CONSOLE_FONT_INFOEX fontInfo {};
-        fontInfo.cbSize = sizeof(fontInfo);
-        auto isBitmap = [](UINT family)
-        {
-            // https://docs.microsoft.com/en-us/windows/console/console-font-infoex
-            // "FontFamily: see the description of the tmPitchAndFamily member
-            //  of the TEXTMETRIC structure."
-            // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-textmetricw
-            // "A monospace bitmap font has all of these low-order bits clear".
-            return !(family & (TMPF_FIXED_PITCH | TMPF_VECTOR | TMPF_TRUETYPE | TMPF_DEVICE));
-        };
-        if ( GetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo)
-             && isBitmap(fontInfo.FontFamily) )
-        {
-            // Compute the new font height based on the bitmap font size.
-            short fontY = 2*min(fontInfo.dwFontSize.X, fontInfo.dwFontSize.Y);
-            for (auto *name : {L"Consolas", L"Lucida Console"})
-            {
-                fontInfo.nFont = 0;
-                fontInfo.FontFamily = FF_DONTCARE;
-                fontInfo.FontWeight = FW_NORMAL;
-                fontInfo.dwFontSize = {0, fontY}; // Width estimated automatically, it seems.
-                wcscpy(fontInfo.FaceName, name);
-                // SetCurrentConsoleFontEx succeeds even if the font is not available.
-                // We need to check whether the font has actually been set.
-                SetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
-                GetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
-                if (wcscmp(fontInfo.FaceName, name) == 0)
-                    break;
-            }
-        }
-    }
+    DWORD startupMode = initInputMode(con);
+    bool isLegacyConsole = initOutputMode(con);
+    if (isLegacyConsole)
+        disableBitmapFont(con);
+    UINT cpInput, cpOutput;
+    initEncoding(cpInput, cpOutput);
     WinWidth::reset();
-    auto &display = *new Win32Display(con, supportsVT);
+    auto &display = *new Win32Display(con, isLegacyConsole);
     auto &input = *new Win32Input(con);
     return *new Win32ConsoleAdapter(con, startupMode, cpInput, cpOutput, display, input);
 }
@@ -115,6 +59,109 @@ Win32ConsoleAdapter::~Win32ConsoleAdapter()
     SetConsoleCP(cpInput);
     SetConsoleOutputCP(cpOutput);
     SetConsoleMode(con.in(), startupMode);
+}
+
+DWORD Win32ConsoleAdapter::initInputMode(ConsoleCtl &con) noexcept
+{
+    DWORD consoleMode = 0;
+    GetConsoleMode(con.in(), &consoleMode);
+    DWORD startupMode = consoleMode;
+    consoleMode |= ENABLE_WINDOW_INPUT; // Report changes in buffer size
+    consoleMode |= ENABLE_MOUSE_INPUT; // Report mouse events.
+    consoleMode &= ~ENABLE_PROCESSED_INPUT; // Report CTRL+C and SHIFT+Arrow events.
+    consoleMode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT); // Report Ctrl+S.
+    consoleMode |= ENABLE_EXTENDED_FLAGS;   /* Disable the Quick Edit mode, */
+    consoleMode &= ~ENABLE_QUICK_EDIT_MODE; /* which inhibits the mouse.    */
+    SetConsoleMode(con.in(), consoleMode);
+    return startupMode;
+}
+
+bool Win32ConsoleAdapter::initOutputMode(ConsoleCtl &con) noexcept
+{
+    DWORD consoleMode = 0;
+    GetConsoleMode(con.out(), &consoleMode);
+    consoleMode &= ~ENABLE_WRAP_AT_EOL_OUTPUT; // Avoid scrolling when reaching end of line.
+    SetConsoleMode(con.out(), consoleMode);
+
+    bool isLegacyConsole;
+    if (isWine())
+        // Wine is not exactly a legacy console, but it does not support VT
+        // sequences even though it returns no errors when setting the
+        // ENABLE_VIRTUAL_TERMINAL_PROCESSING flag.
+        // Therefore, we have to handle this case separately.
+        isLegacyConsole = true;
+    else
+    {
+        consoleMode |= DISABLE_NEWLINE_AUTO_RETURN; // Do not do CR on LF.
+        consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Allow ANSI escape sequences.
+        SetConsoleMode(con.out(), consoleMode);
+        GetConsoleMode(con.out(), &consoleMode);
+        // The legacy console does not support VT sequences.
+        isLegacyConsole = (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0;
+    }
+    return isLegacyConsole;
+}
+
+void Win32ConsoleAdapter::initEncoding(UINT &cpInput, UINT &cpOutput) noexcept
+{
+    cpInput = GetConsoleCP();
+    cpOutput = GetConsoleOutputCP();
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+    // This only affects the C runtime functions, but it has to be invoked again
+    // after calling SetConsoleCP().
+    setlocale(LC_ALL, ".utf8");
+}
+
+bool Win32ConsoleAdapter::isBitmapFont(UINT fontFamily) noexcept
+{
+    // https://docs.microsoft.com/en-us/windows/console/console-font-infoex
+    // "FontFamily: see the description of the tmPitchAndFamily member
+    //  of the TEXTMETRIC structure."
+    // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-textmetricw
+    // "A monospace bitmap font has all of these low-order bits clear".
+    return (fontFamily & (TMPF_FIXED_PITCH | TMPF_VECTOR | TMPF_TRUETYPE | TMPF_DEVICE)) == 0;
+}
+
+void Win32ConsoleAdapter::disableBitmapFont(ConsoleCtl &con) noexcept
+// When in the legacy console, try to set a non-bitmap font in order to reduce
+// the chances of display issues.
+{
+    // These functions only exist since Windows Vista, so check whether they
+    // are present at runtime.
+    static auto pGetCurrentConsoleFontEx =
+        getModuleProc<decltype(&GetCurrentConsoleFontEx)>("KERNEL32", "GetCurrentConsoleFontEx");
+    static auto pSetCurrentConsoleFontEx =
+        getModuleProc<decltype(&SetCurrentConsoleFontEx)>("KERNEL32", "SetCurrentConsoleFontEx");
+
+    if (!pGetCurrentConsoleFontEx || !pSetCurrentConsoleFontEx)
+        // The functions are not present, there's nothing we can do.
+        return;
+
+    CONSOLE_FONT_INFOEX fontInfo {};
+    fontInfo.cbSize = sizeof(fontInfo);
+    if ( !pGetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo) ||
+         !isBitmapFont(fontInfo.FontFamily) )
+        // The bitmap font is already not in use, we don't have to do anything.
+        return;
+
+    // Compute the new font height based on the bitmap font size.
+    short fontY = 2*min(fontInfo.dwFontSize.X, fontInfo.dwFontSize.Y);
+    for (auto *name : {L"Consolas", L"Lucida Console"})
+    {
+        fontInfo.nFont = 0;
+        fontInfo.FontFamily = FF_DONTCARE;
+        fontInfo.FontWeight = FW_NORMAL;
+        fontInfo.dwFontSize = {0, fontY}; // Width estimated automatically, it seems.
+        wcscpy(fontInfo.FaceName, name);
+        // SetCurrentConsoleFontEx succeeds even if the font is not available.
+        // We need to check whether the font has actually been set.
+        pSetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
+        pGetCurrentConsoleFontEx(con.out(), FALSE, &fontInfo);
+        if (wcscmp(fontInfo.FaceName, name) == 0)
+            // We succeeded in changing the font.
+            return;
+    }
 }
 
 bool Win32ConsoleAdapter::isAlive() noexcept
@@ -241,10 +288,10 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
-Win32Display::Win32Display(ConsoleCtl &aCon, bool useAnsi) noexcept :
+Win32Display::Win32Display(ConsoleCtl &aCon, bool isLegacyConsole) noexcept :
     con(aCon)
 {
-    if (useAnsi)
+    if (!isLegacyConsole)
         ansiScreenWriter = new AnsiScreenWriter(con, TermCap::getDisplayCapabilities(con, *this));
 }
 
@@ -298,11 +345,9 @@ TPoint Win32Display::reloadScreenInfo() noexcept
 
 int Win32Display::getColorCount() noexcept
 {
-    // Conhost has had high color support for some time:
     // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
-    DWORD consoleMode = 0;
-    GetConsoleMode(con.out(), &consoleMode);
-    if (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+    // Assume high color support when not in the legacy console.
+    if (ansiScreenWriter)
         return 256*256*256;
     return 16;
 }

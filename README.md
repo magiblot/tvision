@@ -168,7 +168,7 @@ If you use [Turbo Vision as a CMake submodule](#build-cmake), these flags will b
 
 **Note:** Turbo Vision uses `setlocale` to set the [RTL functions in UTF-8 mode](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support). This won't work if you use an old version of the RTL.
 
-With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on **Windows Vista and later**.
+With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Turbo Vision applications are portable and work by default on Windows Vista and later. You may also have them work on Windows XP if you use the right MSVC version and settings.
 
 <div id="build-mingw"></div>
 
@@ -182,6 +182,8 @@ cmake --build ./build
 In the example above, `libtvision.a` and all examples are in `./build` if `TV_BUILD_EXAMPLES` option is `ON` (the default).
 
 If you wish to link an application against Turbo Vision, simply add `-L./build/lib -ltvision` to your linker and `-I./include` to your compiler
+
+Turbo Vision applications can run on Windows XP or newer, if your compiler supports it.
 
 <div id="build-borland"></div>
 

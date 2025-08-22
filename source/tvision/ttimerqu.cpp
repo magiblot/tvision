@@ -2,17 +2,6 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-static TTimePoint systemTimeMs()
-{
-#if !defined( __FLAT__ )
-    return THardwareInfo::getTickCount()*55;
-#elif defined( __BORLANDC__ )
-    return GetTickCount();
-#else
-    return GetTickCount64();
-#endif
-}
-
 struct TTimer
 {
     TTimePoint expiresAt;
@@ -22,7 +11,7 @@ struct TTimer
 };
 
 TTimerQueue::TTimerQueue() noexcept :
-    getTimeMs(systemTimeMs),
+    getTimeMs(THardwareInfo::getTickCountMs),
     first(0)
 {
 }

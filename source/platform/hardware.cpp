@@ -8,9 +8,6 @@
 #include <internal/getenv.h>
 #include <iostream.h>
 #include <chrono>
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::steady_clock;
 
 TEvent THardwareInfo::eventQ[];
 size_t THardwareInfo::eventCount = 0;
@@ -119,6 +116,15 @@ void THardwareInfo::waitForEvents( int timeoutMs ) noexcept
 void THardwareInfo::interruptEventWait() noexcept
 {
     platf->interruptEventWait();
+}
+
+uint64_t THardwareInfo::getTickCountMs() noexcept
+{
+    // This effectively gives a system time reference in milliseconds.
+    // steady_clock is best suited for measuring intervals.
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()
+    ).count();
 }
 
 BOOL THardwareInfo::setClipboardText( TStringView text ) noexcept

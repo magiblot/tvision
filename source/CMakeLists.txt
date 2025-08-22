@@ -64,7 +64,8 @@ if (WIN32)
         _CRT_SECURE_NO_WARNINGS
     )
     target_compile_definitions(${PROJECT_NAME} PRIVATE
-        # Windows Vista is the minimum supported version.
+        # We need Windows Vista symbols during compilation (GetCurrentConsoleFontEx, etc.),
+        # even though the program may be able to run in older versions.
         _WIN32_WINNT=0x0600
     )
 endif()

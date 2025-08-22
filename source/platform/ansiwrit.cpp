@@ -34,6 +34,8 @@ TermCap TermCap::getDisplayCapabilities( ConsoleCtl &con,
             if (con.isLinuxConsole())
                 termcap.quirks |= qfBlinkIsBright | qfNoItalic | qfNoUnderline;
             else
+#else
+            (void) con;
 #endif // __linux__
             if (getEnv<TStringView>("TERM") == "xterm")
                 // Let's assume all terminals disguising themselves as 'xterm'

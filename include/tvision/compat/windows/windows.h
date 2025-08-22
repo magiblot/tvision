@@ -344,11 +344,6 @@ typedef struct _CONSOLE_CURSOR_INFO {
 #define CTRL_C_EVENT        0
 #define CTRL_BREAK_EVENT    1
 
-// winbase.h
-
-DWORD GetTickCount(void) noexcept;
-ULONGLONG GetTickCount64(void) noexcept;
-
 } // extern "C"
 
 #endif // __BORLANDC__ || _WIN32

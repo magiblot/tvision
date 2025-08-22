@@ -50,6 +50,11 @@ public:
     ~THardwareInfo();
 
     static uint32_t getTickCount() noexcept;
+#if defined( __BORLANDC__ )
+    static uint32_t getTickCountMs();
+#else
+    static uint64_t getTickCountMs() noexcept;
+#endif
 
 #if defined( __FLAT__ )
 
@@ -279,6 +284,9 @@ inline ushort *THardwareInfo::getMonoAddr( ushort offset )
 
 inline uint32_t THardwareInfo::getTickCount()
     { return *(uint32_t *) MAKELONG( biosSel, 0x6C ); }
+
+inline uint32_t THardwareInfo::getTickCountMs()
+    { return getTickCount() * 55; }
 
 inline uchar THardwareInfo::getShiftState()
     { return *(uchar *) MAKELONG( biosSel, 0x17 ); }

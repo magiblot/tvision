@@ -43,6 +43,12 @@ class Win32ConsoleAdapter final : public ConsoleAdapter
     bool setClipboardText(TStringView) noexcept override;
     bool requestClipboardText(void (&)(TStringView)) noexcept override;
 
+    static DWORD initInputMode(ConsoleCtl &) noexcept;
+    static bool initOutputMode(ConsoleCtl &) noexcept;
+    static void initEncoding(UINT &, UINT &) noexcept;
+    static bool isBitmapFont(UINT) noexcept;
+    static void disableBitmapFont(ConsoleCtl &) noexcept;
+
 public:
 
     static Win32ConsoleAdapter &create() noexcept;
@@ -70,7 +76,7 @@ class Win32Display final : public DisplayAdapter
 public:
 
     // The lifetime of 'con' must exceed that of 'this'.
-    Win32Display(ConsoleCtl &con, bool useAnsi) noexcept;
+    Win32Display(ConsoleCtl &con, bool isLegacyConsole) noexcept;
     ~Win32Display();
 
 private:
