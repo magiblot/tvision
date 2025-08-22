@@ -8,7 +8,17 @@ namespace tvision
 
 std::atomic<size_t> WinWidth::lastReset {0};
 std::atomic<bool> WinWidth::isLegacyConsole {false};
-WinWidth thread_local WinWidth::localInstance;
+WinWidth thread_local &WinWidth::localInstance = *new WinWidth;
+
+// MinGW: work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83562
+// by deleting 'localInstance' through a static reference.
+struct WinWidth::Destructor
+{
+    ~Destructor()
+    {
+        delete &localInstance;
+    }
+} static thread_local destructor;
 
 WinWidth::~WinWidth()
 {

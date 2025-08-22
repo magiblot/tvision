@@ -22,7 +22,7 @@ class WinWidth
 
     static std::atomic<size_t> lastReset;
     static std::atomic<bool> isLegacyConsole;
-    static thread_local WinWidth localInstance;
+    static thread_local WinWidth &localInstance;
 
     std::unordered_map<uint32_t, short> results;
     HANDLE cnHandle {INVALID_HANDLE_VALUE};
@@ -33,6 +33,7 @@ class WinWidth
     void tearDown() noexcept;
 
     ~WinWidth();
+    struct Destructor;
 
 public:
 
