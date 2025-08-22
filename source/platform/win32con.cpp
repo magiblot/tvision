@@ -45,8 +45,8 @@ Win32ConsoleAdapter &Win32ConsoleAdapter::create() noexcept
     if (isLegacyConsole)
         disableBitmapFont(con);
     UINT cpInput, cpOutput;
-    initEncoding(cpInput, cpOutput);
-    WinWidth::reset();
+    initEncoding(isLegacyConsole, cpInput, cpOutput);
+    WinWidth::reset(isLegacyConsole);
     auto &display = *new Win32Display(con, isLegacyConsole);
     auto &input = *new Win32Input(con);
     return *new Win32ConsoleAdapter(con, startupMode, cpInput, cpOutput, display, input);
@@ -102,12 +102,23 @@ bool Win32ConsoleAdapter::initOutputMode(ConsoleCtl &con) noexcept
     return isLegacyConsole;
 }
 
-void Win32ConsoleAdapter::initEncoding(UINT &cpInput, UINT &cpOutput) noexcept
+void Win32ConsoleAdapter::initEncoding(bool isLegacyConsole, UINT &cpInput, UINT &cpOutput) noexcept
 {
     cpInput = GetConsoleCP();
     cpOutput = GetConsoleOutputCP();
+    // We would like to set all console codepages to UTF-8, but the legacy
+    // console with bitmap font is unable to display UTF-8 text properly.
+    // However, when using the OEM codepage (which is usually the one supported
+    // by the default bitmap font) in the legacy console, unsupported characters
+    // may be replaced automatically with a similar one (e.g. '╪' gets replaced
+    // with '╬' when the OEM codepage is 850, which doesn't support '╪').
+    // If the legacy console is used with a non-bitmap font (such as Lucida
+    // Console), then the output codepage does not make a difference.
     SetConsoleCP(CP_UTF8);
-    SetConsoleOutputCP(CP_UTF8);
+    if (isLegacyConsole)
+        SetConsoleOutputCP(GetOEMCP());
+    else
+        SetConsoleOutputCP(CP_UTF8);
     // This only affects the C runtime functions, but it has to be invoked again
     // after calling SetConsoleCP().
     setlocale(LC_ALL, ".utf8");
@@ -328,7 +339,7 @@ TPoint Win32Display::reloadScreenInfo() noexcept
          && memcmp(&fontInfo, &lastFontInfo, sizeof(fontInfo)) != 0 )
     {
         // Character width depends on the font and the font size being used.
-        WinWidth::reset();
+        WinWidth::reset(ansiScreenWriter == nullptr);
         lastFontInfo = fontInfo;
     }
 
@@ -429,9 +440,37 @@ void Win32Display::flush() noexcept
 {
     if (ansiScreenWriter)
         ansiScreenWriter->flush();
-    else
+    else if (!buf.empty())
     {
-        con.write(buf.data(), buf.size());
+        // When in the legacy console:
+        // * If using a bitmap font, the OEM codepage must be used (see
+        //   'initEncoding()'). WriteConsoleW does not work properly with
+        //   UTF-16 characters which map to control characters in the OEM
+        //   codepage (e.g. '○' translates into 0x09, so it's a tabulator),
+        //   so we use WriteConsoleOutputW instead.
+        // * If not using a bitmap font, there is no need to use the OEM codepage
+        //   and both WriteConsoleW and WriteConsoleOutputW work the same, but
+        //   we don't use a specific logic for this case since it's not necessary.
+        // * Every wchar_t (UTF-16 code unit) takes one screen cell.
+        int wCharCount = MultiByteToWideChar(CP_UTF8, 0, &buf[0], buf.size(), nullptr, 0);
+        std::vector<wchar_t> wChars(wCharCount);
+        MultiByteToWideChar(CP_UTF8, 0, &buf[0], buf.size(), &wChars[0], wCharCount);
+
+        std::vector<CHAR_INFO> cells(wCharCount);
+        for (int i = 0; i < wCharCount; ++i)
+        {
+            cells[i].Char.UnicodeChar = wChars[i];
+            cells[i].Attributes = lastAttr;
+        }
+
+        SMALL_RECT to = {
+            short(caretPos.x - wCharCount),
+            short(caretPos.y),
+            short(caretPos.x - 1),
+            short(caretPos.y),
+        };
+        WriteConsoleOutputW(con.out(), &cells[0], {(short) wCharCount, 1}, {0, 0}, &to);
+
         buf.resize(0);
     }
 }

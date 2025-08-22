@@ -21,6 +21,7 @@ class WinWidth
     // thread-safe and lock-free.
 
     static std::atomic<size_t> lastReset;
+    static std::atomic<bool> isLegacyConsole;
     static thread_local WinWidth localInstance;
 
     std::unordered_map<uint32_t, short> results;
@@ -36,7 +37,7 @@ class WinWidth
 public:
 
     static int width(uint32_t) noexcept;
-    static void reset() noexcept;
+    static void reset(bool) noexcept;
 };
 
 inline int WinWidth::width(uint32_t wc) noexcept
@@ -44,8 +45,9 @@ inline int WinWidth::width(uint32_t wc) noexcept
     return localInstance.calcWidth(wc);
 }
 
-inline void WinWidth::reset() noexcept
+inline void WinWidth::reset(bool isLegacyConsole) noexcept
 {
+    WinWidth::isLegacyConsole = isLegacyConsole;
     ++lastReset;
 }
 

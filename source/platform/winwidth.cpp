@@ -7,6 +7,7 @@ namespace tvision
 {
 
 std::atomic<size_t> WinWidth::lastReset {0};
+std::atomic<bool> WinWidth::isLegacyConsole {false};
 WinWidth thread_local WinWidth::localInstance;
 
 WinWidth::~WinWidth()
@@ -20,14 +21,19 @@ void WinWidth::setUp() noexcept
     {
         tearDown();
         currentReset = lastReset;
-        cnHandle = CreateConsoleScreenBuffer(
-            GENERIC_READ | GENERIC_WRITE,
-            0,
-            0,
-            CONSOLE_TEXTMODE_BUFFER,
-            0);
-        CONSOLE_CURSOR_INFO info = {1, FALSE};
-        SetConsoleCursorInfo(cnHandle, &info);
+        // Allocating a buffer in order to print characters is only necessary
+        // when not in the legacy console.
+        if (!isLegacyConsole)
+        {
+            cnHandle = CreateConsoleScreenBuffer(
+                GENERIC_READ | GENERIC_WRITE,
+                0,
+                0,
+                CONSOLE_TEXTMODE_BUFFER,
+                0);
+            CONSOLE_CURSOR_INFO info = {1, FALSE};
+            SetConsoleCursorInfo(cnHandle, &info);
+        }
     }
 }
 
@@ -43,41 +49,44 @@ void WinWidth::tearDown() noexcept
 
 int WinWidth::calcWidth(uint32_t u32) noexcept
 {
+    static_assert(sizeof(uint16_t) == sizeof(wchar_t), "");
+
     setUp();
+
     auto it = results.find(u32);
     if (it == results.end())
     {
-        char res = -1;
-        if (cnHandle != INVALID_HANDLE_VALUE)
+        uint16_t u16[3];
+        int len = utf32To16(u32, u16);
+        if (cnHandle == INVALID_HANDLE_VALUE)
+            // In the legacy console, each code unit takes one cell.
+            return len;
+        int res = -1;
+        if (len > 0)
         {
-            uint16_t u16[3]; int len;
-            if ((len = utf32To16(u32, u16)) > 0)
+            // We print an additional character so that we can distinguish
+            // actual double-width characters from the ones affected by
+            // https://github.com/microsoft/terminal/issues/11756.
+            u16[len] = '#';
+            SetConsoleCursorPosition(cnHandle, {0, 0});
+            WriteConsoleW(cnHandle, (wchar_t *) u16, len + 1, 0, 0);
+            CONSOLE_SCREEN_BUFFER_INFO sbInfo;
+            if ( GetConsoleScreenBufferInfo(cnHandle, &sbInfo) &&
+                    (res = sbInfo.dwCursorPosition.X - 1) > 1 )
             {
-                // We print an additional character so that we can distinguish
-                // actual double-width characters from the ones affected by
-                // https://github.com/microsoft/terminal/issues/11756.
-                u16[len] = '#';
-                SetConsoleCursorPosition(cnHandle, {0, 0});
-                WriteConsoleW(cnHandle, (wchar_t *) u16, len + 1, 0, 0);
-                CONSOLE_SCREEN_BUFFER_INFO sbInfo;
-                if ( GetConsoleScreenBufferInfo(cnHandle, &sbInfo) &&
-                     (res = sbInfo.dwCursorPosition.X - 1) > 1 )
-                {
-                    COORD coord {1, sbInfo.dwCursorPosition.Y};
-                    DWORD count = 0; wchar_t charAfter;
-                    ReadConsoleOutputCharacterW(cnHandle, &charAfter, 1, coord, &count);
-                    if (count == 1 && charAfter == '#')
-                        res = -1;
-                }
+                COORD coord {1, sbInfo.dwCursorPosition.Y};
+                DWORD count = 0; wchar_t charAfter;
+                ReadConsoleOutputCharacterW(cnHandle, &charAfter, 1, coord, &count);
+                if (count == 1 && charAfter == '#')
+                    res = -1;
             }
-            // Memoize the result.
-            results.emplace(u32, res);
         }
+        // Memoize the result.
+        results.emplace(u32, res);
         return res;
     }
     else
         return it->second;
-    static_assert(sizeof(uint16_t) == sizeof(wchar_t), "");
 }
 
 } // namespace tvision

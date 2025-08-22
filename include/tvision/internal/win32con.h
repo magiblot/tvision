@@ -45,7 +45,7 @@ class Win32ConsoleAdapter final : public ConsoleAdapter
 
     static DWORD initInputMode(ConsoleCtl &) noexcept;
     static bool initOutputMode(ConsoleCtl &) noexcept;
-    static void initEncoding(UINT &, UINT &) noexcept;
+    static void initEncoding(bool, UINT &, UINT &) noexcept;
     static bool isBitmapFont(UINT) noexcept;
     static void disableBitmapFont(ConsoleCtl &) noexcept;
 
