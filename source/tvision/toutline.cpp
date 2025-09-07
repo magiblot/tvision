@@ -522,10 +522,12 @@ void TOutlineViewer::handleEvent(TEvent& event)
           {
           case '-':
           case '+':
-                adjust(getNode(newFocus), code == '+' ? True:False);
+                if ((cur = getNode(newFocus)) != 0)
+                  adjust(cur, code == '+' ? True:False);
                 break;
           case '*':
-                expandAll(getNode(newFocus));
+                if ((cur = getNode(newFocus)) != 0)
+                  expandAll(cur);
                 break;
           default:
                 return;
