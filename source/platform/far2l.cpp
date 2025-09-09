@@ -94,6 +94,18 @@ ParseResult parseFar2lInput(GetChBuf &buf, TEvent &ev, InputState &state) noexce
             memcpy(&kev.dwControlKeyState, &out[6],  4);
             memcpy(&kev.uChar.UnicodeChar, &out[10], 4);
 
+            // putty4far2l has its own special shift bits. we do not need them for now.
+            #define RIGHT_SHIFT_PRESSED   0x0400 // the right shift key is pressed.
+            #define LEFT_SHIFT_PRESSED    0x0200 // the left shift key is pressed.
+            if (kev.dwControlKeyState & RIGHT_SHIFT_PRESSED) {
+                kev.dwControlKeyState = kev.dwControlKeyState & !RIGHT_SHIFT_PRESSED;
+                kev.dwControlKeyState = kev.dwControlKeyState | SHIFT_PRESSED;
+            }
+            if (kev.dwControlKeyState & LEFT_SHIFT_PRESSED) {
+                kev.dwControlKeyState = kev.dwControlKeyState & !LEFT_SHIFT_PRESSED;
+                kev.dwControlKeyState = kev.dwControlKeyState | SHIFT_PRESSED;
+            }
+
 #ifdef TV_BIG_ENDIAN
             // The protocol states that "all integer values are in
             // little-endian format", so convert them.
