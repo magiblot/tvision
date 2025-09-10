@@ -13,6 +13,7 @@
 #include <internal/utf8.h>
 
 #include <chrono>
+#include <ctype.h>
 
 namespace tvision
 {
@@ -284,7 +285,11 @@ void TermIO::keyModsOn(ConsoleCtl &con) noexcept
         "\x1B[?2004s"   // Save bracketed paste.
         "\x1B[?2004h"   // Enable bracketed paste.
         "\x1B[>4;1m"    // Enable modifyOtherKeys (XTerm).
-        "\x1B[>1u"      // Disambiguate escape codes (Kitty).
+        // Enable Kitty protocol mode (29u).
+        // 29 = 1 (disambiguate) + 4 (report alternate keys)
+        //    + 8 (report all keys) + 16 (report associated text).
+        // This gives us the base-layout-key for shortcuts and proper text handling.
+        "\x1B[>29u"
         "\x1B[?9001h"   // Enable win32-input-mode (Conpty).
         far2lEnableSeq  // Enable far2l terminal extensions.
     );
@@ -357,6 +362,104 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
         ;
 }
 
+static ParseResult parseKittyKey(GetChBuf &buf, TEvent &ev) noexcept
+// https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
+{
+    // A robust parser for Kitty sequences.
+    // It reads the entire potential sequence into a buffer, identifies the
+    // terminator, and only if it's 'u', proceeds to parse. Otherwise, it
+    // puts all characters back into the input stream.
+    char seq_buf[128];
+    int seq_len = 0;
+    int terminator = 0;
+
+    // Read until a valid CSI terminator is found.
+    while (seq_len < (int) sizeof(seq_buf) - 1) {
+        int k = buf.get();
+        if (k == -1) { // End of input before terminator.
+            // Put back what we've read and fail.
+            for(int i = 0; i < seq_len; ++i) buf.unget();
+            return Rejected;
+        }
+        seq_buf[seq_len++] = (char)k;
+        if (isalpha(k) || k == '~' || k == '_') {
+            terminator = k;
+            break;
+        }
+    }
+
+    if (terminator != 'u') {
+        // Not a Kitty sequence, put everything back.
+        for(int i = 0; i < seq_len; ++i) buf.unget();
+        return Rejected;
+    }
+
+    // It's a Kitty sequence. Let's parse it from our buffer.
+    seq_buf[seq_len - 1] = '\0'; // Null-terminate before the 'u'.
+    const char* p = seq_buf;
+
+    auto get_num = [&](uint& val) {
+        if (!isdigit((unsigned char)*p)) return false;
+        val = 0;
+        while (isdigit((unsigned char)*p)) {
+            val = val * 10 + (*p - '0');
+            p++;
+        }
+        return true;
+    };
+
+    // CSI unicode-key-code:shifted:base-layout ; modifiers:event-type ; text-codepoints u
+    uint params[3] = {0, 0, 0}; // 0: unicode, 1: shifted, 2: base-layout
+    get_num(params[0]);
+
+    if (*p == ':') { p++;
+        if (*p == ':') { p++; // "::" case
+            get_num(params[2]);
+        } else { // ":" case
+            if (get_num(params[1])) {
+                if (*p == ':') { p++;
+                    get_num(params[2]);
+                }
+            }
+        }
+    }
+
+    uint mods = 1;
+    if (*p == ';') { p++;
+        if (!get_num(mods)) mods = 1; // Handle empty modifier part like ';;'
+        if (*p == ':') { p++; uint dummy; get_num(dummy); } // consume event type
+    }
+
+    char text_utf8_buf[sizeof(KeyDownEvent::text)] = {};
+    size_t text_len = 0;
+    if (*p == ';') { p++;
+        while (*p != '\0') {
+            uint codepoint;
+            if (get_num(codepoint)) {
+                 if (text_len < sizeof(text_utf8_buf)) {
+                    text_len += utf32To8(codepoint, text_utf8_buf + text_len);
+                }
+            }
+            if (*p == ':') p++; else break;
+        }
+    }
+
+    // Success. Build the event.
+    uint key_to_use = params[2] ? params[2] : (params[1] ? params[1] : params[0]);
+
+    if (keyFromCodepoint(key_to_use, mods, ev.keyDown))
+    {
+        if (text_len > 0) {
+            memcpy(ev.keyDown.text, text_utf8_buf, text_len);
+            ev.keyDown.textLength = text_len;
+        }
+        ev.what = evKeyDown;
+
+        return Accepted;
+    }
+    return Ignored;
+}
+
 ParseResult TermIO::parseEvent(GetChBuf &buf, TEvent &ev, InputState &state) noexcept
 {
     if (buf.get() == '\x1B')
@@ -377,6 +480,13 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
                 return parseFar2lAnswer(buf, ev, state);
             break;
         case '[':
+            {
+                // Prioritize the Kitty parser. If it fails, it will have restored the
+                // buffer, so we can proceed with other parsers.
+                ParseResult res = parseKittyKey(buf, ev);
+                if (res != Rejected) return res;
+            }
+            // If parseKittyKey failed, it's some other CSI sequence.
             switch (buf.get())
             {
                 // Note: mouse events are usually detected in 'NcursesInput::parseCursesMouse'.
@@ -392,8 +502,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
                     {
                         switch (csi.terminator)
                         {
-                            case 'u':
-                                return parseFixTermKey(csi, ev);
+                            // 'u' is handled by parseKittyKey now.
                             case 'R':
                                 return parseCPR(csi, state);
                             case '_':
@@ -654,23 +763,6 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev) noexcept
     if (!keyFromLetter(key, mod, ev.keyDown)) return Rejected;
     ev.what = evKeyDown;
     return Accepted;
-}
-
-ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
-// https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
-// http://www.leonerd.org.uk/hacks/fixterms/
-{
-    if (csi.length < 1 || csi.terminator != 'u')
-        return Rejected;
-
-    uint key = csi.getValue(0);
-    uint mods = (csi.length > 1) ? max(csi.getValue(1), 1) : 1;
-    if (keyFromCodepoint(key, mods, ev.keyDown))
-    {
-        ev.what = evKeyDown;
-        return Accepted;
-    }
-    return Ignored;
 }
 
 ParseResult TermIO::parseDCS(GetChBuf &buf, InputState &state) noexcept
