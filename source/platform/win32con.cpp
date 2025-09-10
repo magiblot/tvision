@@ -548,7 +548,54 @@ bool getWin32Key(const KEY_EVENT_RECORD &KeyEvent, TEvent &ev, InputState &state
             // If the character cannot be represented in the current codepage,
             // or if it would accidentally trigger a Ctrl+Key combination,
             // make the whole keyCode zero to avoid side effects.
-            ev.keyDown.keyCode = kbNoKey;
+            {
+                // This breaks menu hotkeys in non-Latin kb layouts
+                //ev.keyDown.keyCode = kbNoKey;
+
+                // Let's use Latin char code detected from virtual key code
+                int latinKey = 0;
+
+                if (
+                    ((KeyEvent.wVirtualKeyCode >= 'A') && (KeyEvent.wVirtualKeyCode <= 'Z')) ||
+                    ((KeyEvent.wVirtualKeyCode >= '0') && (KeyEvent.wVirtualKeyCode <= '9'))
+                ) {
+
+                    latinKey = towlower(KeyEvent.wVirtualKeyCode);
+                }
+
+                switch (KeyEvent.wVirtualKeyCode) {
+
+                    // top row
+                    case VK_OEM_3:      latinKey = '`'; break;
+                    // ...digits...
+                    case VK_OEM_MINUS:  latinKey = '-'; break;
+                    case VK_OEM_PLUS:   latinKey = '+'; break;
+
+                    // second row
+                    // ...letters...
+                    case VK_OEM_4:      latinKey = '['; break;
+                    case VK_OEM_6:      latinKey = ']'; break;
+
+                    // third row
+                    // ...letters...
+                    case VK_OEM_1:      latinKey = ';'; break;
+                    case VK_OEM_7:      latinKey = '\''; break;
+                    case VK_OEM_5:      latinKey = '\\'; break;
+
+                    // forth row
+                    case 0xE1:          latinKey = '/'; break;
+                    // ...letters...
+                    case VK_OEM_COMMA:  latinKey = ','; break;
+                    case VK_OEM_PERIOD: latinKey = '.'; break;
+                    case VK_OEM_2:      latinKey = '/'; break;
+                }
+
+                if (latinKey) {
+                    ev.keyDown.keyCode = latinKey;
+                } else {
+                    ev.keyDown.keyCode = kbNoKey;
+                }
+            }
     }
 
     if ( ev.keyDown.keyCode == 0x2A00 || ev.keyDown.keyCode == 0x1D00 ||
