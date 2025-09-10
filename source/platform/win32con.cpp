@@ -9,6 +9,7 @@
 #include <internal/termio.h>
 #include <internal/utf8.h>
 #include <locale.h>
+#include <wctype.h>
 
 namespace tvision
 {
