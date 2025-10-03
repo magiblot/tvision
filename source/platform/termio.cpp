@@ -54,17 +54,26 @@ static const const_unordered_map<ushort, constarray<ushort, 3>> moddedKeyCodes =
     { kbIns, {kbShiftIns, kbCtrlIns, kbAltIns} }, { kbDel, {kbShiftDel, kbCtrlDel, kbAltDel} },
 };
 
+static ushort getModdedKeyCode(ushort keyCode, ushort tvMods)
+{
+    // Modifier precedece: Shift < Ctrl < Alt.
+    int largestMod = (tvMods & kbLeftAlt) ? 2
+                   : (tvMods & kbLeftCtrl) ? 1
+                   : 0;
+    return moddedKeyCodes[keyCode][largestMod];
+}
+
 const uint XTermModDefault = 1;
 
 static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
 {
     mods -= XTermModDefault;
-    ushort tvmods =
+    ushort tvMods =
           (kbShift & -(mods & 1))
         | (kbLeftAlt & -(mods & 2))
         | (kbLeftCtrl & -(mods & 4))
         ;
-    KeyDownEvent keyDown {{keyCode}, tvmods};
+    KeyDownEvent keyDown {{keyCode}, tvMods};
     TermIO::normalizeKey(keyDown);
     return keyDown;
 }
@@ -72,6 +81,11 @@ static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
 static bool isAlpha(uint32_t ascii) noexcept
 {
     return ' ' <= ascii && ascii < 127;
+};
+
+static bool isAsciiLetter(uint32_t ch) noexcept
+{
+    return ('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z');
 };
 
 static bool isPrivate(uint32_t codepoint) noexcept
@@ -238,16 +252,24 @@ bool GetChBuf::readStr(TStringView str) noexcept
 bool CSIData::readFrom(GetChBuf &buf) noexcept
 // Pre: "\x1B[" has just been read.
 {
-    length = 0;
     for (uint i = 0; i < maxLength; ++i)
     {
-        if (!buf.getNum(_val[i]))
-            _val[i] = UINT_MAX;
+        if (!buf.getNum(_values[i]))
+            _values[i] = UINT_MAX;
         int k = buf.last();
-        if (k == -1) return false;
-        if ((terminator = (uint) k) != ';')
-            return (length = i + 1), true;
+        if (k == -1)
+            // No more input and CSI is not yet complete.
+            return false;
+        if (k == ';' || k == ':')
+            _separators[i] = (char) k;
+        else
+        {
+            terminator = (char) k;
+            length = i + 1;
+            return true;
+        }
     }
+    // CSI may be longer than supported.
     return false;
 }
 
@@ -284,7 +306,7 @@ void TermIO::keyModsOn(ConsoleCtl &con) noexcept
         "\x1B[?2004s"   // Save bracketed paste.
         "\x1B[?2004h"   // Enable bracketed paste.
         "\x1B[>4;1m"    // Enable modifyOtherKeys (XTerm).
-        "\x1B[>1u"      // Disambiguate escape codes (Kitty).
+        "\x1B[>5u"      // Disambiguate escape codes (1) + Report alternate keys (4) (Kitty).
         "\x1B[?9001h"   // Enable win32-input-mode (Conpty).
         far2lEnableSeq  // Enable far2l terminal extensions.
     );
@@ -335,18 +357,12 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
     TKey tKey(keyDown);
     ushort newMods = tKey.mods & (kbShift | kbLeftCtrl | kbLeftAlt);
     if (newMods != 0)
-    {
-        // Modifier precedece: Shift < Ctrl < Alt.
-        int largestMod = (newMods & kbLeftAlt) ? 2
-                       : (newMods & kbLeftCtrl) ? 1
-                       : 0;
-        if (ushort keyCode = moddedKeyCodes[tKey.code][largestMod])
+        if (ushort keyCode = getModdedKeyCode(tKey.code, newMods))
         {
             keyDown.keyCode = keyCode;
             if (keyDown.charScan.charCode < ' ')
                 keyDown.textLength = 0;
         }
-    }
     // TKey does not distinguish left/right modifiers, so preserve those
     // when available.
     ushort origMods = keyDown.controlKeyState;
@@ -393,7 +409,7 @@ ParseResult TermIO::parseEscapeSeq(GetChBuf &buf, TEvent &ev, InputState &state)
                         switch (csi.terminator)
                         {
                             case 'u':
-                                return parseFixTermKey(csi, ev);
+                                return parseKittyKey(csi, ev);
                             case 'R':
                                 return parseCPR(csi, state);
                             case '_':
@@ -592,7 +608,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev, InputState &stat
         if (!keyFromLetter(terminator, XTermModDefault, ev.keyDown))
             return Rejected;
     }
-    else if (csi.length == 2)
+    else if (csi.length == 2 && csi.getSeparator(0) == ';')
     {
         uint mod = csi.getValue(1);
         if (csi.getValue(0) == 1)
@@ -629,7 +645,11 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev, InputState &stat
         else
             return Rejected;
     }
-    else if (csi.length == 3 && csi.getValue(0) == 27 && terminator == '~')
+    else if ( csi.length == 3 &&
+              csi.getValue(0) == 27 &&
+              csi.getSeparator(0) == ';' &&
+              csi.getSeparator(1) == ';' &&
+              terminator == '~' )
     {
         // XTerm's "modifyOtherKeys" mode.
         uint key = csi.getValue(2);
@@ -656,21 +676,73 @@ ParseResult TermIO::parseSS3Key(GetChBuf &buf, TEvent &ev) noexcept
     return Accepted;
 }
 
-ParseResult TermIO::parseFixTermKey(const CSIData &csi, TEvent &ev) noexcept
+ParseResult TermIO::parseKittyKey(const CSIData &csi, TEvent &ev) noexcept
 // https://sw.kovidgoyal.net/kitty/keyboard-protocol.html
 // http://www.leonerd.org.uk/hacks/fixterms/
 {
     if (csi.length < 1 || csi.terminator != 'u')
         return Rejected;
 
-    uint key = csi.getValue(0);
-    uint mods = (csi.length > 1) ? max(csi.getValue(1), 1) : 1;
-    if (keyFromCodepoint(key, mods, ev.keyDown))
+    // NOTE: We are not requesting all of Kitty's Keyboard Protocol features in
+    // keyModsOn(), yet this code supports them.
+    //
+    // Kitty events are structured like:
+    //
+    // unicode-key-code : shifted-key-code : base-layout-key ; modifiers : event-type ; text-as-codepoints u
+    //
+    // Only the 'unicode-key-code' is mandatory; the rest are optional.
+
+    uint kittyKeyCode = 0;
+    uint kittyShiftedKeyCode = 0;
+    uint kittyBaseLayoutKey = 0;
+    uint kittyModifiers = 1;
+    uint kittyEventType = 1;
+    uint kittyText = 0;
+
+    uint i = 0;
+    kittyKeyCode = csi.getValue(i++, 0);
+    if (i < csi.length && csi.getSeparator(i - 1) == ':')
+        kittyShiftedKeyCode = csi.getValue(i++, 0);
+    if (i < csi.length && csi.getSeparator(i - 1) == ':')
+        kittyBaseLayoutKey = csi.getValue(i++, 0);
+    if (i < csi.length)
+        kittyModifiers = csi.getValue(i++, 1);
+    if (i < csi.length && csi.getSeparator(i - 1) == ':')
+        kittyEventType = csi.getValue(i++, 1);
+    if (i < csi.length)
+        // In theory, there could be more than one character, but we
+        // do not currently support this, so just take the first one.
+        kittyText = csi.getValue(i++, 0);
+
+    if (kittyEventType != 1)
+        // We are only interested in Press events.
+        return Ignored;
+
+    uint codepoint = kittyKeyCode;
+    if (kittyText != 0)
+        codepoint = kittyText;
+    else if (kittyShiftedKeyCode != 0)
+        codepoint = kittyShiftedKeyCode;
+
+    if (!keyFromCodepoint(codepoint, kittyModifiers, ev.keyDown))
+        return Ignored;
+
+    // When the unicode-key-code isn't an ASCII letter, but the base-layout-key
+    // is, and at the same time the Ctrl or Alt modifiers are present,
+    // initialize the event's keyCode as if it was Ctrl/Alt + A-Z, so that
+    // standard keyboard shortcuts can still be triggered when using a non-ASCII
+    // keyboard layout (e.g. Ctrl+Ф in the RU keyboard layout will match Ctrl+A).
+    if ( !isAsciiLetter(kittyKeyCode) && isAsciiLetter(kittyBaseLayoutKey) &&
+         (ev.keyDown.controlKeyState & (kbCtrlShift | kbAltShift)) != 0 )
     {
-        ev.what = evKeyDown;
-        return Accepted;
+        // Kitty's 'base-layout-key' is always in lowercase,
+        char upperBaseLayoutKey = kittyBaseLayoutKey - 'a' + 'A';
+        ev.keyDown.keyCode = getModdedKeyCode(upperBaseLayoutKey, ev.keyDown.controlKeyState);
+        // Note that 'ev.keyDown.text' still contains the original key text.
     }
-    return Ignored;
+
+    ev.what = evKeyDown;
+    return Accepted;
 }
 
 ParseResult TermIO::parseDCS(GetChBuf &buf, InputState &state) noexcept
@@ -724,7 +796,7 @@ ParseResult TermIO::parseCPR(const CSIData &csi, InputState &state) noexcept
 // We receive a Cursor Position Report as response to the Device Status Report
 // request we make in 'consumeUnprocessedInput()'.
 {
-    if (csi.length != 2)
+    if (csi.length != 2 || csi.getSeparator(0) != ';')
         return Rejected;
 
     state.gotDsrResponse = true;
