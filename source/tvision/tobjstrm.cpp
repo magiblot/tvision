@@ -102,11 +102,6 @@ TStreamableTypes::TStreamableTypes() noexcept : TNSSortedCollection( 5, 5 )
 {
 }
 
-void *TStreamableTypes::operator new( size_t, void * arena )
-{
-    return arena;
-}
-
 TStreamableTypes::~TStreamableTypes()
 {
 }
