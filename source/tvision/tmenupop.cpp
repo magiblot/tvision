@@ -27,6 +27,11 @@ TMenuPopup::TMenuPopup(const TRect& bounds, TMenu* aMenu, TMenuView *aParentMenu
     putClickEventOnExit = False;
 }
 
+TMenuPopup::~TMenuPopup()
+{
+    delete menu;
+}
+
 ushort TMenuPopup::execute()
 {
     // Do not highlight the default entry, because it would look ugly.
