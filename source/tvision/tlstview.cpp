@@ -319,10 +319,10 @@ void TListViewer::handleEvent( TEvent& event )
                     newItem = range - 1;
                     break;
                 case kbCtrlPgDn:
-                    newItem = range - 1;
+                    newItem = topItem + (size.y * numCols) - 1;
                     break;
                 case kbCtrlPgUp:
-                    newItem = 0;
+                    newItem = topItem;
                     break;
                 default:
                     return;
