@@ -71,20 +71,6 @@ TFileDialog::TFileDialog( TStringView aWildCard,
     fileList->growMode = gfGrowHiX | gfGrowHiY;
     insert( fileList );
 
-    insert( new TLabel( TRect( 2, 23, 3+cstrlen(inputName), 24 ),
-                        inputName,
-                        fileName
-                      ) );
-    first()->growMode = 0;
-
-    fileName = new TFileInputLine( TRect( 3, 24, 31, 25 ), MAXPATH );
-    strnzcpy( fileName->data, wildCard, MAXPATH );
-    fileName->growMode = gfGrowHiX;
-    insert( fileName );
-
-    insert( new THistory( TRect( 31, 24, 34, 25 ), fileName, histId ) );
-    first()->growMode = gfGrowLoX | gfGrowHiX;
-
     ushort opt = bfDefault;
     TRect r( 35, 3, 46, 5 );
 
@@ -138,8 +124,6 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         r.b.y += 3;
         }
 
-    insert( new TFileInfoPane( TRect( 1, 16, 48, 18 ) ) );
-    first()->growMode = gfGrowAll & ~gfGrowLoX;
     selectNext( False );
 
     // I feel too lazy to update all the sizes above. The new default size
@@ -170,6 +154,23 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         // as it would be too sparse.
         locate(bounds);
     }
+
+    insert( new TLabel( TRect( 2, size.y - 6, 3+cstrlen(inputName), size.y - 5 ),
+                        inputName,
+                        fileName
+                      ) );
+    first()->growMode = gfGrowLoY | gfGrowHiY;
+
+    fileName = new TFileInputLine( TRect( 3, size.y - 5, size.x - 4, size.y - 4 ), MAXPATH );
+    strnzcpy( fileName->data, wildCard, MAXPATH );
+    fileName->growMode = gfGrowLoY | gfGrowHiY | gfGrowHiX;
+    insert( fileName );
+
+    insert( new THistory( TRect( size.x - 4, size.y - 5, size.x - 1, size.y - 4 ), fileName, histId ) );
+    first()->growMode = gfGrowLoX | gfGrowHiX | gfGrowLoY | gfGrowHiY; // This one shifts with the right edge
+
+    insert( new TFileInfoPane( TRect( 1, size.y - 3, size.x - 1, size.y - 1 ) ) );
+    first()->growMode = gfGrowHiX | gfGrowLoY | gfGrowHiY;
 
     if( (aOptions & fdNoLoadDir) == 0 )
         readDirectory();
