@@ -55,17 +55,26 @@ static const const_unordered_map<ushort, constarray<ushort, 3>> moddedKeyCodes =
     { kbIns, {kbShiftIns, kbCtrlIns, kbAltIns} }, { kbDel, {kbShiftDel, kbCtrlDel, kbAltDel} },
 };
 
+static ushort getModdedKeyCode(ushort keyCode, ushort tvMods)
+{
+    // Modifier precedece: Shift < Ctrl < Alt.
+    int largestMod = (tvMods & kbLeftAlt) ? 2
+                   : (tvMods & kbLeftCtrl) ? 1
+                   : 0;
+    return moddedKeyCodes[keyCode][largestMod];
+}
+
 const uint XTermModDefault = 1;
 
 static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
 {
     mods -= XTermModDefault;
-    ushort tvmods =
+    ushort tvMods =
           (kbShift & -(mods & 1))
         | (kbLeftAlt & -(mods & 2))
         | (kbLeftCtrl & -(mods & 4))
         ;
-    KeyDownEvent keyDown {{keyCode}, tvmods};
+    KeyDownEvent keyDown {{keyCode}, tvMods};
     TermIO::normalizeKey(keyDown);
     return keyDown;
 }
@@ -73,6 +82,11 @@ static KeyDownEvent keyWithXTermMods(ushort keyCode, uint mods) noexcept
 static bool isAlpha(uint32_t ascii) noexcept
 {
     return ' ' <= ascii && ascii < 127;
+};
+
+static bool isAsciiLetter(uint32_t ch) noexcept
+{
+    return ('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z');
 };
 
 static bool isPrivate(uint32_t codepoint) noexcept
@@ -239,16 +253,24 @@ bool GetChBuf::readStr(TStringView str) noexcept
 bool CSIData::readFrom(GetChBuf &buf) noexcept
 // Pre: "\x1B[" has just been read.
 {
-    length = 0;
     for (uint i = 0; i < maxLength; ++i)
     {
-        if (!buf.getNum(_val[i]))
-            _val[i] = UINT_MAX;
+        if (!buf.getNum(_values[i]))
+            _values[i] = UINT_MAX;
         int k = buf.last();
-        if (k == -1) return false;
-        if ((terminator = (uint) k) != ';')
-            return (length = i + 1), true;
+        if (k == -1)
+            // No more input and CSI is not yet complete.
+            return false;
+        if (k == ';' || k == ':')
+            _separators[i] = (char) k;
+        else
+        {
+            terminator = (char) k;
+            length = i + 1;
+            return true;
+        }
     }
+    // CSI may be longer than supported.
     return false;
 }
 
@@ -340,18 +362,12 @@ void TermIO::normalizeKey(KeyDownEvent &keyDown) noexcept
     TKey tKey(keyDown);
     ushort newMods = tKey.mods & (kbShift | kbLeftCtrl | kbLeftAlt);
     if (newMods != 0)
-    {
-        // Modifier precedece: Shift < Ctrl < Alt.
-        int largestMod = (newMods & kbLeftAlt) ? 2
-                       : (newMods & kbLeftCtrl) ? 1
-                       : 0;
-        if (ushort keyCode = moddedKeyCodes[tKey.code][largestMod])
+        if (ushort keyCode = getModdedKeyCode(tKey.code, newMods))
         {
             keyDown.keyCode = keyCode;
             if (keyDown.charScan.charCode < ' ')
                 keyDown.textLength = 0;
         }
-    }
     // TKey does not distinguish left/right modifiers, so preserve those
     // when available.
     ushort origMods = keyDown.controlKeyState;
@@ -701,7 +717,7 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev, InputState &stat
         if (!keyFromLetter(terminator, XTermModDefault, ev.keyDown))
             return Rejected;
     }
-    else if (csi.length == 2)
+    else if (csi.length == 2 && csi.getSeparator(0) == ';')
     {
         uint mod = csi.getValue(1);
         if (csi.getValue(0) == 1)
@@ -738,7 +754,11 @@ ParseResult TermIO::parseCSIKey(const CSIData &csi, TEvent &ev, InputState &stat
         else
             return Rejected;
     }
-    else if (csi.length == 3 && csi.getValue(0) == 27 && terminator == '~')
+    else if ( csi.length == 3 &&
+              csi.getValue(0) == 27 &&
+              csi.getSeparator(0) == ';' &&
+              csi.getSeparator(1) == ';' &&
+              terminator == '~' )
     {
         // XTerm's "modifyOtherKeys" mode.
         uint key = csi.getValue(2);
@@ -816,7 +836,7 @@ ParseResult TermIO::parseCPR(const CSIData &csi, InputState &state) noexcept
 // We receive a Cursor Position Report as response to the Device Status Report
 // request we make in 'consumeUnprocessedInput()'.
 {
-    if (csi.length != 2)
+    if (csi.length != 2 || csi.getSeparator(0) != ';')
         return Rejected;
 
     state.gotDsrResponse = true;

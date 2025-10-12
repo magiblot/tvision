@@ -162,9 +162,6 @@ public:
     void registerType( const TStreamableClass * );
     const TStreamableClass *lookup( const char * );
 
-    void *operator new( size_t sz ) { return ::operator new( sz ); }
-    void *operator new( size_t, void * );
-
 private:
 
     virtual void *keyOf( void * );

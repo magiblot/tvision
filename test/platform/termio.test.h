@@ -116,7 +116,7 @@ inline std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
     return os;
 }
 
-inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text)
+inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text = {})
 {
     TEvent ev {};
     ev.what = evKeyDown;
