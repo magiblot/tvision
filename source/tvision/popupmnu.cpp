@@ -47,13 +47,13 @@ ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup *receiver)
     {
         {
             TPoint p = app->makeLocal(where);
-            TMenu *mnu = new TMenu(aMenu);
-            TMenuPopup *mpop = new TMenuPopup(TRect(p, p), mnu);
-            autoPlacePopup(mpop, p);
+            TRect bounds(p, p);
+            TMenu *menu = new TMenu(aMenu);
+            TMenuPopup *menuPopup = new TMenuPopup(bounds, menu);
+            autoPlacePopup(menuPopup, p);
             // Execute and dispose the menu.
-            res = app->execView(mpop);
-            TObject::destroy(mpop);
-            delete mnu;
+            res = app->execView(menuPopup);
+            TObject::destroy(menuPopup);
         }
         // Generate an event.
         if (res && receiver)
