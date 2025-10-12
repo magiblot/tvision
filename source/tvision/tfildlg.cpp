@@ -356,7 +356,7 @@ char oldParent[MAXPATH];
                         for (short i = 0; i < items->getCount(); i++)
                         {
                             TSearchRec *item = (TSearchRec *)items->at(i);
-                            if (item != nullptr && stricmp(item->name, oldParent) == 0)
+                            if (item != NULL && stricmp(item->name, oldParent) == 0)
                             {
                                 fileList->focusItem(i);
                                 break;
@@ -383,7 +383,7 @@ char oldParent[MAXPATH];
                         for (short i = 0; i < items->getCount(); i++)
                         {
                             TSearchRec *item = (TSearchRec *)items->at(i);
-                            if (item != nullptr && stricmp(item->name, oldParent) == 0)
+                            if (item != NULL && stricmp(item->name, oldParent) == 0)
                             {
                                 fileList->focusItem(i);
                                 break;
