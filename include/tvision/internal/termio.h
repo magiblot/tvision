@@ -95,28 +95,48 @@ inline void GetChBuf::unget() noexcept
         in.unget(k);
 }
 
-enum ParseResult { Rejected = 0, Accepted, Ignored };
-
 struct CSIData
 {
-    // Represents the data stored in a CSI escape sequence:
-    // \x1B [ _val[0] ; _val[1] ; ... terminator
+    // Represents the data stored in a CSI escape sequence. For example,
+    // given the input "\x1B[123::456;789u", the CSIData would be:
+    // - .length: 5
+    // - .terminator: 'u'
+    // - .getValue(0, <a default value>): 123
+    // - .getSeparator(0): ':'
+    // - .getValue(1, <a default value>): <a default value>
+    // - .getSeparator(1): ':'
+    // - .getValue(2, <a default value>): 456
+    // - .getSeparator(2): ';'
+    // - .getValue(3, <a default value>): 789
 
     // CSIs can be longer, but this is the largest we need for now.
     enum { maxLength = 6 };
 
-    uint _val[maxLength];
-    uint terminator {0};
     uint length {0};
+    uint _values[maxLength];
+    char _separators[maxLength - 1];
+    char terminator {0};
 
     bool readFrom(GetChBuf &buf) noexcept;
-    inline uint getValue(uint i, uint defaultValue = 1) const noexcept;
+    inline uint getValue(uint i, uint aDefault = 1) const noexcept;
+    inline char getSeparator(uint i) const noexcept;
 };
 
-inline uint CSIData::getValue(uint i, uint defaultValue) const noexcept
+inline uint CSIData::getValue(uint i, uint aDefault) const noexcept
 {
-    return i < length && _val[i] != UINT_MAX ? _val[i] : defaultValue;
+    if (i < length && _values[i] != UINT_MAX)
+        return _values[i];
+    return aDefault;
 }
+
+inline char CSIData::getSeparator(uint i) const noexcept
+{
+    if (length > 0 && i < length - 1)
+        return _separators[i];
+    return '\0';
+}
+
+enum ParseResult { Rejected = 0, Accepted, Ignored };
 
 namespace TermIO
 {
@@ -135,10 +155,8 @@ namespace TermIO
     ParseResult parseX10Mouse(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseSGRMouse(GetChBuf&, TEvent&, InputState&) noexcept;
     ParseResult parseCSIKey(const CSIData &csi, TEvent&, InputState&) noexcept;
-    ParseResult parseFKeyA(GetChBuf&, TEvent&) noexcept;
     ParseResult parseSS3Key(GetChBuf&, TEvent&) noexcept;
-    ParseResult parseArrowKeyA(GetChBuf&, TEvent&) noexcept;
-    ParseResult parseFixTermKey(const CSIData &csi, TEvent&) noexcept;
+    ParseResult parseKittyKey(const CSIData &csi, TEvent&) noexcept;
     ParseResult parseDCS(GetChBuf&, InputState&) noexcept;
     ParseResult parseOSC(GetChBuf&, InputState&) noexcept;
     ParseResult parseCPR(const CSIData &csi, InputState&) noexcept;
