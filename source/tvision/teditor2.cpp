@@ -307,12 +307,17 @@ uint TEditor::nextWord( uint p )
 {
     if (p < bufLen)
         {
+        // First, find the next word boundary
         char a = bufChar(p);
         char b;
         do  {
             b = a;
             p = nextChar(p);
-            } while( p < bufLen && !isWordBoundary((a = bufChar(p)), b) );
+        } while( p < bufLen && !isWordBoundary((a = bufChar(p)), b) );
+
+        // Then, skip any whitespace after it
+        while( p < bufLen && getCharType(bufChar(p)) == 0) // type 0 is whitespace
+            p = nextChar(p);
         }
     return p;
 }
@@ -324,18 +329,28 @@ uint TEditor::prevLine( uint p )
 
 uint TEditor::prevWord( uint p )
 {
-    if (p > 0 && (p = prevChar(p), p > 0))
-        {
-        char a = bufChar(p);
-        char b;
-        do  {
-            b = a;
+    if (p > 0)
+    {
+        p = prevChar(p);
+
+        // Skip any whitespace before the cursor
+        while (p > 0 && getCharType(bufChar(p)) == 0)
             p = prevChar(p);
-            a = bufChar(p);
-            } while( p > 0 && !isWordBoundary(a, b) );
-        if( isWordBoundary(a, b) )
-            p = nextChar(p);
+
+        // Now we are at the end of a word. Find its beginning.
+        if (p > 0)
+        {
+            char a = bufChar(p);
+            char b;
+            do {
+                b = a;
+                p = prevChar(p);
+                a = bufChar(p);
+            } while (p > 0 && !isWordBoundary(a, b));
+            if (isWordBoundary(a, b))
+                p = nextChar(p);
         }
+    }
     return p;
 }
 
