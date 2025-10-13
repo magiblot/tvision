@@ -62,14 +62,14 @@ TFileDialog::TFileDialog( TStringView aWildCard,
     flags |= wfGrow;
     strnzcpy( wildCard, aWildCard, sizeof( wildCard ) );
 
-    insert( new TLabel( TRect( 2, 2, 8, 3 ), filesText, fileList ) );
-    first()->growMode = 0;
-
     TScrollBar *sb = new TScrollBar( TRect( 3, 11, 34, 12 ) );
     insert( sb );
     fileList = new TFileList( TRect( 3, 3, 34, 11 ), sb );
     fileList->growMode = gfGrowHiX | gfGrowHiY;
     insert( fileList );
+
+    insert( new TLabel( TRect( 2, 2, 8, 3 ), filesText, fileList ) );
+    first()->growMode = 0;
 
     ushort opt = bfDefault;
     TRect r( 35, 3, 46, 5 );
@@ -124,8 +124,6 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         r.b.y += 3;
         }
 
-    selectNext( False );
-
     // I feel too lazy to update all the sizes above. The new default size
     // is set by resizing the dialog.
     {
@@ -155,22 +153,24 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         locate(bounds);
     }
 
+    fileName = new TFileInputLine( TRect( 3, size.y - 5, size.x - 4, size.y - 4 ), MAXPATH );
+    strnzcpy( fileName->data, wildCard, MAXPATH );
+    fileName->growMode = gfGrowLoY | gfGrowHiY | gfGrowHiX;
+    insert( fileName );
+
     insert( new TLabel( TRect( 2, size.y - 6, 3+cstrlen(inputName), size.y - 5 ),
                         inputName,
                         fileName
                       ) );
     first()->growMode = gfGrowLoY | gfGrowHiY;
 
-    fileName = new TFileInputLine( TRect( 3, size.y - 5, size.x - 4, size.y - 4 ), MAXPATH );
-    strnzcpy( fileName->data, wildCard, MAXPATH );
-    fileName->growMode = gfGrowLoY | gfGrowHiY | gfGrowHiX;
-    insert( fileName );
-
     insert( new THistory( TRect( size.x - 4, size.y - 5, size.x - 1, size.y - 4 ), fileName, histId ) );
     first()->growMode = gfGrowLoX | gfGrowHiX | gfGrowLoY | gfGrowHiY; // This one shifts with the right edge
 
     insert( new TFileInfoPane( TRect( 1, size.y - 3, size.x - 1, size.y - 1 ) ) );
     first()->growMode = gfGrowHiX | gfGrowLoY | gfGrowHiY;
+
+    selectNext( False );
 
     if( (aOptions & fdNoLoadDir) == 0 )
         readDirectory();
