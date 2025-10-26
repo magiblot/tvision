@@ -28,8 +28,15 @@
 void initHistory();
 void doneHistory();
 
-TSubsystemsInit::TSubsystemsInit() noexcept
+TAppInit::TAppInit() noexcept
 {
+    // Initialize the subsystems needed for the application to work when first
+    // constructing a TApplication object.
+    //
+    // Originally, they were initialized statically at program startup,
+    // but that caused issues for applications that might be executed without
+    // a console or terminal (e.g., TVHC), and it could also lead to problems
+    // related to static initialization order.
     static THardwareInfo hwInfoManager;
     static TMouse tms;
     static TScreen tsc;
