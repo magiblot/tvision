@@ -101,7 +101,7 @@ public:
 
     TRect( int ax, int ay, int bx, int by ) noexcept;
     TRect( TPoint p1, TPoint p2 ) noexcept;
-    TRect() noexcept {}
+    TRect() noexcept;
 
     TRect& move( int aDX, int aDY ) noexcept;
     TRect& grow( int aDX, int aDY ) noexcept;
@@ -128,6 +128,12 @@ inline TRect::TRect( TPoint p1, TPoint p2 ) noexcept
 {
     a = p1;
     b = p2;
+}
+
+inline TRect::TRect() noexcept
+{
+    a.x = a.y = 0;
+    b.x = b.y = 0;
 }
 
 inline TRect& TRect::move( int aDX, int aDY ) noexcept
