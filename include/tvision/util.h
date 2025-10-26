@@ -46,12 +46,17 @@ inline constexpr const T& max( const T& a, const T& b )
 void fexpand( char *rpath ) noexcept;
 void fexpand( char *rpath, const char *relativeTo ) noexcept;
 
-char hotKey( const char *s ) noexcept;
-ushort ctrlToArrow( ushort ) noexcept;
+char hotKey( TStringView s ) noexcept;
+ushort ctrlToArrow( ushort keyCode ) noexcept;
 char getAltChar( ushort keyCode ) noexcept;
 ushort getAltCode( char ch ) noexcept;
-char getCtrlChar(ushort) noexcept;
-ushort getCtrlCode(uchar) noexcept;
+char getCtrlChar( ushort keyCode ) noexcept;
+ushort getCtrlCode( uchar ch ) noexcept;
+
+struct _FAR KeyDownEvent;
+TStringView hotKeyStr( TStringView s ) noexcept;
+TStringView getAltCharStr( const KeyDownEvent & ) noexcept;
+TStringView getCtrlCharStr( const KeyDownEvent & ) noexcept;
 
 ushort historyCount( uchar id ) noexcept;
 const char *historyStr( uchar id, int index ) noexcept;

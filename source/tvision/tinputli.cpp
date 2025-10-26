@@ -38,14 +38,27 @@
 
 const int CONTROL_Y = 25;
 
-char hotKey( const char *s ) noexcept
+char hotKey( TStringView s ) noexcept
 {
-    char *p;
-
-    if( (p = strchr( (char *) s, '~' )) != 0 )
-        return toupper((uchar) p[1]);
+    TStringView p = hotKeyStr( s );
+    if ( p.empty() )
+        return '\0';
     else
-        return 0;
+        return toupper((uchar) p[0]);
+}
+
+TStringView hotKeyStr( TStringView s ) noexcept
+{
+    const char *begin = (const char *) memchr( s.begin(), '~', s.size() );
+    if( begin != 0 )
+        {
+        begin += 1; // Skip the '~'.
+        const char *end = (const char *) memchr( begin, '~', s.end() - begin );
+        if ( end == 0 )
+            end = s.end();
+        return TStringView( begin, end - begin );
+        }
+    return TStringView();
 }
 
 static int prevWord(const char *s, int pos) noexcept

@@ -11,6 +11,7 @@
  */
 
 #define Uses_TKeys
+#define Uses_TEvent
 #define Uses_TEditWindow
 #define Uses_TFileList
 #define Uses_TProgram
@@ -35,26 +36,47 @@
 static const char altCodes1[] =
     "QWERTYUIOP\0\0\0\0ASDFGHJKL\0\0\0\0\0ZXCVBNM";
 static const char altCodes2[] = "1234567890-=";
+static const char altSpaceChar = '\xF0'; // '≡' in CP437.
 
-#pragma warn -rng
+static const char ctrlCodes[] = "\0ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 char getAltChar(ushort keyCode) noexcept
 {
-    if ((keyCode & 0xff) == 0)
+    KeyDownEvent keyDown = {{keyCode}};
+    TStringView altChar = getAltCharStr(keyDown);
+
+    if( altChar.empty() )
+        return '\0';
+    else
+        return altChar[0];
+}
+
+TStringView getAltCharStr(const KeyDownEvent &keyDown) noexcept
+{
+    // If the Alt+Key KeyDownEvent contains text, return it.
+    if( (keyDown.controlKeyState & kbAltShift) != 0 &&
+        !keyDown.getText().empty()
+      )
+        return keyDown.getText();
+
+    // Otherwise, try mapping the scan code to a character.
+    if( keyDown.charScan.charCode == 0 )
         {
-        ushort tmp = (keyCode >> 8);
+        ushort scanCode = keyDown.charScan.scanCode;
 
-        if( tmp == 2 )
-            return '\xF0';      // special case to handle alt-Space
+        const char *ch = 0;
+        if( keyDown.keyCode == kbAltSpace )
+            ch = &altSpaceChar; // special case to handle alt-Space
+        else if( scanCode >= 0x10 && scanCode <= 0x32 )
+            ch = &altCodes1[scanCode - 0x10]; // alt-letter
+        else if( scanCode >= 0x78 && scanCode <= 0x83 )
+            ch = &altCodes2[scanCode - 0x78]; // alt-number
 
-        else if( tmp >= 0x10 && tmp <= 0x32 )
-            return altCodes1[tmp-0x10];     // alt-letter
-
-        else if( tmp >= 0x78 && tmp <= 0x83 )
-            return altCodes2[tmp - 0x78];   // alt-number
-
+        if( ch != 0 && *ch != '\0')
+            return TStringView(ch, 1);
         }
-    return 0;
+
+    return TStringView();
 }
 
 ushort getAltCode(char c) noexcept
@@ -64,8 +86,8 @@ ushort getAltCode(char c) noexcept
 
     c = toupper((uchar) c);
 
-    if( c == '\xF0' )
-        return kbAltSpace;  // special case to handle alt-Space
+    if( c == altSpaceChar )
+        return kbAltSpace; // special case to handle alt-Space
 
     size_t i;
     for( i = 0; i < sizeof( altCodes1 ); i++)
@@ -79,25 +101,40 @@ ushort getAltCode(char c) noexcept
     return 0;
 }
 
-inline uchar lo(ushort w) { return w & 0xff; }
-inline uchar hi(ushort w) { return w >> 8; }
-
 char getCtrlChar(ushort keyCode) noexcept
 {
-    if ( (lo(keyCode)!= 0) && (lo(keyCode) <= ('Z'-'A'+1)))
-        return lo(keyCode) + 'A' - 1;
+    KeyDownEvent keyDown = {{keyCode}};
+    TStringView ctrlChar = getCtrlCharStr(keyDown);
+
+    if( ctrlChar.empty() )
+        return '\0';
     else
-        return 0;
+        return ctrlChar[0];
+}
+
+TStringView getCtrlCharStr(const KeyDownEvent &keyDown) noexcept
+{
+    // If the Ctrl+Key KeyDownEvent contains text, return it.
+    // Note that the Alt modifier must not be present, since that would be
+    // considered an Alt+Key press.
+    if( (keyDown.controlKeyState & kbAltShift) == 0 &&
+        (keyDown.controlKeyState & kbCtrlShift) != 0 &&
+        !keyDown.getText().empty()
+      )
+        return keyDown.getText();
+
+    // Otherwise, map control characters into the corresponding ASCII character.
+    uchar charCode = keyDown.charScan.charCode;
+    if( 0 < charCode && charCode <= ('Z' - 'A' + 1) )
+        return TStringView(&ctrlCodes[charCode], 1);
+
+    return TStringView();
 }
 
 ushort getCtrlCode(uchar ch) noexcept
 {
     return getAltCode(ch)|(((('a'<=ch)&&(ch<='z'))?(ch&~0x20):ch)-'A'+1);
 }
-
-
-#pragma warn .rng
-
 
 const char * _NEAR TPXPictureValidator::errorMsg = "Error in picture format.\n %s";
 const char * _NEAR TFilterValidator::errorMsg = "Invalid character in input";
