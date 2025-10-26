@@ -73,6 +73,8 @@ public:
 
     DisplayBuffer() noexcept;
 
+    void reset() noexcept;
+
     void setCaretSize(int size) noexcept;
     void setCaretPosition(int x, int y) noexcept;
     void screenWrite(int x, int y, TScreenCell *buf, int len) noexcept;
@@ -86,6 +88,12 @@ public:
 
     int timeUntilPendingFlushMs() noexcept;
 };
+
+inline void DisplayBuffer::reset() noexcept
+{
+    this->~DisplayBuffer();
+    new (this) DisplayBuffer;
+}
 
 inline bool DisplayBuffer::inBounds(int x, int y) const noexcept
 {

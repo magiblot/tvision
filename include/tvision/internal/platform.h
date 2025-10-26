@@ -122,8 +122,7 @@ public:
         { console.lock([&] (auto *c) { displayBuf.flushScreen(c->display); }); }
     TScreenCell *reloadScreenInfo() noexcept
         { return console.lock([&] (auto *c) { return displayBuf.reloadScreenInfo(c->display); }); }
-    void freeScreenBuffer() noexcept
-        { displayBuf.~DisplayBuffer(); new (&displayBuf) DisplayBuffer; }
+    void freeScreenBuffer() noexcept { displayBuf.reset(); }
 
     bool setClipboardText(TStringView text) noexcept
         { return console.lock([&] (auto *c) { return c->setClipboardText(text); }); }
