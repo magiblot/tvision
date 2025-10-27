@@ -2,54 +2,7 @@
 #define TVISION_TERMIO_TEST_H
 
 #include <internal/termio.h>
-
-inline bool operator==(const TEvent &a, const TEvent &b)
-{
-    if (a.what != b.what)
-        return false;
-    if (a.what == evNothing)
-        return true;
-    if (a.what == evKeyDown)
-        return
-            a.keyDown.keyCode == b.keyDown.keyCode &&
-            a.keyDown.controlKeyState == b.keyDown.controlKeyState &&
-            a.keyDown.getText() == b.keyDown.getText();
-    if (a.what == evMouse)
-        return
-            a.mouse.where == b.mouse.where &&
-            a.mouse.eventFlags == b.mouse.eventFlags &&
-            a.mouse.controlKeyState == b.mouse.controlKeyState &&
-            a.mouse.buttons == b.mouse.buttons &&
-            a.mouse.wheel == b.mouse.wheel;
-    abort();
-}
-
-inline std::ostream &operator<<(std::ostream &os, const TEvent &ev)
-{
-    os << "{";
-    if (ev.what == evKeyDown)
-    {
-        os << "{";
-        printKeyCode(os, ev.keyDown.keyCode);
-        os << "}, {";
-        printControlKeyState(os, ev.keyDown.controlKeyState);
-        os << "}, '" << ev.keyDown.getText() << "'";
-    }
-    else if (ev.what == evMouse)
-    {
-        os << "(" << ev.mouse.where.x << "," << ev.mouse.where.y << ")";
-        os << ", ";
-        printMouseEventFlags(os, ev.mouse.eventFlags);
-        os << ", ";
-        printControlKeyState(os, ev.mouse.controlKeyState);
-        os << ", ";
-        printMouseButtonState(os, ev.mouse.buttons);
-        os << ", ";
-        printMouseWheelState(os, ev.mouse.wheel);
-    }
-    os << "}";
-    return os;
-}
+#include <test_operators.h>
 
 namespace tvision
 {
@@ -105,41 +58,10 @@ inline std::ostream &operator<<(std::ostream &os, const ParseResultEvent &p)
     {
         case Rejected: os << "Rejected"; break;
         case Ignored: os << "Ignored"; break;
-        case Accepted:
-        {
-            os << "Accepted, {";
-            printEventCode(os, p.ev.what);
-            os << ", " << p.ev << "}";
-        }
+        case Accepted: os << "Accepted, " << p.ev; break;
     }
     os << "}";
     return os;
-}
-
-inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text = {})
-{
-    TEvent ev {};
-    ev.what = evKeyDown;
-    ev.keyDown.keyCode = keyCode;
-    ev.keyDown.controlKeyState = controlKeyState;
-    while (ev.keyDown.textLength <= sizeof(ev.keyDown.text) && ev.keyDown.textLength < text.size())
-    {
-        ev.keyDown.text[ev.keyDown.textLength] = text[ev.keyDown.textLength];
-        ++ev.keyDown.textLength;
-    }
-    return ev;
-}
-
-inline TEvent mouseEv(TPoint where, ushort eventFlags, ushort controlKeyState, uchar buttons, uchar wheel)
-{
-    TEvent ev {};
-    ev.what = evMouse;
-    ev.mouse.where = where;
-    ev.mouse.eventFlags = eventFlags;
-    ev.mouse.controlKeyState = controlKeyState;
-    ev.mouse.buttons = buttons;
-    ev.mouse.wheel = wheel;
-    return ev;
 }
 
 } // namespace tvision

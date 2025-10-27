@@ -14,7 +14,7 @@ template <class T1, class T2, class T3>
 inline void expectResultMatches(const T1 &actual, const TestCase<T2, T3> &testCase)
 {
     auto &expected = testCase.result;
-    EXPECT_EQ(actual, expected) << "With test input:\n" << testCase.input;
+    EXPECT_EQ(actual, expected) << "With test input:\n" << testing::PrintToString(testCase.input);
 }
 
 #endif // TVISION_TEST_H
