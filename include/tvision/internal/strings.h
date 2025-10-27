@@ -33,7 +33,7 @@ inline char *fast_btoa(uint8_t value, char *buffer) noexcept
 // Pre: the capacity of 'buffer' is at least 4 bytes.
 {
     extern const btoa_lut_t btoa_lut;
-    const auto &lut = (btoa_lut_elem_t (&) [256]) btoa_lut;
+    auto &lut = (const btoa_lut_elem_t (&) [256]) btoa_lut;
     // Optimization: read and write the whole LUT entry at once in order to
     // minimize memory accesses. We can afford to write more bytes into 'buffer'
     // than digits.
