@@ -60,8 +60,6 @@ public:
                                         DisplayAdapter &display,
                                         InputAdapter &input ) noexcept;
     ~LinuxConsoleAdapter();
-
-    static int charWidth(uint32_t) noexcept;
 };
 
 } // namespace tvision

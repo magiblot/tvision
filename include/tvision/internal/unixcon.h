@@ -41,8 +41,6 @@ public:
 
     bool setClipboardText(TStringView) noexcept override;
     bool requestClipboardText(void (&)(TStringView)) noexcept override;
-
-    static int charWidth(uint32_t) noexcept;
 };
 
 } // namespace tvision

@@ -1,17 +1,9 @@
 #define Uses_TText
 #include <tvision/tv.h>
-#include <tvision/internal/platform.h>
-#include <tvision/internal/unixcon.h>
 
 #include <test.h>
+#include <test_charops.h>
 #include <stdlib.h>
-
-#define COMBINING_ZIGZAG_UTF8 "\xCD\x9B"
-#define COMBINING_ZIGZAG_UTF32 U"\u035B"
-#define DEVANAGARI_VIRAMA_UTF8 "\xE0\xA5\x8D"
-#define DEVANAGARI_VIRAMA_UTF32 U"\u094D"
-#define ZERO_WIDTH_JOINER_UTF8 "\xE2\x80\x8D"
-#define ZERO_WIDTH_JOINER_UTF32 U"\u200D"
 
 static std::ostream &operator<<(std::ostream &os, TSpan<const char32_t> span)
 {
@@ -29,34 +21,9 @@ static std::ostream &operator<<(std::ostream &os, TSpan<const char32_t> span)
     return os;
 }
 
-static int mockCharWidth(uint32_t ch) noexcept
-// Test-only implementation of Platform::charWidth that does not depend on the
-// system locale.
-{
-    switch (ch)
-    {
-        case *COMBINING_ZIGZAG_UTF32:
-        case *DEVANAGARI_VIRAMA_UTF32:
-        case *ZERO_WIDTH_JOINER_UTF32:
-        case U'\0':
-            return 0;
-        default:
-            if (ch <= U'\x1F' || (U'\x7F' <= ch && ch <= U'\x9F'))
-                return -1;
-            return 1;
-    }
-}
-
-static int setUpMockCharWidth = [] ()
-{
-    tvision::Platform::charWidth = mockCharWidth;
-
-    (void) setUpMockCharWidth;
-    return 0;
-}();
-
 TEST(TText, ShouldConvertUtf8ControlCharacters)
 {
+    TestCharOps::init();
     static const TestCase<TStringView> testCases[] =
     {
         {{"\0", 1}, {"\0", 1}},
@@ -74,8 +41,7 @@ TEST(TText, ShouldConvertUtf8ControlCharacters)
     for (auto &testCase : testCases)
     {
         TScreenCell cells[1] {};
-        size_t i = 0, j = 0;
-        while(TText::drawOne(cells, i, testCase.input, j));
+        TText::drawStr(cells, 0, testCase.input, 0);
         TStringView actual = cells[0]._ch.getText();
         expectResultMatches(actual, testCase);
     }
@@ -83,6 +49,7 @@ TEST(TText, ShouldConvertUtf8ControlCharacters)
 
 TEST(TText, ShouldConvertUtf32ControlCharacters)
 {
+    TestCharOps::init();
     static const TestCase<TSpan<const char32_t>, TStringView> testCases[] =
     {
         {{U"\0", 1}, {"\0", 1}},
@@ -101,8 +68,7 @@ TEST(TText, ShouldConvertUtf32ControlCharacters)
     {
         TScreenCell cells[1] {};
         TSpan<const uint32_t> input {(const uint32_t *) testCase.input.data(), testCase.input.size()};
-        size_t i = 0, j = 0;
-        while(TText::drawOne(cells, i, input, j));
+        TText::drawStr(cells, 0, input, 0);
         TStringView actual = cells[0]._ch.getText();
         expectResultMatches(actual, testCase);
     }
@@ -111,6 +77,7 @@ TEST(TText, ShouldConvertUtf32ControlCharacters)
 TEST(TText, ShouldDrawTextInScreenCells)
 {
     enum { nCells = 2 };
+    TestCharOps::init();
     static const TestCase<TStringView, std::vector<TStringView>> testCases[] =
     {
         {"a", {"a", {"\0", 1}}},

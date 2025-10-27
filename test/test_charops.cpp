@@ -1,0 +1,28 @@
+#include <tvision/internal/platform.h>
+#include "test_charops.h"
+
+// Test-only implementation of Platform::CharOps that does not depend on the
+// system locale.
+
+void TestCharOps::init()
+{
+    tvision::Platform::charOps = {
+        mockCharWidth,
+    };
+};
+
+int TestCharOps::mockCharWidth(uint32_t ch) noexcept
+{
+    switch (ch)
+    {
+        case *COMBINING_ZIGZAG_UTF32:
+        case *DEVANAGARI_VIRAMA_UTF32:
+        case *ZERO_WIDTH_JOINER_UTF32:
+        case U'\0':
+            return 0;
+        default:
+            if (ch <= U'\x1F' || (U'\x7F' <= ch && ch <= U'\x9F'))
+                return -1;
+            return 1;
+    }
+}

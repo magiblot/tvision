@@ -52,7 +52,6 @@ class Win32ConsoleAdapter final : public ConsoleAdapter
 public:
 
     static Win32ConsoleAdapter &create() noexcept;
-    static int charWidth(uint32_t) noexcept;
 };
 
 class Win32Input final : public InputAdapter

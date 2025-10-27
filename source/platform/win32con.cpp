@@ -119,8 +119,8 @@ void Win32ConsoleAdapter::initEncoding(bool isLegacyConsole, UINT &cpInput, UINT
         SetConsoleOutputCP(GetOEMCP());
     else
         SetConsoleOutputCP(CP_UTF8);
-    // This only affects the C runtime functions, but it has to be invoked again
-    // after calling SetConsoleCP().
+    // This only affects the C runtime functions. It has to be invoked every
+    // time SetConsoleCP() gets called.
     setlocale(LC_ALL, ".utf8");
 }
 

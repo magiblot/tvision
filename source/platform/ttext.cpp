@@ -3,12 +3,7 @@
 
 #include <internal/codepage.h>
 #include <internal/platform.h>
-#include <internal/unixcon.h>
-#include <internal/linuxcon.h>
-#include <internal/win32con.h>
-#include <internal/winwidth.h>
 #include <internal/utf8.h>
-#include <wchar.h>
 
 namespace ttext
 {
@@ -110,54 +105,11 @@ static mbstat_r mbstat(TStringView text) noexcept
     int length = mbtowc(wc, text);
     int width = 1;
     if (length > 1)
-        width = Platform::charWidth(wc);
+        width = Platform::charOps.width(wc);
     return {length, width};
 }
 
 } // namespace ttext
-
-namespace tvision
-{
-
-#ifdef _TV_UNIX
-int UnixConsoleAdapter::charWidth(uint32_t wc) noexcept
-{
-    return wcwidth(wc);
-}
-#endif // _TV_UNIX
-
-#ifdef __linux__
-int LinuxConsoleAdapter::charWidth(uint32_t wc) noexcept
-{
-    // The Linux Console does not support zero-width characters. It assumes
-    // all characters are either single or double-width. Additionally, the
-    // double-width characters are the same as in the wcwidth() implementation by
-    // Markus Kuhn from 2007-05-26 (https://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c).
-    return 1 +
-        (wc >= 0x1100 &&
-         (wc <= 0x115f ||
-          wc == 0x2329 || wc == 0x232a ||
-          (wc >= 0x2e80 && wc <= 0xa4cf &&
-           wc != 0x303f) ||
-          (wc >= 0xac00 && wc <= 0xd7a3) ||
-          (wc >= 0xf900 && wc <= 0xfaff) ||
-          (wc >= 0xfe10 && wc <= 0xfe19) ||
-          (wc >= 0xfe30 && wc <= 0xfe6f) ||
-          (wc >= 0xff00 && wc <= 0xff60) ||
-          (wc >= 0xffe0 && wc <= 0xffe6) ||
-          (wc >= 0x20000 && wc <= 0x2fffd) ||
-          (wc >= 0x30000 && wc <= 0x3fffd)));
-}
-#endif // __linux__
-
-#ifdef _WIN32
-int Win32ConsoleAdapter::charWidth(uint32_t wc) noexcept
-{
-    return WinWidth::width(wc);
-}
-#endif // _WIN32
-
-} // namespace tvision
 
 size_t TText::width(TStringView text) noexcept
 {
@@ -209,7 +161,7 @@ TText::Lw TText::nextImpl(TSpan<const uint32_t> text) noexcept
     using namespace tvision;
     if (text.size())
     {
-        int width = Platform::charWidth(text[0]);
+        int width = Platform::charOps.width(text[0]);
         return {
             1,
             size_t(width ? max(width, 1) : 0)
@@ -365,7 +317,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         char utf8[4] = {};
         size_t length = utf32To8(textU32[j], utf8);
         TStringView textU8(utf8, length);
-        int width = Platform::charWidth(textU32[j]);
+        int width = Platform::charOps.width(textU32[j]);
         if (width < 0)
         {
             if (i < cells.size())
