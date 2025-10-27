@@ -8,6 +8,7 @@ void TestCharOps::init()
 {
     tvision::Platform::charOps = {
         mockCharWidth,
+        mockCharToLower,
     };
 };
 
@@ -25,4 +26,9 @@ int TestCharOps::mockCharWidth(uint32_t ch) noexcept
                 return -1;
             return 1;
     }
+}
+
+uint32_t TestCharOps::mockCharToLower(uint32_t ch) noexcept
+{
+    return ch;
 }

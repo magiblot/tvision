@@ -5,6 +5,7 @@
 #include <internal/conctl.h>
 
 #include <locale.h>
+#include <wctype.h>
 #include <wchar.h>
 
 namespace tvision
@@ -21,6 +22,7 @@ namespace tvision
 Platform::CharOps Platform::charOps =
 {
     &initCharWidth,
+    &initCharToLower,
 };
 
 void Platform::initLocale() noexcept
@@ -80,6 +82,14 @@ static int linuxConsoleCharWidth(uint32_t wc) noexcept
 #   endif // __linux__
 #endif // _WIN32
 
+static uint32_t charToLower(uint32_t ch) noexcept
+{
+    // Skip the conversion if the character does not fit in a single wchar_t.
+    if (sizeof(uint32_t) > sizeof(wchar_t) && ch > WCHAR_MAX)
+        return ch;
+    return (uint32_t) towlower((wchar_t) ch);
+}
+
 void Platform::initCharOps() noexcept
 {
     static int init = [] ()
@@ -98,6 +108,8 @@ void Platform::initCharOps() noexcept
 #   endif // __linux__
 #endif // _WIN32
 
+        charOps.toLower = charToLower;
+
         Platform::charOps = charOps;
 
         (void) init;
@@ -109,6 +121,12 @@ int Platform::initCharWidth(uint32_t wc) noexcept
 {
     initCharOps();
     return charOps.width(wc);
+}
+
+uint32_t Platform::initCharToLower(uint32_t wc) noexcept
+{
+    initCharOps();
+    return charOps.toLower(wc);
 }
 
 } // namespace tvision

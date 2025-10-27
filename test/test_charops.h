@@ -19,6 +19,7 @@ public:
 private:
 
     static int mockCharWidth(uint32_t) noexcept;
+    static uint32_t mockCharToLower(uint32_t) noexcept;
 };
 
 #endif // TVISION_TEST_CHAROPS_H

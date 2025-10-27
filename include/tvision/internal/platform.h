@@ -86,6 +86,7 @@ class Platform
     static void initLocale() noexcept;
     static void initCharOps() noexcept;
     static int initCharWidth(uint32_t) noexcept;
+    static uint32_t initCharToLower(uint32_t) noexcept;
 
     static void signalCallback(bool) noexcept;
 
@@ -102,6 +103,7 @@ public:
     static struct CharOps
     {
         int (*width)(uint32_t) noexcept;
+        uint32_t (*toLower)(uint32_t) noexcept;
     } charOps;
 
     // Note: explicit 'this' required by GCC 5.

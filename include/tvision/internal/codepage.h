@@ -20,6 +20,11 @@ public:
 
     static void init() noexcept;
 
+    static const char (&toUtf8(unsigned char c) noexcept)[4]
+    {
+        return (*currentToUtf8)[c];
+    }
+
     static uint32_t toPackedUtf8(unsigned char c) noexcept
     {
         uint32_t asInt;

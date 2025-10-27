@@ -40,6 +40,10 @@ public:
     // position 'index'.
     static size_t prev(TStringView text, size_t index) noexcept;
 
+    // Compares two strings ignoring the case differences. Also takes into
+    // account characters encoded in extended ASCII.
+    static Boolean equalsIgnoreCase(TStringView a, TStringView b) noexcept;
+
     // Converts the first character in 'text' to the current code page.
     // If there is no possible converion or 'text' is empty, returns '\0'.
     static char toCodePage(TStringView text) noexcept;
@@ -186,6 +190,13 @@ inline Boolean TText::next(TStringView text, size_t &index, size_t &width)
 inline size_t TText::prev(TStringView text, size_t index)
 {
     return 0 < index && index <= text.size();
+}
+
+inline Boolean TText::equalsIgnoreCase(TStringView a, TStringView b)
+{
+    if (a.size() != b.size())
+        return False;
+    return Boolean( a.empty() || memicmp(a.begin(), b.begin(), a.size()) == 0 );
 }
 
 inline char TText::toCodePage(TStringView text)

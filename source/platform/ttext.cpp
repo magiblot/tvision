@@ -188,6 +188,42 @@ size_t TText::prev(TStringView text, size_t index) noexcept
     return 0;
 }
 
+bool TText::equalsIgnoreCase(TStringView a, TStringView b) noexcept
+{
+    using namespace tvision;
+    while (!a.empty() && !b.empty())
+    {
+        // Convert the first character in each string to UTF-32.
+        // If the conversion fails, assume the character to be in extended ASCII.
+        uint32_t wcA = 0;
+        int lenA;
+        if ((lenA = ttext::mbtowc(wcA, a)) == -1)
+        {
+            ttext::mbtowc(wcA, {CpTranslator::toUtf8(a[0]), 4});
+            lenA = 1;
+        }
+
+        uint32_t wcB = 0;
+        int lenB;
+        if ((lenB = ttext::mbtowc(wcB, b)) == -1)
+        {
+            ttext::mbtowc(wcB, {CpTranslator::toUtf8(b[0]), 4});
+            lenB = 1;
+        }
+
+        // Convert both characters to lowercase. This is the recommended way
+        // of doing case-insensitive comparison.
+        if ( Platform::charOps.toLower(wcA) !=
+             Platform::charOps.toLower(wcB) )
+            break;
+
+        a = a.substr(lenA);
+        b = b.substr(lenB);
+    }
+
+    return a.empty() && b.empty();
+}
+
 char TText::toCodePage(TStringView text) noexcept
 {
     using namespace tvision;
