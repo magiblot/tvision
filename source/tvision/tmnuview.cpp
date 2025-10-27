@@ -20,6 +20,7 @@
 #define Uses_TEvent
 #define Uses_TGroup
 #define Uses_TMenuBox
+#define Uses_TText
 #define Uses_opstream
 #define Uses_ipstream
 #include <tvision/tv.h>
@@ -180,7 +181,6 @@ ushort TMenuView::execute()
     Boolean    autoSelect = False;
     Boolean    firstEvent = True;
     menuAction action;
-    char   ch;
     ushort result = 0;
     TMenuItem *itemShown = 0;
     TMenuItem *p;
@@ -312,12 +312,13 @@ ushort TMenuView::execute()
                         break;
                     default:
                         target = this;
-                        ch = getAltChar(e.keyDown.keyCode);
-                        if( ch == 0 )
-                            ch = e.keyDown.charScan.charCode;
-                        else
+                        if( !getAltCharStr(e.keyDown).empty() )
+                            {
                             target = topMenu();
-                        p = target->findItem(ch);
+                            p = target->findAltShortcut(e.keyDown);
+                            }
+                        else
+                            p = findItem(e.keyDown.getText());
                         if( p == 0 )
                             {
                             p = topMenu()->hotKey(e.keyDown);
@@ -336,7 +337,7 @@ ushort TMenuView::execute()
                             }
                         else if( parentMenu != target ||
                                  parentMenu->current != p )
-                                action = doReturn;
+                            action = doReturn;
                     }
                 break;
             case  evCommand:
@@ -413,19 +414,35 @@ ushort TMenuView::execute()
 
 TMenuItem *TMenuView::findItem( char ch )
 {
-    ch = toupper((uchar) ch);
+    return findItem(TStringView(&ch, 1));
+}
+
+TMenuItem *TMenuView::findItem( TStringView ch )
+{
     TMenuItem *p = menu->items;
     while( p != 0 )
         {
-        if( p->name != 0 && !p->disabled )
-            {
-            char *loc = strchr( (char *) p->name, '~' );
-            if( loc != 0 && ch == (char) toupper((uchar) loc[1]) )
-                return p;
-            }
+        TStringView shortcut = hotKeyStr(p->name);
+        if( !p->disabled &&
+            !shortcut.empty() &&
+            TText::equalsIgnoreCase(ch, hotKeyStr(p->name))
+          )
+            return p;
         p =  p->next;
         }
     return 0;
+}
+
+TMenuItem *TMenuView::findAltShortcut( const KeyDownEvent &keyDown )
+{
+    TMenuItem *p = 0;
+    // First, try to find a menu item that matches the KeyDownEvent's text.
+    if( !keyDown.getText().empty() )
+        p = findItem( getAltCharStr(keyDown) );
+    // If no match was found, try matching using the KeyDownEvent's key code.
+    if( p == 0 )
+        p = findItem( getAltChar(keyDown.keyCode) );
+    return p;
 }
 
 TRect TMenuView::getItemRect( TMenuItem * )
@@ -507,7 +524,7 @@ void TMenuView::handleEvent( TEvent& event )
                 do_a_select(event);
                 break;
             case  evKeyDown:
-                if( findItem(getAltChar(event.keyDown.keyCode)) != 0 )
+                if( findAltShortcut(event.keyDown) != 0 )
                     do_a_select(event);
                 else
                     {

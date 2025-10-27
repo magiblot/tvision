@@ -139,6 +139,7 @@ public:
 class _FAR TRect;
 class _FAR TMenu;
 struct _FAR TEvent;
+struct _FAR KeyDownEvent;
 
 class TMenuView : public TView
 {
@@ -149,7 +150,8 @@ public:
     TMenuView( const TRect& bounds ) noexcept;
 
     virtual ushort execute();
-    TMenuItem *findItem( char ch );
+    TMenuItem *findItem( char shortcut );
+    TMenuItem *findItem( TStringView shortcut );
     virtual TRect getItemRect( TMenuItem *item );
     virtual ushort getHelpCtx();
     virtual TPalette& getPalette() const;
@@ -180,6 +182,7 @@ private:
     Boolean updateMenu( TMenu *menu );
     void do_a_select( TEvent& );
     TMenuItem *findHotKey( TMenuItem *p, TKey key );
+    TMenuItem *findAltShortcut( const KeyDownEvent & );
 
 private:
 

@@ -30,5 +30,11 @@ int TestCharOps::mockCharWidth(uint32_t ch) noexcept
 
 uint32_t TestCharOps::mockCharToLower(uint32_t ch) noexcept
 {
-    return ch;
+    switch (ch)
+    {
+        case U'F': return U'f';
+        case U'Ф': return U'ф';
+        case U'Ы': return U'ы';
+        default: return ch;
+    }
 }
