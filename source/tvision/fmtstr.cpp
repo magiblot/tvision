@@ -2,8 +2,8 @@
 /* filename -       fmtstr.cpp                                */
 /*                                                            */
 /* function(s)                                                */
-/*            fmtStr                                          */
-/*            vFmtStr                                         */
+/*            formatStr                                       */
+/*            vFormatStr                                      */
 /*------------------------------------------------------------*/
 
 #include <tvision/tv.h>
@@ -14,18 +14,18 @@
 #define va_copy(dst, src) ((void) ((dst) = (src)))
 #endif // __BORLANDC__
 
-char *fmtStr(const char _FAR *fmt, ...) noexcept
+char *formatStr(const char _FAR *fmt, ...) noexcept
 {
     va_list ap;
 
     va_start(ap, fmt);
-    char *ret = vFmtStr(fmt, ap);
+    char *ret = vFormatStr(fmt, ap);
     va_end(ap);
 
     return ret;
 }
 
-char *vFmtStr(const char _FAR *fmt, va_list ap) noexcept
+char *vFormatStr(const char _FAR *fmt, va_list ap) noexcept
 {
     va_list ap2;
 

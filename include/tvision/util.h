@@ -77,8 +77,8 @@ ushort popupMenu(TPoint where, TMenuItem &aMenu, TGroup * = 0);
 Boolean lowMemory() noexcept;
 
 char *newStr( TStringView ) noexcept;
-char *fmtStr( const char _FAR *format, ... ) noexcept;
-char *vFmtStr( const char _FAR *format, va_list args ) noexcept;
+char *formatStr( const char _FAR *format, ... ) noexcept;
+char *vFormatStr( const char _FAR *format, va_list args ) noexcept;
 
 Boolean driveValid( char drive ) noexcept;
 Boolean isDir( const char *str ) noexcept;
