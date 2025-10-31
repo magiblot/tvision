@@ -296,8 +296,6 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 
 * `TVISION_MAX_FPS`: maximum refresh rate, default `60`. This can help keep smoothness in terminal emulators with unefficient handling of box-drawing characters. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to `THardwareInfo::screenWrite` (useful when debugging).
 
-* `TVISION_CODEPAGE`: the character set used internally by Turbo Vision to translate *extended ASCII* into Unicode. Valid values at the moment are `437` and `850`, with `437` being the default, although adding more takes very little effort.
-
 ### Unix
 
 * Ncurses-based terminal support.
@@ -338,7 +336,7 @@ The following environment variables are also taken into account:
 
 The following are not available when compiling with Borland C++:
 
-* The console's codepage is set to UTF-8 on startup and restored on exit.
+* The console's code page is set to UTF-8 on startup and restored on exit.
 * Microsoft's C runtime functions are set automatically to UTF-8 mode, so you as a developer don't need to use the `wchar_t` variants.
 * If the console crashes, a new one is allocated automatically.
 
@@ -477,32 +475,29 @@ switch (ev.keyDown.keyCode) {
     // Key shortcuts are usually checked first.
     // ...
     default: {
-        // The character is encoded in the current codepage
-        // (CP437 by default).
         char c = ev.keyDown.charScan.charCode;
         // ...
     }
 }
 ```
 
-Some of the existing Turbo Vision classes that deal with text input still depend on this methodology, which has not changed. Single-byte characters, when representable in the current codepage, continue to be available in `ev.keyDown.charScan.charCode`.
+However, the `charScan.charCode` field can only hold a single-byte character and therefore it does not support Unicode. For backward compatibility, the `charScan.charCode` field in key press events still contains code page characters (CP437, unless overriden by the developer).
 
-Unicode support consists in two new fields in `ev.keyDown` (which is a `struct KeyDownEvent`):
+For Unicode support, two new fields have been introduced in `ev.keyDown` (which is a `struct KeyDownEvent`):
 
 * `char text[4]`, which may contain whatever was read from the terminal: usually a UTF-8 sequence, but possibly any kind of raw data.
 * `uchar textLength`, which is the number of bytes of data available in `text`, from 0 to 4.
 
-Note that the `text` string is not null-terminated.
-You can get a `TStringView` out of a `KeyDownEvent` with the `getText()` method.
+Note that the `text` string is not null-terminated. In order not to tamper with the `text` and `textLength` fields directly, you may instead use the `getText()` method which returns a string view.
 
-So a Unicode character can be retrieved from `TEvent` in the following way:
+So, a Unicode character can be retrieved from `TEvent` in the following way:
 
 ```c++
 switch (ev.keyDown.keyCode) {
     // ...
     default: {
-        std::string_view sv = ev.keyDown.getText();
-        processText(sv);
+        std::string_view ch = ev.keyDown.getText();
+        std::cerr << "Character received: " << ch << std::endl;
     }
 }
 ```
@@ -563,15 +558,15 @@ A new `TScreenCell` type is defined in `<tvision/scrncell.h>` which is capable o
 
 ### Text display rules
 
-A character provided as argument to any of the Turbo Vision API functions that deal with displaying text is interpreted as follows:
+Turbo Vision API functions that handle text display behave as follows:
 
-* Non-printable characters in the range `0x00` to `0xFF` are interpreted as characters in the active codepage. For instance, `0x7F` is displayed as `⌂` and `0xF0` as `≡` if using CP437. As an exception, `0x00` is always displayed as a regular space. These characters are all one column wide.
-* Character sequences which are not valid UTF-8 are interpreted as sequences of characters in the current codepage, as in the case above.
-* Valid UTF-8 sequences with a display width other than one are taken care of in a special way, see below.
+* ASCII control characters are handled as code page characters. For example, `'\x09'` is displayed as `○` instead of a tabulator, and `0x7F` as `⌂`. Null characters are displayed as spaces.
+* Other valid UTF-8 character sequences are displayed as-is. Double-width and combining characters are handled specially; see below.
+* Characters that do not form a valid UTF-8 sequence are also handled as code page characters. For example, a stray `'\xF0'` is displayed as `≡`, even if it is surrounded by valid UTF-8 sequences. So, the string `"╔[\xFE]╗"` is displayed as `╔[■]╗`.
 
-For example, the string `"╔[\xFE]╗"` may be displayed as `╔[■]╗`. This means that box-drawing characters can be mixed with UTF-8 in general, which is useful for backward compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
+This means that extended ASCII characters can be mixed with UTF-8, which is useful for backward-compatibility. If you rely on this behaviour, though, you may get unexpected results: for instance, `"\xC4\xBF"` is a valid UTF-8 sequence and is displayed as `Ŀ` instead of `─┐`.
 
-One of the issues of Unicode support is the existence of [double-width](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
+Another aspect of Unicode support is the existence of [double-width](https://convertcase.net/vaporwave-wide-text-generator/) characters and [combining](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) characters. This conflicts with Turbo Vision's original assumption that the screen is a grid of cells occupied by a single character each. Nevertheless, these cases are handled in the following way:
 
 * Double-width characters can be drawn anywhere on the screen and nothing bad happens if they overlap partially with other characters.
 * Zero-width characters overlay the previous character. For example, the sequence `में` consists of the single-width character `म` and the combining characters `े` and `ं`. In this case, three Unicode codepoints are fit into the same cell.
@@ -590,19 +585,19 @@ The usual way of writing to the screen is by using `TDrawBuffer`. A few methods 
 void TDrawBuffer::moveChar(ushort indent, char c, TColorAttr attr, ushort count);
 void TDrawBuffer::putChar(ushort indent, char c);
 ```
-`c` is always interpreted as a character in the active codepage.
+`c` is handled as a code page character.
 
 ```c++
 ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
 ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
 ```
-`str` is interpreted according to the rules exposed previously.
+`str` is displayed according to the rules exposed previously.
 
 ```c++
 ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strOffset = 0); // New
 ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strOffset = 0); // New
 ```
-`str` is interpreted according to the rules exposed previously, but:
+`str` is displayed according to the rules exposed previously, but:
 * `maxWidth` specifies the maximum amount of text that should be copied from `str`, measured in text width (not in bytes).
 * `strOffset` specifies the initial position in `str` where to copy from, measured in text width (not in bytes). This is useful for horizontal scrolling. If `strOffset` points to the middle of a double-width character, a space will be copied instead of the right half of the double-width character, since it is not possible to do such a thing.
 
@@ -627,7 +622,7 @@ Returns the displayed length of `s`.
 
 On Borland C++, these methods assume a single-byte encoding and all characters being one column wide. This makes it possible to write encoding-agnostic `draw()` and `handleEvent()` methods that work on both platforms without a single `#ifdef`.
 
-The functions above are implemented using the functions from the `TText` namespace, another API extension. You will have to use them directly if you want to fill `TScreenCell` objects with text manually. To give an example, below are some of the `TText` functions. You can find all of them with complete descriptions in `<tvision/ttext.h>`.
+The functions above are implemented using the functions from the `TText` namespace, another API extension. You will have to use them directly if you want to fill `TScreenCell` objects with text manually or to use a custom code page translation table. To give an example, below are some of the `TText` functions. You can find all of them with complete descriptions in `<tvision/ttext.h>`.
 
 ```c++
 size_t TText::next(TStringView text);
@@ -732,16 +727,17 @@ The following views can display Unicode text properly. Some of them also do hori
 - [x] `TFileViewer` (from the `tvdemo` application) ([`068bbf7a`](https://github.com/magiblot/tvision/commit/068bbf7a0a13482bda91f9f3411ec614f9a1e6ff)).
 - [x] `TFilePane` (from the `tvdir` application) ([`9bcd897c`](https://github.com/magiblot/tvision/commit/9bcd897cb7cf010ef34d0281d42e9ea58345ce53)).
 
-The following views can, in addition, process Unicode text or user input:
+The following views can, in addition, process Unicode user input:
 
 - [x] `TInputLine` ([`81066ee5`](https://github.com/magiblot/tvision/commit/81066ee5c05496612dfcd9cf75df5702cbfb9679), [`cb489d42`](https://github.com/magiblot/tvision/commit/cb489d42d522f7515c870942bcaa8f0f3dea3f35)).
 - [x] `TEditor` ([`702114dc`](https://github.com/magiblot/tvision/commit/702114dc03a13ebce2b52504eb122c97f9892de9)). Instances are in UTF-8 mode by default. You may switch back to single-byte mode by pressing `Ctrl+P`. This only changes how the document is displayed and the encoding of user input; it does not alter the document. This class is used in the `tvedit` application; you may test it there.
+- [x] Shortcuts in `TMenuView` ([`64e60064`](https://github.com/magiblot/tvision/commit/64e6006498cf1309d94cdbdb171142d5e9668b9a)).
 
 Views not in this list may not have needed any corrections or I simply forgot to fix them. Please submit an issue if you notice anything not working as expected.
 
 Use cases where Unicode is not supported (not an exhaustive list):
 
-- [ ] Highlighted key shortcuts, in general (e.g. `TMenuBox`, `TStatusLine`, `TButton`...).
+- [ ] Highlighted key shortcuts, in general (e.g. `TStatusLine`, `TButton`...).
 
 <div id="clipboard"></div>
 

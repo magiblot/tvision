@@ -1,34 +1,29 @@
 #ifndef TVISION_CODEPAGE_H
 #define TVISION_CODEPAGE_H
 
-#ifndef _TV_VERSION
-#include <tvision/tv.h>
-#endif
-
+#include <stdint.h>
 #include <string.h>
-#include <unordered_map>
 
 namespace tvision
 {
 
 class CpTranslator
 {
-    static const char (*currentToUtf8)[256][4];
-    static const std::unordered_map<uint32_t, char> *currentFromUtf8;
+    static const char (*cpToUtf8)[256][4];
 
 public:
 
-    static void init() noexcept;
+    static void setTranslation(const char (*translation)[256][4]) noexcept;
 
     static const char (&toUtf8(unsigned char c) noexcept)[4]
     {
-        return (*currentToUtf8)[c];
+        return (*cpToUtf8)[c];
     }
 
     static uint32_t toPackedUtf8(unsigned char c) noexcept
     {
         uint32_t asInt;
-        memcpy(&asInt, (*currentToUtf8)[c], sizeof(asInt));
+        memcpy(&asInt, (*cpToUtf8)[c], sizeof(asInt));
         return asInt;
     }
 
@@ -36,7 +31,7 @@ public:
 
     static char printableFromUtf8(TStringView s) noexcept
     {
-        uchar c = fromUtf8(s);
+        unsigned char c = fromUtf8(s);
         if (c < ' ')
             return '\0';
         return c;

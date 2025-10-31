@@ -44,9 +44,21 @@ public:
     // account characters encoded in extended ASCII.
     static Boolean equalsIgnoreCase(TStringView a, TStringView b) noexcept;
 
-    // Converts the first character in 'text' to the current code page.
-    // If there is no possible converion or 'text' is empty, returns '\0'.
+    // Converts the first character in 'text' to a code page character.
+    // If the character cannot be converted or 'text' is empty, returns '\0'.
     static char toCodePage(TStringView text) noexcept;
+
+#if !defined(__BORLANDC__)
+    // Converts the code page character 'c' into UTF-8. The returned view
+    // remains valid until the next call to 'setCodePageTranslation()'.
+    static TStringView fromCodePage(char c) noexcept;
+
+    // Modifies the internal table used to convert code page characters
+    // to and from UTF-8. By default, code page 437 (United States) is used.
+    // If a null pointer is provided, the internal conversion table is reset
+    // to the default one.
+    static void setCodePageTranslation(const char (*utf8Translation)[256][4]) noexcept;
+#endif // __BORLANDC__
 
     // Returns the length in bytes of a leading substring of 'text' which is
     // 'count' columns wide. If 'text' is less than 'count' columns wide,

@@ -228,11 +228,24 @@ char TText::toCodePage(TStringView text) noexcept
 {
     using namespace tvision;
     size_t length = TText::next(text);
-    if (length == 0)
-        return '\0';
-    if (length == 1 && (text[0] < ' ' || '\x7F' <= text[0]))
+    // ASCII characters must not be converted, let them through.
+    if (length == 1 && (uchar) text[0] <= 0x7F)
         return text[0];
     return CpTranslator::fromUtf8(text.substr(0, length));
+}
+
+TStringView TText::fromCodePage(char c) noexcept
+{
+    using namespace tvision;
+    const char (&s)[4] = CpTranslator::toUtf8(c);
+    size_t length = 1 + (s[1] != 0) + (s[2] != 0) + (s[3] != 0);
+    return TStringView(s, length);
+}
+
+void TText::setCodePageTranslation(const char (*codePageToUtf8)[256][4]) noexcept
+{
+    using namespace tvision;
+    CpTranslator::setTranslation(codePageToUtf8);
 }
 
 template <class Text>

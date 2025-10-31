@@ -1,7 +1,6 @@
 #include <internal/platform.h>
 #include <internal/win32con.h>
 #include <internal/winwidth.h>
-#include <internal/codepage.h>
 #include <internal/conctl.h>
 
 #include <locale.h>
@@ -40,8 +39,6 @@ void Platform::initLocale() noexcept
 #else
         setlocale(LC_ALL, "");
 #endif // _WIN32
-        CpTranslator::init();
-
         (void) init;
         return 0;
     }();
