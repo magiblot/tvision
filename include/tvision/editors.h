@@ -112,6 +112,14 @@ const int
 typedef ushort (*TEditorDialog)( int, ... );
 ushort defEditorDialog( int dialog, ... );
 
+/* ---------------------------------------------------------------------- */
+/*      class TIndicator                                                  */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Frame passive                                               */
+/*        2 = Frame active                                                */
+/* ---------------------------------------------------------------------- */
+
 #if defined( Uses_TIndicator ) && !defined( __TIndicator )
 #define __TIndicator
 
@@ -165,6 +173,13 @@ inline opstream& operator << ( opstream& os, TIndicator* cl )
 
 #endif  // Uses_TIndicator
 
+/* ---------------------------------------------------------------------- */
+/*      class TEditor                                                     */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*      1 = Normal text                                                   */
+/*      2 = Selected text                                                 */
+/* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TEditor ) && !defined( __TEditor )
 #define __TEditor
@@ -324,6 +339,14 @@ inline opstream& operator << ( opstream& os, TEditor* cl )
 
 #endif  // Uses_TEditor
 
+/* ---------------------------------------------------------------------- */
+/*      class TMemo                                                       */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*      1 = Normal text                                                   */
+/*      2 = Selected text                                                 */
+/* ---------------------------------------------------------------------- */
+
 #if defined( Uses_TMemo ) && !defined( __TMemo )
 #define __TMemo
 
@@ -377,6 +400,13 @@ inline opstream& operator << ( opstream& os, TMemo* cl )
 
 #endif  // Uses_TMemo
 
+/* ---------------------------------------------------------------------- */
+/*      class TFileEditor                                                 */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*      1 = Normal text                                                   */
+/*      2 = Selected text                                                 */
+/* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TFileEditor ) && !defined( __TFileEditor )
 #define __TFileEditor
@@ -446,6 +476,18 @@ inline opstream& operator << ( opstream& os, TFileEditor* cl )
 
 #endif  // Uses_TFileEditor
 
+/* ---------------------------------------------------------------------- */
+/*      class TEditWindow                                                 */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Frame passive                                               */
+/*        2 = Frame active                                                */
+/*        3 = Frame icon                                                  */
+/*        4 = ScrollBar page area                                         */
+/*        5 = ScrollBar controls                                          */
+/*        6 = Scroller normal text                                        */
+/*        7 = Scroller selected text                                      */
+/* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TEditWindow ) && !defined( __TEditWindow )
 #define __TEditWindow

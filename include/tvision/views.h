@@ -757,6 +757,17 @@ inline opstream& operator << ( opstream& os, TScroller* cl )
 
 #endif  // Uses_TScroller
 
+/* ---------------------------------------------------------------------- */
+/*      class TListViewer                                                 */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Active                                                      */
+/*        2 = Inactive                                                    */
+/*        3 = Focused                                                     */
+/*        4 = Selected                                                    */
+/*        5 = Divider                                                     */
+/* ---------------------------------------------------------------------- */
+
 #if defined( Uses_TListViewer ) && !defined( __TListViewer )
 #define __TListViewer
 

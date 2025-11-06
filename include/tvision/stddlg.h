@@ -320,6 +320,12 @@ inline TFileCollection *TFileList::list()
 
 #endif  // Uses_TFileList
 
+/* ---------------------------------------------------------------------- */
+/*      class TFileInfoPane                                               */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Normal                                                      */
+/* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TFileInfoPane ) && !defined( __TFileInfoPane )
 #define __TFileInfoPane

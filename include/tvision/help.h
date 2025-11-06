@@ -31,7 +31,14 @@
 
 #include <tvision/helpbase.h>
 
-// THelpViewer
+/* ---------------------------------------------------------------------- */
+/*      class THelpViewer                                                 */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Normal                                                      */
+/*        2 = Keyword                                                     */
+/*        3 = Selected keyword                                            */
+/* ---------------------------------------------------------------------- */
 
 class THelpViewer : public TScroller
 {
@@ -52,7 +59,19 @@ public:
     int selected;
 };
 
-// THelpWindow
+/* ---------------------------------------------------------------------- */
+/*      class THelpWindow                                                 */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Frame passive                                               */
+/*        2 = Frame active                                                */
+/*        3 = Frame icon                                                  */
+/*        4 = ScrollBar page area                                         */
+/*        5 = ScrollBar controls                                          */
+/*        6 = HelpViewer normal                                           */
+/*        7 = HelpViewer keyword                                          */
+/*        8 = HelpViewer selected keyword                                 */
+/* ---------------------------------------------------------------------- */
 
 class THelpWindow : public TWindow
 {
