@@ -14,7 +14,6 @@
 
 #define Uses_TDirListBox
 #define Uses_TEvent
-#define Uses_TDirCollection
 #define Uses_TChDirDialog
 #define Uses_TDirEntry
 #define Uses_TButton

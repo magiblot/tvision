@@ -55,7 +55,7 @@ inline void TListKeyBox::newList( TDataCollection * aList )
 
 inline TDataCollection *TListKeyBox::list()
 {
-    return (TDataCollection *)TSortedListBox::list();
+    return static_cast<TDataCollection *>(TSortedListBox::list());
 }
 
 class TListDialog :  public TDialog

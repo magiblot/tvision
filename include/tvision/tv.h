@@ -250,6 +250,7 @@
 
 #if defined( Uses_TDirListBox )
 #define Uses_TListBox
+#define Uses_TDirCollection
 #define __INC_STDDLG_H
 #endif
 
