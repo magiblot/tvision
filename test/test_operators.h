@@ -77,6 +77,12 @@ inline std::ostream &operator<<(std::ostream &os, const TKey &key)
     return os;
 }
 
+inline std::ostream &operator<<(std::ostream &os, TPoint p)
+{
+    os << "{" << p.x << ", " << p.y << "}";
+    return os;
+}
+
 inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text = {})
 {
     TEvent ev {};

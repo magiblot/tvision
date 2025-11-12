@@ -63,11 +63,6 @@ static inline int isWordChar( int ch )
     return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~\0", ch) == 0;
 }
 
-#pragma warn -asc
-
-
-#pragma warn .asc
-
 void TEditor::detectEol()
 {
     for (uint p = 0; p < bufLen; ++p)
@@ -203,6 +198,8 @@ Boolean TEditor::insertBuffer( const char *p,
 
     uint lines = countLines( &buffer[curPtr], length );
     curPtr += length;
+    bufLen += length - selLen;
+    gapLen -= length - selLen;
     curPos.y += lines;
     drawLine = curPos.y;
     drawPtr = lineStart(curPtr);
@@ -210,8 +207,6 @@ Boolean TEditor::insertBuffer( const char *p,
     if( selectText == False )
         selStart = curPtr;
     selEnd = curPtr;
-    bufLen += length - selLen;
-    gapLen -= length - selLen;
     if( allowUndo == True )
         {
         delCount += delLen;
