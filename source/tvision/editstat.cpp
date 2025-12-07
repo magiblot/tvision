@@ -25,4 +25,5 @@ ushort _NEAR TEditor::editorFlags = efBackupFiles | efPromptOnReplace;
 char _NEAR TEditor::findStr[maxFindStrLen] = "";
 char _NEAR TEditor::replaceStr[maxReplaceStrLen] = "";
 TEditor * _NEAR TEditor::clipboard = 0;
+const TEditor::LineEndingType TEditor::defaultLineEndingType = TEditor::eolCrLf;
 

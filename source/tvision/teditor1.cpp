@@ -192,10 +192,11 @@ TEditor::TEditor( const TRect& bounds,
     selecting( False ),
     overwrite( False ),
     autoIndent( True ) ,
-    encoding( encDefault ),
     lockCount( 0 ),
     updateFlags( 0 ),
-    keyState( 0 )
+    keyState( 0 ),
+    lineEndingType( defaultLineEndingType ),
+    encoding( encDefault )
 {
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable;
@@ -231,62 +232,44 @@ void TEditor::changeBounds( const TRect& bounds )
     update(ufView);
 }
 
-TStringView TEditor::bufChars( uint P )
+uint TEditor::getText( uint p, TSpan<char> dest )
 {
-    static thread_local char buf[maxCharSize];
-    if (encoding == encSingleByte)
+    if( p < bufLen )
         {
-        buf[0] = bufChar(P);
-        return TStringView(buf, 1);
+        uint count = min((uint) dest.size(), bufLen - p);
+        for (uint i = 0; i < count; ++i)
+            dest[i] = bufChar(p + i);
+        return count;
         }
-    else
-        {
-        int len = min(max(max(curPtr, bufLen) - P, 1), sizeof(buf));
-        for (int i = 0; i < len; ++i)
-            buf[i] = bufChar(P + i);
-        return TStringView(buf, len);
-        }
+    return 0;
 }
 
-TStringView TEditor::prevBufChars( uint P )
+Boolean TEditor::nextCharAndPos( uint &p, int &pos )
 {
-    static thread_local char buf[maxCharSize];
-    if (encoding == encSingleByte)
+    if( p < bufLen )
         {
-        buf[0] = bufChar(P - 1);
-        return TStringView(buf, 1);
-        }
-    else
-        {
-        int len = min(max(P, 1), sizeof(buf));
-        for (int i = 0; i < len; ++i)
-            buf[i] = bufChar(P - len + i);
-        return TStringView(buf, len);
-        }
-}
-
-void TEditor::nextChar( TStringView s, uint &p, uint &width )
-{
-    if (encoding == encSingleByte || s.size() == 0)
-        {
-        ++p;
-        ++width;
-        }
-    else
-        {
-        size_t p_ = 0, w_ = 0;
-        TText::next(s, p_, w_);
-        p += p_; width += w_;
-        }
-}
-
-Boolean TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
-                             TStringView text, uint &p, TColorAttr color )
-{
-    size_t p_ = 0, w_ = width;
-    if (TText::drawOne(cells, w_, text, p_, color))
-        {
-        p += p_; width = w_;
+        if( encoding == TEditor::encSingleByte )
+            {
+            ++p;
+            ++pos;
+            }
+        else
+            {
+            char buf[maxCharSize];
+            uint count = getText(p, TSpan<char>(buf, maxCharSize));
+            if( buf[0] == '\t' )
+                {
+                ++p;
+                pos = (pos | 7) + 1;
+                }
+            else
+                {
+                size_t i = 0, w = 0;
+                TText::next(TStringView(buf, count), i, w);
+                p += i;
+                pos += (int) w;
+                }
+            }
         return True;
         }
     return False;
@@ -294,33 +277,28 @@ Boolean TEditor::formatCell( TSpan<TScreenCell> cells, uint &width,
 
 int TEditor::charPos( uint p, uint target )
 {
-    uint pos = 0;
+    int pos = 0;
     while( p < target )
-    {
-        TStringView chars = bufChars(p);
-        if( chars[0] == '\x9' )
-            pos |= 7;
-        nextChar(chars, p, pos);
-    }
+        if( !nextCharAndPos(p, pos) )
+            break;
     return pos;
 }
 
 uint TEditor::charPtr( uint p, int target )
 {
-    uint pos = 0;
-    uint lastP = p;
-    char c;
-    TStringView chars;
-    while( (int) pos < target && p < bufLen &&
-           (c = (chars = bufChars(p))[0]) != '\r' && c != '\n' )
+    int pos = 0;
+    uint prevP = p;
+    while( p < bufLen && pos < target )
         {
-        lastP = p;
-        if( c == '\x09' )
-            pos |= 7;
-        nextChar(chars, p, pos);
+        char c = bufChar(p);
+        if( c == '\r' || c == '\n' )
+            break;
+        prevP = p;
+        if( !nextCharAndPos(p, pos) )
+            break;
         }
-    if( (int) pos > target)
-        p = lastP;
+    if( pos > target )
+        p = prevP;
     return p;
 }
 
@@ -629,7 +607,7 @@ void TEditor::handleEvent( TEvent& event )
                     char buf[512];
                     size_t length;
                     while( textEvent( event, TSpan<char>(buf, sizeof(buf)), length ) )
-                        insertMultilineText( buf, (uint) length );
+                        insertText( buf, (uint) length, False );
                     }
                 else
                     {

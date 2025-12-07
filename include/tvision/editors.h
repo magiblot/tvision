@@ -214,9 +214,7 @@ public:
     virtual void handleEvent( TEvent& );
     virtual void initBuffer();
     virtual TMenuItem& initContextMenu( TPoint );
-    uint insertMultilineText( const char *, uint );
     Boolean insertBuffer( const char *, uint, uint, Boolean, Boolean );
-    Boolean insertEOL( Boolean );
     virtual Boolean insertFrom( TEditor * );
     Boolean insertText( const void *, uint, Boolean );
     void scrollTo( int, int );
@@ -266,7 +264,6 @@ public:
     void unlock();
     void update( uchar );
     void checkScrollBar( const TEvent&, TScrollBar *, int& );
-    void detectEol();
 
     TScrollBar *hScrollBar;
     TScrollBar *vScrollBar;
@@ -292,14 +289,6 @@ public:
     Boolean overwrite;
     Boolean autoIndent;
 
-    enum EolType { eolCrLf, eolLf, eolCr } eolType;
-    enum Encoding { encDefault, encSingleByte } encoding;
-
-    void nextChar( TStringView, uint &P, uint &width );
-    Boolean formatCell( TSpan<TScreenCell>, uint&, TStringView, uint& , TColorAttr );
-    TStringView bufChars( uint );
-    TStringView prevBufChars( uint );
-
     static TEditorDialog _NEAR editorDialog;
     static ushort _NEAR editorFlags;
     static char _NEAR findStr[maxFindStrLen];
@@ -309,7 +298,20 @@ public:
     uchar updateFlags;
     int keyState;
 
+    enum LineEndingType { eolCrLf, eolLf, eolCr } lineEndingType;
+    enum Encoding { encDefault, encSingleByte } encoding;
+
+    uint getText( uint p, TSpan<char> dest );
+    Boolean nextCharAndPos( uint &p, int &pos );
+
 private:
+
+    LineEndingType detectLineEndingType();
+    TStringView getLineEnding();
+    uint lengthWithConvertedLineEndings( const char *, uint );
+    void copyAndConvertLineEndings( char *, const char *, uint );
+
+    static const LineEndingType defaultLineEndingType;
 
     virtual const char *streamableName() const
         { return name; }
@@ -485,8 +487,8 @@ inline opstream& operator << ( opstream& os, TFileEditor* cl )
 /*        3 = Frame icon                                                  */
 /*        4 = ScrollBar page area                                         */
 /*        5 = ScrollBar controls                                          */
-/*        6 = Scroller normal text                                        */
-/*        7 = Scroller selected text                                      */
+/*        6 = Editor normal text                                          */
+/*        7 = Editor selected text                                        */
 /* ---------------------------------------------------------------------- */
 
 #if defined( Uses_TEditWindow ) && !defined( __TEditWindow )

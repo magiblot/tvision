@@ -28,54 +28,60 @@ uint TEditor::bufPtr( uint P )
     return P < curPtr ? P : P + gapLen;
 }
 
-void TEditor::formatLine( TScreenCell *DrawBuf,
-                          uint P,
-                          int Width,
-                          TAttrPair Colors
-                        )
+static inline TColorAttr getColorAt( uint P, TEditor &editor, TAttrPair colors )
 {
-    const struct { TColorAttr color; uint end; } ranges[] =
-    {
-        // The attributes for normal text are in the lower half of 'Colors'.
-        // The attributes for text selection are in the upper half.
-        { TColorAttr(Colors), selStart },
-        { TColorAttr(Colors >> 8), selEnd },
-        { TColorAttr(Colors), bufLen }
-    };
+    if (editor.selStart <= P && P < editor.selEnd)
+        return colors >> 8;
+    return colors;
+}
 
-    TColorAttr Color;
-    TSpan<TScreenCell> Cells(DrawBuf, Width);
-    int X = 0;
-    for (int r = 0; r < 3; ++r)
+static void formatText( TSpan<TScreenCell> cells, size_t &pos,
+                        TEditor &editor, uint &P, TAttrPair colors )
+{
+    char buf[maxCharSize];
+    while (P < editor.bufLen)
     {
-        Color = ranges[r].color;
-        while (P < ranges[r].end)
+        uint count = editor.getText(P, TSpan<char>(buf, maxCharSize));
+        if (buf[0] == '\r' || buf[0] == '\n')
+            break;
+        TColorAttr color = getColorAt(P, editor, colors);
+        if (buf[0] == '\t')
         {
-            TStringView chars = bufChars(P);
-            char Char = chars[0];
-            if (Char == '\r' || Char == '\n')
-                goto fill;
-            if (Char == '\t')
+            if (pos >= cells.size())
+                break;
+            do
             {
-                if (X < Width)
-                {
-                    do
-                    {
-                        ::setCell(Cells[X++], ' ', Color);
-                    } while (X%8 != 0 && X < Width);
-                    ++P;
-                }
-                else
-                    break;
-            }
-            else
-                if (!formatCell(Cells, (uint&) X, chars, P, Color))
-                    break;
+                ::setCell(cells[pos++], ' ', color);
+            } while ((pos % 8 != 0) && pos < cells.size());
+            ++P;
+        }
+        else
+        {
+            // Let 'drawOne' decide whether to keep copying text, since it will
+            // properly handle double-width and combining characters near the
+            // end of the output buffer.
+            size_t i = 0;
+            if (!TText::drawOne(cells, pos, TStringView(buf, count), i, color))
+                break;
+            P += i;
         }
     }
-fill:
-    while (X < Width)
-        ::setCell(Cells[X++], ' ', Color);
+}
+
+void TEditor::formatLine( TScreenCell *drawBuf,
+                          uint P,
+                          int aWidth,
+                          TAttrPair colors )
+{
+    size_t width = max(aWidth, 0);
+    TSpan<TScreenCell> cells(drawBuf, width);
+
+    size_t pos = 0;
+    formatText(cells, pos, *this, P, colors);
+
+    TColorAttr fill = getColorAt(P, *this, colors);
+    while (pos < cells.size())
+        ::setCell(cells[pos++], ' ', fill);
 }
 
 uint TEditor::lineEnd( uint P )
@@ -117,7 +123,11 @@ uint TEditor::nextChar( uint P )
         if (encoding == encSingleByte)
             return P + 1;
         else
-            return P + TText::next(bufChars(P));
+        {
+            char buf[maxCharSize];
+            uint count = getText(P, TSpan<char>(buf, maxCharSize));
+            return P + TText::next(TStringView(buf, count));
+        }
     }
     return bufLen;
 }
@@ -132,8 +142,10 @@ uint TEditor::prevChar( uint P )
             return P - 1;
         else
         {
-            TStringView t = prevBufChars(P);
-            return P - TText::prev(t, t.size());
+            char buf[maxCharSize];
+            uint count = min(maxCharSize, P);
+            getText(P - count, TSpan<char>(buf, count));
+            return P - TText::prev(TStringView(buf, count), count);
         }
     }
     return 0;
