@@ -139,8 +139,8 @@ void TTerminal::draw()
         y = size.y - 1;
     else
         {
-        for( y = limit.y; y < size.y; y++ )
-            writeChar(0, y, ' ', 1, size.x);
+        b.moveChar( 0, ' ', color, size.x );
+        writeLine( 0, limit.y, size.x, size.y - limit.y, b );
         y = limit.y - 1;
         }
 
