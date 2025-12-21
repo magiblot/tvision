@@ -591,17 +591,17 @@ void TDrawBuffer::putChar(ushort indent, char c);
 ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
 ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
 ```
-`str` is displayed according to the rules exposed previously.
+`str` is handled according to the rules exposed previously.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strOffset = 0); // New
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort maxWidth, ushort strOffset = 0); // New
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent = 0); // New
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent = 0); // New
 ```
-`str` is displayed according to the rules exposed previously, but:
-* `maxWidth` specifies the maximum amount of text that should be copied from `str`, measured in text width (not in bytes).
-* `strOffset` specifies the initial position in `str` where to copy from, measured in text width (not in bytes). This is useful for horizontal scrolling. If `strOffset` points to the middle of a double-width character, a space will be copied instead of the right half of the double-width character, since it is not possible to do such a thing.
+`str` is handled according to the rules exposed previously, but:
+* `maxStrWidth` specifies the maximum amount of text that should be copied from `str`, measured in columns (not in bytes).
+* `strIndent` specifies the initial position in `str` where to copy from, measured in columns (not in bytes). This is useful for horizontal scrolling. If `strIndent` points to the middle of a double-width character, a space will be copied instead of the right half of the double-width character, since it is not possible to do such a thing.
 
-The return values are the number of cells in the buffer that were actually filled with text (which is the same as the width of the copied text).
+The return value is the number of columns in the buffer that were actually filled with text.
 
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, TColorAttr attr, ushort count);
