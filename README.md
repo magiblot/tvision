@@ -579,7 +579,7 @@ Here is an example of such characters in the [Turbo](https://github.com/magiblot
 
 ### Unicode-aware API functions
 
-The usual way of writing to the screen is by using `TDrawBuffer`. A few methods have been added and others have changed their meaning:
+The usual way of writing to the screen is by using `TDrawBuffer`. Some of its methods have been updated to support the new features:
 
 ```c++
 void TDrawBuffer::moveChar(ushort indent, char c, TColorAttr attr, ushort count);
@@ -588,25 +588,21 @@ void TDrawBuffer::putChar(ushort indent, char c);
 `c` is handled as a code page character.
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
+ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr,
+                             ushort maxStrWidth = USHRT_MAX, ushort strIndent = 0 ); // New
+ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TColorAttr attr, 
+                              ushort maxStrWidth = USHRT_MAX, ushort strIndent = 0 ); // New
 ```
-`str` is handled according to the rules exposed previously.
-
-```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent = 0); // New
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent = 0); // New
-```
-`str` is handled according to the rules exposed previously, but:
+`str` is handled according to the rules exposed previously, and there are two new parameters:
 * `maxStrWidth` specifies the maximum amount of text that should be copied from `str`, measured in columns (not in bytes).
 * `strIndent` specifies the initial position in `str` where to copy from, measured in columns (not in bytes). This is useful for horizontal scrolling. If `strIndent` points to the middle of a double-width character, a space will be copied instead of the right half of the double-width character, since it is not possible to do such a thing.
 
-The return value is the number of columns in the buffer that were actually filled with text.
+The return value is the width (in columns) of the copied text.
 
 ```c++
 void TDrawBuffer::moveBuf(ushort indent, const void *source, TColorAttr attr, ushort count);
 ```
-The name of this function is misleading. Even in its original implementation, `source` is treated as a string. So it is equivalent to `moveStr(indent, TStringView((const char*) source, count), attr)`.
+This function is actually the same as `moveStr`. However, it exists because it used to be the only `TDrawBuffer` function that could be used with non-null-terminated strings before the introduction of `TStringView`.
 
 There are other useful Unicode-aware functions:
 

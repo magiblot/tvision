@@ -156,33 +156,6 @@ __4:
 /*                low byte is used, and a '~' in the string toggles       */
 /*                between the low byte and the high byte.                 */
 /*                                                                        */
-/*  returns:                                                              */
-/*                                                                        */
-/*      number of columns in the buffer that were actually updated        */
-/*                                                                        */
-/*------------------------------------------------------------------------*/
-
-ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) noexcept
-{
-    return moveCStr(indent, str, attrs, USHRT_MAX, 0);
-}
-
-/*------------------------------------------------------------------------*/
-/*                                                                        */
-/*  TDrawBuffer::moveCStr (2)                                             */
-/*                                                                        */
-/*  arguments:                                                            */
-/*                                                                        */
-/*      indent  - position within the buffer where the data is to go      */
-/*                (in columns)                                            */
-/*                                                                        */
-/*      str     - string of characters to be moved into the buffer        */
-/*                                                                        */
-/*      attrs   - pair of text attributes to be put into the buffer       */
-/*                with each character in the string.  Initially the       */
-/*                low byte is used, and a '~' in the string toggles       */
-/*                between the low byte and the high byte.                 */
-/*                                                                        */
 /*      maxStrWidth - maximum amount of data to be moved (in columns)     */
 /*                                                                        */
 /*      strIndent - position in str where to start moving from            */
@@ -190,7 +163,7 @@ ushort TDrawBuffer::moveCStr( ushort indent, TStringView str, TAttrPair attrs ) 
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      number of columns in the buffer that were actually updated        */
+/*      Width of the moved text (in columns)                              */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
@@ -313,31 +286,6 @@ I   POP     DS
 /*                                                                        */
 /*  arguments:                                                            */
 /*                                                                        */
-/*      indent  - character position within the buffer where the data     */
-/*                is to go                                                */
-/*                                                                        */
-/*      str     - string of characters to be moved into the buffer        */
-/*                                                                        */
-/*      attr    - text attribute to be put into the buffer with each      */
-/*                character in the string.                                */
-/*                                                                        */
-/*  returns:                                                              */
-/*                                                                        */
-/*      number of columns in the buffer that were actually updated        */
-/*                                                                        */
-/*------------------------------------------------------------------------*/
-
-ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) noexcept
-{
-    return moveStr(indent, str, attr, USHRT_MAX, 0);
-}
-
-/*------------------------------------------------------------------------*/
-/*                                                                        */
-/*  TDrawBuffer::moveStr (2)                                              */
-/*                                                                        */
-/*  arguments:                                                            */
-/*                                                                        */
 /*      indent  - position within the buffer where the data is to go      */
 /*                (in columns)                                            */
 /*                                                                        */
@@ -353,7 +301,7 @@ ushort TDrawBuffer::moveStr( ushort indent, TStringView str, TColorAttr attr ) n
 /*                                                                        */
 /*  returns:                                                              */
 /*                                                                        */
-/*      number of columns in the buffer that were actually updated        */
+/*      Width of the moved text (in columns)                              */
 /*                                                                        */
 /*------------------------------------------------------------------------*/
 
