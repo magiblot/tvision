@@ -60,9 +60,6 @@ protected:
 
 };
 
-#define loByte(w)    (((uchar *)&w)[0])
-#define hiByte(w)    (((uchar *)&w)[1])
-
 inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr ) noexcept
 {
     if (indent < length())

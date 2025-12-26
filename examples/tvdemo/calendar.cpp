@@ -205,8 +205,9 @@ void TCalendarView::handleEvent(TEvent& event)
             }
         else if (event.what == evKeyboard)
             {
-            if ( (loByte(event.keyDown.keyCode) == '+') ||
-              event.keyDown.keyCode == kbDown)
+            if (event.keyDown.charScan.charCode == '+' ||
+                event.keyDown.keyCode == kbDown
+               )
                 {
                 ++month;
                 if (month > 12)
@@ -215,8 +216,9 @@ void TCalendarView::handleEvent(TEvent& event)
                     month = 1;
                     }
                 }
-            else if ( (loByte(event.keyDown.keyCode) == '-') ||
-              event.keyDown.keyCode == kbUp)
+            else if (event.keyDown.charScan.charCode == '-' ||
+                     event.keyDown.keyCode == kbUp
+                    )
                 {
                 --month;
                 if (month < 1)
