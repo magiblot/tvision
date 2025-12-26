@@ -249,13 +249,19 @@ inline void TText::drawChar(TSpan<TScreenCell> cells, char c, TColorAttr attr)
 inline size_t TText::drawStr( TSpan<TScreenCell> cells, size_t indent,
                               TStringView text, int textIndent )
 {
+    // BCC optimization: avoid using min/substr/subspan and use pointer-range loop.
     if (indent < cells.size() && textIndent < text.size())
     {
-        cells = cells.subspan(indent);
-        text = text.substr(textIndent);
-        size_t count = min(cells.size(), text.size());
-        for (size_t i = 0; i < count; ++i)
-            ::setChar(cells[i], text[i]);
+        size_t count = cells.size() - indent;
+        if (text.size() < count)
+            count = text.size();
+
+        TScreenCell *dest = &cells[indent];
+        const char *src = &text[textIndent];
+        const char *end = &text[textIndent + count];
+        for (; src != end; ++dest, ++src)
+            *(uchar *)dest = *src;
+
         return count;
     }
     return 0;
@@ -265,13 +271,22 @@ inline size_t TText::drawStr( TSpan<TScreenCell> cells, size_t indent,
                               TStringView text, int textIndent,
                               TColorAttr attr )
 {
+    // BCC optimization: avoid using min/substr/subspan and use pointer-range loop.
     if (indent < cells.size() && textIndent < text.size())
     {
-        cells = cells.subspan(indent);
-        text = text.substr(textIndent);
-        size_t count = min(cells.size(), text.size());
-        for (size_t i = 0; i < count; ++i)
-            ::setCell(cells[i], text[i], attr);
+        size_t count = cells.size() - indent;
+        if (text.size() < count)
+            count = text.size();
+
+        TScreenCell *dest = &cells[indent];
+        const char *src = &text[textIndent];
+        const char *end = &text[textIndent + count];
+        for (; src != end; ++dest, ++src)
+        {
+            ((uchar *) dest)[0] = *src;
+            ((uchar *) dest)[1] = attr;
+        }
+
         return count;
     }
     return 0;

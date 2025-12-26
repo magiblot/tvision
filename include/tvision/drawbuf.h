@@ -43,42 +43,33 @@ public:
     void putAttribute( ushort indent, TColorAttr attr ) noexcept;
     void putChar( ushort indent, uchar c ) noexcept;
 
-#ifdef __FLAT__
+#if defined( __FLAT__ )
     TDrawBuffer() noexcept;
     ~TDrawBuffer();
 #endif
 
 protected:
 
-#ifdef __FLAT__
-    const TSpan<TScreenCell> data;
+#if defined( __FLAT__ )
+    TScreenCell *data;
+    size_t capacity;
 #else
     TScreenCell data[maxViewWidth];
+    enum { capacity = maxViewWidth };
 #endif
-
-    size_t length() const noexcept;
 
 };
 
 inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr ) noexcept
 {
-    if (indent < length())
+    if (indent < capacity)
         ::setAttr(data[indent], attr);
 }
 
 inline void TDrawBuffer::putChar( ushort indent, uchar c ) noexcept
 {
-    if (indent < length())
+    if (indent < capacity)
         ::setChar(data[indent], c);
-}
-
-inline size_t TDrawBuffer::length() const noexcept
-{
-#ifdef __FLAT__
-    return data.size();
-#else
-    return maxViewWidth;
-#endif
 }
 
 #endif  // Uses_TDrawBuffer

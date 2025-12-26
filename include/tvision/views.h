@@ -518,13 +518,13 @@ inline opstream& operator << ( opstream& os, TView* cl )
 inline void TView::writeBuf( short x, short y, short w, short h,
                              const TDrawBuffer& b ) noexcept
 {
-    writeBuf( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
+    writeBuf( x, y, min(w, short(b.capacity - x)), h, &b.data[0] );
 }
 
 inline void TView::writeLine( short x, short y, short w, short h,
                               const TDrawBuffer& b ) noexcept
 {
-    writeLine( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
+    writeLine( x, y, min(w, short(b.capacity - x)), h, &b.data[0] );
 }
 
 #endif  // Uses_TView

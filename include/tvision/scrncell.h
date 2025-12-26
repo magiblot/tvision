@@ -33,7 +33,8 @@ inline void setChar(TScreenCell &cell, TCellChar ch)
 
 inline void setCell(TScreenCell &cell, TCellChar ch, TColorAttr attr)
 {
-    cell = ushort((attr << 8) | ch);
+    setChar(cell, ch);
+    setAttr(cell, attr);
 }
 
 #else
