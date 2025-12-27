@@ -21,6 +21,9 @@
 
 void TFrame::frameLine( TDrawBuffer& frameBuf, short y, short n, TColorAttr color )
 {
+    if (size.x <= 0)
+        return;
+
     uchar *FrameMask = (uchar*) alloca(size.x);
     int x;
 

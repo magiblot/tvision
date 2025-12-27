@@ -17,6 +17,7 @@
 #define Uses_TScreen
 #define Uses_THardwareInfo
 #define Uses_TEvent
+#define Uses_TText
 #include <tvision/tv.h>
 
 #ifdef __FLAT__
@@ -353,15 +354,13 @@ void TView::writeBuf( short x, short y, short w, short h, const void _FAR* b ) n
 
 void TView::writeChar( short x, short y, char c, uchar color, short count ) noexcept
 {
+    if (count > size.x)
+        count = size.x;
     if (count > 0)
     {
-        TScreenCell cell;
-        ::setCell(cell, c, mapColor(color));
-        TScreenCell *buf = (TScreenCell *) alloca(count*sizeof(TScreenCell));
-        for (short i = 0; i < count; ++i)
-        {
-            buf[i] = cell;
-        }
+        TScreenCell *buf = (TScreenCell *) alloca(count * sizeof(TScreenCell));
+        TSpan<TScreenCell> cells(buf, count);
+        TText::drawChar(cells, c, mapColor(color));
         writeView(x, y, count, buf);
     }
 }
@@ -386,19 +385,16 @@ void TView::writeLine( short x, short y, short w, short h, const TScreenCell *b 
 
 void TView::writeStr( short x, short y, const char *str, uchar color ) noexcept
 {
-    if (str != 0)
+    TStringView text(str);
+    int count = strwidth(text);
+    if (count > size.x)
+        count = size.x;
+    if (count > 0)
     {
-        size_t length = strlen(str);
-        if (length > 0)
-        {
-            TColorAttr attr = mapColor(color);
-            TScreenCell *buf = (TScreenCell*) alloca(length*sizeof(TScreenCell));
-            for (size_t i = 0; i < length; ++i)
-            {
-                ::setCell(buf[i], str[i], attr);
-            }
-            writeView(x, y, length, buf);
-        }
+        TScreenCell *buf = (TScreenCell *) alloca(count * sizeof(TScreenCell));
+        TSpan<TScreenCell> cells(buf, count);
+        TText::drawStr(cells, text, mapColor(color));
+        writeView(x, y, count, buf);
     }
 }
 
