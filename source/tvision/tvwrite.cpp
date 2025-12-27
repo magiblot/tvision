@@ -27,7 +27,7 @@
 #include <malloc.h>
 
 extern TPoint shadowSize;
-extern uchar shadowAttr;
+extern TColorAttr shadowAttr;
 
 struct TVWrite {
 

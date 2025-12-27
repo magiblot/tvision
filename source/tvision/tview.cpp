@@ -33,9 +33,9 @@
 #endif  // __LIMITS_H
 
 TPoint shadowSize = {2,1};
-uchar shadowAttr = 0x08;
+TColorAttr shadowAttr = 0x08;
 Boolean _NEAR TView::showMarkers = False;
-uchar _NEAR TView::errorAttr = 0xCF;
+TColorAttr _NEAR TView::errorAttr = 0xCF;
 Boolean _NEAR TView::commandSetChanged = False;
 
 extern TView *TheTopView;

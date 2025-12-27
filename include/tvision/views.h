@@ -464,7 +464,7 @@ public:
     TGroup *owner;
 
     static Boolean _NEAR showMarkers;
-    static uchar _NEAR errorAttr;
+    static TColorAttr _NEAR errorAttr;
 
     virtual void shutDown();
 
