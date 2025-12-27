@@ -37,14 +37,6 @@
 #include <dos.h>
 #endif  // __DOS_H
 
-#if !defined( __MALLOC_H )
-#include <malloc.h>
-#endif  // __MALLOC_H
-
-#if !defined( __STDLIB_H )
-#include <stdlib.h>
-#endif  // __STDLIB_H
-
 #ifndef __BORLANDC__
 #define register
 #endif
@@ -470,16 +462,12 @@ void TEditor::draw()
 
 void TEditor::drawLines( int y, int count, uint linePtr )
 {
+    TDrawBuffer b;
     TAttrPair color = getColor(0x0201);
-#ifndef __FLAT__
-    TScreenCell b[maxLineLength];
-#else
-    TScreenCell *b = (TScreenCell*) alloca(sizeof(TScreenCell)*(delta.x+size.x));
-#endif
     while( count-- > 0 )
         {
-        formatLine( b, linePtr, delta.x+size.x, color );
-        writeBuf(0, y, size.x, 1, &b[delta.x]);
+        formatLine( b, linePtr, delta.x, size.x, color );
+        writeBuf( 0, y, size.x, 1, b );
         linePtr = nextLine(linePtr);
         y++;
         }

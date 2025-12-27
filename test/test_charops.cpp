@@ -21,6 +21,8 @@ int TestCharOps::mockCharWidth(uint32_t ch) noexcept
         case *ZERO_WIDTH_JOINER_UTF32:
         case U'\0':
             return 0;
+        case *SMILING_FACE_WITH_SMILING_EYES_UTF32:
+            return 2;
         default:
             if (ch <= U'\x1F' || (U'\x7F' <= ch && ch <= U'\x9F'))
                 return -1;

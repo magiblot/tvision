@@ -28,60 +28,67 @@ uint TEditor::bufPtr( uint P )
     return P < curPtr ? P : P + gapLen;
 }
 
-static inline TColorAttr getColorAt( uint P, TEditor &editor, TAttrPair colors )
+static inline TColorAttr getColorAt( uint P, TAttrPair colors, TEditor &editor )
 {
     if (editor.selStart <= P && P < editor.selEnd)
         return colors >> 8;
     return colors;
 }
 
-static void formatText( TSpan<TScreenCell> cells, size_t &pos,
-                        TEditor &editor, uint &P, TAttrPair colors )
-{
-    char buf[maxCharSize];
-    while (P < editor.bufLen)
-    {
-        uint count = editor.getText(P, TSpan<char>(buf, maxCharSize));
-        if (buf[0] == '\r' || buf[0] == '\n')
-            break;
-        TColorAttr color = getColorAt(P, editor, colors);
-        if (buf[0] == '\t')
-        {
-            if (pos >= cells.size())
-                break;
-            do
-            {
-                ::setCell(cells[pos++], ' ', color);
-            } while ((pos % 8 != 0) && pos < cells.size());
-            ++P;
-        }
-        else
-        {
-            // Let 'drawOne' decide whether to keep copying text, since it will
-            // properly handle double-width and combining characters near the
-            // end of the output buffer.
-            size_t i = 0;
-            if (!TText::drawOne(cells, pos, TStringView(buf, count), i, color))
-                break;
-            P += i;
-        }
-    }
-}
-
-void TEditor::formatLine( TScreenCell *drawBuf,
-                          uint P,
-                          int aWidth,
+void TEditor::formatLine( TDrawBuffer &b,
+                          uint linePtr,
+                          int hScroll,
+                          int width,
                           TAttrPair colors )
 {
-    size_t width = max(aWidth, 0);
-    TSpan<TScreenCell> cells(drawBuf, width);
+    hScroll = max(hScroll, 0);
+    width = max(width, 0);
 
-    size_t pos = 0;
-    formatText(cells, pos, *this, P, colors);
+    uint P = linePtr;
+    int pos = 0;
+    int x = 0;
+    while (P < bufLen)
+    {
+        uint nextP = P;
+        int nextPos = pos;
+        nextCharAndPos(nextP, nextPos);
 
-    TColorAttr fill = getColorAt(P, *this, colors);
-    while (pos < cells.size())
-        ::setCell(cells[pos++], ' ', fill);
+        // Only break when exceeding 'width', so that combining characters in
+        // the last visible column can be drawn properly.
+        if (x > width || (x == width && pos < nextPos))
+            break;
+
+        char buf[maxCharSize];
+        uint charLen = nextP - P;
+        getText(P, TSpan<char>(buf, charLen));
+
+        if (buf[0] == '\r' || buf[0] == '\n')
+            break;
+
+        // Only draw text beyond position 'hScroll'.
+        if (nextPos > hScroll)
+        {
+            TColorAttr color = getColorAt(P, colors, *this);
+            // If pos < hScroll, we are dealing with an incomplete tabulator or
+            // double-width character which we have to represent as spaces.
+            int charWidth = nextPos - max(pos, hScroll);
+            if (buf[0] == '\t' || pos < hScroll)
+                b.moveChar(x, ' ', color, charWidth);
+            else
+                b.moveStr(x, TStringView(buf, charLen), color);
+
+            x += charWidth;
+        }
+
+        P = nextP;
+        pos = nextPos;
+    }
+
+    if (x < width)
+    {
+        TColorAttr colorAfter = getColorAt(P, colors, *this);
+        b.moveChar(x, ' ', colorAfter, width - x);
+    }
 }
 
 uint TEditor::lineEnd( uint P )

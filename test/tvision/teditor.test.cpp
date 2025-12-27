@@ -40,7 +40,13 @@ public:
         );
         for (int y = 0; y < size.y; ++y)
             for (int x = 0; x < size.x; ++x)
-                text[y][x] = buffer[y*size.x + x]._ch.getText();
+            {
+                auto &ch = buffer[y*size.x + x]._ch;
+                if (ch._flags & TCellChar::fTrail)
+                    text[y][x] = "(wide char trail)";
+                else
+                    text[y][x] = ch.getText();
+            }
         return text;
     }
 
@@ -62,15 +68,16 @@ struct TEditorDisplayTestInput
 {
     TPoint size;
     TStringView text;
-    TPoint cursor;
     std::vector<TEvent> events;
+    TPoint delta;
 };
 
 struct TEditorDisplayTestOutput
 {
     std::vector<std::vector<TStringView>> text;
     std::vector<std::vector<int>> attributes;
-    TPoint cursor;
+    TPoint curPos;
+    TPoint delta;
 };
 
 static bool operator==(const TEditorBufferTestOutput &a, const TEditorBufferTestOutput &b)
@@ -85,7 +92,8 @@ static bool operator==(const TEditorDisplayTestOutput &a, const TEditorDisplayTe
     return
         a.text == b.text &&
         a.attributes == b.attributes &&
-        a.cursor == b.cursor;
+        a.curPos == b.curPos &&
+        a.delta == b.delta;
 }
 
 static std::ostream &operator<<(std::ostream &os, const TEditorBufferTestInput &self)
@@ -106,8 +114,8 @@ static std::ostream &operator<<(std::ostream &os, const TEditorDisplayTestInput 
 {
     os << "Size: " << self.size << std::endl
        << "Text: '" << self.text << '\'' << std::endl
-       << "Cursor: " << self.cursor << std::endl
-       << "Events: " << testing::PrintToString(self.events);
+       << "Events: " << testing::PrintToString(self.events) << std::endl
+       << "Delta: " << self.delta;
     return os;
 }
 
@@ -116,7 +124,8 @@ static std::ostream &operator<<(std::ostream &os, const TEditorDisplayTestOutput
     os << std::endl
        << "Text: " << testing::PrintToString(self.text) << std::endl
        << "Attributes: " << testing::PrintToString(self.attributes) << std::endl
-       << "Cursor: " << self.cursor;
+       << "CurPos: " << self.curPos << std::endl
+       << "Delta: " << self.delta;
     return os;
 }
 
@@ -225,9 +234,9 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
     TestCharOps::init();
     static const TestCase<TEditorDisplayTestInput, TEditorDisplayTestOutput> testCases[] =
     {
+        // Remove part of a multi-byte character, then undo the removal.
         {   {   TPoint { 3, 1 },
                 "€",
-                TPoint { 1, 0 },
                 {   messageEv(evCommand, cmEncoding),
                     keyDownEv(kbLeft, 0x0000),
                     keyDownEv(kbBack, 0x0000),
@@ -235,9 +244,104 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
                     messageEv(evCommand, cmEncoding),
                     messageEv(evCommand, cmUndo),
                 },
+                TPoint { 0, 0 },
             },
             {   {{ "€", " ", " " }},
                 {{   7,   6,   6 }},
+                TPoint { 1, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // It should display multi-byte characters properly when switching to single-byte mode.
+        {   {   TPoint { 4, 1 },
+                "€",
+                {   messageEv(evCommand, cmEncoding),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "Γ", "é", "¼", " " }},
+                {{   6,   6,   6,   6, }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Tabulators should be properly drawn when there is horizontal scroll.
+        {   {   TPoint { 3, 1 },
+                "\ta",
+                {},
+                TPoint { 6, 0 },
+            },
+            {   {{ " ", " ", "a" }},
+                {{   6,   6,   6 }},
+                TPoint { 9, 0 },
+                TPoint { 6, 0 },
+            },
+        },
+        // A partially visible tabulator should be drawn properly when selected.
+        {   {   TPoint { 3, 1 },
+                "\ta",
+                {   keyDownEv(kbLeft, 0x0000),
+                    keyDownEv(kbLeft, kbShift),
+                },
+                TPoint { 6, 0 },
+            },
+            {   {{ " ", " ", "a" }},
+                {{   7,   7,   6 }},
+                TPoint { 0, 0 },
+                TPoint { 6, 0 },
+            },
+        },
+        // A selected line break should be drawn properly.
+        {   {   TPoint { 3, 2 },
+                "ab\ncd",
+                {   keyDownEv(kbLeft, 0x0000),
+                    keyDownEv(kbLeft, kbShift),
+                    keyDownEv(kbLeft, kbShift),
+                    keyDownEv(kbLeft, kbShift),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "a", "b", " " }, { "c", "d", " " }},
+                {{   6,   7,   7 }, {   7,   6,   6 }},
+                TPoint { 1, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // A double-width character should be drawn properly.
+        {   {   TPoint { 3, 1 },
+                SMILING_FACE_WITH_SMILING_EYES_UTF8 "a",
+                {},
+                TPoint { 0, 0 },
+            },
+            {   {{ "😊", "(wide char trail)", "a" }},
+                {{   6,   6,   6 }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // A partially visible and selected double-width character should be drawn properly.
+        {   {   TPoint { 2, 1 },
+                SMILING_FACE_WITH_SMILING_EYES_UTF8 "a",
+                {   keyDownEv(kbLeft, 0x0000),
+                    keyDownEv(kbLeft, kbShift),
+                },
+                TPoint { 1, 0 },
+            },
+            {   {{ " ", "a" }},
+                {{   7,   6 }},
+                TPoint { 0, 0 },
+                TPoint { 1, 0 },
+            },
+        },
+        // Combining characters should be drawn properly.
+        {   {   TPoint { 2, 1 },
+                "a" COMBINING_ZIGZAG_UTF8 "b" COMBINING_ZIGZAG_UTF8 "c" COMBINING_ZIGZAG_UTF8 "d" COMBINING_ZIGZAG_UTF8,
+                {},
+                TPoint { 1, 0 },
+            },
+            {   {{ "b" COMBINING_ZIGZAG_UTF8, "c" COMBINING_ZIGZAG_UTF8 }},
+                {{   6,   6 }},
+                TPoint { 4, 0 },
                 TPoint { 1, 0 },
             },
         },
@@ -246,26 +350,27 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
     for (const auto &testCase : testCases)
     {
         TRect bounds({0, 0}, testCase.input.size);
-        auto cursor = testCase.input.cursor;
         auto text = testCase.input.text;
+        auto delta = testCase.input.delta;
         auto *editor = new TEditor(bounds, nullptr, nullptr, nullptr, 256);
-        editor->setCursor(cursor.x, cursor.y);
-        editor->insertText(text.data(), text.size(), false);
         auto *group = new DrawableTestGroup(bounds);
         group->setState(sfExposed, true);
         group->getBuffer();
         group->insert(editor);
 
+        editor->insertText(text.data(), text.size(), false);
         for (const auto &event : testCase.input.events)
         {
             TEvent inputEvent = event;
             editor->handleEvent(inputEvent);
         }
+        editor->scrollTo(delta.x, delta.y);
 
         TEditorDisplayTestOutput actual {
             group->getBufferText(),
             group->getBufferAttributes(),
-            editor->cursor,
+            editor->curPos,
+            editor->delta,
         };
         expectResultMatches(actual, testCase);
 

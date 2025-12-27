@@ -237,7 +237,7 @@ public:
     void doUpdate();
     void doSearchReplace();
     void drawLines( int, int, uint );
-    void formatLine(TScreenCell *, uint, int, TAttrPair );
+    void formatLine( TDrawBuffer &, uint, int, int, TAttrPair );
     void find();
     uint getMousePtr( TPoint );
     Boolean hasSelection();

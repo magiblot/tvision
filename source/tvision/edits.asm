@@ -15,9 +15,9 @@
         PUBLIC  @TEditor@bufChar$qui
         PUBLIC  @TEditor@bufPtr$qui
 IFNDEF __FLAT__
-        PUBLIC  @TEditor@formatLine$qnusuiius
+        PUBLIC  @TEditor@formatLine$qm11TDrawBufferuiiius
 ELSE
-        PUBLIC  @TEditor@formatLine$qpusuiius
+        PUBLIC  @TEditor@formatLine$qr11TDrawBufferuiiius
 ENDIF
         PUBLIC  @TEditor@lineEnd$qui
         PUBLIC  @TEditor@lineStart$qui
@@ -84,25 +84,28 @@ ENDIF
 
 ENDP @TEditor@bufPtr$qui
 
-;void TEditor::formatLine( ushort *DrawBuf,
+;void TEditor::formatLine( TDrawBuffer &DrawBuf,
 ;                          uint LinePtr,
+;                          int HScroll,
 ;                          int Width,
 ;                          ushort Colors
 ;                        )
 IFNDEF __FLAT__
-@TEditor@formatLine$qnusuiius PROC
+@TEditor@formatLine$qm11TDrawBufferuiiius PROC
 ELSE
-@TEditor@formatLine$qpusuiius PROC
+@TEditor@formatLine$qr11TDrawBufferuiiius PROC
 ENDIF
         ARG     thisPtr:PTR, DrawBuf:PTR, LinePtr:ARGINT, \
-                        W:ARGINT, Colors:WORD
+                HScroll:ARGINT, W:ARGINT, Colors:WORD
 IFNDEF __FLAT__
         USES    DS, SI, DI
 
         LDS     BX, [thisPtr]
         LES     DI, [DrawBuf]
+        ADD     DI, TDrawBufferData
         MOV     SI, [LinePtr]
         XOR     DX, DX
+        SUB     DX, [HScroll]
         CLD
         MOV     AH, BYTE PTR [Colors]
         MOV     CX, DS:[BX+TEditorSelStart]
@@ -118,6 +121,17 @@ IFNDEF __FLAT__
         MOV     CX, DS:[BX+TEditorBufSize]
         CALL  @@10
         JMP   @@31
+
+; Render segment
+; In/Out:
+;       SI = Read position in TEditor::buffer
+;       DI = Pointer to write position in TDrawBuffer
+;       DX = Current column, in the range [-HScroll, W); only columns in the
+;            range [0, W) are written into the TDrawBuffer
+; In:
+;       AH = Color attribute
+;       CX = Segment end position in TEditor::buffer
+
 @@10:   SUB     CX, SI
         JA    @@11
         RETN
@@ -127,10 +141,12 @@ IFNDEF __FLAT__
 @@12:   LODSB
         CMP     AL, ' '
         JB    @@20
-@@13:   STOSW
-        INC     DX
-@@14:   CMP     DX, BX
-        JAE   @@30
+@@13:   TEST    DX, DX
+        JS    @@14
+        STOSW
+@@14:   INC     DX
+@@15:   CMP     DX, BX
+        JGE   @@30
         LOOP  @@12
         LDS     BX, [thisPtr]
         SUB     SI, WORD PTR DS:[BX+TEditorBuffer]
@@ -141,28 +157,37 @@ IFNDEF __FLAT__
         JE    @@30
         CMP     AL, 09H
         JNE   @@13
+@@21:   TEST    DX, DX
+        JS    @@22
         MOV     AL, ' '
-@@21:   STOSW
-        INC     DX
+        STOSW
+@@22:   INC     DX
         CMP     DX, BX
-        JAE   @@30
-        TEST    DL, 7
+        JGE   @@30
+        MOV     AL, DL
+        ADD     AL, BYTE PTR [HScroll]
+        TEST    AL, 7
         JNE   @@21
-        JMP   @@14
+        JMP   @@15
 @@30:   POP     CX
-@@31:   MOV     AL, ' '
-        MOV     CX, [W]
+@@31:   MOV     CX, [W]
+        TEST    DX, DX
+        JS    @@32
         SUB     CX, DX
-        JBE   @@32
+        JBE   @@33
+@@32:   MOV     AL, ' '
         REP     STOSW
-@@32:   RET
+@@33:   RET
 ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         USES    ESI, EDI, EBX
 
         MOV     EBX, DWORD PTR [thisPtr]
         MOV     EDI, DWORD PTR [DrawBuf]
+        ADD     EDI, TDrawBufferData
+        MOV     EDI, [EDI]
         MOV     ESI, [LinePtr]
         XOR     EDX, EDX
+        SUB     EDX, [HScroll]
         CLD
         MOV     AH, BYTE PTR [Colors]
         MOV     ECX, [EBX+TEditorSelStart]
@@ -180,6 +205,16 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CALL  @@10
         JMP   @@31
 
+; Render segment
+; In/Out:
+;       ESI = Read position in TEditor::buffer
+;       EDI = Pointer to write position in TDrawBuffer
+;       EDX = Current column, in the range [-HScroll, W); only columns in the
+;             range [0, W) are written into the TDrawBuffer
+; In:
+;       AH = Color attribute
+;       ECX = Segment end position in TEditor::buffer
+
 @@10:   SUB     ECX, ESI
         JA    @@11
         RETN
@@ -189,10 +224,12 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @@12:   LODSB
         CMP     AL, ' '
         JB    @@20
-@@13:   STOSW
-        INC     EDX
-@@14:   CMP     EDX, EBX
-        JAE   @@30
+@@13:   TEST    EDX, EDX
+        JS    @@14
+        STOSW
+@@14:   INC     EDX
+@@15:   CMP     EDX, EBX
+        JGE   @@30
         LOOP  @@12
         MOV     EBX, [thisPtr]
         SUB     ESI, [EBX+TEditorBuffer]
@@ -203,28 +240,34 @@ ELSE        ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         JE    @@30
         CMP     AL, 09H
         JNE   @@13
+@@21:   TEST    EDX, EDX
+        JS    @@22
         MOV     AL, ' '
-@@21:   STOSW
-        INC     EDX
+        STOSW
+@@22:   INC     EDX
         CMP     EDX, EBX
-        JAE   @@30
-        TEST    DL, 7
+        JGE   @@30
+        MOV     AL, DL
+        ADD     AL, BYTE PTR [HScroll]
+        TEST    AL, 7
         JNE   @@21
-        JMP   @@14
+        JMP   @@15
 
 @@30:   POP     ECX
-@@31:   MOV     AL, ' '
-        MOV     ECX, [W]
+@@31:   MOV     ECX, [W]
+        TEST    EDX, EDX
+        JS    @@32
         SUB     ECX, EDX
-        JBE   @@32
+        JBE   @@33
+@@32:   MOV     AL, ' '
         REP     STOSW
-@@32:   RET
+@@33:   RET
 ENDIF
 
 IFNDEF __FLAT__
-ENDP @TEditor@formatLine$qnusuiius
+ENDP @TEditor@formatLine$qm11TDrawBufferuiiius
 ELSE
-ENDP @TEditor@formatLine$qpusuiius
+ENDP @TEditor@formatLine$qr11TDrawBufferuiiius
 ENDIF
 
 ;function TEditor.lineEnd(P: uint): uint; assembler;
