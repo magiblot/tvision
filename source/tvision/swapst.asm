@@ -70,6 +70,8 @@ ELSE         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         LES     EDI, [LARGE @TScreen@screenBuffer]
         ADD     EDI, EAX
         MOV     ESI, DWORD PTR [Buffer]
+        ADD     ESI, TDrawBufferData
+        MOV     ESI, [ESI]
 @@1:
         MOV     AX, ES:[EDI]
         MOVSW

@@ -199,6 +199,7 @@ else    ;;;;;;;;;;;;;;;;;;;;;;;;;; 32-bit version ;;;;;;;;;;;;;;;;;;;;;;;;;;;
         LEA     ESI, [FrameMask]
         MOV     EDI, DWORD PTR [FrameBuf]
         ADD     EDI, TDrawBufferData
+        MOV     EDI, [EDI]
 @@11:   LODSB
         XLAT
         STOSW
