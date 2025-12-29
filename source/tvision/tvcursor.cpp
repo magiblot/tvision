@@ -18,7 +18,9 @@
 #define Uses_THardwareInfo
 #include <tvision/tv.h>
 
-#ifdef __FLAT__
+#if !defined( __FLAT__ )
+#error The 16-bit version of this file is in TVCURSOR.ASM
+#else
 
 struct TVCursor {
 
@@ -93,4 +95,4 @@ int TVCursor::decideCaretSize() const
     return TScreen::cursorLines & 0x0F;
 }
 
-#endif
+#endif // __FLAT__

@@ -20,7 +20,9 @@
 #define Uses_TText
 #include <tvision/tv.h>
 
-#ifdef __FLAT__
+#if !defined( __FLAT__ )
+#error The 16-bit version of this file is in TVWRITE.ASM
+#else
 
 #include <string.h>
 #include <stdlib.h>
@@ -398,4 +400,4 @@ void TView::writeStr( short x, short y, const char *str, uchar color ) noexcept
     }
 }
 
-#endif
+#endif // __FLAT__

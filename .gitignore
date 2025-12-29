@@ -39,6 +39,7 @@
 *.[tT][rR]2
 *.[fhFH]16
 *.[fhFH]32
+[oO][bB][jJ]*/
 *.kate-swp
 *.a
 *.ilk

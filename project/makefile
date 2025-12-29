@@ -1,10 +1,6 @@
 .autodepend
 .swap
 
-!if !$d(TVDIR)  # From the point of view of the underlying targets.
-TVDIR = ..\..
-TVFLAGS = $(TVFLAGS) -DTVDIR=$(TVDIR)
-!endif
 !if $d(DOS16)
 TVFLAGS = $(TVFLAGS) -DDOS16
 !endif
@@ -32,69 +28,33 @@ TVFLAGS = $(TVFLAGS) -DEXCEPTIONS
 !if $d(NO_STREAMABLE)
 TVFLAGS = $(TVFLAGS) -DNO_STREAMABLE
 !endif
-!if $d(NOTASM)
-TVFLAGS = $(TVFLAGS) -DNOTASM
-!endif
 
-!if !$d(PRJDIR)
-PRJDIR = $(TVDIR)\PROJECT
-!endif
-!if !$d(EXCLUDE)  # To avoid conflicts in files with both a CPP and ASM version.
+# Avoid conflicts in files with both a CPP and ASM version.
+# This is done in several variables to avoid the 'Command arguments too long' issue.
 !if $d(DOS32)
-# This is done in several variables to work around the 'Command arguments too long' bug.
-EXCLUDE2 = TVEXPOSD.CPP TVWRITE.ASM
-EXCLUDE1 = EDITS.ASM FRAMELIN.ASM TVCURSOR.ASM TGRMV.ASM TTPRVLNS.ASM
+EXCLUDE1 = edits.cpp framelin.cpp tvcursor.asm tgrmv.asm ttprvlns.asm
+EXCLUDE2 = tvexposd.cpp tvwrite.asm
 !else
-EXCLUDE1 = EDITS.CPP FRAMELIN.CPP TVCURSOR.CPP TGRMV.CPP TTPRVLNS.CPP
-EXCLUDE2 = TVEXPOSD.CPP TVWRITE.CPP
-!endif
+EXCLUDE1 = edits.cpp framelin.cpp tvcursor.cpp tgrmv.cpp ttprvlns.cpp
+EXCLUDE2 = tvexposd.cpp tvwrite.cpp
 !endif
 
-all: source\tvision examples\tvdemo examples\tvdir examples\tvedit            \
-     examples\tvforms examples\tvhc
+EXAMPLES = examples\tvdemo examples\tvdir examples\tvedit examples\tvforms \
+           examples\tvhc
+
+all: source\tvision $(EXAMPLES)
 
 source\tvision:
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG  # In case build failed last time.
+    CD ..\source\tvision
     IF NOT EXIST excluded MD excluded
-    @for %f in ($(EXCLUDE1)) do IF EXIST %f MOVE %f excluded
-    @for %f in ($(EXCLUDE2)) do IF EXIST %f MOVE %f excluded
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS) -DSRCDIR=.
+    @FOR %f IN ($(EXCLUDE1)) DO IF EXIST %f MOVE %f excluded
+    @FOR %f IN ($(EXCLUDE2)) DO IF EXIST %f MOVE %f excluded
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS) -DTVDIR=..\.. -DSRCDIR=.
     MOVE excluded\* .
     RD excluded
-    CD $(PRJDIR)
+    CD ..\..\project
 
-examples\tvdemo: source\tvision
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
-    CD $(PRJDIR)
-
-examples\tvdir: source\tvision
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
-    CD $(PRJDIR)
-
-examples\tvedit: source\tvision
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
-    CD $(PRJDIR)
-
-examples\tvforms: source\tvision
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
-    CD $(PRJDIR)
-
-examples\tvhc: source\tvision
-    CD ..\$@
-    IF EXIST *.CFG DEL *.CFG
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS)
-    CD $(PRJDIR)
-
-clean:
-    CD ..\source\tvision
-    $(MAKEDIR)\$(MAKE) $(TVFLAGS) clean
-    CD $(PRJDIR)
+$(EXAMPLES): source\tvision
+    CD ..\$*
+    $(MAKEDIR)\$(MAKE) $(TVFLAGS) -DTVDIR=..\..
+    CD ..\..\project

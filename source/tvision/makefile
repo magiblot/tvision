@@ -45,17 +45,6 @@
 #       set TVDIR=\AF
 #       make -DOVERLAY
 #
-#
-#
-#                       !!!!!!!!CAUTION!!!!!!!!
-#
-#   If you did not purchase Turbo Assembler 4.0, DO NOT DELETE the
-#   .OBJ files in the \BC4\LIB\COMPAT directory.  They are built from
-#   .ASM files, and you will not be able to rebuild them.
-#
-#   If you accidentally delete any of these .OBJ files you will have
-#   to reinstall them from a backup or from your original diskettes.
-#
 .autodepend
 .swap
 
@@ -84,8 +73,7 @@ OBJDIR  = $(SRCDIR)\OBJS32
 CFGNAME = TV32.CFG
 INCNAME = TVWRIT32.INC
 GENEXE  = GENINC32.EXE
-GENOBJ  = GENINC32.OBJ
-GENSRC  = GENINC.CPP
+GENOBJ  = GENINC.OBJ
 TARGETFLAG = -WX
 
 CC      = $(BCROOT)\BIN\BCC32
@@ -112,7 +100,6 @@ CFGNAME = TV.CFG
 INCNAME = TVWRITE.INC
 GENEXE  = GENINC.EXE
 GENOBJ  = GENINC.OBJ
-GENSRC  = GENINC.CPP
 TARGETFLAG =
 
 CC      = $(BCROOT)\BIN\BCC
@@ -237,30 +224,24 @@ SOBJS = pfxSBKGRND.OBJ  pfxSBUTTON.OBJ  pfxSCHDRDLG.OBJ pfxSCHECKBO.OBJ \
 
 OBJS  = $(AOBJS) $(TOBJS) $(NOBJS) $(SOBJS)
 
-
 .cpp.obj:
      $(CC) -c +$(CFGNAME) {$. }
 
 .asm.obj:
-!if !$d(NOTASM)
      $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
-!else
-     COPY $(COMPATDIR)\$&.obj $(OBJDIR)
-!endif
 
-all: $(CFGNAME) dirs $(TVLIBDIR)\$(LIBNAME)
+all: $(TVLIBDIR)\$(LIBNAME)
     DEL $(CFGNAME)
 
 dirs:
     IF NOT EXIST $(OBJDIR) MD $(OBJDIR)
 
-$(CFGNAME):
+cfg:
     ECHO $(TARGETFLAG) $(CFLAGS) > $(CFGNAME)
 
-*.cpp: $(CFGNAME)
+*.cpp: cfg dirs
 
-!if !$d(NOTASM)
-*.asm: $(INCNAME)
+*.asm: $(INCNAME) dirs
 
 $(INCNAME): $(GENEXE)
      $(GENEXE) > $(INCNAME)
@@ -268,12 +249,7 @@ $(INCNAME): $(GENEXE)
 $(GENEXE): $(GENOBJ)
      $(CC) +$(CFGNAME) -f- $(TARGETFLAG) -e$(GENEXE) -L$(LIBDIR) -n. $(OBJDIR)\$(GENOBJ)
 
-$(GENOBJ): $(GENSRC)
-     $(CC) +$(CFGNAME) -f- $(TARGETFLAG) -c -o$(OBJDIR)\$(GENOBJ) $(GENSRC)
-
-!endif
-
-OBJPFX=+$(OBJDIR)\\
+OBJPFX = +$(OBJDIR)\ #
 
 $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
      @if not exist $(TVLIBDIR) md $(TVLIBDIR)
@@ -291,8 +267,5 @@ $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
      +syserr +tscreen +drivers +drivers2 +swapst +tevent +sysint +hardware
 |
 !endif
-
-clean:
-     del $(OBJDIR)\*.obj
 
 # End of Turbo Vision 2.0 Makefile!

@@ -73,7 +73,7 @@ CFGFILE    = $(SOURCE).CFG
 CC         = $(BCROOT)\BIN\bcc +$(CFGFILE)
 TLINK      = $(BCROOT)\BIN\tlink
 STARTUP    = c0l.obj
-USERLIBS   = tv$(TVSUFFIX).lib
+TVLIBNAME  = tv$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) emu.lib mathl.lib cl.lib
 CCFLAGS    = -ml $(CCDEBUGFLAG) $(CCOVYFLAGS)
 LINKFLAGS  = $(LINKDEBUGFLAG)
@@ -84,7 +84,7 @@ OBJDIR     = objs16$(DEBUGSUFFIX)
 #
 
 !ifdef OVERLAY
-USERLIBS   = tvo$(TVSUFFIX).lib
+TVLIBNAME  = tvo$(TVSUFFIX).lib
 STDLIBS    = tvno$(TVSUFFIX).lib overlay.lib emu.lib mathl.lib cl.lib
 !endif
 
@@ -97,7 +97,7 @@ CFGFILE    = $(SOURCE).C16
 CC         = $(BCROOT)\BIN\bcc +$(CFGFILE)
 TLINK      = $(BCROOT)\BIN\tlink
 STARTUP    = c0x.obj
-USERLIBS   = tv$(TVSUFFIX).lib
+TVLIBNAME  = tv$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) dpmi16.lib emux.lib mathwl.lib cwl.lib
 CCFLAGS    = -WX -ml $(CCDEBUGFLAG)
 LINKFLAGS  = /Txe $(LINKDEBUGFLAG)
@@ -113,12 +113,21 @@ CFGFILE    = $(SOURCE).C32
 CC         = $(BCROOT)\BIN\bcc32 +$(CFGFILE)
 TLINK      = $(BCROOT)\BIN\tlink32
 STARTUP    = c0x32.obj
-USERLIBS   = tv32$(TVSUFFIX).lib
+TVLIBNAME  = tv32$(TVSUFFIX).lib
 STDLIBS    = $(BGILIB) dpmi32.lib cw32.lib
 CCFLAGS    = -WX $(CCDEBUGFLAG)
 LINKFLAGS  = /Tpe/ax $(LINKDEBUGFLAG)
 OBJDIR     = objs32$(DEBUGSUFFIX)
 !endif
+
+#
+# tell MAKE where to look for OBJ files
+#
+
+.path.obj = $(OBJDIR)
+
+all: $(SOURCE).exe
+  DEL $(CFGFILE)
 
 #
 # implicit rule takes care of compiling all C++ files
@@ -127,43 +136,32 @@ OBJDIR     = objs32$(DEBUGSUFFIX)
 .cpp.obj:
   $(CC) $(CCFLAGS) -c -n$(OBJDIR) {$< }
 
-
 #
 # link the exe
 #
 
-$(SOURCE).exe: dirs $(CFGFILE) $(OBJDIR)\$(SOURCE).obj
+$(SOURCE).exe: $(SOURCE).obj $(TVDIR)\LIB\$(TVLIBNAME)
   $(TLINK) @&&|
-$(LINKFLAGS)/L$(LIBPATH) +      # linker options
-$(STARTUP) +                    # startup code
-$(OBJDIR)\$(SOURCE).obj         # user object files
-$(SOURCE)                       # exe name
-$(SOURCE)                       # mapfile
-$(LINKOVY_ON)$(USERLIBS) +      # overlayable libraries
-$(LINKOVY_OFF)$(STDLIBS)        # non-overlayable libraries
+  $(LINKFLAGS)/L$(LIBPATH) +    # linker options
+  $(STARTUP) +                  # startup code
+  $(OBJDIR)\$(SOURCE).obj       # user object files
+  $(SOURCE)                     # exe name
+  $(SOURCE)                     # mapfile
+  $(LINKOVY_ON) $(TVLIBNAME) +  # overlayable libraries
+  $(LINKOVY_OFF) $(STDLIBS)     # non-overlayable libraries
 |
 
 #
-# the following rule ensures that the appropriate OBJS
-# directory exists.
+# source files depend on the cfg file and OBJs directory
 #
 
-dirs:
-  IF NOT EXIST $(OBJDIR) MD $(OBJDIR)
+*.cpp: cfg dirs
 
 #
-# source file depends on the cfg file, which is created
-# whenever the makefile is modified
+# create the configuration file and OBJs directory
 #
 
-$(OBJDIR)\$(SOURCE).obj: $(CFGFILE) $(SOURCE).cpp
-
-#
-# create a new configuration file whenever the makefile
-# has been modified
-#
-
-$(CFGFILE): makefile
+cfg:
   copy &&|
 -w
 -w-sig
@@ -171,3 +169,6 @@ $(CFGFILE): makefile
 -I$(INCPATH)
 -L$(LIBPATH)
 | $(CFGFILE)
+
+dirs:
+  IF NOT EXIST $(OBJDIR) MD $(OBJDIR)
