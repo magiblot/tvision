@@ -33,7 +33,7 @@ void TTestView::draw()
                                         // given index.
         sprintf(text, " This line uses index %02X, color is %02X ", i, textAttr);
         buf.moveStr(0, text, textAttr);      // Write to buffer.
-        writeLine(0, i-1, size.x, i, buf);   // Write buffer to
+        writeLine(0, i-1, size.x, 1, buf);   // Write buffer to
                                              // view.
     }
 //

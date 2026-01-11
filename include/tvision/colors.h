@@ -222,7 +222,7 @@ inline uint8_t RGBtoXTerm256(TColorRGB c)
     {
         auto scale = [] (uchar c)
         {
-            c += 20 & -(c < 75);
+            c += 20 & -(c < 75); // Compensate for underrepresented dark colors.
             return uchar(max<uchar>(c, 35) - 35)/40;
         };
         uchar r = scale(c.r),
@@ -233,10 +233,12 @@ inline uint8_t RGBtoXTerm256(TColorRGB c)
     auto cnvGray = [] (uchar l)
     {
         if (l < 8 - 5)
-            return 16;
+            return 16; // Totally black.
         if (l >= 238 + 5)
-            return 231;
-        return 232 + uchar(max<uchar>(l, 3) - 3)/uchar(10);
+            return 231; // Totally white.
+        // L is now in the range [3..242] and has to be mapped to one of the 24
+        // grayscale colors.
+        return 232 + uchar(max<uchar>(l, 3) - 3)/uchar(10); // [232..255]
     };
 
     uchar idx = cnvColor(c);
@@ -245,6 +247,8 @@ inline uint8_t RGBtoXTerm256(TColorRGB c)
         uchar Xmin = min(min(c.r, c.g), c.b),
               Xmax = max(max(c.r, c.g), c.b);
         uchar C = Xmax - Xmin; // Chroma in the HSL/HSV theory.
+        // For low-chroma or dark colors which are not exactly representable
+        // in the 6x6x6 color cube, use the grayscale palette.
         if (C < 12 || idx == 16) // Grayscale if Chroma < 12 or rounded to black.
         {
             uchar L = ushort(Xmax + Xmin)/2; // Lightness, as in HSL.

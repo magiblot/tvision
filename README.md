@@ -685,7 +685,7 @@ writeBuf( 0, i, size.x, 1, b );
 ```
 All it does is move part of a string in `fileLines` into `b`, which is a `TDrawBuffer`. `delta` is a `TPoint` representing the scroll offset in the text view, and `i` is the index of the visible line being processed. `c` is the text color. A few issues are present:
 
-* `TDrawBuffer::moveStr(ushort, const char *, TColorAttr)` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and be displayed as garbage.
+* `TDrawBuffer::moveStr` takes a null-terminated string. In order to pass a substring of the current line, a copy is made into the array `s`, at the risk of a [buffer overrun](https://github.com/magiblot/tvision/commit/8aa2bf4af4474b85e86e340b08d7c56081b68986). The case where the line does not fit into `s` is not handled, so at most `maxLineLenght` characters will be copied. What's more, a multibyte character near position `maxLineLength` could be copied incompletely and be displayed as garbage.
 * `delta.x` is the first visible column. With multibyte-encoded text, it is no longer true that such column begins at position `delta.x` in the string.
 
 Below is a corrected version of the code above that handles Unicode properly:
@@ -698,7 +698,7 @@ if (delta.y + i < fileLines->getCount()) {
 }
 writeBuf( 0, i, size.x, 1, b );
 ```
-The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort width, ushort begin)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
+The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
 
 * The intermediary copy is avoided, so the displayed text is not limited to `maxLineLength` bytes.
 * `moveStr` takes care of printing the string starting at column `delta.x`. We do not even need to worry about how many bytes correspond to `delta.x` columns.
@@ -1050,8 +1050,8 @@ assert(hi == attrs[1]);
 Views are commonly drawn by means of a `TDrawBuffer`. Most `TDrawBuffer` member functions take color attributes by parameter. For example:
 
 ```c++
-ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr);
-ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs);
+ushort TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent);
+ushort TDrawBuffer::moveCStr(ushort indent, TStringView str, TAttrPair attrs, ushort maxStrWidth, ushort strIndent);
 void TDrawBuffer::putAttribute(ushort indent, TColorAttr attr);
 ```
 
