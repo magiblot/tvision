@@ -479,7 +479,7 @@ TRect TView::getClipRect() const noexcept
     return clip;
 }
 
-TAttrPair TView::getColor( ushort color ) noexcept
+TAttrPair TView::getColor( ushort color )
 {
     TAttrPair colorPair = color >> 8;
 

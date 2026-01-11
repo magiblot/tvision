@@ -698,7 +698,7 @@ if (delta.y + i < fileLines->getCount()) {
 }
 writeBuf( 0, i, size.x, 1, b );
 ```
-The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
+The overload of `moveStr` used here is `TDrawBuffer::moveStr(ushort indent, TStringView str, TColorAttr attr, ushort maxStrWidth, ushort strIndent = 0)`. This function not only provides Unicode support, but also helps us write cleaner code and overcome some of the limitations previously present:
 
 * The intermediary copy is avoided, so the displayed text is not limited to `maxLineLength` bytes.
 * `moveStr` takes care of printing the string starting at column `delta.x`. We do not even need to worry about how many bytes correspond to `delta.x` columns.
@@ -1099,7 +1099,7 @@ So, in general, there are three ways to use extended colors in views:
 
 ```c++
 // The 'TMyScrollBar' class inherits from 'TScrollBar' and overrides 'TView::mapColor'.
-TColorAttr TMyScrollBar::mapColor(uchar index) noexcept
+TColorAttr TMyScrollBar::mapColor(uchar index)
 {
     // In this example the values are hardcoded,
     // but they could be stored elsewhere if desired.

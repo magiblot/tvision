@@ -409,9 +409,9 @@ public:
     virtual void endModal( ushort command );
     virtual ushort execute();
 
-    TAttrPair getColor( ushort color ) noexcept;
+    TAttrPair getColor( ushort color );
     virtual TPalette& getPalette() const;
-    virtual TColorAttr mapColor( uchar ) noexcept;
+    virtual TColorAttr mapColor( uchar );
 
     Boolean getState( ushort aState ) const noexcept;
     void select();
