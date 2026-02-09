@@ -368,7 +368,7 @@ I   POP     DS
 }
 
 #if defined( __FLAT__ )
-TDrawBuffer::TDrawBuffer(const size_t bufferSize) noexcept
+TDrawBuffer::TDrawBuffer(const size_t bufferSize)
 {
     // Unlike on DOS, the screen's dimensions are arbitrary, so we have to take
     // this into account and allocate the buffer dynamically. We must take the
