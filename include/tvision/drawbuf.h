@@ -44,7 +44,7 @@ public:
     void putChar( ushort indent, uchar c ) noexcept;
 
 #if defined( __FLAT__ )
-    TDrawBuffer() noexcept;
+    TDrawBuffer(size_t bufferSize = -1) noexcept;
     ~TDrawBuffer();
 #endif
 

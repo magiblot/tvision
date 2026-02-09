@@ -368,14 +368,17 @@ I   POP     DS
 }
 
 #if defined( __FLAT__ )
-TDrawBuffer::TDrawBuffer() noexcept
+TDrawBuffer::TDrawBuffer(const size_t bufferSize) noexcept
 {
     // Unlike on DOS, the screen's dimensions are arbitrary, so we have to take
     // this into account and allocate the buffer dynamically. We must take the
     // largest of the screen's dimensions, since TDrawBuffer can also be used to
     // draw vertical views (e.g. TScrollBar).
     // In addition, we give some room for views that might exceed the screen size.
-    capacity = 8 + max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
+    if (bufferSize == -1)
+        capacity = 8 + max(max(TScreen::screenWidth, TScreen::screenHeight), 80);
+    else
+        capacity = bufferSize;
     data = new TScreenCell[capacity];
 #if !defined( __BORLANDC__ )
     // We cannot leave the buffer uninitialized because, if it ends up being
