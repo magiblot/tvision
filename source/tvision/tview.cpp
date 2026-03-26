@@ -396,6 +396,8 @@ void TView::drawUnderView( Boolean doShadow, TView* lastView )
     TRect r = getBounds();
     if( doShadow != False )
         r.b += shadowSize;
+    if( (options & ofFramed) != 0 )
+        r.grow(1, 1);
     drawUnderRect( r, lastView );
 }
 
