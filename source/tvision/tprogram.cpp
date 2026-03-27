@@ -150,7 +150,7 @@ void TProgram::getEvent(TEvent& event)
             }
         }
 
-    if( statusLine != 0 )
+    if( statusLine != 0 && TopView() == this )
         {
         if( (event.what & evKeyDown) != 0 ||
             ( (event.what & evMouseDown) != 0 &&
