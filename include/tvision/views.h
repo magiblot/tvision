@@ -238,7 +238,7 @@ public:
 
 private:
 
-    int loc( int ) noexcept;
+    uint loc( int ) noexcept;
     int mask( int ) noexcept;
 
     static int _NEAR masks[8];
@@ -272,9 +272,9 @@ inline int operator != ( const TCommandSet& tc1, const TCommandSet& tc2 ) noexce
     return !operator == ( tc1, tc2 );
 }
 
-inline int TCommandSet::loc( int cmd ) noexcept
+inline uint TCommandSet::loc( int cmd ) noexcept
 {
-    return cmd / 8;
+    return (uint) cmd / 8;
 }
 
 inline int TCommandSet::mask( int cmd ) noexcept
