@@ -20,6 +20,7 @@
 #define Uses_TEvent
 #define Uses_TGroup
 #define Uses_TKeys
+#define Uses_TScrollBar
 #include <tvision/tv.h>
 
 #if !defined( __DIR_H )
@@ -71,6 +72,107 @@ TFileList::~TFileList()
       destroy ( list() );
 }
 
+#define cpFileList "\x1A\x1A\x1B\x1C\x1D\x1F"
+
+TPalette& TFileList::getPalette() const
+{
+    static TPalette palette( cpFileList, sizeof( cpFileList )-1 );
+    return palette;
+}
+
+void TFileList::draw()
+{
+    short i, j, item;
+    TColorAttr normalColor, selectedColor, focusedColor, dirColor, color;
+    short colWidth, curCol, indent;
+    TDrawBuffer b;
+    uchar scOff;
+    Boolean focusedVis;
+
+    if( (state&(sfSelected | sfActive)) == (sfSelected | sfActive))
+        {
+        normalColor = getColor(1);
+        focusedColor = getColor(3);
+        selectedColor = getColor(4);
+        dirColor = getColor(6);
+        }
+    else
+        {
+        normalColor = getColor(2);
+        selectedColor = getColor(4);
+        dirColor = getColor(6);
+        focusedColor = 0;
+        }
+
+    if( hScrollBar != 0 )
+        indent = hScrollBar->value;
+    else
+        indent = 0;
+
+    focusedVis = False;
+    colWidth = size.x / numCols + 1;
+    for( i = 0; i < size.y; i++ )
+        {
+        for( j = 0; j < numCols; j++ )
+            {
+            item =  j * size.y + i + topItem;
+            curCol = j * colWidth;
+            if( (state & (sfSelected | sfActive)) == (sfSelected | sfActive) &&
+                focused == item &&
+                range > 0)
+                {
+                color = focusedColor;
+                setCursor( curCol + 1, i );
+                scOff = 0;
+                focusedVis = True;
+                }
+            else if( item < range && isSelected(item) )
+                {
+                color = selectedColor;
+                scOff = 2;
+                }
+            else
+                {
+                color = normalColor;
+                if (item < range)
+                    {
+                    TSearchRec *f = (TSearchRec *)(list()->at(item));
+                    if ( (f->attr & FA_DIREC) != 0 )
+                        color = dirColor;
+                    }
+                scOff = 4;
+                }
+
+            b.moveChar( curCol, ' ', color, colWidth );
+            if( item < range )
+                {
+                if (indent < 255)
+                    {
+                    char text[256];
+                    getText( text, item, 255 );
+                    b.moveStr( curCol+1, text, color, colWidth, indent );
+                    }
+                if( showMarkers )
+                    {
+                    b.putChar( curCol, specialChars[scOff] );
+                    b.putChar( curCol+colWidth-2, specialChars[scOff+1] );
+                    }
+                }
+            else if( i == 0 && j == 0 )
+                {
+                static const char * const localEmptyText = "<empty>";
+                b.moveStr( curCol+1, localEmptyText, getColor(1) );
+                }
+
+            b.moveChar( curCol+colWidth-1, '\xB3', getColor(5), 1 );
+            }
+        writeLine( 0, i, size.x, 1, b );
+        }
+
+    if ( !focusedVis )
+        setCursor( -1, -1 );
+}
+
 void TFileList::focusItem( short item )
 {
     TSortedListBox::focusItem( item );
@@ -116,8 +218,8 @@ void TFileList::getText( char *dest, short item, short maxChars )
 
     strncpy( dest, f->name, maxChars );
     dest[maxChars] = '\0';
-    if( f->attr & FA_DIREC )
-        strcat( dest, "\\" );
+//    if( f->attr & FA_DIREC )
+//        strcat( dest, "\\" );
 }
 
 
