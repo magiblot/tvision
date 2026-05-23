@@ -400,6 +400,13 @@
 #define __INC_DIALOGS_H
 #endif
 
+#if defined( Uses_TChoiceInputLine )
+#define Uses_TInputLine
+#define Uses_TView
+#define Uses_TValidator
+#define __INC_DIALOGS_H
+#endif
+
 #if defined( Uses_TDialog )
 #define Uses_TWindow
 #define __INC_DIALOGS_H

@@ -244,6 +244,48 @@ inline opstream& operator << ( opstream& os, TInputLine* cl )
 
 #endif  // Uses_TInputLine
 
+/* ---------------------------------------------------------------------- */
+/*      class TChoiceInputLine                                            */
+/*                                                                        */
+/*      A TInputLine with an attached in-memory choice list.               */
+/*      The user can type to filter choices by substring or press Down     */
+/*      to open the list explicitly. Accepting a choice copies it into     */
+/*      the input line without changing its case.                          */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TChoiceInputLine ) && !defined( __TChoiceInputLine )
+#define __TChoiceInputLine
+
+class TChoiceInputLine : public TInputLine
+{
+
+public:
+
+    TChoiceInputLine( const TRect& bounds, int limit,
+                      const char * const *aChoices = 0,
+                      short aChoiceCount = 0,
+                      TValidator *aValid = 0,
+                      ushort limitMode = ilMaxBytes ) noexcept;
+
+    virtual void handleEvent( TEvent& event );
+    void setChoices( const char * const *aChoices,
+                     short aChoiceCount ) noexcept;
+    Boolean showChoices( Boolean filtered = False );
+    virtual Boolean choiceMatches( TStringView choice,
+                                   TStringView filter ) const noexcept;
+
+    const char * const *choices;
+    short choiceCount;
+    short maxVisibleRows;
+
+protected:
+
+    virtual void copyChoice( TStringView choice );
+
+};
+
+#endif  // Uses_TChoiceInputLine
+
 
 /* ---------------------------------------------------------------------- */
 /*      TButton object                                                    */
