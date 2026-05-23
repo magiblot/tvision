@@ -365,6 +365,11 @@
 #define __INC_DIALOGS_H
 #endif
 
+#if defined( Uses_TTableListBox )
+#define Uses_TListViewer
+#define __INC_DIALOGS_H
+#endif
+
 #if defined( Uses_TCheckBoxes )
 #define Uses_TCluster
 #define __INC_DIALOGS_H

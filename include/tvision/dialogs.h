@@ -715,6 +715,60 @@ inline TCollection *TListBox::list()
 
 #endif  // Uses_TListBox
 
+/* ---------------------------------------------------------------------- */
+/*      class TTableListBox                                               */
+/*                                                                        */
+/*      Displays a one-dimensional selection list as rows made of          */
+/*      multiple text columns. Unlike TListBox's numCols layout, each      */
+/*      row remains one selectable item.                                   */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TTableListBox ) && !defined( __TTableListBox )
+#define __TTableListBox
+
+class _FAR TRect;
+class _FAR TScrollBar;
+
+struct TTableListBoxRec
+{
+    const char * const *cells;
+    ushort rowCount;
+    ushort columnCount;
+    ushort selection;
+};
+
+class TTableListBox : public TListViewer
+{
+
+public:
+
+    TTableListBox( const TRect& bounds, TScrollBar *aScrollBar ) noexcept;
+    ~TTableListBox();
+
+    virtual ushort dataSize();
+    virtual void getData( void *rec );
+    virtual void getText( char *dest, short item, short maxLen );
+    virtual void setData( void *rec );
+    void setRows( const char * const *aCells, ushort aRowCount,
+                  ushort aColumnCount, ushort selection = 0 );
+    short selectedIndex() const noexcept;
+
+    ushort columnPadding;
+
+protected:
+
+    virtual TStringView getCell( short row, short column ) const noexcept;
+    void updateColumnWidths();
+
+    const char * const *cells;
+    ushort rowCount;
+    ushort columnCount;
+    ushort *columnWidths;
+
+};
+
+#endif  // Uses_TTableListBox
+
 
 /* ---------------------------------------------------------------------- */
 /*      class TStaticText                                                 */
