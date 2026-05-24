@@ -62,24 +62,15 @@ TFileDialog::TFileDialog( TStringView aWildCard,
     flags |= wfGrow;
     strnzcpy( wildCard, aWildCard, sizeof( wildCard ) );
 
-    fileName = new TFileInputLine( TRect( 3, 3, 31, 4 ), MAXPATH );
-    strnzcpy( fileName->data, wildCard, MAXPATH );
-    insert( fileName );
-    first()->growMode = gfGrowHiX;
-
-    insert( new TLabel( TRect( 2, 2, 3+cstrlen(inputName), 3 ),
-                        inputName,
-                        fileName
-                      ) );
-    first()->growMode = 0;
-    insert( new THistory( TRect( 31, 3, 34, 4 ), fileName, histId ) );
-    first()->growMode = gfGrowLoX | gfGrowHiX;
-    TScrollBar *sb = new TScrollBar( TRect( 3, 14, 34, 15 ) );
+    TScrollBar *sb = new TScrollBar( TRect( 3, 11, 34, 12 ) );
     insert( sb );
-    insert( fileList = new TFileList( TRect( 3, 6, 34, 14 ), sb ) );
-    first()->growMode = gfGrowHiX | gfGrowHiY;
-    insert( new TLabel( TRect( 2, 5, 8, 6 ), filesText, fileList ) );
+    fileList = new TFileList( TRect( 3, 3, 34, 11 ), sb );
+    fileList->growMode = gfGrowHiX | gfGrowHiY;
+    insert( fileList );
+
+    insert( new TLabel( TRect( 2, 2, 8, 3 ), filesText, fileList ) );
     first()->growMode = 0;
+
     ushort opt = bfDefault;
     TRect r( 35, 3, 46, 5 );
 
@@ -133,10 +124,6 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         r.b.y += 3;
         }
 
-    insert( new TFileInfoPane( TRect( 1, 16, 48, 18 ) ) );
-    first()->growMode = gfGrowAll & ~gfGrowLoX;
-    selectNext( False );
-
     // I feel too lazy to update all the sizes above. The new default size
     // is set by resizing the dialog.
     {
@@ -165,6 +152,25 @@ TFileDialog::TFileDialog( TStringView aWildCard,
         // as it would be too sparse.
         locate(bounds);
     }
+
+    fileName = new TFileInputLine( TRect( 3, size.y - 5, size.x - 4, size.y - 4 ), MAXPATH );
+    strnzcpy( fileName->data, wildCard, MAXPATH );
+    fileName->growMode = gfGrowLoY | gfGrowHiY | gfGrowHiX;
+    insert( fileName );
+
+    insert( new TLabel( TRect( 2, size.y - 6, 3+cstrlen(inputName), size.y - 5 ),
+                        inputName,
+                        fileName
+                      ) );
+    first()->growMode = gfGrowLoY | gfGrowHiY;
+
+    insert( new THistory( TRect( size.x - 4, size.y - 5, size.x - 1, size.y - 4 ), fileName, histId ) );
+    first()->growMode = gfGrowLoX | gfGrowHiX | gfGrowLoY | gfGrowHiY; // This one shifts with the right edge
+
+    insert( new TFileInfoPane( TRect( 1, size.y - 3, size.x - 1, size.y - 1 ) ) );
+    first()->growMode = gfGrowHiX | gfGrowLoY | gfGrowHiY;
+
+    selectNext( False );
 
     if( (aOptions & fdNoLoadDir) == 0 )
         readDirectory();
@@ -257,6 +263,7 @@ void TFileDialog::readDirectory()
 {
     char curDir[MAXPATH];
     getCurDir( curDir );
+    fexpand( curDir );
     if( directory )
         delete[] (char *) directory;
     directory = newStr( curDir );
@@ -297,6 +304,9 @@ char drive[MAXDRIVE];
 char dir[MAXDIR];
 char name[MAXFILE];
 char ext[MAXEXT];
+char oldParent[MAXPATH];
+
+    oldParent[0] = '\0';
 
     if( command == 0 )
         return True;
@@ -306,6 +316,23 @@ char ext[MAXEXT];
         if( command != cmCancel && command != cmFileClear )
             {
             getFileName( fName );
+
+            // Find the position of the first difference
+            const char *p1 = fName;
+            const char *p2 = directory;
+            while (*p1 && *p2 && *p1 == *p2) {
+                p1++; p2++;
+            }
+
+            // p2 points to the beginning of the old parent folder name
+            // copy until next '/'
+            const char *end = strpbrk(p2, "/\\");
+            if (!end) end = p2 + strlen(p2);
+            size_t len = end - p2;
+            if (len < MAXPATH) {
+                strncpy(oldParent, p2, len);
+                oldParent[len] = '\0';
+            }
 
             if( isWild( fName ) )
                 {
@@ -322,6 +349,21 @@ char ext[MAXEXT];
                     if( command != cmFileInit )
                         fileList->select();
                     fileList->readDirectory( directory, wildCard );
+
+                    TCollection *items = fileList->list();
+                    if (items != 0)
+                    {
+                        for (short i = 0; i < items->getCount(); i++)
+                        {
+                            TSearchRec *item = (TSearchRec *)items->at(i);
+                            if (item != NULL && stricmp(item->name, oldParent) == 0)
+                            {
+                                fileList->focusItem(i);
+                                break;
+                            }
+                        }
+                    }
+
                     }
                 }
             else if( isDir( fName ) )
@@ -334,6 +376,21 @@ char ext[MAXEXT];
                     if( command != cmFileInit )
                         fileList->select();
                     fileList->readDirectory( directory, wildCard );
+
+                    TCollection *items = fileList->list();
+                    if (items != 0)
+                    {
+                        for (short i = 0; i < items->getCount(); i++)
+                        {
+                            TSearchRec *item = (TSearchRec *)items->at(i);
+                            if (item != NULL && stricmp(item->name, oldParent) == 0)
+                            {
+                                fileList->focusItem(i);
+                                break;
+                            }
+                        }
+                    }
+
                     }
                 }
             else if( validFileName( fName ) )
