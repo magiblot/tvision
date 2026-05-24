@@ -142,13 +142,17 @@ void TWindow::handleEvent( TEvent& event )
                 break;
             }
     else if( event.what == evKeyDown )
-            switch (event.keyDown.keyCode)
+            switch (ctrlToArrow(event.keyDown.keyCode))
                 {
                 case  kbTab:
+                case  kbDown:
+                case  kbRight:
                     focusNext(False);
                     clearEvent(event);
                     break;
                 case  kbShiftTab:
+                case  kbUp:
+                case  kbLeft:
                     focusNext(True);
                     clearEvent(event);
                     break;
