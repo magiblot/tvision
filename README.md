@@ -380,8 +380,8 @@ The following are new features not available in Borland's release of Turbo Visio
 * New virtual method `TMenuItem& TEditor::initContextMenu(TPoint p)` that determines the entries of the right-click context menu in `TEditor`.
 * `fexpand` can now take a second parameter `relativeTo`.
 * New class `TStringView`, inspired by `std::string_view`.
-    * Many functions which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is compatible with `std::string_view`, `std::string` and `const char *` (even `nullptr`).
-* New class `TSpan<T>`, inspired by `std::span`.
+    * Many functions which originally had null-terminated string parameters now receive `TStringView` instead. `TStringView` is intercompatible with `std::string_view`, `std::string` and `TSpan<const char>`, and can also be constructed from `const char *` (even `nullptr`, in which case it results in an empty view).
+* New class `TSpan<T>`, inspired by `std::span` and intercompatible with it.
 * New classes `TDrawSurface` and `TSurfaceView`, see `<tvision/surface.h>`.
 * Turbo Vision's subsystems (`THardwareInfo`, `TScreen`, `TEventQueue`...) are now initialized when constructing a `TApplication` for the first time, rather than before `main`. They are still destroyed on exit from `main`.
 * New method `TVMemMgr::reallocateDiscardable()` which can be used along `allocateDiscardable` and `freeDiscardable`.
