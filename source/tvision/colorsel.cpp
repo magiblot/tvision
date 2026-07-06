@@ -344,10 +344,12 @@ TColorDisplay::~TColorDisplay()
 
 void TColorDisplay::draw()
 {
-    uchar c = *color;
+    TColorAttr c = *color;
+    // BIOS color 0 has a special meaning in TDrawBuffer functions, so display
+    // it as an invalid color.
     if( c == 0 )
         c = errorAttr;
-    const int len = strlen( text );
+    const int len = strwidth( text );
     TDrawBuffer b;
     for( int i = 0; i <= size.x/len; i++ )
         b.moveStr( i*len, text, c );
@@ -374,7 +376,7 @@ void TColorDisplay::handleEvent( TEvent& event )
 void TColorDisplay::setColor( TColorAttr *aColor )
 {
     color = aColor;
-    message( owner, evBroadcast, cmColorSet, (void *)(size_t)(*color) );
+    message( owner, evBroadcast, cmColorSet, (void *)(size_t) *color );
     drawView();
 }
 
@@ -764,7 +766,7 @@ void TColorDialog::handleEvent( TEvent& event )
 
 ushort TColorDialog::dataSize()
 {
-    return *pal->data + 1;
+    return pal->data[0] + 1;
 }
 
 void TColorDialog::getData( void *rec )

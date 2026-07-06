@@ -166,7 +166,7 @@ void AnsiScreenWriter::flush() noexcept
 //////////////////////////////////////////////////////////////////////////
 // Attribute conversion
 
-static void convertColor(TColorDesired, TermColor &, TColorAttr::Style &, const TermCap &, bool) noexcept;
+static void convertColor(TColor, TermColor &, ushort &, const TermCap &, bool) noexcept;
 static char *writeAttributes(const TermAttr &, const TermAttr &, char *) noexcept;
 static char *writeColor(TermColor, bool, char *) noexcept;
 
@@ -174,10 +174,10 @@ static inline char *convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
                                        const TermCap &termcap, char *buf ) noexcept
 {
     TermAttr attr {};
-    attr.style = ::getStyle(c);
+    attr.style = c.getStyle();
 
-    convertColor(::getFore(c), attr.fg, attr.style, termcap, true);
-    convertColor(::getBack(c), attr.bg, attr.style, termcap, false);
+    convertColor(c.getForeground(), attr.fg, attr.style, termcap, true);
+    convertColor(c.getBackground(), attr.bg, attr.style, termcap, false);
 
     if (termcap.quirks & qfNoItalic)
         attr.style &= ~slItalic;
@@ -196,11 +196,11 @@ static inline char *convertAttributes( const TColorAttr &c, TermAttr &lastAttr,
 struct alignas(8) colorconv_r
 {
     TermColor color;
-    TColorAttr::Style extraStyle;
+    ushort extraStyle;
     uint8_t unused[2];
 
     colorconv_r() = default;
-    colorconv_r(TermColor aColor, TColorAttr::Style aExtraFlags=0) noexcept
+    colorconv_r(TermColor aColor, ushort aExtraFlags = 0) noexcept
     {
         // Optimization: do bit-casting manually, just like with TermColor.
         uint64_t val = aColor | (uint64_t(aExtraFlags) << 32);
@@ -212,16 +212,16 @@ struct alignas(8) colorconv_r
     }
 };
 
-static colorconv_r convertNoColor(TColorDesired, const TermCap &, bool) noexcept;
-static colorconv_r convertIndexed8(TColorDesired color, const TermCap &, bool) noexcept;
-static colorconv_r convertIndexed16(TColorDesired, const TermCap &, bool) noexcept;
-static colorconv_r convertIndexed256(TColorDesired, const TermCap &, bool) noexcept;
-static colorconv_r convertDirect(TColorDesired, const TermCap &, bool) noexcept;
+static colorconv_r convertNoColor(TColor, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed8(TColor color, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed16(TColor, const TermCap &, bool) noexcept;
+static colorconv_r convertIndexed256(TColor, const TermCap &, bool) noexcept;
+static colorconv_r convertDirect(TColor, const TermCap &, bool) noexcept;
 
 // C++ doesn't allow creating an array of noexcept function pointers directly...
 struct ColorConverter
 {
-    colorconv_r (&apply) (TColorDesired, const TermCap &, bool) noexcept;
+    colorconv_r (&apply) (TColor, const TermCap &, bool) noexcept;
 };
 
 static constexpr ColorConverter colorConverters[TermCapColorCount] =
@@ -233,9 +233,9 @@ static constexpr ColorConverter colorConverters[TermCapColorCount] =
     {convertDirect},
 };
 
-static inline void convertColor( TColorDesired c,
-                                 TermColor &resultColor, TColorAttr::Style &resultStyle,
-                                 const TermCap &termcap, bool isFg ) noexcept
+static inline void convertColor( TColor c, TermColor &resultColor,
+                                 ushort &resultStyle, const TermCap &termcap,
+                                 bool isFg ) noexcept
 {
     auto cnv = colorConverters[termcap.colors].apply(c, termcap, isFg);
     resultColor = cnv.color;
@@ -355,7 +355,7 @@ static char *writeColor(TermColor color, bool isFg, char *p) noexcept
 
 // Color conversion functions
 
-static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isFg) noexcept
+static colorconv_r convertNoColor(TColor color, const TermCap &, bool isFg) noexcept
 {
     colorconv_r cnv {{TermColor::NoColor}};
     // Mimic the mono palettes with styles.
@@ -375,8 +375,8 @@ static colorconv_r convertNoColor(TColorDesired color, const TermCap &, bool isF
     return cnv;
 }
 
-static colorconv_r convertIndexed8( TColorDesired color,
-                                    const TermCap &termcap, bool isFg ) noexcept
+static colorconv_r convertIndexed8( TColor color, const TermCap &termcap,
+                                    bool isFg ) noexcept
 {
     auto cnv = convertIndexed16(color, termcap, isFg);
     if ( cnv.color.type == TermColor::Indexed &&
@@ -397,31 +397,30 @@ static colorconv_r convertIndexed8( TColorDesired color,
     return cnv;
 }
 
-static colorconv_r convertIndexed16( TColorDesired color,
-                                     const TermCap &, bool ) noexcept
+static colorconv_r convertIndexed16(TColor color, const TermCap &, bool) noexcept
 {
     if (color.isBIOS())
     {
-        uint8_t idx = BIOStoXTerm16(color.asBIOS());
+        uint8_t idx = TColorConversion::BIOStoXTerm16(color.asBIOS());
         return {{idx, TermColor::Indexed}};
     }
     else if (color.isXTerm())
     {
         uint8_t idx = color.asXTerm();
         if (idx >= 16)
-            idx = XTerm256toXTerm16(idx);
+            idx = TColorConversion::XTerm256toXTerm16(idx);
         return {{idx, TermColor::Indexed}};
     }
     else if (color.isRGB())
     {
-        uint8_t idx = RGBtoXTerm16(color.asRGB());
+        uint8_t idx = TColorConversion::RGBtoXTerm16(color.asRGB());
         return {{idx, TermColor::Indexed}};
     }
     return {{TermColor::Default}};
 }
 
-static colorconv_r convertIndexed256( TColorDesired color,
-                                      const TermCap &termcap, bool isFg ) noexcept
+static colorconv_r convertIndexed256( TColor color, const TermCap &termcap,
+                                      bool isFg ) noexcept
 {
     if (color.isXTerm())
     {
@@ -430,14 +429,14 @@ static colorconv_r convertIndexed256( TColorDesired color,
     }
     else if (color.isRGB())
     {
-        uint8_t idx = RGBtoXTerm256(color.asRGB());
+        uint8_t idx = TColorConversion::RGBtoXTerm256(color.asRGB());
         return {{idx, TermColor::Indexed}};
     }
     return convertIndexed16(color, termcap, isFg);
 }
 
-static colorconv_r convertDirect( TColorDesired color,
-                                  const TermCap &termcap, bool isFg ) noexcept
+static colorconv_r convertDirect( TColor color, const TermCap &termcap,
+                                  bool isFg ) noexcept
 {
     if (color.isRGB())
     {

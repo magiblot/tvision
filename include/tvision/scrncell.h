@@ -2,143 +2,191 @@
 /*                                                                         */
 /*   SCRNCELL.H                                                            */
 /*                                                                         */
-/*   Defines the structs TCellChar and TScreenCell.                        */
+/*   Defines the structs TScreenCharacter and TScreenCell.                 */
 /*                                                                         */
 /* ------------------------------------------------------------------------*/
 
 #ifndef TVISION_SCRNCELL_H
 #define TVISION_SCRNCELL_H
 
-#ifdef __BORLANDC__
+#if defined( __BORLANDC__ )
 
-inline const TColorAttr &getAttr(const TScreenCell &cell)
+// Struct that replicates the memory layout of a DOS text mode screen cell,
+// with optimized custom operators for converting to and from unsigned short.
+
+struct TScreenCell
 {
-    return ((uchar *) &cell)[1];
+    char character;
+    TColorAttr attribute;
+
+    TScreenCell& operator=(const TScreenCell &other);
+    TScreenCell& operator=(ushort value);
+    operator ushort() const;
+};
+
+inline TScreenCell& TScreenCell::operator=(const TScreenCell &other)
+{
+    (ushort &) *this = (const ushort &) other;
+    return *this;
 }
 
-inline void setAttr(TScreenCell &cell, TColorAttr attr)
+inline TScreenCell& TScreenCell::operator=(ushort value)
 {
-    ((uchar *) &cell)[1] = attr;
+    (ushort &) *this = value;
+    return *this;
 }
 
-inline const TCellChar &getChar(const TScreenCell &cell)
+inline TScreenCell::operator ushort() const
 {
-    return ((uchar *) &cell)[0];
-}
-
-inline void setChar(TScreenCell &cell, TCellChar ch)
-{
-    ((uchar *) &cell)[0] = ch;
-}
-
-inline void setCell(TScreenCell &cell, TCellChar ch, TColorAttr attr)
-{
-    setChar(cell, ch);
-    setAttr(cell, attr);
+    return (const ushort &) *this;
 }
 
 #else
 
-//// TCellChar
-//
-// Represents text in a screen cell. You should usually not need to interact
-// with this manually. In order to write text into a screen cell, just use
-// the functions in the TText namespace.
-//
-// INVARIANT:
-// * '_text' contains one of the following:
-//     1. A single byte of ASCII or 'extended ASCII' text (1 column wide).
-//     2. Up to 15 bytes of UTF-8 text (1 or 2 columns wide in total,
-//        meaning that it must not contain just zero-width characters).
-//     3. A special value that marks it as wide char trail.
+/*-------------------------------------------------------------------------*/
+/*                                                                         */
+/*  struct TScreenCharacter                                                */
+/*                                                                         */
+/*  Represents text in a screen cell. You should usually not need to       */
+/*  interact with this directly. In order to write text into a screen      */
+/*  cell, just use the functions in the TText namespace.                   */
+/*                                                                         */
+/*  A TScreenCharacter stores one of the following:                        */
+/*    1. A single byte of ASCII or 'extended ASCII' text (1 column wide).  */
+/*    2. Up to 15 bytes of UTF-8 text (1 or 2 columns wide in total,       */
+/*       so it cannot contain just zero-width characters).                 */
+/*    3. A special value that marks it as wide char trail.                 */
+/*                                                                         */
+/*  In order for a double-width character to be displayed entirely, its    */
+/*  cell must be followed by another containing a wide char trail. If it   */
+/*  does not, or if a wide char trail is not preceded by a double-width    */
+/*  character, it will be assumed that a double-width character is being   */
+/*  partially overlapped.                                                  */
+/*                                                                         */
+/*  TScreenCharacter is designed to be compatible with 'memset' and        */
+/*  'memcpy', and it is therefore trivially constructible and copyable.    */
+/*  Because of this, variables of this type which are not explicitly       */
+/*  initialized will contain uninitialized data. Watch out!                */
+/*                                                                         */
+/*  A zero-initialized TScreenCharacter (using 'memset' or                 */
+/*  value-initialization) is valid and represents the text of an empty     */
+/*  screen cell.                                                           */
+/*                                                                         */
+/*-------------------------------------------------------------------------*/
 
-struct TCellChar
+struct TScreenCharacter
 {
-    enum : uint8_t { fWide = 0x1, fTrail = 0x2 };
+    TScreenCharacter() = default; // Watch out! This is a trivial constructor.
+
+    constexpr TScreenCharacter(char c) noexcept;
+
+    constexpr void initWithChar(char c) noexcept;
+    constexpr void initWithMultiByteChar(uint32_t mbc, bool wide = false) noexcept;
+    constexpr void initWithMultiByteChar(TStringView mbc, bool wide = false) noexcept;
+    constexpr void initAsWideCharTrail() noexcept;
+
+    constexpr bool isWide() const noexcept;
+    constexpr bool isWideCharTrail() const noexcept;
+    constexpr void appendZeroWidthChar(TStringView mbc) noexcept;
+    constexpr TStringView getText() const noexcept;
+
+private:
+
+    enum : uint8_t
+    {
+        fWide     = 0x1,
+        fTrail    = 0x2,
+        fOverflow = 0x4,
+    };
 
     char _text[15];
     uint8_t
-        _textLength : 4,
+        // There is always at least one character, even if it is a null byte.
+        _textLengthMinusOne : 4,
         _flags : 4;
-
-    TCellChar() = default;
-    inline void moveChar(char ch);
-    inline void moveMultiByteChar(uint32_t mbc, bool wide = false);
-    inline void moveMultiByteChar(TStringView mbc, bool wide = false);
-    inline void moveWideCharTrail();
-
-    constexpr inline bool isWide() const;
-    constexpr inline bool isWideCharTrail() const;
-    constexpr inline void appendZeroWidthChar(TStringView mbc);
-    constexpr inline TStringView getText() const;
-    constexpr inline size_t size() const;
-
-    constexpr inline char& operator[](size_t i);
-    constexpr inline const char& operator[](size_t i) const;
 };
 
-inline void TCellChar::moveChar(char ch)
+constexpr TScreenCharacter::TScreenCharacter(char c) noexcept :
+    _text {c},
+    _textLengthMinusOne(0),
+    _flags(0)
 {
-    memset(this, 0, sizeof(*this));
-    _text[0] = ch;
-    _textLength = 1;
 }
 
-inline void TCellChar::moveMultiByteChar(uint32_t mbc, bool wide)
+constexpr void TScreenCharacter::initWithChar(char c) noexcept
+{
+    *this = {};
+    _text[0] = c;
+}
+
+constexpr void TScreenCharacter::initWithMultiByteChar(uint32_t mbc, bool wide) noexcept
 // Pre: 'mbc' is a bit-casted multibyte-encoded character.
 {
-    memset(this, 0, sizeof(*this));
-    memcpy(_text, &mbc, sizeof(mbc));
-    _flags = -int(wide) & fWide;
-#ifndef TV_BIG_ENDIAN
-    _textLength = 1 + ((mbc & 0xFF00) != 0) +
-                      ((mbc & 0xFF0000) != 0) +
-                      ((mbc & 0xFF000000) != 0);
+    *this = {};
+#if !defined( TV_BIG_ENDIAN )
+    _text[0] = char(mbc);
+    _text[1] = char(mbc >> 8);
+    _text[2] = char(mbc >> 16);
+    _text[3] = char(mbc >> 24);
+
+    _textLengthMinusOne =
+        (mbc > 0x000000FFU) +
+        (mbc > 0x0000FFFFU) +
+        (mbc > 0x00FFFFFFU);
 #else
-    _textLength = 1 + ((mbc & 0xFF0000) != 0) +
-                      ((mbc & 0xFF00) != 0) +
-                      ((mbc & 0xFF) != 0);
+    _text[0] = char(mbc >> 24);
+    _text[1] = char(mbc >> 16);
+    _text[2] = char(mbc >> 8);
+    _text[3] = char(mbc);
+
+    _textLengthMinusOne =
+        ((mbc & 0x00FFFFFFU) != 0) +
+        ((mbc & 0x0000FFFFU) != 0) +
+        ((mbc & 0x000000FFU) != 0);
 #endif
+    _flags = -int(wide) & fWide;
 }
 
-inline void TCellChar::moveMultiByteChar(TStringView mbc, bool wide)
+constexpr void TScreenCharacter::initWithMultiByteChar(TStringView mbc, bool wide) noexcept
 {
     static_assert(sizeof(_text) >= maxCharSize, "");
-    memset(this, 0, sizeof(*this));
+    *this = {};
     if (0 < mbc.size() && mbc.size() <= maxCharSize)
     {
         _flags |= -int(wide) & fWide;
-        switch (mbc.size())
+        _textLengthMinusOne = mbc.size() - 1;
+        switch (_textLengthMinusOne)
         {
-            case 4: _text[3] = mbc[3];
-            case 3: _text[2] = mbc[2];
-            case 2: _text[1] = mbc[1];
-            case 1: _text[0] = mbc[0];
+            case 3: _text[3] = mbc[3];
+            case 2: _text[2] = mbc[2];
+            case 1: _text[1] = mbc[1];
+            case 0: _text[0] = mbc[0];
         }
-        _textLength = mbc.size();
     }
 }
 
-inline void TCellChar::moveWideCharTrail()
+constexpr void TScreenCharacter::initAsWideCharTrail() noexcept
 {
-    memset(this, 0, sizeof(*this));
+    *this = {};
     _flags = fTrail;
 }
 
-constexpr inline bool TCellChar::isWide() const
+constexpr bool TScreenCharacter::isWide() const noexcept
 {
     return _flags & fWide;
 }
 
-constexpr inline bool TCellChar::isWideCharTrail() const
+constexpr bool TScreenCharacter::isWideCharTrail() const noexcept
 {
     return _flags & fTrail;
 }
 
-constexpr inline void TCellChar::appendZeroWidthChar(TStringView mbc)
-// Pre: !isWideCharTrail();
+constexpr void TScreenCharacter::appendZeroWidthChar(TStringView mbc) noexcept
+// Pre: '_text' contains valid UTF-8 text.
 {
-    size_t sz = size();
+    if (_flags & fOverflow)
+        return;
+    size_t sz = _textLengthMinusOne + 1;
     if (mbc.size() <= sizeof(_text) - sz)
     {
         if (_text[0] == '\0')
@@ -150,74 +198,61 @@ constexpr inline void TCellChar::appendZeroWidthChar(TStringView mbc)
             case 2: _text[sz + 1] = mbc[1];
             case 1: _text[sz] = mbc[0];
         }
-        _textLength = sz + mbc.size();
+        _textLengthMinusOne += mbc.size();
     }
+    else
+        _flags |= fOverflow;
 }
 
-constexpr inline TStringView TCellChar::getText() const
+constexpr TStringView TScreenCharacter::getText() const noexcept
+// Pre: This is not a wide char trail.
 {
-    return {_text, size()};
+    return {_text, size_t(_textLengthMinusOne + 1)};
 }
 
-constexpr inline size_t TCellChar::size() const
-{
-    // There is always at least one character, even if it is a null byte and
-    // '_textLength' is zero (e.g. because the TCellChar was zero-initialized).
-    return max(_textLength, 1);
-}
-
-constexpr inline char& TCellChar::operator[](size_t i)
-{
-    return _text[i];
-}
-
-constexpr inline const char& TCellChar::operator[](size_t i) const
-{
-    return _text[i];
-}
-
-//// TScreenCell
-//
-// Stores the text and color attributes in a screen cell.
-// Please use the functions in the TText namespace in order to fill screen cells
-// with text.
-//
-// Considerations:
-// * In order for a double-width character to be displayed entirely, its cell
-//   must be followed by another containing a wide char trail. If it is not,
-//   or if a wide char trail is not preceded by a double-width character,
-//   we'll understand that a double-width character is being overlapped partially.
+/*-------------------------------------------------------------------------*/
+/*                                                                         */
+/*  struct TScreenCell                                                     */
+/*                                                                         */
+/*  Stores the text and color attributes in a screen cell. You should      */
+/*  usually not need to interact with this directly. In order to write     */
+/*  text into a screen cell, just use the functions in the TText           */
+/*  namespace.                                                             */
+/*                                                                         */
+/*  TScreenCell is designed to be compatible with 'memset' and 'memcpy',   */
+/*  and it is therefore trivially constructible and copyable. Because of   */
+/*  this, variables of this type which are not explicitly initialized      */
+/*  will contain uninitialized data. Watch out!                            */
+/*                                                                         */
+/*  A zero-initialized TScreenCell (using 'memset' or                      */
+/*  value-initialization) is valid and represents an empty screen cell     */
+/*  with default foreground and background colors and no style.            */
+/*                                                                         */
+/*-------------------------------------------------------------------------*/
 
 struct TScreenCell
 {
-    TColorAttr attr;
-    TCellChar _ch;
+    TScreenCharacter character;
+    TColorAttr attribute;
 
-    TScreenCell() = default;
-    inline TScreenCell(ushort bios);
-    TV_TRIVIALLY_ASSIGNABLE(TScreenCell)
+    TScreenCell() = default; // Watch out! This is a trivial constructor.
+    constexpr TScreenCell(const TScreenCharacter &ch, TColorAttr attr) noexcept;
+    constexpr TScreenCell(ushort bios) noexcept;
 
-    constexpr inline bool isWide() const;
-
-    inline bool operator==(const TScreenCell &other) const;
-    inline bool operator!=(const TScreenCell &other) const;
+    bool operator==(const TScreenCell &other) const;
+    bool operator!=(const TScreenCell &other) const;
 };
 
-inline const TColorAttr &getAttr(const TScreenCell &cell);
-inline void setAttr(TScreenCell &cell, const TColorAttr &attr);
-inline void setChar(TScreenCell &cell, char ch);
-inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr);
-
-inline TScreenCell::TScreenCell(ushort bios)
+constexpr TScreenCell::TScreenCell(const TScreenCharacter &ch, TColorAttr attr) noexcept :
+    character(ch),
+    attribute(attr)
 {
-    memset(this, 0, sizeof(*this));
-    _ch.moveChar(char(bios));
-    attr = uchar(bios >> 8);
 }
 
-constexpr inline bool TScreenCell::isWide() const
+constexpr TScreenCell::TScreenCell(ushort bios) noexcept :
+    character(char(bios)),
+    attribute(uchar(bios >> 8))
 {
-    return _ch.isWide();
 }
 
 inline bool TScreenCell::operator==(const TScreenCell &other) const
@@ -228,28 +263,6 @@ inline bool TScreenCell::operator==(const TScreenCell &other) const
 inline bool TScreenCell::operator!=(const TScreenCell &other) const
 {
     return !(*this == other);
-}
-
-inline const TColorAttr &getAttr(const TScreenCell &cell)
-{
-    return cell.attr;
-}
-
-inline void setAttr(TScreenCell &cell, const TColorAttr &attr)
-{
-    cell.attr = attr;
-}
-
-inline void setChar(TScreenCell &cell, char ch)
-{
-    cell._ch.moveChar(ch);
-}
-
-inline void setCell(TScreenCell &cell, char ch, const TColorAttr &attr)
-{
-    memset(&cell, 0, sizeof(cell));
-    ::setChar(cell, ch);
-    ::setAttr(cell, attr);
 }
 
 #endif // __BORLANDC__

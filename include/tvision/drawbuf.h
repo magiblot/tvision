@@ -63,13 +63,13 @@ protected:
 inline void TDrawBuffer::putAttribute( ushort indent, TColorAttr attr ) noexcept
 {
     if (indent < capacity)
-        ::setAttr(data[indent], attr);
+        data[indent].attribute = attr;
 }
 
 inline void TDrawBuffer::putChar( ushort indent, uchar c ) noexcept
 {
     if (indent < capacity)
-        ::setChar(data[indent], c);
+        data[indent].character = c;
 }
 
 #endif  // Uses_TDrawBuffer

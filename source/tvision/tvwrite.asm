@@ -33,7 +33,7 @@ else
         EXTRN   @THWMouse@show$qv : NEAR
         EXTRN   @THWMouse@hide$qv : NEAR
         EXTRN   @TView@mapColor$quc : NEAR
-        EXTRN   @THardwareInfo@screenWrite$qususpusul : NEAR
+        EXTRN   @THardwareInfo@screenWrite$qususp10_CHAR_INFOul : NEAR
 endif
         EXTRN   @TEventQueue@curMouse : WORD
         EXTRN   @TScreen@screenBuffer : DWORD
@@ -556,7 +556,7 @@ ENDIF
         POP     ECX
         POP     EAX
         PUSHAD
-        CALL    @THardwareInfo@screenWrite$qususpusul, EBX, EAX, EDI, ECX
+        CALL    @THardwareInfo@screenWrite$qususp10_CHAR_INFOul, EBX, EAX, EDI, ECX
         POPAD
         JMP   @@70
 

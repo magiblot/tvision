@@ -36,7 +36,7 @@
     ((long)(((unsigned)(l)) | (((long)((unsigned)(h))) << 16)))
 #endif
 
-#endif
+#endif // __FLAT__
 
 struct TEvent;
 struct MouseEventType;
@@ -78,7 +78,11 @@ public:
     static void setScreenMode( ushort mode ) noexcept;
     static void clearScreen( ushort w, ushort h ) noexcept;
     static void flushScreen() noexcept;
+#if defined( __BORLANDC__ )
+    static void screenWrite( ushort x, ushort y, CHAR_INFO *buf, DWORD len ) noexcept;
+#else
     static void screenWrite( ushort x, ushort y, TScreenCell *buf, DWORD len ) noexcept;
+#endif
     static TScreenCell *allocateScreenBuffer() noexcept;
     static void freeScreenBuffer( TScreenCell *buffer ) noexcept;
     static void setUpConsole() noexcept;
@@ -133,8 +137,8 @@ private:
 
 #else
 
-    static ushort *getColorAddr( ushort offset = 0 );
-    static ushort *getMonoAddr( ushort offset = 0 );
+    static TScreenCell *getColorAddr( ushort offset = 0 );
+    static TScreenCell *getMonoAddr( ushort offset = 0 );
     static uchar getShiftState();
     static uchar getBiosScreenRows();
     static uchar getBiosVideoInfo();
@@ -217,7 +221,8 @@ inline TScreenCell *THardwareInfo::allocateScreenBuffer() noexcept
     if( y < 50 )
         y = 50;
 
-    return (TScreenCell *) VirtualAlloc( 0, x * y * 4, MEM_COMMIT, PAGE_READWRITE );
+    // This is actually a CHAR_INFO *.
+    return (TScreenCell *) VirtualAlloc( 0, x * y * sizeof(CHAR_INFO), MEM_COMMIT, PAGE_READWRITE );
 }
 
 inline void THardwareInfo::freeScreenBuffer( TScreenCell *buffer ) noexcept
@@ -276,11 +281,11 @@ inline BOOL THardwareInfo::setCritErrorHandler( BOOL install ) noexcept
 
 #else
 
-inline ushort *THardwareInfo::getColorAddr( ushort offset )
-    { return (ushort *) MAKELONG( colorSel, offset ); }
+inline TScreenCell *THardwareInfo::getColorAddr( ushort offset )
+    { return (TScreenCell *) MAKELONG( colorSel, offset ); }
 
-inline ushort *THardwareInfo::getMonoAddr( ushort offset )
-    { return (ushort *) MAKELONG( monoSel, offset ); }
+inline TScreenCell *THardwareInfo::getMonoAddr( ushort offset )
+    { return (TScreenCell *) MAKELONG( monoSel, offset ); }
 
 inline uint32_t THardwareInfo::getTickCount()
     { return *(uint32_t *) MAKELONG( biosSel, 0x6C ); }

@@ -84,8 +84,7 @@ TSurfaceView::TSurfaceView( const TRect &bounds,
 
 static void fillWithSpaces(TScreenCell *b, int len, TColorAttr c)
 {
-    TScreenCell cell;
-    ::setCell(cell, ' ', c);
+    TScreenCell cell = {' ', c};
     for (int i = 0; i < len; ++i)
         b[i] = cell;
 }

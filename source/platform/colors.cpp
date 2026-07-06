@@ -1,9 +1,5 @@
 #define Uses_TColorAttr
 #include <tvision/tv.h>
-#include <internal/constarr.h>
-
-namespace tvision
-{
 
 //// RGB to XTerm16 conversion algorithm
 //
@@ -68,22 +64,21 @@ static constexpr uint8_t u8(double d) noexcept
 }
 
 static constexpr
-uint8_t RGBtoXTerm16(uint8_t r, uint8_t g, uint8_t b) noexcept
+TColorXTerm RGBtoXTerm16Impl(uint8_t r, uint8_t g, uint8_t b) noexcept
 {
     HCL c = RGBtoHCL(r, g, b);
 
     if (c.c >= 12) // Color if Chroma >= 12.
     {
-        constexpr uint8_t normal[6] = {0x1, 0x3, 0x2, 0x6, 0x4, 0x5};
-        constexpr uint8_t bright[6] = {0x9, 0xB, 0xA, 0xE, 0xC, 0xD};
-        uint8_t index = uint8_t(c.h < HUE_MAX - HUE_PRECISION/2 ?
-                                    c.h + HUE_PRECISION/2
-                                  : c.h - (HUE_MAX - HUE_PRECISION/2)
-                               )/HUE_PRECISION;
+        constexpr uint8_t hueToXTerm[6] = {1, 3, 2, 6, 4, 5};
+        uint8_t hue = uint8_t(c.h < HUE_MAX - HUE_PRECISION/2 ?
+                                  c.h + HUE_PRECISION/2
+                                : c.h - (HUE_MAX - HUE_PRECISION/2)
+                             )/HUE_PRECISION;
         if (c.l < u8(0.5))
-            return normal[index];
+            return hueToXTerm[hue];
         if (c.l < u8(0.925))
-            return bright[index];
+            return hueToXTerm[hue] + 8; // Bright: {9, 11, 10, 14, 12, 13}.
         return 15;
     }
     else
@@ -98,46 +93,19 @@ uint8_t RGBtoXTerm16(uint8_t r, uint8_t g, uint8_t b) noexcept
     }
 }
 
-static constexpr
-constarray<uint8_t, 256> initXTerm256toXTerm16LUT() noexcept
+class TColorConversionInit
 {
-    constarray<uint8_t, 256> res {};
-    for (uint8_t i = 0; i < 16; ++i)
-        res[i] = i;
-    for (uint8_t i = 0; i < 6; ++i)
-    {
-        uint8_t R = i ? 55 + i*40 : 0;
-        for (uint8_t j = 0; j < 6; ++j)
-        {
-            uint8_t G = j ? 55 + j*40 : 0;
-            for (uint8_t k = 0; k < 6; ++k)
-            {
-                uint8_t B = k ? 55 + k*40 : 0;
-                uint8_t idx16 = RGBtoXTerm16(R, G, B);
-                res[16 + (i*6 + j)*6 + k] = idx16;
-            }
-        }
-    }
-    for (uint8_t i = 0; i < 24; ++i)
-    {
-        uint8_t L = i * 10 + 8;
-        uint8_t idx16 = RGBtoXTerm16(L, L, L);
-        res[232 + i] = idx16;
-    }
-    return res;
-}
+public:
 
-static constexpr
-uint32_t pack(uint8_t R, uint8_t G, uint8_t B) noexcept
-{
-    return (((R << 8) | G) << 8) | B;
+    static constexpr TColorConversion::LUT<TColorXTerm, 256> initXTerm256toXTerm16LUT() noexcept;
+    static constexpr TColorConversion::LUT<TColorRGB, 256> initXTerm256toRGBLUT() noexcept;
 };
 
-static constexpr
-constarray<uint32_t, 256> initXTerm256toRGBLUT() noexcept
+constexpr TColorConversion::LUT<TColorXTerm, 256> TColorConversionInit::initXTerm256toXTerm16LUT() noexcept
 {
-    // Indices 16..255 only.
-    constarray<uint32_t, 256> res {};
+    TColorConversion::LUT<TColorXTerm, 256> lut {};
+    for (uint8_t i = 0; i < 16; ++i)
+        lut.entries[i] = i;
     for (uint8_t i = 0; i < 6; ++i)
     {
         uint8_t R = i ? 55 + i*40 : 0;
@@ -147,27 +115,139 @@ constarray<uint32_t, 256> initXTerm256toRGBLUT() noexcept
             for (uint8_t k = 0; k < 6; ++k)
             {
                 uint8_t B = k ? 55 + k*40 : 0;
-                res[16 + (i*6 + j)*6 + k] = pack(R, G, B);
+                TColorXTerm idx16 = RGBtoXTerm16Impl(R, G, B);
+                lut.entries[16 + (i*6 + j)*6 + k] = idx16;
             }
         }
     }
     for (uint8_t i = 0; i < 24; ++i)
     {
         uint8_t L = i * 10 + 8;
-        res[232 + i] = pack(L, L, L);
+        TColorXTerm idx16 = RGBtoXTerm16Impl(L, L, L);
+        lut.entries[232 + i] = idx16;
     }
-    return res;
+    return lut;
 }
 
-extern constexpr
-constarray<uint8_t, 256> XTerm256toXTerm16LUT = initXTerm256toXTerm16LUT();
-
-extern constexpr
-constarray<uint32_t, 256> XTerm256toRGBLUT = initXTerm256toRGBLUT();
-
-uint8_t RGBtoXTerm16Impl(TColorRGB c) noexcept
+constexpr TColorConversion::LUT<TColorRGB, 256> TColorConversionInit::initXTerm256toRGBLUT() noexcept
 {
-    return RGBtoXTerm16(c.r, c.g, c.b);
+    TColorConversion::LUT<TColorRGB, 256> lut {};
+    // Indices 16..255 only.
+    for (uint8_t i = 0; i < 6; ++i)
+    {
+        uint8_t R = i ? 55 + i*40 : 0;
+        for (uint8_t j = 0; j < 6; ++j)
+        {
+            uint8_t G = j ? 55 + j*40 : 0;
+            for (uint8_t k = 0; k < 6; ++k)
+            {
+                uint8_t B = k ? 55 + k*40 : 0;
+                lut.entries[16 + (i*6 + j)*6 + k] = {R, G, B};
+            }
+        }
+    }
+    for (uint8_t i = 0; i < 24; ++i)
+    {
+        uint8_t L = i * 10 + 8;
+        lut.entries[232 + i] = {L, L, L};
+    }
+    return lut;
 }
 
-} // namespace tvision
+constexpr TColorConversion::LUT<TColorXTerm, 256> TColorConversion::XTerm256toXTerm16LUT =
+    TColorConversionInit::initXTerm256toXTerm16LUT();
+constexpr TColorConversion::LUT<TColorRGB, 256> TColorConversion::XTerm256toRGBLUT =
+    TColorConversionInit::initXTerm256toRGBLUT();
+
+TColorXTerm TColorConversion::RGBtoXTerm16(TColorRGB c) noexcept
+{
+    return RGBtoXTerm16Impl(c.getRed(), c.getGreen(), c.getBlue());
+}
+
+TColorXTerm TColorConversion::RGBtoXTerm256(TColorRGB c) noexcept
+{
+    // The xterm-256color palette consists of:
+    //
+    // * [0..15]: 16 colors as in xterm-16color.
+    // * [16..231]: 216 colors in a 6x6x6 cube.
+    // * [232..255]: 24 grayscale colors.
+    //
+    // This function does not return indices in the range [0..15]. For that,
+    // use 'RGBtoXTerm16' instead.
+    //
+    // Dark colors are underrepresented in the 6x6x6 cube. The channel values
+    // [0, 1, 2, 3, 4, 5] correspond to the 8-bit values
+    // [0, 95, 135, 175, 215, 255]. Thus there is a distance of 40 between
+    // values, except for 0. Any 8-bit value smaller than 95 - 40/2 = 75
+    // would have to be mapped into 0. To compensate a bit for this, we allow
+    // values [55..74] to also be mapped into 1.
+    //
+    // Additionally, we fall back on the grayscale colors whenever using
+    // the 6x6x6 color cube would round the color to pure black. This
+    // makes it possible to preserve details that would otherwise be lost.
+    auto cnvColor = [] (TColorRGB c)
+    {
+        auto scale = [] (uchar c)
+        {
+            c += 20 & -(c < 75); // Compensate for underrepresented dark colors.
+            return uchar(max<uchar>(c, 35) - 35)/40;
+        };
+        uchar r = scale(c.getRed()),
+              g = scale(c.getGreen()),
+              b = scale(c.getBlue());
+        return 16 + uchar(r*uchar(6) + g)*uchar(6) + b;
+    };
+    auto cnvGray = [] (uchar l)
+    {
+        if (l < 8 - 5)
+            return 16; // Totally black.
+        if (l >= 238 + 5)
+            return 231; // Totally white.
+        // L is now in the range [3..242] and has to be mapped to one of the 24
+        // grayscale colors.
+        return 232 + uchar(max<uchar>(l, 3) - 3)/uchar(10); // [232..255]
+    };
+
+    uchar idx = cnvColor(c);
+    if (c != XTerm256toRGB(idx))
+    {
+        uchar Xmin = min(min(c.getRed(), c.getGreen()), c.getBlue()),
+              Xmax = max(max(c.getRed(), c.getGreen()), c.getBlue());
+        uchar C = Xmax - Xmin; // Chroma in the HSL/HSV theory.
+        // For low-chroma or dark colors which are not exactly representable
+        // in the 6x6x6 color cube, use the grayscale palette.
+        if (C < 12 || idx == 16) // Grayscale if Chroma < 12 or rounded to black.
+        {
+            uchar L = ushort(Xmax + Xmin)/2; // Lightness, as in HSL.
+            idx = cnvGray(L);
+        }
+    }
+    return idx;
+}
+
+TColorBIOS TColor::toBIOS(bool isForeground) const noexcept
+{
+    switch (type())
+    {
+        case ctBIOS:
+            return asBIOS();
+        case ctRGB:
+            return TColorConversion::XTerm16toBIOS(
+                TColorConversion::RGBtoXTerm16(asRGB())
+            );
+        case ctXTerm:
+        {
+            uint8_t idx = asXTerm();
+            if (idx >= 16)
+                idx = TColorConversion::XTerm256toXTerm16(idx);
+            return TColorConversion::XTerm16toBIOS(idx);
+        }
+        default:
+            return isForeground ? 0x7 : 0x0;
+    }
+}
+
+uchar TColorAttr::toBIOS() const noexcept
+{
+    return getForeground().toBIOS(true) | (getBackground().toBIOS(false) << 4);
+}

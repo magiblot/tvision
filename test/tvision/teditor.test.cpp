@@ -41,8 +41,8 @@ public:
         for (int y = 0; y < size.y; ++y)
             for (int x = 0; x < size.x; ++x)
             {
-                auto &ch = buffer[y*size.x + x]._ch;
-                if (ch._flags & TCellChar::fTrail)
+                auto &ch = buffer[y*size.x + x].character;
+                if (ch.isWideCharTrail())
                     text[y][x] = "(wide char trail)";
                 else
                     text[y][x] = ch.getText();
@@ -59,7 +59,7 @@ public:
         for (int y = 0; y < size.y; ++y)
             for (int x = 0; x < size.x; ++x)
                 // Extract palette index from attribute.
-                attributes[y][x] = (uchar) buffer[y*size.x + x].attr;
+                attributes[y][x] = (uchar) buffer[y*size.x + x].attribute;
         return attributes;
     }
 };

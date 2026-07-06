@@ -483,12 +483,12 @@ TRect TView::getClipRect() const noexcept
 
 TAttrPair TView::getColor( ushort color )
 {
-    TAttrPair colorPair = color >> 8;
+    TAttrPair colorPair = 0;
 
-    if( colorPair != 0 )
-        colorPair = mapColor(colorPair) << 8;
+    if( (color & 0xFF00) != 0 )
+        colorPair = mapColor( color >> 8 ) << 8;
 
-    colorPair |= mapColor( uchar(color) );
+    colorPair |= mapColor( color & 0xFF );
 
     return colorPair;
 }

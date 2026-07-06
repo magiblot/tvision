@@ -293,7 +293,7 @@ class TPalette
 public:
 
     TPalette( const char *, ushort ) noexcept;
-#ifndef __BORLANDC__
+#if !defined( __BORLANDC__ )
     TPalette( const TColorAttr *, ushort ) noexcept;
     template <size_t N>
     TPalette( const TColorAttr (&array) [N] ) noexcept :
@@ -308,6 +308,9 @@ public:
 
     TColorAttr& operator[]( int ) const noexcept;
 
+    // For regular views, this contains 1-based indices into the owner's
+    // palette (TColorAttr is only used to store numeric values).
+    // For TApplication, this contains actual color attributes.
     TColorAttr *data;
 
 };

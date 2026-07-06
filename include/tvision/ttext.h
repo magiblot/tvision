@@ -234,16 +234,13 @@ inline void TText::scroll( TStringView text, int count, Boolean,
 inline void TText::drawChar(TSpan<TScreenCell> cells, char c)
 {
     for (size_t i = 0; i < cells.size(); ++i)
-        ::setChar(cells[i], c);
+        cells[i].character = c;
 }
 
 inline void TText::drawChar(TSpan<TScreenCell> cells, char c, TColorAttr attr)
 {
     for (size_t i = 0; i < cells.size(); ++i)
-    {
-        ::setChar(cells[i], c);
-        ::setAttr(cells[i], attr);
-    }
+        cells[i] = uchar(c) | (attr << 8);
 }
 
 inline size_t TText::drawStr( TSpan<TScreenCell> cells, size_t indent,
@@ -310,7 +307,7 @@ inline Boolean TText::drawOne( TSpan<TScreenCell> cells, size_t &i,
 {
     if (i < cells.size() && j < text.size())
     {
-        ::setChar(cells[i++], text[j++]);
+        cells[i++].character = text[j++];
         return True;
     }
     return False;
@@ -322,7 +319,7 @@ inline Boolean TText::drawOne( TSpan<TScreenCell> cells, size_t &i,
 {
     if (i < cells.size() && j < text.size())
     {
-        ::setCell(cells[i++], text[j++], attr);
+        cells[i++] = uchar(text[j++]) | (attr << 8);
         return True;
     }
     return False;
@@ -386,8 +383,7 @@ inline void TText::drawChar(TSpan<TScreenCell> cells, char c) noexcept
 
 inline void TText::drawChar(TSpan<TScreenCell> cells, char c, TColorAttr attr) noexcept
 {
-    TScreenCell aCell;
-    ::setCell(aCell, c, attr);
+    TScreenCell aCell {c, attr};
     for (auto &cell : cells)
         cell = aCell;
 }
@@ -397,8 +393,8 @@ inline void TText::drawCharEx(TSpan<TScreenCell> cells, char ch, Func &&transfor
 {
     for (auto &c : cells)
     {
-        ::setChar(c, ch);
-        transformAttr(c.attr);
+        c.character = ch;
+        transformAttr(c.attribute);
     }
 }
 
@@ -501,8 +497,8 @@ inline size_t TText::drawStrExT( TSpan<TScreenCell> cells, size_t indent,
         TText::scroll(text, textIndent, True, j, leadWidth);
         if (leadWidth > (size_t) textIndent && i < cells.size())
         {
-            ::setChar(cells[i], ' ');
-            transformAttr(cells[i++].attr);
+            cells[i].character = ' ';
+            transformAttr(cells[i++].attribute);
         }
     }
     while (TText::drawOneT(cells, i, text, j, (Func &&) transformAttr));
@@ -515,9 +511,9 @@ inline Boolean TText::drawOneT( TSpan<TScreenCell> cells, size_t &i,
 {
     auto result = drawOneImpl(cells, i, text, j);
     if (result.width)
-        transformAttr(cells[i].attr);
+        transformAttr(cells[i].attribute);
     if (result.width > 1)
-        transformAttr(cells[i + 1].attr);
+        transformAttr(cells[i + 1].attribute);
     i += result.width;
     j += result.length;
     return result.length != 0;

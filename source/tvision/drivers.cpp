@@ -126,17 +126,16 @@ __4:
     if (attr != 0)
         if (c != 0)
             {
-            TScreenCell cell;
-            ::setCell(cell, (uchar) c, attr);
+            TScreenCell cell = {c, attr};
             while (count--)
                 *dest++ = cell;
             }
         else
             while(count--)
-                ::setAttr(*dest++, attr);
+                (*dest++).attribute = attr;
     else
         while (count--)
-            ::setChar(*dest++, (uchar) c);
+            (*dest++).character = c;
 #endif
 }
 
@@ -272,8 +271,11 @@ I   POP     DS
                 if (!TText::next(str, j, w))
                     break;
                 if (strIndent < w && i < dest.size())
+                    {
                     // 'strIndent' is in the middle of a double-width character.
-                    ::setCell(dest[i++], ' ', curAttr);
+                    TScreenCell cell = {' ', curAttr};
+                    dest[i++] = cell;
+                    }
                 }
             }
     return i - indent;

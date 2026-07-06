@@ -881,86 +881,80 @@ Below is a more detailed explanation aimed at developers.
 
 In the first place we will explain the data types the programmer needs to know in order to take advantage of the extended color support. To get access to them, you may have to define the macro `Uses_TColorAttr` before including `<tvision/tv.h>`.
 
-All the types described in this section are *trivial*. This means that they can be `memset`'d and `memcpy`'d. But variables of these types are *uninitialized* when declared without initializer, just like primitive types. So make sure you don't manipulate them before initializing them.
-
 ### Color format types
 
 Several types are defined which represent different color formats.
-The reason why these types exist is to allow distinguishing color formats using the type system. Some of them also have public fields which make it easier to manipulate individual bits.
+The reason why these types exist is to allow distinguishing color formats using the type system.
 
-* `TColorBIOS` represents a BIOS color. It allows accessing the `r`, `g`, `b` and `bright` bits individually, and can be casted implicitly into/from `uint8_t`.
+* `TColorBIOS` represents a BIOS color. It allows accessing the individual color components via getter/setter methods, and can be casted implicitly into/from `uint8_t`.
 
     The memory layout is:
 
-    * Bit 0: Blue (field `b`).
-    * Bit 1: Green (field `g`).
-    * Bit 2: Red (field `r`).
-    * Bit 3: Bright (field `bright`).
-    * Bits 4-7: unused.
+    * Bit 0: Blue.
+    * Bit 1: Green.
+    * Bit 2: Red.
+    * Bit 3: Intensity.
+    * Bits 4-7: Unused.
 
     Examples of `TColorBIOS` usage:
     ```c++
-    TColorBIOS bios = 0x4;  // 0x4: red.
-    bios.bright = 1;        // 0xC: light red.
-    bios.b = bios.r;        // 0xD: light magenta.
-    bios = bios ^ 3;        // 0xE: yellow.
-    uint8_t c = bios;       // Implicit conversion to integer types.
+    TColorBIOS bios = 0x4;          // 0x4: red.
+    bios.setIntensity(true);        // 0xC: light red.
+    bios.setBlue(bios.getRed());    // 0xD: light magenta.
+    bios = bios ^ 3;                // 0xE: yellow.
+    uint8_t c = bios;               // Implicit conversion to integer types.
     ```
 
     In terminal emulators, BIOS colors are mapped to the basic 16 ANSI colors.
 
-* `TColorRGB` represents a color in 24-bit RGB. It allows accessing the `r`, `g` and `b` bit fields individually, and can be casted implicitly into/from `uint32_t`.
+* `TColorRGB` represents a color in 24-bit RGB. It allows accessing the individual color components via getter/setter methods, and can be casted implicitly into/from `uint32_t`.
 
     The memory layout is:
 
-    * Bits 0-7: Blue (field `b`).
-    * Bits 8-15: Green (field `g`).
-    * Bits 16-23: Red (field `r`).
-    * Bits 24-31: unused.
+    * Bits 0-7: Blue.
+    * Bits 8-15: Green.
+    * Bits 16-23: Red.
+    * Bits 24-31: Unused.
 
     Examples of `TColorRGB` usage:
     ```c++
-    TColorRGB rgb = 0x9370DB;   // 0xRRGGBB.
-    rgb = {0x93, 0x70, 0xDB};   // {R, G, B}.
-    rgb = rgb ^ 0xFFFFFF;       // Negated.
-    rgb.g = rgb.r & 0x88;       // Access to individual components.
-    uint32_t c = rgb;           // Implicit conversion to integer types.
+    TColorRGB rgb = 0x9370DB;           // 0xRRGGBB.
+    rgb = {0x93, 0x70, 0xDB};           // {R, G, B}.
+    rgb = rgb ^ 0xFFFFFF;               // Negated.
+    rgb.setGreen(rgb.getRed() & 0x88);  // Access to individual components.
+    uint32_t c = rgb;                   // Implicit conversion to integer types.
     ```
 
 * `TColorXTerm` represents an index into the `xterm-256color` color palette. It can be casted into and from `uint8_t`.
 
-### `TColorDesired`
+* `TColorDefault` represents the terminal default color. This is the color used by terminal emulators when no display attributes are enabled (usually white for foreground and black for background). It is implicitly convertible to `TColor`.
 
-`TColorDesired` represents a color which the programmer intends to show on screen, encoded in any of the supported color types.
+### `TColor`
 
-A `TColorDesired` can be initialized in the following ways:
+`TColor` works like a union type of the different supported color types.
+
+A `TColor` can be initialized in the following ways:
 
 * As a BIOS color: with a `char` literal or a `TColorBIOS` object:
 
     ```c++
-    TColorDesired bios1 = '\xF';
-    TColorDesired bios2 = TColorBIOS(0xF);
+    TColor bios1 = '\xF';
+    TColor bios2 = TColorBIOS(0xF);
     ```
 * As a RGB color: with an `int` literal or a `TColorRGB` object:
 
     ```c++
-    TColorDesired rgb1 = 0xFF7700; // 0xRRGGBB.
-    TColorDesired rgb2 = TColorRGB(0xFF, 0x77, 0x00); // {R, G, B}.
-    TColorDesired rgb3 = TColorRGB(0xFF7700); // 0xRRGGBB.
+    TColor rgb1 = 0xFF7700; // 0xRRGGBB.
+    TColor rgb2 = TColorRGB(0xFF, 0x77, 0x00); // {R, G, B}.
+    TColor rgb3 = TColorRGB(0xFF7700); // 0xRRGGBB.
     ```
 * As an XTerm palette index: with a `TColorXTerm` object.
-* As the *terminal default* color: through zero-initialization:
+* As the *terminal default* color: with a `TColorDefault` object, or through value-initialization:
 
     ```c++
-    TColorDesired def1 {};
-    // Or with 'memset':
-    TColorDesired def2;
-    memset(&def2, 0, sizeof(def2));
+    TColor def1 = TColorDefault();
+    TColor def2 {};
     ```
-
-`TColorDesired` has methods to query the contained color, but you will usually not need to use them. See the struct definition in `<tvision/colors.h>` for more information.
-
-Trivia: the name is inspired by [Scintilla](https://www.scintilla.org/index.html)'s `ColourDesired`.
 
 ### `TColorAttr`
 
@@ -968,8 +962,8 @@ Trivia: the name is inspired by [Scintilla](https://www.scintilla.org/index.html
 
 A `TColorAttr` is composed of:
 
-* A foreground color, of type `TColorDesired`.
-* A background color, of type `TColorDesired`.
+* A foreground color, of type `TColor`.
+* A background color, of type `TColor`.
 * A style bitmask containing a combination of the following flags:
 
     * `slBold`.
@@ -979,9 +973,9 @@ A `TColorAttr` is composed of:
     * `slReverse`.
     * `slStrike`.
 
-    These flags are based on the basic display attributes selectable through [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters). The results may vary between terminal emulators. `slReverse` is probably the least reliable of them: prefer using the `TColorAttr reverseAttribute(TColorAttr attr)` free function over setting this flag.
+    These flags are based on the basic display attributes selectable through [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters). The results may vary between terminal emulators. `slReverse` is probably the least reliable of them: prefer using the `reversed()` method over setting this flag.
 
-The most straight-forward way to create a `TColorAttr` is by means of the `TColorAttr(TColorDesired fg, TColorDesired bg, ushort style=0)` and `TColorAttr(int bios)` constructors:
+The most straight-forward way to create a `TColorAttr` is by means of the `TColorAttr(TColor fg, TColor bg, ushort style = 0)` and `TColorAttr(int bios)` constructors:
 
 ```c++
 // Foreground: RGB 0x892312
@@ -997,7 +991,7 @@ TColorAttr a2 = {'\x7', 0x7F00BB, slBold | slItalic};
 // Foreground: Terminal default.
 // Background: BIOS 0xF.
 // Style: Normal.
-TColorAttr a3 = {{}, TColorBIOS(0xF)};
+TColorAttr a3 = {TColorDefault(), TColorBIOS(0xF)};
 
 // Foreground: Terminal default.
 // Background: Terminal default.
@@ -1010,16 +1004,7 @@ TColorAttr a4 = {};
 TColorAttr a5 = 0x70;
 ```
 
-The fields of a `TColorAttr` can be accessed with the following free functions:
-
-```c++
-TColorDesired getFore(const TColorAttr &attr);
-TColorDesired getBack(const TColorAttr &attr);
-ushort getStyle(const TColorAttr &attr);
-void setFore(TColorAttr &attr, TColorDesired fg);
-void setBack(TColorAttr &attr, TColorDesired bg);
-void setStyle(TColorAttr &attr, ushort style);
-```
+Important: `TColorAttr` is a *trivial* type. This means that it can be `memset`'d and `memcpy`'d. But variables of this type are *uninitialized* when declared without an initializer, just like primitive types. So make sure you don't manipulate them before initializing them.
 
 ### `TAttrPair`
 
@@ -1128,20 +1113,7 @@ TColorAttr TMyScrollBar::mapColor(uchar index)
 
 3. By modifying the palettes. There are two ways to do this:
 
-    1. By modifying the application palette after it has been built. Note that the palette elements are `TColorAttr`. For example:
-
-    ```c++
-    void updateAppPalette()
-    {
-        TPalette &pal = TProgram::application->getPalete();
-        pal[1] = {0x762892, 0x828712};              // TBackground.
-        pal[2] = {0x874832, 0x249838, slBold};      // TMenuView normal text.
-        pal[3] = {{}, {}, slItalic | slUnderline};  // TMenuView disabled text.
-        /* ... */
-    }
-    ```
-
-    2. By using extended color attributes in the application palette definition:
+    1. By redefining the entire application palette using extended color attributes:
 
     ```c++
     static const TColorAttr cpMyApp[] =
@@ -1157,6 +1129,19 @@ TColorAttr TMyScrollBar::mapColor(uchar index)
     {
         static TPalette palette(cpMyApp);
         return palette;
+    }
+    ```
+
+    2. By modifying the application palette after it has been built. For example:
+
+    ```c++
+    void updateAppPalette()
+    {
+        TPalette &pal = TProgram::application->getPalete();
+        pal[1] = {0x762892, 0x828712};              // TBackground.
+        pal[2] = {0x874832, 0x249838, slBold};      // TMenuView normal text.
+        pal[3] = {{}, {}, slItalic | slUnderline};  // TMenuView disabled text.
+        /* ... */
     }
     ```
 
@@ -1177,8 +1162,8 @@ The types defined previously represent concepts that are also important when dev
 | Concept | Layout in Borland C++ | Layout in modern platforms |
 |:-:|:-:|:-:|
 | Color Attribute | `uchar`. A BIOS color attribute. | `struct TColorAttr`. |
-| Color | A 4-bit number. | `struct TColorDesired`. |
-| Attribute Pair | `ushort`. An attribute in each byte. | `struct TAttrPair`. |
+| Color | A 4-bit number. | `class TColor`. |
+| Attribute Pair | `ushort`. An attribute in each byte. | `class TAttrPair`. |
 
 One of this project's key principles is that the API should be used in the same way both in Borland C++ and modern platforms, that is to say, without the need for `#ifdef`s. Another principle is that legacy code should compile out-of-the-box, and adapting it to the new features should increase complexity as little as possible.
 
@@ -1189,7 +1174,7 @@ Backward-compatibility is accomplished in the following way:
 
     A `TColorAttr` initialized with `uchar` represents a BIOS color attribute. When converting back to `uchar`, the following happens:
 
-    * If `fg` and `bg` are BIOS colors, and `style` is cleared, the resulting `uchar` represents the same BIOS color attribute contained in the `TColorAttr` (as in the code above).
+    * If both the foreground and background are BIOS colors, and no style flags have been set, the resulting `uchar` represents the same BIOS color attribute contained in the `TColorAttr` (as in the code above).
     * Otherwise, the conversion results in a color attribute that stands out, i.e. white on magenta, meaning that the programmer should consider replacing `uchar`/`ushort` with `TColorAttr`/`TAttrPair` if they intend to support the extended color attributes.
 
     The same goes for `TAttrPair` and `ushort`, considering that it is composed of two `TColorAttr`.
@@ -1233,4 +1218,4 @@ The code above still works just like it did originally. It's only non-BIOS color
 +    TAttrPair cFrame, cTitle;
 ```
 
-Nothing prevents you from using different variables for palette indices and color attributes, which is what should actually be done. The point of backward-compatibility is the ability to support new features without changing the program's logic, that is to say, minimizing the risk of increasing code complexity or introducing bugs.
+Since this example was using the same variables for storing both palette indices and color attributes, replacing `ushort` with `TAttrPair` may result in counter-intuitive code: it would be best to use different sets of variables. Nevertheless, the point of backward-compatibility is to be able to support new features without changing the program's logic, which minimizes the risk of increasing code complexity or introducing bugs.

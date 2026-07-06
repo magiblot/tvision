@@ -22,12 +22,12 @@
 
 #include <tvision/compat/borland/_defs.h>
 
-#ifdef __BORLANDC__
+#if defined( __BORLANDC__ )
 #define I   asm
 #endif
 
 
-#ifdef __BORLANDC__
+#if defined( __BORLANDC__ )
 enum Boolean { False, True };
 #else
 typedef bool Boolean;
@@ -41,7 +41,7 @@ typedef unsigned long ulong;
 
 #include <stddef.h>
 
-#ifndef __BORLANDC__
+#if !defined( __BORLANDC__ )
 #include <stdint.h>
 #else
 typedef char int8_t;
@@ -54,18 +54,13 @@ typedef long intptr_t;
 typedef ulong uintptr_t;
 #endif
 
-#ifdef __BORLANDC__
-typedef ushort TScreenCell;
-typedef uchar TCellChar;
-typedef uchar TColorDesired;
+struct TScreenCell;
+#if defined( __BORLANDC__ )
 typedef uchar TColorAttr;
 typedef ushort TAttrPair;
 #else
-struct TScreenCell;
-struct TCellChar;
-struct TColorDesired;
 struct TColorAttr;
-struct TAttrPair;
+class TAttrPair;
 #endif
 
 const char EOS = '\0';
@@ -137,48 +132,5 @@ extern const uchar specialChars[];
 #if !defined( __BORLANDC__ ) && !defined( TVISION_NO_STL )
 #define TVISION_STL
 #endif
-
-// Constructors and casting operator which make a struct trivial and
-// convertible from and into a primitive type 'T'.
-#define TV_TRIVIALLY_CONVERTIBLE(Self, T, mask) \
-    Self() = default; \
-    Self(T asT) \
-    { \
-        asT &= T(mask); \
-        memcpy(this, &asT, sizeof(T)); \
-    } \
-    operator T() const \
-    { \
-        T asT; \
-        memcpy(&asT, this, sizeof(T)); \
-        return asT & T(mask); \
-    }
-
-// In types with user-defined constructors, the default assignment operator
-// creates a temporary object. If the type is large enough, the compiler
-// may not be able to optimize out the temporary object. This has been observed
-// with GCC, Clang and MSVC.
-//
-// To work around this in performance-critical types, we define a custom
-// assignment operator which just invokes the type constructor with the
-// assigned object, so that the initialization is done in-place instead of in a
-// temporary location.
-//
-// In order to use placement new, 'operator new(size_t, void*)' has to be defined.
-// Instead of including the <new> header, due to compilation performance, it is
-// more convenient to define a class-overloaded operator new. We also define
-// operator delete to avoid a warning in some compilers.
-//
-// Also, it is required to use a template assignment operator. This is the
-// only way to make the assignment 't = {}' equivalent to 't = T()'.
-//
-// This macro is intended to be used in the definition of types with trivial
-// destructors, so there is no need to invoke the destructor before placement
-// new nor guard against self-assignment.
-#define TV_TRIVIALLY_ASSIGNABLE(Self) \
-    void* operator new(size_t, void *p) noexcept { return p; } \
-    void operator delete(void *, void *) noexcept {}; \
-    template <class T> \
-    Self& operator=(const T &t) { return *new (this) Self(t); }
 
 #endif  // __TTYPES_H

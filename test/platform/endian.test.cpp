@@ -41,26 +41,6 @@ TEST(Endianness, TWindowShouldHandleSelectCommand)
     window.shutDown();
 }
 
-TEST(Endianness, ColorsWithBitFieldsShouldBehaveAsExpected)
-{
-    TColorRGB rgb = 0x112233;
-    EXPECT_EQ(rgb.r, 0x11);
-    EXPECT_EQ(rgb.g, 0x22);
-    EXPECT_EQ(rgb.b, 0x33);
-
-    TColorBIOS bios = 0x3;
-    EXPECT_EQ(bios.b, 1);
-    EXPECT_EQ(bios.g, 1);
-    EXPECT_EQ(bios.r, 0);
-    EXPECT_EQ(bios.bright, 0);
-
-    bios = 0xC;
-    EXPECT_EQ(bios.b, 0);
-    EXPECT_EQ(bios.g, 0);
-    EXPECT_EQ(bios.r, 1);
-    EXPECT_EQ(bios.bright, 1);
-}
-
 TEST(Endianness, TermColorShouldBehaveAsExpected)
 {
     TColorRGB rgb = 0x123456;

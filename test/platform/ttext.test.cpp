@@ -130,7 +130,7 @@ TEST(TText, ShouldConvertUtf8ControlCharacters)
     {
         TScreenCell cells[1] {};
         TText::drawStr(cells, testCase.input);
-        TStringView actual = cells[0]._ch.getText();
+        TStringView actual = cells[0].character.getText();
         expectResultMatches(actual, testCase);
     }
 }
@@ -157,7 +157,7 @@ TEST(TText, ShouldConvertUtf32ControlCharacters)
         TScreenCell cells[1] {};
         TSpan<const uint32_t> input {(const uint32_t *) testCase.input.data(), testCase.input.size()};
         TText::drawStr(cells, 0, input, 0);
-        TStringView actual = cells[0]._ch.getText();
+        TStringView actual = cells[0].character.getText();
         expectResultMatches(actual, testCase);
     }
 }
@@ -185,7 +185,7 @@ TEST(TText, ShouldDrawTextInScreenCells)
 
         std::vector<TStringView> actual(nCells);
         for (int i = 0; i < nCells; ++i)
-            actual[i] = cells[i]._ch.getText();
+            actual[i] = cells[i].character.getText();
 
         expectResultMatches(actual, testCase);
     }

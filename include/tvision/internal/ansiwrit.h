@@ -68,7 +68,7 @@ struct TermColor
 struct TermAttr
 {
     TermColor fg, bg;
-    TColorAttr::Style style;
+    ushort style;
 };
 
 // Terminal quirk flags.

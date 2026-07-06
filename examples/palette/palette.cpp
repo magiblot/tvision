@@ -25,13 +25,14 @@ TTestView::TTestView( TRect& r ) : TView( r )
 void TTestView::draw()
 {
     TDrawBuffer buf;
-    char textAttr, text[128];
+    TColorAttr textAttr;
+    char text[128];
     for(int i = 1; i <= 6; i++)         // Loop through palette
                                         // (6 entries).
     {
         textAttr = getColor( i );       // Obtain attribute for
                                         // given index.
-        sprintf(text, " This line uses index %02X, color is %02X ", i, textAttr);
+        sprintf(text, " This line uses index %02X, color is %02X ", i, (uchar) textAttr);
         buf.moveStr(0, text, textAttr);      // Write to buffer.
         writeLine(0, i-1, size.x, 1, buf);   // Write buffer to
                                              // view.

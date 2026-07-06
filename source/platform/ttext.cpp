@@ -311,9 +311,9 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 // We need to convert control characters here since we
                 // might later try to append combining characters to them.
                 if (text[j] < ' ' || '\x7F' <= text[j])
-                    cells[i]._ch.moveMultiByteChar(CpTranslator::toPackedUtf8(text[j]));
+                    cells[i].character.initWithMultiByteChar(CpTranslator::toPackedUtf8(text[j]));
                 else
-                    cells[i]._ch.moveChar(text[j]);
+                    cells[i].character.initWithChar(text[j]);
                 return {1, 1};
             }
         }
@@ -323,7 +323,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             {
                 if (i < cells.size())
                 {
-                    cells[i]._ch.moveMultiByteChar("�");
+                    cells[i].character.initWithMultiByteChar("�");
                     return {(size_t) mb.length, 1};
                 }
             }
@@ -334,8 +334,8 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (i > 0 && !isZeroWidthJoiner(zwc))
                 {
                     size_t k = i;
-                    while (cells[--k]._ch.isWideCharTrail() && k > 0);
-                    cells[k]._ch.appendZeroWidthChar(zwc);
+                    while (cells[--k].character.isWideCharTrail() && k > 0);
+                    cells[k].character.appendZeroWidthChar(zwc);
                 }
                 return {(size_t) mb.length, 0};
             }
@@ -344,10 +344,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
                 if (i < cells.size())
                 {
                     bool wide = mb.width > 1;
-                    cells[i]._ch.moveMultiByteChar({&text[j], (size_t) mb.length}, wide);
+                    cells[i].character.initWithMultiByteChar({&text[j], (size_t) mb.length}, wide);
                     bool drawTrail = (wide && i + 1 < cells.size());
                     if (drawTrail)
-                        cells[i + 1]._ch.moveWideCharTrail();
+                        cells[i + 1].character.initAsWideCharTrail();
                     return {(size_t) mb.length, size_t(1 + drawTrail)};
                 }
             }
@@ -371,7 +371,7 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
         {
             if (i < cells.size())
             {
-                cells[i]._ch.moveMultiByteChar("�");
+                cells[i].character.initWithMultiByteChar("�");
                 return {1, 1};
             }
         }
@@ -381,8 +381,8 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i > 0 && !isZeroWidthJoiner(textU8))
             {
                 size_t k = i;
-                while (cells[--k]._ch.isWideCharTrail() && k > 0);
-                cells[k]._ch.appendZeroWidthChar(textU8);
+                while (cells[--k].character.isWideCharTrail() && k > 0);
+                cells[k].character.appendZeroWidthChar(textU8);
             }
             return {1, 0};
         }
@@ -391,10 +391,10 @@ TText::Lw TText::drawOneImpl( TSpan<TScreenCell> cells, size_t i,
             if (i < cells.size())
             {
                 bool wide = width > 1;
-                cells[i]._ch.moveMultiByteChar(textU8, wide);
+                cells[i].character.initWithMultiByteChar(textU8, wide);
                 bool drawTrail = (wide && i + 1 < cells.size());
                 if (drawTrail)
-                    cells[i + 1]._ch.moveWideCharTrail();
+                    cells[i + 1].character.initAsWideCharTrail();
                 return {1, size_t(1 + drawTrail)};
             }
         }
