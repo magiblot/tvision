@@ -46,6 +46,7 @@ inline constexpr const T& max( const T& a, const T& b )
 void fexpand( char *rpath ) noexcept;
 void fexpand( char *rpath, const char *relativeTo ) noexcept;
 
+class TStringView;
 char hotKey( TStringView s ) noexcept;
 ushort ctrlToArrow( ushort keyCode ) noexcept;
 char getAltChar( ushort keyCode ) noexcept;
@@ -90,6 +91,8 @@ Boolean isWild( const char *f ) noexcept;
 
 size_t strnzcpy( char *dst, TStringView src, size_t dstSize ) noexcept;
 size_t strnzcat( char *dst, TStringView src, size_t dstSize ) noexcept;
+
+#include <tvision/compat/borland/iosfwd.h>
 
 void printKeyCode(ostream _FAR &, ushort keyCode);
 void printControlKeyState(ostream _FAR &, ushort controlKeyState);

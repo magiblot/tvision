@@ -102,10 +102,6 @@ opstream& _Cdecl operator << ( opstream&, long double );
 opstream& _Cdecl operator << ( opstream&, TStreamable& );
 opstream& _Cdecl operator << ( opstream&, TStreamable _FAR * );
 
-#include <tvision/compat/borland/iosfwd.h>
-class TStringView;
-ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
-
 typedef void _FAR *TTimerId;
 
 typedef int ccIndex;
@@ -125,12 +121,6 @@ extern const uchar specialChars[];
 #define constexpr
 #define noexcept
 #define thread_local
-#endif
-
-// Do not include unnecessary STL headers if TVISION_NO_STL is defined.
-// This speeds up compilation when building the library.
-#if !defined( __BORLANDC__ ) && !defined( TVISION_NO_STL )
-#define TVISION_STL
 #endif
 
 #endif  // __TTYPES_H
