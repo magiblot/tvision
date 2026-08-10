@@ -25,6 +25,7 @@ The original location of this project is https://github.com/magiblot/tvision.
 * [Releases and downloads](#downloads)
 * Build environment
     * [Linux](#build-linux)
+    * [macOS](#build-macos)
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
@@ -139,6 +140,36 @@ You may also need:
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
 The backward-compatibility headers in `include/tvision/compat/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
+
+<div id="build-macos"></div>
+
+### macOS
+
+Turbo Vision is built and tested on macOS with Apple Clang in GitHub Actions. Install the Xcode Command Line Tools and CMake before configuring the project:
+
+```sh
+xcode-select --install
+brew install cmake
+```
+
+The macOS SDK provides the required `ncurses` library. A release build of the library and example applications can be created with:
+
+```sh
+cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Release
+cmake --build ./build --parallel "$(sysctl -n hw.logicalcpu)"
+```
+
+The resulting library and executables are placed in `./build`. For example, run `./build/hello` or `./build/tvdemo` from a terminal. The applications can usually be closed with `Alt+X`.
+
+To build and run the optional tests, install GoogleTest and enable `TV_BUILD_TESTS` in a separate build directory:
+
+```sh
+brew install googletest
+cmake -S . -B ./build-tests -DCMAKE_BUILD_TYPE=Release -DTV_BUILD_TESTS=ON
+cmake --build ./build-tests --parallel "$(sysctl -n hw.logicalcpu)"
+```
+
+The public Turbo Vision library target continues to require C++14. Current GoogleTest releases require C++17, so only the test executable is built with C++17 when tests are enabled.
 
 <div id="build-msvc"></div>
 
