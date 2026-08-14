@@ -452,6 +452,10 @@ If your application is based on this project and you'd like it to appear in the 
 * [Turbo](https://github.com/magiblot/turbo) by [magiblot](https://github.com/magiblot), a proof-of-concept text editor.
 * [tvterm](https://github.com/magiblot/tvterm) by [magiblot](https://github.com/magiblot), a proof-of-concept terminal emulator.
 * [TMBASIC](https://github.com/electroly/tmbasic) by [Brian Luft](https://github.com/electroly), a programming language for creating console applications.
+* [battleships](https://github.com/Ddimk/battleships) by [Ddimk](https://github.com/Ddimk), an implementation of the the world-famous game *Battleship*.
+* [Turbo Vision dialog designer](https://github.com/IngvarRiga/TurboVision-dialog-designer) by [Ivan Rog](https://github.com/IngvarRiga), a proof-of-concept dialog editor.
+* [turboIDE](https://github.com/aestubbs/turboIDE) by [Alistair Stubbs](https://github.com/aestubbs), a fork of [Turbo](https://github.com/magiblot/turbo) that adds many additional features to it.
+* [mr (*Multi-Edit Revisited*)](https://github.com/ebeneezer/mr) by [Michael Raus](https://github.com/ebeneezer), an attempt at recreating American Cybernetics' *Multi-Edit* application.
 
 <div id="unicode"></div>
 
@@ -461,7 +465,7 @@ The Turbo Vision API has been extended to allow receiving Unicode input and disp
 
 * It is compatible with already present data types (`char *`), so it does not require intrusive modifications to existing code.
 * It is the same encoding used for terminal I/O, so redundant conversions are avoided.
-* Conformance to the [UTF-8 Everywhere Manifesto](http://utf8everywhere.org/), which exposes many other advantages.
+* Several other advantages enumerated in the [UTF-8 Everywhere Manifesto](http://utf8everywhere.org/).
 
 Note that when built with Borland C++, Turbo Vision does not support Unicode. However, this does not affect the way Turbo Vision applications are written, since the API extensions are designed to allow for encoding-agnostic code.
 
