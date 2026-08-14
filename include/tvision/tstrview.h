@@ -12,7 +12,7 @@
 #include <string.h>
 #include <tvision/compat/borland/iosfwd.h>
 
-#if !defined(TVISION_NO_STL)
+#if !defined(TVISION_NO_STL) && __cplusplus >= 199711L
 #include <string>
 
 #if __cplusplus >= 201703L
@@ -52,7 +52,7 @@ public:
     constexpr TStringView(const char _FAR *str, size_t len) noexcept;
     constexpr TStringView(TSpan<char> span) noexcept;
     constexpr TStringView(TSpan<const char> span) noexcept;
-#if !defined(TVISION_NO_STL)
+#if !defined(TVISION_NO_STL) && __cplusplus >= 199711L
 #if __cplusplus >= 201703L
     constexpr TStringView(std::string_view text) noexcept;
     constexpr operator std::string_view() const noexcept;
@@ -131,7 +131,7 @@ constexpr TStringView::TStringView(TSpan<const char> span) noexcept :
 {
 }
 
-#if !defined(TVISION_NO_STL)
+#if !defined(TVISION_NO_STL) && __cplusplus >= 199711L
 #if __cplusplus >= 201703L
 constexpr TStringView::TStringView(std::string_view text) noexcept :
     str(text.data()),

@@ -185,20 +185,20 @@ public:
     ushort mods;
 };
 
-inline constexpr TKey::TKey() noexcept :
+constexpr TKey::TKey() noexcept :
     code(0),
     mods(0)
 {
 }
 
-inline constexpr Boolean operator==(TKey a, TKey b) noexcept
+constexpr Boolean operator==(TKey a, TKey b) noexcept
 {
     return Boolean(
         (a.code | ((int32_t) a.mods << 16)) == (b.code | ((int32_t) b.mods << 16))
     );
 }
 
-inline constexpr Boolean operator!=(TKey a, TKey b) noexcept
+constexpr Boolean operator!=(TKey a, TKey b) noexcept
 {
     return Boolean( !(a == b) );
 }

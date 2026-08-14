@@ -18,12 +18,12 @@
 
 #include <stdarg.h>
 
-inline constexpr int min( int a, int b )
+constexpr int min( int a, int b )
 {
     return a < b ? a : b;
 }
 
-inline constexpr int max( int a, int b )
+constexpr int max( int a, int b )
 {
     return a > b ? a : b;
 }
@@ -31,13 +31,13 @@ inline constexpr int max( int a, int b )
 #if !defined( __MINMAX_DEFINED ) // Also defined in Borland C++'s stdlib.h.
 #define __MINMAX_DEFINED
 template <class T>
-inline constexpr const T& min( const T& a, const T& b )
+constexpr const T& min( const T& a, const T& b )
 {
     return a < b ? a : b;
 }
 
 template <class T>
-inline constexpr const T& max( const T& a, const T& b )
+constexpr const T& max( const T& a, const T& b )
 {
     return a > b ? a : b;
 }

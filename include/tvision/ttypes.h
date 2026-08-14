@@ -118,7 +118,7 @@ extern const uchar specialChars[];
 
 // Reserve future keywords
 #if __cplusplus < 201103L
-#define constexpr
+#define constexpr inline
 #define noexcept
 #define thread_local
 #endif
