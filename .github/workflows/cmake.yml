@@ -7,7 +7,7 @@ jobs:
     name: Linux (GCC) (Unity)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Dependencies
       run: sudo apt-get -y install libgpm-dev libgtest-dev
@@ -24,7 +24,7 @@ jobs:
     name: Linux (GCC 5)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Dependencies
       run: |
@@ -52,7 +52,7 @@ jobs:
     name: Linux (Clang)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Dependencies
       run: sudo apt-get -y install libncursesw5-dev
@@ -72,10 +72,10 @@ jobs:
     name: Linux (GCC) (Big Endian)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Build in container
-      uses: uraimo/run-on-arch-action@v2
+      uses: uraimo/run-on-arch-action@v3
       with:
         arch: s390x
         distro: alpine_latest
@@ -94,7 +94,7 @@ jobs:
     name: Windows (MSVC) (Win32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Configure CMake
       shell: bash
@@ -113,7 +113,7 @@ jobs:
       run: cmake --build . --config Debug --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Examples
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: examples-x86
         path: |
@@ -122,7 +122,7 @@ jobs:
           Release/tvhc.exe
 
     - name: Upload Library
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: library-x86
         path: |
@@ -136,7 +136,7 @@ jobs:
     name: Windows (MSVC) (x64)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Configure CMake
       shell: bash
@@ -155,7 +155,7 @@ jobs:
       run: cmake --build . --config Debug --target tvision -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Examples
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: examples-x64
         path: |
@@ -164,7 +164,7 @@ jobs:
           Release/tvhc.exe
 
     - name: Upload Library
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: library-x64
         path: |
@@ -178,7 +178,7 @@ jobs:
     name: Windows (MinGW)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Configure CMake
       shell: bash
@@ -192,7 +192,7 @@ jobs:
     name: Windows (BCC32) (DPMI32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Build Tools
       shell: bash
@@ -210,7 +210,7 @@ jobs:
         /c/bc45/bin/make.exe -DDOS32
 
     - name: Upload Examples
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: examples-dos32
         path: |
@@ -219,7 +219,7 @@ jobs:
           examples/tvhc/tvhc.EXE
 
     - name: Upload Library
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: library-dos32
         path: |
@@ -229,7 +229,7 @@ jobs:
     name: MacOS (Clang)
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Configure CMake
       shell: bash
