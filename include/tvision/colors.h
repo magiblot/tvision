@@ -71,6 +71,7 @@ private:
 constexpr TColorRGB::TColorRGB() noexcept :
     TColorRGB(0)
 {
+    (void) _unused;
 }
 
 constexpr TColorRGB::TColorRGB(uint8_t r, uint8_t g, uint8_t b) noexcept :
@@ -175,6 +176,7 @@ private:
 constexpr TColorBIOS::TColorBIOS() noexcept :
     TColorBIOS(0)
 {
+    (void) _unused;
 }
 
 constexpr TColorBIOS::TColorBIOS(uint8_t irgb) noexcept :
@@ -585,7 +587,7 @@ const ushort
 
     slWindowShadow = 0x200;
 
-struct TAttrPair;
+class TAttrPair;
 
 struct TColorAttr
 {
