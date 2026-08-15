@@ -231,9 +231,12 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
+    - name: Install Dependencies
+      run: brew install googletest
+
     - name: Configure CMake
       shell: bash
-      run: cmake . -DCMAKE_BUILD_TYPE=Release
+      run: cmake . -DCMAKE_BUILD_TYPE=Release -DTV_BUILD_TESTS=ON
 
     - name: Build
       shell: bash

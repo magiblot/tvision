@@ -3,7 +3,8 @@ if (TV_BUILD_TESTS)
 
     add_executable(${PROJECT_NAME}-test ${TEST_SRC})
 
-    target_compile_features(${PROJECT_NAME}-test PRIVATE cxx_std_14)
+    # Latest versions of GoogleTest require at least C++17.
+    target_compile_features(${PROJECT_NAME}-test PRIVATE cxx_std_17)
     target_include_directories(${PROJECT_NAME}-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 
     tv_add_private_includes(${PROJECT_NAME}-test)
@@ -13,11 +14,20 @@ if (TV_BUILD_TESTS)
     tv_message(STATUS "Found 'gtest': ${GTEST}")
     find_library(GTEST_MAIN gtest_main REQUIRED)
     tv_message(STATUS "Found 'gtest_main': ${GTEST_MAIN}")
+    find_path(GTEST_INCLUDE gtest/gtest.h)
+    if (GTEST_INCLUDE)
+        tv_message(STATUS "Found 'gtest' header: ${GTEST_INCLUDE}/gtest/gtest.h")
+    else()
+        tv_message(FATAL_ERROR "'gtest' development headers not found")
+    endif()
+
     target_link_libraries(${PROJECT_NAME}-test PRIVATE
         ${PROJECT_NAME}
         ${GTEST}
         ${GTEST_MAIN}
     )
+    target_include_directories(${PROJECT_NAME}-test PRIVATE "${GTEST_INCLUDE}")
+
 
     if (NOT WIN32)
         find_library(PTHREAD pthread REQUIRED)
