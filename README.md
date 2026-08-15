@@ -8,7 +8,7 @@ I started this as a personal project at the very end of 2018. By May 2020 I cons
 
 The original goals of this project were:
 
-* Making Turbo Vision work on Linux by altering the legacy codebase as little as possible.
+* Making Turbo Vision work on Unix/Linux by altering the legacy codebase as little as possible.
 * Keeping it functional on DOS/Windows.
 * Being as compatible as possible at the source code level with old Turbo Vision applications. This led me to implement some of the Borland C++ RTL functions, as explained below.
 
@@ -24,7 +24,7 @@ The original location of this project is https://github.com/magiblot/tvision.
 * [How do I use Turbo Vision?](#how-to)
 * [Releases and downloads](#downloads)
 * Build environment
-    * [Linux](#build-linux)
+    * [Unix/Linux](#build-linux)
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
@@ -49,7 +49,7 @@ Turbo Vision does not excel at any of those, but it certainly overcomes many of 
 
 2. Reuse what has already been done. Turbo Vision provides many widget classes (also known as *views*), including resizable, overlapping windows, pull-down menus, dialog boxes, buttons, scroll bars, input boxes, check boxes and radio buttons. You may use and extend these; but even if you prefer creating your own, Turbo Vision already handles event dispatching, display of fullwidth Unicode characters, etc.: you do not need to waste time rewriting any of that.
 
-3. Can you imagine writing a text-based interface that works both on Linux and Windows (and thus is cross-platform) out-of-the-box, with no `#ifdef`s? Turbo Vision makes this possible. First: Turbo Vision keeps on using `char` arrays instead of relying on the implementation-defined and platform-dependent `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as intended:
+3. Can you imagine writing a text-based interface that works both on Unix/Linux and Windows (and thus is cross-platform) out-of-the-box, with no `#ifdef`s? Turbo Vision makes this possible. First: Turbo Vision keeps on using `char` arrays instead of relying on the implementation-defined and platform-dependent `wchar_t` or `TCHAR`. Second: thanks to UTF-8 support in `setlocale` in [recent versions of Microsoft's RTL](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale#utf-8-support), code like the following will work as intended:
     ```c++
     std::ifstream f("コンピュータ.txt"); // On Windows, the RTL converts this to the system encoding on-the-fly.
     ```
@@ -81,7 +81,7 @@ If you just want to test the demo applications:
 
 <div id="build-linux"></div>
 
-### Linux
+### Unix/Linux
 
 Turbo Vision can be built as an static library with CMake and GCC/Clang.
 
@@ -111,9 +111,9 @@ The build requirements are:
 
 * A compiler supporting C++14.
 * `libncursesw` (note the 'w').
-* `libgpm` for mouse support on the Linux console (optional).
+* `libgpm` for mouse support on the Linux console (optional, Linux only).
 
-If your distribution provides separate *devel* packages (e.g. `libncurses-dev`, `libgpm-dev` in Debian-based distros), install these too.
+If your package manager provides separate development packages (e.g. `libncurses-dev`, `libgpm-dev` in Debian-based Linux distributions), install these too.
 
 <div id="build-linux-runtime"></div>
 
@@ -174,7 +174,7 @@ With the RTL statically linked in, and if UTF-8 is supported in `setlocale`, Tur
 
 ### Windows (MinGW)
 
-Once your MinGW environment is properly set up, build is done in a similar way to Linux:
+Once your MinGW environment is properly set up, build is done in a similar way to Unix/Linux:
 ```sh
 cmake . -B ./build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release &&
 cmake --build ./build
@@ -296,7 +296,7 @@ There are a few environment variables that affect the behaviour of all Turbo Vis
 
 * `TVISION_MAX_FPS`: maximum refresh rate, default `60`. This can help keep smoothness in terminal emulators with unefficient handling of box-drawing characters. Special values for this option are `0`, to disable refresh rate limiting, and `-1`, to actually draw to the terminal in every call to `THardwareInfo::screenWrite` (useful when debugging).
 
-### Unix
+### Unix/Linux
 
 * Ncurses-based terminal support.
 * Extensive mouse and keyboard support:
@@ -755,7 +755,7 @@ To deal with this, a new class `TClipboard` has been added which allows accessin
 
 On Windows (including WSL) and macOS, clipboard integration is supported out-of-the-box.
 
-On Unix systems other than macOS, it is necessary to install some external dependencies. See [runtime requirements](#build-linux-runtime).
+On Unix/Linux systems (except macOS) it is necessary to install some external dependencies. See [runtime requirements](#build-linux-runtime).
 
 For applications running remotely (e.g. through SSH), clipboard integration is supported in the following situations:
 
