@@ -240,7 +240,7 @@ inline void TText::drawChar(TSpan<TScreenCell> cells, char c)
 inline void TText::drawChar(TSpan<TScreenCell> cells, char c, TColorAttr attr)
 {
     for (size_t i = 0; i < cells.size(); ++i)
-        cells[i] = uchar(c) | (attr << 8);
+        cells[i] = ushort(uchar(c) | (attr << 8));
 }
 
 inline size_t TText::drawStr( TSpan<TScreenCell> cells, size_t indent,
@@ -319,7 +319,7 @@ inline Boolean TText::drawOne( TSpan<TScreenCell> cells, size_t &i,
 {
     if (i < cells.size() && j < text.size())
     {
-        cells[i++] = uchar(text[j++]) | (attr << 8);
+        cells[i++] = ushort(uchar(text[j++]) | (attr << 8));
         return True;
     }
     return False;

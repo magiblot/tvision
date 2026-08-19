@@ -4,9 +4,6 @@
 #include <tvision/tv.h>
 #include <internal/strings.h>
 
-#include <cstddef>
-#include <utility>
-#include <algorithm>
 #include <unordered_map>
 
 namespace tvision
@@ -70,21 +67,16 @@ class const_unordered_map<uint64_t, Value> : public const_unordered_map_base<uin
 
     struct StringAsIntPair : const_unordered_map::super::value_type
     {
-
         using super = typename const_unordered_map::super::value_type;
 
-        using super::super;
-
-        constexpr StringAsIntPair(TStringView s, const Value &v) noexcept :
-            super(string_as_int<uint64_t>(s), v)
+        constexpr StringAsIntPair() noexcept
         {
         }
 
-        constexpr StringAsIntPair(TStringView s, Value &&v) noexcept :
-            super(string_as_int<uint64_t>(s), std::move(v))
+        constexpr StringAsIntPair(TStringView s, Value v) noexcept :
+            super(string_as_int<uint64_t>(s), (Value &&) v)
         {
         }
-
     };
 
 public:

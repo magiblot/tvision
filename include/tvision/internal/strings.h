@@ -1,7 +1,9 @@
 #ifndef TVISION_STRINGS_H
 #define TVISION_STRINGS_H
 
-#include <tvision/tv.h>
+#include <internal/constarr.h>
+
+#include <stdint.h>
 
 namespace tvision
 {
@@ -18,9 +20,6 @@ inline constexpr Int string_as_int(TStringView s) noexcept
 
 char *fast_utoa(uint32_t value, char *buffer) noexcept;
 
-template <class T, size_t N>
-struct constarray;
-
 struct alignas(4) btoa_lut_elem_t
 {
     char chars[3];
@@ -33,11 +32,10 @@ inline char *fast_btoa(uint8_t value, char *buffer) noexcept
 // Pre: the capacity of 'buffer' is at least 4 bytes.
 {
     extern const btoa_lut_t btoa_lut;
-    auto &lut = (const btoa_lut_elem_t (&) [256]) btoa_lut;
     // Optimization: read and write the whole LUT entry at once in order to
     // minimize memory accesses. We can afford to write more bytes into 'buffer'
     // than digits.
-    memcpy(buffer, &lut[value], 4);
+    memcpy(buffer, &btoa_lut[value], 4);
     return buffer + (uint8_t) buffer[3];
     static_assert(sizeof(btoa_lut_elem_t) == 4, "");
 }
