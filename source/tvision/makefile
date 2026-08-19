@@ -243,13 +243,32 @@ cfg:
 
 *.asm: $(INCNAME) dirs
 
+# These objects have both an original assembly source file (DOS/DPMI32) and a
+# translated C++ source file with the same name. The following explicit targets
+# avoid ambiguity between the two candidates.
+EDITS.OBJ: EDITS.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+FRAMELIN.OBJ: FRAMELIN.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+TGRMV.OBJ: TGRMV.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+TTPRVLNS.OBJ: TTPRVLNS.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+TVCURSOR.OBJ: TVCURSOR.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+TVEXPOSD.OBJ: TVEXPOSD.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+TVWRITE.OBJ: TVWRITE.ASM
+     $(ASM) $(AFLAGS) $&.ASM $(OBJDIR)\$&.OBJ
+
 $(INCNAME): $(GENEXE)
      $(GENEXE) > $(INCNAME)
 
 $(GENEXE): $(GENOBJ)
      $(CC) +$(CFGNAME) -f- $(TARGETFLAG) -e$(GENEXE) -L$(LIBDIR) -n. $(OBJDIR)\$(GENOBJ)
 
-OBJPFX = +$(OBJDIR)\ #
+# Prefix for TLIB's input object files.
+OBJPFX = +$(OBJDIR)\ # (This comment is needed to avoid a line continuation)
 
 $(TVLIBDIR)\$(LIBNAME): $(OBJS:pfx=)
      @if not exist $(TVLIBDIR) md $(TVLIBDIR)
