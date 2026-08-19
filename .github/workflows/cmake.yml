@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v7
 
     - name: Install Dependencies
-      run: sudo apt-get -y install libgpm-dev libgtest-dev
+      run: sudo apt-get -y --no-install-recommends install libgpm-dev libgtest-dev
 
     - name: Configure CMake
       shell: bash
@@ -35,7 +35,7 @@ jobs:
         EOF
         sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
         sudo apt-get update
-        sudo apt-get -y install g++-5
+        sudo apt-get -y --no-install-recommends install g++-5
 
     - name: Configure CMake
       shell: bash
@@ -55,7 +55,7 @@ jobs:
     - uses: actions/checkout@v7
 
     - name: Install Dependencies
-      run: sudo apt-get -y install libncursesw5-dev
+      run: sudo apt-get -y --no-install-recommends install libncursesw5-dev
 
     - name: Configure CMake
       shell: bash
@@ -197,10 +197,12 @@ jobs:
     - name: Install Build Tools
       shell: bash
       run: |
-        curl -LJO "https://github.com/magiblot/tvision/files/5578778/BC45-32.zip"
-        curl -LJO "https://github.com/magiblot/tvision/files/5578815/tasm4-32.zip"
-        unzip BC45-32.zip -d C:/BC45
-        unzip tasm4-32.zip -d C:/tasm
+        curl -LJO "https://github.com/user-attachments/files/31184465/bc45-ci.zip"
+        curl -LJO "https://github.com/user-attachments/files/31184581/tasm4-ci.zip"
+        curl -LJO "https://github.com/user-attachments/files/31240466/bc55-make.zip"
+        unzip bc45-ci.zip -d C:/bc45
+        unzip tasm4-ci.zip -d C:/tasm
+        unzip -o bc55-make.zip -d C:/bc45/bin
 
     - name: Build
       shell: bash
@@ -212,7 +214,7 @@ jobs:
     - name: Upload Examples
       uses: actions/upload-artifact@v7
       with:
-        name: examples-dos32
+        name: examples-dpmi32
         path: |
           examples/tvdemo/tvdemo.EXE
           examples/tvedit/tvedit.EXE
@@ -221,9 +223,60 @@ jobs:
     - name: Upload Library
       uses: actions/upload-artifact@v7
       with:
-        name: library-dos32
+        name: library-dpmi32
         path: |
           LIB/TV32.LIB
+
+  build-dos-bcc:
+    name: DOS (BCC)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install Build Tools
+      run: |
+        sudo add-apt-repository -y ppa:dosemu2/ppa
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends dosemu2
+        curl -LJO "https://github.com/user-attachments/files/31184465/bc45-ci.zip"
+        curl -LJO "https://github.com/user-attachments/files/31184581/tasm4-ci.zip"
+        unzip bc45-ci.zip -d bc45
+        unzip tasm4-ci.zip -d tasm
+
+    - name: Build
+      run: |
+        cat > run.bat << EOF
+          C:
+          CD C:\project
+          SET PATH=C:\bc45\bin;C:\tasm\bin
+          MAKER.EXE
+        EOF
+        sed -i 's/$/\r/' run.bat
+
+        cat > dosemu.conf << 'EOF'
+          $_cpu_vm = "emulated"
+          $_cpu_vm_dpmi = "emulated"
+          $_layout = "us"
+          $_sound = (off)
+        EOF
+
+        dosemu -n -t -ks -f dosemu.conf --Fdrive_c "$PWD" -E 'C:\run.bat'
+
+    - name: Upload Examples
+      uses: actions/upload-artifact@v7
+      with:
+        name: examples-dos
+        path: |
+          examples/tvdemo/tvdemo.exe
+          examples/tvedit/tvedit.exe
+          examples/tvhc/tvhc.exe
+
+    - name: Upload Library
+      uses: actions/upload-artifact@v7
+      with:
+        name: library-dos
+        path: |
+          LIB/tv.lib
 
   build-macos-clang:
     name: MacOS (Clang)

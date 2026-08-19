@@ -72,10 +72,11 @@ This project has no stable releases for the time being. If you are a developer, 
 If you just want to test the demo applications:
 
 * Unix systems: you'll have to build Turbo Vision yourself. You may follow the [build instructions](#build-linux) below.
-* Windows: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
-    * `examples-dos32.zip`: 32-bit executables built with Borland C++. No Unicode support.
+* Windows/DOS: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
     * `examples-x86.zip`: 32-bit executables built with MSVC. Windows Vista or later required.
     * `examples-x64.zip`: 64-bit executables built with MSVC. x64 Windows Vista or later required.
+    * `examples-dos.zip`: 16-bit DOS executables built with Borland C++. No Unicode support.
+    * `examples-dpmi32.zip`: 32-bit Windows/DOS executables built with Borland C++. No Unicode support.
 
 ## Build environment
 
