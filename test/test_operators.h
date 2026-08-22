@@ -83,7 +83,7 @@ inline std::ostream &operator<<(std::ostream &os, TPoint p)
     return os;
 }
 
-inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState, TStringView text = {})
+inline TEvent keyDownEv(ushort keyCode, ushort controlKeyState = 0, TStringView text = {})
 {
     TEvent ev {};
     ev.what = evKeyDown;
@@ -106,6 +106,20 @@ inline TEvent mouseEv(TPoint where, ushort eventFlags, ushort controlKeyState, u
     ev.mouse.controlKeyState = controlKeyState;
     ev.mouse.buttons = buttons;
     ev.mouse.wheel = wheel;
+    return ev;
+}
+
+inline TEvent mouseDownEv(TPoint where, ushort eventFlags = 0, uchar buttons = mbLeftButton, ushort controlKeyState = 0, uchar wheel = 0)
+{
+    TEvent ev = mouseEv(where, eventFlags, controlKeyState, buttons, wheel);
+    ev.what = evMouseDown;
+    return ev;
+}
+
+inline TEvent mouseUpEv(TPoint where, uchar buttons = mbLeftButton, ushort controlKeyState = 0, uchar wheel = 0)
+{
+    TEvent ev = mouseEv(where, 0, controlKeyState, buttons, wheel);
+    ev.what = evMouseUp;
     return ev;
 }
 

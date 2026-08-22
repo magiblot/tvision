@@ -10,6 +10,7 @@
 #include <test.h>
 #include <test_operators.h>
 #include <test_charops.h>
+#include <test_group.h>
 
 enum : ushort
 {
@@ -64,38 +65,6 @@ static std::ostream &operator<<(std::ostream &os, const MenuItemsAndEventQueue &
     os << "Event queue: " << testing::PrintToString(menuItemsAndEventQueue.eventQueue);
     return os;
 }
-
-class TestGroup : public TGroup
-{
-public:
-
-    TestGroup(std::forward_list<TEvent> aEventQueue) :
-        TGroup(TRect()),
-        eventQueue(std::move(aEventQueue))
-    {
-    }
-
-    void getEvent(TEvent &event) override
-    {
-        if (!eventQueue.empty())
-        {
-            event = eventQueue.front();
-            eventQueue.pop_front();
-        }
-        else
-            // Force the menu to exit.
-            event = messageEv(evCommand, cmNoItemChosen);
-    }
-
-    void putEvent(TEvent &event) override
-    {
-        eventQueue.push_front(event);
-    }
-
-private:
-
-    std::forward_list<TEvent> eventQueue;
-};
 
 TEST(TMenuView, ShouldSelectMenuItemOnKeyPress)
 {
@@ -155,7 +124,7 @@ TEST(TMenuView, ShouldSelectMenuItemOnKeyPress)
         auto *menuView = new TMenuView(TRect(), &menu, nullptr);
         menuView->options |= ofPreProcess;
 
-        auto *group = new TestGroup(input.eventQueue);
+        auto *group = new TestGroup(input.eventQueue, messageEv(evCommand, cmNoItemChosen));
         group->insert(menuView);
         menuView->select();
 
@@ -180,7 +149,7 @@ TEST(TMenuView, ShouldNotSelectMenuItemOnKeyPress)
         {   *new TSubMenu("~F~ile", 0) +
               *new TMenuItem("Exit", cmMenuItemChosen, kbNoKey), // No shortcut.
             {   keyDownEv(kbAltF, kbLeftAlt),
-                keyDownEv(kbNoKey, 0x0000), // No text.
+                keyDownEv(kbNoKey), // No text.
             },
         },
     };
@@ -196,7 +165,7 @@ TEST(TMenuView, ShouldNotSelectMenuItemOnKeyPress)
         auto *menuView = new TMenuView(TRect(), &menu, nullptr);
         menuView->options |= ofPreProcess;
 
-        auto *group = new TestGroup(input.eventQueue);
+        auto *group = new TestGroup(input.eventQueue, messageEv(evCommand, cmNoItemChosen));
         group->insert(menuView);
         menuView->select();
 

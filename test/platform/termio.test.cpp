@@ -21,7 +21,7 @@ TEST(TermIO, ShouldNormalizeKeys)
         {keyDownEv(kbIns, kbShift), keyDownEv(kbShiftIns, kbShift)},
         {keyDownEv(kbBack, kbLeftCtrl | kbLeftAlt), keyDownEv(kbAltBack, kbLeftCtrl | kbLeftAlt)},
         {keyDownEv(kbCtrlBack, kbRightCtrl), keyDownEv(kbCtrlBack, kbRightCtrl)},
-        {keyDownEv(kbCtrlBack, 0x0000), keyDownEv(kbCtrlBack, kbLeftCtrl)},
+        {keyDownEv(kbCtrlBack), keyDownEv(kbCtrlBack, kbLeftCtrl)},
         {keyDownEv(kbIns, kbLeftCtrl | kbEnhanced), keyDownEv(kbCtrlIns, kbLeftCtrl | kbEnhanced)},
         {keyDownEv(kbCtrlDel, kbLeftAlt), keyDownEv(kbAltDel, kbLeftCtrl | kbLeftAlt)},
     };
@@ -168,19 +168,19 @@ TEST(TermIO, ShouldReadKittyKeys)
         // ф + Shift + Alt (RU)
         {"\x1B[1092:1060:97;4u", {keyDownEv(kbAltA, kbShift | kbLeftAlt, "Ф")}},
         // Right
-        {"\x1B[C", {keyDownEv(kbRight, 0x0000)}},
+        {"\x1B[C", {keyDownEv(kbRight)}},
         // F2
-        {"\x1B[Q", {keyDownEv(kbF2, 0x0000)}},
+        {"\x1B[Q", {keyDownEv(kbF2)}},
         // F3
-        {"\x1B[13~", {keyDownEv(kbF3, 0x0000)}},
+        {"\x1B[13~", {keyDownEv(kbF3)}},
         // Del
-        {"\x1B[3~", {keyDownEv(kbDel, 0x0000)}},
+        {"\x1B[3~", {keyDownEv(kbDel)}},
         // Tab
-        {"\x1B[9u", {keyDownEv(kbTab, 0x0000)}},
+        {"\x1B[9u", {keyDownEv(kbTab)}},
         // Enter
-        {"\x1B[13u", {keyDownEv(kbEnter, 0x0000)}},
+        {"\x1B[13u", {keyDownEv(kbEnter)}},
         // Back
-        {"\x1B[127u", {keyDownEv(kbBack, 0x0000)}},
+        {"\x1B[127u", {keyDownEv(kbBack)}},
         // Space + Ctrl
         {"\x1B[32;5u", {keyDownEv(0x0020, kbLeftCtrl, " ")}},
         // Enter + Ctrl

@@ -310,6 +310,8 @@ private:
     TStringView getLineEnding();
     uint lengthWithConvertedLineEndings( const char *, uint );
     void copyAndConvertLineEndings( char *, const char *, uint );
+    uint nextWordBoundary( uint );
+    uint prevWordBoundary( uint );
 
     static const LineEndingType defaultLineEndingType;
 

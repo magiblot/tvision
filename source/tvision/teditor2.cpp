@@ -42,25 +42,30 @@ uint scan( const char *block, uint size, const char *str );
 uint iScan( const char *block, uint size, const char *str );
 }
 
-static int getCharType( char ch )
+static int getCharCategory( char ch )
 {
-    if( strchr("\t \0", ch) )
+    if( ch == ' ' || ch == '\t' || ch == '\0' )
         return 0;
-    if( strchr("\n\r", ch) )
+    if( ch == '\n' || ch == '\r' )
         return 1;
-    if( strchr("!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) )
+    if( ch != '_' && ispunct((uchar) ch) )
         return 2;
     return 3;
 }
 
 static inline int isWordBoundary( char a, char b )
 {
-    return getCharType(a) != getCharType(b);
+    return getCharCategory(a) != getCharCategory(b);
 }
 
-static inline int isWordChar( int ch )
+static inline int isWhitespaceOrNewline( char ch )
 {
-    return strchr(" !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~\0", ch) == 0;
+    return getCharCategory(ch) <= 1;
+}
+
+static inline int isWordChar( char ch )
+{
+    return getCharCategory(ch) == 3;
 }
 
 TEditor::LineEndingType TEditor::detectLineEndingType()
@@ -315,17 +320,23 @@ uint TEditor::nextLine( uint p )
     return nextChar(lineEnd(p));
 }
 
-uint TEditor::nextWord( uint p )
+uint TEditor::nextWordBoundary( uint p )
 {
     if (p < bufLen)
         {
-        char a = bufChar(p);
-        char b;
+        char c = bufChar(p);
         do  {
-            b = a;
             p = nextChar(p);
-            } while( p < bufLen && !isWordBoundary((a = bufChar(p)), b) );
+            } while( p < bufLen && !isWordBoundary(bufChar(p), c) );
         }
+    return p;
+}
+
+uint TEditor::nextWord( uint p )
+{
+    p = nextWordBoundary(p);
+    while( p < bufLen && isWhitespaceOrNewline(bufChar(p)) )
+        p = nextWordBoundary(p);
     return p;
 }
 
@@ -334,20 +345,28 @@ uint TEditor::prevLine( uint p )
   return lineStart(prevChar(p));
 }
 
+uint TEditor::prevWordBoundary( uint p )
+{
+    if (p > 0)
+        {
+        p = prevChar(p);
+        char c = bufChar(p);
+        while( p > 0 )
+            {
+            uint q = prevChar(p);
+            if( isWordBoundary(bufChar(q), c) )
+                break;
+            p = q;
+            }
+        }
+    return p;
+}
+
 uint TEditor::prevWord( uint p )
 {
-    if (p > 0 && (p = prevChar(p), p > 0))
-        {
-        char a = bufChar(p);
-        char b;
-        do  {
-            b = a;
-            p = prevChar(p);
-            a = bufChar(p);
-            } while( p > 0 && !isWordBoundary(a, b) );
-        if( isWordBoundary(a, b) )
-            p = nextChar(p);
-        }
+    p = prevWordBoundary(p);
+    while( p > 0 && isWhitespaceOrNewline(bufChar(p)) )
+        p = prevWordBoundary(p);
     return p;
 }
 
@@ -470,8 +489,8 @@ void TEditor::setCurPtr( uint p, uchar selectMode )
         {
         if( (selectMode & smDouble) != 0 )
             {
-            p = prevWord(nextWord(p));
-            anchor = nextWord(prevWord(anchor));
+            p = prevWordBoundary(nextWordBoundary(p));
+            anchor = nextWordBoundary(prevWordBoundary(anchor));
             }
         else if( (selectMode & smTriple) != 0 )
             {
@@ -484,8 +503,8 @@ void TEditor::setCurPtr( uint p, uchar selectMode )
         {
         if( (selectMode & smDouble) != 0 )
             {
-            p = nextWord(p);
-            anchor = prevWord(nextWord(anchor));
+            p = nextWordBoundary(p);
+            anchor = prevWordBoundary(nextWordBoundary(anchor));
             }
         else if( (selectMode & smTriple) != 0 )
             {

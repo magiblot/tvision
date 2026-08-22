@@ -3,9 +3,11 @@
 #define Uses_TText
 #include <tvision/tv.h>
 
+#include <forward_list>
 #include <test.h>
 #include <test_operators.h>
 #include <test_charops.h>
+#include <test_group.h>
 
 struct TEditorBufferTestInput
 {
@@ -19,12 +21,13 @@ struct TEditorBufferTestOutput
     int lineEndingType;
 };
 
-class DrawableTestGroup : public TGroup
+class DrawableTestGroup : public TestGroup
 {
 public:
-    DrawableTestGroup(const TRect &bounds) noexcept :
-        TGroup(bounds)
+    DrawableTestGroup(const TRect &bounds, std::forward_list<TEvent> eventQueue = {}) noexcept :
+        TestGroup(std::move(eventQueue))
     {
+        changeBounds(bounds);
     }
 
     TColorAttr mapColor(uchar i) noexcept
@@ -68,7 +71,7 @@ struct TEditorDisplayTestInput
 {
     TPoint size;
     TStringView text;
-    std::vector<TEvent> events;
+    std::forward_list<TEvent> events;
     TPoint delta;
 };
 
@@ -237,10 +240,11 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         // Remove part of a multi-byte character, then undo the removal.
         {   {   TPoint { 3, 1 },
                 "€",
-                {   messageEv(evCommand, cmEncoding),
-                    keyDownEv(kbLeft, 0x0000),
-                    keyDownEv(kbBack, 0x0000),
-                    keyDownEv(kbBack, 0x0000),
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmEncoding),
+                    keyDownEv(kbLeft),
+                    keyDownEv(kbBack),
+                    keyDownEv(kbBack),
                     messageEv(evCommand, cmEncoding),
                     messageEv(evCommand, cmUndo),
                 },
@@ -256,6 +260,7 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         {   {   TPoint { 4, 1 },
                 "€",
                 {   messageEv(evCommand, cmEncoding),
+                    messageEv(evCommand, cmTextEnd),
                 },
                 TPoint { 0, 0 },
             },
@@ -268,7 +273,8 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         // Tabulators should be properly drawn when there is horizontal scroll.
         {   {   TPoint { 3, 1 },
                 "\ta",
-                {},
+                {   messageEv(evCommand, cmTextEnd),
+                },
                 TPoint { 6, 0 },
             },
             {   {{ " ", " ", "a" }},
@@ -280,7 +286,8 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         // A partially visible tabulator should be drawn properly when selected.
         {   {   TPoint { 3, 1 },
                 "\ta",
-                {   keyDownEv(kbLeft, 0x0000),
+                {   messageEv(evCommand, cmTextEnd),
+                    keyDownEv(kbLeft),
                     keyDownEv(kbLeft, kbShift),
                 },
                 TPoint { 6, 0 },
@@ -294,16 +301,16 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         // A selected line break should be drawn properly.
         {   {   TPoint { 3, 2 },
                 "ab\ncd",
-                {   keyDownEv(kbLeft, 0x0000),
-                    keyDownEv(kbLeft, kbShift),
-                    keyDownEv(kbLeft, kbShift),
-                    keyDownEv(kbLeft, kbShift),
+                {   keyDownEv(kbRight),
+                    keyDownEv(kbRight, kbShift),
+                    keyDownEv(kbRight, kbShift),
+                    keyDownEv(kbRight, kbShift),
                 },
                 TPoint { 0, 0 },
             },
             {   {{ "a", "b", " " }, { "c", "d", " " }},
                 {{   6,   7,   7 }, {   7,   6,   6 }},
-                TPoint { 1, 0 },
+                TPoint { 1, 1 },
                 TPoint { 0, 0 },
             },
         },
@@ -315,14 +322,15 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
             },
             {   {{ "😊", "(wide char trail)", "a" }},
                 {{   6,   6,   6 }},
-                TPoint { 3, 0 },
+                TPoint { 0, 0 },
                 TPoint { 0, 0 },
             },
         },
         // A partially visible and selected double-width character should be drawn properly.
         {   {   TPoint { 2, 1 },
                 SMILING_FACE_WITH_SMILING_EYES_UTF8 "a",
-                {   keyDownEv(kbLeft, 0x0000),
+                {   messageEv(evCommand, cmTextEnd),
+                    keyDownEv(kbLeft),
                     keyDownEv(kbLeft, kbShift),
                 },
                 TPoint { 1, 0 },
@@ -341,8 +349,205 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
             },
             {   {{ "b" COMBINING_ZIGZAG_UTF8, "c" COMBINING_ZIGZAG_UTF8 }},
                 {{   6,   6 }},
-                TPoint { 4, 0 },
+                TPoint { 0, 0 },
                 TPoint { 1, 0 },
+            },
+        },
+        // Ctrl+Right should skip trailing whitespace instead of stopping on it.
+        {   {   TPoint { 7, 1 },
+                "foo bar",
+                {   messageEv(evCommand, cmWordRight),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 4, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Left should do the same in reverse.
+        {   {   TPoint { 7, 1 },
+                "foo bar",
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmWordLeft),
+                    messageEv(evCommand, cmWordLeft),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 0, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Right should reach the punctuation before the next word.
+        {   {   TPoint { 10, 1 },
+                "foo(); bar",
+                {   messageEv(evCommand, cmWordRight),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "(", ")", ";", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // A second Ctrl+Right should then skip the punctuation and the whitespace after it together.
+        {   {   TPoint { 10, 1 },
+                "foo(); bar",
+                {   messageEv(evCommand, cmWordRight),
+                    messageEv(evCommand, cmWordRight),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "(", ")", ";", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 7, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Left should reach the same two points in reverse.
+        {   {   TPoint { 10, 1 },
+                "foo(); bar",
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmWordLeft),
+                    messageEv(evCommand, cmWordLeft),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "(", ")", ";", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        {   {   TPoint { 10, 1 },
+                "foo(); bar",
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmWordLeft),
+                    messageEv(evCommand, cmWordLeft),
+                    messageEv(evCommand, cmWordLeft),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "(", ")", ";", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 0, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Right should skip consecutive blank lines in a single jump.
+        {   {   TPoint { 3, 4 },
+                "foo\n\n\nbar",
+                {   messageEv(evCommand, cmWordRight),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o" }, { " ", " ", " " }, { " ", " ", " " }, { "b", "a", "r" }},
+                {{   6,   6,   6 }, {   6,   6,   6 }, {   6,   6,   6 }, {   6,   6,   6 }},
+                TPoint { 0, 3 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Left should do the same in reverse.
+        {   {   TPoint { 3, 4 },
+                "foo\n\n\nbar",
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmWordLeft),
+                    messageEv(evCommand, cmWordLeft),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o" }, { " ", " ", " " }, { " ", " ", " " }, { "b", "a", "r" }},
+                {{   6,   6,   6 }, {   6,   6,   6 }, {   6,   6,   6 }, {   6,   6,   6 }},
+                TPoint { 0, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Del should delete consecutive punctuation characters and the whitespace after them in one step.
+        {   {   TPoint { 10, 1 },
+                "foo(); bar",
+                {   messageEv(evCommand, cmWordRight),
+                    messageEv(evCommand, cmDelWord),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "b", "a", "r", " ", " ", " ", " " }},
+                {{   6,   6,   6,   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Ctrl+Backspace should mirror that going left.
+        {   {   TPoint { 7, 1 },
+                "foo bar",
+                {   messageEv(evCommand, cmTextEnd),
+                    messageEv(evCommand, cmDelWordLeft),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " ", " ", " ", " " }},
+                {{   6,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 4, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Double-clicking inside a word selects exactly that word.
+        {   {   TPoint { 9, 1 },
+                "foo   bar",
+                {   mouseDownEv({ 1, 0 }, meDoubleClick),
+                    mouseUpEv({ 1, 0 }),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " ", " ", " ", "b", "a", "r" }},
+                {{   7,   7,   7,   6,   6,   6,   6,   6,   6 }},
+                TPoint { 3, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Double-clicking inside a run of whitespace selects just that run.
+        {   {   TPoint { 9, 1 },
+                "foo   bar",
+                {   mouseDownEv({ 4, 0 }, meDoubleClick),
+                    mouseUpEv({ 4, 0 }),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " ", " ", " ", "b", "a", "r" }},
+                {{   6,   6,   6,   7,   7,   7,   6,   6,   6 }},
+                TPoint { 6, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Double-clicking on punctuation selects just the consecutive punctuation characters.
+        {   {   TPoint { 9, 1 },
+                "foo();bar",
+                {   mouseDownEv({ 4, 0 }, meDoubleClick),
+                    mouseUpEv({ 4, 0 }),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", "(", ")", ";", "b", "a", "r" }},
+                {{   6,   6,   6,   7,   7,   7,   6,   6,   6 }},
+                TPoint { 6, 0 },
+                TPoint { 0, 0 },
+            },
+        },
+        // Double-clicking on trailing whitespace must not select across a line break.
+        {   {   TPoint { 4, 2 },
+                "foo \n bar",
+                {   mouseDownEv({ 3, 0 }, meDoubleClick),
+                    mouseUpEv({ 3, 0 }),
+                },
+                TPoint { 0, 0 },
+            },
+            {   {{ "f", "o", "o", " " }, { " ", "b", "a", "r" }},
+                {{   6,   6,   6,   7 }, {   6,   6,   6,   6 }},
+                TPoint { 4, 0 },
+                TPoint { 0, 0 },
             },
         },
     };
@@ -353,16 +558,19 @@ TEST(TEditor, ShouldDrawTextAndPlaceCursorCorrectly)
         auto text = testCase.input.text;
         auto delta = testCase.input.delta;
         auto *editor = new TEditor(bounds, nullptr, nullptr, nullptr, 256);
-        auto *group = new DrawableTestGroup(bounds);
+        auto *group = new DrawableTestGroup(bounds, testCase.input.events);
         group->setState(sfExposed, true);
         group->getBuffer();
         group->insert(editor);
 
         editor->insertText(text.data(), text.size(), false);
-        for (const auto &event : testCase.input.events)
+        editor->setCurPtr(0, 0);
+        TEvent inputEvent;
+        group->getEvent(inputEvent);
+        while (inputEvent.what != evNothing)
         {
-            TEvent inputEvent = event;
             editor->handleEvent(inputEvent);
+            group->getEvent(inputEvent);
         }
         editor->scrollTo(delta.x, delta.y);
 
