@@ -26,7 +26,7 @@ static int decideCaretSize(TView *p)
 {
     if (p->state & sfCursorIns)
         return 100;
-    return TScreen::cursorLines & 0x0F;
+    return TScreen::cursorLines & 0xFF;
 }
 
 static Boolean caretIsCoveredBySiblings(TView *p, int x, int y)
