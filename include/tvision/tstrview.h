@@ -80,9 +80,17 @@ public:
 #if !defined(TVISION_NO_STL) && __cplusplus >= 201703L
     friend constexpr Boolean operator==(TStringView a, TStringView b) noexcept;
     friend constexpr Boolean operator!=(TStringView a, TStringView b) noexcept;
+    friend constexpr Boolean operator<(TStringView a, TStringView b) noexcept;
+    friend constexpr Boolean operator>(TStringView a, TStringView b) noexcept;
+    friend constexpr Boolean operator<=(TStringView a, TStringView b) noexcept;
+    friend constexpr Boolean operator>=(TStringView a, TStringView b) noexcept;
 #else
     friend Boolean operator==(TStringView a, TStringView b) noexcept;
     friend Boolean operator!=(TStringView a, TStringView b) noexcept;
+    friend Boolean operator<(TStringView a, TStringView b) noexcept;
+    friend Boolean operator>(TStringView a, TStringView b) noexcept;
+    friend Boolean operator<=(TStringView a, TStringView b) noexcept;
+    friend Boolean operator>=(TStringView a, TStringView b) noexcept;
 #endif
 
     friend ostream _FAR & _Cdecl operator<<(ostream _FAR &, TStringView);
@@ -250,6 +258,46 @@ constexpr
 inline Boolean operator!=(TStringView a, TStringView b) noexcept
 {
     return Boolean( !(a == b) );
+}
+
+#if !defined(TVISION_NO_STL) && __cplusplus >= 201703L
+constexpr Boolean operator<(TStringView a, TStringView b) noexcept
+{
+    size_t n = a.size() < b.size() ? a.size() : b.size();
+    int c = n ? std::char_traits<char>::compare(a.data(), b.data(), n) : 0;
+    return Boolean( c < 0 || (c == 0 && a.size() < b.size()) );
+}
+#else
+inline Boolean operator<(TStringView a, TStringView b) noexcept
+{
+    size_t n = a.size() < b.size() ? a.size() : b.size();
+    int c = n ? memcmp(a.data(), b.data(), n) : 0;
+    return Boolean( c < 0 || (c == 0 && a.size() < b.size()) );
+}
+#endif
+
+#if !defined(TVISION_NO_STL) && __cplusplus >= 201703L
+constexpr
+#endif
+inline Boolean operator>(TStringView a, TStringView b) noexcept
+{
+    return Boolean( b < a );
+}
+
+#if !defined(TVISION_NO_STL) && __cplusplus >= 201703L
+constexpr
+#endif
+inline Boolean operator<=(TStringView a, TStringView b) noexcept
+{
+    return Boolean( !(b < a) );
+}
+
+#if !defined(TVISION_NO_STL) && __cplusplus >= 201703L
+constexpr
+#endif
+inline Boolean operator>=(TStringView a, TStringView b) noexcept
+{
+    return Boolean( !(a < b) );
 }
 
 #if !defined(TVISION_NO_STL) && __cplusplus >= 201103L
