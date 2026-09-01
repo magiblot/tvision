@@ -2,7 +2,7 @@
  Turbo Vision demonstration Ü
   ßßßßßßßßßßßßßßßßßßßßßßßßßßß
 Welcome to Turbo Vision.  This is a demonstration program that allows
-you to view some of the capablilities of Turbo Vision.  The ð menu is
+you to view some of the capabilities of Turbo Vision.  The ð menu is
 accessed by pressing Alt-Space.  All the other menus are accessed by
 pressing Alt-Z, where Z is the first letter of the menu.  For example,
 the "File" menu is pulled down by Alt-F.
@@ -22,8 +22,8 @@ arrow keys to move about in the file. A file is loaded via the
   Left       Move left one column
   PgUp       Move one page up
   PgDn       Move one page down
-  Home       View right most column of the file
-  End        View left most column of the file
+  Home       View leftmost column of the file
+  End        View rightmost column of the file
   Ctrl-PgUp  View top of file
   Ctrl-PgDn  View bottom of file.
 
@@ -52,16 +52,16 @@ a tile is moved.
 The calculator is a simple four-function calculator with add, subtract,
 multiply, and divide.  To operate the calculator you can either use the
 keyboard or press the buttons on the calculator with the mouse.  The 'C'
-key clears the calculator, the '' key will erases the last character
+key clears the calculator, the '' key will erase the last character
 typed, and the 'ñ' key toggles the value from positive to negative (the
 keyboard equivalent of 'ñ' is '_').
 
 .topic Calendar
  Calendar Ü
   ßßßßßßßßß
-The calendar displays the current month, highlighting todays date. The
+The calendar displays the current month, highlighting today's date. The
 next and previous months can be viewed using the '+' or '-' keys
-respectivly.  The mouse can also be used to change the month by pressing
+respectively.  The mouse can also be used to change the month by pressing
 the  or  icons.
 
 .topic AsciiTable
@@ -109,7 +109,7 @@ the current month. It also allows you to view other months.
 .topic SAsciiTable
  ð³ASCII table Ü
   ßßßßßßßßßßßßßß
-The ASCII menu items opens an {ASCII Table:AsciiTable} that
+The ASCII menu item opens an {ASCII Table:AsciiTable} that
 displays the IBM PC character set.
 
 .topic SCalculator
@@ -130,7 +130,7 @@ directories, and exiting the program.
  File³Open  (F3) Ü
   ßßßßßßßßßßßßßßßß
 The Open command displays the Open a File dialog box. In this
-dialog box you select the text file you want browse in a
+dialog box you select the text file you want to browse in a
 {file viewer:Viewer}.
 
 The {Open a File:FOFileOpenDBox} dialog box contains:
@@ -300,14 +300,14 @@ where you can customize the colors of the display.
 .topic OSaveDesktop
  Options³Save Desktop Ü
   ßßßßßßßßßßßßßßßßßßßßß
-Saves the state of all open windows to a file call TVDEMO.DST. This
+Saves the state of all open windows to a file called TVDEMO.DST. This
 file can be reloaded by selecting {Options³Restore Desktop:ORestoreDesktop}.
 
 .topic ORestoreDesktop
  Options³Restore Desktop Ü
   ßßßßßßßßßßßßßßßßßßßßßßßß
 Restore a previously-saved state of all open windows from a file
-call TVDEMO.DST. This file is saved via the
+called TVDEMO.DST. This file is saved via the
 {Options³Save Desktop:OSaveDesktop} menu command.
 
 .topic FOFileOpenDBox
@@ -491,7 +491,7 @@ Background palettes to modify colors.
  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 On monochrome systems, you use the Colors set of radio buttons
-systems to modify the character attributes.
+to modify the character attributes.
 
  ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
  ³ Text Text Text ³
