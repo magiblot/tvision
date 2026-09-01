@@ -26,8 +26,8 @@ class THeapView : public TView
 public:
 
     THeapView( TRect& r );
-    virtual void update();
     virtual void draw();
+    void update();
     uint32_t heapSize();
 
 private:
@@ -45,7 +45,7 @@ public:
 
     TClockView( TRect& r );
     virtual void draw();
-    virtual void update();
+    void update();
 
 private:
 
