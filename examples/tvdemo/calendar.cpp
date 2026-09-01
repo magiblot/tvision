@@ -97,6 +97,12 @@ TCalendarView::TCalendarView(TRect& r) : TView( r )
 }
 
 
+int isLeapYear(int year)
+{
+    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+}
+
+
 int dayOfWeek(int day, int month, int year)
 {
     int century, yr, dw;
@@ -126,7 +132,7 @@ void TCalendarView::draw()
     char str[23];
     char current = (char)(1 - dayOfWeek(1, month, year));
     char days = (char)( daysInMonth[month] +
-                        ((year % 4 == 0 && month == 2) ? 1 : 0) );
+                        ((isLeapYear(year) && month == 2) ? 1 : 0) );
     TColorAttr color, boldColor;
     short  i, j;
     TDrawBuffer buf;
@@ -172,6 +178,30 @@ void TCalendarView::draw()
 }
 
 
+void TCalendarView::nextMonth()
+{
+    ++month;
+    if (month > 12)
+        {
+        month = 1;
+        ++year;
+        }
+    drawView();
+}
+
+
+void TCalendarView::prevMonth()
+{
+    --month;
+    if (month < 1)
+        {
+        month = 12;
+        --year;
+        }
+    drawView();
+}
+
+
 void TCalendarView::handleEvent(TEvent& event)
 {
     TPoint point;
@@ -183,51 +213,20 @@ void TCalendarView::handleEvent(TEvent& event)
             {
             point = makeLocal(event.mouse.where);
             if (point.x == 15 && point.y == 0)
-                {
-                ++month;
-                if (month > 12)
-                    {
-                    ++year;
-                    month = 1;
-                    }
-                drawView();
-                }
+                prevMonth();
             else if (point.x == 18 && point.y == 0)
-                {
-                --month;
-                if (month < 1)
-                    {
-                    --year;
-                    month = 12;
-                    }
-                drawView();
-                }
+                nextMonth();
             }
         else if (event.what == evKeyboard)
             {
             if (event.keyDown.charScan.charCode == '+' ||
                 event.keyDown.keyCode == kbDown
                )
-                {
-                ++month;
-                if (month > 12)
-                    {
-                    ++year;
-                    month = 1;
-                    }
-                }
+                nextMonth();
             else if (event.keyDown.charScan.charCode == '-' ||
                      event.keyDown.keyCode == kbUp
                     )
-                {
-                --month;
-                if (month < 1)
-                    {
-                    --year;
-                    month = 12;
-                    }
-                }
-            drawView();
+                prevMonth();
             }
         }
 }

@@ -29,6 +29,9 @@ private:
     unsigned days, month, year;
     unsigned curDay, curMonth, curYear;
 
+    void nextMonth();
+    void prevMonth();
+
     virtual const char *streamableName() const
         { return name; }
 
