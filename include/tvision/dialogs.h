@@ -1218,6 +1218,7 @@ public:
     virtual TComboWindow *initComboWindow( const TRect& bounds );
 
     virtual void focusItem( short item ) noexcept;
+    virtual void setState( ushort aState, Boolean enable );
     void newList( TComboItem *aItems, short aFocused = 0 ) noexcept;
 
     short focused;

@@ -140,6 +140,17 @@ TComboWindow *TComboBox::initComboWindow( const TRect& bounds )
     return new TComboWindow( bounds, items, focused );
 }
 
+void TComboBox::setState( ushort aState, Boolean enable )
+{
+    TView::setState( aState, enable );
+    // TView::setState() does not repaint on sfFocused/sfSelected changes
+    // by itself (same reason TCluster and TButton override this too) -
+    // without this, the box would keep showing whichever color it was
+    // last drawn with even after focus moves elsewhere.
+    if( aState & (sfSelected | sfFocused) )
+        drawView();
+}
+
 void TComboBox::handleEvent( TEvent& event )
 {
     TView::handleEvent( event );
