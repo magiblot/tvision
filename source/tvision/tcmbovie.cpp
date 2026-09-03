@@ -81,47 +81,57 @@ ulong TComboViewer::getValue( short item ) noexcept
 
 void TComboViewer::handleEvent( TEvent& event )
 {
-    if( ( event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick) ) ||
-        ( event.what == evKeyDown && event.keyDown.keyCode == kbEnter )
-      )
+    if( event.what == evKeyDown && event.keyDown.keyCode == kbEnter )
         {
         endModal( cmOK );
         clearEvent( event );
         }
-    else
-        if( ( event.what == evKeyDown && event.keyDown.keyCode == kbEsc ) ||
-            ( event.what == evCommand && event.message.command == cmCancel )
-          )
+    else if( ( event.what == evKeyDown && event.keyDown.keyCode == kbEsc ) ||
+             ( event.what == evCommand && event.message.command == cmCancel )
+           )
+        {
+        endModal( cmCancel );
+        clearEvent( event );
+        }
+    else if( event.what == evMouseDown )
+        {
+        // A single click on an entry both picks it and closes the popup -
+        // the same behavior as a native combo box's drop-down list.
+        // Mouse events only reach here when they land inside this view
+        // (the scrollbar is a separate sibling view with its own
+        // handling), so there is no "click outside" case to guard here -
+        // TComboWindow::handleEvent already closes the popup with
+        // cmCancel for clicks outside it.
+        TListViewer::handleEvent( event ); // updates focused to the clicked row
+        endModal( cmOK );
+        clearEvent( event );
+        }
+    else if( event.what == evKeyDown && event.keyDown.charScan.charCode != ' ' &&
+             event.keyDown.charScan.charCode != '\0' )
+        {
+        // Incremental search: jump to the next entry whose text starts
+        // with the typed character (case-insensitive), wrapping around.
+        char typed = event.keyDown.charScan.charCode;
+        if( range > 0 )
             {
-            endModal( cmCancel );
-            clearEvent( event );
-            }
-        else if( event.what == evKeyDown && event.keyDown.charScan.charCode != ' ' &&
-                 event.keyDown.charScan.charCode != '\0' )
-            {
-            // Incremental search: jump to the next entry whose text starts
-            // with the typed character (case-insensitive), wrapping around.
-            char typed = event.keyDown.charScan.charCode;
-            if( range > 0 )
+            char buf[256];
+            short i;
+            for( i = 1; i <= range; i++ )
                 {
-                char buf[256];
-                short i;
-                for( i = 1; i <= range; i++ )
+                short candidate = (focused + i) % range;
+                getText( buf, candidate, 255 );
+                if( buf[0] != EOS && toupper((uchar)buf[0]) == toupper((uchar)typed) )
                     {
-                    short candidate = (focused + i) % range;
-                    getText( buf, candidate, 255 );
-                    if( buf[0] != EOS && toupper((uchar)buf[0]) == toupper((uchar)typed) )
-                        {
-                        focusItemNum( candidate );
-                        drawView();
-                        break;
-                        }
+                    focusItemNum( candidate );
+                    drawView();
+                    break;
                     }
                 }
-            clearEvent( event );
             }
-        else
-            TListViewer::handleEvent( event );
+        clearEvent( event );
+        }
+    else
+        TListViewer::handleEvent( event );
 }
 
 int TComboViewer::itemWidth() noexcept
