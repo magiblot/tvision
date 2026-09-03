@@ -276,6 +276,9 @@ public:
     virtual void getData( void *rec );
     virtual void setData( void *rec );
 
+    virtual void draw();
+    virtual TPalette& getPalette() const;
+
     TFileCollection *list();
 
 private:

@@ -313,16 +313,16 @@ void TListViewer::handleEvent( TEvent& event )
                     newItem = focused - size.y * numCols;
                     break;
                 case kbHome:
-                    newItem = topItem;
+                    newItem = 0;
                     break;
                 case kbEnd:
-                    newItem = topItem + (size.y * numCols) - 1;
-                    break;
-                case kbCtrlPgDn:
                     newItem = range - 1;
                     break;
+                case kbCtrlPgDn:
+                    newItem = topItem + (size.y * numCols) - 1;
+                    break;
                 case kbCtrlPgUp:
-                    newItem = 0;
+                    newItem = topItem;
                     break;
                 default:
                     return;
