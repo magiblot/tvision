@@ -1060,6 +1060,179 @@ inline opstream& operator << ( opstream& os, THistory* cl )
 
 #endif  // Uses_THistory
 
+/* ---------------------------------------------------------------------- */
+/*      class TComboItem                                                  */
+/*                                                                        */
+/*      A node in a singly-linked list of combo box entries. Each entry   */
+/*      has a displayed 'text' and an opaque 'value' that the programmer  */
+/*      may use to identify the entry (e.g. an enum or an index into      */
+/*      another array). 'value' may be left as 0 if unused.               */
+/*                                                                        */
+/*      Ownership of the whole chain is transferred to the TComboBox it   */
+/*      is passed to, which deletes it in its own destructor. A           */
+/*      TComboWindow only borrows the chain for as long as its popup is   */
+/*      on screen and does not delete it -- the same convention used by   */
+/*      THistoryWindow, which does not own the (separately managed)       */
+/*      history strings it displays either.                               */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TComboItem ) && !defined( __TComboItem )
+#define __TComboItem
+
+class TComboItem
+{
+
+public:
+
+    TComboItem( TStringView aText, ulong aValue, TComboItem *aNext ) noexcept :
+        value( aValue ),
+        next( aNext )
+        { text = newStr(aText); }
+    ~TComboItem() { delete[] (char *) text; }
+
+    const char *text;
+    ulong value;
+    TComboItem *next;
+
+};
+
+#endif  // Uses_TComboItem
+
+/* ---------------------------------------------------------------------- */
+/*      class TComboViewer                                                */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Active                                                      */
+/*        2 = Inactive                                                    */
+/*        3 = Focused                                                     */
+/*        4 = Selected                                                    */
+/*        5 = Divider                                                     */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TComboViewer ) && !defined( __TComboViewer )
+#define __TComboViewer
+
+class _FAR TRect;
+class _FAR TScrollBar;
+class _FAR TComboItem;
+
+class TComboViewer : public TListViewer
+{
+
+public:
+
+    TComboViewer( const TRect& bounds,
+                  TScrollBar *aVScrollBar,
+                  TComboItem *aItems,
+                  short aFocused
+                ) noexcept;
+
+    virtual TPalette& getPalette() const;
+    virtual void getText( char *dest, short item, short maxLen );
+    virtual void handleEvent( TEvent& event );
+    ulong getValue( short item ) noexcept;
+    int itemWidth() noexcept;
+
+protected:
+
+    TComboItem *items;
+
+};
+
+#endif  // Uses_TComboViewer
+
+/* ---------------------------------------------------------------------- */
+/*      class TComboWindow                                                */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Frame passive                                               */
+/*        2 = Frame active                                                */
+/*        3 = Frame icon                                                  */
+/*        4 = ScrollBar page area                                         */
+/*        5 = ScrollBar controls                                          */
+/*        6 = ComboViewer normal text                                     */
+/*        7 = ComboViewer selected text                                   */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TComboWindow ) && !defined( __TComboWindow )
+#define __TComboWindow
+
+class _FAR TRect;
+class _FAR TComboItem;
+class _FAR TComboViewer;
+
+class TComboWindow : public TWindow
+{
+
+public:
+
+    TComboWindow( const TRect& bounds, TComboItem *aItems, short aFocused ) noexcept;
+
+    virtual TPalette& getPalette() const;
+    virtual short getSelection();
+    virtual void handleEvent( TEvent& event );
+
+protected:
+
+    TComboViewer *viewer;
+
+};
+
+#endif  // Uses_TComboWindow
+
+/* ---------------------------------------------------------------------- */
+/*      class TComboBox                                                   */
+/*                                                                        */
+/*      A single-line, single-selection drop-down combo box. Clicking it, */
+/*      or pressing Space/Enter/Down while it is focused, opens a         */
+/*      TComboWindow (a borderless popup list, built the same way         */
+/*      THistoryWindow is for TInputLine) from which an entry can be      */
+/*      chosen with the mouse, Enter or double-click; Esc or a click      */
+/*      outside the popup cancels it.                                     */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Normal text                                                 */
+/*        2 = Focused text                                                */
+/*        3 = Arrow                                                       */
+/* ---------------------------------------------------------------------- */
+
+#if defined( Uses_TComboBox ) && !defined( __TComboBox )
+#define __TComboBox
+
+class _FAR TRect;
+class _FAR TComboItem;
+class _FAR TComboWindow;
+struct _FAR TEvent;
+
+class TComboBox : public TView
+{
+
+public:
+
+    TComboBox( const TRect& bounds, TComboItem *aItems, short aFocused = 0 ) noexcept;
+    ~TComboBox();
+
+    virtual void draw();
+    virtual TPalette& getPalette() const;
+    virtual void handleEvent( TEvent& event );
+    virtual TComboWindow *initComboWindow( const TRect& bounds );
+
+    virtual void focusItem( short item ) noexcept;
+    void newList( TComboItem *aItems, short aFocused = 0 ) noexcept;
+
+    short focused;
+    const char *text;
+    ulong value;
+
+protected:
+
+    TComboItem *items;
+    short numItems;
+
+};
+
+#endif  // Uses_TComboBox
+
 #if defined( __BORLANDC__ )
 #pragma option -Vo.
 #endif
