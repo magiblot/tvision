@@ -294,3 +294,19 @@ jobs:
     - name: Build
       shell: bash
       run: cmake --build . -j$(sysctl -n hw.logicalcpu)
+
+    - name: Upload Examples
+      uses: actions/upload-artifact@v7
+      with:
+        name: examples-macos
+        path: |
+          tvdemo
+          tvedit
+          tvhc
+
+    - name: Upload Library
+      uses: actions/upload-artifact@v7
+      with:
+        name: library-macos
+        path: |
+          libtvision.a
