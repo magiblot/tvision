@@ -25,6 +25,7 @@ The original location of this project is https://github.com/magiblot/tvision.
 * [Releases and downloads](#downloads)
 * Build environment
     * [Unix/Linux](#build-linux)
+    * [macOS](#build-macos)
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
@@ -140,6 +141,25 @@ You may also need:
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
 The backward-compatibility headers in `include/tvision/compat/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
+
+<div id="build-macos"></div>
+
+### macOS
+
+Turbo Vision can be built with CMake and Apple Clang (or another Clang/GCC from Homebrew). The process is the same as on [Unix/Linux](#build-linux):
+
+```sh
+cmake . -B ./build -DCMAKE_BUILD_TYPE=Release &&
+cmake --build ./build
+```
+
+The build requirements are:
+
+* A compiler supporting C++14 (Xcode Command Line Tools or equivalent).
+* `ncurses`, which is provided by the system. macOS has no `ncursesw` by default; CMake will use `ncurses` instead.
+* `googletest` if you enable `TV_BUILD_TESTS` (`brew install googletest`).
+
+`libgpm` is Linux-only and is not needed. Clipboard integration works out-of-the-box; see [Clipboard interaction](#clipboard).
 
 <div id="build-msvc"></div>
 
