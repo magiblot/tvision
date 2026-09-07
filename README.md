@@ -76,7 +76,8 @@ If you just want to test the demo applications:
 * Windows/DOS/macOS: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
     * `examples-x86.zip`: 32-bit executables built with MSVC. Windows Vista or later required.
     * `examples-x64.zip`: 64-bit executables built with MSVC. x64 Windows Vista or later required.
-    * `examples-macos.zip`: Apple Silicon executables built with Clang.
+    * `examples-macos-arm64.zip`: Apple Silicon executables built with Clang.
+    * `examples-macos-x64.zip`: Intel executables built with Clang.
     * `examples-dos.zip`: 16-bit DOS executables built with Borland C++. No Unicode support.
     * `examples-dpmi32.zip`: 32-bit Windows/DOS executables built with Borland C++. No Unicode support.
 

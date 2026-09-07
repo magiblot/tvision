@@ -279,8 +279,16 @@ jobs:
           LIB/tv.lib
 
   build-macos-clang:
-    name: MacOS (Clang) (Unity)
-    runs-on: macos-latest
+    name: MacOS (Clang) (${{ matrix.arch }}) (Unity)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-26-intel
+            arch: x64
     steps:
     - uses: actions/checkout@v7
 
@@ -298,7 +306,7 @@ jobs:
     - name: Upload Examples
       uses: actions/upload-artifact@v7
       with:
-        name: examples-macos
+        name: examples-macos-${{ matrix.arch }}
         path: |
           tvdemo
           tvedit
@@ -307,6 +315,6 @@ jobs:
     - name: Upload Library
       uses: actions/upload-artifact@v7
       with:
-        name: library-macos
+        name: library-macos-${{ matrix.arch }}
         path: |
           libtvision.a
