@@ -279,7 +279,7 @@ jobs:
           LIB/tv.lib
 
   build-macos-clang:
-    name: MacOS (Clang)
+    name: MacOS (Clang) (Unity)
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v7
@@ -289,7 +289,7 @@ jobs:
 
     - name: Configure CMake
       shell: bash
-      run: cmake . -DCMAKE_BUILD_TYPE=Release -DTV_BUILD_TESTS=ON
+      run: cmake . -DCMAKE_BUILD_TYPE=Release -DTV_BUILD_TESTS=ON -DTV_REDUCE_APP_SIZE=ON -DTV_LIBRARY_UNITY_BUILD=ON
 
     - name: Build
       shell: bash
