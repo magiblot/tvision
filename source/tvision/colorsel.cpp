@@ -570,7 +570,7 @@ TColorItem *TColorGroupList::readItems( ipstream& is )
         uchar index;
         is >> index;
         *cur = new TColorItem( nm, index );
-        delete nm;
+        delete[] nm;
         cur = &((*cur)->next);
         }
     *cur = 0;
@@ -589,7 +589,7 @@ TColorGroup *TColorGroupList::readGroups( ipstream& is )
         TColorItem *grp = readItems( is );
         *cur = new TColorGroup( nm, grp );
         cur = &((*cur)->next);
-        delete nm;
+        delete[] nm;
         }
     *cur = 0;
     return groups;

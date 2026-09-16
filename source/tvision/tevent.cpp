@@ -101,7 +101,7 @@ void TEventQueue::suspend() noexcept
 TEventQueue::~TEventQueue()
 {
     suspend();
-    delete pasteText;
+    delete[] pasteText;
     pasteText = 0;
 }
 
@@ -325,6 +325,7 @@ void TEventQueue::getKeyEvent( TEvent &ev ) noexcept
 }
 
 void TEventQueue::setPasteText( TStringView text ) noexcept
+// Pre: 'text' does not point into 'pasteText'.
 {
     delete[] pasteText;
     // Always initialize the paste event, even if it is empty, so that

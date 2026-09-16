@@ -164,8 +164,8 @@ void *TDirCollection::readItem( ipstream& is )
     char *txt = is.readString();
     char *dir = is.readString();
     TDirEntry *entry = new TDirEntry( txt, dir );
-    delete txt;
-    delete dir;
+    delete[] txt;
+    delete[] dir;
     return entry;
 }
 

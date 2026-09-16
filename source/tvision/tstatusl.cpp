@@ -267,7 +267,7 @@ TStatusItem *TStatusLine::readItems( ipstream& is )
         cur = new TStatusItem( t, key, cmd );
         *last = cur;
         last = &(cur->next);
-        delete t;
+        delete[] t;
         }
     *last = 0;
     return first;

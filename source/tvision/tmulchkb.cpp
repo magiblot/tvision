@@ -59,7 +59,7 @@ TStreamable* TMultiCheckBoxes::build()
 
 TMultiCheckBoxes::~TMultiCheckBoxes()
 {
-    delete states;
+    delete[] states;
 }
 
 void TMultiCheckBoxes::draw()
