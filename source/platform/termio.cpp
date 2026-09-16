@@ -492,6 +492,8 @@ ParseResult TermIO::parseX10Mouse(GetChBuf &buf, TEvent &ev, InputState &state) 
         case 3: state.buttons = 0; break; // Release.
         case 64: ev.mouse.wheel = mwUp; break;
         case 65: ev.mouse.wheel = mwDown; break;
+        case 66: ev.mouse.wheel = mwLeft; break;
+        case 67: ev.mouse.wheel = mwRight; break;
     }
     ev.mouse.buttons = state.buttons;
     return Accepted;
@@ -540,6 +542,8 @@ ParseResult TermIO::parseSGRMouse(GetChBuf &buf, TEvent &ev, InputState &state) 
                 state.buttons |= mbRightButton; break;
             case 64: ev.mouse.wheel = mwUp; break;
             case 65: ev.mouse.wheel = mwDown; break;
+            case 66: ev.mouse.wheel = mwLeft; break;
+            case 67: ev.mouse.wheel = mwRight; break;
         }
     }
     else // Release.
