@@ -9,11 +9,17 @@
 #include <internal/ncursinp.h>
 #include <internal/sighandl.h>
 #include <internal/conctl.h>
+#include <internal/getenv.h>
 
 namespace tvision
 {
 
 Platform *Platform::instance;
+
+Platform::Platform() noexcept :
+    displayBuf(getEnv<int>("TVISION_MAX_FPS", -1))
+{
+}
 
 Platform &Platform::getInstance() noexcept
 {

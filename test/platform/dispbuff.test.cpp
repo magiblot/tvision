@@ -102,7 +102,7 @@ TEST(DisplayBuffer, ShouldRenderProperlyOnFlushScreen)
         auto &input = testCase.input;
 
         TestDisplayAdapter display(input.size);
-        DisplayBuffer buf;
+        DisplayBuffer buf(0);
         buf.reloadScreenInfo(display);
         // Flush once so that the caret size is settled and does not show up
         // as a call below.

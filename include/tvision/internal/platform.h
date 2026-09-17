@@ -77,6 +77,8 @@ class Platform
 
     static Platform *instance;
 
+    Platform() noexcept;
+
     void setUpConsole(ConsoleAdapter *&) noexcept;
     void restoreConsole(ConsoleAdapter *&) noexcept;
     void checkConsole() noexcept;

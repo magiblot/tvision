@@ -4,7 +4,6 @@
 #include <internal/dispbuff.h>
 #include <internal/platform.h>
 #include <internal/codepage.h>
-#include <internal/getenv.h>
 #include <chrono>
 
 #ifdef _MSC_VER
@@ -14,7 +13,7 @@
 namespace tvision
 {
 
-DisplayBuffer::DisplayBuffer() noexcept :
+DisplayBuffer::DisplayBuffer(int aMaxFps) noexcept :
     // This could be checked at runtime, but for now this is as much as I know.
 #ifdef _WIN32
     wideOverlapping(false)
@@ -22,11 +21,9 @@ DisplayBuffer::DisplayBuffer() noexcept :
     wideOverlapping(true)
 #endif
 {
-    // Check if FPS shall be limited.
-    int fps = getEnv<int>("TVISION_MAX_FPS", defaultFPS);
-    limitFPS = (fps > 0);
-    if (limitFPS)
-        flushDelay = std::chrono::microseconds((int) 1e6/fps);
+    maxFps = aMaxFps < 0 ? defaultFps : aMaxFps;
+    if (maxFps > 0)
+        flushDelay = std::chrono::microseconds((int) 1e6/maxFps);
 }
 
 TScreenCell *DisplayBuffer::reloadScreenInfo(DisplayAdapter &display) noexcept
@@ -114,7 +111,7 @@ void DisplayBuffer::setDirty(int x, int y, int len) noexcept
 bool DisplayBuffer::timeToFlush() noexcept
 {
     // Avoid flushing faster than the maximum FPS.
-    if (limitFPS)
+    if (maxFps > 0)
     {
         auto now = Clock::now();
         auto flushTime = lastFlush + flushDelay;
