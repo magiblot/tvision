@@ -457,6 +457,7 @@ If your application is based on this project and you'd like it to appear in the 
 * [Turbo Vision dialog designer](https://github.com/IngvarRiga/TurboVision-dialog-designer) by [Ivan Rog](https://github.com/IngvarRiga), a proof-of-concept dialog editor.
 * [turboIDE](https://github.com/aestubbs/turboIDE) by [Alistair Stubbs](https://github.com/aestubbs), a fork of [Turbo](https://github.com/magiblot/turbo) that adds many additional features to it.
 * [mr (*Multi-Edit Revisited*)](https://github.com/ebeneezer/mr) by [Michael Raus](https://github.com/ebeneezer), an attempt at recreating American Cybernetics' *Multi-Edit* application.
+* [TV-Transmission([https://github.com/ebeneezer/mr](https://github.com/zanac/tv-transmission) by [Vanni Brutto](https://github.com/zanac), a Transmission Torrent Client multi language that implement all Transmission RPC API
 
 <div id="unicode"></div>
 
