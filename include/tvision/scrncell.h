@@ -205,7 +205,7 @@ constexpr void TScreenCharacter::appendZeroWidthChar(TStringView mbc) noexcept
 }
 
 constexpr TStringView TScreenCharacter::getText() const noexcept
-// Pre: This is not a wide char trail.
+// Pre: 'isWideCharTrail() == false'.
 {
     return {_text, size_t(_textLengthMinusOne + 1)};
 }

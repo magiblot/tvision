@@ -226,17 +226,6 @@ void DisplayBuffer::flushScreen(DisplayAdapter &display) noexcept
     }
 }
 
-inline void DisplayBuffer::validateCell(TScreenCell &cell) const noexcept
-{
-    TStringView text = cell.character.getText();
-    uchar c = text[0];
-    if (c == '\0')
-        cell.character.initWithChar(' ');
-    else if (text.size() == 1 && (c < ' ' || 0x7F <= c))
-        // Translate from codepage as fallback.
-        cell.character.initWithMultiByteChar(CpTranslator::toPackedUtf8(c));
-}
-
 //////////////////////////////////////////////////////////////////////////
 // FlushScreenAlgorithm
 
@@ -263,6 +252,7 @@ struct FlushScreenAlgorithm
     void writeSpace() noexcept;
     void writeCell(const TScreenCharacter &Char, const TColorAttr &Attr, bool wide) noexcept;
     void commitDirty() noexcept;
+    void ensureCharacterIsPrintable(TScreenCell &cell) const noexcept;
     void handleWideCharSpill() noexcept;
     void handleTrail() noexcept;
 };
@@ -285,7 +275,7 @@ inline const TScreenCell& FlushScreenAlgorithm::cellAt(int x) const noexcept
 inline void FlushScreenAlgorithm::getCell() noexcept
 {
     cell = &disp.buffer[rowOffs + x];
-    disp.validateCell(*cell);
+    ensureCharacterIsPrintable(*cell);
 }
 
 inline bool FlushScreenAlgorithm::cellDirty() const noexcept
@@ -378,6 +368,20 @@ inline void FlushScreenAlgorithm::writeCell( const TScreenCharacter &ch,
     display.writeCell({x, y}, ch.getText(), attr, wide);
 }
 
+void FlushScreenAlgorithm::ensureCharacterIsPrintable(TScreenCell &cell) const noexcept
+{
+    if (cell.character.isWideCharTrail())
+        return;
+
+    TStringView text = cell.character.getText();
+    uchar c = text[0];
+    if (c == '\0')
+        cell.character.initWithChar(' ');
+    else if (text.size() == 1 && (c < ' ' || 0x7F <= c))
+        // Translate from codepage as fallback.
+        cell.character.initWithMultiByteChar(CpTranslator::toPackedUtf8(c));
+}
+
 void FlushScreenAlgorithm::handleWideCharSpill() noexcept
 {
     uchar width = cell->character.isWide();
@@ -435,8 +439,6 @@ void FlushScreenAlgorithm::handleWideCharSpill() noexcept
 
 void FlushScreenAlgorithm::handleTrail() noexcept
 {
-    // Having TScreenCharacter::wideCharTrail in a cell implies wide characters
-    // can spill, as the value is otherwise discarded in ensurePrintable().
     const auto Attr = cell->attribute;
     if (x > 0) {
         --x;

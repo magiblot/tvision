@@ -58,7 +58,6 @@ class DisplayBuffer
 
     void resizeBuffer() noexcept;
     void setDirty(int x, int y, int len) noexcept;
-    void validateCell(TScreenCell &cell) const noexcept;
 
     void drawCursor() noexcept;
     void undrawCursor() noexcept;
