@@ -19,6 +19,24 @@
 #include <string.h>
 #endif  // __STRING_H
 
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  newStr                                                                */
+/*                                                                        */
+/*  argument:                                                             */
+/*                                                                        */
+/*      s       - input string                                            */
+/*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      If 's' holds a null pointer, also returns a null pointer.         */
+/*      Otherwise, 's.size() + 1' bytes are allocated, containing a       */
+/*      copy of 's' (with a terminating '\0'), and a pointer to the       */
+/*      first byte is returned.                                           */
+/*      The returned string can be disposed of using 'delete[]'.          */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
 char *newStr( TStringView s ) noexcept
 {
     if( s.data() == 0 )

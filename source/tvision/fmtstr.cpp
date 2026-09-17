@@ -14,31 +14,48 @@
 #define va_copy(dst, src) ((void) ((dst) = (src)))
 #endif // __BORLANDC__
 
-char *formatStr(const char _FAR *fmt, ...) noexcept
+/*------------------------------------------------------------------------*/
+/*                                                                        */
+/*  formatStr                                                             */
+/*                                                                        */
+/*  arguments:                                                            */
+/*                                                                        */
+/*      format  - string with format specifiers                           */
+/*                                                                        */
+/*      ...     - list of parameters                                      */
+/*                                                                        */
+/*  returns:                                                              */
+/*                                                                        */
+/*      A string formatted using vsnprintf, allocated dynamically.        */
+/*      If vsnprintf fails, returns a copy of 'format'.                   */
+/*      The returned string can be disposed of using 'delete[]'.          */
+/*                                                                        */
+/*------------------------------------------------------------------------*/
+
+char *formatStr(const char _FAR *format, ...) noexcept
 {
     va_list ap;
 
-    va_start(ap, fmt);
-    char *ret = vFormatStr(fmt, ap);
+    va_start(ap, format);
+    char *ret = vFormatStr(format, ap);
     va_end(ap);
 
     return ret;
 }
 
-char *vFormatStr(const char _FAR *fmt, va_list ap) noexcept
+char *vFormatStr(const char _FAR *format, va_list ap) noexcept
 {
     va_list ap2;
 
     va_copy(ap2, ap);
-    int n = vsnprintf(0, 0, fmt, ap2);
+    int n = vsnprintf(0, 0, format, ap2);
     va_end(ap2);
 
     if (n < 0)
-        return 0;
+        return newStr(format);
 
     char *buf = new char[n + 1];
-    if (buf)
-        vsprintf(buf, fmt, ap);
+    vsprintf(buf, format, ap);
 
     return buf;
 }
