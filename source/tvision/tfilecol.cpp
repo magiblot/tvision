@@ -43,14 +43,14 @@ int TFileCollection::compare(void *key1, void *key2)
         return 0;
 
     if( strcmp( getName( key1 ), ".." ) == 0 )
-        return 1;
-    if( strcmp( getName( key2 ), ".." ) == 0 )
         return -1;
+    if( strcmp( getName( key2 ), ".." ) == 0 )
+        return 1;
 
     if( (attr( key1 ) & FA_DIREC) != 0 && (attr( key2 ) & FA_DIREC) == 0 )
-        return 1;
-    if( (attr( key2 ) & FA_DIREC) != 0 && (attr( key1 ) & FA_DIREC) == 0 )
         return -1;
+    if( (attr( key2 ) & FA_DIREC) != 0 && (attr( key1 ) & FA_DIREC) == 0 )
+        return 1;
 
     return strcmp( getName( key1 ), getName( key2 ) );
 }
