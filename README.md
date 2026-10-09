@@ -192,6 +192,8 @@ Turbo Vision applications can run on Windows XP or newer, if your compiler suppo
 
 Turbo Vision can still be built either as a DOS or Windows library with Borland C++. Obviously, there is no Unicode support here.
 
+A 16-bit DOS build can switch the long file name functions of the process (`INT 21h AH=71h`) to UTF-8 when the DOS offers it (the AMIS provider `DOS-UTF8/NAMES`, which DOSBox-X has since [joncampbell123/dosbox-x#6632](https://github.com/joncampbell123/dosbox-x/pull/6632)). This is off by default; set `TV_DOS_UTF8_NAMES=1` to enable it. Note that Turbo Vision itself does not use the long file name functions and treats text as one byte per character in the OEM code page, so this is only useful for programs that call `INT 21h AH=71h` themselves and convert the names.
+
 I can confirm the build process works with:
 
 * Borland C++ 4.52 with the Borland PowerPack for DOS.
