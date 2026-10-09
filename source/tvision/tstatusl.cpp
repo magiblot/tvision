@@ -261,13 +261,11 @@ TStatusItem *TStatusLine::readItems( ipstream& is )
     is >> count;
     while( count-- > 0 )
         {
-        char *t = is.readString();
-        ushort key, cmd;
-        is >> key >> cmd;
-        cur = new TStatusItem( t, key, cmd );
+        cur = new TStatusItem( 0, 0, 0 );
+        cur->text = is.readString();
+        is >> cur->keyCode >> cur->command;
         *last = cur;
         last = &(cur->next);
-        delete[] t;
         }
     *last = 0;
     return first;
