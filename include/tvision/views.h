@@ -194,6 +194,10 @@ const ushort
 
     cmScreenChanged     = 57,
 
+//  TComboBox messages
+
+    cmComboBoxSelectionChanged = 59,
+
 //  Event masks
 
     positionalEvents    = evMouse & ~evMouseWheel,
