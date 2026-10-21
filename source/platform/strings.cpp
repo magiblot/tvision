@@ -58,7 +58,7 @@ btoa_lut_t btoa_lut = init_btoa_lut();
 
 } // namespace tvision
 
-#ifndef _MSC_VER
+#if !defined(__BORLANDC__) && !defined(_WIN32)
 
 #include <strings.h>
 
@@ -123,4 +123,4 @@ char *ultoa( unsigned long value, char *buffer, int radix ) noexcept
     return ltoa(value, buffer, radix);
 }
 
-#endif // _MSC_VER
+#endif // !__BORLANDC__ && !_WIN32
