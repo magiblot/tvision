@@ -10,7 +10,9 @@ using std::chrono::steady_clock;
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#ifdef __APPLE__
 #include <sys/select.h>
+#endif
 #endif
 
 namespace tvision
@@ -132,34 +134,54 @@ static bool fdEmpty(int fd) noexcept
     return ioctl(fd, FIONREAD, &nbytes) == -1 || !nbytes;
 }
 
+#ifdef __APPLE__
+
+// With '_DARWIN_UNLIMITED_SELECT', which the build defines on macOS, 'select'
+// accepts file descriptors from 'FD_SETSIZE' on in a set made of several
+// 'fd_set'. Without it, they are not waited for. Negative ones never are.
+static bool fdSelectable(int fd) noexcept
+{
+#ifdef _DARWIN_UNLIMITED_SELECT
+    return 0 <= fd;
+#else
+    return 0 <= fd && fd < FD_SETSIZE;
+#endif
+}
+
 static void pollHandles(PollData &pd, int ms) noexcept
 {
     auto &fds = pd.handles;
     auto &states = pd.states;
-    // We use 'select' instead of 'poll' because it is more portable, especially
-    // on macOS. However, 'select' only supports file descriptors smaller than
-    // 'FD_SETSIZE'. But this should not be an issue, since we just open a few
-    // of them at program startup and when suspending/resuming the application.
-    fd_set readFds;
-    FD_ZERO(&readFds);
+    // We use 'select' instead of 'poll' on macOS because 'poll' does not work
+    // with terminal devices in some of its versions (see magiblot/turbo#65).
     int maxFd = -1;
     for (size_t i = 0; i < fds.size(); ++i)
-        if (fds[i] < FD_SETSIZE)
-        {
-            FD_SET(fds[i], &readFds);
-            if (fds[i] > maxFd)
-                maxFd = fds[i];
-        }
+        if (fdSelectable(fds[i]) && fds[i] > maxFd)
+            maxFd = fds[i];
 
     if (maxFd >= 0)
     {
+        // One 'fd_set' is enough unless a descriptor is past it.
+        fd_set single;
+        std::vector<fd_set> several;
+        fd_set *readFds = &single;
+        FD_ZERO(&single);
+        if (maxFd >= FD_SETSIZE)
+        {
+            several.resize(maxFd/FD_SETSIZE + 1);
+            readFds = several.data();
+        }
+        for (size_t i = 0; i < fds.size(); ++i)
+            if (fdSelectable(fds[i]))
+                FD_SET(fds[i], readFds);
+
         struct timeval timeout;
-        timeout.tv_sec = 0;
-        timeout.tv_usec = ms*1000;
-        if ( select( maxFd + 1, &readFds, nullptr, nullptr,
+        timeout.tv_sec = ms/1000;
+        timeout.tv_usec = ms%1000*1000;
+        if ( select( maxFd + 1, readFds, nullptr, nullptr,
                      (ms < 0 ? nullptr : &timeout) ) >= 0 )
             for (size_t i = 0; i < fds.size(); ++i)
-                if (fds[i] < FD_SETSIZE && FD_ISSET(fds[i], &readFds))
+                if (fdSelectable(fds[i]) && FD_ISSET(fds[i], readFds))
                 {
                     if (fdEmpty(fds[i]))
                         states[i] = psDisconnect;
@@ -168,6 +190,38 @@ static void pollHandles(PollData &pd, int ms) noexcept
                 }
     }
 }
+
+#else
+
+static void pollHandles(PollData &pd, int ms) noexcept
+{
+    auto &fds = pd.handles;
+    auto &states = pd.states;
+    // Unlike 'select', 'poll' supports file descriptors of any number, which
+    // matters when the application has opened many files before the terminal.
+    // Negative ones are not waited for.
+    auto &items = pd.items;
+    items.resize(fds.size());
+    for (size_t i = 0; i < fds.size(); ++i)
+    {
+        items[i].fd = fds[i];
+        items[i].events = POLLIN;
+    }
+
+    if (poll(items.data(), items.size(), ms) > 0)
+        for (size_t i = 0; i < items.size(); ++i)
+        {
+            if ( (items[i].revents & POLLHUP) ||
+                 ((items[i].revents & POLLIN) && fdEmpty(fds[i])) )
+                // Broken pipe or EOF will cause poll to return immediately,
+                // so remove it from the list.
+                states[i] = psDisconnect;
+            else if (items[i].revents & POLLIN)
+                states[i] = psReady;
+        }
+}
+
+#endif // __APPLE__
 
 #else
 
