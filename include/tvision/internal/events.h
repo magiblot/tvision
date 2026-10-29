@@ -9,7 +9,7 @@
 
 #ifdef _WIN32
 #include <tvision/compat/windows/windows.h>
-#elif !defined(__APPLE__)
+#else
 #include <poll.h>
 #endif
 
@@ -119,8 +119,8 @@ struct PollData
 {
     std::vector<SysHandle> handles;
     std::vector<PollState> states;
-#if !defined(_WIN32) && !defined(__APPLE__)
-    // Filled from 'handles' on every call to 'poll', kept to avoid allocating.
+#ifndef _WIN32
+    // Filled from 'handles' on every wait, kept to avoid allocating.
     std::vector<struct pollfd> items;
 #endif
 
