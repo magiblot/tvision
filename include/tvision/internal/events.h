@@ -9,6 +9,8 @@
 
 #ifdef _WIN32
 #include <tvision/compat/windows/windows.h>
+#else
+#include <poll.h>
 #endif
 
 namespace tvision
@@ -117,6 +119,10 @@ struct PollData
 {
     std::vector<SysHandle> handles;
     std::vector<PollState> states;
+#ifndef _WIN32
+    // Filled from 'handles' on every wait, kept to avoid allocating.
+    std::vector<struct pollfd> items;
+#endif
 
     void push_back(SysHandle h)
     {
