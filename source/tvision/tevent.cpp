@@ -119,7 +119,15 @@ void TEventQueue::getMouseEvent( TEvent & ev) noexcept
             return;
             }
         if( !getMouseState( ev ) )
-            return;
+            {
+            // Without new input, a held button keeps its state and may
+            // auto-repeat, as the mouse state read in DOS does.
+            if( lastMouse.buttons == 0 )
+                return;
+            ev.what = THardwareInfo::getTickCount();
+            ev.mouse = lastMouse;
+            ev.mouse.wheel = 0;
+            }
 
         ev.mouse.eventFlags = 0;
 
@@ -453,7 +461,20 @@ void TEventQueue::waitForEvents( int timeoutMs ) noexcept
 {
 #if defined( __FLAT__ )
     if( pasteText == 0 && keyEventCount == 0 )
+        {
+        if( mouseEvents == True && lastMouse.buttons != 0 )
+            {
+            // A held button auto-repeats without input. Do not wait past the
+            // tick in which it is due. The tick may change in between, which
+            // only makes us wake up early.
+            int elapsedMs = int( THardwareInfo::getTickCountMs() % 55 );
+            short ticks = short( autoTicks + autoDelay + 1 - (ushort) THardwareInfo::getTickCount() );
+            int dueMs = ticks > 0 ? ticks * 55 - elapsedMs : 0;
+            if( timeoutMs < 0 || dueMs < timeoutMs )
+                timeoutMs = dueMs;
+            }
         THardwareInfo::waitForEvents( timeoutMs );
+        }
 #else
     (void) timeoutMs;
 #endif
