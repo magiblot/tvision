@@ -30,10 +30,9 @@ jobs:
       run: |
         # Add legacy repositories required by g++-5
         sudo tee --append /etc/apt/sources.list << EOF
-          deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
-          deb http://us.archive.ubuntu.com/ubuntu/ bionic main
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://us.archive.ubuntu.com/ubuntu/ bionic universe
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://us.archive.ubuntu.com/ubuntu/ bionic main
         EOF
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
         sudo apt-get update
         sudo apt-get -y --no-install-recommends install g++-5
 
