@@ -27,6 +27,7 @@
 
 void initHistory();
 void doneHistory();
+void initDosUtf8();
 
 TAppInit::TAppInit() noexcept
 {
@@ -50,6 +51,7 @@ TApplication::TApplication() noexcept :
                   &TApplication::initDeskTop
                 )
 {
+    initDosUtf8();
     initHistory();
 }
 
