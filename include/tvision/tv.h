@@ -345,6 +345,29 @@
 #define __INC_DIALOGS_H
 #endif
 
+#if defined( Uses_TComboBox )
+#define Uses_TView
+#define Uses_TComboItem
+#define __INC_DIALOGS_H
+#endif
+
+#if defined( Uses_TComboWindow )
+#define Uses_TWindow
+#define Uses_TComboViewer
+#define Uses_TComboItem
+#define __INC_DIALOGS_H
+#endif
+
+#if defined( Uses_TComboViewer )
+#define Uses_TListViewer
+#define Uses_TComboItem
+#define __INC_DIALOGS_H
+#endif
+
+#if defined( Uses_TComboItem )
+#define __INC_DIALOGS_H
+#endif
+
 #if defined( Uses_TLabel )
 #define Uses_TStaticText
 #define __INC_DIALOGS_H
