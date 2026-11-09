@@ -36,9 +36,15 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE
             -fdata-sections -ffunction-sections
         )
-        target_link_options(${PROJECT_NAME} PUBLIC
-            -Wl,--gc-sections
-        )
+        if (APPLE)
+            target_link_options(${PROJECT_NAME} PUBLIC
+                -Wl,-dead_strip
+            )
+        else()
+            target_link_options(${PROJECT_NAME} PUBLIC
+                -Wl,--gc-sections
+            )
+        endif()
     endif()
 endif()
 

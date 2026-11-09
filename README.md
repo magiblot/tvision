@@ -25,6 +25,7 @@ The original location of this project is https://github.com/magiblot/tvision.
 * [Releases and downloads](#downloads)
 * Build environment
     * [Unix/Linux](#build-linux)
+    * [macOS](#build-macos)
     * [Windows (MSVC)](#build-msvc)
     * [Windows (MinGW)](#build-mingw)
     * [Windows/DOS (Borland C++)](#build-borland)
@@ -71,10 +72,12 @@ This project has no stable releases for the time being. If you are a developer, 
 
 If you just want to test the demo applications:
 
-* Unix systems: you'll have to build Turbo Vision yourself. You may follow the [build instructions](#build-linux) below.
-* Windows/DOS: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
+* Linux: you'll have to build Turbo Vision yourself. You may follow the [build instructions](#build-linux) below.
+* Windows/DOS/macOS: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/tvision/actions?query=branch:master+event:push) section. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
     * `examples-x86.zip`: 32-bit executables built with MSVC. Windows Vista or later required.
     * `examples-x64.zip`: 64-bit executables built with MSVC. x64 Windows Vista or later required.
+    * `examples-macos-arm64.zip`: Apple Silicon executables built with Clang.
+    * `examples-macos-x64.zip`: Intel executables built with Clang.
     * `examples-dos.zip`: 16-bit DOS executables built with Borland C++. No Unicode support.
     * `examples-dpmi32.zip`: 32-bit Windows/DOS executables built with Borland C++. No Unicode support.
 
@@ -140,6 +143,25 @@ You may also need:
 `-lgpm` is only necessary if Turbo Vision was built with `libgpm` support.
 
 The backward-compatibility headers in `include/tvision/compat/borland` emulate the Borland C++ RTL. Turbo Vision's source code still depends on them, and they could be useful if porting old applications. This also means that including `tvision/tv.h` will bring several `std` names to the global namespace.
+
+<div id="build-macos"></div>
+
+### macOS
+
+Turbo Vision can be built with CMake and Apple Clang (or another Clang/GCC from Homebrew). The process is the same as on [Unix/Linux](#build-linux):
+
+```sh
+cmake . -B ./build -DCMAKE_BUILD_TYPE=Release &&
+cmake --build ./build
+```
+
+The build requirements are:
+
+* A compiler supporting C++14 (Xcode Command Line Tools or equivalent).
+* `ncurses`, which is provided by the system. macOS has no `ncursesw` by default; CMake will use `ncurses` instead.
+* `googletest` if you enable `TV_BUILD_TESTS` (`brew install googletest`).
+
+`libgpm` is Linux-only and is not needed. Clipboard integration works out-of-the-box; see [Clipboard interaction](#clipboard).
 
 <div id="build-msvc"></div>
 
