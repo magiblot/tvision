@@ -1,5 +1,7 @@
 #define Uses_TEventPoll
+#define Uses_TEventSource
 #include <internal/events.h>
+#include <internal/platform.h>
 #include <chrono>
 using time_point = std::chrono::steady_clock::time_point;
 using std::chrono::milliseconds;
@@ -365,6 +367,38 @@ int TEventPoll::defaultFunction( struct pollfd *fds, size_t count,
 void TEventPoll::setFunction( Function function ) noexcept
 {
     tvision::pollFunction = function ? function : &defaultFunction;
+}
+
+class TEventSource::Source final : public tvision::EventSource
+{
+    TEventSource &owner;
+
+public:
+
+    Source(TEventSource &aOwner) noexcept :
+        EventSource(aOwner.fd),
+        owner(aOwner)
+    {
+    }
+
+    bool getEvent(TEvent &ev) noexcept override
+    {
+        return owner.getEvent(ev);
+    }
+};
+
+TEventSource::TEventSource( int aFd ) noexcept :
+    fd( aFd ),
+    source( new Source( *this ) )
+{
+    tvision::Platform::getInstance().addSource( *source );
+}
+
+TEventSource::~TEventSource()
+{
+    // Nothing happens if it was already left out after hanging up.
+    tvision::Platform::getInstance().removeSource( *source );
+    delete source;
 }
 
 #endif // _TV_UNIX

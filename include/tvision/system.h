@@ -417,6 +417,50 @@ private:
 
 #endif  // Uses_TEventPoll
 
+#if defined( Uses_TEventSource ) && !defined( __TEventSource )
+#define __TEventSource
+
+#if defined( _TV_UNIX )
+
+class TEventSource
+{
+public:
+
+    // While the object exists, Turbo Vision waits for 'fd' to become readable
+    // along with the input it reads events from, and then asks the object for
+    // an event with 'getEvent'. This lets an application handle input of its
+    // own (a pipe, a socket, an inotify descriptor...) in 'handleEvent' as any
+    // other event, without a thread or a short timeout to poll for it.
+    // 'fd' is not owned and must stay open while the object exists. Turbo
+    // Vision stops waiting for it once it hangs up or has nothing left to read
+    // when readable, which is checked with FIONREAD, so a descriptor that does
+    // not support FIONREAD (e.g. an eventfd) cannot be used. The object must
+    // only be created and destroyed in the thread that runs the event loop.
+    TEventSource( int fd ) noexcept;
+    virtual ~TEventSource();
+
+    TEventSource( const TEventSource & ) = delete;
+    TEventSource &operator=( const TEventSource & ) = delete;
+
+    // Invoked by the event loop when 'fd' is readable. It should consume what
+    // made 'fd' readable, or it is invoked again right away. Returns True to
+    // hand 'event' over to the application (e.g. an 'evBroadcast' message),
+    // which ends the wait even if 'event.what' is 'evNothing', or False to go
+    // on waiting. It must not destroy the object.
+    virtual Boolean getEvent( TEvent &event ) noexcept = 0;
+
+    const int fd;
+
+private:
+
+    class Source;
+    Source *source;
+};
+
+#endif // _TV_UNIX
+
+#endif  // Uses_TEventSource
+
 #if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen
 
