@@ -387,6 +387,36 @@ private:
 
 #endif
 
+#if defined( Uses_TEventPoll ) && !defined( __TEventPoll )
+#define __TEventPoll
+
+#if defined( _TV_UNIX )
+
+struct pollfd;
+
+class TEventPoll
+{
+public:
+
+    // Turbo Vision waits for input with a function that works like 'poll',
+    // on the file descriptors it reads events from. An application with an
+    // event loop of its own may replace it, e.g. to wait in that loop instead.
+    typedef int (*Function)( struct pollfd *fds, size_t count, int timeoutMs );
+
+    // A null function restores the default one.
+    static void setFunction( Function function ) noexcept;
+    static int defaultFunction( struct pollfd *fds, size_t count,
+                                int timeoutMs ) noexcept;
+
+private:
+
+    TEventPoll();
+};
+
+#endif // _TV_UNIX
+
+#endif  // Uses_TEventPoll
+
 #if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen
 
