@@ -300,16 +300,12 @@ bool Win32Input::getEvent(const INPUT_RECORD &ir, TEvent &ev) noexcept
 /////////////////////////////////////////////////////////////////////////
 // Win32Display
 
-Win32Display::Win32Display(ConsoleCtl &aCon, bool isLegacyConsole) noexcept :
-    con(aCon)
+Win32Display::Win32Display(ConsoleCtl &aCon, bool aIsLegacyConsole) noexcept :
+    con(aCon),
+    isLegacyConsole(aIsLegacyConsole),
+    // Note: 'getColorCount()' depends on 'isLegacyConsole' being already initialized.
+    ansiScreenWriter(aCon, TermCap::getDisplayCapabilities(con, getColorCount()))
 {
-    if (!isLegacyConsole)
-        ansiScreenWriter = new AnsiScreenWriter(con, TermCap::getDisplayCapabilities(con, *this));
-}
-
-Win32Display::~Win32Display()
-{
-    delete ansiScreenWriter;
 }
 
 TPoint Win32Display::reloadScreenInfo() noexcept
@@ -340,12 +336,12 @@ TPoint Win32Display::reloadScreenInfo() noexcept
          && memcmp(&fontInfo, &lastFontInfo, sizeof(fontInfo)) != 0 )
     {
         // Character width depends on the font and the font size being used.
-        WinWidth::reset(ansiScreenWriter == nullptr);
+        WinWidth::reset(isLegacyConsole);
         lastFontInfo = fontInfo;
     }
 
-    if (ansiScreenWriter)
-        ansiScreenWriter->reset();
+    if (!isLegacyConsole)
+        ansiScreenWriter.reset();
     else
     {
         caretPos = {-1, -1};
@@ -359,7 +355,7 @@ int Win32Display::getColorCount() noexcept
 {
     // https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
     // Assume high color support when not in the legacy console.
-    if (ansiScreenWriter)
+    if (!isLegacyConsole)
         return 256*256*256;
     return 16;
 }
@@ -384,8 +380,8 @@ void Win32Display::setCaretSize(int size) noexcept
 
 void Win32Display::clearScreen() noexcept
 {
-    if (ansiScreenWriter)
-        ansiScreenWriter->clearScreen();
+    if (!isLegacyConsole)
+        ansiScreenWriter.clearScreen();
     else
     {
         COORD coord = {0, 0};
@@ -401,8 +397,8 @@ void Win32Display::clearScreen() noexcept
 void Win32Display::writeCell( TPoint pos, TStringView text, TColorAttr attr,
                               bool doubleWidth ) noexcept
 {
-    if (ansiScreenWriter)
-        ansiScreenWriter->writeCell(pos, text, attr, doubleWidth);
+    if (!isLegacyConsole)
+        ansiScreenWriter.writeCell(pos, text, attr, doubleWidth);
     else
     {
         if (pos != caretPos)
@@ -427,8 +423,8 @@ void Win32Display::writeCell( TPoint pos, TStringView text, TColorAttr attr,
 
 void Win32Display::setCaretPosition(TPoint pos) noexcept
 {
-    if (ansiScreenWriter)
-        ansiScreenWriter->setCaretPosition(pos);
+    if (!isLegacyConsole)
+        ansiScreenWriter.setCaretPosition(pos);
     else
     {
         flush();
@@ -439,8 +435,8 @@ void Win32Display::setCaretPosition(TPoint pos) noexcept
 
 void Win32Display::flush() noexcept
 {
-    if (ansiScreenWriter)
-        ansiScreenWriter->flush();
+    if (!isLegacyConsole)
+        ansiScreenWriter.flush();
     else if (!buf.empty())
     {
         // When in the legacy console:

@@ -11,7 +11,7 @@ namespace tvision
 {
 
 TermCap TermCap::getDisplayCapabilities( ConsoleCtl &con,
-                                         DisplayAdapter &display ) noexcept
+                                         int tentativeColorCount ) noexcept
 {
     TermCap termcap {};
     auto colorterm = getEnv<TStringView>("COLORTERM");
@@ -19,14 +19,13 @@ TermCap TermCap::getDisplayCapabilities( ConsoleCtl &con,
         termcap.colors = Direct;
     else
     {
-        int colors = display.getColorCount();
-        if (colors >= 256*256*256)
+        if (tentativeColorCount >= 256*256*256)
             termcap.colors = Direct;
-        else if (colors >= 256)
+        else if (tentativeColorCount >= 256)
             termcap.colors = Indexed256;
-        else if (colors >= 16)
+        else if (tentativeColorCount >= 16)
             termcap.colors = Indexed16;
-        else if (colors >= 8)
+        else if (tentativeColorCount >= 8)
         {
             termcap.colors = Indexed8;
             termcap.quirks |= qfBoldIsBright;

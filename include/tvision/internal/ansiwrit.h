@@ -11,7 +11,6 @@ namespace tvision
 {
 
 class ConsoleCtl;
-class DisplayAdapter;
 
 // TermColor represents a color that is to be printed to screen
 // using certain ANSI escape sequences.
@@ -95,7 +94,7 @@ struct TermCap
     ushort quirks;
 
     static TermCap getDisplayCapabilities( ConsoleCtl &con,
-                                           DisplayAdapter &display ) noexcept;
+                                           int tentativeColorCount ) noexcept;
 };
 
 // AnsiScreenWriter allows printing characters and color attributes directly

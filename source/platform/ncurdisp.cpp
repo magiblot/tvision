@@ -11,7 +11,7 @@ namespace tvision
 inline NcursesDisplay::NcursesDisplay(ConsoleCtl &aCon, SCREEN *aTerm) noexcept :
     con(aCon),
     term(aTerm),
-    ansiScreenWriter(aCon, TermCap::getDisplayCapabilities(con, *this))
+    ansiScreenWriter(aCon, TermCap::getDisplayCapabilities(con, getColorCount()))
 {
 }
 

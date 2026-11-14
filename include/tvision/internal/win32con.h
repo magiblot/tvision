@@ -77,17 +77,19 @@ public:
 
     // The lifetime of 'con' must exceed that of 'this'.
     Win32Display(ConsoleCtl &con, bool isLegacyConsole) noexcept;
-    ~Win32Display();
 
 private:
 
     ConsoleCtl &con;
+    bool isLegacyConsole;
 
     TPoint size {};
     CONSOLE_FONT_INFO lastFontInfo {};
 
-    AnsiScreenWriter *ansiScreenWriter {nullptr};
+    // Only used when 'isLegacyConsole == false'.
+    AnsiScreenWriter ansiScreenWriter;
 
+    // Only used when 'isLegacyConsole == true'.
     TPoint caretPos {-1, -1};
     uchar lastAttr {'\x00'};
     std::vector<char> buf;
