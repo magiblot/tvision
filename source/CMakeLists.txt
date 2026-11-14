@@ -75,6 +75,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     TVISION_NO_STL
 )
 
+if (APPLE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        # Let 'select' wait for file descriptors from 'FD_SETSIZE' on.
+        _DARWIN_UNLIMITED_SELECT
+    )
+endif()
+
 include(TestBigEndian)
 
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)

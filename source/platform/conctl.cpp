@@ -32,15 +32,39 @@ void ConsoleCtl::destroyInstance() noexcept
 #if __has_include(<linux/kd.h>)
 #   include <linux/kd.h>
 #endif
+#ifdef __APPLE__
+#   include <sys/select.h>
+#endif
 
 namespace tvision
 {
 
+static FILE *openTty(const char *mode) noexcept
+{
+    FILE *file = fopen("/dev/tty", mode);
+#ifdef __APPLE__
+    // Ncurses waits for input with 'select' on macOS, which does not support
+    // file descriptors from 'FD_SETSIZE' on. If the terminal gets one of them
+    // because the application has opened many files, it is moved below
+    // 'FD_SETSIZE', or the standard streams are used if there is no room.
+    if (file != nullptr && fileno(file) >= FD_SETSIZE)
+    {
+        FILE *low = nullptr;
+        int fd = fcntl(fileno(file), F_DUPFD, 0);
+        if (fd != -1 && (fd >= FD_SETSIZE || !(low = fdopen(fd, mode))))
+            close(fd);
+        fclose(file);
+        file = low;
+    }
+#endif
+    return file;
+}
+
 ConsoleCtl::ConsoleCtl() noexcept
 {
     if ( getEnv<TStringView>("TVISION_USE_STDIO").empty()
-         && (files[0] = fopen("/dev/tty", "r")) != nullptr
-         && (files[1] = fopen("/dev/tty", "w")) != nullptr )
+         && (files[0] = openTty("r")) != nullptr
+         && (files[1] = openTty("w")) != nullptr )
     {
         ownsFiles = true;
         fds[0] = fileno(files[0]);
