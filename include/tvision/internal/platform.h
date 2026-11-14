@@ -117,6 +117,9 @@ public:
     bool getEvent(TEvent &ev) noexcept { return waiter.getEvent(ev); }
     void waitForEvents(int ms) noexcept;
     void interruptEventWait() noexcept { waiter.interruptEventWait(); }
+    // Sources of the application, waited for along with those of the console.
+    void addSource(EventSource &src) noexcept { waiter.addSource(src); }
+    void removeSource(EventSource &src) noexcept { waiter.removeSource(src); }
 
     // Adjust the caret size to the range 1 to 100 because that's what the original
     // THardwareInfo::getCaretSize() does and what TScreen expects.
